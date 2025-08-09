@@ -13,6 +13,17 @@ const config: Config = {
     future: {
         v4: true, // Improve compatibility with the upcoming Docusaurus v4
     },
+  plugins: [
+    [
+      "@signalwire/docusaurus-plugin-llms-txt",
+      {
+        depth: 5,
+        content: {
+          enableLlmsFullTxt: true,
+        },
+      },
+    ],
+  ],
 
     // Set the production url of your site here
     url: "https://your-docusaurus-site.example.com",
