@@ -35,12 +35,14 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--primary button--lg"
-            to="/docs/intro">
+            to="/docs/intro"
+            style={{cursor: 'pointer'}}>
             Get Started with NATS
           </Link>
           <Link
-            className="button button--secondary button--lg margin-left--md"
-            to="/docs/concepts/what-is-nats">
+            className="button button--secondary button--lg"
+            to="/docs/concepts/what-is-nats"
+            style={{cursor: 'pointer', marginLeft: '1rem'}}>
             Learn More
           </Link>
         </div>
