@@ -4,27 +4,144 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
+/* NATS Brand Colors */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #3884ff;
+  --ifm-color-primary-dark: #1a6ff7;
+  --ifm-color-primary-darker: #0d62f0;
+  --ifm-color-primary-darkest: #0a4fc5;
+  --ifm-color-primary-light: #5699ff;
+  --ifm-color-primary-lighter: #6fa9ff;
+  --ifm-color-primary-lightest: #9fc5ff;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-font-family-base: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+  --docusaurus-highlighted-code-line-bg: rgba(56, 132, 255, 0.1);
+  
+  /* NATS Brand Accent Colors */
+  --nats-accent-blue: #3884ff;
+  --nats-accent-dark: #1d1d1d;
+  --nats-accent-gray: #6c757d;
+  --nats-success: #27c940;
+  --nats-warning: #ffb347;
+  --nats-error: #ff5252;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* Dark mode with NATS branding */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #5699ff;
+  --ifm-color-primary-dark: #3884ff;
+  --ifm-color-primary-darker: #2b79ff;
+  --ifm-color-primary-darkest: #0d62f0;
+  --ifm-color-primary-light: #74aaff;
+  --ifm-color-primary-lighter: #83b3ff;
+  --ifm-color-primary-lightest: #b0d0ff;
+  --docusaurus-highlighted-code-line-bg: rgba(56, 132, 255, 0.2);
+  --ifm-background-color: #1a1a1a;
+}
+
+/* Custom NATS Styles */
+.hero {
+  background: linear-gradient(135deg, #27AAE1 0%, #375C93 50%, #34A574 100%);
+}
+
+.hero--primary {
+  --ifm-hero-text-color: #ffffff;
+}
+
+/* Feature cards styling */
+.feature {
+  padding: 2rem;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(56, 132, 255, 0.15);
+}
+
+/* Code blocks enhancement */
+pre code {
+  border-radius: 4px;
+}
+
+/* Navbar enhancements */
+.navbar__title {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.navbar__logo {
+  height: 2rem;
+  margin-right: 0.5rem;
+}
+
+/* Footer styling */
+.footer {
+  background-color: var(--ifm-color-primary-darkest);
+}
+
+.footer--dark {
+  --ifm-footer-background-color: #1a1a1a;
+}
+
+/* Button styles */
+.button--primary {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Documentation specific styles */
+.markdown h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--nats-accent-blue);
+}
+
+.markdown h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+
+.markdown h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
+/* Cards and boxes */
+.card {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.card:hover {
+  border-color: var(--nats-accent-blue);
+  box-shadow: 0 4px 12px rgba(56, 132, 255, 0.1);
+}
+
+/* Alert/Admonition customization */
+.admonition {
+  border-left-width: 4px;
+}
+
+.admonition-note {
+  border-left-color: var(--nats-accent-blue);
+}
+
+.admonition-tip {
+  border-left-color: var(--nats-success);
+}
+
+.admonition-warning {
+  border-left-color: var(--nats-warning);
+}
+
+.admonition-danger {
+  border-left-color: var(--nats-error);
 }

@@ -6,8 +6,8 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
     title: "NATS Documentation",
-    tagline: "All things NATS",
-    favicon: "img/favicon.ico",
+    tagline: "Connective Technology for Adaptive Edge & Distributed Systems",
+    favicon: "favicon.ico",
 
     // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
     future: {
@@ -15,7 +15,7 @@ const config: Config = {
     },
 
     // Set the production url of your site here
-    url: "https://your-docusaurus-site.example.com",
+    url: "https://docs.nats.io",
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: "/",
@@ -41,28 +41,14 @@ const config: Config = {
             "classic",
             {
                 docs: {
-                    routeBasePath: "/",
+                    routeBasePath: "docs",
                     sidebarPath: "./sidebars.ts",
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
                     // editUrl:
                     // "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
                 },
-                blog: {
-                    showReadingTime: true,
-                    feedOptions: {
-                        type: ["rss", "atom"],
-                        xslt: true,
-                    },
-                    // Please change this to your repo.
-                    // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
-                    // Useful options to enforce blogging best practices
-                    onInlineTags: "warn",
-                    onInlineAuthors: "warn",
-                    onUntruncatedBlogPosts: "warn",
-                },
+                blog: false,
                 theme: {
                     customCss: "./src/css/custom.css",
                 },
@@ -71,25 +57,37 @@ const config: Config = {
     ],
 
     themeConfig: {
-        // Replace with your project's social card
-        image: "img/docusaurus-social-card.jpg",
+        // NATS social card for sharing
+        image: "img/nats-social-card.png",
+        metadata: [
+            {name: 'keywords', content: 'nats, messaging, pubsub, cloud native, microservices, iot, edge'},
+            {name: 'twitter:card', content: 'summary_large_image'},
+            {name: 'og:image', content: '/img/nats-social-card.png'},
+        ],
         navbar: {
-            title: "My Site",
+            title: "",
             logo: {
-                alt: "My Site Logo",
-                src: "img/logo.svg",
+                alt: "NATS Logo",
+                src: "img/nats-logo.svg",
+                srcDark: "img/nats-logo-dark.svg",
+                width: 100,
+                height: 32,
             },
             items: [
                 {
                     type: "docSidebar",
-                    sidebarId: "tutorialSidebar",
+                    sidebarId: "docsSidebar",
                     position: "left",
-                    label: "Tutorial",
+                    label: "Documentation",
                 },
-                { to: "/blog", label: "Blog", position: "left" },
                 {
-                    href: "https://github.com/facebook/docusaurus",
+                    href: "https://github.com/nats-io",
                     label: "GitHub",
+                    position: "right",
+                },
+                {
+                    href: "https://natsio.slack.com",
+                    label: "Slack",
                     position: "right",
                 },
             ],
@@ -98,11 +96,19 @@ const config: Config = {
             style: "dark",
             links: [
                 {
-                    title: "Docs",
+                    title: "Documentation",
                     items: [
                         {
-                            label: "Tutorial",
+                            label: "Introduction",
                             to: "/docs/intro",
+                        },
+                        {
+                            label: "What is NATS",
+                            to: "/docs/concepts/what-is-nats",
+                        },
+                        {
+                            label: "Getting Started",
+                            to: "/docs/getting-started",
                         },
                     ],
                 },
@@ -110,17 +116,16 @@ const config: Config = {
                     title: "Community",
                     items: [
                         {
-                            label: "Stack Overflow",
-                            href:
-                                "https://stackoverflow.com/questions/tagged/docusaurus",
+                            label: "Slack",
+                            href: "https://natsio.slack.com",
                         },
                         {
-                            label: "Discord",
-                            href: "https://discordapp.com/invite/docusaurus",
+                            label: "Twitter",
+                            href: "https://twitter.com/nats_io",
                         },
                         {
-                            label: "X",
-                            href: "https://x.com/docusaurus",
+                            label: "Google Groups",
+                            href: "https://groups.google.com/forum/#!forum/natsio",
                         },
                     ],
                 },
@@ -128,19 +133,23 @@ const config: Config = {
                     title: "More",
                     items: [
                         {
-                            label: "Blog",
-                            to: "/blog",
+                            label: "GitHub",
+                            href: "https://github.com/nats-io",
                         },
                         {
-                            label: "GitHub",
-                            href: "https://github.com/facebook/docusaurus",
+                            label: "NATS.io",
+                            href: "https://nats.io",
+                        },
+                        {
+                            label: "Examples",
+                            href: "https://natsbyexample.com",
                         },
                     ],
                 },
             ],
             copyright: `Copyright © ${
                 new Date().getFullYear()
-            } Synadia Communications, Inc. Built with Docusaurus.`,
+            } The NATS Authors. Built with Docusaurus.`,
         },
         prism: {
             theme: prismThemes.github,
