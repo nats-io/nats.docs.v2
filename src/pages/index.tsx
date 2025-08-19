@@ -1,21 +1,25 @@
-import React from 'react';
-import clsx from 'clsx';
-import Link from '@docusaurus/Link';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
-import styles from './index.module.css';
+import React from "react";
+import clsx from "clsx";
+import Link from "@docusaurus/Link";
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import Layout from "@theme/Layout";
+import HomepageFeatures from "@site/src/components/HomepageFeatures";
+import styles from "./index.module.css";
 
 function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
-    <header className={clsx('hero', styles.heroBanner)}>
+    <header className={clsx("hero", styles.heroBanner)}>
       <div className="container">
-        <img src="/img/nats-icon.svg" alt="NATS Logo" className={styles.heroLogo} />
-        <h1 className={clsx('hero__title', styles.heroTitle)}>
+        <img
+          src="/img/nats-icon.svg"
+          alt="NATS Logo"
+          className={styles.heroLogo}
+        />
+        <h1 className={clsx("hero__title", styles.heroTitle)}>
           {siteConfig.title}
         </h1>
-        <p className={clsx('hero__subtitle', styles.heroSubtitle)}>
+        <p className={clsx("hero__subtitle", styles.heroSubtitle)}>
           {siteConfig.tagline}
         </p>
         <div className={styles.heroStats}>
@@ -35,14 +39,16 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--primary button--lg"
-            to="/docs/intro"
-            style={{cursor: 'pointer'}}>
+            to="/intro"
+            style={{ cursor: "pointer" }}
+          >
             Get Started with NATS
           </Link>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/concepts/what-is-nats"
-            style={{cursor: 'pointer', marginLeft: '1rem'}}>
+            to="/concepts/what-is-nats"
+            style={{ cursor: "pointer", marginLeft: "1rem" }}
+          >
             Learn More
           </Link>
         </div>
@@ -52,11 +58,12 @@ function HomepageHeader() {
 }
 
 export default function Home(): React.JSX.Element {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title={`Welcome to ${siteConfig.title}`}
-      description="NATS is a simple, secure and high-performance open source messaging system for cloud native applications, IoT messaging, and microservices architectures.">
+      description="NATS is a simple, secure and high-performance open source messaging system for cloud native applications, IoT messaging, and microservices architectures."
+    >
       <HomepageHeader />
       <main>
         <HomepageFeatures />
@@ -72,3 +79,4 @@ export default function Home(): React.JSX.Element {
     </Layout>
   );
 }
+
