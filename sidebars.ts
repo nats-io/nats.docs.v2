@@ -1,4 +1,4 @@
-import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
+import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
 /**
  * Creating a sidebar enables you to:
@@ -11,26 +11,46 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
  Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
-  // Main documentation sidebar
   docsSidebar: [
     {
-      type: 'doc',
-      id: 'intro',
-      label: 'Welcome',
+      type: "doc",
+      id: "intro",
+      label: "Welcome",
     },
     {
-      type: 'category',
-      label: 'Core Concepts',
+      type: "category",
+      label: "Core Concepts",
       collapsed: false,
-      items: [
-        'concepts/what-is-nats',
-        'concepts/pub-sub-basics',
-      ],
+      items: ["concepts/what-is-nats", "concepts/pub-sub-basics"],
     },
     {
-      type: 'doc',
-      id: 'getting-started/index',
-      label: 'Getting Started',
+      type: "doc",
+      id: "getting-started/index",
+      label: "Getting Started",
+    },
+  ],
+
+  tutorialsSidebar: [
+    {
+      type: "doc",
+      id: "tutorials/index",
+      label: "Tutorials",
+    },
+  ],
+
+  guidesSidebar: [
+    {
+      type: "doc",
+      id: "guides/index",
+      label: "Guides",
+    },
+  ],
+
+  referenceSidebar: [
+    {
+      type: "doc",
+      id: "reference/index",
+      label: "Reference",
     },
   ],
 };
