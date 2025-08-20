@@ -24,7 +24,7 @@ NATS embodies a set of principles that guide its design:
 
 ## How NATS Works
 
-NATS creates a **messaging fabric** that connects all your applications and services:
+NATS is a **messaging fabric** that connects all your applications and services:
 
 ```
 ┌─────────┐     messages      ┌─────────┐
@@ -124,7 +124,7 @@ Ready to try NATS? Here's the quickest path:
    ```bash
    # Using Docker
    docker run -p 4222:4222 nats:latest
-   
+
    # Or download the binary
    # Visit https://nats.io/download/
    ```
@@ -134,7 +134,7 @@ Ready to try NATS? Here's the quickest path:
    // Node.js example
    const NATS = require('nats');
    const nc = await NATS.connect();
-   
+
    // Publish a message
    nc.publish('hello', 'world');
    ```

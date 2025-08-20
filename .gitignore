@@ -3,3 +3,13 @@ node_modules/
 # Generated files
 .docusaurus
 build/
+
+# Fetched code examples (regenerated during build)
+static/examples/snippets/
+
+# Old example location
+
+# IDE directories
+.idea/
+.vscode/
+
