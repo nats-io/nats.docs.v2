@@ -13,6 +13,15 @@ const config: Config = {
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
+  
+  // Global scripts
+  scripts: [
+    {
+      src: '/js/nats-example-loader-v2.js',
+      defer: true,
+    }
+  ],
+  
   plugins: [
     [
       "@signalwire/docusaurus-plugin-llms-txt",
@@ -191,8 +200,9 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} The NATS Authors. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: prismThemes.oneLight,
+      darkTheme: prismThemes.oneDark,
+      additionalLanguages: ['bash', 'go', 'rust', 'java', 'csharp'],
     },
   } satisfies Preset.ThemeConfig,
 };

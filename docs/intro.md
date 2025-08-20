@@ -22,7 +22,7 @@ NATS is a connective technology built for the ever increasingly hyper-connected 
 
 ### Key Features
 
-- **Ultra-High Performance** - NATS can process millions of messages per second
+- **High Performance** - NATS can process millions of messages per second
 - **Lightweight** - Small footprint, minimal overhead
 - **Simple to Use** - Easy to understand API, no complex configuration required
 - **Resilient** - Built-in resilience with clustering and fault tolerance

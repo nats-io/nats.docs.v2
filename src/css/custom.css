@@ -63,6 +63,17 @@
 /* Code blocks enhancement */
 pre code {
   border-radius: 4px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  text-shadow: none !important; /* Remove any text shadows */
+}
+
+/* Better font rendering for dark mode */
+[data-theme='dark'] pre code {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: none !important;
 }
 
 /* Navbar enhancements */
@@ -181,4 +192,89 @@ pre code {
 
 [data-theme='dark'] .navbar__item:hover svg {
   color: var(--ifm-color-primary-light);
+}
+
+/* Bash comment colors - make comments gray in both themes */
+/* Works for both Docusaurus native tabs and custom JavaScript tabs */
+.language-bash .token.comment,
+pre[class*="language-bash"] .token.comment {
+  color: #6b7280 !important; /* Gray for comments in light mode */
+}
+
+[data-theme='dark'] .language-bash .token.comment,
+[data-theme='dark'] pre[class*="language-bash"] .token.comment {
+  color: #9ca3af !important; /* Gray for comments in dark mode */
+}
+
+/* Light mode syntax highlighting for dynamic code blocks */
+/* Override Prism CDN default to match Docusaurus oneLight theme */
+/* Only apply to custom tabs, not Docusaurus native tabs */
+.nats-tab-panel code[class*="language-"],
+.nats-tab-panel pre[class*="language-"] {
+  background: hsl(230, 1%, 98%);
+}
+
+/* Dark mode syntax highlighting for dynamic code blocks */
+/* Prism CDN loads light theme - these overrides provide dark mode colors */
+/* Only apply to custom tabs, not Docusaurus native tabs */
+[data-theme='dark'] .nats-tab-panel code[class*="language-"],
+[data-theme='dark'] .nats-tab-panel pre[class*="language-"] {
+  color: #d4d4d4;
+  background: hsl(220, 13%, 18%);
+  text-shadow: none;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.comment,
+[data-theme='dark'] .nats-tab-panel .token.prolog,
+[data-theme='dark'] .nats-tab-panel .token.doctype,
+[data-theme='dark'] .nats-tab-panel .token.cdata {
+  color: #6a9955;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.punctuation {
+  color: #d4d4d4;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.property,
+[data-theme='dark'] .nats-tab-panel .token.tag,
+[data-theme='dark'] .nats-tab-panel .token.boolean,
+[data-theme='dark'] .nats-tab-panel .token.number,
+[data-theme='dark'] .nats-tab-panel .token.constant,
+[data-theme='dark'] .nats-tab-panel .token.symbol,
+[data-theme='dark'] .nats-tab-panel .token.deleted {
+  color: #b5cea8;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.selector,
+[data-theme='dark'] .nats-tab-panel .token.attr-name,
+[data-theme='dark'] .nats-tab-panel .token.string,
+[data-theme='dark'] .nats-tab-panel .token.char,
+[data-theme='dark'] .nats-tab-panel .token.builtin,
+[data-theme='dark'] .nats-tab-panel .token.inserted {
+  color: #ce9178;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.operator,
+[data-theme='dark'] .nats-tab-panel .token.entity,
+[data-theme='dark'] .nats-tab-panel .token.url,
+[data-theme='dark'] .nats-tab-panel .language-css .token.string,
+[data-theme='dark'] .nats-tab-panel .style .token.string {
+  color: #d4d4d4;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.atrule,
+[data-theme='dark'] .nats-tab-panel .token.attr-value,
+[data-theme='dark'] .nats-tab-panel .token.keyword {
+  color: #569cd6;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.function,
+[data-theme='dark'] .nats-tab-panel .token.class-name {
+  color: #dcdcaa;
+}
+
+[data-theme='dark'] .nats-tab-panel .token.regex,
+[data-theme='dark'] .nats-tab-panel .token.important,
+[data-theme='dark'] .nats-tab-panel .token.variable {
+  color: #d16969;
 }
