@@ -1,0 +1,219 @@
+.iframeContainer {
+  position: fixed;
+  z-index: 999;
+  background: var(--ifm-background-color);
+  transition: all 0.3s ease-in-out;
+}
+
+.iframeContainer.bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--ifm-toc-border-color);
+  height: 48px;
+}
+
+.iframeContainer.right {
+  top: var(--ifm-navbar-height);
+  right: 0;
+  bottom: 0;
+  border-left: 1px solid var(--ifm-toc-border-color);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  width: 48px;
+  display: flex;
+  flex-direction: column;
+}
+
+.iframeContainer.open.bottom {
+  height: 50vh;
+}
+
+.iframeContainer.open.right {
+  width: 40vw;
+}
+
+.iframeContainer.resizing {
+  transition: none;
+  user-select: none;
+}
+
+.resizeHandle {
+  position: absolute;
+  background: transparent;
+  z-index: 10;
+}
+
+.resizeHandle:hover {
+  background: var(--ifm-color-primary-lighter);
+  opacity: 0.3;
+}
+
+.resizeHandle-bottom {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.resizeHandle-right {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: var(--ifm-background-surface-color);
+  height: 48px;
+}
+
+.iframeContainer.bottom .controls {
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+.iframeContainer.right .controls {
+  flex-shrink: 0;
+  flex-direction: row;
+  width: 100%;
+  height: 48px;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  background: var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  z-index: 10;
+}
+
+.toggleButton,
+.newTabButton,
+.positionButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--ifm-color-primary);
+  background: transparent;
+  color: var(--ifm-color-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.iframeContainer.right .toggleButton,
+.iframeContainer.right .newTabButton,
+.iframeContainer.right .positionButton {
+  writing-mode: initial;
+  padding: 0.4rem 0.8rem;
+  font-size: 13px;
+}
+
+.toggleButton:hover,
+.newTabButton:hover,
+.positionButton:hover {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+.positionButton {
+  background: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-darker);
+  border-color: var(--ifm-color-primary-light);
+}
+
+.positionButton:hover {
+  background: var(--ifm-color-primary-light);
+  border-color: var(--ifm-color-primary);
+}
+
+.iframe {
+  width: 100%;
+  border: none;
+}
+
+.iframeContainer.bottom .iframe {
+  height: calc(100% - 48px);
+}
+
+.iframeContainer.right .iframe {
+  flex: 1;
+  height: auto;
+}
+
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  flex: 1;
+  background-color: var(--ifm-background-surface-color);
+}
+
+.iframeContainer.bottom .loadingSpinner {
+  height: calc(100% - 48px);
+}
+
+.spinner {
+  border: 4px solid var(--ifm-color-emphasis-200);
+  border-top: 4px solid var(--ifm-color-primary);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingSpinner p {
+  margin: 0.5rem 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.loadingSubtext {
+  font-size: 14px;
+  color: var(--ifm-color-emphasis-600) !important;
+}
+
+@media (max-width: 996px) {
+  .iframeContainer.right {
+    width: 60vw !important;
+  }
+  
+  .iframeContainer.right .controls {
+    flex-direction: row;
+    width: 100%;
+    height: 48px;
+    padding: 0.5rem;
+  }
+  
+  .iframeContainer.right .toggleButton,
+  .iframeContainer.right .newTabButton,
+  .iframeContainer.right .positionButton {
+    writing-mode: initial;
+    padding: 0.4rem 0.8rem;
+    font-size: 12px;
+  }
+  
+  .controls {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .toggleButton,
+  .newTabButton,
+  .positionButton {
+    font-size: 12px;
+    padding: 0.4rem 0.8rem;
+  }
+}
