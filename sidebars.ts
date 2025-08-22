@@ -52,6 +52,21 @@ const sidebars: SidebarsConfig = {
       id: "reference/index",
       label: "Reference",
     },
+    {
+      type: "category",
+      label: "Protocols",
+      collapsed: true,
+      link: {
+        type: "doc",
+        id: "reference/protocols/index",
+      },
+      items: [
+        "reference/protocols/client",
+        "reference/protocols/route",
+        "reference/protocols/leafnode",
+        "reference/protocols/gateway",
+      ],
+    },
   ],
 };
 
