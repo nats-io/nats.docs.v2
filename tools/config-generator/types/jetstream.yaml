@@ -1,0 +1,144 @@
+---
+types:
+  jetstream-limits:
+    type: object
+    properties:
+      max_ack_pending:
+        type: integer
+        description: |-
+          Defines the maximum number of in-flight messages allowed to be
+          configured on consumers.
+
+      max_ha_assets:
+        type: integer
+        description: |-
+          The maximum number of JetStream assets that can exist at any given
+          time having more than one replica.
+
+      max_request_batch:
+        type: integer
+        description: |-
+          The maximum request batch size allowed to be configured on pull
+          consumers.
+
+      duplicate_window:
+        type: duration
+        description: |-
+          The maximum duplication window period allowed to be configured on
+          a stream.
+
+  jetstream:
+    type: object
+    reloadable: false
+    description: |-
+      If the JetStream block is defined, this implicitly enables
+      JetStream, unless the `enabled` property is set to `false`.
+
+    properties:
+      enabled:
+        type: boolean
+        default: true
+        aliases:
+          - enable
+        description: |-
+          If true, enables the JetStream subsystem.
+
+      store_dir:
+        type: string
+        aliases:
+          - store
+          - storedir
+        default: /tmp/nats/jetstream
+        description: |-
+          Directory to use for file-based storage.
+
+      max_memory_store:
+        type: storage
+        aliases:
+          - max_mem_store
+          - max_mem
+        description: |-
+          Maximum size of the *memory* storage.
+          Defaults to 75% of available memory.
+
+      max_file_store:
+        type: storage
+        aliases:
+          - max_file
+        description: |-
+          Maximum size of the *file* storage.
+          Defaults to up to 1TB if available.
+
+      domain:
+        type: string
+        description: |-
+          The JetStream domain the server is part of.
+
+      encryption_key:
+        type: string
+        aliases:
+          - key
+          - ek
+        description: |-
+          If defined, enables JetStream filestore encryption using the
+          value as the encryption key. A key length of at least 32 bytes
+          is recommended. Note, this key is HMAC-256 hashed on startup which
+          reduces the byte length to 64.
+
+      cipher:
+        type: string
+        choices:
+          - chacha
+          - chachapoly
+          - aes
+        description: |-
+          Defines the encryption algorithm to use if an encryption key is defined.
+
+      extension_hint:
+        type: string
+
+      limits:
+        type: jetstream-limits
+        description: |-
+          Default cross-account JetStream limits.
+
+      unique_tag:
+        type: string
+        description: |-
+          Defines a tag prefix as a constraint for placement of assets across
+          a JetStream domain. For example, if the value is `az:` then replicas
+          of an assets will be required to be placed on servers having
+          different `az:` tags.
+
+      max_outstanding_catchup:
+        type: storage
+        default: 32M
+        description: |-
+          Max in-flight bytes for stream catch-up. This was introduced to
+          control how much bandwidth should be dedicated during catch-up to
+          guard against saturating and degrading performance of the network.
+
+      sync_interval:
+        types:
+          - duration
+          - sync-interval-choices
+        default: 2m
+        aliases:
+          - sync
+        description: |-
+          Defines the internal to force sync file-based stream and consumer data
+          to disk. The filestore relies on the operating system's filesystem buffers
+          to periodically sync to disk. However, the server will still periodically
+          force sync files based on this interval.
+
+          For use cases where unclean shutdowns are common, this can provide more
+          control over how frequently to force sync data when written.
+
+          If a value `always` is used, a explicit sync will occur on every write.
+          Do note that this will degrade the max throughput due to the additional
+          I/O calls.
+
+  sync-interval-choices:
+    type: string
+    choices:
+      - always

@@ -1,0 +1,11 @@
+# url
+
+<Reloadable /> 
+An explicit override URL to request staples.
+
+
+## Types
+
+| Type | Description | Choices |
+| :--- | :---------- | :------ |
+| `string` | - | - |

@@ -1,0 +1,66 @@
+types:
+  resolver:
+    type: object
+    properties:
+      type:
+        type: string
+        choices:
+          - full
+          - cache
+        description: |-
+          Defines whether the resolver type. A `full` resolver stores all
+          account JWTs unless they are explicitly deleted.
+
+          A `cache` resolver stores only a subset based on a least-recently-used
+          (LRU) TTL.
+
+      dir:
+        type: string
+        description: |-
+          The path to storing account JWT files when pushed to the server.
+
+      limit:
+        type: integer
+        description: |-
+          If set, limit the number of stored JWTs. In `full` mode, new JWTs
+          will be rejected where as in `cache` mode, old JWTs will be evicted
+          for new JWTs.
+
+      ttl:
+        type: duration
+        description: |-
+          If `cache` mode, defines how long an account JWT will be cached
+          for before being considered for auto-eviction.
+
+      interval:
+        type: duration
+        description: |-
+          Defines the interval the resolver will randomly contact another server
+          to reconcile JWTs, such as receiving new ones and deleting old ones.
+
+          Applies to `full` mode only.
+
+      timeout:
+        type: duration
+        description: |-
+          Defines the request timeout for resolvers interacting with with
+          other resolvers.
+
+      allow_delete:
+        type: boolean
+        default: false
+        description: |-
+          If true, allows JWTs to be deleted. Note, in `full` mode, this will
+          result in the JWT file being renamed to with a `.delete` suffix, unless
+          `hard_delete` is true.
+
+      hard_delete:
+        type: boolean
+        default: false
+        description: |-
+          If true, and the resolver is in `full` mode, deleted account JWTs will
+          be removed from disk rather than having the `.delete` suffix appended.
+
+  operator:
+    type: object
+    properties:

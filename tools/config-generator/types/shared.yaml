@@ -1,0 +1,46 @@
+---
+types:
+  host:
+    type: string
+    description: |-
+      Supports IPv4 and IPv6 addresses, as well as hostnames.
+    default: 0.0.0.0
+    aliases:
+      - net
+    reloadable: false
+    examples:
+      - label: Hostname
+        value: "localhost"
+      - label: IPv4
+        value: "127.0.0.1"
+      - label: IPv6
+        value: "[::]"
+
+  listen:
+    type: string
+    description: |-
+      This is an alternate to setting the `host` and `port` separately.
+    examples:
+      - label: Hostname
+        value: "localhost:4222"
+      - label: IPv4
+        value: "0.0.0.0:4222"
+      - label: IPv6
+        value: "[::]:4222"
+
+  enable-disable:
+    type: string
+    description: |-
+      Indicates the capability is enabled or disabled.
+    choices:
+      - enabled
+      - enable
+      - disabled
+      - disable
+
+  storage:
+    types:
+      - integer
+      - string
+    description: |-
+      Storage size in bytes or string in with a metric unit K, M, G, or T.

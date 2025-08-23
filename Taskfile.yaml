@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+  run-config-generator:
+    cmds:
+      - rm -rf ./docs/reference/config
+      - go run -C ./tools/config-generator . -types ./types -markdown -trimindex -dir ../../docs/reference/config -base /reference/config -sidebar ../../config-sidebar.json

@@ -1,0 +1,147 @@
+---
+types:
+  cluster:
+    type: object
+    disabled: true
+    properties:
+      name:
+        type: string
+        description: |-
+          Name of the cluster.
+
+      host:
+        type: host
+        description: |-
+          Host for cluster route connections.
+
+      port:
+        type: integer
+        description: |-
+          Port for cluster route connections.
+        default: 6222
+
+      listen:
+        type: listen
+
+      tls:
+        type: tls
+        description: |-
+          TLS configuration for securing cluster connections.
+          `verify` is always enabled and `cert_file` is used for
+          both client and server for mutual TLS.
+
+      advertise:
+        type: string
+        description: |-
+          Advertised cluster `<host>:<port>`. Useful for cluster setups since
+          behind NAT. When using TLS this is important to set to control the
+          hostname that clients will use when discovering the route so TLS
+          hostname verification does not fail.
+        aliases:
+          - cluster_advertise
+
+      no_advertise:
+        type: boolean
+        description: |-
+          If true, the server will not send or gossip its client URLs to other servers in the cluster, nor
+          will it tell its clients about other servers' client URLs.
+
+      routes:
+        type: array(string)
+        description: |-
+          A list of server URLs to cluster with. Self-routes are ignored. Should authentication via token or username/password
+          be required, specify them as part of the URL.
+        examples:
+          - label: Simple Route URLs
+            value: |
+              routes: [
+                nats-route://localhost:6222,
+                nats-route://localhost:6223,
+                nats-route://localhost:6224,
+              ]
+
+      connect_retries:
+        type: integer
+        default: 0
+        description: |-
+          After how many failed connect attempts to give up establishing a connection to a *discovered* route. Default is 0, do not retry.
+          When enabled, attempts will be made once a second. This, does not apply to explicitly configured routes.
+
+      authorization:
+        type: network-authorization
+        description: |-
+          Authorization map for configuring cluster routes. When a single username/password is used, it defines the authentication mechanism
+          this server expects, and how this server will authenticate itself when establishing a connection to a discovered route. This will
+          not be used for routes explicitly listed in routes and therefore have to be provided as part of the URL. With this authentication
+          mode, either use the same credentials throughout the system or list every route explicitly on every server.
+
+          If the `tls` configuration map specifies `verify_and_map` only, provide the expected username. Here different certificates can be
+          used, but they have to map to the same `username`. The authorization map also allows for timeout which is honored but users and
+          token configuration are not supported and will prevent the server from starting. The `permissions` block is ignored.
+
+      pool_size:
+        type: integer
+        default: 3
+        description: |-
+          The size of the connection pool used to distribute load across non-pinned
+          accounts.
+
+      accounts:
+        type: array(string)
+        description: |-
+          A list of accounts to *pin*, each of which will have their own dedicated
+          route connection between servers. Note, this is not take up a connection
+          from the pool.
+
+      compression:
+        types:
+          - compression-mode
+          - compression-map
+        description: |-
+          Defines the type compression mode to use between routes.
+
+          If set to `on`, it will use the `s2_fast` compression.
+
+  compression-mode:
+    type: string
+    choices:
+      - disabled
+      - off
+      - enabled
+      - on
+      - accept
+      - s2_fast
+      - s2_better
+      - s2_best
+      - s2_auto
+    default: accept
+    description: |-
+      The compression mode dictates if and how compression is applied for a
+      connection.
+
+      The value of `accept` indicates it will inherit the mode of the server
+      it is connecting to. If both have `accept`, no compression will be used.
+
+      The `s2_fast`, `s2_better`, and `s2_best` modes indicate the level of S2
+      compression used.
+
+      `s2_auto` will dynamically change the compression level based on RTT thresholds.
+
+  compression-map:
+    type: object
+    properties:
+      mode:
+        type: compression-mode
+      rtt_thresholds:
+        type: array(duration)
+        default: [10ms, 50ms, 100ms]
+        description: |-
+          Applies only when the `s2_auto` mode is used and defines the round-trip time (RTT)
+          thresholds for compression level changes.
+
+          By default, no compression is used unless the RTT hits the first threshold
+          (e.g. 10ms), then `s2_fast`. The next threshold would switch to `s2_better`,
+          and then finally `s2_best` is the last threshold is reached.
+
+          Note, the compression level is dynamic so if the RTT decreases, the compression
+          level will decrease accordingly.
