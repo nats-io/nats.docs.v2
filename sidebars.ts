@@ -1,4 +1,5 @@
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
+import configSidebar from "./config-sidebar";
 
 /**
  * Creating a sidebar enables you to:
@@ -67,6 +68,7 @@ const sidebars: SidebarsConfig = {
         "reference/protocols/gateway",
       ],
     },
+    configSidebar,
   ],
 };
 

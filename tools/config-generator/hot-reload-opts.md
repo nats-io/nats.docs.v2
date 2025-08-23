@@ -1,0 +1,62 @@
+# NOT Reloadable
+
+- host
+- port
+  - changing other than to `0` for random
+- listen
+- client_advertise
+- allow_non_tls
+- ocsp
+- accounts
+- operator
+- trusted_keys
+- mappings
+- server_name
+- server_tags
+- http
+- https
+- http_port
+- https_port
+- http_base_bath
+- max_connections
+- max_pending
+- max_subscriptions
+- max_subscription_tokens
+- ping_max
+- no_header_support
+- disable_sublist_cache
+- lame_duck_duration
+- lame_duck_grace_period
+- prof_port
+- default_js_domain
+- cluster
+  - host
+  - port
+  - pinned accounts (routes) if the account doesn't exist
+- resolver
+  - enabling or disabling
+- resolver_tls
+- resolver_preload
+- resolver_pinned_accounts
+- gateways
+  - non-TLS changes
+- leafnodes
+  - remotes
+  - users
+- jetstream
+  - store dir (if already enabled)
+  - max file or memory (if already enabled)
+- websocket
+  - non-TLS changes
+- mqtt
+  - host
+  - port
+  - listen
+  - authorization
+  - no_auth_user
+  - js_domain
+- no_auth_user
+- system_account
+  - going from `$SYS` to something else
+  - going from something to disabled
+- no_system_account

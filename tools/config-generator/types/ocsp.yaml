@@ -1,0 +1,23 @@
+types:
+  ocsp:
+    type: object
+    properties:
+      mode:
+        type: string
+        choices:
+          - always
+          - must
+          - never
+          - auto
+        description: |-
+          The OCSP stapling mode to adhere to.
+
+      url:
+        type: string
+        description: |-
+          An explicit override URL to request staples.
+
+      urls:
+        type: array(string)
+        description: |-
+          An explicit list of override URLs to request staples.

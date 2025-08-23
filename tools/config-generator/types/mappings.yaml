@@ -1,0 +1,119 @@
+types:
+  mappings:
+    type: map(mapping)
+    examples:
+      - label: Basic
+        description: |-
+          Messages published on `orders` will be broadcasted by the
+          server on subject `orders.internal`. Subscribers expecting to
+          receive the message must be subscribed to `orders.internal`.
+
+        value: |-
+          mappings {
+            "orders": "orders.internal"
+          }
+
+      - label: Token reordering
+        description: |-
+          Wildcards can be selected using the `{{wildcard(N)}}` notation
+          using 1-based indexing.
+
+          A message published on subject `orders.placed.123` would be
+          mapped to `orders.123.placed`.
+
+        value: |-
+          mappings {
+            "orders.*.*": "orders.{{wildcard(2)}}.{{wildcard(1)}}"
+          }
+
+      - label: Deterministic subject partitioning
+        description: |-
+          Subject partitioning can be achieved using the
+          `{{partition(n, p...)}}` notation where `n` is the number of partitions
+          and the `p...` represents the wildcard positions.
+
+          A message published to `orders.placed.123` would be mapped to
+          `orders.placed.123.0`, `orders.placed.124` would be mapped to
+          `orders.placed.124.3`, and so on.
+
+        value: |-
+          mappings {
+            "orders.*.*": "orders.{{wildcard(1)}}.{{wildcard(2)}}.{{partition(5,1,2)}}"
+          }
+
+      - label: Versioned mapping
+        description: |-
+          The publish subject is exposed without an explicit version, however
+          the mapping includes the version token. Since there is only a single
+          destination, the weight must be 100%.
+
+        value: |-
+          mappings {
+            myservice.requests: [
+              { destination: myservice.requests.v1, weight: 100% }
+            ]
+          }
+
+      - label: Traffic shaping
+        description: |-
+          Building on the previous example, when a new version of the service
+          is deployed, the mapping can be updated to send some percentage of
+          traffic to the new version for a canary rollout.
+
+        value: |-
+          mappings {
+            myservice.requests: [
+              { destination: myservice.requests.v1, weight: 90% }
+              { destination: myservice.requests.v2, weight: 10% }
+            ]
+          }
+
+      - label: Cluster-scoped mapping
+        description: |-
+          Multiple destinations can be specified that are cluster-scoped.
+          Given a server in cluster `west` it will apply the mapping(s)
+          having the same cluster, i.e. routing it to `myservice.requests.west`.
+          For servers in other clusters or not in a cluster, the non-scoped
+          mappings will be used, if any.
+
+        value: |-
+          mappings: {
+            myservice.requests: [
+               {destination: myservice.requests.west, weight: 100%, cluster: west}
+               {destination: myservice.requests.central, weight: 100%, cluster: central}
+               {destination: myservice.requests.east, weight: 100%, cluster: east}
+               {destination: myservice.requests.fallback, weight: 100%}
+            ]
+
+  mapping:
+    types:
+      - string
+      - array(mapping-destination)
+
+  mapping-destination:
+    type: object
+    properties:
+      destination:
+        aliases:
+          - dest
+        type: string
+        description: |-
+          The subject mapping destination for the source subject.
+
+      weight:
+        types:
+          - string
+          - integer
+        description: |-
+          A number between 0 and 100 (inclusive). The string form allows for
+          a trailing `%` sign. Note, if the `cluster` field is used, weights
+          across the destinations must add up to 100% on a per-cluster basis
+          unless artifical message loss is desired for testing.
+
+      cluster:
+        type: string
+        description: |-
+          If specified, the destination is cluster-scoped. Messages received
+          by servers within the named cluster will only consider mappings with
+          the same cluster name. Otherwise, it will fallback to non-cluster scoped
+          mappings.
