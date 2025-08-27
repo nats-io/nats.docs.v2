@@ -258,6 +258,11 @@ const sidebars: SidebarsConfig = {
             "reference/system/monitor/raftz",
           ],
         },
+        {
+          type: "doc",
+          label: "Errors",
+          id: "reference/system/errors",
+        },
       ],
     },
     {
