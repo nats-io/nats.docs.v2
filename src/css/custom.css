@@ -145,3 +145,40 @@ pre code {
 .admonition-danger {
   border-left-color: var(--nats-error);
 }
+
+/* Navigation Icons */
+.navbar__item svg {
+  color: var(--ifm-navbar-link-color);
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+
+.navbar__item:hover svg {
+  color: var(--ifm-navbar-link-hover-color);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.navbar__link {
+  transition: all 0.2s ease;
+}
+
+.navbar__link:hover {
+  text-decoration: none;
+}
+
+[data-theme='light'] .navbar__item svg {
+  color: #6c757d;
+}
+
+[data-theme='light'] .navbar__item:hover svg {
+  color: var(--ifm-color-primary);
+}
+
+[data-theme='dark'] .navbar__item svg {
+  color: #a0a0a0;
+}
+
+[data-theme='dark'] .navbar__item:hover svg {
+  color: var(--ifm-color-primary-light);
+}

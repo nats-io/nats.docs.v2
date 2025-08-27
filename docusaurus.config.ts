@@ -90,28 +90,28 @@ const config: Config = {
       },
       items: [
         {
-          type: "docSidebar",
+          type: "custom-docSidebar",
           sidebarId: "docsSidebar",
           position: "left",
           label: "Docs",
           href: "/intro/",
         },
         {
-          type: "docSidebar",
+          type: "custom-docSidebar",
           sidebarId: "guidesSidebar",
           position: "left",
           label: "Guides",
           href: "/guides/",
         },
         {
-          type: "docSidebar",
+          type: "custom-docSidebar",
           sidebarId: "tutorialsSidebar",
           position: "left",
           label: "Tutorials",
           href: "/tutorials/",
         },
         {
-          type: "docSidebar",
+          type: "custom-docSidebar",
           sidebarId: "referenceSidebar",
           position: "left",
           label: "Reference",
