@@ -1,3 +1,5 @@
+import React from 'react';
+
 type Props = {
   aliases: string;
 };
@@ -8,8 +10,15 @@ export default function Aliases({ aliases }: Props) {
       Aliases:{" "}
       {aliases
         .split(",")
-        .map((t) => <code>{t.trim()}</code>)
-        .reduce((prev, curr) => [prev, ", ", curr])}
+        .map((t, i) => {
+          const trimmed = t.trim();
+          return (
+            <React.Fragment key={i}>
+              {i > 0 && ", "}
+              <code>{trimmed}</code>
+            </React.Fragment>
+          );
+        })}
     </div>
   );
 }

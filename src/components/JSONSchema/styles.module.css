@@ -1,0 +1,381 @@
+.schemaContainer {
+  margin: 1rem 0;
+  font-family: var(--ifm-font-family-base);
+}
+
+.schemaTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--ifm-heading-color);
+  font-family: var(--ifm-font-family-base);
+}
+
+.schemaDescription {
+  margin-bottom: 1rem;
+  color: var(--ifm-color-emphasis-800);
+  font-family: var(--ifm-font-family-base);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.expandAllContainer {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.expandAllButton {
+  background: transparent;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--ifm-font-family-base);
+  color: var(--ifm-color-emphasis-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expandAllButton:hover {
+  background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-emphasis-400);
+  color: var(--ifm-color-emphasis-900);
+}
+
+.expandAllButton:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.propertiesContainer {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  padding-left: 1rem;
+  border: none;
+  border-left: 2px solid var(--ifm-color-emphasis-200);
+  position: relative;
+}
+
+.property {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0;
+  border-bottom: none;
+  position: relative;
+}
+
+.property:last-child {
+  margin-bottom: 0;
+}
+
+.propertyHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+/* Create a consistent gutter for all properties */
+.propertyHeader::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+/* Properties with expand toggle will have the icon in the gutter */
+.propertyHeader:has(.expandToggle)::before {
+  display: none;
+}
+
+.expandToggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 20px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ifm-color-emphasis-600);
+  transition: transform 0.2s ease;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.expandToggle:hover {
+  color: var(--ifm-color-emphasis-800);
+}
+
+.expandToggle:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.expandToggle[aria-expanded="true"] {
+  transform: rotate(90deg);
+}
+
+.propertyName {
+  font-weight: 600;
+  color: var(--ifm-font-color-base);
+  font-size: 1rem;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.propertyType {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.9rem;
+  font-family: var(--ifm-font-family-base);
+}
+
+.propertyType::before {
+  content: "";
+}
+
+.required {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background: rgba(255, 107, 74, 0.1);
+  color: #ff6b4a;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: auto;
+  text-transform: uppercase;
+}
+
+.description {
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  margin-left: 20px;
+  font-family: var(--ifm-font-family-base);
+}
+
+.example,
+.enum,
+.default,
+.pattern,
+.constraint {
+  margin-top: 0.25rem;
+  margin-left: 20px;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.exampleLabel,
+.enumLabel,
+.defaultLabel,
+.patternLabel,
+.constraintLabel {
+  color: var(--ifm-color-emphasis-600);
+  font-family: var(--ifm-font-family-base);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.exampleValue,
+.enumValue,
+.defaultValue,
+.patternValue,
+.constraintValue {
+  background: var(--ifm-color-emphasis-100);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  color: var(--ifm-color-emphasis-900);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.enumValue {
+  margin-right: 0.5rem;
+}
+
+.nestedProperties {
+  margin-top: 1rem;
+  margin-left: 20px;
+  padding-top: 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--ifm-color-emphasis-200);
+  position: relative;
+}
+
+.nestedProperties .property {
+  margin-bottom: 1rem;
+}
+
+.nestedProperties .propertyName {
+  font-size: 0.95rem;
+}
+
+/* Adjust nested property descriptions and metadata to maintain alignment */
+.nestedProperties .description {
+  margin-left: 20px;
+}
+
+.nestedProperties .example,
+.nestedProperties .enum,
+.nestedProperties .default,
+.nestedProperties .pattern,
+.nestedProperties .constraint {
+  margin-left: 20px;
+}
+
+.comment {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 0.25rem;
+  margin-left: 20px;
+  font-family: var(--ifm-font-family-base);
+}
+
+.deprecated {
+  color: #ff6b4a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  margin-left: 20px;
+  font-family: var(--ifm-font-family-base);
+  text-transform: uppercase;
+}
+
+.schemaVariantLabel,
+.arrayItemsLabel {
+  font-weight: 600;
+  color: var(--ifm-font-color-base);
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  margin-left: 20px;
+  font-family: var(--ifm-font-family-base);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.schemaVariant {
+  background: transparent;
+  border: none;
+  border-left: 2px solid var(--ifm-color-emphasis-200);
+  border-radius: 0;
+  padding: 0.75rem 0 0.75rem 1rem;
+  margin-bottom: 1rem;
+  margin-left: 20px;
+  position: relative;
+}
+
+.variantHeader {
+  font-weight: 600;
+  color: var(--ifm-font-color-base);
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.variantType {
+  font-weight: normal;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.rootOneOf,
+.rootAnyOf,
+.rootAllOf,
+.oneOf,
+.anyOf,
+.allOf {
+  margin-top: 1rem;
+}
+
+/* Collapsible sections */
+.collapsibleSection {
+  margin-bottom: 0.25rem;
+}
+
+.collapsibleHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsibleContent {
+  margin-top: 0.5rem;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .schemaContainer {
+  color: var(--ifm-font-color-base);
+}
+
+[data-theme="dark"] .propertiesContainer {
+  border-left-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme="dark"] .propertyName {
+  color: var(--ifm-font-color-base);
+}
+
+[data-theme="dark"] .description {
+  color: var(--ifm-color-emphasis-700);
+}
+
+[data-theme="dark"] .required {
+  background: rgba(255, 107, 74, 0.15);
+  color: #ff8a6f;
+}
+
+[data-theme="dark"] .exampleValue,
+[data-theme="dark"] .enumValue,
+[data-theme="dark"] .defaultValue,
+[data-theme="dark"] .patternValue,
+[data-theme="dark"] .constraintValue {
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-font-color-base);
+}
+
+[data-theme="dark"] .nestedProperties {
+  border-left-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme="dark"] .schemaVariant {
+  border-left-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme="dark"] .variantHeader {
+  border-bottom-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme="dark"] .expandToggle {
+  color: var(--ifm-color-emphasis-500);
+}
+
+[data-theme="dark"] .expandToggle:hover {
+  color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme="dark"] .expandAllButton {
+  border-color: var(--ifm-color-emphasis-400);
+  color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme="dark"] .expandAllButton:hover {
+  background: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-emphasis-500);
+  color: var(--ifm-font-color-base);
+}

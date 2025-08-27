@@ -24,7 +24,7 @@ function HomepageHeader() {
         </p>
         <div className={styles.heroStats}>
           <div className={styles.stat}>
-            <span className={styles.statNumber}>4M+</span>
+            <span className={styles.statNumber}>10M+</span>
             <span className={styles.statLabel}>Messages/Second</span>
           </div>
           <div className={styles.stat}>
@@ -32,8 +32,8 @@ function HomepageHeader() {
             <span className={styles.statLabel}>Latency</span>
           </div>
           <div className={styles.stat}>
-            <span className={styles.statNumber}>~15MB</span>
-            <span className={styles.statLabel}>Memory Footprint</span>
+            <span className={styles.statNumber}>~18MB</span>
+            <span className={styles.statLabel}>Binary Size</span>
           </div>
         </div>
         <div className={styles.buttons}>
