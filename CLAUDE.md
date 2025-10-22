@@ -1,24 +1,12 @@
-# CLAUDE.md
+# NATS Documentation Style Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> AI-focused guide for maintaining NATS documentation consistency.
 
-## Code Examples Convention
+## 🔴 MUST Rules (Non-Negotiable)
 
-When adding code examples to documentation, use Docusaurus's Tabs component to show examples in multiple languages:
+### Code Example Tabs
 
-1. **Always include CLI as the default tab** - Set `default` attribute on the CLI TabItem
-2. **Use bash language for CLI examples** - Use ` ```bash ` for CLI code blocks to enable syntax highlighting with grayed-out comments
-3. **Use consistent groupId** - Use `groupId="lang"` to synchronize language selection across all code blocks on the page
-4. **Standard language order**:
-   - CLI (default)
-   - JavaScript/TypeScript
-   - Go
-   - Python
-   - Java
-   - Rust
-   - C#/.NET
-
-Example structure:
+**Required structure:**
 ```mdx
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -27,193 +15,205 @@ import TabItem from '@theme/TabItem';
 <TabItem value="cli" label="CLI" default>
 
 ```bash
-# Comments will be grayed out
 nats pub hello "Hello NATS!"
-nats sub weather.updates
 ```
 
 </TabItem>
 <TabItem value="js" label="JavaScript/TypeScript">
 
 ```javascript
-// JavaScript example here
+await nc.publish("hello", "Hello NATS!");
 ```
 
 </TabItem>
-<!-- Add other languages -->
 </Tabs>
 ```
 
-## Development Commands
+**Rules:**
+1. CLI tab MUST be first with `default` attribute
+2. MUST use `groupId="lang"` for synchronized tabs
+3. MUST use `bash` language for CLI code blocks (not sh/shell/zsh)
+4. MUST import Tabs components at top of MDX files
+5. MUST follow language order: CLI, JavaScript/TypeScript, Go, Python, Java, Rust, C#/.NET
 
-### Install dependencies
-```bash
-npm install
-```
+### Code Example Workflow
 
-### Start development server
-```bash
-npm start
-```
-Opens a local development server at http://localhost:3000 with hot reload.
-
-### Build the site
-```bash
-npm run build
-```
-Generates static content into the `build` directory.
-
-### Type checking
-```bash
-npm run typecheck
-```
-
-### Serve production build locally
-```bash
-npm run serve
-```
-
-### Deploy to GitHub Pages
-```bash
-# With SSH
-USE_SSH=true npm run deploy
-
-# Without SSH
-GIT_USER=<GitHub username> npm run deploy
-```
-
-## Code Examples System
-
-The documentation includes code examples from NATS client repositories. This system fetches real, working code from official repos to keep docs in sync with actual client libraries.
-
-### How It Works
-
-The `scripts/fetch-examples.js` script:
-
-1. **Fetches examples** from GitHub repositories (nats.go, nats.rs, etc.)
-2. **Extracts snippets** using `NATS-DOC-START` / `NATS-DOC-END` markers (or uses full file if no markers)
-3. **Cleans indentation** to make snippets presentable
-4. **Organizes by page and snippet** (e.g., `basics-publish` → `basics/publish.go`)
-5. **Generates metadata.json** with information about all fetched examples
-
-### Output Location
-
-All fetched examples go to: **`static/examples/snippets/`**
-
-```
-static/examples/snippets/
-├── go/
-│   └── basics/
-│       ├── publish.go
-│       └── subscribe.go
-├── rust/
-│   └── basics/
-│       ├── publish.rs
-│       └── subscribe.rs
-├── cli/              (local files, not fetched)
-│   └── basics/
-│       └── publish.sh
-└── metadata.json     (generated)
-```
-
-**Important:** This entire directory is gitignored and regenerated during build.
-
-### Running the Script
-
-```bash
-# Manually fetch examples
-npm run fetch-examples
-
-# Automatically run during build
-npm run build  # Runs fetch-examples first
-```
-
-### Adding New Examples
-
-#### For Remote Examples (Go, Rust, etc.)
-
-1. Add examples to the client repo (e.g., nats.go) on the `doc-examples` branch
-2. Use this file naming pattern:
-   - **Go:** `examples/docs/[page]-[snippet]/main.go`
-   - **Rust:** `async-nats/examples/docs_[page]_[snippet].rs`
-3. Add markers to extract specific sections (optional):
-   ```go
-   // Full example file with setup...
-
-   // NATS-DOC-START
-   nc.Publish("subject", []byte("hello"))
-   // NATS-DOC-END
-
-   // Cleanup code...
-   ```
-4. Add entry to `EXAMPLES_CONFIG` in `scripts/fetch-examples.js`:
-   ```javascript
-   "go": {
-       repo: "nats-io/nats.go",
-       branch: "doc-examples",
-       examples: {
-           "basics-publish": "examples/docs/basics-publish/main.go",
-           "basics-subscribe": "examples/docs/basics-subscribe/main.go",
-       },
-   },
-   ```
-
-#### For CLI Examples
-
-CLI examples are stored locally (not fetched):
-1. Create `.sh` files in `static/examples/snippets/cli/[page]/[snippet].sh`
-2. The script automatically finds and includes them in metadata.json
-
-### Using in Documentation
-
-Use the custom `<div class="nats-example">` tag:
-
+**Using nats-example tags (preferred):**
 ```mdx
 <div class="nats-example" data-type="basics-publish" data-languages="cli,go,rust"></div>
 ```
 
-The JavaScript loader (`static/js/nats-example-loader-v2.js`) will:
-- Read the metadata.json
-- Load the appropriate code files
-- Create multi-language tabs
-- Apply syntax highlighting
+**Adding new examples:**
 
-### Configuration
+1. **CLI**: Write in `static/examples/snippets/cli/[page]/[snippet].sh` (this repo)
+2. **Go**: Write in `~/coding/nats.go-docs` at `examples/docs/[page]-[snippet]/main.go` (doc-examples branch)
+3. **Rust**: Write in `~/coding/nats.rs-docs` at `async-nats/examples/docs_[page]_[snippet].rs` (doc-examples branch)
+4. **Fetch**: Run `npm run fetch-examples` to pull Go/Rust into this repo
 
-Edit `scripts/fetch-examples.js` to configure:
-- `EXAMPLES_CONFIG`: Repository URLs, branches, and example paths
-- `OUTPUT_DIR`: Where examples are saved (don't change unless needed)
-- Marker patterns for snippet extraction
+**Optional markers** (to exclude setup code):
+```go
+// NATS-DOC-START
+nc.Publish("subject", []byte("hello"))
+// NATS-DOC-END
+```
 
-## Architecture Overview
+**For inline examples:**
+Use manual `<Tabs groupId="lang">` when examples don't need to be in client repos. Still follow all tab rules.
 
-This is a **Docusaurus v3** documentation site for NATS. Key architectural elements:
+## 🟡 SHOULD Rules (Best Practices)
 
-### Configuration
-- **docusaurus.config.ts**: Main configuration file containing site metadata, presets, theme config, and deployment settings
-- **sidebars.ts**: Defines sidebar structure (currently using autogenerated sidebar from filesystem)
-- **tsconfig.json**: TypeScript configuration extending Docusaurus defaults
+### Code Examples
+- Include 3+ languages when possible (minimum: CLI, JS, Go)
+- Keep examples focused (under 20 lines)
+- Show complete, runnable code
+- Add comments for complex operations
+- Show expected output when helpful
+- Use realistic names (not foo/bar)
+- Include errors ONLY if they teach the concept
 
-### Content Structure
-- **docs/**: Documentation pages in Markdown/MDX format
-  - Uses autogenerated sidebar from folder structure
-  - Root path is configured as "/" (docs are the main content)
-- **blog/**: Blog posts with author info (authors.yml) and tags (tags.yml)
-- **src/**: React components and custom styling
-  - components/HomepageFeatures/: Custom homepage features component
-  - css/custom.css: Global CSS customizations
-  - pages/: Additional standalone pages
+**Decision tree:**
+```
+Basic operation (pub/sub/request)? → CLI, JS, Go minimum
+Language-specific feature? → Only relevant languages
+General feature? → All available languages
+```
 
-### Key Configuration Notes
-- Docs are served at root path ("/") instead of "/docs"
-- Site is configured for GitHub Pages deployment (org: nats-io, project: nats.docs)
-- Uses Prism for syntax highlighting
-- TypeScript support enabled with strict type checking
+### Writing Style
+- Active voice: "NATS delivers messages"
+- Present tense: "NATS provides"
+- Welcoming and conversational (not dry/robotic)
+- Explain concepts clearly
+- Progressive complexity (simple → advanced)
+- Link to reference docs for exhaustive details
 
-### Branding Assets
-- **nats-branding/**: Contains official NATS logo assets in various formats
-  - Horizontal, stacked, and icon versions
-  - Color, black, and white variants
-  - AI, PNG, and SVG formats
-- Logos automatically switch between light/dark mode
-- Official NATS color palette: #27AAE1, #375C93, #34A574, #8DC63F
+### Interactive Animations
+
+**Use NatsFlow for:**
+- Message flow patterns (pub/sub, request/reply)
+- Timing/sequencing
+- Fan-out, load balancing
+- JetStream operations
+
+**Don't use NatsFlow for:**
+- API syntax (use code examples)
+- Configuration (use code blocks)
+- Static architecture (use diagrams)
+
+**Usage:**
+```mdx
+import { NatsFlow, publishSubscribeScenario } from '@site/src/components/NatsFlow';
+
+<NatsFlow scenario={publishSubscribeScenario} />
+```
+
+Available scenarios: `publishSubscribeScenario`, `requestReplyScenario`, `fanOutScenario`, `queueGroupScenario`
+
+## 🟢 MAY Rules (Optional)
+
+- Additional language examples beyond core set
+- Debug mode: `<NatsFlow scenario={x} debug={true} />`
+- "Under the Hood" sections revealing mechanisms
+- Language-specific notes in expandable sections
+- Error cases when they teach concepts
+- Links to related concepts
+- Troubleshooting sections
+
+## ⛔ NEVER Rules
+
+- Create documentation without testing examples
+- Use images for code (must be copy-pasteable)
+- Skip language label in TabItem
+- Use relative imports (use `@site/` alias)
+- Introduce advanced concepts before foundations
+- Document every parameter (link to reference instead)
+
+---
+
+## Technical Reference
+
+### Code Examples System
+
+**How it works:**
+1. `scripts/fetch-examples.js` fetches from GitHub repos (nats.go, nats.rs)
+2. Extracts snippets using `NATS-DOC-START/END` markers
+3. Organizes by page/snippet
+4. Generates metadata.json
+
+**Output:** `static/examples/snippets/` (gitignored, regenerated on build)
+
+### NatsFlow Props
+```typescript
+interface NatsFlowProps {
+  scenario: Scenario;              // Required
+  customButtons?: ControlButton[]; // Optional
+  width?: number;                  // Default: 800
+  height?: number;                 // Default: 400
+  showDefaultControls?: boolean;   // Default: true
+  debug?: boolean;                 // Default: false
+}
+```
+
+See `src/components/NatsFlow/README.md` for custom scenarios.
+
+### Common Commands
+```bash
+npm start              # Dev server (localhost:3000)
+npm run build          # Build site
+npm run typecheck      # Type checking
+npm run fetch-examples # Fetch code examples
+```
+
+### Architecture
+- **docs/**: Documentation pages (Markdown/MDX) - served at root "/"
+- **src/components/**: React components (use `@site/` imports)
+- **static/**: Static assets
+- **docusaurus.config.ts**: Site configuration
+
+### Brand Colors
+- Primary Blue: `#27AAE1`
+- Navy: `#375C93`
+- Green: `#34A574`
+- Lime: `#8DC63F`
+
+---
+
+## Pre-Commit Validation
+
+**Technical:**
+- [ ] CLI is default tab with `groupId="lang"`
+- [ ] Tabs imported at top of MDX
+- [ ] Code blocks specify language
+- [ ] Examples tested and working
+- [ ] Links are valid
+- [ ] `npm run typecheck` passes
+
+**Content:**
+- [ ] Welcoming, conversational tone
+- [ ] Realistic names in examples
+- [ ] Expected output shown when helpful
+- [ ] Progressive complexity
+- [ ] Errors only if they teach
+
+---
+
+## Formatting Standards
+
+**Go:** `go fmt`
+**Rust:** `cargo +nightly fmt`
+**GitHub CLI:** `gh pr view <number>` / `gh issue view <number>`
+
+---
+
+## Subagent Usage
+
+A specialized subagent (`nats-docs-writer`) auto-triggers on:
+- `docs/**/*.md`
+- `docs/**/*.mdx`
+- `src/components/NatsFlow/**`
+
+Manual invocation:
+```
+/task Create documentation for [topic] following NATS standards
+```
+
+The subagent enforces MUST rules, applies SHOULD guidelines, and validates against the checklist.
