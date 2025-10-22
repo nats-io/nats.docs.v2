@@ -1,0 +1,55 @@
+---
+sidebar_position: 100
+title: NatsFlow Animation Examples
+description: Interactive message flow animations demonstrating NATS patterns
+---
+
+import {
+  NatsFlow,
+  Showcase,
+  publishSubscribeScenario,
+  requestReplyScenario,
+  fanOutScenario,
+  queueGroupScenario,
+} from '@site/src/components/NatsFlow';
+import { CustomScenarioDemo } from '@site/src/components/NatsFlow/examples';
+
+# Interactive Message Flow Animations
+
+This page demonstrates the NatsFlow animation framework for visualizing NATS messaging patterns.
+
+## Publish/Subscribe
+
+The most basic pattern in NATS. Publishers send messages to subjects, and all subscribers listening to those subjects receive the messages.
+
+<NatsFlow scenario={publishSubscribeScenario} />
+
+## Request/Reply
+
+A synchronous communication pattern where a client sends a request and waits for a reply from a service.
+
+<NatsFlow scenario={requestReplyScenario} />
+
+## Fan-out Distribution
+
+Messages are simultaneously distributed to many subscribers, enabling parallel processing and real-time updates.
+
+<NatsFlow scenario={fanOutScenario} height={450} />
+
+## Queue Groups (Load Balancing)
+
+Multiple workers in a queue group share the workload. Each message is delivered to only one worker, enabling horizontal scaling.
+
+<NatsFlow scenario={queueGroupScenario} />
+
+## Dynamic Example
+
+This example demonstrates how to create scenarios that respond to user interaction. Try adding and removing subscribers!
+
+<CustomScenarioDemo />
+
+---
+
+## All Examples
+
+<Showcase />

@@ -1,0 +1,335 @@
+/* Container */
+.container {
+  margin: 2rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Canvas */
+.canvas {
+  position: relative;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+[data-theme='dark'] .canvas {
+  background: linear-gradient(to bottom, #1a1a1a 0%, #2d2d2d 100%);
+  border-color: #404040;
+}
+
+/* Node */
+.node {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border: 3px solid;
+  border-radius: 12px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translate(-40px, -40px);
+}
+
+[data-theme='dark'] .node {
+  background: #333;
+}
+
+.node.highlighted {
+  transform: translate(-40px, -40px) scale(1.1);
+  box-shadow: 0 4px 12px rgba(39, 170, 225, 0.5);
+  animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-40px, -40px) scale(1.1);
+  }
+  50% {
+    transform: translate(-40px, -40px) scale(1.15);
+  }
+}
+
+.nodeIcon {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.nodeLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  color: #495057;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .nodeLabel {
+  color: #adb5bd;
+}
+
+/* Message */
+.message {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transform: translate(-10px, -10px);
+  animation: messageBounce 0.3s ease-in-out;
+  z-index: 10;
+}
+
+@keyframes messageBounce {
+  0%, 100% {
+    transform: translate(-10px, -10px) scale(1);
+  }
+  50% {
+    transform: translate(-10px, -10px) scale(1.2);
+  }
+}
+
+.messageLabel {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #495057;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+[data-theme='dark'] .messageLabel {
+  color: #adb5bd;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Arrow */
+.arrow {
+  position: absolute;
+  height: 2px;
+  z-index: 1;
+}
+
+.arrowLine {
+  height: 2px;
+  background: #adb5bd;
+  width: 100%;
+}
+
+[data-theme='dark'] .arrowLine {
+  background: #495057;
+}
+
+.arrowLine.arrowDashed {
+  background: linear-gradient(
+    to right,
+    #adb5bd 0%,
+    #adb5bd 50%,
+    transparent 50%,
+    transparent 100%
+  );
+  background-size: 10px 2px;
+}
+
+[data-theme='dark'] .arrowLine.arrowDashed {
+  background: linear-gradient(
+    to right,
+    #495057 0%,
+    #495057 50%,
+    transparent 50%,
+    transparent 100%
+  );
+  background-size: 10px 2px;
+}
+
+.arrowHead {
+  position: absolute;
+  right: 0;
+  top: -3px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #adb5bd;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+[data-theme='dark'] .arrowHead {
+  border-left-color: #495057;
+}
+
+/* Control Panel */
+.controlPanel {
+  background: white;
+  padding: 1.5rem;
+  border-top: 1px solid #dee2e6;
+}
+
+[data-theme='dark'] .controlPanel {
+  background: #2d2d2d;
+  border-top-color: #404040;
+}
+
+.controlTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+[data-theme='dark'] .controlTitle {
+  color: #f8f9fa;
+}
+
+.controlDescription {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+[data-theme='dark'] .controlDescription {
+  color: #adb5bd;
+}
+
+.controlButtons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.controlButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.controlButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.controlButton:active {
+  transform: translateY(0);
+}
+
+.buttonIcon {
+  font-size: 1rem;
+}
+
+/* Button variants */
+.btnPrimary {
+  background: #27AAE1;
+  color: white;
+}
+
+.btnPrimary:hover {
+  background: #1f8fc4;
+}
+
+.btnSecondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btnSecondary:hover {
+  background: #5a6268;
+}
+
+.btnSuccess {
+  background: #34A574;
+  color: white;
+}
+
+.btnSuccess:hover {
+  background: #2d8f63;
+}
+
+.btnDanger {
+  background: #dc3545;
+  color: white;
+}
+
+.btnDanger:hover {
+  background: #c82333;
+}
+
+/* Debug Overlay */
+.debugOverlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 10px;
+  max-width: 300px;
+  max-height: 100%;
+  overflow-y: auto;
+  z-index: 100;
+  border-left: 2px solid #00ff00;
+}
+
+[data-theme='dark'] .debugOverlay {
+  background: rgba(0, 255, 0, 0.1);
+  border-left-color: #00ff00;
+}
+
+.debugPanel h4 {
+  margin: 0 0 10px 0;
+  color: #00ff00;
+  font-size: 14px;
+  border-bottom: 1px solid #00ff00;
+  padding-bottom: 5px;
+}
+
+.debugPanel > div {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.debugMessages {
+  border-top: 1px solid #00ff00;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.debugMessage {
+  font-size: 11px;
+  padding: 3px 0;
+  color: #00ff00;
+}
+
+.debugStep {
+  border-top: 1px solid #00ff00;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.debugStep pre {
+  font-size: 10px;
+  margin: 5px 0 0 0;
+  color: #00ff00;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

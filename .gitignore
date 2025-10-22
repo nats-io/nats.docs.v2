@@ -7,6 +7,9 @@ build/
 # Fetched code examples (regenerated during build)
 static/examples/snippets/
 
+# Animation testing screenshots
+animation-screenshots/
+
 # Old example location
 
 # IDE directories
