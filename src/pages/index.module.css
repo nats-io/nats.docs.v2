@@ -4,7 +4,7 @@
  */
 
 .heroBanner {
-  padding: 6rem 0;
+  padding: 5rem 0 4rem;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -30,64 +30,26 @@
 }
 
 .heroLogo {
-  width: 120px;
-  height: 120px;
-  margin-bottom: 2rem;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 1.5rem;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
 }
 
 .heroTitle {
-  font-size: 3.5rem;
-  font-weight: 800;
+  font-size: 3rem;
+  font-weight: 700;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .heroSubtitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 300;
-  max-width: 800px;
-  margin: 0 auto 3rem;
+  max-width: 700px;
+  margin: 0 auto 2rem;
   opacity: 0.95;
-}
-
-.heroStats {
-  display: flex;
-  justify-content: center;
-  gap: 4rem;
-  margin: 3rem 0;
-  flex-wrap: wrap;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.statNumber {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #8DC63F;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.statLabel {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.9;
-  margin-top: 0.5rem;
+  line-height: 1.6;
 }
 
 .buttons {
@@ -107,62 +69,51 @@
   pointer-events: auto !important;
 }
 
-.trustedBy {
-  padding: 4rem 0;
-  text-align: center;
-  background: var(--ifm-background-surface-color);
-}
-
-.trustedBy h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: var(--ifm-color-primary);
-}
-
-.trustedByText {
-  font-size: 1.2rem;
-  color: var(--ifm-color-emphasis-700);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
 @media screen and (max-width: 996px) {
   .heroBanner {
-    padding: 4rem 0;
+    padding: 3rem 0;
   }
-  
+
+  .heroLogo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+  }
+
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
   }
-  
+
   .heroSubtitle {
-    font-size: 1.2rem;
-  }
-  
-  .heroStats {
-    gap: 2rem;
-  }
-  
-  .statNumber {
-    font-size: 2rem;
+    font-size: 1.1rem;
   }
 }
 
 @media screen and (max-width: 576px) {
-  .heroTitle {
-    font-size: 2rem;
+  .heroBanner {
+    padding: 2.5rem 0;
   }
-  
+
+  .heroLogo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+
   .heroSubtitle {
     font-size: 1rem;
+    padding: 0 1rem;
   }
-  
+
   .buttons {
     flex-direction: column;
     width: 100%;
     padding: 0 1rem;
   }
-  
+
   .buttons .button {
     width: 100%;
   }
