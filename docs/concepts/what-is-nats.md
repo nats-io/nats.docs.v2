@@ -26,15 +26,7 @@ NATS embodies a set of principles that guide its design:
 
 NATS is a **messaging fabric** that connects all your applications and services:
 
-```
-┌─────────┐     messages      ┌─────────┐
-│Publisher├──────────────────►│  NATS   │
-└─────────┘                    │ Server  │
-                               │         │
-┌──────────┐    messages      │         │
-│Subscriber│◄──────────────────┤         │
-└──────────┘                   └─────────┘
-```
+<div class="nats-flow" data-scenario="publishSubscribe" data-width="600" data-height="400"></div>
 
 ### Core Components
 
