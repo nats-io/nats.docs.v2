@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BaseEdge, type EdgeProps, getBezierPath } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, type EdgeProps, getBezierPath } from '@xyflow/react';
 import type { AnimatedEdgeData } from '../types';
 
 interface Circle {
@@ -37,7 +37,7 @@ export function AnimatedEdge(props: EdgeProps) {
 
   const edgeData = data as AnimatedEdgeData;
 
-  const [edgePath] = getBezierPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -114,14 +114,24 @@ export function AnimatedEdge(props: EdgeProps) {
         style={{ stroke: color, strokeWidth: 2 }}
       />
       {edgeData?.label && (
-        <text
-          x={sourceX + (targetX - sourceX) / 2}
-          y={sourceY + (targetY - sourceY) / 2 - 10}
-          className="text-xs"
-          style={{ fill: '#666', fontSize: 12 }}
-        >
-          {edgeData.label}
-        </text>
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY - 15}px)`,
+              background: 'white',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 500,
+              color: '#666',
+              pointerEvents: 'all',
+            }}
+            className="nodrag nopan"
+          >
+            {edgeData.label}
+          </div>
+        </EdgeLabelRenderer>
       )}
       <g>
         {circles.map((circle) => {

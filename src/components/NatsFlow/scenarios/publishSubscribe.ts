@@ -43,7 +43,7 @@ export const publishSubscribeScenario: NatsFlowScenario = {
       type: 'animated',
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
-      data: { color: '#3b82f6', animated: true, label: 'subject.topic' },
+      data: { color: '#3b82f6', animated: true, label: 'events.data' },
     },
     {
       id: 'e-server-sub1',
