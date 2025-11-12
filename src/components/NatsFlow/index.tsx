@@ -59,7 +59,7 @@ export function NatsFlow({
   scenario,
   width = 600,
   height = 400,
-  showControls = true,
+  showControls = false,
 }: NatsFlowProps) {
   useEffect(() => {
     return suppressResizeObserverError();
@@ -91,6 +91,7 @@ export function NatsFlow({
         preventScrolling={true}
         minZoom={0.5}
         maxZoom={1.5}
+        proOptions={{ hideAttribution: true }}
       >
         <Background />
         {showControls && <Controls showInteractive={false} />}

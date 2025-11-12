@@ -73,7 +73,7 @@
       const scenarioName = container.dataset.scenario;
       const width = parseInt(container.dataset.width || '600', 10);
       const height = parseInt(container.dataset.height || '400', 10);
-      const showControls = container.dataset.showControls !== 'false';
+      const showControls = container.dataset.showControls === 'true';
 
       try {
         const scenario = scenarios[scenarioName];
