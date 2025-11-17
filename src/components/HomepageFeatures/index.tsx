@@ -30,7 +30,7 @@ const DocSections: DocSection[] = [
         Understand the core concepts and architecture behind NATS messaging patterns and JetStream.
       </>
     ),
-    link: '/concepts/what-is-nats',
+    link: '/what-is-nats',
   },
   {
     title: 'Guides',

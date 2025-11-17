@@ -20,6 +20,11 @@ const sidebars: SidebarsConfig = {
         },
         {
             type: "doc",
+            id: "what-is-nats",
+            label: "What is NATS?",
+        },
+        {
+            type: "doc",
             id: "getting-started/index",
             label: "Getting Started",
         },
@@ -28,7 +33,6 @@ const sidebars: SidebarsConfig = {
             label: "Core Concepts",
             collapsed: false,
             items: [
-                "concepts/what-is-nats",
                 "concepts/pub-sub-basics",
                 "concepts/subjects",
                 "concepts/request-reply",

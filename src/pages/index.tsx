@@ -31,7 +31,7 @@ function HomepageHeader() {
           </Link>
           <Link
             className="button button--secondary button--lg"
-            to="/concepts/what-is-nats"
+            to="/what-is-nats"
           >
             Learn Concepts
           </Link>
