@@ -144,9 +144,10 @@ Ready to try NATS? Here's the quickest path:
 
 Now that you understand what NATS is, explore:
 
-- **[Pub/Sub Basics](pub-sub-basics)** - Deep dive into the publish-subscribe pattern
-- **[Getting Started Guide](../getting-started)** - Set up your first NATS application
-- **[JetStream](https://docs.nats.io/jetstream)** - Add persistence to your messaging
+- **[Getting Started Guide](getting-started)** - Set up your first NATS application
+- **[Pub/Sub Basics](concepts/pub-sub-basics)** - Deep dive into the publish-subscribe pattern
+- **[Request-Reply](concepts/request-reply)** - Learn synchronous communication patterns
+- **[Queue Groups](concepts/queue-groups)** - Implement load balancing
 
 ## Summary
 

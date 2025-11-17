@@ -613,10 +613,10 @@ Congratulations! You've successfully:
 
 ### What to explore next:
 
-1. **[Request-Reply Pattern](https://docs.nats.io/nats-concepts/core-nats/reqreply)** - Synchronous communication
-2. **[Queue Groups](https://docs.nats.io/nats-concepts/core-nats/queue)** - Load balancing
-3. **[JetStream](https://docs.nats.io/jetstream)** - Persistent messaging
-4. **[Security](https://docs.nats.io/running-a-nats-service/configuration/securing_nats)** - Authentication & TLS
+1. **[Request-Reply Pattern](../concepts/request-reply)** - Synchronous communication
+2. **[Queue Groups](../concepts/queue-groups)** - Load balancing
+3. **[Subjects](../concepts/subjects)** - Understanding subject-based messaging
+4. **[Pub/Sub Basics](../concepts/pub-sub-basics)** - Core messaging patterns
 
 ### Client Libraries
 
