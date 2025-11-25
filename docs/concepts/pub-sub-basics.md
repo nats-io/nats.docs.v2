@@ -26,6 +26,10 @@ Publisher → Subject → Subscriber(s)
 
 This decoupling provides tremendous flexibility in building distributed systems.
 
+<div class="nats-flow" data-scenario="publishSubscribeAnimated" data-width="600" data-height="350"></div>
+
+Watch how messages flow as subscribers join. With no subscribers, messages reach the server but aren't delivered. As subscribers connect, each receives a copy of every message.
+
 ## How It Works in NATS
 
 ### 1. Publishing Messages

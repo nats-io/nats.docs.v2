@@ -50,7 +50,12 @@ export function AnimatedEdge(props: EdgeProps) {
   useEffect(() => {
     if (!edgeData?.animated) return;
 
-    const interval = setInterval(() => {
+    const delay = edgeData?.delay || 0;
+    let interval: NodeJS.Timeout | undefined;
+
+    // Wait for the delay before starting the animation
+    const delayTimeout = setTimeout(() => {
+      // Add the first circle immediately after delay
       const newCircle: Circle = {
         id: nextId.current++,
         progress: 0,
@@ -58,10 +63,24 @@ export function AnimatedEdge(props: EdgeProps) {
         startTime: Date.now(),
       };
       setCircles((prev) => [...prev, newCircle]);
-    }, 2000);
 
-    return () => clearInterval(interval);
-  }, [edgeData?.animated]);
+      // Then add a circle every 2 seconds
+      interval = setInterval(() => {
+        const newCircle: Circle = {
+          id: nextId.current++,
+          progress: 0,
+          isActive: true,
+          startTime: Date.now(),
+        };
+        setCircles((prev) => [...prev, newCircle]);
+      }, 2000);
+    }, delay);
+
+    return () => {
+      clearTimeout(delayTimeout);
+      if (interval) clearInterval(interval);
+    };
+  }, [edgeData?.animated, edgeData?.delay]);
 
   // Animation loop
   useEffect(() => {

@@ -14,6 +14,10 @@ NATS implements a subject-based messaging system where publishers and subscriber
 
 A subject is a string of characters that forms a name which publishers and subscribers use to find each other. It acts as the address for message routing within NATS. Subjects are case-sensitive and can include alphanumeric characters, `-` (dash), and `_` (underscore).
 
+<div class="nats-flow" data-scenario="publishSubscribe" data-width="600" data-height="350"></div>
+
+In the animation above, `events.data` is the subject - it's the named channel that connects the publisher to all subscribers without any direct addressing.
+
 ## Subject Hierarchies
 
 The `.` (dot) character creates a subject hierarchy, enabling logical grouping of related subjects. This hierarchical namespace helps organize your messaging architecture:
