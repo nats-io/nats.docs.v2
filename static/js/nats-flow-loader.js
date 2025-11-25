@@ -64,7 +64,7 @@
       return;
     }
 
-    const { NatsFlow, scenarios } = components;
+    const { NatsFlow, ToggleableSubscribersScenario, QueueGroupAnimated, PublishSubscribeAnimated, scenarios } = components;
 
     // Wait for React to be available
     const { React, ReactDOM } = await waitForReact();
@@ -76,6 +76,42 @@
       const showControls = container.dataset.showControls === 'true';
 
       try {
+        // Special case: toggleableSubscribers uses a custom interactive component
+        if (scenarioName === 'toggleableSubscribers') {
+          const root = ReactDOM.createRoot(container);
+          const element = React.createElement(ToggleableSubscribersScenario, {
+            width,
+            height,
+          });
+          root.render(element);
+          container.setAttribute('data-initialized', 'true');
+          return;
+        }
+
+        // Special case: queueGroupAnimated uses a custom animated component
+        if (scenarioName === 'queueGroupAnimated') {
+          const root = ReactDOM.createRoot(container);
+          const element = React.createElement(QueueGroupAnimated, {
+            width,
+            height,
+          });
+          root.render(element);
+          container.setAttribute('data-initialized', 'true');
+          return;
+        }
+
+        // Special case: publishSubscribeAnimated uses a custom animated component
+        if (scenarioName === 'publishSubscribeAnimated') {
+          const root = ReactDOM.createRoot(container);
+          const element = React.createElement(PublishSubscribeAnimated, {
+            width,
+            height,
+          });
+          root.render(element);
+          container.setAttribute('data-initialized', 'true');
+          return;
+        }
+
         const scenario = scenarios[scenarioName];
 
         if (!scenario) {

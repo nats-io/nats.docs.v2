@@ -20,11 +20,15 @@ if (ExecutionEnvironment.canUseDOM) {
   import('../../components/NatsFlow').then((module) => {
     window.NatsFlow = {
       NatsFlow: module.NatsFlow,
+      ToggleableSubscribersScenario: module.ToggleableSubscribersScenario,
+      QueueGroupAnimated: module.QueueGroupAnimated,
+      PublishSubscribeAnimated: module.PublishSubscribeAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,
         queueGroup: module.queueGroupScenario,
         fanOut: module.fanOutScenario,
+        toggleableSubscribers: module.toggleableSubscribersScenario,
       },
     };
 

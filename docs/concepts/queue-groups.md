@@ -8,19 +8,26 @@ import TabItem from '@theme/TabItem';
 
 # Queue Groups
 
-Queue groups provide NATS's built-in load balancing feature. When multiple subscribers join the same queue group, NATS ensures that each message is delivered to only one member of the group, automatically distributing the workload across available consumers.
+In standard publish-subscribe, every subscriber receives every message (1:N fan-out). Queue groups provide an additional feature: subscribers can register with a **queue name**. When multiple subscribers join the same queue name, they form a **queue group**, and only **one randomly chosen member** receives each message. This is NATS's built-in load balancing.
 
-## How Queue Groups Work
+<div class="nats-flow" data-scenario="queueGroupAnimated" data-width="600" data-height="350"></div>
 
-In standard publish-subscribe, every subscriber receives every message. With queue groups:
+Watch how each message (animated dot) flows to only one worker, even though all three are subscribed. NATS automatically distributes the load.
 
-1. **Multiple subscribers register with the same queue name**
-2. **NATS randomly selects one member per message**
-3. **Selected member receives and processes the message**
-4. **Other members don't see that specific message**
-5. **Load is automatically balanced across the group**
+## How It Works
 
-This happens without any configuration on the server side - it's purely a client-side feature built into the NATS protocol.
+When subscribers register to receive messages from a publisher, the normal 1:N pattern ensures every message reaches all subscribers. Queue groups change this behavior:
+
+- **Without queue groups**: Message → All subscribers (fan-out)
+- **With queue groups**: Message → One random subscriber from the group (load balancing)
+
+Subscribers in a queue group still receive messages based on the subject, but NATS ensures each message goes to only one member. If a subscriber joins a queue group alone, it receives all messages. Add more subscribers to the same queue name, and they automatically share the load.
+
+**Key characteristics:**
+- No server configuration needed
+- Queue groups are defined by applications, not the server
+- Subscribers can be added or removed dynamically
+- Built-in fault tolerance and scalability
 
 ## Basic Queue Groups
 

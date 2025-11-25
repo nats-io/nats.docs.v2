@@ -21,6 +21,7 @@ export type AnimatedEdgeData = {
   label?: string;
   throughput?: number;
   animated?: boolean;
+  delay?: number; // Delay in milliseconds before starting animation
 };
 
 export type NatsNodeData = {
