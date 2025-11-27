@@ -23,6 +23,7 @@ if (ExecutionEnvironment.canUseDOM) {
       ToggleableSubscribersScenario: module.ToggleableSubscribersScenario,
       QueueGroupAnimated: module.QueueGroupAnimated,
       PublishSubscribeAnimated: module.PublishSubscribeAnimated,
+      SubjectsWildcardAnimated: module.SubjectsWildcardAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,

@@ -35,6 +35,10 @@ weather.eu.north
 
 NATS provides two wildcards for flexible subscription patterns. While publishers always send to a fully specified subject, subscribers can use wildcards to receive messages from multiple subjects.
 
+<div class="nats-flow" data-scenario="subjectsWildcardAnimated" data-width="700" data-height="450"></div>
+
+The subscriber with pattern `weather.*.east` receives messages from matching subjects (green paths) but not from non-matching subjects (red path). The `*` wildcard matches exactly one token.
+
 ### Single Token Wildcard (`*`)
 
 The `*` wildcard matches exactly one token. For example:
