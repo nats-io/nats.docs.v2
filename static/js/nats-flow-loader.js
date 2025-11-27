@@ -64,7 +64,7 @@
       return;
     }
 
-    const { NatsFlow, ToggleableSubscribersScenario, QueueGroupAnimated, PublishSubscribeAnimated, scenarios } = components;
+    const { NatsFlow, ToggleableSubscribersScenario, QueueGroupAnimated, PublishSubscribeAnimated, SubjectsWildcardAnimated, scenarios } = components;
 
     // Wait for React to be available
     const { React, ReactDOM } = await waitForReact();
@@ -104,6 +104,18 @@
         if (scenarioName === 'publishSubscribeAnimated') {
           const root = ReactDOM.createRoot(container);
           const element = React.createElement(PublishSubscribeAnimated, {
+            width,
+            height,
+          });
+          root.render(element);
+          container.setAttribute('data-initialized', 'true');
+          return;
+        }
+
+        // Special case: subjectsWildcardAnimated uses a custom animated component
+        if (scenarioName === 'subjectsWildcardAnimated') {
+          const root = ReactDOM.createRoot(container);
+          const element = React.createElement(SubjectsWildcardAnimated, {
             width,
             height,
           });

@@ -22,6 +22,7 @@ export type AnimatedEdgeData = {
   throughput?: number;
   animated?: boolean;
   delay?: number; // Delay in milliseconds before starting animation
+  interval?: number; // Interval in milliseconds between circles (default: 2000)
 };
 
 export type NatsNodeData = {
