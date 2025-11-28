@@ -34,19 +34,19 @@ function SubjectsWildcardAnimatedInner({
       id: 'publisher-1',
       type: 'publisher',
       position: { x: 0, y: 50 },
-      data: { label: 'Publisher' },
+      data: { label: 'Publisher 1' },
     },
     {
       id: 'publisher-2',
       type: 'publisher',
       position: { x: 0, y: 200 },
-      data: { label: 'Publisher' },
+      data: { label: 'Publisher 2' },
     },
     {
       id: 'publisher-3',
       type: 'publisher',
       position: { x: 0, y: 350 },
-      data: { label: 'Publisher' },
+      data: { label: 'Publisher 3' },
     },
     {
       id: 'server',
@@ -58,7 +58,7 @@ function SubjectsWildcardAnimatedInner({
       id: 'subscriber',
       type: 'subscriber',
       position: { x: 550, y: 200 },
-      data: { label: 'weather.*.east' },
+      data: { label: 'Subscriber' },
     },
   ];
 
@@ -128,6 +128,7 @@ function SubjectsWildcardAnimatedInner({
         animated: true,
         delay: 1500, // Starts after message reaches server from pub 1
         interval: 12000, // Repeat every 12 seconds
+        label: 'weather.*.east',
       },
     },
     {
@@ -142,6 +143,7 @@ function SubjectsWildcardAnimatedInner({
         animated: true,
         delay: 4500, // Starts after message reaches server from pub 2
         interval: 12000, // Repeat every 12 seconds
+        label: 'weather.*.east',
       },
     },
   ];

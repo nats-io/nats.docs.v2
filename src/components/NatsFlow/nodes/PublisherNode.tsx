@@ -11,7 +11,6 @@ export function PublisherNode({ data, selected }: NodeProps) {
       <div className="flex flex-col items-center gap-1">
         <NatsIcon width={24} height={24} />
         <div className="font-semibold text-gray-800">{nodeData.label}</div>
-        <div className="text-xs text-gray-500">Publisher</div>
       </div>
       <Handle
         type="source"
