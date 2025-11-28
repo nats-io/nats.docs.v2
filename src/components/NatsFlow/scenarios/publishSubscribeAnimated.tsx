@@ -80,7 +80,7 @@ function PublishSubscribeAnimatedInner({
             id: "publisher",
             type: "publisher",
             position: { x: 0, y: 150 },
-            data: { label: "events.user" },
+            data: { label: "Publisher" },
         },
         {
             id: "server",
@@ -92,7 +92,7 @@ function PublishSubscribeAnimatedInner({
             id: "subscriber-1",
             type: "subscriber",
             position: { x: 400, y: 150 },
-            data: { label: "1" },
+            data: { label: "Subscriber 1" },
             style: {
                 opacity: subscriber1Active ? 1 : 0.3,
             },
@@ -101,7 +101,7 @@ function PublishSubscribeAnimatedInner({
             id: "subscriber-2",
             type: "subscriber",
             position: { x: 400, y: 50 },
-            data: { label: "2" },
+            data: { label: "Subscriber 2" },
             style: {
                 opacity: subscriber2Active ? 1 : 0.3,
             },
@@ -110,7 +110,7 @@ function PublishSubscribeAnimatedInner({
             id: "subscriber-3",
             type: "subscriber",
             position: { x: 400, y: 250 },
-            data: { label: "3" },
+            data: { label: "Subscriber 3" },
             style: {
                 opacity: subscriber3Active ? 1 : 0.3,
             },
@@ -129,6 +129,7 @@ function PublishSubscribeAnimatedInner({
             data: {
                 color: "#3b82f6",
                 animated: true,
+                label: "updates",
             },
         },
     ];
@@ -146,6 +147,7 @@ function PublishSubscribeAnimatedInner({
                 color: "#3b82f6",
                 animated: true,
                 delay: 1500, // Sequential animation
+                label: "updates",
             },
         });
     }
@@ -162,6 +164,7 @@ function PublishSubscribeAnimatedInner({
                 color: "#3b82f6",
                 animated: true,
                 delay: 1500,
+                label: "updates",
             },
         });
     }
@@ -178,6 +181,7 @@ function PublishSubscribeAnimatedInner({
                 color: "#3b82f6",
                 animated: true,
                 delay: 1500,
+                label: "updates",
             },
         });
     }
