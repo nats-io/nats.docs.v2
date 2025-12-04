@@ -11,6 +11,10 @@
 nats pub weather.updates "Temperature: 72°F"`,
     'basics-subscribe': `# Subscribe to weather updates
 nats sub weather.updates`,
+    'getting-started-publish': `# Publish a message to demo.nats.io
+nats pub --server=demo.nats.io hello "Hello NATS!"`,
+    'getting-started-subscribe': `# Subscribe to messages from demo.nats.io
+nats sub --server=demo.nats.io hello`,
   };
 
   const languageMap = {
