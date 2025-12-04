@@ -98,7 +98,7 @@ nats pub hello "Hello NATS!"
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
 
-```
+```bash
 # The NATS CLI is already installed (see above)
 # You can use it directly for pub/sub operations
 ```
@@ -106,37 +106,15 @@ nats pub hello "Hello NATS!"
 </TabItem>
 <TabItem value="js" label="JavaScript/TypeScript">
 
-```
+```bash
 npm install nats
 ```
 
 </TabItem>
 <TabItem value="go" label="Go">
 
-```
+```bash
 go get github.com/nats-io/nats.go
-```
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-```
-pip install nats-py
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```xml title="Maven"
-<dependency>
-    <groupId>io.nats</groupId>
-    <artifactId>jnats</artifactId>
-    <version>2.17.0</version>
-</dependency>
-```
-
-```gradle title="Gradle"
-implementation 'io.nats:jnats:2.17.0'
 ```
 
 </TabItem>
@@ -149,375 +127,22 @@ tokio = { version = "1", features = ["full"] }
 ```
 
 </TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```
-dotnet add package NATS.Client.Core
-```
-
-</TabItem>
 </Tabs>
 
 ### Publisher Example
 
-<Tabs groupId="lang">
-<TabItem value="cli" label="CLI" default>
-
-```
-# Publish a single message
-nats pub hello "Hello NATS!"
-
-# Publish multiple messages
-nats pub hello "Hello NATS!" --count=3
-
-# Publish with headers
-nats pub hello "Hello NATS!" -H "X-Custom:value"
-
-# Publish JSON data
-echo '{"name":"NATS","type":"messaging"}' | nats pub hello
-```
-
-</TabItem>
-<TabItem value="js" label="JavaScript/TypeScript">
-
-```javascript title="publisher.js"
-const { connect, StringCodec } = require('nats');
-
-(async () => {
-  // Connect to NATS
-  const nc = await connect({ servers: 'localhost:4222' });
-  console.log('Connected to NATS');
-  
-  // Create encoder
-  const sc = StringCodec();
-  
-  // Publish messages
-  nc.publish('hello', sc.encode('Hello NATS!'));
-  nc.publish('hello', sc.encode('Welcome to messaging'));
-  
-  console.log('Messages published');
-  
-  // Close connection
-  await nc.close();
-})();
-```
-
-</TabItem>
-<TabItem value="go" label="Go">
-
-```go title="publisher.go"
-package main
-
-import (
-    "log"
-    "github.com/nats-io/nats.go"
-)
-
-func main() {
-    // Connect to NATS
-    nc, err := nats.Connect("localhost:4222")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer nc.Close()
-    
-    log.Println("Connected to NATS")
-    
-    // Publish messages
-    nc.Publish("hello", []byte("Hello NATS!"))
-    nc.Publish("hello", []byte("Welcome to messaging"))
-    
-    log.Println("Messages published")
-    
-    // Flush and close
-    nc.Flush()
-}
-```
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-```python title="publisher.py"
-import asyncio
-import nats
-
-async def main():
-    # Connect to NATS
-    nc = await nats.connect("localhost:4222")
-    print("Connected to NATS")
-    
-    # Publish messages
-    await nc.publish("hello", b"Hello NATS!")
-    await nc.publish("hello", b"Welcome to messaging")
-    
-    print("Messages published")
-    
-    # Close connection
-    await nc.close()
-
-if __name__ == '__main__':
-    asyncio.run(main())
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```java title="Publisher.java"
-import io.nats.client.Connection;
-import io.nats.client.Nats;
-import java.time.Duration;
-
-public class Publisher {
-    public static void main(String[] args) throws Exception {
-        // Connect to NATS
-        Connection nc = Nats.connect("nats://localhost:4222");
-        System.out.println("Connected to NATS");
-        
-        // Publish messages
-        nc.publish("hello", "Hello NATS!".getBytes());
-        nc.publish("hello", "Welcome to messaging".getBytes());
-        
-        System.out.println("Messages published");
-        
-        // Flush and close
-        nc.flush(Duration.ZERO);
-        nc.close();
-    }
-}
-```
-
-</TabItem>
-<TabItem value="rust" label="Rust">
-
-```rust title="publisher.rs"
-use async_nats;
-
-#[tokio::main]
-async fn main() -> Result<(), async_nats::Error> {
-    // Connect to NATS
-    let client = async_nats::connect("localhost:4222").await?;
-    println!("Connected to NATS");
-    
-    // Publish messages
-    client.publish("hello", "Hello NATS!".into()).await?;
-    client.publish("hello", "Welcome to messaging".into()).await?;
-    
-    println!("Messages published");
-    
-    // Flush and close
-    client.flush().await?;
-    
-    Ok(())
-}
-```
-
-</TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```csharp title="Publisher.cs"
-using NATS.Client.Core;
-
-// Connect to NATS
-await using var nats = new NatsConnection();
-Console.WriteLine("Connected to NATS");
-
-// Publish messages
-await nats.PublishAsync("hello", "Hello NATS!");
-await nats.PublishAsync("hello", "Welcome to messaging");
-
-Console.WriteLine("Messages published");
-```
-
-</TabItem>
-</Tabs>
+<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,rust"></div>
 
 ### Subscriber Example
 
-<Tabs groupId="lang">
-<TabItem value="cli" label="CLI" default>
-
-```
-# Subscribe to a subject
-nats sub hello
-
-# Subscribe with queue group for load balancing
-nats sub hello --queue=workers
-
-# Subscribe and auto-acknowledge (useful for testing)
-nats sub hello --ack
-
-# Subscribe with custom output format
-nats sub hello --raw
-```
-
-</TabItem>
-<TabItem value="js" label="JavaScript/TypeScript">
-
-```javascript title="subscriber.js"
-const { connect, StringCodec } = require('nats');
-
-(async () => {
-  // Connect to NATS
-  const nc = await connect({ servers: 'localhost:4222' });
-  console.log('Connected to NATS');
-  
-  // Create decoder
-  const sc = StringCodec();
-  
-  // Subscribe to 'hello'
-  const sub = nc.subscribe('hello');
-  console.log('Waiting for messages...');
-  
-  // Process messages
-  for await (const msg of sub) {
-    console.log(`Received: ${sc.decode(msg.data)}`);
-  }
-})();
-```
-
-</TabItem>
-<TabItem value="go" label="Go">
-
-```go title="subscriber.go"
-package main
-
-import (
-    "log"
-    "runtime"
-    "github.com/nats-io/nats.go"
-)
-
-func main() {
-    // Connect to NATS
-    nc, err := nats.Connect("localhost:4222")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer nc.Close()
-    
-    log.Println("Connected to NATS")
-    
-    // Subscribe to 'hello'
-    nc.Subscribe("hello", func(msg *nats.Msg) {
-        log.Printf("Received: %s", string(msg.Data))
-    })
-    
-    log.Println("Waiting for messages...")
-    
-    // Keep the connection alive
-    runtime.Goexit()
-}
-```
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-```python title="subscriber.py"
-import asyncio
-import nats
-
-async def main():
-    # Connect to NATS
-    nc = await nats.connect("localhost:4222")
-    print("Connected to NATS")
-    
-    # Message handler
-    async def message_handler(msg):
-        data = msg.data.decode()
-        print(f"Received: {data}")
-    
-    # Subscribe to 'hello'
-    await nc.subscribe("hello", cb=message_handler)
-    print("Waiting for messages...")
-    
-    # Keep the connection alive
-    await asyncio.Future()
-
-if __name__ == '__main__':
-    asyncio.run(main())
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```java title="Subscriber.java"
-import io.nats.client.*;
-
-public class Subscriber {
-    public static void main(String[] args) throws Exception {
-        // Connect to NATS
-        Connection nc = Nats.connect("nats://localhost:4222");
-        System.out.println("Connected to NATS");
-        
-        // Subscribe to 'hello'
-        Dispatcher d = nc.createDispatcher((msg) -> {
-            String message = new String(msg.getData());
-            System.out.printf("Received: %s\n", message);
-        });
-        
-        d.subscribe("hello");
-        System.out.println("Waiting for messages...");
-        
-        // Keep the connection alive
-        Thread.sleep(Long.MAX_VALUE);
-    }
-}
-```
-
-</TabItem>
-<TabItem value="rust" label="Rust">
-
-```rust title="subscriber.rs"
-use async_nats;
-use futures::StreamExt;
-
-#[tokio::main]
-async fn main() -> Result<(), async_nats::Error> {
-    // Connect to NATS
-    let client = async_nats::connect("localhost:4222").await?;
-    println!("Connected to NATS");
-    
-    // Subscribe to 'hello'
-    let mut subscriber = client.subscribe("hello").await?;
-    println!("Waiting for messages...");
-    
-    // Process messages
-    while let Some(msg) = subscriber.next().await {
-        println!("Received: {}", 
-            String::from_utf8_lossy(&msg.payload));
-    }
-    
-    Ok(())
-}
-```
-
-</TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```csharp title="Subscriber.cs"
-using NATS.Client.Core;
-using System.Text;
-
-// Connect to NATS
-await using var nats = new NatsConnection();
-Console.WriteLine("Connected to NATS");
-
-// Subscribe to 'hello'
-await foreach (var msg in nats.SubscribeAsync<string>("hello"))
-{
-    Console.WriteLine($"Received: {msg.Data}");
-}
-```
-
-</TabItem>
-</Tabs>
+<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,rust"></div>
 
 ### Running the Examples
 
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
 
-```
+```bash
 # Terminal 1 - Start subscriber
 nats sub hello
 
@@ -536,7 +161,7 @@ nats request hello "Anyone there?" --timeout=2s
 </TabItem>
 <TabItem value="js" label="JavaScript/TypeScript">
 
-```
+```bash
 # Terminal 1 - Start subscriber
 node subscriber.js
 
@@ -547,7 +172,7 @@ node publisher.js
 </TabItem>
 <TabItem value="go" label="Go">
 
-```
+```bash
 # Terminal 1 - Start subscriber
 go run subscriber.go
 
@@ -556,49 +181,14 @@ go run publisher.go
 ```
 
 </TabItem>
-<TabItem value="python" label="Python">
-
-```
-# Terminal 1 - Start subscriber
-python subscriber.py
-
-# Terminal 2 - Run publisher
-python publisher.py
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```
-# Terminal 1 - Start subscriber
-javac -cp ".:jnats-2.17.0.jar" Subscriber.java
-java -cp ".:jnats-2.17.0.jar" Subscriber
-
-# Terminal 2 - Run publisher
-javac -cp ".:jnats-2.17.0.jar" Publisher.java
-java -cp ".:jnats-2.17.0.jar" Publisher
-```
-
-</TabItem>
 <TabItem value="rust" label="Rust">
 
-```
+```bash
 # Terminal 1 - Start subscriber
 cargo run --bin subscriber
 
 # Terminal 2 - Run publisher
 cargo run --bin publisher
-```
-
-</TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```
-# Terminal 1 - Start subscriber
-dotnet run --project Subscriber
-
-# Terminal 2 - Run publisher
-dotnet run --project Publisher
 ```
 
 </TabItem>

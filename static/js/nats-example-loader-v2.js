@@ -5,7 +5,7 @@
 
 (function() {
 
-  // CLI examples are hardcoded
+  // CLI examples fallback (kept for backwards compatibility)
   const cliExamples = {
     'basics-publish': `# Publish a message
 nats pub weather.updates "Temperature: 72°F"`,
@@ -19,7 +19,8 @@ nats sub weather.updates`,
     'rust': { label: 'Rust', lang: 'rust' },
     'python': { label: 'Python', lang: 'python' },
     'java': { label: 'Java', lang: 'java' },
-    'javascript': { label: 'JavaScript', lang: 'javascript' },
+    'js': { label: 'JavaScript/TypeScript', lang: 'javascript' },
+    'javascript': { label: 'JavaScript/TypeScript', lang: 'javascript' },
     'csharp': { label: 'C#/.NET', lang: 'csharp' }
   };
 
@@ -76,10 +77,14 @@ nats sub weather.updates`,
   // Create tabs HTML
   function createTabs(type, languages, examples) {
     const availableLanguages = languages.filter(lang => {
-      if (lang === 'cli') {
-        return !!cliExamples[type];
+      // Normalize language key (js -> javascript)
+      const normalizedLang = lang === 'js' ? 'javascript' : lang;
+
+      if (normalizedLang === 'cli') {
+        // Check both fetched examples and fallback hardcoded examples
+        return (examples['cli'] && examples['cli'][type]) || !!cliExamples[type];
       }
-      return examples[lang] && examples[lang][type];
+      return examples[normalizedLang] && examples[normalizedLang][type];
     });
 
     if (availableLanguages.length === 0) {
@@ -102,8 +107,17 @@ nats sub weather.updates`,
 
     // Create tab panels
     const tabPanels = availableLanguages.map((lang, index) => {
+      // Normalize language key (js -> javascript)
+      const normalizedLang = lang === 'js' ? 'javascript' : lang;
       const { lang: prismLang } = languageMap[lang];
-      let code = lang === 'cli' ? cliExamples[type] : examples[lang][type];
+
+      let code;
+      if (normalizedLang === 'cli') {
+        // Use fetched CLI example if available, fallback to hardcoded
+        code = (examples['cli'] && examples['cli'][type]) || cliExamples[type];
+      } else {
+        code = examples[normalizedLang][type];
+      }
 
       const activeStyle = index === 0 ? 'block' : 'none';
       const langClass = prismLang ? `language-${prismLang}` : '';
