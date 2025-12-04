@@ -21,6 +21,8 @@ const EXAMPLES_CONFIG = {
         examples: {
             "basics-publish": "examples/docs/basics-publish/main.go",
             "basics-subscribe": "examples/docs/basics-subscribe/main.go",
+            "getting-started-publish": "examples/docs/getting-started-publish/main.go",
+            "getting-started-subscribe": "examples/docs/getting-started-subscribe/main.go",
             // Add more as they become available
         },
     },
@@ -30,6 +32,8 @@ const EXAMPLES_CONFIG = {
         examples: {
             "basics-publish": "async-nats/examples/docs_basics_publish.rs",
             "basics-subscribe": "async-nats/examples/docs_basics_subscribe.rs",
+            "getting-started-publish": "async-nats/examples/docs_getting_started_publish.rs",
+            "getting-started-subscribe": "async-nats/examples/docs_getting_started_subscribe.rs",
             // Add more as they become available
         },
     },
@@ -38,7 +42,9 @@ const EXAMPLES_CONFIG = {
         repo: "nats-io/nats.js",
         branch: "doc-examples",
         examples: {
-            // TODO: Add when JavaScript adopts [page]-[snippet] pattern
+            "getting-started-publish": "examples/docs/getting-started-publish/index.ts",
+            "getting-started-subscribe": "examples/docs/getting-started-subscribe/index.ts",
+            // TODO: Add more when JavaScript adopts [page]-[snippet] pattern
         },
     },
     "python": {
