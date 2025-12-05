@@ -17,12 +17,9 @@ The publish-subscribe pattern is the foundation of NATS messaging. It enables de
 
 Publish-Subscribe (pub/sub) is a messaging pattern where:
 - **Publishers** send messages without knowing who will receive them
-- **Subscribers** receive messages without knowing who sent them
+- **Subscribers** receive messages without needing to know who sent them
 - **Subjects** act as the addressing mechanism
 
-```
-Publisher → Subject → Subscriber(s)
-```
 
 This decoupling provides tremendous flexibility in building distributed systems.
 
@@ -34,7 +31,7 @@ Watch how messages flow as subscribers join. With no subscribers, messages reach
 
 ### 1. Publishing Messages
 
-Publishers send messages to a **subject** - a simple string that acts as an address:
+Publishers send messages to a [subject](./subjects) - a simple string that acts as an address:
 
 
 <div class="nats-example" data-type="basics-publish" data-languages="cli,go,rust"></div>
