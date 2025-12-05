@@ -74,71 +74,13 @@ NATS excels in scenarios requiring:
 ### Edge Computing
 - Edge-to-cloud connectivity
 - Intermittent network handling
-- Bandwidth-constrained environments
+- Bandwidth and resource-constrained environments
 
 ### Command and Control
 - Remote procedure calls
 - Configuration management
 - System orchestration
 
-## NATS vs Traditional Message Brokers
-
-| Feature | NATS | Traditional MQ |
-|---------|------|----------------|
-| Setup Complexity | Simple, single binary | Complex, multiple components |
-| Performance | Millions msgs/sec | Thousands msgs/sec |
-| Footprint | ~15MB | 100s of MB to GBs |
-| Protocol | Text-based, simple | Binary, complex |
-| Clustering | Built-in, automatic | Complex configuration |
-| Multi-tenancy | Native support | Limited or add-on |
-
-## Architecture Patterns
-
-NATS enables several architectural patterns:
-
-### Publish-Subscribe
-One-to-many message distribution where publishers don't know about subscribers.
-
-### Request-Reply
-Synchronous communication pattern for service invocation.
-
-### Queue Groups
-Automatic load balancing across multiple service instances.
-
-### Scatter-Gather
-Parallel processing with result aggregation.
-
-## Getting Started
-
-Ready to try NATS? Here's the quickest path:
-
-1. **Install NATS Server**
-   ```bash
-   # Using Docker
-   docker run -p 4222:4222 nats:latest
-
-   # Or download the binary
-   # Visit https://nats.io/download/
-   ```
-
-2. **Connect with a Client**
-   ```javascript
-   // Node.js example
-   const NATS = require('nats');
-   const nc = await NATS.connect();
-
-   // Publish a message
-   nc.publish('hello', 'world');
-   ```
-
-3. **Subscribe to Messages**
-   ```javascript
-   // Subscribe to 'hello' subject
-   const sub = nc.subscribe('hello');
-   for await (const msg of sub) {
-     console.log(`Received: ${msg.data}`);
-   }
-   ```
 
 ## What's Next?
 
