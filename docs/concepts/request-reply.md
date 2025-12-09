@@ -23,7 +23,7 @@ Under the hood, request-reply uses NATS's publish-subscribe with these steps:
 
 This pattern is so common that NATS clients provide a simplified `request()` method that handles all these steps automatically.
 
-<div class="nats-flow" data-scenario="requestReply" data-width="600" data-height="350"></div>
+<div class="nats-flow" data-scenario="requestReply" data-width="800" data-height="350"></div>
 
 In the animation above:
 - The **orange arrow** shows the request flowing from client to service

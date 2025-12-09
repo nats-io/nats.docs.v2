@@ -5,6 +5,7 @@ description: Understanding NATS subject-based messaging and wildcards
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import { WildcardComparison } from '@site/src/components/NatsFlow';
 
 # Subjects
 
@@ -43,8 +44,13 @@ The subscriber with pattern `weather.*.east` receives messages from matching sub
 
 The `*` wildcard matches exactly one token. For example:
 
-- `weather.*.east` matches `weather.us.east` and `weather.eu.east`
-- `orders.*.shipped` matches `orders.retail.shipped` and `orders.wholesale.shipped`
+- `weather.*.east` matches:
+  - `weather.us.east`
+  - `weather.eu.east`
+
+- `orders.*.shipped` matches:
+  - `orders.retail.shipped`
+  - `orders.wholesale.shipped`
 
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
@@ -193,7 +199,11 @@ await nc.PublishAsync("weather.eu.east", "Temperature: 18C");
 
 The `>` wildcard matches one or more tokens and can only appear at the end of a subject. For example:
 
-- `weather.>` matches `weather.us`, `weather.us.east`, `weather.eu.north.helsinki`
+- `weather.>` matches:
+  - `weather.us`
+  - `weather.us.east`
+  - `weather.eu.north.helsinki`
+
 - `orders.>` matches all subjects starting with `orders.`
 
 <Tabs groupId="lang">
@@ -319,8 +329,23 @@ await nc.PublishAsync("weather.eu.north.finland", "Finland weather");
 
 You can combine wildcards for more complex patterns:
 
-- `*.*.east.>` matches `weather.us.east.boston` and `traffic.us.east.newyork`
-- `orders.*.pending` matches `orders.retail.pending` and `orders.wholesale.pending`
+- `*.*.east.>` matches:
+  - `weather.us.east.boston`
+  - `traffic.us.east.newyork`
+
+- `orders.*.pending` matches:
+  - `orders.retail.pending`
+  - `orders.wholesale.pending`
+
+### Wildcard Comparison
+
+Here's a side-by-side comparison showing how `*` and `>` wildcards behave differently:
+
+<WildcardComparison width={800} height={500} />
+
+The visualization demonstrates:
+- **Single token wildcard (`*`)**: Matches exactly one token, so `weather.*.east` receives messages from `weather.us.east` and `weather.eu.east`, but not `weather.us.east.boston` (too many tokens)
+- **Multi-token wildcard (`>`)**: Matches one or more tokens, so `weather.>` receives all three messages regardless of depth
 
 ## Subject Naming Conventions
 

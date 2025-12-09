@@ -11,21 +11,20 @@ export function ServiceNode({ data, selected }: NodeProps) {
       <div className="flex flex-col items-center gap-1">
         <NatsIcon width={24} height={24} />
         <div className="font-semibold text-gray-800">{nodeData.label}</div>
-        <div className="text-xs text-gray-500">Service</div>
       </div>
       <Handle
         type="target"
         position={Position.Left}
         id="request"
-        className="!h-3 !w-3 !bg-orange-500"
-        style={{ top: '30%' }}
+        className="!h-3 !w-3 !bg-blue-500"
+        style={{ top: '30%', opacity: 0 }}
       />
       <Handle
         type="source"
-        position={Position.Right}
+        position={Position.Left}
         id="reply"
-        className="!h-3 !w-3 !bg-green-500"
-        style={{ top: '70%' }}
+        className="!h-3 !w-3 !bg-blue-500"
+        style={{ top: '70%', opacity: 0 }}
       />
     </BaseNode>
   );
