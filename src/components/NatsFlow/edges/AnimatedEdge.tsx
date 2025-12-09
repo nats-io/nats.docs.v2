@@ -138,13 +138,13 @@ export function AnimatedEdge(props: EdgeProps) {
           <div
             style={{
               position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY - 15}px)`,
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY + (edgeData.labelOffset || -15)}px)`,
               background: 'white',
               padding: '2px 6px',
               borderRadius: '4px',
               fontSize: '11px',
               fontWeight: 500,
-              color: '#666',
+              color: edgeData.labelColor || '#666',
               pointerEvents: 'all',
             }}
             className="nodrag nopan"
