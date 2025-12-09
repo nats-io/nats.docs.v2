@@ -12,7 +12,7 @@ NATS implements a subject-based messaging system where publishers and subscriber
 
 ## What is a Subject?
 
-A subject is a string of characters that forms a name which publishers and subscribers use to find each other. It acts as the address for message routing within NATS. Subjects are case-sensitive and can include alphanumeric characters, `-` (dash), and `_` (underscore).
+A subject is a string of characters that forms a name which publishers and subscribers use to find each other. It acts as the address for message routing within NATS. Subjects are case-sensitive and can any UTF-8 characters except whitespace, tabs and line breaks. It's a good practice to use alphanumeric characters along with `-` (dash) and `_` (underscore) for readability.
 
 <div class="nats-flow" data-scenario="publishSubscribe" data-width="600" data-height="350"></div>
 
@@ -105,17 +105,17 @@ import nats
 
 async def main():
     nc = await nats.connect()
-    
+
     # Subscribe with single token wildcard
     async def message_handler(msg):
         print(f"Received on {msg.subject}: {msg.data.decode()}")
-    
+
     await nc.subscribe("weather.*.east", cb=message_handler)
-    
+
     # Publish to specific subjects
     await nc.publish("weather.us.east", b"Temperature: 72F")
     await nc.publish("weather.eu.east", b"Temperature: 18C")
-    
+
     await asyncio.sleep(1)
     await nc.close()
 
@@ -130,7 +130,7 @@ Connection nc = Nats.connect();
 
 // Subscribe with single token wildcard
 Dispatcher d = nc.createDispatcher((msg) -> {
-    System.out.printf("Received on %s: %s%n", 
+    System.out.printf("Received on %s: %s%n",
         msg.getSubject(), new String(msg.getData()));
 });
 d.subscribe("weather.*.east");
@@ -149,22 +149,22 @@ use async_nats;
 #[tokio::main]
 async fn main() -> Result<(), async_nats::Error> {
     let client = async_nats::connect("nats://localhost:4222").await?;
-    
+
     // Subscribe with single token wildcard
     let mut sub = client.subscribe("weather.*.east").await?;
-    
+
     tokio::spawn(async move {
         while let Some(msg) = sub.next().await {
-            println!("Received on {}: {}", 
-                msg.subject, 
+            println!("Received on {}: {}",
+                msg.subject,
                 String::from_utf8_lossy(&msg.payload));
         }
     });
-    
+
     // Publish to specific subjects
     client.publish("weather.us.east", "Temperature: 72F".into()).await?;
     client.publish("weather.eu.east", "Temperature: 18C".into()).await?;
-    
+
     Ok(())
 }
 ```
@@ -264,7 +264,7 @@ await nc.publish("weather.eu.north.finland", b"Finland weather")
 ```java
 // Subscribe to all weather updates
 Dispatcher d = nc.createDispatcher((msg) -> {
-    System.out.printf("Received on %s: %s%n", 
+    System.out.printf("Received on %s: %s%n",
         msg.getSubject(), new String(msg.getData()));
 });
 d.subscribe("weather.>");
@@ -284,8 +284,8 @@ let mut sub = client.subscribe("weather.>").await?;
 
 tokio::spawn(async move {
     while let Some(msg) = sub.next().await {
-        println!("Received on {}: {}", 
-            msg.subject, 
+        println!("Received on {}: {}",
+            msg.subject,
             String::from_utf8_lossy(&msg.payload));
     }
 });
