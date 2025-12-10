@@ -5,18 +5,6 @@
 
 (function() {
 
-  // CLI examples fallback (kept for backwards compatibility)
-  const cliExamples = {
-    'basics-publish': `# Publish a message
-nats pub weather.updates "Temperature: 72°F"`,
-    'basics-subscribe': `# Subscribe to weather updates
-nats sub weather.updates`,
-    'getting-started-publish': `# Publish a message to demo.nats.io
-nats pub --server=demo.nats.io hello "Hello NATS!"`,
-    'getting-started-subscribe': `# Subscribe to messages from demo.nats.io
-nats sub --server=demo.nats.io hello`,
-  };
-
   const languageMap = {
     'cli': { label: 'CLI', lang: 'bash' },
     'go': { label: 'Go', lang: 'go' },
@@ -83,11 +71,6 @@ nats sub --server=demo.nats.io hello`,
     const availableLanguages = languages.filter(lang => {
       // Normalize language key (js -> javascript)
       const normalizedLang = lang === 'js' ? 'javascript' : lang;
-
-      if (normalizedLang === 'cli') {
-        // Check both fetched examples and fallback hardcoded examples
-        return (examples['cli'] && examples['cli'][type]) || !!cliExamples[type];
-      }
       return examples[normalizedLang] && examples[normalizedLang][type];
     });
 
@@ -115,17 +98,11 @@ nats sub --server=demo.nats.io hello`,
       const normalizedLang = lang === 'js' ? 'javascript' : lang;
       const { lang: prismLang } = languageMap[lang];
 
-      let code;
-      if (normalizedLang === 'cli') {
-        // Use fetched CLI example if available, fallback to hardcoded
-        code = (examples['cli'] && examples['cli'][type]) || cliExamples[type];
-      } else {
-        code = examples[normalizedLang][type];
-      }
+      const code = examples[normalizedLang][type];
 
       const activeStyle = index === 0 ? 'block' : 'none';
       const langClass = prismLang ? `language-${prismLang}` : '';
-      
+
       return `<div class="nats-tab-panel" data-tab="${tabId}" data-panel="${lang}" style="display: ${activeStyle};">
         <pre><code class="language-${prismLang || 'text'}">${escapeHtml(code || '// Code not found')}</code></pre>
       </div>`;
