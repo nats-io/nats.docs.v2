@@ -1,8 +1,15 @@
 import type { Node, Edge } from '@xyflow/react';
 
+export interface NatsEdge extends Edge {
+  pathOptions?: {
+    offset?: number;
+    curvature?: number;
+  };
+}
+
 export interface NatsFlowScenario {
   nodes: Node[];
-  edges: Edge[];
+  edges: NatsEdge[];
   description?: string;
 }
 
@@ -19,6 +26,8 @@ export type AnimatedEdgeData = {
   color?: string;
   size?: number;
   label?: string;
+  labelOffset?: number; // Vertical offset for label positioning
+  labelColor?: string; // Color for the label text
   throughput?: number;
   animated?: boolean;
   delay?: number; // Delay in milliseconds before starting animation

@@ -32,7 +32,6 @@ export const requestReplyScenario: NatsFlowScenario = {
       sourceHandle: 'request',
       targetHandle: 'request-in',
       type: 'animated',
-      animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
         color: '#f97316',
@@ -53,7 +52,6 @@ export const requestReplyScenario: NatsFlowScenario = {
       sourceHandle: 'request-out',
       targetHandle: 'request',
       type: 'animated',
-      animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
         color: '#f97316',
@@ -74,7 +72,6 @@ export const requestReplyScenario: NatsFlowScenario = {
       sourceHandle: 'reply',
       targetHandle: 'reply-in',
       type: 'animated',
-      animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
         color: '#10b981',
@@ -96,7 +93,6 @@ export const requestReplyScenario: NatsFlowScenario = {
       sourceHandle: 'reply-out',
       targetHandle: 'reply',
       type: 'animated',
-      animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
         color: '#10b981',
