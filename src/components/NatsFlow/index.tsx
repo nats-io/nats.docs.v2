@@ -88,7 +88,7 @@ export function NatsFlow({
         elementsSelectable={false}
         zoomOnScroll={false}
         panOnDrag={false}
-        preventScrolling={true}
+        preventScrolling={false}
         minZoom={0.5}
         maxZoom={1.5}
         proOptions={{ hideAttribution: true }}
