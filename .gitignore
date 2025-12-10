@@ -5,15 +5,14 @@ node_modules/
 build/
 
 # Fetched code examples (regenerated during build from GitHub)
-# Go and Rust examples are fetched from nats.go and nats.rs repos
-static/examples/snippets/go/
-static/examples/snippets/rust/
-static/examples/snippets/javascript/
-static/examples/snippets/metadata.json
+# All languages EXCEPT CLI are fetched from their respective repos during build
+static/examples/snippets/*
+!static/examples/snippets/cli/
 
-# IMPORTANT: CLI examples are NOT ignored - they must be committed to git
-# CLI examples live in this repo at: static/examples/snippets/cli/
-# When adding new CLI examples, use: git add static/examples/snippets/cli/your-new-example.sh
+# IMPORTANT: Only CLI examples are committed to git
+# All other languages (Go, Rust, JavaScript, Python, Java, C#, etc.) are fetched during build
+# CLI examples live in: static/examples/snippets/cli/
+# When adding CLI examples, just use: git add static/examples/snippets/cli/your-example.sh
 
 # Old example location
 

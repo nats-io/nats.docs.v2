@@ -232,15 +232,16 @@ rm -rf static/examples/snippets/go static/examples/snippets/rust
 npm run fetch-examples
 ```
 
-## Key Differences: CLI vs Go/Rust
+## Key Differences: CLI vs Other Languages
 
-| Aspect | CLI Examples | Go/Rust Examples |
-|--------|--------------|------------------|
-| **Location** | This repo | Client repos (nats.go, nats.rs) |
+| Aspect | CLI Examples | Other Languages (Go/Rust/JS/etc) |
+|--------|--------------|----------------------------------|
+| **Location** | This repo | Client repos (nats.go, nats.rs, etc.) |
 | **Storage** | Committed to git | Fetched during build |
-| **Path** | `static/examples/snippets/cli/` | Fetched to `static/examples/snippets/go/` and `rust/` |
+| **Path** | `static/examples/snippets/cli/` | `static/examples/snippets/{go,rust,javascript,python,...}/` |
 | **When to add** | `git add` immediately | Push to client repo, then fetch |
-| **gitignore** | NOT ignored | Ignored (regenerated) |
+| **gitignore** | NOT ignored (exception) | ALL ignored (rule: `static/examples/snippets/*`) |
+| **Future languages** | Never changes | Automatically ignored when added |
 
 ## Documentation
 
