@@ -1,5 +1,7 @@
 export { publishSubscribeScenario } from './publishSubscribe';
 export { requestReplyScenario } from './requestReply';
+export { requestReplyScatterGatherScenario } from './requestReplyScatterGather';
+export { requestReplyQueueGroupScenario } from './requestReplyQueueGroup';
 export { queueGroupScenario } from './queueGroup';
 export { fanOutScenario } from './fanOut';
 export { toggleableSubscribersScenario, ToggleableSubscribersScenario } from './toggleableSubscribers';

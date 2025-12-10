@@ -19,7 +19,7 @@ Under the hood, request-reply uses NATS's publish-subscribe with these steps:
 3. **Client publishes the request** with the reply subject
 4. **Service receives the request** and sees the reply subject
 5. **Service publishes the response** to the reply subject
-6. **Client receives the response** and unsubscribes
+6. **Client receives the response**
 
 This pattern is so common that NATS clients provide a simplified `request()` method that handles all these steps automatically.
 
@@ -68,8 +68,8 @@ nc.subscribe("time", {
 
 // Make a request
 try {
-  const response = await nc.request("time", sc.encode(""), { 
-    timeout: 1000 
+  const response = await nc.request("time", sc.encode(""), {
+    timeout: 1000
   });
   console.log(`Response: ${sc.decode(response.data)}`);
 } catch (err) {
@@ -108,21 +108,21 @@ from datetime import datetime
 
 async def main():
     nc = await nats.connect()
-    
+
     # Set up a service
     async def time_handler(msg):
         time = datetime.now().isoformat()
         await msg.respond(time.encode())
-    
+
     await nc.subscribe("time", cb=time_handler)
-    
+
     # Make a request
     try:
         response = await nc.request("time", b"", timeout=1)
         print(f"Response: {response.data.decode()}")
     except asyncio.TimeoutError:
         print("Request timed out")
-    
+
     await nc.close()
 
 asyncio.run(main())
@@ -160,18 +160,18 @@ use chrono::Utc;
 #[tokio::main]
 async fn main() -> Result<(), async_nats::Error> {
     let client = async_nats::connect("nats://localhost:4222").await?;
-    
+
     // Set up a service
     let mut sub = client.subscribe("time").await?;
     let service_client = client.clone();
-    
+
     tokio::spawn(async move {
         while let Some(msg) = sub.next().await {
             let time = Utc::now().to_rfc3339();
             let _ = msg.respond(time.into()).await;
         }
     });
-    
+
     // Make a request
     match client.request("time", "".into()).await {
         Ok(response) => {
@@ -181,7 +181,7 @@ async fn main() -> Result<(), async_nats::Error> {
             eprintln!("Request failed: {}", e);
         }
     }
-    
+
     Ok(())
 }
 ```
@@ -204,7 +204,7 @@ var subscription = Task.Run(async () =>
 // Make a request
 try
 {
-    var response = await nc.RequestAsync<string, string>("time", "", 
+    var response = await nc.RequestAsync<string, string>("time", "",
         cancellationToken: new CancellationTokenSource(1000).Token);
     Console.WriteLine($"Response: {response.Data}");
 }
@@ -280,7 +280,31 @@ except asyncio.TimeoutError:
 
 ## Multiple Responders
 
-When multiple services listen to the same subject, the request will receive multiple responses. By default, the request method returns after the first response:
+When multiple services subscribe to the same request subject, NATS supports two distinct patterns depending on whether queue groups are used:
+
+### Pattern 1: All Services Respond (Scatter-Gather)
+
+If each app creates a "service" subscription, all of them will receive the request and **all** can respond. The client can collect multiple responses:
+
+<div class="nats-flow" data-scenario="requestReplyScatterGather" data-width="800" data-height="450"></div>
+
+In this pattern, one request is broadcast to all three services (A, B, C), and all three send responses back. This is useful for:
+- Gathering data from multiple sources
+- Aggregating results from distributed services
+- Querying multiple replicas for consensus
+
+### Pattern 2: One Service Responds (Load Balancing)
+
+With [queue groups](./queue-groups), **only one** service receives the request and responds, providing automatic load balancing for scalability:
+
+<div class="nats-flow" data-scenario="requestReplyQueueGroup" data-width="800" data-height="450"></div>
+
+In this pattern, NATS selects one service from the queue group (Service B in this example) to handle the request. This provides:
+- Automatic load distribution across service instances
+- Horizontal scalability
+- Built-in failover (if one service is down, another handles it)
+
+By default, the `request()` method returns after receiving the first response. To collect multiple responses from the scatter-gather pattern, use manual inbox subscription (shown in examples below):
 
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
@@ -289,7 +313,7 @@ When multiple services listen to the same subject, the request will receive mult
 # Terminal 1: First service
 nats reply service 'echo "Response from service 1"'
 
-# Terminal 2: Second service  
+# Terminal 2: Second service
 nats reply service 'echo "Response from service 2"'
 
 # Terminal 3: Make request (receives one random response)
@@ -318,7 +342,7 @@ nc.subscribe("calc.add", {
 });
 
 // Request will get one response (randomly from A or B)
-const response = await nc.request("calc.add", 
+const response = await nc.request("calc.add",
   sc.encode(JSON.stringify({ a: 5, b: 3 })));
 console.log("Response:", sc.decode(response.data));
 ```
@@ -348,7 +372,7 @@ fmt.Printf("Got response: %s\n", msg.Data)
 
 ## No Responders Detection
 
-NATS can detect when no services are available to handle a request. When there are no subscribers for the request subject, modern NATS servers return a "no responders" error immediately:
+NATS will detect when no services are available to handle a request. When there are no subscribers for the request subject, NATS server will return a "no responders" error immediately:
 
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
@@ -444,201 +468,6 @@ if err == nil {
 </TabItem>
 </Tabs>
 
-## Scatter-Gather Pattern
-
-The scatter-gather pattern collects multiple responses to a single request. This is useful for aggregating data from multiple services:
-
-<Tabs groupId="lang">
-<TabItem value="cli" label="CLI" default>
-
-```
-# Cannot directly do scatter-gather with CLI
-# Use programming language clients for this pattern
-```
-
-</TabItem>
-<TabItem value="javascript" label="JavaScript">
-
-```javascript
-// Scatter-gather: collect multiple responses
-async function scatterGather(subject, data, maxResponses, timeout) {
-  const responses = [];
-  const inbox = nc.createInbox();
-  
-  const sub = nc.subscribe(inbox, {
-    callback: (err, msg) => {
-      if (!err) {
-        responses.push(msg);
-      }
-    }
-  });
-  
-  // Publish request with reply-to
-  nc.publish(subject, data, { reply: inbox });
-  
-  // Wait for timeout or max responses
-  const start = Date.now();
-  while (responses.length < maxResponses && 
-         Date.now() - start < timeout) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-  
-  sub.unsubscribe();
-  return responses;
-}
-
-// Use scatter-gather
-const responses = await scatterGather("service", data, 5, 1000);
-console.log(`Got ${responses.length} responses`);
-```
-
-</TabItem>
-<TabItem value="go" label="Go">
-
-```go
-// Scatter-gather implementation
-func scatterGather(nc *nats.Conn, subject string, data []byte, 
-                   maxResponses int, timeout time.Duration) []*nats.Msg {
-    inbox := nats.NewInbox()
-    sub, _ := nc.SubscribeSync(inbox)
-    defer sub.Unsubscribe()
-    
-    // Send request
-    nc.PublishRequest(subject, inbox, data)
-    
-    // Collect responses
-    var responses []*nats.Msg
-    deadline := time.Now().Add(timeout)
-    
-    for len(responses) < maxResponses && time.Now().Before(deadline) {
-        msg, err := sub.NextMsg(time.Until(deadline))
-        if err == nil {
-            responses = append(responses, msg)
-        } else if err == nats.ErrTimeout {
-            break
-        }
-    }
-    
-    return responses
-}
-
-// Usage
-responses := scatterGather(nc, "service", data, 5, time.Second)
-fmt.Printf("Received %d responses\n", len(responses))
-```
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-```python
-async def scatter_gather(nc, subject, data, max_responses, timeout):
-    """Collect multiple responses to a single request"""
-    responses = []
-    inbox = nc.new_inbox()
-    
-    # Subscribe to inbox
-    sub = await nc.subscribe(inbox)
-    
-    # Send request
-    await nc.publish_request(subject, inbox, data)
-    
-    # Collect responses
-    deadline = asyncio.get_event_loop().time() + timeout
-    while len(responses) < max_responses:
-        remaining = deadline - asyncio.get_event_loop().time()
-        if remaining <= 0:
-            break
-        
-        try:
-            msg = await sub.next_msg(timeout=remaining)
-            responses.append(msg)
-        except asyncio.TimeoutError:
-            break
-    
-    await sub.unsubscribe()
-    return responses
-
-# Usage
-responses = await scatter_gather(nc, "service", b"data", 5, 1.0)
-print(f"Received {len(responses)} responses")
-```
-
-</TabItem>
-</Tabs>
-
-## Request-Reply with Queue Groups
-
-Combining request-reply with [queue groups](./queue-groups) provides automatic load balancing:
-
-<Tabs groupId="lang">
-<TabItem value="cli" label="CLI" default>
-
-```
-# Terminal 1: Service A in queue group
-nats reply service --queue workers 'echo "Response from A"'
-
-# Terminal 2: Service B in queue group
-nats reply service --queue workers 'echo "Response from B"'
-
-# Terminal 3: Requests are load balanced
-nats request service "test"  # Goes to A or B
-nats request service "test"  # Goes to A or B
-```
-
-</TabItem>
-<TabItem value="javascript" label="JavaScript">
-
-```javascript
-// Multiple services in a queue group
-const opts = { queue: "workers" };
-
-// Service instances
-nc.subscribe("work.process", opts, {
-  callback: async (err, msg) => {
-    const result = await processWork(msg.data);
-    msg.respond(sc.encode(`Processed by worker A: ${result}`));
-  }
-});
-
-nc.subscribe("work.process", opts, {
-  callback: async (err, msg) => {
-    const result = await processWork(msg.data);
-    msg.respond(sc.encode(`Processed by worker B: ${result}`));
-  }
-});
-
-// Requests are automatically load balanced
-for (let i = 0; i < 10; i++) {
-  const response = await nc.request("work.process", sc.encode(`job${i}`));
-  console.log(sc.decode(response.data));
-}
-```
-
-</TabItem>
-<TabItem value="go" label="Go">
-
-```go
-// Services in queue group for load balancing
-nc.QueueSubscribe("work.process", "workers", func(m *nats.Msg) {
-    result := processWork(m.Data)
-    m.Respond([]byte(fmt.Sprintf("Worker A: %s", result)))
-})
-
-nc.QueueSubscribe("work.process", "workers", func(m *nats.Msg) {
-    result := processWork(m.Data)
-    m.Respond([]byte(fmt.Sprintf("Worker B: %s", result)))
-})
-
-// Requests are load balanced between workers
-for i := 0; i < 10; i++ {
-    msg, _ := nc.Request("work.process", []byte(fmt.Sprintf("job%d", i)), time.Second)
-    fmt.Printf("Response: %s\n", msg.Data)
-}
-```
-
-</TabItem>
-</Tabs>
-
 ## Best Practices
 
 ### Timeout Strategy
@@ -719,7 +548,7 @@ nc.subscribe("calc.add", {
 });
 
 // Make calculation requests
-const result = await nc.request("calc.add", 
+const result = await nc.request("calc.add",
   sc.encode(JSON.stringify({ a: 5, b: 3 })));
 console.log(`5 + 3 = ${sc.decode(result.data)}`);
 ```

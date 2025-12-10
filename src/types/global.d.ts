@@ -2,6 +2,8 @@ import type { NatsFlow as NatsFlowComponent } from '../components/NatsFlow';
 import type {
   publishSubscribeScenario,
   requestReplyScenario,
+  requestReplyScatterGatherScenario,
+  requestReplyQueueGroupScenario,
   queueGroupScenario,
   fanOutScenario,
   toggleableSubscribersScenario,
@@ -26,6 +28,8 @@ declare global {
       scenarios: {
         publishSubscribe: typeof publishSubscribeScenario;
         requestReply: typeof requestReplyScenario;
+        requestReplyScatterGather: typeof requestReplyScatterGatherScenario;
+        requestReplyQueueGroup: typeof requestReplyQueueGroupScenario;
         queueGroup: typeof queueGroupScenario;
         fanOut: typeof fanOutScenario;
         toggleableSubscribers: typeof toggleableSubscribersScenario;

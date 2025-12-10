@@ -27,6 +27,8 @@ if (ExecutionEnvironment.canUseDOM) {
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,
+        requestReplyScatterGather: module.requestReplyScatterGatherScenario,
+        requestReplyQueueGroup: module.requestReplyQueueGroupScenario,
         queueGroup: module.queueGroupScenario,
         fanOut: module.fanOutScenario,
         toggleableSubscribers: module.toggleableSubscribersScenario,
