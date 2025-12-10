@@ -13,7 +13,7 @@ NATS implements a subject-based messaging system where publishers and subscriber
 
 ## What is a Subject?
 
-A subject is a string of characters that forms a name which publishers and subscribers use to find each other. It acts as the address for message routing within NATS. Subjects are case-sensitive and can any UTF-8 characters except whitespace, tabs and line breaks. It's a good practice to use alphanumeric characters along with `-` (dash) and `_` (underscore) for readability.
+A subject is a string of characters that forms a name which publishers and subscribers use to find each other. It acts as the address for message routing within NATS. Subjects are case-sensitive and can contain any UTF-8 characters except whitespace, tabs and line breaks. It's a good practice to use alphanumeric characters along with `-` (dash) and `_` (underscore) for readability.
 
 <div class="nats-flow" data-scenario="publishSubscribe" data-width="600" data-height="350"></div>
 
