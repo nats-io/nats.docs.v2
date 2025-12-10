@@ -66,33 +66,12 @@ This creates logical namespaces for organizing messages. For a deep dive into su
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
 
-```
+```bash
 # Event Publisher
 nats pub user.login '{"userId":"123","timestamp":1234567890}'
 
 # Event Subscriber (in another terminal)
 nats sub user.login
-```
-
-</TabItem>
-<TabItem value="js" label="JavaScript/TypeScript">
-
-```javascript
-// Event Publisher
-function userLoggedIn(userId) {
-  nc.publish('user.login', JSON.stringify({
-    userId: userId,
-    timestamp: Date.now()
-  }));
-}
-
-// Event Subscriber (Analytics Service)
-const sub = nc.subscribe('user.login');
-for await (const msg of sub) {
-  const event = JSON.parse(msg.string());
-  console.log(`User ${event.userId} logged in`);
-  // Update analytics...
-}
 ```
 
 </TabItem>
@@ -121,51 +100,6 @@ nc.Subscribe("user.login", func(msg *nats.Msg) {
     log.Printf("User %s logged in", event.UserID)
     // Update analytics...
 })
-```
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-```python
-# Event Publisher
-import json
-import time
-
-async def user_logged_in(user_id):
-    event = {
-        "userId": user_id,
-        "timestamp": int(time.time())
-    }
-    await nc.publish("user.login", json.dumps(event).encode())
-
-# Event Subscriber (Analytics Service)
-async def login_handler(msg):
-    event = json.loads(msg.data.decode())
-    print(f"User {event['userId']} logged in")
-    # Update analytics...
-
-await nc.subscribe("user.login", cb=login_handler)
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```java
-// Event Publisher
-void userLoggedIn(String userId) {
-    JSONObject event = new JSONObject();
-    event.put("userId", userId);
-    event.put("timestamp", System.currentTimeMillis());
-    nc.publish("user.login", event.toString().getBytes());
-}
-
-// Event Subscriber (Analytics Service)
-Dispatcher d = nc.createDispatcher((msg) -> {
-    JSONObject event = new JSONObject(new String(msg.getData()));
-    System.out.println("User " + event.getString("userId") + " logged in");
-    // Update analytics...
-});
-d.subscribe("user.login");
 ```
 
 </TabItem>
@@ -201,27 +135,6 @@ while let Some(msg) = sub.next().await {
 ```
 
 </TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```csharp
-// Event Publisher
-public record LoginEvent(string UserId, long Timestamp);
-
-async Task UserLoggedIn(string userId)
-{
-    var evt = new LoginEvent(userId, DateTimeOffset.Now.ToUnixTimeSeconds());
-    await nats.PublishAsync("user.login", evt);
-}
-
-// Event Subscriber (Analytics Service)
-await foreach (var msg in nats.SubscribeAsync<LoginEvent>("user.login"))
-{
-    Console.WriteLine($"User {msg.Data.UserId} logged in");
-    // Update analytics...
-}
-```
-
-</TabItem>
 </Tabs>
 
 ### Example 2: Distributed Logging
@@ -229,7 +142,7 @@ await foreach (var msg in nats.SubscribeAsync<LoginEvent>("user.login"))
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
 
-```
+```bash
 # Application components publish logs
 nats pub logs.error "Database connection failed"
 nats pub logs.info "Service started successfully"
@@ -237,23 +150,6 @@ nats pub logs.debug "Processing request ID: 12345"
 
 # Centralized logger subscribes to all log levels
 nats sub 'logs.>'
-```
-
-</TabItem>
-<TabItem value="js" label="JavaScript/TypeScript">
-
-```javascript
-// Application components publish logs
-nc.publish('logs.error', 'Database connection failed');
-nc.publish('logs.info', 'Service started successfully');
-nc.publish('logs.debug', 'Processing request ID: 12345');
-
-// Centralized logger subscribes to all log levels
-const sub = nc.subscribe('logs.>');
-for await (const msg of sub) {
-  // Write to file, send to monitoring service, etc.
-  saveToLogFile(msg);
-}
 ```
 
 </TabItem>
@@ -270,40 +166,6 @@ nc.Subscribe("logs.>", func(msg *nats.Msg) {
     // Write to file, send to monitoring service, etc.
     saveToLogFile(msg)
 })
-```
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-```python
-# Application components publish logs
-await nc.publish('logs.error', b'Database connection failed')
-await nc.publish('logs.info', b'Service started successfully')
-await nc.publish('logs.debug', b'Processing request ID: 12345')
-
-# Centralized logger subscribes to all log levels
-async def log_handler(msg):
-    # Write to file, send to monitoring service, etc.
-    save_to_log_file(msg)
-
-await nc.subscribe('logs.>', cb=log_handler)
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```java
-// Application components publish logs
-nc.publish("logs.error", "Database connection failed".getBytes());
-nc.publish("logs.info", "Service started successfully".getBytes());
-nc.publish("logs.debug", "Processing request ID: 12345".getBytes());
-
-// Centralized logger subscribes to all log levels
-Dispatcher d = nc.createDispatcher((msg) -> {
-    // Write to file, send to monitoring service, etc.
-    saveToLogFile(msg);
-});
-d.subscribe("logs.>");
 ```
 
 </TabItem>
@@ -324,43 +186,7 @@ while let Some(msg) = sub.next().await {
 ```
 
 </TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```csharp
-// Application components publish logs
-await nats.PublishAsync("logs.error", "Database connection failed");
-await nats.PublishAsync("logs.info", "Service started successfully");
-await nats.PublishAsync("logs.debug", "Processing request ID: 12345");
-
-// Centralized logger subscribes to all log levels
-await foreach (var msg in nats.SubscribeAsync<string>("logs.>"))
-{
-    // Write to file, send to monitoring service, etc.
-    SaveToLogFile(msg);
-}
-```
-
-</TabItem>
 </Tabs>
-
-### Example 3: Multi-Region Data Distribution
-
-```javascript
-// Regional sensors publish data
-nc.publish('sensors.us.west.temp', '72');
-nc.publish('sensors.eu.north.temp', '15');
-nc.publish('sensors.asia.east.temp', '28');
-
-// Subscribe to all temperature sensors globally
-nc.subscribe('sensors.>.temp', (msg) => {
-  updateGlobalDashboard(msg);
-});
-
-// Subscribe to specific region
-nc.subscribe('sensors.us.>', (msg) => {
-  updateUSRegionDashboard(msg);
-});
-```
 
 ## Pub/Sub Patterns
 
@@ -383,14 +209,7 @@ Publisher C ──┘
 ```
 
 ### Topic Routing
-Using subjects to route messages to specific handlers:
-
-```javascript
-// Different handlers for different event types
-nc.subscribe('orders.created', handleNewOrder);
-nc.subscribe('orders.shipped', handleShipment);
-nc.subscribe('orders.cancelled', handleCancellation);
-```
+Using subjects to route messages to specific handlers based on their topic.
 
 ## Best Practices
 
@@ -404,49 +223,13 @@ app.payment.completed
 ```
 
 ### 2. Message Serialization
-Use consistent serialization across your system:
-```javascript
-// Standardize on JSON for complex data
-const publish = (subject, data) => {
-  nc.publish(subject, JSON.stringify(data));
-};
-
-const subscribe = (subject, handler) => {
-  nc.subscribe(subject, (msg) => {
-    const data = JSON.parse(msg.string());
-    handler(data);
-  });
-};
-```
+Use consistent serialization across your system (JSON for complex data, protobuf for performance, etc.).
 
 ### 3. Error Handling
-Always handle potential subscription errors:
-```javascript
-const sub = nc.subscribe('important.events');
-
-(async () => {
-  try {
-    for await (const msg of sub) {
-      await processMessage(msg);
-    }
-  } catch (err) {
-    console.error('Subscription error:', err);
-    // Implement retry logic or alerting
-  }
-})();
-```
+Always handle potential subscription errors with proper error handling and retry logic.
 
 ### 4. Subscription Lifecycle
-Clean up subscriptions when no longer needed:
-```javascript
-// Unsubscribe after processing 10 messages
-const sub = nc.subscribe('limited.events', { max: 10 });
-
-// Or manually unsubscribe
-const sub = nc.subscribe('temp.events');
-// ... later ...
-sub.unsubscribe();
-```
+Clean up subscriptions when no longer needed to prevent resource leaks.
 
 ## Advanced Features
 
@@ -456,21 +239,11 @@ Automatically load balance messages across subscribers:
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
 
-```
+```bash
 # Multiple instances subscribe to the same queue group
 nats sub work.tasks --queue=workers
 
 # Only one member of the 'workers' group receives each message
-```
-
-</TabItem>
-<TabItem value="js" label="JavaScript/TypeScript">
-
-```javascript
-// Multiple instances subscribe to the same queue group
-nc.subscribe('work.tasks', { queue: 'workers' });
-
-// Only one member of the 'workers' group receives each message
 ```
 
 </TabItem>
@@ -486,44 +259,11 @@ nc.QueueSubscribe("work.tasks", "workers", func(msg *nats.Msg) {
 ```
 
 </TabItem>
-<TabItem value="python" label="Python">
-
-```python
-# Multiple instances subscribe to the same queue group
-await nc.subscribe("work.tasks", queue="workers", cb=handler)
-
-# Only one member of the 'workers' group receives each message
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```java
-// Multiple instances subscribe to the same queue group
-d.subscribe("work.tasks", "workers");
-
-// Only one member of the 'workers' group receives each message
-```
-
-</TabItem>
 <TabItem value="rust" label="Rust">
 
 ```rust
 // Multiple instances subscribe to the same queue group
 let mut sub = client.queue_subscribe("work.tasks", "workers").await?;
-
-// Only one member of the 'workers' group receives each message
-```
-
-</TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```csharp
-// Multiple instances subscribe to the same queue group
-await foreach (var msg in nats.SubscribeAsync<string>("work.tasks", queueGroup: "workers"))
-{
-    // Process work task
-}
 
 // Only one member of the 'workers' group receives each message
 ```
@@ -537,26 +277,12 @@ Built on pub/sub but adds synchronous communication:
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
 
-```
+```bash
 # Responder (Terminal 1)
 nats reply time.request "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # Requester (Terminal 2)
 nats request time.request "" --timeout=2s
-```
-
-</TabItem>
-<TabItem value="js" label="JavaScript/TypeScript">
-
-```javascript
-// Responder
-nc.subscribe('time.request', (msg) => {
-  msg.respond(new Date().toISOString());
-});
-
-// Requester
-const response = await nc.request('time.request');
-console.log('Server time:', response.string());
 ```
 
 </TabItem>
@@ -574,38 +300,6 @@ fmt.Printf("Server time: %s\n", string(response.Data))
 ```
 
 </TabItem>
-<TabItem value="python" label="Python">
-
-```python
-# Responder
-async def time_handler(msg):
-    await msg.respond(datetime.now().isoformat().encode())
-
-await nc.subscribe("time.request", cb=time_handler)
-
-# Requester
-response = await nc.request("time.request", b"", timeout=2)
-print(f"Server time: {response.data.decode()}")
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```java
-// Responder
-Dispatcher d = nc.createDispatcher((msg) -> {
-    nc.publish(msg.getReplyTo(),
-        Instant.now().toString().getBytes());
-});
-d.subscribe("time.request");
-
-// Requester
-Message response = nc.request("time.request", null,
-    Duration.ofSeconds(2));
-System.out.println("Server time: " + new String(response.getData()));
-```
-
-</TabItem>
 <TabItem value="rust" label="Rust">
 
 ```rust
@@ -620,21 +314,6 @@ while let Some(msg) = sub.next().await {
 // Requester
 let response = client.request("time.request", "".into()).await?;
 println!("Server time: {}", String::from_utf8_lossy(&response.payload));
-```
-
-</TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```csharp
-// Responder
-await foreach (var msg in nats.SubscribeAsync<string>("time.request"))
-{
-    await msg.ReplyAsync(DateTime.UtcNow.ToString("O"));
-}
-
-// Requester
-var response = await nats.RequestAsync<string, string>("time.request", "");
-Console.WriteLine($"Server time: {response.Data}");
 ```
 
 </TabItem>
@@ -686,41 +365,6 @@ nats pub demo.test.nested "Hierarchical subjects work!"
 ```
 
 </TabItem>
-<TabItem value="js" label="JavaScript/TypeScript">
-
-```javascript
-const NATS = require('nats');
-
-async function demo() {
-  // Connect to NATS
-  const nc = await NATS.connect({ servers: 'localhost:4222' });
-
-  // Create a subscriber
-  const sub = nc.subscribe('demo.>');
-
-  // Process messages asynchronously
-  (async () => {
-    for await (const msg of sub) {
-      console.log(`[${msg.subject}]: ${msg.string()}`);
-    }
-  })();
-
-  // Publish some messages
-  nc.publish('demo.hello', 'Hello NATS!');
-  nc.publish('demo.greeting', 'Welcome to pub/sub');
-  nc.publish('demo.test.nested', 'Hierarchical subjects work!');
-
-  // Give messages time to process
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  // Cleanup
-  await nc.close();
-}
-
-demo().catch(console.error);
-```
-
-</TabItem>
 <TabItem value="go" label="Go">
 
 ```go
@@ -753,75 +397,6 @@ func main() {
 
     // Give messages time to process
     time.Sleep(1 * time.Second)
-}
-```
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-```python
-import asyncio
-import nats
-
-async def demo():
-    # Connect to NATS
-    nc = await nats.connect("localhost:4222")
-
-    # Message handler
-    async def message_handler(msg):
-        subject = msg.subject
-        data = msg.data.decode()
-        print(f"[{subject}]: {data}")
-
-    # Create a subscriber
-    await nc.subscribe("demo.>", cb=message_handler)
-
-    # Publish some messages
-    await nc.publish("demo.hello", b"Hello NATS!")
-    await nc.publish("demo.greeting", b"Welcome to pub/sub")
-    await nc.publish("demo.test.nested", b"Hierarchical subjects work!")
-
-    # Give messages time to process
-    await asyncio.sleep(1)
-
-    # Cleanup
-    await nc.close()
-
-if __name__ == '__main__':
-    asyncio.run(demo())
-```
-
-</TabItem>
-<TabItem value="java" label="Java">
-
-```java
-import io.nats.client.*;
-import java.time.Duration;
-
-public class Demo {
-    public static void main(String[] args) throws Exception {
-        // Connect to NATS
-        Connection nc = Nats.connect("nats://localhost:4222");
-
-        // Create a subscriber
-        Dispatcher d = nc.createDispatcher((msg) -> {
-            System.out.printf("[%s]: %s\n",
-                msg.getSubject(),
-                new String(msg.getData()));
-        });
-        d.subscribe("demo.>");
-
-        // Publish some messages
-        nc.publish("demo.hello", "Hello NATS!".getBytes());
-        nc.publish("demo.greeting", "Welcome to pub/sub".getBytes());
-        nc.publish("demo.test.nested", "Hierarchical subjects work!".getBytes());
-
-        // Give messages time to process
-        Thread.sleep(1000);
-
-        // Cleanup
-        nc.close();
-    }
 }
 ```
 
@@ -860,33 +435,6 @@ async fn main() -> Result<(), async_nats::Error> {
 
     Ok(())
 }
-```
-
-</TabItem>
-<TabItem value="csharp" label="C#/.NET">
-
-```csharp
-using NATS.Client.Core;
-
-// Connect to NATS
-await using var nats = new NatsConnection();
-
-// Create a subscriber (runs in background)
-var subscription = Task.Run(async () =>
-{
-    await foreach (var msg in nats.SubscribeAsync<string>("demo.>"))
-    {
-        Console.WriteLine($"[{msg.Subject}]: {msg.Data}");
-    }
-});
-
-// Publish some messages
-await nats.PublishAsync("demo.hello", "Hello NATS!");
-await nats.PublishAsync("demo.greeting", "Welcome to pub/sub");
-await nats.PublishAsync("demo.test.nested", "Hierarchical subjects work!");
-
-// Give messages time to process
-await Task.Delay(1000);
 ```
 
 </TabItem>
