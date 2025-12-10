@@ -39,9 +39,10 @@ Examples:
 
 ## Why CLI Examples are Different
 
-- **Go/Rust examples**: Stored in their respective repos (nats.go, nats.rs) and fetched during build
+- **All other languages** (Go, Rust, JavaScript, Python, Java, C#, etc.): Stored in their respective client repos and fetched during build
 - **CLI examples**: Stored directly in this repo and committed to git
 - **Reason**: CLI examples are simple shell scripts that don't need separate repos
+- **gitignore**: Uses pattern `static/examples/snippets/*` to ignore all languages, with exception `!static/examples/snippets/cli/` to keep CLI tracked
 
 ## Example Workflow
 
