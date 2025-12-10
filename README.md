@@ -1,8 +1,5 @@
 # NATS Documentation
 
-[![Deploy to GitHub Pages](https://github.com/nats-io/nats.docs/actions/workflows/deploy.yml/badge.svg)](https://github.com/nats-io/nats.docs/actions/workflows/deploy.yml)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/YOUR-SITE-ID/deploy-status)](https://app.netlify.com/sites/YOUR-SITE/deploys)
-
 This is the official documentation site for NATS, built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
 ## Overview
