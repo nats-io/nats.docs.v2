@@ -53,27 +53,34 @@ Queue groups can coexist with regular subscribers. This enables patterns like:
 
 ## Geo-Affinity in Super-Clusters
 
-In globally distributed NATS super-clusters, queue groups exhibit geo-affinity - preferring local processing when possible:
+In globally distributed NATS super-clusters, queue groups exhibit **geo-affinity** - automatically preferring local workers when available.
 
-```
-┌─────────────────────────────────────────────┐
-│            Global Super-Cluster             │
-├──────────────┬──────────────┬──────────────┤
-│   US-East    │   US-West    │   EU-West    │
-│              │              │              │
-│  Workers:    │  Workers:    │  Workers:    │
-│  - Queue: Q  │  - Queue: Q  │  - Queue: Q  │
-│              │              │              │
-│  Publisher   │              │              │
-│      ↓       │              │              │
-│   Message    │              │              │
-│      ↓       │              │              │
-│ Local Worker │              │              │
-│  (Preferred) │              │              │
-└──────────────┴──────────────┴──────────────┘
-```
+### How It Works
 
-Messages are preferentially delivered to queue group members in the same cluster/region, only routing to remote regions if no local workers are available.
+When you have queue group subscribers distributed across multiple regions:
+
+1. **Local preference**: Messages are delivered to workers in the same cluster/region as the publisher
+2. **Automatic failover**: If no local workers are available, NATS routes to workers in other regions
+3. **No configuration needed**: This happens automatically based on network topology
+
+### Example Scenario
+
+Consider a queue group named `"order-processors"` with workers in three regions:
+
+| Region | Workers | Publisher Location |
+|--------|---------|-------------------|
+| **US-East** | 3 workers | ✅ Publisher here |
+| **US-West** | 2 workers | - |
+| **EU-West** | 2 workers | - |
+
+**Result**: Messages from the US-East publisher are preferentially delivered to the 3 US-East workers. Only if all US-East workers are unavailable will messages route to US-West or EU-West workers.
+
+### Benefits
+
+- **Lower latency**: Local processing is faster
+- **Reduced bandwidth**: Fewer cross-region transfers
+- **Natural failover**: Automatic global distribution if local workers fail
+- **No configuration**: Works out of the box in super-clusters
 
 ## Queue Group Naming
 
@@ -126,46 +133,6 @@ Track these metrics for queue groups:
 - Worker count
 - Processing latency
 - Error rates
-
-## Queue Groups vs Other Patterns
-
-### Queue Groups vs Pub-Sub
-- **Pub-Sub**: All subscribers receive all messages
-- **Queue Groups**: Only one member receives each message
-
-### Queue Groups vs JetStream Consumers
-- **Queue Groups**: Memory-based, no persistence
-- **JetStream**: Persistent, with replay and exactly-once semantics
-
-### Queue Groups vs Traditional Message Queues
-- **Traditional Queues**: Require broker configuration
-- **Queue Groups**: No configuration, purely client-side
-
-## Common Use Cases
-
-### Microservices Load Balancing
-```javascript
-// Each service instance joins the same queue
-nc.subscribe("service.orders", { queue: "order-service" }, handler);
-```
-
-### Task Processing
-```javascript
-// Workers pull from task queue
-nc.subscribe("tasks.process", { queue: "task-workers" }, processTask);
-```
-
-### Event Processing
-```javascript
-// Event processors share the load
-nc.subscribe("events.>", { queue: "event-processors" }, handleEvent);
-```
-
-### API Gateway
-```javascript
-// Multiple gateway instances for high availability
-nc.subscribe("api.>", { queue: "api-gateway" }, routeRequest);
-```
 
 ## Related Concepts
 
