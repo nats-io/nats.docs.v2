@@ -38,7 +38,7 @@ NATS provides two wildcards for flexible subscription patterns. While publishers
 
 <div class="nats-flow" data-scenario="subjectsWildcardAnimated" data-width="700" data-height="450"></div>
 
-The subscriber with pattern `weather.*.east` receives messages from matching subjects (green paths) but not from non-matching subjects (red path). The `*` wildcard matches exactly one token.
+The subscriber with pattern `weather.*.east` receives messages from matching subjects (green and blue paths) but not from non-matching subjects (red path). The `*` wildcard matches exactly one token.
 
 ### Single Token Wildcard (`*`)
 
@@ -333,10 +333,6 @@ You can combine wildcards for more complex patterns:
   - `weather.us.east.boston`
   - `traffic.us.east.newyork`
 
-- `orders.*.pending` matches:
-  - `orders.retail.pending`
-  - `orders.wholesale.pending`
-
 ### Wildcard Comparison
 
 Here's a side-by-side comparison showing how `*` and `>` wildcards behave differently:
@@ -368,6 +364,8 @@ Subjects starting with `$` are reserved for system use:
 - `$SYS` - System subjects
 - `$JS` - JetStream API subjects
 - `$KV` - Key-Value store subjects
+- `$O` - Object Store subjects
+- `$SRV` - Service API subjects
 - `_INBOX` - Auto-generated reply subjects
 
 ## Best Practices
@@ -388,9 +386,9 @@ Subjects starting with `$` are reserved for system use:
 
 ### Performance Considerations
 
-- Subjects are ephemeral and automatically cleaned up when not in use
-- NATS can efficiently handle millions of unique subjects
-- Subject subscriptions are cached in memory (1M subjects ≈ 1GB RAM)
+- **Subjects Interest graph is in-memory and dynamic**: NATS builds a routing table only for subjects with active subscribers, kept entirely in RAM for fast lookups
+- **Subjects are essentially free**: Creating new subjects has virtually no overhead - NATS efficiently handles millions of unique subjects.
+- **Wildcard matching is optimized**: Subscriptions with wildcards (`*` and `>`) use efficient trie-based matching.
 
 ### Security and Filtering
 
