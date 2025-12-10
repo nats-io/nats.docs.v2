@@ -46,9 +46,19 @@ await nc.publish("hello", "Hello NATS!");
 **Adding new examples:**
 
 1. **CLI**: Write in `static/examples/snippets/cli/[page]/[snippet].sh` (this repo)
+   - **IMPORTANT**: CLI examples must be committed to git
+   - Use: `git add static/examples/snippets/cli/[page]/[snippet].sh`
+   - See `static/examples/snippets/cli/README.md` for details
+
 2. **Go**: Write in `~/coding/nats.go-docs` at `examples/docs/[page]-[snippet]/main.go` (doc-examples branch)
+   - Commit and push to nats-io/nats.go doc-examples branch
+   - Fetched during build via `npm run fetch-examples`
+
 3. **Rust**: Write in `~/coding/nats.rs-docs` at `async-nats/examples/docs_[page]_[snippet].rs` (doc-examples branch)
-4. **Fetch**: Run `npm run fetch-examples` to pull Go/Rust into this repo
+   - Commit and push to nats-io/nats.rs doc-examples branch
+   - Fetched during build via `npm run fetch-examples`
+
+4. **Fetch**: Run `npm run fetch-examples` to pull Go/Rust into this repo (CLI examples stay in git)
 
 **Optional markers** (to exclude setup code):
 ```go
