@@ -5,7 +5,7 @@ description: Built-in load balancing for NATS subscribers
 
 # Queue Groups
 
-In standard publish-subscribe, every subscriber receives every message (1:N fan-out). Queue groups provide an additional feature: subscribers can register with a **queue name**. When multiple subscribers join the same queue name, they form a **queue group**, and only **one randomly chosen member** receives each message. This is NATS's built-in load balancing.
+In standard publish-subscribe, every subscriber receives every message. Queue groups change this: when subscribers share a **queue name**, NATS delivers each message to only **one randomly chosen member** of that group.
 
 <div class="nats-flow" data-scenario="queueGroupAnimated" data-width="600" data-height="350"></div>
 
@@ -13,18 +13,13 @@ Watch how each message (animated dot) flows to only one worker, even though all 
 
 ## How It Works
 
-When subscribers register to receive messages from a publisher, the normal 1:N pattern ensures every message reaches all subscribers. Queue groups change this behavior:
+Queue groups operate at the subject level - subscribers still filter messages by subject, but NATS adds distribution logic:
 
-- **Without queue groups**: Message → All subscribers (fan-out)
-- **With queue groups**: Message → One random subscriber from the group (load balancing)
+1. **Single member**: A lone subscriber in a queue group receives all messages for that subject
+2. **Multiple members**: NATS randomly selects one member for each message
+3. **Member joins/leaves**: Distribution automatically adjusts without configuration
 
-Subscribers in a queue group still receive messages based on the subject, but NATS ensures each message goes to only one member. If a subscriber joins a queue group alone, it receives all messages. Add more subscribers to the same queue name, and they automatically share the load.
-
-**Key characteristics:**
-- No server configuration needed
-- Queue groups are defined by applications, not the server
-- Subscribers can be added or removed dynamically
-- Built-in fault tolerance and scalability
+The queue name is application-defined, not server-configured. Subscribers specify it when subscribing, and NATS handles the rest. If a selected member is slow or unresponsive, subsequent messages go to other members.
 
 ## Basic Queue Groups
 
