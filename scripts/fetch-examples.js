@@ -83,12 +83,14 @@ const EXAMPLES_CONFIG = {
     "java": {
         repo: "nats-io/nats.java",
         branch: "doc-examples",
+        directory: "src/examples/java/io/nats/examples/doc/",
         examples: {
-            "basics-publish": "src/examples/java/io/nats/examples/doc/BasicsPublish.java",
-            "basics-subscribe": "src/examples/java/io/nats/examples/doc/BasicsSubscribe.java",
-            "getting-started-publish": "src/examples/java/io/nats/examples/doc/GettingStartedPublish.java",
-            "getting-started-subscribe": "src/examples/java/io/nats/examples/doc/GettingStartedSubscribe.java",
-            "publish-subscribe-basic": "src/examples/java/io/nats/examples/doc/PublishSubscribeBasic.java",
+            "basics-publish": "BasicsPublish.java",
+            "basics-subscribe": "BasicsSubscribe.java",
+            "getting-started-publish": "GettingStartedPublish.java",
+            "getting-started-subscribe": "GettingStartedSubscribe.java",
+            "publish-subscribe-basic": "PublishSubscribeBasic.java",
+            "queue-groups-basic": "QueueGroupsBasic.java",
         },
     },
     "csharp": {
@@ -224,6 +226,12 @@ async function fetchAllExamples() {
         results[language] = {};
         metadata.examples[language] = {};
 
+        directory = ""
+        if (config.directory != null) {
+            directory = config.directory
+            console.log(`  ⌘ Examples Directory ${directory}`)
+        }
+
         // Skip if no examples defined yet
         if (Object.keys(config.examples).length === 0) {
             console.log(`  ⏭ Skipping ${language} - no examples defined yet`);
@@ -241,7 +249,7 @@ async function fetchAllExamples() {
                 const code = await fetchFromGitHub(
                     config.repo,
                     config.branch,
-                    examplePath,
+                    directory + examplePath,
                 );
                 const originalLines = code.split("\n").length;
                 const snippet = extractSnippet(code, language, exampleType);
