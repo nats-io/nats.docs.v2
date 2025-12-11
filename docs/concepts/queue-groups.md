@@ -23,66 +23,33 @@ The queue name is application-defined, not server-configured. Subscribers specif
 
 ## Basic Queue Groups
 
-Queue groups are your go-to solution for distributing work across multiple workers. Think of it like a team of people processing tasks from a shared inbox - each task goes to exactly one person, but everyone shares the workload.
+Multiple subscribers use the same queue group name when subscribing to a subject. NATS ensures each message is delivered to only one member of that group, chosen randomly.
 
-The pattern is simple: multiple subscribers use the same queue group name when subscribing to a subject. NATS then ensures each message is delivered to only one member of that group, chosen randomly. This gives you instant load balancing without any external infrastructure.
-
-**Common use cases:**
-- Background job processing (email sending, image resizing, data imports)
-- API request handling across multiple service instances
-- Event processing pipelines where each event needs single processing
-- Batch operations that can be parallelized
+Common use cases: background job processing, API request handling across service instances, event processing pipelines, batch operations.
 
 <div class="nats-example" data-type="queue-groups-basic" data-languages="cli,go,rust"></div>
 
 ## Dynamic Scaling
 
-One of the most powerful features of queue groups is dynamic scaling without configuration changes. You can add or remove workers at any time - even while the system is running - and NATS automatically adjusts the distribution.
+Add or remove workers at any time and NATS automatically adjusts distribution. When a worker joins, it immediately starts receiving messages. When it leaves, NATS stops routing to it within milliseconds.
 
-When you add a new worker, it immediately starts receiving messages. When a worker shuts down or crashes, NATS stops routing messages to it within milliseconds. There's no configuration to update, no load balancer to reconfigure, and no coordination protocol to implement.
-
-This makes queue groups perfect for auto-scaling scenarios. Your orchestration system (Kubernetes, ECS, etc.) can spin up new workers based on metrics like CPU usage or queue depth, and they'll instantly participate in message processing.
-
-**Real-world scenarios:**
-- **Traffic spikes**: Add workers during peak hours, remove them during off-hours
-- **Gradual rollouts**: Start new version workers alongside old ones, gradually shift traffic
-- **Cost optimization**: Scale down to zero workers when idle, scale up on demand
-- **Testing in production**: Add a single test worker to receive real traffic safely
+Perfect for auto-scaling scenarios where orchestration systems (Kubernetes, ECS) spin up new workers based on metrics. Supports gradual rollouts, traffic spike handling, and cost optimization.
 
 <div class="nats-example" data-type="queue-groups-dynamic-scaling" data-languages="cli,go,rust"></div>
 
 ## Queue Groups with Request-Reply
 
-Queue groups shine in request-reply patterns because they let you build horizontally scalable services without a service mesh or API gateway. Each request goes to exactly one available service instance, giving you automatic load balancing and high availability.
+Queue groups enable horizontally scalable services without a service mesh or API gateway. Each request goes to exactly one service instance, providing automatic load balancing.
 
-When a client sends a request, NATS routes it to one random member of the queue group. That member processes the request and sends back a reply. If you have 10 service instances in the queue group, NATS naturally distributes requests across all 10.
-
-The beauty is in the simplicity: your service code doesn't need to know about other instances, handle leader election, or coordinate work. Just subscribe with a queue group name and start responding to requests.
-
-**Perfect for:**
-- Microservices APIs (authentication, payments, user management)
-- RPC-style services where each request needs exactly one response
-- Services with expensive operations (database queries, external API calls)
-- Stateless services that can handle requests independently
+Your service code doesn't need to know about other instances, handle leader election, or coordinate work. Just subscribe with a queue group name and respond to requests.
 
 <div class="nats-example" data-type="queue-groups-request-reply" data-languages="cli,go,rust"></div>
 
 ## Mixed Subscribers
 
-Queue groups can coexist with regular subscribers on the same subject, enabling powerful hybrid patterns. Regular subscribers receive every message (traditional pub-sub), while queue group members share the load (distributed processing).
+Queue groups coexist with regular subscribers on the same subject. Regular subscribers receive every message (pub-sub), while queue group members share the load (work distribution).
 
-This combination lets you separate concerns cleanly: use queue groups for operational work that needs to happen exactly once, and regular subscribers for observational tasks that need to see everything.
-
-**Common patterns:**
-- **Audit logging**: Regular subscriber records all events while queue group processes them
-- **Monitoring**: Regular subscriber tracks metrics and health while workers handle requests
-- **Multi-stage processing**: Queue group does primary processing, regular subscribers do secondary analysis
-- **Debugging**: Temporarily add a regular subscriber to observe traffic without affecting processing
-
-For example, you might have a `orders.created` subject where:
-- A queue group named `"order-fulfillment"` handles order processing (only one worker processes each order)
-- A regular subscriber feeds a real-time analytics dashboard (sees all orders)
-- Another regular subscriber archives orders to cold storage (sees all orders)
+Use queue groups for operational work that needs to happen exactly once, and regular subscribers for observational tasks (audit logging, monitoring, analytics).
 
 <div class="nats-example" data-type="queue-groups-mixed-subscribers" data-languages="cli,go,rust"></div>
 
