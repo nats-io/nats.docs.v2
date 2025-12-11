@@ -94,6 +94,7 @@ Documentation pages are located in the `docs/` directory and written in Markdown
   - Go → `nats.go` repository
   - Rust → `nats.rs` repository
   - JavaScript/TypeScript → `nats.js` repository
+  - Java → `nats.java` repository
 
 - **CLI-only examples**: In this documentation repository
   - Location: `static/examples/snippets/cli/[page]/[snippet].sh`

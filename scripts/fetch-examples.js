@@ -84,7 +84,11 @@ const EXAMPLES_CONFIG = {
         repo: "nats-io/nats.java",
         branch: "doc-examples",
         examples: {
-            // TODO: Add when Java adopts [page]-[snippet] pattern
+            "basics-publish": "src/examples/java/io/nats/examples/doc/BasicsPublish.java",
+            "basics-subscribe": "src/examples/java/io/nats/examples/doc/BasicsSubscribe.java",
+            "getting-started-publish": "src/examples/java/io/nats/examples/doc/GettingStartedPublish.java",
+            "getting-started-subscribe": "src/examples/java/io/nats/examples/doc/GettingStartedSubscribe.java",
+            "publish-subscribe-basic": "src/examples/java/io/nats/examples/doc/PublishSubscribeBasic.java",
         },
     },
     "csharp": {
