@@ -93,7 +93,7 @@ const EXAMPLES_CONFIG = {
             "subjects-single-wildcard": "SubjectsSingleWildcard.java",
             "subjects-multi-wildcard": "SubjectsMultiWildcard.java",
             "subjects-monitoring": "SubjectsMonitoring.java",
-            "queue-groups-basic": "QueueGroupsBasic.java",
+            "queue-groups-basic": "QueueGroupsBasic.java"
         },
     },
     "csharp": {
@@ -232,7 +232,7 @@ async function fetchAllExamples() {
         directory = ""
         if (config.directory != null) {
             directory = config.directory
-            console.log(`  ⌘ Examples Directory ${directory}`)
+            console.log(`  ⌘ Examples Directory: ${directory}`)
         }
 
         // Skip if no examples defined yet
