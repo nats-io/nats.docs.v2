@@ -46,19 +46,31 @@ await nc.publish("hello", "Hello NATS!");
 **Adding new examples:**
 
 1. **CLI**: Write in `static/examples/snippets/cli/[page]/[snippet].sh` (this repo)
+   - Example name auto-generated from path: `cli/basics/publish.sh` → `basics-publish`
    - **IMPORTANT**: CLI examples must be committed to git
    - Use: `git add static/examples/snippets/cli/[page]/[snippet].sh`
    - See `static/examples/snippets/cli/README.md` for details
 
 2. **Go**: Write in `~/coding/nats.go-docs` at `examples/docs/[page]-[snippet]/main.go` (doc-examples branch)
    - Commit and push to nats-io/nats.go doc-examples branch
+   - **IMPORTANT**: Add entry to `EXAMPLES_CONFIG` in `scripts/fetch-examples.js`:
+     ```javascript
+     "queue-groups-basic": "examples/docs/queue-groups-basic/main.go"
+     ```
    - Fetched during build via `npm run fetch-examples`
 
 3. **Rust**: Write in `~/coding/nats.rs-docs` at `async-nats/examples/docs_[page]_[snippet].rs` (doc-examples branch)
    - Commit and push to nats-io/nats.rs doc-examples branch
+   - **IMPORTANT**: Add entry to `EXAMPLES_CONFIG` in `scripts/fetch-examples.js`:
+     ```javascript
+     "queue-groups-basic": "async-nats/examples/docs_queue_groups_basic.rs"
+     ```
    - Fetched during build via `npm run fetch-examples`
 
-4. **Fetch**: Run `npm run fetch-examples` to pull Go/Rust into this repo (CLI examples stay in git)
+4. **Fetch & metadata**: Run `npm run fetch-examples` to:
+   - Pull Go/Rust examples from GitHub (based on EXAMPLES_CONFIG entries)
+   - Auto-scan CLI examples from directory structure
+   - Auto-generate `metadata.json` with all example information
 
 **Optional markers** (to exclude setup code):
 ```go

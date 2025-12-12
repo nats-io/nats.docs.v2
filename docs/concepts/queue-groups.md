@@ -88,6 +88,9 @@ Consider a queue group named `"order-processors"` with workers in three regions:
 
 ### Naming Conventions
 
+Queue groups follow similar naming conventions as subjects. Here are some common patterns:
+
+
 ```
 # Service-based naming
 api.auth.workers
