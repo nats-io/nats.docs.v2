@@ -5,7 +5,7 @@ description: Built-in load balancing for NATS subscribers
 
 # Queue Groups
 
-In standard publish-subscribe, every subscriber receives every message (1:N fan-out). Queue groups provide an additional feature: subscribers can register with a **queue name**. When multiple subscribers join the same queue name, they form a **queue group**, and only **one randomly chosen member** receives each message. This is NATS's built-in load balancing.
+In standard publish-subscribe, every subscriber receives every message. Queue groups change this: when subscribers share a **queue name**, NATS delivers each message to only **one randomly chosen member** of that group.
 
 <div class="nats-flow" data-scenario="queueGroupAnimated" data-width="600" data-height="350"></div>
 
@@ -13,41 +13,43 @@ Watch how each message (animated dot) flows to only one worker, even though all 
 
 ## How It Works
 
-When subscribers register to receive messages from a publisher, the normal 1:N pattern ensures every message reaches all subscribers. Queue groups change this behavior:
+Queue groups operate at the subject level - subscribers still filter messages by subject, but NATS adds distribution logic:
 
-- **Without queue groups**: Message → All subscribers (fan-out)
-- **With queue groups**: Message → One random subscriber from the group (load balancing)
+1. **Single member**: A lone subscriber in a queue group receives all messages for that subject
+2. **Multiple members**: NATS randomly selects one member for each message
+3. **Member joins/leaves**: Distribution automatically adjusts without configuration
 
-Subscribers in a queue group still receive messages based on the subject, but NATS ensures each message goes to only one member. If a subscriber joins a queue group alone, it receives all messages. Add more subscribers to the same queue name, and they automatically share the load.
-
-**Key characteristics:**
-- No server configuration needed
-- Queue groups are defined by applications, not the server
-- Subscribers can be added or removed dynamically
-- Built-in fault tolerance and scalability
+The queue name is application-defined, not server-configured. Subscribers specify it when subscribing, and NATS handles the rest. If a selected member is slow or unresponsive, subsequent messages go to other members.
 
 ## Basic Queue Groups
+
+Multiple subscribers use the same queue group name when subscribing to a subject. NATS ensures each message is delivered to only one member of that group, chosen randomly.
+
+Common use cases: background job processing, API request handling across service instances, event processing pipelines, batch operations.
 
 <div class="nats-example" data-type="queue-groups-basic" data-languages="cli,go,rust"></div>
 
 ## Dynamic Scaling
 
-One of the most powerful features of queue groups is dynamic scaling without configuration changes:
+Add or remove workers at any time and NATS automatically adjusts distribution. When a worker joins, it immediately starts receiving messages. When it leaves, NATS stops routing to it within milliseconds.
+
+Perfect for auto-scaling scenarios where orchestration systems (Kubernetes, ECS) spin up new workers based on metrics. Supports gradual rollouts, traffic spike handling, and cost optimization.
 
 <div class="nats-example" data-type="queue-groups-dynamic-scaling" data-languages="cli,go,rust"></div>
 
 ## Queue Groups with Request-Reply
 
-Queue groups are perfect for building scalable services with request-reply:
+Queue groups enable horizontally scalable services without a service mesh or API gateway. Each request goes to exactly one service instance, providing automatic load balancing.
+
+Your service code doesn't need to know about other instances, handle leader election, or coordinate work. Just subscribe with a queue group name and respond to requests.
 
 <div class="nats-example" data-type="queue-groups-request-reply" data-languages="cli,go,rust"></div>
 
 ## Mixed Subscribers
 
-Queue groups can coexist with regular subscribers. This enables patterns like:
-- Audit logging (regular subscriber sees all messages)
-- Monitoring (regular subscriber tracks all activity)
-- Processing (queue group handles the work)
+Queue groups coexist with regular subscribers on the same subject. Regular subscribers receive every message (pub-sub), while queue group members share the load (work distribution).
+
+Use queue groups for operational work that needs to happen exactly once, and regular subscribers for observational tasks (audit logging, monitoring, analytics).
 
 <div class="nats-example" data-type="queue-groups-mixed-subscribers" data-languages="cli,go,rust"></div>
 
@@ -82,18 +84,12 @@ Consider a queue group named `"order-processors"` with workers in three regions:
 - **Natural failover**: Automatic global distribution if local workers fail
 - **No configuration**: Works out of the box in super-clusters
 
-## Queue Group Naming
-
-Queue group names follow the same rules as subjects:
-
-- **Case sensitive**: `Workers` ≠ `workers`
-- **Allowed characters**: Alphanumeric, `-`, `_`
-- **No whitespace**: Spaces not permitted
-- **Hierarchical**: Can use `.` for organization (e.g., `api.v1.workers`)
-
 ## Best Practices
 
 ### Naming Conventions
+
+Queue groups follow similar naming conventions as subjects. Here are some common patterns:
+
 
 ```
 # Service-based naming
