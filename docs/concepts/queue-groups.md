@@ -84,15 +84,6 @@ Consider a queue group named `"order-processors"` with workers in three regions:
 - **Natural failover**: Automatic global distribution if local workers fail
 - **No configuration**: Works out of the box in super-clusters
 
-## Queue Group Naming
-
-Queue group names follow the same rules as subjects:
-
-- **Case sensitive**: `Workers` ≠ `workers`
-- **Allowed characters**: Alphanumeric, `-`, `_`
-- **No whitespace**: Spaces not permitted
-- **Hierarchical**: Can use `.` for organization (e.g., `api.v1.workers`)
-
 ## Best Practices
 
 ### Naming Conventions
