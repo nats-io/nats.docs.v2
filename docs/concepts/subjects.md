@@ -50,7 +50,7 @@ The `*` wildcard matches exactly one token. For example:
   - `orders.retail.shipped`
   - `orders.wholesale.shipped`
 
-<div class="nats-example" data-type="subjects-single-wildcard" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="subjects-single-wildcard" data-languages="cli,go,rust,java"></div>
 
 ### Multi-Token Wildcard (`>`)
 
@@ -63,7 +63,7 @@ The `>` wildcard matches one or more tokens and can only appear at the end of a 
 
 - `orders.>` matches all subjects starting with `orders.`
 
-<div class="nats-example" data-type="subjects-multi-wildcard" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="subjects-multi-wildcard" data-languages="cli,go,rust,java"></div>
 
 ### Mixing Wildcards
 
@@ -151,7 +151,7 @@ One of NATS' key features is location transparency through subject-based address
 
 The `>` wildcard enables powerful monitoring capabilities:
 
-<div class="nats-example" data-type="subjects-monitoring" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="subjects-monitoring" data-languages="cli,go,rust,java"></div>
 
 ## Related Concepts
 
