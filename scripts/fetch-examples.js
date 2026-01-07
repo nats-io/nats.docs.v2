@@ -80,22 +80,33 @@ const EXAMPLES_CONFIG = {
             // TODO: Add when Python adopts [page]-[snippet] pattern
         },
     },
-    "java": {
-        repo: "nats-io/nats.java",
-        branch: "doc-examples",
-        directory: "src/examples/java/io/nats/examples/natsIoDoc/",
-        examples: {
-            "basics-publish": "BasicsPublish.java",
-            "basics-subscribe": "BasicsSubscribe.java",
-            "getting-started-publish": "GettingStartedPublish.java",
-            "getting-started-subscribe": "GettingStartedSubscribe.java",
-            "publish-subscribe-basic": "PublishSubscribeBasic.java",
-            "subjects-single-wildcard": "SubjectsSingleWildcard.java",
-            "subjects-multi-wildcard": "SubjectsMultiWildcard.java",
-            "subjects-monitoring": "SubjectsMonitoring.java",
-            "queue-groups-basic": "QueueGroupsBasic.java"
+    "java": [
+        {
+            repo: "nats-io/nats.java",
+            branch: "main",
+            directory: "src/examples/java/io/nats/examples/natsIoDoc/",
+            examples: {
+                "basics-publish": "BasicsPublish.java",
+                "basics-subscribe": "BasicsSubscribe.java",
+                "getting-started-publish": "GettingStartedPublish.java",
+                "getting-started-subscribe": "GettingStartedSubscribe.java",
+                "publish-subscribe-basic": "PublishSubscribeBasic.java",
+                "subjects-single-wildcard": "SubjectsSingleWildcard.java",
+                "subjects-multi-wildcard": "SubjectsMultiWildcard.java",
+                "queue-groups-basic": "QueueGroupsBasic.java"
+            }
         },
-    },
+        {
+            repo: "nats-io/nats.java",
+            branch: "doc-examples",
+            directory: "src/examples/java/io/nats/examples/natsIoDoc/",
+            examples: {
+                "subjects-monitoring": "SubjectsMonitoring.java",
+                "request-reply-basic": "RequestReplyBasic.java",
+            }
+        }
+
+    ],
     "csharp": {
         repo: "nats-io/nats.net",
         branch: "doc-examples",
@@ -224,78 +235,14 @@ async function fetchAllExamples() {
         examples: {},
     };
 
-    for (const [language, config] of Object.entries(EXAMPLES_CONFIG)) {
+    for (const [language, configOrArrayOfConfigs] of Object.entries(EXAMPLES_CONFIG)) {
         console.log(`\nFetching examples for ${language}...`);
         results[language] = {};
         metadata.examples[language] = {};
 
-        directory = ""
-        if (config.directory != null) {
-            directory = config.directory
-            console.log(`  ⌘ Examples Directory: ${directory}`)
-        }
-
-        // Skip if no examples defined yet
-        if (Object.keys(config.examples).length === 0) {
-            console.log(`  ⏭ Skipping ${language} - no examples defined yet`);
-            continue;
-        }
-
-        // Create language directory
-        const langDir = path.join(OUTPUT_DIR, language);
-        await fs.mkdir(langDir, { recursive: true });
-
-        for (
-            const [exampleType, examplePath] of Object.entries(config.examples)
-        ) {
-            try {
-                const code = await fetchFromGitHub(
-                    config.repo,
-                    config.branch,
-                    directory + examplePath,
-                );
-                const originalLines = code.split("\n").length;
-                const snippet = extractSnippet(code, language, exampleType);
-                const extractedLines = snippet.split("\n").length;
-
-                // Parse page and snippet from example type
-                const { page, snippet: snippetName } = parseExampleType(
-                    exampleType,
-                );
-
-                // Create page directory
-                const pageDir = path.join(langDir, page);
-                await fs.mkdir(pageDir, { recursive: true });
-
-                // Save the snippet in page/snippet.ext structure
-                const outputPath = path.join(
-                    pageDir,
-                    `${snippetName}.${getFileExtension(language)}`,
-                );
-                await fs.writeFile(outputPath, snippet);
-
-                // Store metadata
-                metadata.examples[language][exampleType] = {
-                    path: outputPath.replace(OUTPUT_DIR + "/", ""),
-                    page: page,
-                    snippet: snippetName,
-                    originalLines: originalLines,
-                    extractedLines: extractedLines,
-                    markersFound: originalLines !== extractedLines,
-                };
-
-                results[language][exampleType] = outputPath;
-                console.log(
-                    `  ✓ ${exampleType} -> ${page}/${snippetName}.${getFileExtension(language)
-                    }`,
-                );
-            } catch (error) {
-                console.error(`  ✗ ${exampleType}: ${error.message}`);
-                results[language][exampleType] = null;
-                metadata.examples[language][exampleType] = {
-                    error: error.message,
-                };
-            }
+        const configs = Array.isArray(configOrArrayOfConfigs) ? configOrArrayOfConfigs : [configOrArrayOfConfigs];
+        for (const config of configs) {
+            await fetchExample(results, metadata, language, config)
         }
     }
 
@@ -314,6 +261,76 @@ async function fetchAllExamples() {
     return results;
 }
 
+async function fetchExample(results, metadata, language, config) {
+    // Skip if no examples defined yet
+    if (Object.keys(config.examples).length === 0) {
+        console.log(`  ⏭ Skipping ${language} - no examples defined yet`);
+        return;
+    }
+
+    directory = ""
+    if (config.directory != null) {
+        directory = config.directory
+        console.log(`⌘ Examples Directory: ${directory}`)
+    }
+
+    // Create language directory
+    const langDir = path.join(OUTPUT_DIR, language);
+    await fs.mkdir(langDir, { recursive: true });
+
+    for (
+        const [exampleType, examplePath] of Object.entries(config.examples)
+        ) {
+        try {
+            const code = await fetchFromGitHub(
+                config.repo,
+                config.branch,
+                directory + examplePath,
+            );
+            const originalLines = code.split("\n").length;
+            const snippet = extractSnippet(code, language, exampleType);
+            const extractedLines = snippet.split("\n").length;
+
+            // Parse page and snippet from example type
+            const { page, snippet: snippetName } = parseExampleType(
+                exampleType,
+            );
+
+            // Create page directory
+            const pageDir = path.join(langDir, page);
+            await fs.mkdir(pageDir, { recursive: true });
+
+            // Save the snippet in page/snippet.ext structure
+            const outputPath = path.join(
+                pageDir,
+                `${snippetName}.${getFileExtension(language)}`,
+            );
+            await fs.writeFile(outputPath, snippet);
+
+            // Store metadata
+            metadata.examples[language][exampleType] = {
+                path: outputPath.replace(OUTPUT_DIR + "/", ""),
+                page: page,
+                snippet: snippetName,
+                originalLines: originalLines,
+                extractedLines: extractedLines,
+                markersFound: originalLines !== extractedLines,
+            };
+
+            results[language][exampleType] = outputPath;
+            console.log(
+                `  ✓ ${exampleType} -> ${page}/${snippetName}.${getFileExtension(language)
+                }`,
+            );
+        } catch (error) {
+            console.error(`  ✗ ${exampleType}: ${error.message}`);
+            results[language][exampleType] = null;
+            metadata.examples[language][exampleType] = {
+                error: error.message,
+            };
+        }
+    }
+}
 /**
  * Get file extension for a language
  */
