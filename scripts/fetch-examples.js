@@ -103,6 +103,11 @@ const EXAMPLES_CONFIG = {
             examples: {
                 "subjects-monitoring": "SubjectsMonitoring.java",
                 "request-reply-basic": "RequestReplyBasic.java",
+                "request-reply-timeout": "RequestReplyTimeout.java",
+                "request-reply-multiple-responders": "RequestReplyMultipleResponders.java",
+                "request-reply-no-responders": "RequestReplyNoResponders.java",
+                "request-reply-headers": "RequestReplyHeaders.java",
+                "request-reply-calculator": "RequestReplyCalculator.java",
             }
         }
     ],

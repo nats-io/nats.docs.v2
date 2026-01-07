@@ -29,13 +29,13 @@ In the animation above:
 
 ## Basic Request-Reply
 
-<div class="nats-example" data-type="request-reply-basic" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="request-reply-basic" data-languages="cli,go,rust,java"></div>
 
 ## Handling Timeouts
 
 Timeouts are crucial in request-reply to prevent indefinite waiting. All NATS clients support configurable timeouts:
 
-<div class="nats-example" data-type="request-reply-timeout" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="request-reply-timeout" data-languages="cli,go,rust,java"></div>
 
 ## Multiple Responders
 
@@ -65,19 +65,19 @@ In this pattern, NATS selects one service from the queue group (Service B in thi
 
 By default, the `request()` method returns after receiving the first response. To collect multiple responses from the scatter-gather pattern, use manual inbox subscription:
 
-<div class="nats-example" data-type="request-reply-multiple-responders" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="request-reply-multiple-responders" data-languages="cli,go,rust,java"></div>
 
 ## No Responders Detection
 
 NATS will detect when no services are available to handle a request. When there are no subscribers for the request subject, NATS server will return a "no responders" error immediately:
 
-<div class="nats-example" data-type="request-reply-no-responders" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="request-reply-no-responders" data-languages="cli,go,rust,java"></div>
 
 ## Request with Headers
 
 NATS supports headers in request-reply, enabling metadata exchange:
 
-<div class="nats-example" data-type="request-reply-headers" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="request-reply-headers" data-languages="cli,go,rust,java"></div>
 
 ## Best Practices
 
@@ -130,4 +130,4 @@ Use publish-subscribe when you need:
 
 Create a simple calculator service:
 
-<div class="nats-example" data-type="request-reply-calculator" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="request-reply-calculator" data-languages="cli,go,rust,java"></div>
