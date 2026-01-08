@@ -80,37 +80,22 @@ const EXAMPLES_CONFIG = {
             // TODO: Add when Python adopts [page]-[snippet] pattern
         },
     },
-    "java": [
-        {
-            repo: "nats-io/nats.java",
-            branch: "main",
-            directory: "src/examples/java/io/nats/examples/natsIoDoc/",
-            examples: {
-                "basics-publish": "BasicsPublish.java",
-                "basics-subscribe": "BasicsSubscribe.java",
-                "getting-started-publish": "GettingStartedPublish.java",
-                "getting-started-subscribe": "GettingStartedSubscribe.java",
-                "publish-subscribe-basic": "PublishSubscribeBasic.java",
-                "subjects-single-wildcard": "SubjectsSingleWildcard.java",
-                "subjects-multi-wildcard": "SubjectsMultiWildcard.java",
-                "queue-groups-basic": "QueueGroupsBasic.java"
-            }
+    "java": {
+        repo: "nats-io/nats.java",
+        branch: "doc-examples",
+        directory: "src/examples/java/io/nats/examples/natsIoDoc/",
+        examples: {
+            "basics-publish": "BasicsPublish.java",
+            "basics-subscribe": "BasicsSubscribe.java",
+            "getting-started-publish": "GettingStartedPublish.java",
+            "getting-started-subscribe": "GettingStartedSubscribe.java",
+            "publish-subscribe-basic": "PublishSubscribeBasic.java",
+            "subjects-single-wildcard": "SubjectsSingleWildcard.java",
+            "subjects-multi-wildcard": "SubjectsMultiWildcard.java",
+            "subjects-monitoring": "SubjectsMonitoring.java",
+            "queue-groups-basic": "QueueGroupsBasic.java"
         },
-        {
-            repo: "nats-io/nats.java",
-            branch: "doc-examples",
-            directory: "src/examples/java/io/nats/examples/natsIoDoc/",
-            examples: {
-                "subjects-monitoring": "SubjectsMonitoring.java",
-                "request-reply-basic": "RequestReplyBasic.java",
-                "request-reply-timeout": "RequestReplyTimeout.java",
-                "request-reply-multiple-responders": "RequestReplyMultipleResponders.java",
-                "request-reply-no-responders": "RequestReplyNoResponders.java",
-                "request-reply-headers": "RequestReplyHeaders.java",
-                "request-reply-calculator": "RequestReplyCalculator.java",
-            }
-        }
-    ],
+    },
     "csharp": {
         repo: "nats-io/nats.net",
         branch: "doc-examples",
