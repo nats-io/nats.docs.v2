@@ -82,7 +82,7 @@ const EXAMPLES_CONFIG = {
     },
     "java": {
         repo: "nats-io/nats.java",
-        branch: "doc-examples",
+        branch: "main",
         directory: "src/examples/java/io/nats/examples/natsIoDoc/",
         examples: {
             "basics-publish": "BasicsPublish.java",
@@ -93,7 +93,16 @@ const EXAMPLES_CONFIG = {
             "subjects-single-wildcard": "SubjectsSingleWildcard.java",
             "subjects-multi-wildcard": "SubjectsMultiWildcard.java",
             "subjects-monitoring": "SubjectsMonitoring.java",
-            "queue-groups-basic": "QueueGroupsBasic.java"
+            "queue-groups-basic": "QueueGroupsBasic.java",
+            "queue-groups-dynamic-scaling": "QueueGroupsDynamicScaling.java",
+            "queue-groups-request-reply": "QueueGroupsRequestReply.java",
+            "queue-groups-mixed-subscribers": "QueueGroupsMixedSubscribers.java",
+            "request-reply-basic": "RequestReplyBasic.java",
+            "request-reply-timeout": "RequestReplyTimeout.java",
+            "request-reply-multiple-responders": "RequestReplyMultipleResponders.java",
+            "request-reply-no-responders": "RequestReplyNoResponders.java",
+            "request-reply-headers": "RequestReplyHeaders.java",
+            "request-reply-calculator": "RequestReplyCalculator.java",
         },
     },
     "csharp": {
