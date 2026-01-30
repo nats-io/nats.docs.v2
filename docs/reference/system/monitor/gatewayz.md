@@ -1,8 +1,8 @@
 # Gatewayz
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import gatewayzRequest from '@site/jsm.go/schemas/server/monitor/v1/gatewayz_request.json';
-import gatewayzResponse from '@site/jsm.go/schemas/server/monitor/v1/gatewayz_response.json';
+import gatewayzRequest from '@site/static/schemas/server/monitor/v1/gatewayz_request.json';
+import gatewayzResponse from '@site/static/schemas/server/monitor/v1/gatewayz_response.json';
 
 ## Request Schema
 

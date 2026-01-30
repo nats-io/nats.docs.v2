@@ -729,7 +729,7 @@ func generateMonitorSchemas(serverPath, outputDir string, dryRun bool) error {
 	}
 
 	endpoints := getMonitorEndpoints()
-	schemasDir := filepath.Join(outputDir, "jsm.go/schemas/server/monitor/v1")
+	schemasDir := filepath.Join(outputDir, "static/schemas/server/monitor/v1")
 
 	if !dryRun {
 		if err := os.MkdirAll(schemasDir, 0755); err != nil {

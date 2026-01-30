@@ -1,8 +1,8 @@
 # Idz
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import idzRequest from '@site/jsm.go/schemas/server/monitor/v1/idz_request.json';
-import idzResponse from '@site/jsm.go/schemas/server/monitor/v1/idz_response.json';
+import idzRequest from '@site/static/schemas/server/monitor/v1/idz_request.json';
+import idzResponse from '@site/static/schemas/server/monitor/v1/idz_response.json';
 
 ## Request Schema
 

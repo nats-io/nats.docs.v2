@@ -1,8 +1,8 @@
 # Raftz
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import raftzRequest from '@site/jsm.go/schemas/server/monitor/v1/raftz_request.json';
-import raftzResponse from '@site/jsm.go/schemas/server/monitor/v1/raftz_response.json';
+import raftzRequest from '@site/static/schemas/server/monitor/v1/raftz_request.json';
+import raftzResponse from '@site/static/schemas/server/monitor/v1/raftz_response.json';
 
 ## Request Schema
 

@@ -27,7 +27,7 @@ The script generates documentation files and JSON schemas:
 
 #### JSON Schemas
 
-4. **jsm.go/schemas/server/monitor/v1/*.json** - Monitor endpoint schemas (30 files)
+4. **static/schemas/server/monitor/v1/*.json** - Monitor endpoint schemas (30 files)
    - Source: `~/coding/nats-server/server/monitor.go`
    - Request and response schemas for 15 monitor endpoints:
      - `varz`, `connz`, `routez`, `subsz`, `gatewayz`, `leafz`, `accountz`, `jsz`
@@ -37,6 +37,7 @@ The script generates documentation files and JSON schemas:
      - Field types from Go type system
      - Field descriptions from Go comments
    - Handles both structs and type aliases (maps)
+   - Referenced in docs via `@site/static/schemas/server/monitor/v1/`
 
 ### Usage
 
