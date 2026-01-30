@@ -1,0 +1,18 @@
+---
+title: System Errors
+sidebar_label: Errors
+description: NATS server non-JetStream errors for client, route, gateway, and leafnode connections
+---
+
+# System Errors
+
+This page documents all non-JetStream errors that the NATS server can return to clients, routes, gateways, and leafnode connections.
+
+{{range .Categories}}
+## {{.Name}}
+
+| Error | Description |
+|-------|-------------|
+{{range .Errors}}| `{{.Name}}` | {{.Description}} |
+{{end}}
+{{end}}
