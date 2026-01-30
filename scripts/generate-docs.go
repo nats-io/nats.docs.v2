@@ -20,6 +20,7 @@ const (
 	errorsJSONPath = "server/errors.json"
 	errorsGoPath   = "server/errors.go"
 	streamGoPath   = "server/stream.go"
+	monitorGoPath  = "server/monitor.go"
 )
 
 // JetStream Error structures
@@ -61,6 +62,35 @@ type HeaderSection struct {
 	Name        string
 	Description string
 	Headers     []Header
+}
+
+// JSON Schema structures
+type JSONSchema struct {
+	Schema      string                  `json:"$schema"`
+	ID          string                  `json:"$id"`
+	Title       string                  `json:"title"`
+	Description string                  `json:"description,omitempty"`
+	Type        string                  `json:"type"`
+	Properties  map[string]JSONProperty `json:"properties,omitempty"`
+	Required    []string                `json:"required,omitempty"`
+	Items       *JSONProperty           `json:"items,omitempty"`
+}
+
+type JSONProperty struct {
+	Type        string                  `json:"type,omitempty"`
+	Description string                  `json:"description,omitempty"`
+	Properties  map[string]JSONProperty `json:"properties,omitempty"`
+	Items       *JSONProperty           `json:"items,omitempty"`
+	Required    []string                `json:"required,omitempty"`
+	Format      string                  `json:"format,omitempty"`
+	Enum        []string                `json:"enum,omitempty"`
+}
+
+// Monitor endpoint definition
+type MonitorEndpoint struct {
+	Name           string // e.g., "varz", "connz"
+	OptionsStruct  string // e.g., "VarzOptions", "ConnzOptions"
+	ResponseStruct string // e.g., "Varz", "Connz"
 }
 
 // categorizeJSErrors groups errors by their prefix
@@ -124,6 +154,15 @@ func categorizeJSErrors(errors []JSError) []ErrorCategory {
 	return result
 }
 
+// escapeMDXCurlyBraces escapes curly braces for MDX compatibility using HTML entities
+func escapeMDXCurlyBraces(s string) string {
+	// Replace { with &#123; (HTML entity)
+	s = strings.ReplaceAll(s, "{", "&#123;")
+	// Replace } with &#125; (HTML entity)
+	s = strings.ReplaceAll(s, "}", "&#125;")
+	return s
+}
+
 // parseJSErrors reads and parses the JetStream errors JSON
 func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 	path := filepath.Join(serverPath, errorsJSONPath)
@@ -135,6 +174,11 @@ func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 	var errors []JSError
 	if err := json.Unmarshal(data, &errors); err != nil {
 		return nil, fmt.Errorf("failed to parse errors.json: %w", err)
+	}
+
+	// Escape curly braces in descriptions for MDX compatibility
+	for i := range errors {
+		errors[i].Description = escapeMDXCurlyBraces(errors[i].Description)
 	}
 
 	return categorizeJSErrors(errors), nil
@@ -446,6 +490,351 @@ func inferDescription(constName, headerName string) string {
 }
 
 // generateDocs generates documentation files from templates
+// getMonitorEndpoints returns the list of monitor endpoints to generate schemas for
+func getMonitorEndpoints() []MonitorEndpoint {
+	return []MonitorEndpoint{
+		{Name: "varz", OptionsStruct: "VarzOptions", ResponseStruct: "Varz"},
+		{Name: "connz", OptionsStruct: "ConnzOptions", ResponseStruct: "Connz"},
+		{Name: "routez", OptionsStruct: "RoutezOptions", ResponseStruct: "Routez"},
+		{Name: "subsz", OptionsStruct: "SubszOptions", ResponseStruct: "Subsz"},
+		{Name: "gatewayz", OptionsStruct: "GatewayzOptions", ResponseStruct: "Gatewayz"},
+		{Name: "leafz", OptionsStruct: "LeafzOptions", ResponseStruct: "Leafz"},
+		{Name: "accountz", OptionsStruct: "AccountzOptions", ResponseStruct: "Accountz"},
+		{Name: "jsz", OptionsStruct: "JSzOptions", ResponseStruct: "JSInfo"},
+		{Name: "healthz", OptionsStruct: "HealthzOptions", ResponseStruct: "HealthStatus"},
+		{Name: "profilez", OptionsStruct: "ProfilezOptions", ResponseStruct: "ProfilezStatus"},
+		{Name: "raftz", OptionsStruct: "RaftzOptions", ResponseStruct: "RaftzStatus"},
+		{Name: "ipqueuesz", OptionsStruct: "IpqueueszOptions", ResponseStruct: "IpqueueszStatus"},
+		// Note: statsz, accstatz, idz don't have dedicated structs - they use runtime stats
+		{Name: "statsz", OptionsStruct: "", ResponseStruct: ""},
+		{Name: "accstatz", OptionsStruct: "", ResponseStruct: ""},
+		{Name: "idz", OptionsStruct: "", ResponseStruct: ""},
+	}
+}
+
+// parseMonitorStructs parses monitor.go and extracts struct definitions and type aliases
+func parseMonitorStructs(serverPath string) (map[string]*ast.StructType, map[string]ast.Expr, *ast.File, error) {
+	monitorPath := filepath.Join(serverPath, monitorGoPath)
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, monitorPath, nil, parser.ParseComments)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to parse %s: %w", monitorPath, err)
+	}
+
+	structs := make(map[string]*ast.StructType)
+	typeAliases := make(map[string]ast.Expr)
+
+	// Walk AST to find struct type declarations and type aliases
+	ast.Inspect(file, func(n ast.Node) bool {
+		typeSpec, ok := n.(*ast.TypeSpec)
+		if !ok {
+			return true
+		}
+
+		if structType, ok := typeSpec.Type.(*ast.StructType); ok {
+			structs[typeSpec.Name.Name] = structType
+		} else {
+			// Store other type declarations (maps, aliases, etc.)
+			typeAliases[typeSpec.Name.Name] = typeSpec.Type
+		}
+		return true
+	})
+
+	return structs, typeAliases, file, nil
+}
+
+// goTypeToJSONType converts Go types to JSON Schema types
+func goTypeToJSONType(expr ast.Expr) (string, *JSONProperty) {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		switch t.Name {
+		case "string":
+			return "string", nil
+		case "int", "int8", "int16", "int32", "int64",
+			"uint", "uint8", "uint16", "uint32", "uint64":
+			return "integer", nil
+		case "float32", "float64":
+			return "number", nil
+		case "bool":
+			return "boolean", nil
+		case "Time":
+			return "string", &JSONProperty{Format: "date-time"}
+		default:
+			// Custom type - treat as object
+			return "object", nil
+		}
+	case *ast.ArrayType:
+		itemType, itemProp := goTypeToJSONType(t.Elt)
+		if itemProp == nil {
+			itemProp = &JSONProperty{Type: itemType}
+		}
+		return "array", &JSONProperty{Items: itemProp}
+	case *ast.MapType:
+		return "object", &JSONProperty{Type: "object"}
+	case *ast.StarExpr:
+		// Pointer - unwrap and process the underlying type
+		return goTypeToJSONType(t.X)
+	case *ast.SelectorExpr:
+		// Package selector like time.Time
+		if ident, ok := t.X.(*ast.Ident); ok && ident.Name == "time" && t.Sel.Name == "Time" {
+			return "string", &JSONProperty{Format: "date-time"}
+		}
+		return "object", nil
+	}
+	return "string", nil
+}
+
+// extractJSONTag extracts the field name from json struct tag
+func extractJSONTag(tag string) (string, bool) {
+	if tag == "" {
+		return "", false
+	}
+
+	tag = strings.Trim(tag, "`")
+	parts := strings.Fields(tag)
+
+	for _, part := range parts {
+		if strings.HasPrefix(part, "json:") {
+			jsonValue := strings.TrimPrefix(part, "json:")
+			jsonValue = strings.Trim(jsonValue, `"`)
+
+			// Handle json:"-" (omit field)
+			if jsonValue == "-" {
+				return "", false
+			}
+
+			// Handle json:"fieldname,omitempty"
+			fieldName := strings.Split(jsonValue, ",")[0]
+			return fieldName, true
+		}
+	}
+
+	return "", false
+}
+
+// structToJSONSchema converts a Go struct to a JSON Schema
+func structToJSONSchema(structName string, structType *ast.StructType, file *ast.File) JSONSchema {
+	schema := JSONSchema{
+		Schema:      "http://json-schema.org/draft-07/schema#",
+		ID:          "https://nats.io/schemas/server/monitor/v1/" + strings.ToLower(structName) + ".json",
+		Title:       "io.nats.server.monitor.v1." + strings.ToLower(structName),
+		Description: fmt.Sprintf("NATS Server %s monitoring endpoint", structName),
+		Type:        "object",
+		Properties:  make(map[string]JSONProperty),
+	}
+
+	for _, field := range structType.Fields.List {
+		// Get field name from JSON tag
+		var fieldName string
+		var include bool
+
+		if field.Tag != nil {
+			fieldName, include = extractJSONTag(field.Tag.Value)
+			if !include {
+				continue
+			}
+		}
+
+		// If no JSON tag, use field name (lowercased)
+		if fieldName == "" && len(field.Names) > 0 {
+			fieldName = strings.ToLower(field.Names[0].Name)
+		}
+
+		if fieldName == "" {
+			continue
+		}
+
+		// Get field type
+		jsonType, prop := goTypeToJSONType(field.Type)
+
+		if prop == nil {
+			prop = &JSONProperty{Type: jsonType}
+		} else if prop.Type == "" {
+			prop.Type = jsonType
+		}
+
+		// Extract description from field comment
+		if field.Doc != nil && len(field.Doc.List) > 0 {
+			var desc []string
+			for _, comment := range field.Doc.List {
+				text := strings.TrimPrefix(comment.Text, "//")
+				text = strings.TrimSpace(text)
+				if text != "" {
+					desc = append(desc, text)
+				}
+			}
+			if len(desc) > 0 {
+				prop.Description = strings.Join(desc, " ")
+			}
+		}
+
+		schema.Properties[fieldName] = *prop
+	}
+
+	return schema
+}
+
+// typeAliasToJSONSchema converts a type alias (like map types) to a JSON Schema
+func typeAliasToJSONSchema(typeName string, typeExpr ast.Expr) JSONSchema {
+	schema := JSONSchema{
+		Schema:      "http://json-schema.org/draft-07/schema#",
+		ID:          "https://nats.io/schemas/server/monitor/v1/" + strings.ToLower(typeName) + ".json",
+		Title:       "io.nats.server.monitor.v1." + strings.ToLower(typeName),
+		Description: fmt.Sprintf("NATS Server %s monitoring endpoint", typeName),
+	}
+
+	// Handle map types
+	if mapType, ok := typeExpr.(*ast.MapType); ok {
+		schema.Type = "object"
+
+		// For nested maps, set additionalProperties
+		if _, isNestedMap := mapType.Value.(*ast.MapType); isNestedMap {
+			schema.Properties = map[string]JSONProperty{
+				"additionalProperties": {
+					Type: "object",
+				},
+			}
+		} else {
+			// Try to get the value type
+			valueType, valueProp := goTypeToJSONType(mapType.Value)
+			if valueProp != nil {
+				schema.Items = valueProp
+			} else {
+				schema.Properties = map[string]JSONProperty{
+					"additionalProperties": {
+						Type: valueType,
+					},
+				}
+			}
+		}
+	} else {
+		// For other type aliases, convert the underlying type
+		jsonType, prop := goTypeToJSONType(typeExpr)
+		schema.Type = jsonType
+		if prop != nil && prop.Properties != nil {
+			schema.Properties = prop.Properties
+		}
+	}
+
+	return schema
+}
+
+// generateMonitorSchemas generates JSON schemas for all monitor endpoints
+func generateMonitorSchemas(serverPath, outputDir string, dryRun bool) error {
+	// Parse monitor.go
+	structs, typeAliases, file, err := parseMonitorStructs(serverPath)
+	if err != nil {
+		return err
+	}
+
+	endpoints := getMonitorEndpoints()
+	schemasDir := filepath.Join(outputDir, "jsm.go/schemas/server/monitor/v1")
+
+	if !dryRun {
+		if err := os.MkdirAll(schemasDir, 0755); err != nil {
+			return fmt.Errorf("failed to create schemas directory: %w", err)
+		}
+	}
+
+	for _, endpoint := range endpoints {
+		// Skip endpoints without struct definitions
+		if endpoint.OptionsStruct == "" && endpoint.ResponseStruct == "" {
+			// Generate minimal schemas for statsz, accstatz, idz
+			if err := generateMinimalSchema(endpoint.Name, "request", schemasDir, dryRun); err != nil {
+				return err
+			}
+			if err := generateMinimalSchema(endpoint.Name, "response", schemasDir, dryRun); err != nil {
+				return err
+			}
+			continue
+		}
+
+		// Generate request schema (Options struct)
+		if endpoint.OptionsStruct != "" {
+			if structType, ok := structs[endpoint.OptionsStruct]; ok {
+				schema := structToJSONSchema(endpoint.OptionsStruct, structType, file)
+				schema.Description = fmt.Sprintf("Request options for %s monitoring endpoint", endpoint.Name)
+
+				filename := filepath.Join(schemasDir, endpoint.Name+"_request.json")
+				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
+					return err
+				}
+			}
+		} else {
+			// No options struct - generate empty schema
+			if err := generateMinimalSchema(endpoint.Name, "request", schemasDir, dryRun); err != nil {
+				return err
+			}
+		}
+
+		// Generate response schema
+		if endpoint.ResponseStruct != "" {
+			if structType, ok := structs[endpoint.ResponseStruct]; ok {
+				schema := structToJSONSchema(endpoint.ResponseStruct, structType, file)
+				schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpoint.Name)
+
+				filename := filepath.Join(schemasDir, endpoint.Name+"_response.json")
+				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
+					return err
+				}
+			} else if typeExpr, ok := typeAliases[endpoint.ResponseStruct]; ok {
+				// Handle type aliases like map types
+				schema := typeAliasToJSONSchema(endpoint.ResponseStruct, typeExpr)
+				schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpoint.Name)
+
+				filename := filepath.Join(schemasDir, endpoint.Name+"_response.json")
+				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
+					return err
+				}
+			}
+		} else {
+			// No response struct - generate empty schema
+			if err := generateMinimalSchema(endpoint.Name, "response", schemasDir, dryRun); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// generateMinimalSchema creates a minimal schema for endpoints without dedicated structs
+func generateMinimalSchema(endpoint, schemaType, outputDir string, dryRun bool) error {
+	schema := JSONSchema{
+		Schema:      "http://json-schema.org/draft-07/schema#",
+		ID:          fmt.Sprintf("https://nats.io/schemas/server/monitor/v1/%s_%s.json", endpoint, schemaType),
+		Title:       fmt.Sprintf("io.nats.server.monitor.v1.%s_%s", endpoint, schemaType),
+		Description: fmt.Sprintf("%s for %s monitoring endpoint", strings.Title(schemaType), endpoint),
+		Type:        "object",
+		Properties:  make(map[string]JSONProperty),
+	}
+
+	filename := filepath.Join(outputDir, fmt.Sprintf("%s_%s.json", endpoint, schemaType))
+	return writeJSONSchema(schema, filename, dryRun)
+}
+
+// writeJSONSchema writes a JSON schema to a file
+func writeJSONSchema(schema JSONSchema, filename string, dryRun bool) error {
+	data, err := json.MarshalIndent(schema, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal schema: %w", err)
+	}
+
+	if dryRun {
+		fmt.Printf("Would write to: %s\n", filename)
+		fmt.Println(string(data))
+		return nil
+	}
+
+	if err := os.WriteFile(filename, data, 0644); err != nil {
+		return fmt.Errorf("failed to write schema %s: %w", filename, err)
+	}
+
+	fmt.Printf("✓ Generated schema: %s\n", filename)
+	return nil
+}
+
 func generateDocs(serverPath, outputDir string, dryRun bool) error {
 	// Parse JetStream errors
 	fmt.Println("Parsing JetStream errors...")
@@ -498,6 +887,12 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 		map[string]interface{}{"Sections": headers},
 		dryRun,
 	); err != nil {
+		return err
+	}
+
+	// Generate monitor schemas
+	fmt.Println("Generating monitor endpoint schemas...")
+	if err := generateMonitorSchemas(serverPath, outputDir, dryRun); err != nil {
 		return err
 	}
 

@@ -8,11 +8,14 @@ Generates reference documentation by parsing the nats-server source code.
 
 ### What It Generates
 
-The script generates three documentation files:
+The script generates documentation files and JSON schemas:
+
+#### Documentation Files
 
 1. **docs/reference/jetstream/errors.md** - JetStream error codes and descriptions
    - Source: `~/coding/nats-server/server/errors.json`
    - Organized by category (Account, Stream, Consumer, etc.)
+   - Curly braces in descriptions are escaped for MDX compatibility
 
 2. **docs/reference/system/errors.md** - System error messages
    - Source: `~/coding/nats-server/server/errors.go`
@@ -21,6 +24,19 @@ The script generates three documentation files:
 3. **docs/reference/jetstream/api/headers.md** - JetStream header reference
    - Source: `~/coding/nats-server/server/stream.go`
    - Grouped by function (Publishing, Delivery, etc.)
+
+#### JSON Schemas
+
+4. **jsm.go/schemas/server/monitor/v1/*.json** - Monitor endpoint schemas (30 files)
+   - Source: `~/coding/nats-server/server/monitor.go`
+   - Request and response schemas for 15 monitor endpoints:
+     - `varz`, `connz`, `routez`, `subsz`, `gatewayz`, `leafz`, `accountz`, `jsz`
+     - `healthz`, `profilez`, `raftz`, `ipqueuesz`, `statsz`, `accstatz`, `idz`
+   - Automatically extracts:
+     - Field names from JSON struct tags
+     - Field types from Go type system
+     - Field descriptions from Go comments
+   - Handles both structs and type aliases (maps)
 
 ### Usage
 
