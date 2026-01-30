@@ -88,12 +88,18 @@ Template structure:
 
 ### Versioning
 
-To track when documentation was last generated:
+Generated files are committed to git:
 
 ```bash
 # Check if docs are up-to-date
-git status docs/reference/jetstream/errors.md docs/reference/system/errors.md docs/reference/jetstream/api/headers.md
+git status docs/reference/jetstream/errors.md docs/reference/system/errors.md docs/reference/jetstream/api/headers.md src/schemas/
 ```
+
+**Important**: The generated JSON schemas in `src/schemas/` are **NOT committed** to git:
+- They are generated during the build process (see `npm run build`)
+- The nats-server repository is included as a git submodule at `./nats-server`
+- Run `git submodule update --init --recursive` after cloning to fetch the submodule
+- The `src/schemas/` directory is in `.gitignore`
 
 ### Customizing
 

@@ -5,7 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "npm run fetch-examples && docusaurus build",
+    "build": "npm run fetch-examples && npm run generate-docs:build && docusaurus build",
     "build:no-fetch": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
@@ -16,7 +16,8 @@
     "typecheck": "tsc",
     "fetch-examples": "node scripts/fetch-examples.js",
     "generate-docs": "go run scripts/generate-docs.go -server ~/coding/nats-server",
-    "generate-docs:dry-run": "go run scripts/generate-docs.go -server ~/coding/nats-server -dry-run"
+    "generate-docs:dry-run": "go run scripts/generate-docs.go -server ~/coding/nats-server -dry-run",
+    "generate-docs:build": "go run scripts/generate-docs.go -server ./nats-server"
   },
   "dependencies": {
     "@docusaurus/core": "3.8.1",

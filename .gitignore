@@ -20,3 +20,5 @@ static/examples/snippets/*
 .idea/
 .vscode/
 
+# Generated JSON schemas (regenerated during build from nats-server submodule)
+src/schemas/
