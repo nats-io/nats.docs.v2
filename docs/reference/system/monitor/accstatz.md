@@ -1,8 +1,8 @@
 # Accstatz
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import accstatzRequest from '@site/static/schemas/server/monitor/v1/accstatz_request.json';
-import accstatzResponse from '@site/static/schemas/server/monitor/v1/accstatz_response.json';
+import accstatzRequest from '@site/src/schemas/server/monitor/v1/accstatz_request.json';
+import accstatzResponse from '@site/src/schemas/server/monitor/v1/accstatz_response.json';
 
 ## Request Schema
 

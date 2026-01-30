@@ -1,8 +1,8 @@
 # Varz
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import varzRequest from '@site/static/schemas/server/monitor/v1/varz_request.json';
-import varzResponse from '@site/static/schemas/server/monitor/v1/varz_response.json';
+import varzRequest from '@site/src/schemas/server/monitor/v1/varz_request.json';
+import varzResponse from '@site/src/schemas/server/monitor/v1/varz_response.json';
 
 ## Request Schema
 

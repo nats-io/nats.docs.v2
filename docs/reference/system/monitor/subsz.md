@@ -1,8 +1,8 @@
 # Subsz
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import subszRequest from '@site/static/schemas/server/monitor/v1/subsz_request.json';
-import subszResponse from '@site/static/schemas/server/monitor/v1/subsz_response.json';
+import subszRequest from '@site/src/schemas/server/monitor/v1/subsz_request.json';
+import subszResponse from '@site/src/schemas/server/monitor/v1/subsz_response.json';
 
 ## Request Schema
 

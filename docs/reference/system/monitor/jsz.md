@@ -1,8 +1,8 @@
 # JSz
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import jszRequest from '@site/static/schemas/server/monitor/v1/jsz_request.json';
-import jszResponse from '@site/static/schemas/server/monitor/v1/jsz_response.json';
+import jszRequest from '@site/src/schemas/server/monitor/v1/jsz_request.json';
+import jszResponse from '@site/src/schemas/server/monitor/v1/jsz_response.json';
 
 ## Request Schema
 
