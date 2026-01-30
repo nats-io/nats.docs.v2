@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/gatewayz.json",
+  "title": "io.nats.server.monitor.v1.gatewayz",
+  "description": "Response from gatewayz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "host": {
+      "type": "string"
+    },
+    "inbound_gateways": {
+      "type": "object"
+    },
+    "name": {
+      "type": "string"
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outbound_gateways": {
+      "type": "object"
+    },
+    "port": {
+      "type": "integer"
+    },
+    "server_id": {
+      "type": "string"
+    }
+  }
+}

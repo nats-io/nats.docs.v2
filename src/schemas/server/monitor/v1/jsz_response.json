@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/jsinfo.json",
+  "title": "io.nats.server.monitor.v1.jsinfo",
+  "description": "Response from jsz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "account_details": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "bytes": {
+      "type": "integer"
+    },
+    "config": {
+      "type": "object"
+    },
+    "consumers": {
+      "type": "integer"
+    },
+    "consumers_leader": {
+      "type": "integer"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "limits": {
+      "type": "object"
+    },
+    "messages": {
+      "type": "integer"
+    },
+    "meta_cluster": {
+      "type": "object"
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "streams": {
+      "type": "integer"
+    },
+    "streams_leader": {
+      "type": "integer"
+    },
+    "total": {
+      "type": "integer"
+    }
+  }
+}

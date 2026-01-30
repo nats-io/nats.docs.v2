@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/routez.json",
+  "title": "io.nats.server.monitor.v1.routez",
+  "description": "Response from routez monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "export": {
+      "type": "object"
+    },
+    "import": {
+      "type": "object"
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "num_routes": {
+      "type": "integer"
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "server_name": {
+      "type": "string"
+    }
+  }
+}

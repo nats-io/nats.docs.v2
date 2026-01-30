@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/varzoptions.json",
+  "title": "io.nats.server.monitor.v1.varzoptions",
+  "description": "Request options for varz monitoring endpoint",
+  "type": "object"
+}

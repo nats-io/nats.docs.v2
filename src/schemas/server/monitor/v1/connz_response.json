@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/connz.json",
+  "title": "io.nats.server.monitor.v1.connz",
+  "description": "Response from connz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "num_connections": {
+      "type": "integer"
+    },
+    "offset": {
+      "type": "integer"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "total": {
+      "type": "integer"
+    }
+  }
+}

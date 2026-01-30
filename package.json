@@ -5,7 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "npm run fetch-examples && npm run generate-docs:build && docusaurus build",
+    "build": "npm run fetch-examples && docusaurus build",
     "build:no-fetch": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",

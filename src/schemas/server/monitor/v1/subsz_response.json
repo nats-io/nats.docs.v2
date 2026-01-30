@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/subsz.json",
+  "title": "io.nats.server.monitor.v1.subsz",
+  "description": "Response from subsz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer"
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "offset": {
+      "type": "integer"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "subscriptions_list": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "total": {
+      "type": "integer"
+    }
+  }
+}

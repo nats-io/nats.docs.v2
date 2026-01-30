@@ -95,11 +95,11 @@ Generated files are committed to git:
 git status docs/reference/jetstream/errors.md docs/reference/system/errors.md docs/reference/jetstream/api/headers.md src/schemas/
 ```
 
-**Important**: The generated JSON schemas in `src/schemas/` are **NOT committed** to git:
-- They are generated during the build process (see `npm run build`)
-- The nats-server repository is included as a git submodule at `./nats-server`
-- Run `git submodule update --init --recursive` after cloning to fetch the submodule
-- The `src/schemas/` directory is in `.gitignore`
+**Important**: The generated JSON schemas in `src/schemas/` **ARE committed** to git:
+- They are derived from the nats-server source code
+- The nats-server repository is included as a git submodule for reference and regeneration
+- To regenerate schemas: `npm run generate-docs` (requires Go and nats-server submodule)
+- Schemas should be regenerated when updating the nats-server submodule to a new version
 
 ### Customizing
 
