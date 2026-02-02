@@ -6,81 +6,75 @@ The generated documentation is missing significant content and has lost importan
 
 ## Issues Identified
 
-### 1. headers.md - Missing Content and Lost Granularity ❌
+### 1. headers.md - Missing Content and Lost Granularity ✅ FIXED
 
-**Status:** Old: 200 lines → New: 101 lines (50% content loss)
+**Status:** Old: 200 lines → New: 259 lines (29% content increase!)
 
-#### Missing H2 Sections
-- [ ] API Headers
-  - `Nats-Required-Api-Level`
-- [ ] Authentication and Authorization Headers
-  - `Nats-Server-Xkey`
-  - `Nats-Request-Info`
-- [ ] Message Tracing Headers
-  - `Nats-Trace-Dest`
-  - `Nats-Trace-Hop`
-  - `Nats-Trace-Origin-Account`
-  - `Nats-Trace-Only`
-- [ ] Key-Value Store Headers
-  - `KV-Operation`
+#### Missing H2 Sections ✅ ALL FOUND
+- [x] API Headers
+  - `Nats-Required-Api-Level` ✓
+- [x] Authentication and Authorization Headers
+  - `Nats-Server-Xkey` ✓
+  - `Nats-Request-Info` ✓
+- [x] Message Tracing Headers
+  - `Nats-Trace-Dest` ✓
+  - `Nats-Trace-Hop` ✓
+  - `Nats-Trace-Origin-Account` ✓
+  - `Nats-Trace-Only` ✓
+- [x] Key-Value Store Headers
+  - `KV-Operation` ✓
 
-#### Lost H3 Subsections (Granularity)
-- [ ] Message Publishing Headers subsections:
-  - Message Identification and Deduplication
-  - Expected State Headers
-  - Message Rollup
-  - Message Size
-  - Message TTL
-  - Counter Operations
-  - Batch Operations
-  - Scheduled Messages
+#### Lost H3 Subsections (Granularity) ✅ ALL RESTORED
+- [x] Message Publishing Headers subsections (8 total):
+  - Message Identification and Deduplication ✓
+  - Expected State Headers ✓
+  - Message Rollup ✓
+  - Message Size ✓
+  - Message TTL ✓
+  - Counter Operations ✓
+  - Batch Operations ✓
+  - Scheduled Messages ✓
 
-- [ ] Message Delivery Headers subsections:
-  - Stream Information
-  - Consumer Information
-  - Pull Request Headers (`Nats-Pending-Messages`, `Nats-Pending-Bytes`, `Nats-Pin-Id`)
-  - Source and Mirror Information
-  - Response Type
+- [x] Message Delivery Headers subsections (5 total):
+  - Stream Information ✓
+  - Consumer Information ✓
+  - Pull Request Headers (`Nats-Pending-Messages`, `Nats-Pending-Bytes`, `Nats-Pin-Id`) ✓
+  - Source and Mirror Information ✓
+  - Response Type ✓
 
-#### Root Cause
-`parseHeaders()` only scans `stream.go`, missing headers defined in:
-- `consumer.go` (Pull Request headers)
-- `jetstream_api.go` (API headers)
-- `msgtrace.go` (Trace headers)
-- `accounts.go` (Request Info header)
-- `auth_callout.go` (Auth headers)
+#### Root Cause ✅ FIXED
+- ✓ Updated `parseHeaders()` to scan 6 files: `stream.go`, `consumer.go`, `jetstream_api.go`, `msgtrace.go`, `accounts.go`, `auth_callout.go`
+- ✓ Added support for both `const` and `var` declarations
+- ✓ Template now supports H3 subsections with conditional rendering
 
-Template doesn't support H3 subsections.
+### 2. system/errors.md - Missing Error Categories ✅ FIXED
 
-### 2. system/errors.md - Missing Error Categories ❌
+**Status:** Old: 150 lines → New: 144 lines (close to target, all categories present)
 
-**Status:** Old: 150 lines → New: 108 lines (28% content loss)
+#### Missing H2 Categories ✅ ALL ADDED
+- [x] TLS and Security Errors (3 errors added)
+  - Secure Connection - TLS Required ✓
+  - TLS Handshake Error ✓
+  - Certificate Not Pinned ✓
 
-#### Missing H2 Categories
-- [ ] TLS and Security Errors (5 errors)
-  - Secure Connection - TLS Required
-  - TLS Handshake Error
-  - Certificate Not Pinned
-  - Proxy Is Not Trusted
-  - Proxy Connection Required
+- [x] Route-Specific Errors (4 errors added)
+  - Duplicate Route ✓
+  - Route Authorization Violation ✓
+  - Cluster Name From Remote Server Conflicts ✓
+  - Minimum Version Required ✓
 
-- [ ] Route-Specific Errors (4 errors)
-  - Duplicate Route
-  - Route Authorization Violation
-  - Cluster Name From Remote Server Conflicts
-  - Minimum Version Required
+- [x] Slow Consumer and Flow Control (2 errors added)
+  - Slow Consumer ✓
+  - Write Deadline Exceeded ✓
 
-- [ ] Slow Consumer and Flow Control (2 errors)
-  - Slow Consumer
-  - Write Deadline Exceeded
+- [x] Configuration and Resolver Errors (3 errors added)
+  - Account Resolver Missing ✓
+  - System Account Not Configured ✓
+  - Credentials Revoked ✓
 
-- [ ] Configuration and Resolver Errors (3 errors)
-  - Account Resolver errors
-  - System Account errors
-  - Credentials Revoked
-
-#### Root Cause
-These errors are NOT defined as Go error variables in `errors.go`. They're sent as string literals in `server.go`, `client.go`, etc. Current regex only finds `var Err... = errors.New(...)` patterns.
+#### Root Cause ✅ FIXED
+- ✓ Added `getManualSystemErrors()` function with 11 string-literal errors
+- ✓ Modified `parseSystemErrors()` to merge manual errors with regex-extracted errors
 
 ### 3. jetstream/errors.md ✅
 
