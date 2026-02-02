@@ -22,8 +22,9 @@ The script generates documentation files and JSON schemas:
    - Categorized by error type (Authentication, Protocol, etc.)
 
 3. **docs/reference/jetstream/api/headers.md** - JetStream header reference
-   - Source: `~/coding/nats-server/server/stream.go`
-   - Grouped by function (Publishing, Delivery, etc.)
+   - Sources: Multiple nats-server files (see Header Generation Details below)
+   - Organized into sections (H2) and subsections (H3)
+   - Supports both const and var declarations
 
 #### JSON Schemas
 
@@ -62,13 +63,13 @@ go run scripts/generate-docs.go -dry-run | head -100
 
 1. **Parsing**: The script parses source files from nats-server:
    - JSON parsing for `errors.json`
-   - Go AST parsing for `errors.go`
-   - Go AST parsing for header constants in `stream.go`
+   - Go AST parsing for `errors.go` (including manual string-literal errors)
+   - Go AST parsing for header constants and variables across 6 files
 
 2. **Categorization**: Errors and headers are automatically categorized:
    - JetStream errors grouped by subsystem (Account, Consumer, Stream, etc.)
    - System errors grouped by function (Authentication, Protocol, etc.)
-   - Headers grouped by usage (Publishing, Delivery, etc.)
+   - Headers grouped by usage with subsections (e.g., Message Publishing → Expected State Headers)
 
 3. **Template Rendering**: Uses Go templates from `scripts/templates/`:
    - `jetstream-errors.md.tmpl`
@@ -100,6 +101,70 @@ git status docs/reference/jetstream/errors.md docs/reference/system/errors.md do
 - The nats-server repository is included as a git submodule for reference and regeneration
 - To regenerate schemas: `npm run generate-docs` (requires Go and nats-server submodule)
 - Schemas should be regenerated when updating the nats-server submodule to a new version
+
+### Header Generation Details
+
+The header generation process scans multiple nats-server source files:
+
+- `server/stream.go` - Core JetStream headers (Message ID, Rollup, TTL, etc.)
+- `server/consumer.go` - Pull request headers (Pending Messages, Pending Bytes, Pin ID)
+- `server/jetstream_api.go` - API headers (Required API Level)
+- `server/msgtrace.go` - Message tracing headers (Trace Dest, Trace Hop, etc.)
+- `server/accounts.go` - Account headers (Request Info)
+- `server/auth_callout.go` - Authentication headers (Server Xkey)
+
+Headers are organized into sections (H2) and subsections (H3):
+
+**Sections with subsections:**
+- **Message Publishing Headers** (8 subsections):
+  - Message Identification and Deduplication
+  - Expected State Headers
+  - Message Rollup
+  - Message Size
+  - Message TTL
+  - Counter Operations
+  - Batch Operations
+  - Scheduled Messages
+
+- **Message Delivery Headers** (5 subsections):
+  - Stream Information
+  - Consumer Information
+  - Pull Request Headers
+  - Source and Mirror Information
+  - Response Type
+
+**Sections without subsections:**
+- API Headers
+- Marker Headers
+- Authentication and Authorization Headers
+- Message Tracing Headers
+- Key-Value Store Headers
+
+The parser supports both `const` and `var` declarations, enabling it to find headers like `KV-Operation` that are defined as variables rather than constants.
+
+### System Error Generation Details
+
+System errors are extracted from two sources:
+
+1. **Go error variables** in `server/errors.go` (regex-based extraction)
+2. **Manual error definitions** in `generate-docs.go` for errors that are sent as string literals
+
+Manual errors include categories:
+- **TLS and Security Errors**: Secure Connection - TLS Required, TLS Handshake Error, Certificate Not Pinned
+- **Route-Specific Errors**: Duplicate Route, Route Authorization Violation, Cluster Name Conflicts, Minimum Version Required
+- **Slow Consumer and Flow Control**: Slow Consumer, Write Deadline Exceeded
+- **Configuration and Resolver Errors**: Account Resolver Missing, System Account Not Configured, Credentials Revoked
+
+To add new manual errors, update `getManualSystemErrors()` in `generate-docs.go`:
+
+```go
+{
+    Name: "New Category",
+    Errors: []SystemError{
+        {Name: "Error Name", Description: "Error description"},
+    },
+}
+```
 
 ### Customizing
 

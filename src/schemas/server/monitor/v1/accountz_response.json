@@ -6,7 +6,124 @@
   "type": "object",
   "properties": {
     "account_detail": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "account_name": {
+          "type": "string"
+        },
+        "client_connections": {
+          "type": "integer"
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "decoded_jwt": {
+          "type": "object"
+        },
+        "expired": {
+          "type": "boolean"
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "approved_accounts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "revoked_activations": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "imports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "invalid": {
+                "type": "boolean"
+              },
+              "latency": {
+                "type": "object"
+              },
+              "m1": {
+                "type": "object"
+              },
+              "share": {
+                "type": "boolean"
+              },
+              "tracking": {
+                "type": "boolean"
+              },
+              "tracking_header": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "is_system": {
+          "type": "boolean"
+        },
+        "issuer_key": {
+          "type": "string"
+        },
+        "jetstream_enabled": {
+          "type": "boolean"
+        },
+        "jwt": {
+          "type": "string"
+        },
+        "leafnode_connections": {
+          "type": "integer"
+        },
+        "mappings": {
+          "type": "object"
+        },
+        "name_tag": {
+          "type": "string"
+        },
+        "responses": {
+          "type": "object"
+        },
+        "revoked_user": {
+          "type": "object"
+        },
+        "sublist_stats": {
+          "type": "object"
+        },
+        "subscriptions": {
+          "type": "integer"
+        },
+        "tags": {
+          "type": "object"
+        },
+        "update_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_result_jwt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "blocking": {
+                "type": "boolean"
+              },
+              "description": {
+                "type": "string"
+              },
+              "time_check": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
     },
     "accounts": {
       "type": "array",

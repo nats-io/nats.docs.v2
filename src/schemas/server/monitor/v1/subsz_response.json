@@ -21,7 +21,33 @@
     "subscriptions_list": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "account_tag": {
+            "type": "string"
+          },
+          "cid": {
+            "type": "integer"
+          },
+          "max": {
+            "type": "integer"
+          },
+          "msgs": {
+            "type": "integer"
+          },
+          "qgroup": {
+            "type": "string"
+          },
+          "sid": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        }
       }
     },
     "total": {

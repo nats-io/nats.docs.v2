@@ -11,7 +11,65 @@
     "leafs": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "compression": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "in_bytes": {
+            "type": "integer"
+          },
+          "in_msgs": {
+            "type": "integer"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "is_isolated": {
+            "type": "boolean"
+          },
+          "is_spoke": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "out_bytes": {
+            "type": "integer"
+          },
+          "out_msgs": {
+            "type": "integer"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "proxy": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "rtt": {
+            "type": "string"
+          },
+          "subscriptions": {
+            "type": "integer"
+          },
+          "subscriptions_list": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     },
     "now": {

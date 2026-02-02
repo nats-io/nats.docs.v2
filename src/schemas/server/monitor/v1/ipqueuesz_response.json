@@ -4,9 +4,15 @@
   "title": "io.nats.server.monitor.v1.ipqueueszstatus",
   "description": "Response from ipqueuesz monitoring endpoint",
   "type": "object",
-  "properties": {
-    "additionalProperties": {
-      "type": "object"
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "in_progress": {
+        "type": "integer"
+      },
+      "pending": {
+        "type": "integer"
+      }
     }
   }
 }

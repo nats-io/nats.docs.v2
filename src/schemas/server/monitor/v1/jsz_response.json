@@ -8,7 +8,77 @@
     "account_details": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stream_detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cluster": {
+                  "type": "object"
+                },
+                "config": {
+                  "type": "object"
+                },
+                "consumer_detail": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "consumer_raft_groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "raft_group": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "created": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "direct_consumer_detail": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "mirror": {
+                  "type": "object"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "state": {
+                  "type": "object"
+                },
+                "stream_raft_group": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "bytes": {
@@ -33,7 +103,48 @@
       "type": "integer"
     },
     "meta_cluster": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "cluster_size": {
+          "type": "integer"
+        },
+        "leader": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "peer": {
+          "type": "string"
+        },
+        "pending": {
+          "type": "integer"
+        },
+        "replicas": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "snapshot": {
+          "type": "object",
+          "properties": {
+            "last_duration": {
+              "type": "object"
+            },
+            "last_time": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "pending_entries": {
+              "type": "integer"
+            },
+            "pending_size": {
+              "type": "integer"
+            }
+          }
+        }
+      }
     },
     "now": {
       "type": "string",

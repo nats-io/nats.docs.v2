@@ -12,7 +12,49 @@
       "type": "number"
     },
     "cluster": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "addr": {
+          "type": "string"
+        },
+        "auth_timeout": {
+          "type": "number"
+        },
+        "cluster_port": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pool_size": {
+          "type": "integer"
+        },
+        "tls_cert_not_after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tls_required": {
+          "type": "boolean"
+        },
+        "tls_timeout": {
+          "type": "number"
+        },
+        "tls_verify": {
+          "type": "boolean"
+        },
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "write_deadline": {
+          "type": "object"
+        },
+        "write_timeout": {
+          "type": "string"
+        }
+      }
     },
     "config_digest": {
       "type": "string"
@@ -37,7 +79,69 @@
       "type": "number"
     },
     "gateway": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "advertise": {
+          "type": "string"
+        },
+        "auth_timeout": {
+          "type": "number"
+        },
+        "connect_retries": {
+          "type": "integer"
+        },
+        "gateways": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "tls_timeout": {
+                "type": "number"
+              },
+              "urls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "host": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "reject_unknown": {
+          "type": "boolean"
+        },
+        "tls_cert_not_after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tls_required": {
+          "type": "boolean"
+        },
+        "tls_timeout": {
+          "type": "number"
+        },
+        "tls_verify": {
+          "type": "boolean"
+        },
+        "write_deadline": {
+          "type": "object"
+        },
+        "write_timeout": {
+          "type": "string"
+        }
+      }
     },
     "git_commit": {
       "type": "string"
@@ -79,10 +183,138 @@
       "type": "string"
     },
     "jetstream": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object"
+        },
+        "limits": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "cluster_size": {
+              "type": "integer"
+            },
+            "leader": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "peer": {
+              "type": "string"
+            },
+            "pending": {
+              "type": "integer"
+            },
+            "replicas": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "snapshot": {
+              "type": "object",
+              "properties": {
+                "last_duration": {
+                  "type": "object"
+                },
+                "last_time": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "pending_entries": {
+                  "type": "integer"
+                },
+                "pending_size": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "stats": {
+          "type": "object"
+        }
+      }
     },
     "leaf": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "auth_timeout": {
+          "type": "number"
+        },
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "remotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "deny": {
+                "type": "object",
+                "properties": {
+                  "exports": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "imports": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "local_account": {
+                "type": "string"
+              },
+              "tls_ocsp_peer_verify": {
+                "type": "boolean"
+              },
+              "tls_timeout": {
+                "type": "number"
+              },
+              "urls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tls_cert_not_after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tls_ocsp_peer_verify": {
+          "type": "boolean"
+        },
+        "tls_required": {
+          "type": "boolean"
+        },
+        "tls_timeout": {
+          "type": "number"
+        },
+        "tls_verify": {
+          "type": "boolean"
+        },
+        "write_deadline": {
+          "type": "object"
+        },
+        "write_timeout": {
+          "type": "string"
+        }
+      }
     },
     "leafnodes": {
       "type": "integer"
@@ -109,14 +341,79 @@
       "type": "object"
     },
     "mqtt": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "ack_wait": {
+          "type": "object"
+        },
+        "auth_timeout": {
+          "type": "number"
+        },
+        "host": {
+          "type": "string"
+        },
+        "js_domain": {
+          "type": "string"
+        },
+        "max_ack_pending": {
+          "type": "integer"
+        },
+        "no_auth_user": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "tls_cert_not_after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tls_map": {
+          "type": "boolean"
+        },
+        "tls_ocsp_peer_verify": {
+          "type": "boolean"
+        },
+        "tls_pinned_certs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tls_timeout": {
+          "type": "number"
+        }
+      }
     },
     "now": {
       "type": "string",
       "format": "date-time"
     },
     "ocsp_peer_cache": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "cache_hits": {
+          "type": "integer"
+        },
+        "cache_misses": {
+          "type": "integer"
+        },
+        "cache_type": {
+          "type": "string"
+        },
+        "cached_good_responses": {
+          "type": "integer"
+        },
+        "cached_responses": {
+          "type": "integer"
+        },
+        "cached_revoked_responses": {
+          "type": "integer"
+        },
+        "cached_unknown_responses": {
+          "type": "integer"
+        }
+      }
     },
     "out_bytes": {
       "type": "integer"
@@ -140,7 +437,20 @@
       "type": "integer"
     },
     "proxies": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "trusted": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     },
     "remotes": {
       "type": "integer"
@@ -155,13 +465,41 @@
       "type": "string"
     },
     "slow_consumer_stats": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "clients": {
+          "type": "integer"
+        },
+        "gateways": {
+          "type": "integer"
+        },
+        "leafs": {
+          "type": "integer"
+        },
+        "routes": {
+          "type": "integer"
+        }
+      }
     },
     "slow_consumers": {
       "type": "integer"
     },
     "stale_connection_stats": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "clients": {
+          "type": "integer"
+        },
+        "gateways": {
+          "type": "integer"
+        },
+        "leafs": {
+          "type": "integer"
+        },
+        "routes": {
+          "type": "integer"
+        }
+      }
     },
     "stale_connections": {
       "type": "integer"
@@ -220,7 +558,61 @@
       "type": "string"
     },
     "websocket": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "advertise": {
+          "type": "string"
+        },
+        "allowed_origins": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "auth_timeout": {
+          "type": "number"
+        },
+        "compression": {
+          "type": "boolean"
+        },
+        "handshake_timeout": {
+          "type": "object"
+        },
+        "host": {
+          "type": "string"
+        },
+        "jwt_cookie": {
+          "type": "string"
+        },
+        "no_auth_user": {
+          "type": "string"
+        },
+        "no_tls": {
+          "type": "boolean"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "same_origin": {
+          "type": "boolean"
+        },
+        "tls_cert_not_after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tls_map": {
+          "type": "boolean"
+        },
+        "tls_ocsp_peer_verify": {
+          "type": "boolean"
+        },
+        "tls_pinned_certs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "write_deadline": {
       "type": "object"

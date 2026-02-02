@@ -106,3 +106,39 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `Server is not running` | Server is not running |
 
 
+## TLS and Security Errors
+
+| Error | Description |
+|-------|-------------|
+| `Secure Connection - TLS Required` | Server requires TLS but client attempted non-TLS connection |
+| `TLS Handshake Error` | TLS handshake failed |
+| `Certificate Not Pinned` | Client certificate is not in the pinned certificates list |
+
+
+## Route-Specific Errors
+
+| Error | Description |
+|-------|-------------|
+| `Duplicate Route` | Route already exists to this server |
+| `Route Authorization Violation` | Route connection failed authorization |
+| `Cluster Name From Remote Server Conflicts` | Remote route server has conflicting cluster name |
+| `Minimum Version Required` | Route connection does not meet minimum version requirement |
+
+
+## Slow Consumer and Flow Control
+
+| Error | Description |
+|-------|-------------|
+| `Slow Consumer` | Client is not consuming messages fast enough |
+| `Write Deadline Exceeded` | Write operation exceeded deadline |
+
+
+## Configuration and Resolver Errors
+
+| Error | Description |
+|-------|-------------|
+| `Account Resolver Missing` | Account resolver is not configured |
+| `System Account Not Configured` | System account is not properly configured |
+| `Credentials Revoked` | Client credentials have been revoked |
+
+

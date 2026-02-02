@@ -21,7 +21,115 @@
     "routes": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "compression": {
+            "type": "string"
+          },
+          "did_solicit": {
+            "type": "boolean"
+          },
+          "export": {
+            "type": "object"
+          },
+          "idle": {
+            "type": "string"
+          },
+          "import": {
+            "type": "object"
+          },
+          "in_bytes": {
+            "type": "integer"
+          },
+          "in_msgs": {
+            "type": "integer"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "is_configured": {
+            "type": "boolean"
+          },
+          "last_activity": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "out_bytes": {
+            "type": "integer"
+          },
+          "out_msgs": {
+            "type": "integer"
+          },
+          "pending_size": {
+            "type": "integer"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "remote_id": {
+            "type": "string"
+          },
+          "remote_name": {
+            "type": "string"
+          },
+          "rid": {
+            "type": "integer"
+          },
+          "rtt": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subscriptions": {
+            "type": "integer"
+          },
+          "subscriptions_list": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subscriptions_list_detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "account_tag": {
+                  "type": "string"
+                },
+                "cid": {
+                  "type": "integer"
+                },
+                "max": {
+                  "type": "integer"
+                },
+                "msgs": {
+                  "type": "integer"
+                },
+                "qgroup": {
+                  "type": "string"
+                },
+                "sid": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "uptime": {
+            "type": "string"
+          }
+        }
       }
     },
     "server_id": {

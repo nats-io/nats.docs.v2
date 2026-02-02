@@ -5,21 +5,84 @@ This document provides a comprehensive reference for all headers used in JetStre
 
 ## Message Publishing Headers
 
+
+
+### Message Identification and Deduplication
+
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Msg-Id` | String | Unique message ID for deduplication. Messages with the same ID within the deduplication window will be rejected as duplicates. |
+| `Nats-Expected-Last-Msg-Id` | String | Message will only be stored if the last message ID matches this value |
+
+
+
+### Expected State Headers
+
+These headers enforce expected state conditions when publishing. If conditions are not met, the publish will fail.
+
+
+| Header | Value | Description |
+|--------|-------|-------------|
 | `Nats-Expected-Stream` | Stream name | Verifies the message is being published to the expected stream |
 | `Nats-Expected-Last-Sequence` | Sequence number | Message will only be stored if the stream's last sequence matches this value |
 | `Nats-Expected-Last-Subject-Sequence` | Sequence number | Message will only be stored if the last sequence for this subject matches this value |
 | `Nats-Expected-Last-Subject-Sequence-Subject` | Sequence number | Specifies the subject for the expected last subject sequence check |
-| `Nats-Expected-Last-Msg-Id` | String | Message will only be stored if the last message ID matches this value |
+
+
+
+### Message Rollup
+
+| Header | Value | Description |
+|--------|-------|-------------|
 | `Nats-Rollup` | String | Indicates this message should replace previous messages. `sub` replaces all previous messages on the same subject, `all` replaces all messages in the stream |
+
+
+
+### Message Size
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Nats-Msg-Size` | Size in bytes | Indicates the size of the message payload |
+
+
+
+### Message TTL
+
+| Header | Value | Description |
+|--------|-------|-------------|
 | `Nats-TTL` | Duration | Time-to-live for the message (e.g., "60s", "5m"). Message will be automatically removed after this duration |
+
+
+
+### Counter Operations
+
+| Header | Value | Description |
+|--------|-------|-------------|
 | `Nats-Incr` | String | Increment value for counter operations |
 | `Nats-Counter-Sources` | String | Sources for counter values in JSON format |
+
+
+
+### Batch Operations
+
+Headers for atomic batch publishing:
+
+
+| Header | Value | Description |
+|--------|-------|-------------|
 | `Nats-Batch-Id` | String | Unique identifier for the batch |
 | `Nats-Batch-Sequence` | Sequence number | Sequence number within the batch |
 | `Nats-Batch-Commit` | Number or ID | Marks the final message in a batch, triggering atomic commit |
+
+
+
+### Scheduled Messages
+
+Headers for scheduled message delivery:
+
+
+| Header | Value | Description |
+|--------|-------|-------------|
 | `Nats-Schedule` | Cron expression or timestamp | Schedule pattern for message delivery |
 | `Nats-Schedule-TTL` | Duration | Time-to-live for the schedule |
 | `Nats-Schedule-Target` | Cron expression or timestamp | Target subject for scheduled delivery |
@@ -27,36 +90,131 @@ This document provides a comprehensive reference for all headers used in JetStre
 | `Nats-Schedule-Next` | Cron expression or timestamp | Next scheduled time or purge indicator |
 
 
+
+
+
 ## Message Delivery Headers
+
+
+
+### Stream Information
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Nats-Last-Stream` | Sequence number | Stream's last sequence at delivery time |
+| `Nats-Stream` | Stream name | Name of the stream the message came from |
+| `Nats-Sequence` | Sequence number | Stream sequence number of the message |
+| `Nats-Time-Stamp` | String | Timestamp when the message was stored |
+| `Nats-Subject` | String | Original subject the message was published to |
+| `Nats-Last-Sequence` | Sequence number | Last sequence number in the stream when this message was delivered |
+| `Nats-UpTo-Sequence` | Sequence number | Upper bound sequence for batch delivery |
+
+
+
+### Consumer Information
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Nats-Last-Consumer` | Sequence number | Consumer's last delivered sequence |
+| `Nats-Consumer-Stalled` | Consumer name | Indicates consumer is stalled with delivery count |
+
+
+
+### Pull Request Headers
+
+Headers used in pull request responses:
+
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Nats-Num-Pending` | String | Number of pending messages for the consumer |
+| `Nats-Pending-Messages` | String | Header: Nats-Pending-Messages |
+| `Nats-Pending-Bytes` | String | Header: Nats-Pending-Bytes |
+| `Nats-Pin-Id` | String | Header: Nats-Pin-Id |
+
+
+
+### Source and Mirror Information
 
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Stream-Source` | Stream name | Information about the source stream in format: "stream-name > seq > subject" |
-| `Nats-Last-Consumer` | Sequence number | Consumer's last delivered sequence |
-| `Nats-Last-Stream` | Sequence number | Stream's last sequence at delivery time |
-| `Nats-Consumer-Stalled` | Consumer name | Indicates consumer is stalled with delivery count |
-| `Nats-Stream` | Stream name | Name of the stream the message came from |
-| `Nats-Sequence` | Sequence number | Stream sequence number of the message |
-| `Nats-Time-Stamp` | String | Timestamp when the message was stored |
-| `Nats-Last-Sequence` | Sequence number | Last sequence number in the stream when this message was delivered |
-| `Nats-Num-Pending` | String | Number of pending messages for the consumer |
-| `Nats-UpTo-Sequence` | Sequence number | Upper bound sequence for batch delivery |
+
+
+
+### Response Type
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Nats-Response-Type` | String | Type of response being sent |
+
+
+
+
+
+## API Headers
+
+
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Nats-Required-Api-Level` | String | Header: Nats-Required-Api-Level |
+
+
+
 
 
 ## Marker Headers
+
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Marker-Reason` | String | Reason for the marker: `MaxAge`, `Purge`, or `Remove` |
 
 
-## Other Headers
+
+
+
+## Authentication and Authorization Headers
+
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Msg-Size` | Size in bytes | Indicates the size of the message payload |
-| `Nats-Response-Type` | String | Type of response being sent |
-| `Nats-Subject` | String | Original subject the message was published to |
+| `Nats-Request-Info` | String | Header: Nats-Request-Info |
+| `Nats-Server-Xkey` | String | Header: Nats-Server-Xkey |
+
+
+
+
+
+## Message Tracing Headers
+
+
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Nats-Trace-Dest` | String | Header: Nats-Trace-Dest |
+| `Nats-Trace-Hop` | String | Header: Nats-Trace-Hop |
+| `Nats-Trace-Origin-Account` | String | Header: Nats-Trace-Origin-Account |
+| `Nats-Trace-Only` | String | Header: Nats-Trace-Only |
+
+
+
+
+
+## Key-Value Store Headers
+
+
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `KV-Operation` | String | Header: KV-Operation |
+
+
+
+
 
 
 ## Usage Examples

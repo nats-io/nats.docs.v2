@@ -4,14 +4,34 @@ This document provides a comprehensive reference for all headers used in JetStre
 
 {{range .Sections}}
 ## {{.Name}}
+{{if .Description}}
+{{.Description}}
 
-{{if .Description}}{{.Description}}
+{{end}}
+{{if .Subsections}}
+{{range .Subsections}}
+### {{.Name}}
+{{if .Description}}
+{{.Description}}
 
-{{end}}| Header | Value | Description |
+{{end}}
+| Header | Value | Description |
 |--------|-------|-------------|
 {{range .Headers}}| `{{.Name}}` | {{.ValueType}} | {{.Description}} |
 {{end}}
+
 {{end}}
+{{else}}
+{{if .Headers}}
+| Header | Value | Description |
+|--------|-------|-------------|
+{{range .Headers}}| `{{.Name}}` | {{.ValueType}} | {{.Description}} |
+{{end}}
+
+{{end}}
+{{end}}
+{{end}}
+
 ## Usage Examples
 
 ### Publishing with Deduplication

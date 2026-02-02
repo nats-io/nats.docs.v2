@@ -11,7 +11,24 @@
     "errors": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "consumer": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "stream": {
+            "type": "string"
+          },
+          "type": {
+            "type": "object"
+          }
+        }
       }
     },
     "status": {

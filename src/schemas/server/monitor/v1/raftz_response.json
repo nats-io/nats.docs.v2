@@ -4,9 +4,7 @@
   "title": "io.nats.server.monitor.v1.raftzstatus",
   "description": "Response from raftz monitoring endpoint",
   "type": "object",
-  "properties": {
-    "additionalProperties": {
-      "type": "object"
-    }
+  "additionalProperties": {
+    "type": "object"
   }
 }

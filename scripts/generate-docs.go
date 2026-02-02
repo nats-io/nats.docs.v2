@@ -23,6 +23,16 @@ const (
 	monitorGoPath  = "server/monitor.go"
 )
 
+// Header source files - scanned in order to find all header constants
+var headerSourceFiles = []string{
+	"server/stream.go",
+	"server/consumer.go",
+	"server/jetstream_api.go",
+	"server/msgtrace.go",
+	"server/accounts.go",
+	"server/auth_callout.go",
+}
+
 // JetStream Error structures
 type JSError struct {
 	Constant    string `json:"constant"`
@@ -58,32 +68,41 @@ type Header struct {
 	Description string
 }
 
-type HeaderSection struct {
+type HeaderSubsection struct {
 	Name        string
 	Description string
 	Headers     []Header
 }
 
+type HeaderSection struct {
+	Name        string
+	Description string
+	Headers     []Header             // For sections without subsections
+	Subsections []HeaderSubsection   // For sections with subsections (e.g., Message Publishing Headers)
+}
+
 // JSON Schema structures
 type JSONSchema struct {
-	Schema      string                  `json:"$schema"`
-	ID          string                  `json:"$id"`
-	Title       string                  `json:"title"`
-	Description string                  `json:"description,omitempty"`
-	Type        string                  `json:"type"`
-	Properties  map[string]JSONProperty `json:"properties,omitempty"`
-	Required    []string                `json:"required,omitempty"`
-	Items       *JSONProperty           `json:"items,omitempty"`
+	Schema               string                  `json:"$schema"`
+	ID                   string                  `json:"$id"`
+	Title                string                  `json:"title"`
+	Description          string                  `json:"description,omitempty"`
+	Type                 string                  `json:"type"`
+	Properties           map[string]JSONProperty `json:"properties,omitempty"`
+	Required             []string                `json:"required,omitempty"`
+	Items                *JSONProperty           `json:"items,omitempty"`
+	AdditionalProperties *JSONProperty           `json:"additionalProperties,omitempty"`
 }
 
 type JSONProperty struct {
-	Type        string                  `json:"type,omitempty"`
-	Description string                  `json:"description,omitempty"`
-	Properties  map[string]JSONProperty `json:"properties,omitempty"`
-	Items       *JSONProperty           `json:"items,omitempty"`
-	Required    []string                `json:"required,omitempty"`
-	Format      string                  `json:"format,omitempty"`
-	Enum        []string                `json:"enum,omitempty"`
+	Type                 string                  `json:"type,omitempty"`
+	Description          string                  `json:"description,omitempty"`
+	Properties           map[string]JSONProperty `json:"properties,omitempty"`
+	Items                *JSONProperty           `json:"items,omitempty"`
+	AdditionalProperties *JSONProperty           `json:"additionalProperties,omitempty"`
+	Required             []string                `json:"required,omitempty"`
+	Format               string                  `json:"format,omitempty"`
+	Enum                 []string                `json:"enum,omitempty"`
 }
 
 // Monitor endpoint definition
@@ -184,6 +203,45 @@ func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 	return categorizeJSErrors(errors), nil
 }
 
+// getManualSystemErrors returns errors that are sent as string literals in the server code
+// (not defined as Go error variables, so they can't be extracted via AST parsing)
+func getManualSystemErrors() []SystemErrorCategory {
+	return []SystemErrorCategory{
+		{
+			Name: "TLS and Security Errors",
+			Errors: []SystemError{
+				{Name: "Secure Connection - TLS Required", Description: "Server requires TLS but client attempted non-TLS connection"},
+				{Name: "TLS Handshake Error", Description: "TLS handshake failed"},
+				{Name: "Certificate Not Pinned", Description: "Client certificate is not in the pinned certificates list"},
+			},
+		},
+		{
+			Name: "Route-Specific Errors",
+			Errors: []SystemError{
+				{Name: "Duplicate Route", Description: "Route already exists to this server"},
+				{Name: "Route Authorization Violation", Description: "Route connection failed authorization"},
+				{Name: "Cluster Name From Remote Server Conflicts", Description: "Remote route server has conflicting cluster name"},
+				{Name: "Minimum Version Required", Description: "Route connection does not meet minimum version requirement"},
+			},
+		},
+		{
+			Name: "Slow Consumer and Flow Control",
+			Errors: []SystemError{
+				{Name: "Slow Consumer", Description: "Client is not consuming messages fast enough"},
+				{Name: "Write Deadline Exceeded", Description: "Write operation exceeded deadline"},
+			},
+		},
+		{
+			Name: "Configuration and Resolver Errors",
+			Errors: []SystemError{
+				{Name: "Account Resolver Missing", Description: "Account resolver is not configured"},
+				{Name: "System Account Not Configured", Description: "System account is not properly configured"},
+				{Name: "Credentials Revoked", Description: "Client credentials have been revoked"},
+			},
+		},
+	}
+}
+
 // parseSystemErrors extracts error variables from errors.go
 func parseSystemErrors(serverPath string) ([]SystemErrorCategory, error) {
 	path := filepath.Join(serverPath, errorsGoPath)
@@ -262,6 +320,29 @@ func parseSystemErrors(serverPath string) ([]SystemErrorCategory, error) {
 		}
 	}
 
+	// Add manual errors that are sent as string literals (not Go error variables)
+	manualErrors := getManualSystemErrors()
+	for _, manualCat := range manualErrors {
+		// Check if category already exists
+		found := false
+		for i := range result {
+			if result[i].Name == manualCat.Name {
+				// Merge manual errors into existing category
+				result[i].Errors = append(result[i].Errors, manualCat.Errors...)
+				// Re-sort
+				sort.Slice(result[i].Errors, func(a, b int) bool {
+					return result[i].Errors[a].Name < result[i].Errors[b].Name
+				})
+				found = true
+				break
+			}
+		}
+		if !found {
+			// Add new category
+			result = append(result, manualCat)
+		}
+	}
+
 	return result, nil
 }
 
@@ -290,16 +371,8 @@ func humanizeName(s string) string {
 	return s
 }
 
-// parseHeaders extracts header constants from stream.go
+// parseHeaders extracts header constants from multiple nats-server source files
 func parseHeaders(serverPath string) ([]HeaderSection, error) {
-	path := filepath.Join(serverPath, streamGoPath)
-
-	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse stream.go: %w", err)
-	}
-
 	sections := make(map[string][]Header)
 	sectionOrder := []string{
 		"Message Publishing Headers",
@@ -311,82 +384,125 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 		"Key-Value Store Headers",
 	}
 
-	currentSection := ""
-	sectionComments := make(map[string]string)
+	// Scan all header source files
+	for _, sourceFile := range headerSourceFiles {
+		path := filepath.Join(serverPath, sourceFile)
 
-	// Walk the AST
-	ast.Inspect(file, func(n ast.Node) bool {
-		// Look for const blocks
-		genDecl, ok := n.(*ast.GenDecl)
-		if !ok || genDecl.Tok != token.CONST {
+		fset := token.NewFileSet()
+		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+		if err != nil {
+			// Some files might not exist in older versions, skip with warning
+			fmt.Printf("Warning: Could not parse %s: %v\n", sourceFile, err)
+			continue
+		}
+
+		// Walk the AST
+		ast.Inspect(file, func(n ast.Node) bool {
+			// Look for const and var blocks
+			genDecl, ok := n.(*ast.GenDecl)
+			if !ok || (genDecl.Tok != token.CONST && genDecl.Tok != token.VAR) {
+				return true
+			}
+
+			// Extract constants
+			for _, spec := range genDecl.Specs {
+				valueSpec, ok := spec.(*ast.ValueSpec)
+				if !ok {
+					continue
+				}
+
+				for i, name := range valueSpec.Names {
+					if len(valueSpec.Values) <= i {
+						continue
+					}
+
+					// Get the string value
+					basicLit, ok := valueSpec.Values[i].(*ast.BasicLit)
+					if !ok || basicLit.Kind != token.STRING {
+						continue
+					}
+
+					headerValue := strings.Trim(basicLit.Value, `"`)
+					if !strings.HasPrefix(headerValue, "Nats-") && !strings.HasPrefix(headerValue, "KV-") {
+						continue
+					}
+
+					header := Header{
+						Name:        headerValue,
+						ValueType:   inferValueType(name.Name),
+						Description: inferDescription(name.Name, headerValue),
+					}
+
+					// Categorize with subsection support
+					sectionName, subsectionName := categorizeHeaderWithSubsection(headerValue)
+					key := sectionName
+					if subsectionName != "" {
+						key = sectionName + "|" + subsectionName
+					}
+					sections[key] = append(sections[key], header)
+				}
+			}
+
 			return true
-		}
-
-		// Check for header-related comment
-		if genDecl.Doc != nil {
-			comment := genDecl.Doc.Text()
-			if strings.Contains(comment, "Headers for") || strings.Contains(comment, "headers") {
-				currentSection = strings.TrimSpace(strings.TrimPrefix(comment, "//"))
-				currentSection = strings.TrimSuffix(currentSection, ".")
-			}
-		}
-
-		// Extract constants
-		for _, spec := range genDecl.Specs {
-			valueSpec, ok := spec.(*ast.ValueSpec)
-			if !ok {
-				continue
-			}
-
-			for i, name := range valueSpec.Names {
-				if len(valueSpec.Values) <= i {
-					continue
-				}
-
-				// Get the string value
-				basicLit, ok := valueSpec.Values[i].(*ast.BasicLit)
-				if !ok || basicLit.Kind != token.STRING {
-					continue
-				}
-
-				headerValue := strings.Trim(basicLit.Value, `"`)
-				if !strings.HasPrefix(headerValue, "Nats-") && !strings.HasPrefix(headerValue, "KV-") {
-					continue
-				}
-
-				header := Header{
-					Name:        headerValue,
-					ValueType:   inferValueType(name.Name),
-					Description: inferDescription(name.Name, headerValue),
-				}
-
-				section := categorizeHeader(headerValue)
-				sections[section] = append(sections[section], header)
-			}
-		}
-
-		return true
-	})
-
-	// Build ordered result
-	var result []HeaderSection
-	for _, name := range sectionOrder {
-		if headers, ok := sections[name]; ok {
-			result = append(result, HeaderSection{
-				Name:        name,
-				Description: sectionComments[name],
-				Headers:     headers,
-			})
-			delete(sections, name)
-		}
+		})
 	}
 
-	// Add remaining sections
-	for name, headers := range sections {
-		result = append(result, HeaderSection{
-			Name:    name,
-			Headers: headers,
-		})
+	// Build ordered result with subsection support
+	var result []HeaderSection
+	for _, sectionName := range sectionOrder {
+		// Collect all headers for this section (both with and without subsections)
+		sectionHeaders := make(map[string][]Header) // subsection name -> headers
+		var directHeaders []Header                   // headers without subsection
+
+		for key, headers := range sections {
+			if strings.HasPrefix(key, sectionName) {
+				if strings.Contains(key, "|") {
+					// Has subsection
+					parts := strings.SplitN(key, "|", 2)
+					subsectionName := parts[1]
+					sectionHeaders[subsectionName] = headers
+				} else if key == sectionName {
+					// No subsection
+					directHeaders = headers
+				}
+			}
+		}
+
+		// Only add section if it has headers
+		if len(sectionHeaders) > 0 || len(directHeaders) > 0 {
+			section := HeaderSection{
+				Name: sectionName,
+			}
+
+			if len(sectionHeaders) > 0 {
+				// Build subsections
+				subsectionOrder := getSubsectionOrder(sectionName)
+				for _, subsectionName := range subsectionOrder {
+					if headers, ok := sectionHeaders[subsectionName]; ok {
+						subsection := HeaderSubsection{
+							Name:        subsectionName,
+							Description: getSubsectionDescription(sectionName, subsectionName),
+							Headers:     headers,
+						}
+						section.Subsections = append(section.Subsections, subsection)
+						delete(sectionHeaders, subsectionName)
+					}
+				}
+				// Add any remaining subsections not in order
+				for subsectionName, headers := range sectionHeaders {
+					subsection := HeaderSubsection{
+						Name:    subsectionName,
+						Headers: headers,
+					}
+					section.Subsections = append(section.Subsections, subsection)
+				}
+			} else {
+				// No subsections, use direct headers
+				section.Headers = directHeaders
+			}
+
+			result = append(result, section)
+		}
 	}
 
 	return result, nil
@@ -394,30 +510,133 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 
 // categorizeHeader determines which section a header belongs to
 func categorizeHeader(name string) string {
-	switch {
-	case strings.Contains(name, "Expected") || strings.HasSuffix(name, "Msg-Id") ||
-		strings.Contains(name, "Rollup") || strings.Contains(name, "TTL") ||
-		strings.Contains(name, "Incr") || strings.Contains(name, "Counter") ||
-		strings.Contains(name, "Batch") || strings.Contains(name, "Schedule"):
-		return "Message Publishing Headers"
-	case strings.Contains(name, "Stream") || strings.Contains(name, "Sequence") ||
-		strings.Contains(name, "Consumer") || strings.Contains(name, "Pending") ||
-		strings.Contains(name, "Stalled") || strings.Contains(name, "Time-Stamp") ||
-		strings.Contains(name, "Pin-Id"):
-		return "Message Delivery Headers"
-	case strings.Contains(name, "Required-Api"):
-		return "API Headers"
-	case strings.Contains(name, "Marker"):
-		return "Marker Headers"
-	case strings.Contains(name, "Xkey") || strings.Contains(name, "Request-Info"):
-		return "Authentication and Authorization Headers"
-	case strings.Contains(name, "Trace"):
-		return "Message Tracing Headers"
-	case strings.HasPrefix(name, "KV-"):
-		return "Key-Value Store Headers"
-	default:
-		return "Other Headers"
+	section, _ := categorizeHeaderWithSubsection(name)
+	return section
+}
+
+// categorizeHeaderWithSubsection determines which section and subsection a header belongs to
+// Returns (section, subsection). If subsection is empty, the header goes directly in the section.
+func categorizeHeaderWithSubsection(name string) (section string, subsection string) {
+	// Message Publishing Headers with subsections
+	if strings.HasSuffix(name, "Msg-Id") {
+		return "Message Publishing Headers", "Message Identification and Deduplication"
 	}
+	if strings.Contains(name, "Expected") {
+		return "Message Publishing Headers", "Expected State Headers"
+	}
+	if strings.Contains(name, "Rollup") {
+		return "Message Publishing Headers", "Message Rollup"
+	}
+	if strings.Contains(name, "Msg-Size") {
+		return "Message Publishing Headers", "Message Size"
+	}
+	if strings.Contains(name, "TTL") && !strings.Contains(name, "Schedule") {
+		return "Message Publishing Headers", "Message TTL"
+	}
+	if strings.Contains(name, "Incr") || strings.Contains(name, "Counter") {
+		return "Message Publishing Headers", "Counter Operations"
+	}
+	if strings.Contains(name, "Batch") {
+		return "Message Publishing Headers", "Batch Operations"
+	}
+	if strings.Contains(name, "Schedule") {
+		return "Message Publishing Headers", "Scheduled Messages"
+	}
+
+	// Message Delivery Headers with subsections
+	if (strings.Contains(name, "Stream") || strings.Contains(name, "Sequence") ||
+		strings.Contains(name, "Time-Stamp") || strings.Contains(name, "Subject")) &&
+		!strings.Contains(name, "Stream-Source") && !strings.Contains(name, "Consumer") &&
+		!strings.Contains(name, "Pending") && !strings.Contains(name, "Stalled") {
+		return "Message Delivery Headers", "Stream Information"
+	}
+	if strings.Contains(name, "Consumer") || strings.Contains(name, "Stalled") {
+		return "Message Delivery Headers", "Consumer Information"
+	}
+	if strings.Contains(name, "Pending") || strings.Contains(name, "Pin-Id") || strings.Contains(name, "UpTo") {
+		return "Message Delivery Headers", "Pull Request Headers"
+	}
+	if strings.Contains(name, "Stream-Source") {
+		return "Message Delivery Headers", "Source and Mirror Information"
+	}
+	if strings.Contains(name, "Response-Type") {
+		return "Message Delivery Headers", "Response Type"
+	}
+
+	// Top-level sections (no subsections)
+	if strings.Contains(name, "Required-Api") {
+		return "API Headers", ""
+	}
+	if strings.Contains(name, "Marker") {
+		return "Marker Headers", ""
+	}
+	if strings.Contains(name, "Xkey") || strings.Contains(name, "Request-Info") {
+		return "Authentication and Authorization Headers", ""
+	}
+	if strings.Contains(name, "Trace") {
+		return "Message Tracing Headers", ""
+	}
+	if strings.HasPrefix(name, "KV-") {
+		return "Key-Value Store Headers", ""
+	}
+
+	return "Other Headers", ""
+}
+
+// getSubsectionOrder returns the ordered list of subsections for a given section
+func getSubsectionOrder(sectionName string) []string {
+	switch sectionName {
+	case "Message Publishing Headers":
+		return []string{
+			"Message Identification and Deduplication",
+			"Expected State Headers",
+			"Message Rollup",
+			"Message Size",
+			"Message TTL",
+			"Counter Operations",
+			"Batch Operations",
+			"Scheduled Messages",
+		}
+	case "Message Delivery Headers":
+		return []string{
+			"Stream Information",
+			"Consumer Information",
+			"Pull Request Headers",
+			"Source and Mirror Information",
+			"Response Type",
+		}
+	default:
+		return []string{}
+	}
+}
+
+// getSubsectionDescription returns the description for a subsection
+func getSubsectionDescription(sectionName, subsectionName string) string {
+	switch sectionName {
+	case "Message Publishing Headers":
+		switch subsectionName {
+		case "Expected State Headers":
+			return "These headers enforce expected state conditions when publishing. If conditions are not met, the publish will fail."
+		case "Batch Operations":
+			return "Headers for atomic batch publishing:"
+		case "Scheduled Messages":
+			return "Headers for scheduled message delivery:"
+		}
+	case "Message Delivery Headers":
+		switch subsectionName {
+		case "Stream Information":
+			return ""
+		case "Consumer Information":
+			return ""
+		case "Pull Request Headers":
+			return "Headers used in pull request responses:"
+		case "Source and Mirror Information":
+			return ""
+		case "Response Type":
+			return ""
+		}
+	}
+	return ""
 }
 
 // inferValueType infers the type of value for a header
@@ -545,7 +764,7 @@ func parseMonitorStructs(serverPath string) (map[string]*ast.StructType, map[str
 }
 
 // goTypeToJSONType converts Go types to JSON Schema types
-func goTypeToJSONType(expr ast.Expr) (string, *JSONProperty) {
+func goTypeToJSONType(expr ast.Expr, structs map[string]*ast.StructType, file *ast.File) (string, *JSONProperty) {
 	switch t := expr.(type) {
 	case *ast.Ident:
 		switch t.Name {
@@ -561,11 +780,20 @@ func goTypeToJSONType(expr ast.Expr) (string, *JSONProperty) {
 		case "Time":
 			return "string", &JSONProperty{Format: "date-time"}
 		default:
-			// Custom type - treat as object
+			// Custom type - try to resolve it
+			if structType, ok := structs[t.Name]; ok {
+				// Convert the struct to a JSONProperty
+				schema := structToJSONSchema(t.Name, structType, structs, file)
+				return "object", &JSONProperty{
+					Type:       "object",
+					Properties: schema.Properties,
+				}
+			}
+			// Unknown custom type - treat as object
 			return "object", nil
 		}
 	case *ast.ArrayType:
-		itemType, itemProp := goTypeToJSONType(t.Elt)
+		itemType, itemProp := goTypeToJSONType(t.Elt, structs, file)
 		if itemProp == nil {
 			itemProp = &JSONProperty{Type: itemType}
 		}
@@ -574,7 +802,7 @@ func goTypeToJSONType(expr ast.Expr) (string, *JSONProperty) {
 		return "object", &JSONProperty{Type: "object"}
 	case *ast.StarExpr:
 		// Pointer - unwrap and process the underlying type
-		return goTypeToJSONType(t.X)
+		return goTypeToJSONType(t.X, structs, file)
 	case *ast.SelectorExpr:
 		// Package selector like time.Time
 		if ident, ok := t.X.(*ast.Ident); ok && ident.Name == "time" && t.Sel.Name == "Time" {
@@ -614,7 +842,7 @@ func extractJSONTag(tag string) (string, bool) {
 }
 
 // structToJSONSchema converts a Go struct to a JSON Schema
-func structToJSONSchema(structName string, structType *ast.StructType, file *ast.File) JSONSchema {
+func structToJSONSchema(structName string, structType *ast.StructType, structs map[string]*ast.StructType, file *ast.File) JSONSchema {
 	schema := JSONSchema{
 		Schema:      "http://json-schema.org/draft-07/schema#",
 		ID:          "https://nats.io/schemas/server/monitor/v1/" + strings.ToLower(structName) + ".json",
@@ -646,7 +874,7 @@ func structToJSONSchema(structName string, structType *ast.StructType, file *ast
 		}
 
 		// Get field type
-		jsonType, prop := goTypeToJSONType(field.Type)
+		jsonType, prop := goTypeToJSONType(field.Type, structs, file)
 
 		if prop == nil {
 			prop = &JSONProperty{Type: jsonType}
@@ -676,7 +904,7 @@ func structToJSONSchema(structName string, structType *ast.StructType, file *ast
 }
 
 // typeAliasToJSONSchema converts a type alias (like map types) to a JSON Schema
-func typeAliasToJSONSchema(typeName string, typeExpr ast.Expr) JSONSchema {
+func typeAliasToJSONSchema(typeName string, typeExpr ast.Expr, structs map[string]*ast.StructType, file *ast.File) JSONSchema {
 	schema := JSONSchema{
 		Schema:      "http://json-schema.org/draft-07/schema#",
 		ID:          "https://nats.io/schemas/server/monitor/v1/" + strings.ToLower(typeName) + ".json",
@@ -688,29 +916,20 @@ func typeAliasToJSONSchema(typeName string, typeExpr ast.Expr) JSONSchema {
 	if mapType, ok := typeExpr.(*ast.MapType); ok {
 		schema.Type = "object"
 
-		// For nested maps, set additionalProperties
-		if _, isNestedMap := mapType.Value.(*ast.MapType); isNestedMap {
-			schema.Properties = map[string]JSONProperty{
-				"additionalProperties": {
-					Type: "object",
-				},
-			}
+		// Get the value type of the map
+		valueType, valueProp := goTypeToJSONType(mapType.Value, structs, file)
+
+		// Set additionalProperties to describe the map value type
+		if valueProp != nil {
+			schema.AdditionalProperties = valueProp
 		} else {
-			// Try to get the value type
-			valueType, valueProp := goTypeToJSONType(mapType.Value)
-			if valueProp != nil {
-				schema.Items = valueProp
-			} else {
-				schema.Properties = map[string]JSONProperty{
-					"additionalProperties": {
-						Type: valueType,
-					},
-				}
+			schema.AdditionalProperties = &JSONProperty{
+				Type: valueType,
 			}
 		}
 	} else {
 		// For other type aliases, convert the underlying type
-		jsonType, prop := goTypeToJSONType(typeExpr)
+		jsonType, prop := goTypeToJSONType(typeExpr, structs, file)
 		schema.Type = jsonType
 		if prop != nil && prop.Properties != nil {
 			schema.Properties = prop.Properties
@@ -753,7 +972,7 @@ func generateMonitorSchemas(serverPath, outputDir string, dryRun bool) error {
 		// Generate request schema (Options struct)
 		if endpoint.OptionsStruct != "" {
 			if structType, ok := structs[endpoint.OptionsStruct]; ok {
-				schema := structToJSONSchema(endpoint.OptionsStruct, structType, file)
+				schema := structToJSONSchema(endpoint.OptionsStruct, structType, structs, file)
 				schema.Description = fmt.Sprintf("Request options for %s monitoring endpoint", endpoint.Name)
 
 				filename := filepath.Join(schemasDir, endpoint.Name+"_request.json")
@@ -771,7 +990,7 @@ func generateMonitorSchemas(serverPath, outputDir string, dryRun bool) error {
 		// Generate response schema
 		if endpoint.ResponseStruct != "" {
 			if structType, ok := structs[endpoint.ResponseStruct]; ok {
-				schema := structToJSONSchema(endpoint.ResponseStruct, structType, file)
+				schema := structToJSONSchema(endpoint.ResponseStruct, structType, structs, file)
 				schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpoint.Name)
 
 				filename := filepath.Join(schemasDir, endpoint.Name+"_response.json")
@@ -780,7 +999,7 @@ func generateMonitorSchemas(serverPath, outputDir string, dryRun bool) error {
 				}
 			} else if typeExpr, ok := typeAliases[endpoint.ResponseStruct]; ok {
 				// Handle type aliases like map types
-				schema := typeAliasToJSONSchema(endpoint.ResponseStruct, typeExpr)
+				schema := typeAliasToJSONSchema(endpoint.ResponseStruct, typeExpr, structs, file)
 				schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpoint.Name)
 
 				filename := filepath.Join(schemasDir, endpoint.Name+"_response.json")
