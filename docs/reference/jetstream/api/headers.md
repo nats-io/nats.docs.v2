@@ -62,7 +62,7 @@ These headers enforce expected state conditions when publishing. If conditions a
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Incr` | Number | Increment value for counter operations |
-| `Nats-Counter-Sources` | String | Sources for counter values in JSON format |
+| `Nats-Counter-Sources` | JSON | Sources for counter values in JSON format |
 
 
 
@@ -89,7 +89,7 @@ Headers for scheduled message delivery:
 | `Nats-Schedule` | Cron expression | Schedule pattern for message delivery |
 | `Nats-Schedule-TTL` | Duration | Time-to-live for the schedule |
 | `Nats-Schedule-Target` | Subject | Target subject for scheduled delivery |
-| `Nats-Schedule-Source` | String |  |
+| `Nats-Schedule-Source` | Subject | Source subject for scheduled message delivery |
 | `Nats-Scheduler` | Scheduler ID | Identifier for the scheduler |
 | `Nats-Schedule-Next` | RFC3339 timestamp or `purge` | Next scheduled time or purge indicator |
 
@@ -113,7 +113,7 @@ Headers added by JetStream when delivering messages to consumers.
 | `Nats-Sequence` | Sequence number | Stream sequence number of the message |
 | `Nats-Time-Stamp` | RFC3339 timestamp | Timestamp when the message was stored |
 | `Nats-Subject` | Subject | Original subject the message was published to |
-| `Nats-Last-Sequence` | Sequence number | The sequence number of the precedent message either republished or in a batch of responses. 0 in the first message. |
+| `Nats-Last-Sequence` | Sequence number | Last sequence number in the stream when this message was delivered |
 | `Nats-UpTo-Sequence` | Sequence number | Upper bound sequence for batch delivery |
 
 
@@ -134,10 +134,10 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Num-Pending` | Count | Number of messages pending in the multi/batched get response |
+| `Nats-Num-Pending` | Count | Number of pending messages for the consumer |
 | `Nats-Pending-Messages` | Count | Number of pending messages for the pull request |
 | `Nats-Pending-Bytes` | Size in bytes | Number of pending bytes for the pull request |
-| `Nats-Pin-Id` | Pin ID | Pin ID for the pull request |
+| `Nats-Pin-Id` | NUID | Pin ID for the pull request |
 
 
 
@@ -168,7 +168,7 @@ Headers used in JetStream API requests and responses.
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Required-Api-Level` | API level number | JSRequiredApiLevel requires the API level of the responding server to have the specified minimum value. |
+| `Nats-Required-Api-Level` | API level number | Minimum API level required for the request |
 
 
 

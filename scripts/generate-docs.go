@@ -688,12 +688,19 @@ func wrapMDXCurlyBraces(s string) string {
 	return curlyBracePattern.ReplaceAllString(s, "`{$1}`")
 }
 
-// escapeMDX escapes characters that MDX would interpret as JSX.
+// escapeMDX wraps tokens containing characters that MDX would interpret as JSX
+// (angle brackets, curly braces) in backtick code spans.
+var angleBracketExpr = regexp.MustCompile(`\S*[<>]\S*`)
+
 func escapeMDX(s string) string {
-	s = strings.ReplaceAll(s, "{", "&#123;")
-	s = strings.ReplaceAll(s, "}", "&#125;")
-	s = strings.ReplaceAll(s, "<", "&lt;")
-	s = strings.ReplaceAll(s, ">", "&gt;")
+	s = wrapMDXCurlyBraces(s)
+	s = angleBracketExpr.ReplaceAllStringFunc(s, func(m string) string {
+		// Don't double-wrap if already in backticks
+		if strings.HasPrefix(m, "`") {
+			return m
+		}
+		return "`" + m + "`"
+	})
 	return s
 }
 
@@ -1148,19 +1155,18 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 						continue
 					}
 
-					// Extract description: spec doc > spec inline comment > block doc > fallback
-					var description string
-					if valueSpec.Doc != nil {
-						description = cleanComment(valueSpec.Doc.Text())
-					} else if valueSpec.Comment != nil {
-						description = cleanComment(valueSpec.Comment.Text())
-					} else if blockDoc != "" && len(genDecl.Specs) == 1 {
-						description = blockDoc
-					}
-
-					// If still empty, use fallback from data
+					// Extract description: override map > spec doc > spec inline comment > block doc
+					// The override map takes priority to fix cases where Go doc comments
+					// leak constant names or are otherwise unsuitable for documentation.
+					description := headerDescriptionFallback(name.Name)
 					if description == "" {
-						description = headerDescriptionFallback(name.Name)
+						if valueSpec.Doc != nil {
+							description = cleanComment(valueSpec.Doc.Text())
+						} else if valueSpec.Comment != nil {
+							description = cleanComment(valueSpec.Comment.Text())
+						} else if blockDoc != "" && len(genDecl.Specs) == 1 {
+							description = blockDoc
+						}
 					}
 
 					header := Header{
@@ -1213,12 +1219,14 @@ var headerValueTypeOverrides = map[string]string{
 	"JSStream":                  "Stream name",
 	"JSSubject":                 "Subject",
 	"JSUpToSequence":            "Sequence number",
-	"JSPullRequestNatsPinId":    "Pin ID",
+	"JSPullRequestNatsPinId":    "NUID",
 	"JSSchedulePattern":         "Cron expression",
 	"JSScheduleTarget":          "Subject",
 	"JSScheduler":               "Scheduler ID",
 	"JSScheduleNext":            "RFC3339 timestamp or `purge`",
 	"KVOperation":               "`PUT`, `DEL`, or `PURGE`",
+	"JSMessageCounterSources":   "JSON",
+	"JSScheduleSource":          "Subject",
 }
 
 // headerValueType derives the value type from the constant name.
@@ -1261,6 +1269,7 @@ var headerDescriptionData = map[string]string{
 	"JSMarkerReason":            "Reason for the marker: MaxAge, Purge, or Remove",
 	"JSMessageIncr":             "Increment value for counter operations",
 	"JSMessageCounterSources":   "Sources for counter values in JSON format",
+	"JSScheduleSource":          "Source subject for scheduled message delivery",
 	"JSBatchId":                 "Unique identifier for the batch",
 	"JSBatchSeq":                "Sequence number within the batch",
 	"JSBatchCommit":             "Marks the final message in a batch, triggering atomic commit",
@@ -1279,7 +1288,7 @@ var headerDescriptionData = map[string]string{
 	"JSPullRequestPendingMsgs":  "Number of pending messages for the pull request",
 	"JSPullRequestPendingBytes": "Number of pending bytes for the pull request",
 	"JSPullRequestNatsPinId":    "Pin ID for the pull request",
-	"JSRequiredApiLevel":        "Required API level for the request",
+	"JSRequiredApiLevel":        "Minimum API level required for the request",
 	"MsgTraceDest":              "Destination subject for message tracing",
 	"MsgTraceHop":               "Trace hop information",
 	"MsgTraceOriginAccount":     "Origin account for message tracing",

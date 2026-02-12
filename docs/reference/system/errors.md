@@ -63,7 +63,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrMappingDestinationTooManyArgs` | ErrMappingDestinationTooManyArgs is returned when the mapping destination function is passed too many arguments |
 | `ErrNoTransforms` | ErrNoTransforms signals no subject transforms are available to map this subject. |
 | `ErrReservedAccount` | ErrReservedAccount represents a reserved account that can not be created. |
-| `ErrReservedPublishSubject` | ErrReservedPublishSubject represents an error condition when sending to a reserved subject, e.g. _SYS.&gt; |
+| `ErrReservedPublishSubject` | ErrReservedPublishSubject represents an error condition when sending to a reserved subject, e.g. `_SYS.>` |
 | `ErrUnknownMappingDestinationFunction` | ErrUnknownMappingDestinationFunction is returned when a subject mapping destination contains an unknown mustache-escaped mapping function. |
 
 
@@ -84,7 +84,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrAccountResolverUpdateTooSoon` | ErrAccountResolverUpdateTooSoon is returned when we attempt an update too soon to last request. |
 | `ErrAccountValidation` | ErrAccountValidation is returned when an account has failed validation. |
 | `ErrBadAccount` | ErrBadAccount represents a malformed or incorrect account. |
-| `ErrBadSampling` | ErrBadSampling is returned when the sampling for latency tracking is not 1 &gt;= sample &lt;= 100. |
+| `ErrBadSampling` | ErrBadSampling is returned when the sampling for latency tracking is not 1 `>=` sample `<=` 100. |
 | `ErrBadServiceType` | ErrBadServiceType is returned when latency tracking is being applied to non-singleton response types. |
 | `ErrImportFormsCycle` | ErrImportFormsCycle is returned when an import would form a cycle. |
 | `ErrMissingAccount` | ErrMissingAccount is returned when an account does not exist. |
