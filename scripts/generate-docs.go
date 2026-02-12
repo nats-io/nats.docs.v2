@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -679,10 +680,12 @@ func categorizeJSErrors(errors []JSError) []ErrorCategory {
 	return result
 }
 
-func escapeMDXCurlyBraces(s string) string {
-	s = strings.ReplaceAll(s, "{", "&#123;")
-	s = strings.ReplaceAll(s, "}", "&#125;")
-	return s
+// wrapMDXCurlyBraces wraps {placeholder} patterns in backtick code spans so MDX
+// doesn't interpret them as JSX expressions.
+var curlyBracePattern = regexp.MustCompile(`\{([a-zA-Z_]+)\}`)
+
+func wrapMDXCurlyBraces(s string) string {
+	return curlyBracePattern.ReplaceAllString(s, "`{$1}`")
 }
 
 // escapeMDX escapes characters that MDX would interpret as JSX.
@@ -707,7 +710,7 @@ func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 	}
 
 	for i := range errors {
-		errors[i].Description = escapeMDXCurlyBraces(errors[i].Description)
+		errors[i].Description = wrapMDXCurlyBraces(errors[i].Description)
 	}
 
 	return categorizeJSErrors(errors), nil
@@ -913,6 +916,159 @@ func categorizeSystemErrors(errors []SystemError) []SystemErrorCategory {
 }
 
 // -------------------------------------------------------------------
+// ClosedState parsing: connection close reasons from nats-server
+// -------------------------------------------------------------------
+
+type ClosedStateEntry struct {
+	ConstName   string // e.g. "SlowConsumerPendingBytes"
+	Description string // e.g. "Slow Consumer (Pending Bytes)"
+}
+
+// parseClosedStates extracts ClosedState enum constants from server/client.go
+// and their human-readable descriptions from the String() method in server/monitor.go.
+func parseClosedStates(serverPath string) ([]ClosedStateEntry, error) {
+	// Step 1: Parse client.go to get the ordered list of ClosedState constants
+	clientPath := filepath.Join(serverPath, "server/client.go")
+	fset := token.NewFileSet()
+	clientFile, err := parser.ParseFile(fset, clientPath, nil, parser.ParseComments)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse client.go: %w", err)
+	}
+
+	var constNames []string
+	for _, decl := range clientFile.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.CONST {
+			continue
+		}
+
+		// Look for the const block containing ClosedState(iota
+		isClosedStateBlock := false
+		for _, spec := range genDecl.Specs {
+			vs, ok := spec.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+
+			// Detect the first entry: ClientClosed = ClosedState(iota + 1)
+			if !isClosedStateBlock {
+				if vs.Type != nil {
+					if call, ok := vs.Type.(*ast.CallExpr); ok {
+						if fn, ok := call.Fun.(*ast.Ident); ok && fn.Name == "ClosedState" {
+							isClosedStateBlock = true
+						}
+					}
+				}
+				if !isClosedStateBlock && len(vs.Values) > 0 {
+					if call, ok := vs.Values[0].(*ast.CallExpr); ok {
+						if fn, ok := call.Fun.(*ast.Ident); ok && fn.Name == "ClosedState" {
+							isClosedStateBlock = true
+						}
+					}
+				}
+			}
+
+			if isClosedStateBlock {
+				for _, name := range vs.Names {
+					if name.IsExported() {
+						constNames = append(constNames, name.Name)
+					}
+				}
+			}
+		}
+
+		if isClosedStateBlock {
+			break // Found the block, stop looking
+		}
+	}
+
+	if len(constNames) == 0 {
+		return nil, fmt.Errorf("no ClosedState constants found in client.go")
+	}
+
+	// Step 2: Parse monitor.go to get the String() mappings
+	monitorPath := filepath.Join(serverPath, "server/monitor.go")
+	mfset := token.NewFileSet()
+	monitorFile, err := parser.ParseFile(mfset, monitorPath, nil, parser.ParseComments)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse monitor.go: %w", err)
+	}
+
+	stringMap := make(map[string]string)
+	for _, decl := range monitorFile.Decls {
+		funcDecl, ok := decl.(*ast.FuncDecl)
+		if !ok || funcDecl.Name.Name != "String" {
+			continue
+		}
+		// Check it's a method on ClosedState
+		if funcDecl.Recv == nil || len(funcDecl.Recv.List) == 0 {
+			continue
+		}
+		recvType := funcDecl.Recv.List[0].Type
+		var typeName string
+		if id, ok := recvType.(*ast.Ident); ok {
+			typeName = id.Name
+		} else if star, ok := recvType.(*ast.StarExpr); ok {
+			if id, ok := star.X.(*ast.Ident); ok {
+				typeName = id.Name
+			}
+		}
+		if typeName != "ClosedState" {
+			continue
+		}
+
+		// Walk the function body looking for switch/case statements
+		ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+			caseClause, ok := n.(*ast.CaseClause)
+			if !ok || len(caseClause.List) == 0 {
+				return true
+			}
+
+			// Extract the constant name from the case
+			var caseName string
+			for _, expr := range caseClause.List {
+				if id, ok := expr.(*ast.Ident); ok {
+					caseName = id.Name
+					break
+				}
+			}
+			if caseName == "" {
+				return true
+			}
+
+			// Extract the return string
+			for _, stmt := range caseClause.Body {
+				retStmt, ok := stmt.(*ast.ReturnStmt)
+				if !ok || len(retStmt.Results) == 0 {
+					continue
+				}
+				if lit, ok := retStmt.Results[0].(*ast.BasicLit); ok && lit.Kind == token.STRING {
+					stringMap[caseName] = strings.Trim(lit.Value, `"`)
+				}
+			}
+
+			return true
+		})
+		break // Found the String() method
+	}
+
+	// Step 3: Build the result list in enum declaration order
+	var entries []ClosedStateEntry
+	for _, name := range constNames {
+		desc, ok := stringMap[name]
+		if !ok {
+			desc = name // Fallback to the constant name
+		}
+		entries = append(entries, ClosedStateEntry{
+			ConstName:   name,
+			Description: desc,
+		})
+	}
+
+	return entries, nil
+}
+
+// -------------------------------------------------------------------
 // Header structures and parsing (with inline comment extraction)
 // -------------------------------------------------------------------
 
@@ -1029,23 +1185,53 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 	return buildHeaderSections(sections, sectionOrder), nil
 }
 
+// headerValueTypeOverrides provides exact type mappings for headers where
+// pattern-based matching would produce incorrect or overly generic results.
+var headerValueTypeOverrides = map[string]string{
+	"JSTimeStamp":               "RFC3339 timestamp",
+	"JSConsumerStalled":         "Reply subject",
+	"JSMsgRollup":               "`sub` or `all`",
+	"JSNumPending":              "Count",
+	"JSPullRequestPendingMsgs":  "Count",
+	"JSPullRequestPendingBytes": "Size in bytes",
+	"JSMarkerReason":            "`MaxAge`, `Purge`, or `Remove`",
+	"JSBatchCommit":             "`1`",
+	"JSBatchId":                 "Batch ID",
+	"JSResponseType":            "Response type string",
+	"MsgTraceDest":              "Subject",
+	"MsgTraceHop":               "Trace hop info",
+	"MsgTraceOriginAccount":     "Account name",
+	"MsgTraceOnly":              "Boolean flag",
+	"ClientInfoHdr":             "JSON-encoded client info",
+	"AuthRequestXKeyHeader":     "X-Key string",
+	"JSMsgId":                   "Unique message ID",
+	"JSExpectedStream":          "Stream name",
+	"JSExpectedLastMsgId":       "Message ID",
+	"JSExpectedLastSubjSeqSubj": "Subject",
+	"JSStreamSource":            "Stream source info",
+	"JSRequiredApiLevel":        "API level number",
+	"JSStream":                  "Stream name",
+	"JSSubject":                 "Subject",
+	"JSUpToSequence":            "Sequence number",
+	"JSPullRequestNatsPinId":    "Pin ID",
+	"JSSchedulePattern":         "Cron expression",
+	"JSScheduleTarget":          "Subject",
+	"JSScheduler":               "Scheduler ID",
+	"JSScheduleNext":            "RFC3339 timestamp or `purge`",
+	"KVOperation":               "`PUT`, `DEL`, or `PURGE`",
+}
+
 // headerValueType derives the value type from the constant name.
+// It checks exact overrides first, then falls back to reliable pattern matching.
 func headerValueType(constName string) string {
+	if vt, ok := headerValueTypeOverrides[constName]; ok {
+		return vt
+	}
 	switch {
 	case strings.Contains(constName, "Seq"):
 		return "Sequence number"
 	case strings.Contains(constName, "TTL"):
 		return "Duration"
-	case strings.Contains(constName, "Stream") && !strings.Contains(constName, "Source"):
-		return "Stream name"
-	case strings.Contains(constName, "Consumer"):
-		return "Consumer name"
-	case strings.Contains(constName, "Id"):
-		return "String"
-	case strings.Contains(constName, "Schedule"):
-		return "Cron expression or timestamp"
-	case strings.Contains(constName, "Batch"):
-		return "Number or ID"
 	case strings.Contains(constName, "Size"):
 		return "Size in bytes"
 	case strings.Contains(constName, "Incr"):
@@ -1100,6 +1286,7 @@ var headerDescriptionData = map[string]string{
 	"MsgTraceOnly":              "Indicates trace-only mode (message is not delivered)",
 	"ClientInfoHdr":             "Client authorization information for the request",
 	"AuthRequestXKeyHeader":     "Server X-Key for encrypted auth callout requests",
+	"KVOperation":               "Type of KV operation: PUT, DEL, or PURGE",
 }
 
 func headerDescriptionFallback(constName string) string {
@@ -1195,7 +1382,10 @@ func buildHeaderSections(sections map[string][]Header, sectionOrder []string) []
 		}
 
 		if len(sectionHeaders) > 0 || len(directHeaders) > 0 {
-			section := HeaderSection{Name: sectionName}
+			section := HeaderSection{
+				Name:        sectionName,
+				Description: getSectionDescription(sectionName),
+			}
 
 			if len(sectionHeaders) > 0 {
 				subsectionOrder := getSubsectionOrder(sectionName)
@@ -1248,6 +1438,27 @@ func getSubsectionOrder(sectionName string) []string {
 		}
 	default:
 		return []string{}
+	}
+}
+
+func getSectionDescription(sectionName string) string {
+	switch sectionName {
+	case "Message Publishing Headers":
+		return "Headers used when publishing messages to JetStream streams."
+	case "Message Delivery Headers":
+		return "Headers added by JetStream when delivering messages to consumers."
+	case "API Headers":
+		return "Headers used in JetStream API requests and responses."
+	case "Marker Headers":
+		return "Headers used to mark special message types in streams."
+	case "Authentication and Authorization Headers":
+		return "Headers used for authentication callout and authorization."
+	case "Message Tracing Headers":
+		return "Headers used for message tracing and diagnostics."
+	case "Key-Value Store Headers":
+		return "Headers used by the NATS Key-Value store built on JetStream."
+	default:
+		return ""
 	}
 }
 
@@ -1416,6 +1627,25 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 	sysErrors, err := parseSystemErrors(serverPath)
 	if err != nil {
 		return err
+	}
+
+	// Parse connection close reasons (ClosedState enum)
+	fmt.Println("Parsing connection close reasons...")
+	closedStates, err := parseClosedStates(serverPath)
+	if err != nil {
+		fmt.Printf("Warning: Could not parse ClosedState: %v\n", err)
+	} else if len(closedStates) > 0 {
+		var closeErrors []SystemError
+		for _, cs := range closedStates {
+			closeErrors = append(closeErrors, SystemError{
+				Name:        cs.ConstName,
+				Description: cs.Description,
+			})
+		}
+		sysErrors = append(sysErrors, SystemErrorCategory{
+			Name:   "Connection Close Reasons",
+			Errors: closeErrors,
+		})
 	}
 
 	// Parse headers

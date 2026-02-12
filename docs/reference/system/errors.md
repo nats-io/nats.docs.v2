@@ -150,3 +150,49 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrSubscribePermissionViolation` | ErrSubscribePermissionViolation is returned when processing of a subscription fails due to permissions. |
 
 
+## Connection Close Reasons
+
+These are the reasons a client connection may be closed by the server.
+They appear in monitoring data and disconnect events.
+
+| Error | Description |
+|-------|-------------|
+| `ClientClosed` | Client Closed |
+| `AuthenticationTimeout` | Authentication Timeout |
+| `AuthenticationViolation` | Authentication Failure |
+| `TLSHandshakeError` | TLS Handshake Failure |
+| `SlowConsumerPendingBytes` | Slow Consumer (Pending Bytes) |
+| `SlowConsumerWriteDeadline` | Slow Consumer (Write Deadline) |
+| `WriteError` | Write Error |
+| `ReadError` | Read Error |
+| `ParseError` | Parse Error |
+| `StaleConnection` | Stale Connection |
+| `ProtocolViolation` | Protocol Violation |
+| `BadClientProtocolVersion` | Bad Client Protocol Version |
+| `WrongPort` | Incorrect Port |
+| `MaxAccountConnectionsExceeded` | Maximum Account Connections Exceeded |
+| `MaxConnectionsExceeded` | Maximum Connections Exceeded |
+| `MaxPayloadExceeded` | Maximum Message Payload Exceeded |
+| `MaxControlLineExceeded` | Maximum Control Line Exceeded |
+| `MaxSubscriptionsExceeded` | Maximum Subscriptions Exceeded |
+| `DuplicateRoute` | Duplicate Route |
+| `RouteRemoved` | Route Removed |
+| `ServerShutdown` | Server Shutdown |
+| `AuthenticationExpired` | Authentication Expired |
+| `WrongGateway` | Wrong Gateway |
+| `MissingAccount` | Missing Account |
+| `Revocation` | Credentials Revoked |
+| `InternalClient` | Internal Client |
+| `MsgHeaderViolation` | Message Header Violation |
+| `NoRespondersRequiresHeaders` | No Responders Requires Headers |
+| `ClusterNameConflict` | Cluster Name Conflict |
+| `DuplicateRemoteLeafnodeConnection` | Duplicate Remote LeafNode Connection |
+| `DuplicateClientID` | Duplicate Client ID |
+| `DuplicateServerName` | Duplicate Server Name |
+| `MinimumVersionRequired` | Minimum Version Required |
+| `ClusterNamesIdentical` | Cluster Names Identical |
+| `Kicked` | Kicked |
+| `ProxyNotTrusted` | Proxy Not Trusted |
+| `ProxyRequired` | Proxy Required |
+
+

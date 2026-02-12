@@ -10,7 +10,10 @@ This page documents all non-JetStream errors that the NATS server can return to 
 
 {{range .Categories}}
 ## {{.Name}}
-
+{{if eq .Name "Connection Close Reasons"}}
+These are the reasons a client connection may be closed by the server.
+They appear in monitoring data and disconnect events.
+{{end}}
 | Error | Description |
 |-------|-------------|
 {{range .Errors}}| `{{.Name}}` | {{.Description}} |
