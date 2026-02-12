@@ -21,6 +21,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrRevocation` | ErrRevocation is returned when a credential has been revoked. |
 | `ErrServiceImportAuthorization` | ErrServiceImportAuthorization is returned when a service import is not authorized. |
 | `ErrStreamImportAuthorization` | ErrStreamImportAuthorization is returned when a stream import is not authorized. |
+| `Permissions Violation for Publish` | Client attempted to publish to a subject without permission |
 
 
 ## Connection Limit Errors
@@ -31,6 +32,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrTooManyConnections` | ErrTooManyConnections signals a client that the maximum number of connections supported by the server has been reached. |
 | `ErrTooManySubTokens` | ErrTooManySubTokens signals a client that the subject has too many tokens. |
 | `ErrTooManySubs` | ErrTooManySubs signals a client that the maximum number of subscriptions per connection has been reached. |
+| `Connection Throttling Is Active` | Server is actively throttling new connections |
 
 
 ## Protocol and Payload Errors
@@ -65,6 +67,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrReservedAccount` | ErrReservedAccount represents a reserved account that can not be created. |
 | `ErrReservedPublishSubject` | ErrReservedPublishSubject represents an error condition when sending to a reserved subject, e.g. `_SYS.>` |
 | `ErrUnknownMappingDestinationFunction` | ErrUnknownMappingDestinationFunction is returned when a subject mapping destination contains an unknown mustache-escaped mapping function. |
+| `Invalid Subscription` | Subscription request is invalid |
 
 
 ## TLS and Security Errors
@@ -72,6 +75,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | Error | Description |
 |-------|-------------|
 | `ErrCertNotPinned` | ErrCertNotPinned is returned when pinned certs are set and the certificate is not in it |
+| `Secure Connection - TLS Required` | Server requires TLS but client attempted non-TLS connection |
 
 
 ## Account Errors
@@ -93,6 +97,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrNoSysAccount` | ErrNoSysAccount is returned when an attempt to publish or subscribe is made when there is no internal system account defined. |
 | `ErrStreamImportBadPrefix` | ErrStreamImportBadPrefix is returned when a stream import prefix contains wildcards. |
 | `ErrStreamImportDuplicate` | ErrStreamImportDuplicate is returned when a stream import is a duplicate of one that already exists. |
+| `Failed Account Registration` | Failed to register client with account |
 
 
 ## Server Name and Cluster Errors
@@ -123,6 +128,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | Error | Description |
 |-------|-------------|
 | `ErrWrongGateway` | ErrWrongGateway represents an error condition when a server receives a connect request from a remote Gateway with a destination name that does not match the server's Gateway's name. |
+| `Connection to Gateway Rejected` | Gateway rejected the connection |
 
 
 ## Leafnode-Specific Errors
@@ -148,6 +154,13 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrCycleSearchDepth` | ErrCycleSearchDepth is returned when we have exceeded our maximum search depth.. |
 | `ErrMinimumVersionRequired` | ErrMinimumVersionRequired is returned when a connection is not at the minimum version required. |
 | `ErrSubscribePermissionViolation` | ErrSubscribePermissionViolation is returned when processing of a subscription fails due to permissions. |
+
+
+## Route-Specific Errors
+
+| Error | Description |
+|-------|-------------|
+| `Route Authorization Violation` | Route connection failed authorization |
 
 
 ## Connection Close Reasons

@@ -922,6 +922,50 @@ func categorizeSystemErrors(errors []SystemError) []SystemErrorCategory {
 	return result
 }
 
+// supplementalErrors provides protocol-level errors that are sent as -ERR messages
+// to clients but don't have corresponding Err* variable declarations in errors.go.
+// These are hand-curated to match runtime error strings from the server source.
+var supplementalErrors = []struct {
+	Name        string
+	Description string
+	Category    string
+}{
+	{"Permissions Violation for Publish", "Client attempted to publish to a subject without permission", "Authentication and Authorization Errors"},
+	{"Connection Throttling Is Active", "Server is actively throttling new connections", "Connection Limit Errors"},
+	{"Invalid Subscription", "Subscription request is invalid", "Subject and Publishing Errors"},
+	{"Secure Connection - TLS Required", "Server requires TLS but client attempted non-TLS connection", "TLS and Security Errors"},
+	{"Route Authorization Violation", "Route connection failed authorization", "Route-Specific Errors"},
+	{"Connection to Gateway Rejected", "Gateway rejected the connection", "Gateway-Specific Errors"},
+	{"Failed Account Registration", "Failed to register client with account", "Account Errors"},
+}
+
+// mergeSupplementalErrors adds curated protocol-level errors into the categorized
+// system errors list. It merges into existing categories or creates new ones.
+func mergeSupplementalErrors(categories []SystemErrorCategory) []SystemErrorCategory {
+	catMap := make(map[string]int)
+	for i, cat := range categories {
+		catMap[cat.Name] = i
+	}
+
+	for _, se := range supplementalErrors {
+		entry := SystemError{
+			Name:        se.Name,
+			Description: se.Description,
+		}
+		if idx, ok := catMap[se.Category]; ok {
+			categories[idx].Errors = append(categories[idx].Errors, entry)
+		} else {
+			categories = append(categories, SystemErrorCategory{
+				Name:   se.Category,
+				Errors: []SystemError{entry},
+			})
+			catMap[se.Category] = len(categories) - 1
+		}
+	}
+
+	return categories
+}
+
 // -------------------------------------------------------------------
 // ClosedState parsing: connection close reasons from nats-server
 // -------------------------------------------------------------------
@@ -1637,6 +1681,9 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 	if err != nil {
 		return err
 	}
+
+	// Merge supplemental protocol-level errors not in errors.go
+	sysErrors = mergeSupplementalErrors(sysErrors)
 
 	// Parse connection close reasons (ClosedState enum)
 	fmt.Println("Parsing connection close reasons...")
