@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/ipqueueszstatus.json",
-  "title": "io.nats.server.monitor.v1.ipqueueszstatus",
+  "$id": "https://nats.io/schemas/server/monitor/v1/ipqueuesz_response.json",
+  "title": "io.nats.server.monitor.v1.ipqueuesz_response",
   "description": "Response from ipqueuesz monitoring endpoint",
   "type": "object",
   "additionalProperties": {
@@ -13,6 +13,9 @@
       "pending": {
         "type": "integer"
       }
-    }
+    },
+    "required": [
+      "pending"
+    ]
   }
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/healthstatus.json",
-  "title": "io.nats.server.monitor.v1.healthstatus",
+  "$id": "https://nats.io/schemas/server/monitor/v1/healthz_response.json",
+  "title": "io.nats.server.monitor.v1.healthz_response",
   "description": "Response from healthz monitoring endpoint",
   "type": "object",
   "properties": {
@@ -26,9 +26,20 @@
             "type": "string"
           },
           "type": {
-            "type": "object"
+            "type": "string",
+            "enum": [
+              "CONNECTION",
+              "BAD_REQUEST",
+              "JETSTREAM",
+              "ACCOUNT",
+              "STREAM",
+              "CONSUMER"
+            ]
           }
-        }
+        },
+        "required": [
+          "type"
+        ]
       }
     },
     "status": {
@@ -37,5 +48,8 @@
     "status_code": {
       "type": "integer"
     }
-  }
+  },
+  "required": [
+    "status"
+  ]
 }

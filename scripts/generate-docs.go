@@ -9,7 +9,6 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -19,8 +18,6 @@ const (
 	natsServerPath = "../nats-server"
 	errorsJSONPath = "server/errors.json"
 	errorsGoPath   = "server/errors.go"
-	streamGoPath   = "server/stream.go"
-	monitorGoPath  = "server/monitor.go"
 )
 
 // Header source files - scanned in order to find all header constants
@@ -33,55 +30,239 @@ var headerSourceFiles = []string{
 	"server/auth_callout.go",
 }
 
-// JetStream Error structures
-type JSError struct {
-	Constant    string `json:"constant"`
-	Code        int    `json:"code"`
-	ErrorCode   int    `json:"error_code"`
-	Description string `json:"description"`
-	Comment     string `json:"comment"`
-	Help        string `json:"help"`
-	URL         string `json:"url"`
-	Deprecates  string `json:"deprecates"`
+// Monitor source files - parsed to build the TypeRegistry
+var monitorSourceFiles = []string{
+	"server/monitor.go",
+	"server/monitor_sort_opts.go",
+	"server/events.go",
 }
 
-type ErrorCategory struct {
-	Name   string
-	Errors []JSError
+// -------------------------------------------------------------------
+// TypeRegistry: multi-file Go type resolution
+// -------------------------------------------------------------------
+
+type TypeKind int
+
+const (
+	TypeKindStruct TypeKind = iota
+	TypeKindEnum
+	TypeKindAlias
+	TypeKindMap
+)
+
+type FieldInfo struct {
+	Name        string   // Go field name
+	JSONName    string   // from json tag
+	Type        ast.Expr // raw AST type
+	Description string   // from doc or inline comment
+	OmitEmpty   bool     // json tag has omitempty
+	OmitZero    bool     // json tag has omitzero
+	Embedded    bool     // embedded struct (no field name)
 }
 
-// System Error structures
-type SystemError struct {
-	Name        string
-	Description string
+type EnumValue struct {
+	Name  string // Go const name
+	Value string // string literal value
 }
 
-type SystemErrorCategory struct {
-	Name   string
-	Errors []SystemError
+type TypeInfo struct {
+	Name       string
+	Kind       TypeKind
+	Fields     []FieldInfo // for structs
+	EnumValues []EnumValue // for string enums
+	Doc        string      // doc comment on the type
+	Underlying ast.Expr    // for aliases
+	StructType *ast.StructType
 }
 
-// Header structures
-type Header struct {
-	Name        string
-	ValueType   string
-	Description string
+type TypeRegistry struct {
+	types map[string]*TypeInfo
 }
 
-type HeaderSubsection struct {
-	Name        string
-	Description string
-	Headers     []Header
+func NewTypeRegistry() *TypeRegistry {
+	return &TypeRegistry{
+		types: make(map[string]*TypeInfo),
+	}
 }
 
-type HeaderSection struct {
-	Name        string
-	Description string
-	Headers     []Header             // For sections without subsections
-	Subsections []HeaderSubsection   // For sections with subsections (e.g., Message Publishing Headers)
+// ParseFile parses a single Go source file and registers all types and const enums.
+func (r *TypeRegistry) ParseFile(path string) error {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+	if err != nil {
+		return fmt.Errorf("failed to parse %s: %w", path, err)
+	}
+
+	// First pass: collect all type declarations
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.TYPE {
+			continue
+		}
+		for _, spec := range genDecl.Specs {
+			typeSpec, ok := spec.(*ast.TypeSpec)
+			if !ok {
+				continue
+			}
+			info := &TypeInfo{Name: typeSpec.Name.Name}
+
+			// Extract doc comment
+			if typeSpec.Doc != nil {
+				info.Doc = typeSpec.Doc.Text()
+			} else if genDecl.Doc != nil && len(genDecl.Specs) == 1 {
+				info.Doc = genDecl.Doc.Text()
+			}
+
+			switch t := typeSpec.Type.(type) {
+			case *ast.StructType:
+				info.Kind = TypeKindStruct
+				info.StructType = t
+				info.Fields = extractFields(t, file)
+			case *ast.MapType:
+				info.Kind = TypeKindMap
+				info.Underlying = t
+			default:
+				info.Kind = TypeKindAlias
+				info.Underlying = typeSpec.Type
+			}
+			r.types[info.Name] = info
+		}
+	}
+
+	// Second pass: collect const blocks for enum values
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.CONST {
+			continue
+		}
+		r.extractEnumConsts(genDecl)
+	}
+
+	return nil
 }
 
+// extractFields extracts field info from a struct type, including inline comments.
+func extractFields(st *ast.StructType, file *ast.File) []FieldInfo {
+	var fields []FieldInfo
+	for _, field := range st.Fields.List {
+		fi := FieldInfo{Type: field.Type}
+
+		// Handle embedded structs (no names)
+		if len(field.Names) == 0 {
+			fi.Embedded = true
+			// Try to get the embedded type name
+			switch t := field.Type.(type) {
+			case *ast.Ident:
+				fi.Name = t.Name
+			case *ast.StarExpr:
+				if id, ok := t.X.(*ast.Ident); ok {
+					fi.Name = id.Name
+				}
+			}
+			fields = append(fields, fi)
+			continue
+		}
+
+		fi.Name = field.Names[0].Name
+
+		// Extract JSON tag
+		if field.Tag != nil {
+			jsonName, omitEmpty, omitZero, include := parseJSONTag(field.Tag.Value)
+			if !include {
+				continue
+			}
+			fi.JSONName = jsonName
+			fi.OmitEmpty = omitEmpty
+			fi.OmitZero = omitZero
+		}
+
+		// Extract description: doc comment first, then inline comment
+		if field.Doc != nil {
+			fi.Description = cleanComment(field.Doc.Text())
+		} else if field.Comment != nil {
+			fi.Description = cleanComment(field.Comment.Text())
+		}
+
+		fields = append(fields, fi)
+	}
+	return fields
+}
+
+// extractEnumConsts processes a const block and associates values with their type.
+func (r *TypeRegistry) extractEnumConsts(genDecl *ast.GenDecl) {
+	var currentType string
+
+	for _, spec := range genDecl.Specs {
+		vs, ok := spec.(*ast.ValueSpec)
+		if !ok {
+			continue
+		}
+
+		// Track the type name (may be specified only on first const in block)
+		if vs.Type != nil {
+			if id, ok := vs.Type.(*ast.Ident); ok {
+				currentType = id.Name
+			} else if callExpr, ok := vs.Type.(*ast.CallExpr); ok {
+				// Handle ConnState(iota) pattern
+				if fn, ok := callExpr.Fun.(*ast.Ident); ok {
+					currentType = fn.Name
+				}
+			}
+		}
+
+		// Check if the value is a type conversion like ConnState(iota)
+		if len(vs.Values) > 0 {
+			if call, ok := vs.Values[0].(*ast.CallExpr); ok {
+				if fn, ok := call.Fun.(*ast.Ident); ok {
+					if currentType == "" {
+						currentType = fn.Name
+					}
+				}
+			}
+		}
+
+		if currentType == "" {
+			continue
+		}
+
+		typeInfo, exists := r.types[currentType]
+		if !exists {
+			continue
+		}
+
+		for i, name := range vs.Names {
+			if !name.IsExported() {
+				continue
+			}
+
+			ev := EnumValue{Name: name.Name}
+
+			// Try to extract string literal value
+			if i < len(vs.Values) {
+				if lit, ok := vs.Values[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
+					ev.Value = strings.Trim(lit.Value, `"`)
+				}
+			}
+
+			typeInfo.EnumValues = append(typeInfo.EnumValues, ev)
+		}
+
+		// If we found enum values, mark as enum
+		if len(typeInfo.EnumValues) > 0 {
+			typeInfo.Kind = TypeKindEnum
+		}
+	}
+}
+
+// Resolve returns the TypeInfo for a given name, or nil.
+func (r *TypeRegistry) Resolve(name string) *TypeInfo {
+	return r.types[name]
+}
+
+// -------------------------------------------------------------------
 // JSON Schema structures
+// -------------------------------------------------------------------
+
 type JSONSchema struct {
 	Schema               string                  `json:"$schema"`
 	ID                   string                  `json:"$id"`
@@ -103,16 +284,345 @@ type JSONProperty struct {
 	Required             []string                `json:"required,omitempty"`
 	Format               string                  `json:"format,omitempty"`
 	Enum                 []string                `json:"enum,omitempty"`
+	Comment              string                  `json:"$comment,omitempty"`
 }
 
-// Monitor endpoint definition
+// -------------------------------------------------------------------
+// External types: cross-package types that can't be resolved from source
+// -------------------------------------------------------------------
+
+var externalTypes = map[string]JSONProperty{
+	"time.Time":     {Type: "string", Format: "date-time"},
+	"time.Duration": {Type: "integer", Comment: "nanoseconds depicting a duration in time"},
+	"jwt.TagList":   {Type: "array", Items: &JSONProperty{Type: "string"}},
+}
+
+// Known int enum mappings for types that use iota + custom JSON marshaling
+var knownIntEnumMappings = map[string][]string{
+	"ConnState":        {"open", "closed", "all"},
+	"HealthZErrorType": {"CONNECTION", "BAD_REQUEST", "JETSTREAM", "ACCOUNT", "STREAM", "CONSUMER"},
+	"ServerCapability": nil, // Integer flags, no string enum
+}
+
+// -------------------------------------------------------------------
+// Go type → JSON Schema conversion (using TypeRegistry)
+// -------------------------------------------------------------------
+
+func goTypeToJSONSchema(expr ast.Expr, registry *TypeRegistry, depth int) JSONProperty {
+	if depth > 10 {
+		return JSONProperty{Type: "object"}
+	}
+
+	switch t := expr.(type) {
+	case *ast.Ident:
+		return resolveIdent(t.Name, registry, depth)
+	case *ast.ArrayType:
+		itemProp := goTypeToJSONSchema(t.Elt, registry, depth+1)
+		return JSONProperty{Type: "array", Items: &itemProp}
+	case *ast.MapType:
+		valProp := goTypeToJSONSchema(t.Value, registry, depth+1)
+		return JSONProperty{Type: "object", AdditionalProperties: &valProp}
+	case *ast.StarExpr:
+		return goTypeToJSONSchema(t.X, registry, depth)
+	case *ast.SelectorExpr:
+		return resolveSelectorExpr(t)
+	case *ast.InterfaceType:
+		return JSONProperty{Type: "object"}
+	}
+	return JSONProperty{Type: "string"}
+}
+
+func resolveIdent(name string, registry *TypeRegistry, depth int) JSONProperty {
+	// Primitives
+	switch name {
+	case "string":
+		return JSONProperty{Type: "string"}
+	case "int", "int8", "int16", "int32", "int64",
+		"uint", "uint8", "uint16", "uint32", "uint64":
+		return JSONProperty{Type: "integer"}
+	case "float32", "float64":
+		return JSONProperty{Type: "number"}
+	case "bool":
+		return JSONProperty{Type: "boolean"}
+	case "byte":
+		return JSONProperty{Type: "integer"}
+	}
+
+	// Check registry
+	info := registry.Resolve(name)
+	if info == nil {
+		return JSONProperty{Type: "object"}
+	}
+
+	switch info.Kind {
+	case TypeKindEnum:
+		return resolveEnum(info)
+	case TypeKindStruct:
+		return resolveStruct(info, registry, depth)
+	case TypeKindMap:
+		if mt, ok := info.Underlying.(*ast.MapType); ok {
+			valProp := goTypeToJSONSchema(mt.Value, registry, depth+1)
+			return JSONProperty{Type: "object", AdditionalProperties: &valProp}
+		}
+		return JSONProperty{Type: "object"}
+	case TypeKindAlias:
+		// Resolve the underlying type
+		return goTypeToJSONSchema(info.Underlying, registry, depth+1)
+	}
+
+	return JSONProperty{Type: "object"}
+}
+
+func resolveEnum(info *TypeInfo) JSONProperty {
+	// Check if it's a known int enum with string mappings
+	if mappings, ok := knownIntEnumMappings[info.Name]; ok {
+		if mappings != nil {
+			return JSONProperty{Type: "string", Enum: mappings}
+		}
+		return JSONProperty{Type: "integer"}
+	}
+
+	// String enum: extract values
+	var enumValues []string
+	for _, ev := range info.EnumValues {
+		if ev.Value != "" {
+			enumValues = append(enumValues, ev.Value)
+		}
+	}
+	if len(enumValues) > 0 {
+		return JSONProperty{Type: "string", Enum: enumValues}
+	}
+
+	return JSONProperty{Type: "string"}
+}
+
+func resolveStruct(info *TypeInfo, registry *TypeRegistry, depth int) JSONProperty {
+	props, required := buildStructProperties(info, registry, depth+1)
+	prop := JSONProperty{
+		Type:       "object",
+		Properties: props,
+	}
+	if len(required) > 0 {
+		prop.Required = required
+	}
+	return prop
+}
+
+func resolveSelectorExpr(sel *ast.SelectorExpr) JSONProperty {
+	pkgIdent, ok := sel.X.(*ast.Ident)
+	if !ok {
+		return JSONProperty{Type: "object"}
+	}
+
+	key := pkgIdent.Name + "." + sel.Sel.Name
+	if prop, ok := externalTypes[key]; ok {
+		return prop
+	}
+
+	return JSONProperty{Type: "object"}
+}
+
+// -------------------------------------------------------------------
+// Struct → JSON Schema properties (handles embedding + required fields)
+// -------------------------------------------------------------------
+
+func buildStructProperties(info *TypeInfo, registry *TypeRegistry, depth int) (map[string]JSONProperty, []string) {
+	if depth > 10 {
+		return nil, nil
+	}
+
+	props := make(map[string]JSONProperty)
+	var required []string
+
+	for _, field := range info.Fields {
+		if field.Embedded {
+			// Resolve embedded struct and merge its fields
+			embeddedInfo := registry.Resolve(field.Name)
+			if embeddedInfo != nil && embeddedInfo.Kind == TypeKindStruct {
+				embProps, embRequired := buildStructProperties(embeddedInfo, registry, depth+1)
+				for k, v := range embProps {
+					props[k] = v
+				}
+				required = append(required, embRequired...)
+			}
+			continue
+		}
+
+		jsonName := field.JSONName
+		if jsonName == "" {
+			jsonName = strings.ToLower(field.Name)
+		}
+
+		prop := goTypeToJSONSchema(field.Type, registry, depth)
+
+		if field.Description != "" {
+			prop.Description = field.Description
+		}
+
+		props[jsonName] = prop
+
+		// Fields without omitempty/omitzero are required
+		if !field.OmitEmpty && !field.OmitZero && jsonName != "" {
+			required = append(required, jsonName)
+		}
+	}
+
+	sort.Strings(required)
+	return props, required
+}
+
+// -------------------------------------------------------------------
+// Monitor endpoint definitions
+// -------------------------------------------------------------------
+
 type MonitorEndpoint struct {
-	Name           string // e.g., "varz", "connz"
-	OptionsStruct  string // e.g., "VarzOptions", "ConnzOptions"
-	ResponseStruct string // e.g., "Varz", "Connz"
+	Name           string
+	OptionsStruct  string
+	ResponseStruct string
 }
 
-// categorizeJSErrors groups errors by their prefix
+func getMonitorEndpoints() []MonitorEndpoint {
+	return []MonitorEndpoint{
+		// Note: varz response comes from jsm.go, only generate request schema
+		{Name: "varz", OptionsStruct: "VarzOptions", ResponseStruct: ""},
+		{Name: "connz", OptionsStruct: "ConnzOptions", ResponseStruct: "Connz"},
+		{Name: "routez", OptionsStruct: "RoutezOptions", ResponseStruct: "Routez"},
+		{Name: "subsz", OptionsStruct: "SubszOptions", ResponseStruct: "Subsz"},
+		{Name: "gatewayz", OptionsStruct: "GatewayzOptions", ResponseStruct: "Gatewayz"},
+		{Name: "leafz", OptionsStruct: "LeafzOptions", ResponseStruct: "Leafz"},
+		{Name: "accountz", OptionsStruct: "AccountzOptions", ResponseStruct: "Accountz"},
+		{Name: "jsz", OptionsStruct: "JSzOptions", ResponseStruct: "JSInfo"},
+		{Name: "healthz", OptionsStruct: "HealthzOptions", ResponseStruct: "HealthStatus"},
+		{Name: "profilez", OptionsStruct: "ProfilezOptions", ResponseStruct: "ProfilezStatus"},
+		{Name: "ipqueuesz", OptionsStruct: "IpqueueszOptions", ResponseStruct: "IpqueueszStatus"},
+		{Name: "raftz", OptionsStruct: "RaftzOptions", ResponseStruct: "RaftzStatus"},
+		{Name: "accstatz", OptionsStruct: "AccountStatzOptions", ResponseStruct: "AccountStatz"},
+		{Name: "statsz", OptionsStruct: "StatszEventOptions", ResponseStruct: "ServerStats"},
+		{Name: "idz", OptionsStruct: "", ResponseStruct: "ServerInfo"},
+	}
+}
+
+// -------------------------------------------------------------------
+// Schema generation from TypeRegistry
+// -------------------------------------------------------------------
+
+func generateMonitorSchemas(serverPath, outputDir string, registry *TypeRegistry, dryRun bool) error {
+	endpoints := getMonitorEndpoints()
+	schemasDir := filepath.Join(outputDir, "src/schemas/server/monitor/v1")
+
+	if !dryRun {
+		if err := os.MkdirAll(schemasDir, 0755); err != nil {
+			return fmt.Errorf("failed to create schemas directory: %w", err)
+		}
+	}
+
+	for _, ep := range endpoints {
+		// Generate request schema
+		if ep.OptionsStruct != "" {
+			info := registry.Resolve(ep.OptionsStruct)
+			if info != nil && info.Kind == TypeKindStruct {
+				schema := typeInfoToSchema(info, registry, ep.Name, "request")
+				filename := filepath.Join(schemasDir, ep.Name+"_request.json")
+				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
+					return err
+				}
+			} else {
+				fmt.Printf("Warning: Options struct %s not found for %s\n", ep.OptionsStruct, ep.Name)
+			}
+		}
+
+		// Generate response schema
+		if ep.ResponseStruct != "" {
+			info := registry.Resolve(ep.ResponseStruct)
+			if info != nil {
+				var schema JSONSchema
+				switch info.Kind {
+				case TypeKindStruct:
+					schema = typeInfoToSchema(info, registry, ep.Name, "response")
+				case TypeKindMap:
+					schema = mapTypeInfoToSchema(info, registry, ep.Name, "response")
+				default:
+					schema = typeInfoToSchema(info, registry, ep.Name, "response")
+				}
+				filename := filepath.Join(schemasDir, ep.Name+"_response.json")
+				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
+					return err
+				}
+			} else {
+				fmt.Printf("Warning: Response struct %s not found for %s\n", ep.ResponseStruct, ep.Name)
+			}
+		}
+	}
+
+	return nil
+}
+
+func typeInfoToSchema(info *TypeInfo, registry *TypeRegistry, endpointName, schemaType string) JSONSchema {
+	props, required := buildStructProperties(info, registry, 0)
+
+	schema := JSONSchema{
+		Schema:     "http://json-schema.org/draft-07/schema#",
+		ID:         fmt.Sprintf("https://nats.io/schemas/server/monitor/v1/%s_%s.json", endpointName, schemaType),
+		Title:      fmt.Sprintf("io.nats.server.monitor.v1.%s_%s", endpointName, schemaType),
+		Type:       "object",
+		Properties: props,
+	}
+
+	if schemaType == "request" {
+		schema.Description = fmt.Sprintf("Request options for %s monitoring endpoint", endpointName)
+	} else {
+		schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpointName)
+	}
+
+	if len(required) > 0 {
+		schema.Required = required
+	}
+
+	return schema
+}
+
+func mapTypeInfoToSchema(info *TypeInfo, registry *TypeRegistry, endpointName, schemaType string) JSONSchema {
+	schema := JSONSchema{
+		Schema: "http://json-schema.org/draft-07/schema#",
+		ID:     fmt.Sprintf("https://nats.io/schemas/server/monitor/v1/%s_%s.json", endpointName, schemaType),
+		Title:  fmt.Sprintf("io.nats.server.monitor.v1.%s_%s", endpointName, schemaType),
+		Type:   "object",
+	}
+
+	if schemaType == "request" {
+		schema.Description = fmt.Sprintf("Request options for %s monitoring endpoint", endpointName)
+	} else {
+		schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpointName)
+	}
+
+	if mt, ok := info.Underlying.(*ast.MapType); ok {
+		valProp := goTypeToJSONSchema(mt.Value, registry, 0)
+		schema.AdditionalProperties = &valProp
+	}
+
+	return schema
+}
+
+// -------------------------------------------------------------------
+// JetStream Error structures and parsing (kept from original)
+// -------------------------------------------------------------------
+
+type JSError struct {
+	Constant    string `json:"constant"`
+	Code        int    `json:"code"`
+	ErrorCode   int    `json:"error_code"`
+	Description string `json:"description"`
+	Comment     string `json:"comment"`
+	Help        string `json:"help"`
+	URL         string `json:"url"`
+	Deprecates  string `json:"deprecates"`
+}
+
+type ErrorCategory struct {
+	Name   string
+	Errors []JSError
+}
+
 func categorizeJSErrors(errors []JSError) []ErrorCategory {
 	categories := make(map[string][]JSError)
 	categoryOrder := []string{
@@ -148,14 +658,12 @@ func categorizeJSErrors(errors []JSError) []ErrorCategory {
 		categories[category] = append(categories[category], err)
 	}
 
-	// Sort errors within each category by error code
 	for _, errs := range categories {
 		sort.Slice(errs, func(i, j int) bool {
 			return errs[i].ErrorCode < errs[j].ErrorCode
 		})
 	}
 
-	// Build ordered result
 	var result []ErrorCategory
 	for _, name := range categoryOrder {
 		fullName := name + " Errors"
@@ -164,8 +672,6 @@ func categorizeJSErrors(errors []JSError) []ErrorCategory {
 			delete(categories, fullName)
 		}
 	}
-
-	// Add any remaining categories
 	for name, errs := range categories {
 		result = append(result, ErrorCategory{Name: name, Errors: errs})
 	}
@@ -173,16 +679,21 @@ func categorizeJSErrors(errors []JSError) []ErrorCategory {
 	return result
 }
 
-// escapeMDXCurlyBraces escapes curly braces for MDX compatibility using HTML entities
 func escapeMDXCurlyBraces(s string) string {
-	// Replace { with &#123; (HTML entity)
 	s = strings.ReplaceAll(s, "{", "&#123;")
-	// Replace } with &#125; (HTML entity)
 	s = strings.ReplaceAll(s, "}", "&#125;")
 	return s
 }
 
-// parseJSErrors reads and parses the JetStream errors JSON
+// escapeMDX escapes characters that MDX would interpret as JSX.
+func escapeMDX(s string) string {
+	s = strings.ReplaceAll(s, "{", "&#123;")
+	s = strings.ReplaceAll(s, "}", "&#125;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	return s
+}
+
 func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 	path := filepath.Join(serverPath, errorsJSONPath)
 	data, err := os.ReadFile(path)
@@ -195,7 +706,6 @@ func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 		return nil, fmt.Errorf("failed to parse errors.json: %w", err)
 	}
 
-	// Escape curly braces in descriptions for MDX compatibility
 	for i := range errors {
 		errors[i].Description = escapeMDXCurlyBraces(errors[i].Description)
 	}
@@ -203,113 +713,175 @@ func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 	return categorizeJSErrors(errors), nil
 }
 
-// getManualSystemErrors returns errors that are sent as string literals in the server code
-// (not defined as Go error variables, so they can't be extracted via AST parsing)
-func getManualSystemErrors() []SystemErrorCategory {
-	return []SystemErrorCategory{
-		{
-			Name: "TLS and Security Errors",
-			Errors: []SystemError{
-				{Name: "Secure Connection - TLS Required", Description: "Server requires TLS but client attempted non-TLS connection"},
-				{Name: "TLS Handshake Error", Description: "TLS handshake failed"},
-				{Name: "Certificate Not Pinned", Description: "Client certificate is not in the pinned certificates list"},
-			},
-		},
-		{
-			Name: "Route-Specific Errors",
-			Errors: []SystemError{
-				{Name: "Duplicate Route", Description: "Route already exists to this server"},
-				{Name: "Route Authorization Violation", Description: "Route connection failed authorization"},
-				{Name: "Cluster Name From Remote Server Conflicts", Description: "Remote route server has conflicting cluster name"},
-				{Name: "Minimum Version Required", Description: "Route connection does not meet minimum version requirement"},
-			},
-		},
-		{
-			Name: "Slow Consumer and Flow Control",
-			Errors: []SystemError{
-				{Name: "Slow Consumer", Description: "Client is not consuming messages fast enough"},
-				{Name: "Write Deadline Exceeded", Description: "Write operation exceeded deadline"},
-			},
-		},
-		{
-			Name: "Configuration and Resolver Errors",
-			Errors: []SystemError{
-				{Name: "Account Resolver Missing", Description: "Account resolver is not configured"},
-				{Name: "System Account Not Configured", Description: "System account is not properly configured"},
-				{Name: "Credentials Revoked", Description: "Client credentials have been revoked"},
-			},
-		},
-	}
+// -------------------------------------------------------------------
+// System Error structures and AST-based parsing
+// -------------------------------------------------------------------
+
+type SystemError struct {
+	Name        string
+	Description string
 }
 
-// parseSystemErrors extracts error variables from errors.go
+type SystemErrorCategory struct {
+	Name   string
+	Errors []SystemError
+}
+
+// parseSystemErrors extracts error variables from errors.go using AST parsing.
+// It reads doc comments above each error variable for the description.
 func parseSystemErrors(serverPath string) ([]SystemErrorCategory, error) {
 	path := filepath.Join(serverPath, errorsGoPath)
-	data, err := os.ReadFile(path)
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read errors.go: %w", err)
+		return nil, fmt.Errorf("failed to parse %s: %w", path, err)
 	}
 
-	content := string(data)
+	var allErrors []SystemError
 
-	// Define error categories and their patterns
-	categories := []struct {
-		Name    string
-		Pattern *regexp.Regexp
-	}{
-		{"Authentication and Authorization Errors", regexp.MustCompile(`Err(Auth|Authentication|Authorization|Permissions)`)},
-		{"Connection Limit Errors", regexp.MustCompile(`Err(TooMany|Maximum|Throttl)`)},
-		{"Protocol and Payload Errors", regexp.MustCompile(`Err(MaxPayload|MaxControl|Protocol|Parser|Header|Responders)`)},
-		{"Subject and Publishing Errors", regexp.MustCompile(`Err(BadSubject|InvalidSubject|BadPublish|InvalidPublish|Reserved|Malformed|InvalidSubscription)`)},
-		{"TLS and Security Errors", regexp.MustCompile(`Err(TLS|Secure|Certificate|Proxy)`)},
-		{"Account Errors", regexp.MustCompile(`Err(Account|Service|Stream.*Import|Failed.*Registration)`)},
-		{"Server Name and Cluster Errors", regexp.MustCompile(`Err(Duplicate.*Server|.*Name.*Conflicts|.*Cannot.*Contain.*Spaces)`)},
-		{"Wrong Port Connection Errors", regexp.MustCompile(`Err(.*Connected.*To.*Port)`)},
-		{"Route-Specific Errors", regexp.MustCompile(`Err(Route|.*Route.*)`)},
-		{"Gateway-Specific Errors", regexp.MustCompile(`Err(Gateway|.*Gateway.*)`)},
-		{"Leafnode-Specific Errors", regexp.MustCompile(`Err(Leaf|.*Leaf.*)`)},
-		{"Slow Consumer and Flow Control", regexp.MustCompile(`Err(Slow|Write.*Deadline)`)},
-		{"Connection State Errors", regexp.MustCompile(`Err(Connection.*Closed|Stale|.*Not.*Running)`)},
-		{"Configuration and Resolver Errors", regexp.MustCompile(`Err(Resolver|System.*Account|Credentials.*Revoked)`)},
-	}
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.VAR {
+			continue
+		}
 
-	// Extract error definitions using regex
-	errorPattern := regexp.MustCompile(`(?m)^\s*Err([A-Z][a-zA-Z0-9]+)\s*=\s*errors\.New\("([^"]+)"\)`)
-	matches := errorPattern.FindAllStringSubmatch(content, -1)
-
-	errorMap := make(map[string]SystemError)
-	for _, match := range matches {
-		if len(match) >= 3 {
-			varName := "Err" + match[1]
-			description := match[2]
-
-			// Capitalize first letter of description
-			if len(description) > 0 {
-				description = strings.ToUpper(description[:1]) + description[1:]
+		for _, spec := range genDecl.Specs {
+			vs, ok := spec.(*ast.ValueSpec)
+			if !ok {
+				continue
 			}
 
-			errorMap[varName] = SystemError{
-				Name:        humanizeName(description),
-				Description: description,
+			for _, name := range vs.Names {
+				if !strings.HasPrefix(name.Name, "Err") {
+					continue
+				}
+
+				// Extract description from doc comment
+				var description string
+				if vs.Doc != nil {
+					description = cleanComment(vs.Doc.Text())
+				} else if vs.Comment != nil {
+					description = cleanComment(vs.Comment.Text())
+				}
+
+				if description == "" {
+					// Fallback: use the error string itself
+					description = extractErrorString(vs)
+					if description != "" {
+						description = capitalize(description)
+					}
+				}
+
+				allErrors = append(allErrors, SystemError{
+					Name:        name.Name,
+					Description: escapeMDX(description),
+				})
 			}
 		}
 	}
 
-	// Categorize errors
+	return categorizeSystemErrors(allErrors), nil
+}
+
+// extractErrorString extracts the string argument from errors.New("...") or fmt.Errorf("...", ...)
+func extractErrorString(vs *ast.ValueSpec) string {
+	if len(vs.Values) == 0 {
+		return ""
+	}
+
+	call, ok := vs.Values[0].(*ast.CallExpr)
+	if !ok {
+		return ""
+	}
+
+	if len(call.Args) == 0 {
+		return ""
+	}
+
+	// First arg should be a string literal
+	lit, ok := call.Args[0].(*ast.BasicLit)
+	if !ok || lit.Kind != token.STRING {
+		return ""
+	}
+
+	return strings.Trim(lit.Value, `"`)
+}
+
+// categorizeSystemErrors groups system errors into categories based on patterns.
+func categorizeSystemErrors(errors []SystemError) []SystemErrorCategory {
+	type categoryDef struct {
+		Name    string
+		Matches func(string) bool
+	}
+
+	categories := []categoryDef{
+		{"Authentication and Authorization Errors", func(n string) bool {
+			return strings.Contains(n, "Auth") || strings.Contains(n, "Permissions") || strings.Contains(n, "Revocation")
+		}},
+		{"Connection Limit Errors", func(n string) bool {
+			return (strings.Contains(n, "TooMany") && !strings.Contains(n, "Mapping")) ||
+				strings.Contains(n, "Maximum") || strings.Contains(n, "Throttl")
+		}},
+		{"Protocol and Payload Errors", func(n string) bool {
+			return strings.Contains(n, "MaxPayload") || strings.Contains(n, "MaxControl") ||
+				strings.Contains(n, "Protocol") || strings.Contains(n, "Parser") ||
+				strings.Contains(n, "Header") || strings.Contains(n, "Responders") ||
+				strings.Contains(n, "BadClient")
+		}},
+		{"Subject and Publishing Errors", func(n string) bool {
+			return strings.Contains(n, "BadSubject") || strings.Contains(n, "InvalidSubject") ||
+				strings.Contains(n, "BadPublish") || strings.Contains(n, "InvalidPublish") ||
+				strings.Contains(n, "Reserved") || strings.Contains(n, "Malformed") ||
+				strings.Contains(n, "InvalidSubscription") || strings.Contains(n, "SubTokens") ||
+				strings.Contains(n, "BadQualifier") || strings.Contains(n, "NoTransforms") ||
+				strings.Contains(n, "Mapping")
+		}},
+		{"TLS and Security Errors", func(n string) bool {
+			return strings.Contains(n, "TLS") || strings.Contains(n, "Secure") ||
+				strings.Contains(n, "Cert") || strings.Contains(n, "Proxy")
+		}},
+		{"Account Errors", func(n string) bool {
+			return strings.Contains(n, "Account") || strings.Contains(n, "Service") ||
+				strings.Contains(n, "StreamImport") || strings.Contains(n, "ServiceImport") ||
+				strings.Contains(n, "Import") || strings.Contains(n, "Sampling")
+		}},
+		{"Server Name and Cluster Errors", func(n string) bool {
+			return strings.Contains(n, "Duplicate") || strings.Contains(n, "ClusterName") ||
+				strings.Contains(n, "ServerName") || strings.Contains(n, "Spaces")
+		}},
+		{"Wrong Port Connection Errors", func(n string) bool {
+			return strings.Contains(n, "ConnectedTo") || strings.Contains(n, "WrongPort")
+		}},
+		{"Route-Specific Errors", func(n string) bool {
+			return strings.Contains(n, "Route")
+		}},
+		{"Gateway-Specific Errors", func(n string) bool {
+			return strings.Contains(n, "Gateway")
+		}},
+		{"Leafnode-Specific Errors", func(n string) bool {
+			return strings.Contains(n, "Leaf")
+		}},
+		{"Slow Consumer and Flow Control", func(n string) bool {
+			return strings.Contains(n, "Slow") || strings.Contains(n, "WriteDeadline") || strings.Contains(n, "Stall")
+		}},
+		{"Connection State Errors", func(n string) bool {
+			return strings.Contains(n, "ConnectionClosed") || strings.Contains(n, "Stale") || strings.Contains(n, "NotRunning")
+		}},
+	}
+
 	result := make([]SystemErrorCategory, 0)
 	used := make(map[string]bool)
 
 	for _, cat := range categories {
 		var catErrors []SystemError
-		for varName, sysErr := range errorMap {
-			if cat.Pattern.MatchString(varName) && !used[varName] {
+		for _, sysErr := range errors {
+			if cat.Matches(sysErr.Name) && !used[sysErr.Name] {
 				catErrors = append(catErrors, sysErr)
-				used[varName] = true
+				used[sysErr.Name] = true
 			}
 		}
-
 		if len(catErrors) > 0 {
-			// Sort alphabetically
 			sort.Slice(catErrors, func(i, j int) bool {
 				return catErrors[i].Name < catErrors[j].Name
 			})
@@ -320,58 +892,51 @@ func parseSystemErrors(serverPath string) ([]SystemErrorCategory, error) {
 		}
 	}
 
-	// Add manual errors that are sent as string literals (not Go error variables)
-	manualErrors := getManualSystemErrors()
-	for _, manualCat := range manualErrors {
-		// Check if category already exists
-		found := false
-		for i := range result {
-			if result[i].Name == manualCat.Name {
-				// Merge manual errors into existing category
-				result[i].Errors = append(result[i].Errors, manualCat.Errors...)
-				// Re-sort
-				sort.Slice(result[i].Errors, func(a, b int) bool {
-					return result[i].Errors[a].Name < result[i].Errors[b].Name
-				})
-				found = true
-				break
-			}
-		}
-		if !found {
-			// Add new category
-			result = append(result, manualCat)
+	// Collect uncategorized errors
+	var uncategorized []SystemError
+	for _, sysErr := range errors {
+		if !used[sysErr.Name] {
+			uncategorized = append(uncategorized, sysErr)
 		}
 	}
+	if len(uncategorized) > 0 {
+		sort.Slice(uncategorized, func(i, j int) bool {
+			return uncategorized[i].Name < uncategorized[j].Name
+		})
+		result = append(result, SystemErrorCategory{
+			Name:   "Other Errors",
+			Errors: uncategorized,
+		})
+	}
 
-	return result, nil
+	return result
 }
 
-// humanizeName converts error string to human-readable name
-func humanizeName(s string) string {
-	// Special cases
-	replacements := map[string]string{
-		"authentication error":                        "Authentication Error",
-		"authentication timeout":                      "Authentication Timeout",
-		"authentication expired":                      "Authentication Expired",
-		"maximum payload exceeded":                    "Maximum Payload Exceeded",
-		"maximum control line exceeded":               "Maximum Control Line Exceeded",
-		"maximum connections exceeded":                "Maximum Connections Exceeded",
-		"maximum account active connections exceeded": "Maximum Account Active Connections Exceeded",
-	}
+// -------------------------------------------------------------------
+// Header structures and parsing (with inline comment extraction)
+// -------------------------------------------------------------------
 
-	lower := strings.ToLower(s)
-	if replacement, ok := replacements[lower]; ok {
-		return replacement
-	}
-
-	// Capitalize first letter
-	if len(s) > 0 {
-		return strings.ToUpper(s[:1]) + s[1:]
-	}
-	return s
+type Header struct {
+	Name        string
+	ValueType   string
+	Description string
 }
 
-// parseHeaders extracts header constants from multiple nats-server source files
+type HeaderSubsection struct {
+	Name        string
+	Description string
+	Headers     []Header
+}
+
+type HeaderSection struct {
+	Name        string
+	Description string
+	Headers     []Header
+	Subsections []HeaderSubsection
+}
+
+// parseHeaders extracts header constants from multiple nats-server source files.
+// Uses AST parsing to extract both doc comments and inline comments.
 func parseHeaders(serverPath string) ([]HeaderSection, error) {
 	sections := make(map[string][]Header)
 	sectionOrder := []string{
@@ -384,27 +949,28 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 		"Key-Value Store Headers",
 	}
 
-	// Scan all header source files
 	for _, sourceFile := range headerSourceFiles {
 		path := filepath.Join(serverPath, sourceFile)
 
 		fset := token.NewFileSet()
 		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
 		if err != nil {
-			// Some files might not exist in older versions, skip with warning
 			fmt.Printf("Warning: Could not parse %s: %v\n", sourceFile, err)
 			continue
 		}
 
-		// Walk the AST
 		ast.Inspect(file, func(n ast.Node) bool {
-			// Look for const and var blocks
 			genDecl, ok := n.(*ast.GenDecl)
 			if !ok || (genDecl.Tok != token.CONST && genDecl.Tok != token.VAR) {
 				return true
 			}
 
-			// Extract constants
+			// Get block-level doc comment
+			var blockDoc string
+			if genDecl.Doc != nil {
+				blockDoc = cleanComment(genDecl.Doc.Text())
+			}
+
 			for _, spec := range genDecl.Specs {
 				valueSpec, ok := spec.(*ast.ValueSpec)
 				if !ok {
@@ -416,7 +982,6 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 						continue
 					}
 
-					// Get the string value
 					basicLit, ok := valueSpec.Values[i].(*ast.BasicLit)
 					if !ok || basicLit.Kind != token.STRING {
 						continue
@@ -427,13 +992,27 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 						continue
 					}
 
-					header := Header{
-						Name:        headerValue,
-						ValueType:   inferValueType(name.Name),
-						Description: inferDescription(name.Name, headerValue),
+					// Extract description: spec doc > spec inline comment > block doc > fallback
+					var description string
+					if valueSpec.Doc != nil {
+						description = cleanComment(valueSpec.Doc.Text())
+					} else if valueSpec.Comment != nil {
+						description = cleanComment(valueSpec.Comment.Text())
+					} else if blockDoc != "" && len(genDecl.Specs) == 1 {
+						description = blockDoc
 					}
 
-					// Categorize with subsection support
+					// If still empty, use fallback from data
+					if description == "" {
+						description = headerDescriptionFallback(name.Name)
+					}
+
+					header := Header{
+						Name:        headerValue,
+						ValueType:   headerValueType(name.Name),
+						Description: description,
+					}
+
 					sectionName, subsectionName := categorizeHeaderWithSubsection(headerValue)
 					key := sectionName
 					if subsectionName != "" {
@@ -447,75 +1026,90 @@ func parseHeaders(serverPath string) ([]HeaderSection, error) {
 		})
 	}
 
-	// Build ordered result with subsection support
-	var result []HeaderSection
-	for _, sectionName := range sectionOrder {
-		// Collect all headers for this section (both with and without subsections)
-		sectionHeaders := make(map[string][]Header) // subsection name -> headers
-		var directHeaders []Header                   // headers without subsection
+	return buildHeaderSections(sections, sectionOrder), nil
+}
 
-		for key, headers := range sections {
-			if strings.HasPrefix(key, sectionName) {
-				if strings.Contains(key, "|") {
-					// Has subsection
-					parts := strings.SplitN(key, "|", 2)
-					subsectionName := parts[1]
-					sectionHeaders[subsectionName] = headers
-				} else if key == sectionName {
-					// No subsection
-					directHeaders = headers
-				}
-			}
-		}
-
-		// Only add section if it has headers
-		if len(sectionHeaders) > 0 || len(directHeaders) > 0 {
-			section := HeaderSection{
-				Name: sectionName,
-			}
-
-			if len(sectionHeaders) > 0 {
-				// Build subsections
-				subsectionOrder := getSubsectionOrder(sectionName)
-				for _, subsectionName := range subsectionOrder {
-					if headers, ok := sectionHeaders[subsectionName]; ok {
-						subsection := HeaderSubsection{
-							Name:        subsectionName,
-							Description: getSubsectionDescription(sectionName, subsectionName),
-							Headers:     headers,
-						}
-						section.Subsections = append(section.Subsections, subsection)
-						delete(sectionHeaders, subsectionName)
-					}
-				}
-				// Add any remaining subsections not in order
-				for subsectionName, headers := range sectionHeaders {
-					subsection := HeaderSubsection{
-						Name:    subsectionName,
-						Headers: headers,
-					}
-					section.Subsections = append(section.Subsections, subsection)
-				}
-			} else {
-				// No subsections, use direct headers
-				section.Headers = directHeaders
-			}
-
-			result = append(result, section)
-		}
+// headerValueType derives the value type from the constant name.
+func headerValueType(constName string) string {
+	switch {
+	case strings.Contains(constName, "Seq"):
+		return "Sequence number"
+	case strings.Contains(constName, "TTL"):
+		return "Duration"
+	case strings.Contains(constName, "Stream") && !strings.Contains(constName, "Source"):
+		return "Stream name"
+	case strings.Contains(constName, "Consumer"):
+		return "Consumer name"
+	case strings.Contains(constName, "Id"):
+		return "String"
+	case strings.Contains(constName, "Schedule"):
+		return "Cron expression or timestamp"
+	case strings.Contains(constName, "Batch"):
+		return "Number or ID"
+	case strings.Contains(constName, "Size"):
+		return "Size in bytes"
+	case strings.Contains(constName, "Incr"):
+		return "Number"
+	default:
+		return "String"
 	}
-
-	return result, nil
 }
 
-// categorizeHeader determines which section a header belongs to
-func categorizeHeader(name string) string {
-	section, _ := categorizeHeaderWithSubsection(name)
-	return section
+// headerDescriptionFallback provides descriptions for headers that lack source comments.
+// This is used only when AST comment extraction yields nothing.
+var headerDescriptionData = map[string]string{
+	"JSMsgId":                   "Unique message ID for deduplication. Messages with the same ID within the deduplication window will be rejected as duplicates.",
+	"JSExpectedStream":          "Verifies the message is being published to the expected stream",
+	"JSExpectedLastSeq":         "Message will only be stored if the stream's last sequence matches this value",
+	"JSExpectedLastSubjSeq":     "Message will only be stored if the last sequence for this subject matches this value",
+	"JSExpectedLastSubjSeqSubj": "Specifies the subject for the expected last subject sequence check",
+	"JSExpectedLastMsgId":       "Message will only be stored if the last message ID matches this value",
+	"JSStreamSource":            "Information about the source stream in format: stream-name > seq > subject",
+	"JSLastConsumerSeq":         "Consumer's last delivered sequence",
+	"JSLastStreamSeq":           "Stream's last sequence at delivery time",
+	"JSConsumerStalled":         "Indicates consumer is stalled with delivery count",
+	"JSMsgRollup":               "Indicates this message should replace previous messages. sub replaces all previous messages on the same subject, all replaces all messages in the stream",
+	"JSMsgSize":                 "Indicates the size of the message payload",
+	"JSResponseType":            "Type of response being sent",
+	"JSMessageTTL":              "Time-to-live for the message. Message will be automatically removed after this duration",
+	"JSMarkerReason":            "Reason for the marker: MaxAge, Purge, or Remove",
+	"JSMessageIncr":             "Increment value for counter operations",
+	"JSMessageCounterSources":   "Sources for counter values in JSON format",
+	"JSBatchId":                 "Unique identifier for the batch",
+	"JSBatchSeq":                "Sequence number within the batch",
+	"JSBatchCommit":             "Marks the final message in a batch, triggering atomic commit",
+	"JSSchedulePattern":         "Schedule pattern for message delivery",
+	"JSScheduleTTL":             "Time-to-live for the schedule",
+	"JSScheduleTarget":          "Target subject for scheduled delivery",
+	"JSScheduler":               "Identifier for the scheduler",
+	"JSScheduleNext":            "Next scheduled time or purge indicator",
+	"JSStream":                  "Name of the stream the message came from",
+	"JSSequence":                "Stream sequence number of the message",
+	"JSTimeStamp":               "Timestamp when the message was stored",
+	"JSSubject":                 "Original subject the message was published to",
+	"JSLastSequence":            "Last sequence number in the stream when this message was delivered",
+	"JSNumPending":              "Number of pending messages for the consumer",
+	"JSUpToSequence":            "Upper bound sequence for batch delivery",
+	"JSPullRequestPendingMsgs":  "Number of pending messages for the pull request",
+	"JSPullRequestPendingBytes": "Number of pending bytes for the pull request",
+	"JSPullRequestNatsPinId":    "Pin ID for the pull request",
+	"JSRequiredApiLevel":        "Required API level for the request",
+	"MsgTraceDest":              "Destination subject for message tracing",
+	"MsgTraceHop":               "Trace hop information",
+	"MsgTraceOriginAccount":     "Origin account for message tracing",
+	"MsgTraceOnly":              "Indicates trace-only mode (message is not delivered)",
+	"ClientInfoHdr":             "Client authorization information for the request",
+	"AuthRequestXKeyHeader":     "Server X-Key for encrypted auth callout requests",
 }
 
-// categorizeHeaderWithSubsection determines which section and subsection a header belongs to
-// Returns (section, subsection). If subsection is empty, the header goes directly in the section.
+func headerDescriptionFallback(constName string) string {
+	if desc, ok := headerDescriptionData[constName]; ok {
+		return desc
+	}
+	return ""
+}
+
+// categorizeHeaderWithSubsection determines which section and subsection a header belongs to.
 func categorizeHeaderWithSubsection(name string) (section string, subsection string) {
 	// Message Publishing Headers with subsections
 	if strings.HasSuffix(name, "Msg-Id") {
@@ -563,7 +1157,7 @@ func categorizeHeaderWithSubsection(name string) (section string, subsection str
 		return "Message Delivery Headers", "Response Type"
 	}
 
-	// Top-level sections (no subsections)
+	// Top-level sections
 	if strings.Contains(name, "Required-Api") {
 		return "API Headers", ""
 	}
@@ -583,7 +1177,54 @@ func categorizeHeaderWithSubsection(name string) (section string, subsection str
 	return "Other Headers", ""
 }
 
-// getSubsectionOrder returns the ordered list of subsections for a given section
+func buildHeaderSections(sections map[string][]Header, sectionOrder []string) []HeaderSection {
+	var result []HeaderSection
+	for _, sectionName := range sectionOrder {
+		sectionHeaders := make(map[string][]Header)
+		var directHeaders []Header
+
+		for key, headers := range sections {
+			if strings.HasPrefix(key, sectionName) {
+				if strings.Contains(key, "|") {
+					parts := strings.SplitN(key, "|", 2)
+					sectionHeaders[parts[1]] = headers
+				} else if key == sectionName {
+					directHeaders = headers
+				}
+			}
+		}
+
+		if len(sectionHeaders) > 0 || len(directHeaders) > 0 {
+			section := HeaderSection{Name: sectionName}
+
+			if len(sectionHeaders) > 0 {
+				subsectionOrder := getSubsectionOrder(sectionName)
+				for _, subsectionName := range subsectionOrder {
+					if headers, ok := sectionHeaders[subsectionName]; ok {
+						section.Subsections = append(section.Subsections, HeaderSubsection{
+							Name:        subsectionName,
+							Description: getSubsectionDescription(sectionName, subsectionName),
+							Headers:     headers,
+						})
+						delete(sectionHeaders, subsectionName)
+					}
+				}
+				for subsectionName, headers := range sectionHeaders {
+					section.Subsections = append(section.Subsections, HeaderSubsection{
+						Name:    subsectionName,
+						Headers: headers,
+					})
+				}
+			} else {
+				section.Headers = directHeaders
+			}
+
+			result = append(result, section)
+		}
+	}
+	return result
+}
+
 func getSubsectionOrder(sectionName string) []string {
 	switch sectionName {
 	case "Message Publishing Headers":
@@ -610,7 +1251,6 @@ func getSubsectionOrder(sectionName string) []string {
 	}
 }
 
-// getSubsectionDescription returns the description for a subsection
 func getSubsectionDescription(sectionName, subsectionName string) string {
 	switch sectionName {
 	case "Message Publishing Headers":
@@ -624,201 +1264,19 @@ func getSubsectionDescription(sectionName, subsectionName string) string {
 		}
 	case "Message Delivery Headers":
 		switch subsectionName {
-		case "Stream Information":
-			return ""
-		case "Consumer Information":
-			return ""
 		case "Pull Request Headers":
 			return "Headers used in pull request responses:"
-		case "Source and Mirror Information":
-			return ""
-		case "Response Type":
-			return ""
 		}
 	}
 	return ""
 }
 
-// inferValueType infers the type of value for a header
-func inferValueType(constName string) string {
-	switch {
-	case strings.Contains(constName, "Seq"):
-		return "Sequence number"
-	case strings.Contains(constName, "TTL"):
-		return "Duration"
-	case strings.Contains(constName, "Stream"):
-		return "Stream name"
-	case strings.Contains(constName, "Consumer"):
-		return "Consumer name"
-	case strings.Contains(constName, "Id"):
-		return "String"
-	case strings.Contains(constName, "Schedule"):
-		return "Cron expression or timestamp"
-	case strings.Contains(constName, "Batch"):
-		return "Number or ID"
-	case strings.Contains(constName, "Size"):
-		return "Size in bytes"
-	default:
-		return "String"
-	}
-}
+// -------------------------------------------------------------------
+// Helpers
+// -------------------------------------------------------------------
 
-// inferDescription generates a description for a header
-func inferDescription(constName, headerName string) string {
-	descriptions := map[string]string{
-		"JSMsgId":                   "Unique message ID for deduplication. Messages with the same ID within the deduplication window will be rejected as duplicates.",
-		"JSExpectedStream":          "Verifies the message is being published to the expected stream",
-		"JSExpectedLastSeq":         "Message will only be stored if the stream's last sequence matches this value",
-		"JSExpectedLastSubjSeq":     "Message will only be stored if the last sequence for this subject matches this value",
-		"JSExpectedLastSubjSeqSubj": "Specifies the subject for the expected last subject sequence check",
-		"JSExpectedLastMsgId":       "Message will only be stored if the last message ID matches this value",
-		"JSStreamSource":            "Information about the source stream in format: \"stream-name > seq > subject\"",
-		"JSLastConsumerSeq":         "Consumer's last delivered sequence",
-		"JSLastStreamSeq":           "Stream's last sequence at delivery time",
-		"JSConsumerStalled":         "Indicates consumer is stalled with delivery count",
-		"JSMsgRollup":               "Indicates this message should replace previous messages. `sub` replaces all previous messages on the same subject, `all` replaces all messages in the stream",
-		"JSMsgSize":                 "Indicates the size of the message payload",
-		"JSResponseType":            "Type of response being sent",
-		"JSMessageTTL":              "Time-to-live for the message (e.g., \"60s\", \"5m\"). Message will be automatically removed after this duration",
-		"JSMarkerReason":            "Reason for the marker: `MaxAge`, `Purge`, or `Remove`",
-		"JSMessageIncr":             "Increment value for counter operations",
-		"JSMessageCounterSources":   "Sources for counter values in JSON format",
-		"JSBatchId":                 "Unique identifier for the batch",
-		"JSBatchSeq":                "Sequence number within the batch",
-		"JSBatchCommit":             "Marks the final message in a batch, triggering atomic commit",
-		"JSSchedulePattern":         "Schedule pattern for message delivery",
-		"JSScheduleTTL":             "Time-to-live for the schedule",
-		"JSScheduleTarget":          "Target subject for scheduled delivery",
-		"JSScheduler":               "Identifier for the scheduler",
-		"JSScheduleNext":            "Next scheduled time or purge indicator",
-		"JSStream":                  "Name of the stream the message came from",
-		"JSSequence":                "Stream sequence number of the message",
-		"JSTimeStamp":               "Timestamp when the message was stored",
-		"JSSubject":                 "Original subject the message was published to",
-		"JSLastSequence":            "Last sequence number in the stream when this message was delivered",
-		"JSNumPending":              "Number of pending messages for the consumer",
-		"JSUpToSequence":            "Upper bound sequence for batch delivery",
-	}
-
-	if desc, ok := descriptions[constName]; ok {
-		return desc
-	}
-
-	// Generate generic description
-	return fmt.Sprintf("Header: %s", headerName)
-}
-
-// generateDocs generates documentation files from templates
-// getMonitorEndpoints returns the list of monitor endpoints to generate schemas for
-func getMonitorEndpoints() []MonitorEndpoint {
-	return []MonitorEndpoint{
-		{Name: "varz", OptionsStruct: "VarzOptions", ResponseStruct: "Varz"},
-		{Name: "connz", OptionsStruct: "ConnzOptions", ResponseStruct: "Connz"},
-		{Name: "routez", OptionsStruct: "RoutezOptions", ResponseStruct: "Routez"},
-		{Name: "subsz", OptionsStruct: "SubszOptions", ResponseStruct: "Subsz"},
-		{Name: "gatewayz", OptionsStruct: "GatewayzOptions", ResponseStruct: "Gatewayz"},
-		{Name: "leafz", OptionsStruct: "LeafzOptions", ResponseStruct: "Leafz"},
-		{Name: "accountz", OptionsStruct: "AccountzOptions", ResponseStruct: "Accountz"},
-		{Name: "jsz", OptionsStruct: "JSzOptions", ResponseStruct: "JSInfo"},
-		{Name: "healthz", OptionsStruct: "HealthzOptions", ResponseStruct: "HealthStatus"},
-		{Name: "profilez", OptionsStruct: "ProfilezOptions", ResponseStruct: "ProfilezStatus"},
-		{Name: "raftz", OptionsStruct: "RaftzOptions", ResponseStruct: "RaftzStatus"},
-		{Name: "ipqueuesz", OptionsStruct: "IpqueueszOptions", ResponseStruct: "IpqueueszStatus"},
-		// Note: statsz, accstatz, idz don't have dedicated structs - they use runtime stats
-		{Name: "statsz", OptionsStruct: "", ResponseStruct: ""},
-		{Name: "accstatz", OptionsStruct: "", ResponseStruct: ""},
-		{Name: "idz", OptionsStruct: "", ResponseStruct: ""},
-	}
-}
-
-// parseMonitorStructs parses monitor.go and extracts struct definitions and type aliases
-func parseMonitorStructs(serverPath string) (map[string]*ast.StructType, map[string]ast.Expr, *ast.File, error) {
-	monitorPath := filepath.Join(serverPath, monitorGoPath)
-
-	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, monitorPath, nil, parser.ParseComments)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to parse %s: %w", monitorPath, err)
-	}
-
-	structs := make(map[string]*ast.StructType)
-	typeAliases := make(map[string]ast.Expr)
-
-	// Walk AST to find struct type declarations and type aliases
-	ast.Inspect(file, func(n ast.Node) bool {
-		typeSpec, ok := n.(*ast.TypeSpec)
-		if !ok {
-			return true
-		}
-
-		if structType, ok := typeSpec.Type.(*ast.StructType); ok {
-			structs[typeSpec.Name.Name] = structType
-		} else {
-			// Store other type declarations (maps, aliases, etc.)
-			typeAliases[typeSpec.Name.Name] = typeSpec.Type
-		}
-		return true
-	})
-
-	return structs, typeAliases, file, nil
-}
-
-// goTypeToJSONType converts Go types to JSON Schema types
-func goTypeToJSONType(expr ast.Expr, structs map[string]*ast.StructType, file *ast.File) (string, *JSONProperty) {
-	switch t := expr.(type) {
-	case *ast.Ident:
-		switch t.Name {
-		case "string":
-			return "string", nil
-		case "int", "int8", "int16", "int32", "int64",
-			"uint", "uint8", "uint16", "uint32", "uint64":
-			return "integer", nil
-		case "float32", "float64":
-			return "number", nil
-		case "bool":
-			return "boolean", nil
-		case "Time":
-			return "string", &JSONProperty{Format: "date-time"}
-		default:
-			// Custom type - try to resolve it
-			if structType, ok := structs[t.Name]; ok {
-				// Convert the struct to a JSONProperty
-				schema := structToJSONSchema(t.Name, structType, structs, file)
-				return "object", &JSONProperty{
-					Type:       "object",
-					Properties: schema.Properties,
-				}
-			}
-			// Unknown custom type - treat as object
-			return "object", nil
-		}
-	case *ast.ArrayType:
-		itemType, itemProp := goTypeToJSONType(t.Elt, structs, file)
-		if itemProp == nil {
-			itemProp = &JSONProperty{Type: itemType}
-		}
-		return "array", &JSONProperty{Items: itemProp}
-	case *ast.MapType:
-		return "object", &JSONProperty{Type: "object"}
-	case *ast.StarExpr:
-		// Pointer - unwrap and process the underlying type
-		return goTypeToJSONType(t.X, structs, file)
-	case *ast.SelectorExpr:
-		// Package selector like time.Time
-		if ident, ok := t.X.(*ast.Ident); ok && ident.Name == "time" && t.Sel.Name == "Time" {
-			return "string", &JSONProperty{Format: "date-time"}
-		}
-		return "object", nil
-	}
-	return "string", nil
-}
-
-// extractJSONTag extracts the field name from json struct tag
-func extractJSONTag(tag string) (string, bool) {
-	if tag == "" {
-		return "", false
-	}
-
+// parseJSONTag parses a json struct tag and returns (fieldName, omitEmpty, omitZero, include).
+func parseJSONTag(tag string) (string, bool, bool, bool) {
 	tag = strings.Trim(tag, "`")
 	parts := strings.Fields(tag)
 
@@ -827,222 +1285,69 @@ func extractJSONTag(tag string) (string, bool) {
 			jsonValue := strings.TrimPrefix(part, "json:")
 			jsonValue = strings.Trim(jsonValue, `"`)
 
-			// Handle json:"-" (omit field)
 			if jsonValue == "-" {
-				return "", false
+				return "", false, false, false
 			}
 
-			// Handle json:"fieldname,omitempty"
-			fieldName := strings.Split(jsonValue, ",")[0]
-			return fieldName, true
-		}
-	}
-
-	return "", false
-}
-
-// structToJSONSchema converts a Go struct to a JSON Schema
-func structToJSONSchema(structName string, structType *ast.StructType, structs map[string]*ast.StructType, file *ast.File) JSONSchema {
-	schema := JSONSchema{
-		Schema:      "http://json-schema.org/draft-07/schema#",
-		ID:          "https://nats.io/schemas/server/monitor/v1/" + strings.ToLower(structName) + ".json",
-		Title:       "io.nats.server.monitor.v1." + strings.ToLower(structName),
-		Description: fmt.Sprintf("NATS Server %s monitoring endpoint", structName),
-		Type:        "object",
-		Properties:  make(map[string]JSONProperty),
-	}
-
-	for _, field := range structType.Fields.List {
-		// Get field name from JSON tag
-		var fieldName string
-		var include bool
-
-		if field.Tag != nil {
-			fieldName, include = extractJSONTag(field.Tag.Value)
-			if !include {
-				continue
-			}
-		}
-
-		// If no JSON tag, use field name (lowercased)
-		if fieldName == "" && len(field.Names) > 0 {
-			fieldName = strings.ToLower(field.Names[0].Name)
-		}
-
-		if fieldName == "" {
-			continue
-		}
-
-		// Get field type
-		jsonType, prop := goTypeToJSONType(field.Type, structs, file)
-
-		if prop == nil {
-			prop = &JSONProperty{Type: jsonType}
-		} else if prop.Type == "" {
-			prop.Type = jsonType
-		}
-
-		// Extract description from field comment
-		if field.Doc != nil && len(field.Doc.List) > 0 {
-			var desc []string
-			for _, comment := range field.Doc.List {
-				text := strings.TrimPrefix(comment.Text, "//")
-				text = strings.TrimSpace(text)
-				if text != "" {
-					desc = append(desc, text)
+			segments := strings.Split(jsonValue, ",")
+			fieldName := segments[0]
+			omitEmpty := false
+			omitZero := false
+			for _, seg := range segments[1:] {
+				if seg == "omitempty" {
+					omitEmpty = true
+				}
+				if seg == "omitzero" {
+					omitZero = true
 				}
 			}
-			if len(desc) > 0 {
-				prop.Description = strings.Join(desc, " ")
-			}
-		}
 
-		schema.Properties[fieldName] = *prop
+			return fieldName, omitEmpty, omitZero, true
+		}
 	}
 
-	return schema
+	return "", false, false, false
 }
 
-// typeAliasToJSONSchema converts a type alias (like map types) to a JSON Schema
-func typeAliasToJSONSchema(typeName string, typeExpr ast.Expr, structs map[string]*ast.StructType, file *ast.File) JSONSchema {
-	schema := JSONSchema{
-		Schema:      "http://json-schema.org/draft-07/schema#",
-		ID:          "https://nats.io/schemas/server/monitor/v1/" + strings.ToLower(typeName) + ".json",
-		Title:       "io.nats.server.monitor.v1." + strings.ToLower(typeName),
-		Description: fmt.Sprintf("NATS Server %s monitoring endpoint", typeName),
+// cleanComment strips Go comment markers and extra whitespace, and joins multi-line text.
+func cleanComment(s string) string {
+	s = strings.TrimSpace(s)
+	// Join multi-line comments into a single line
+	s = strings.ReplaceAll(s, "\n", " ")
+	// Collapse multiple spaces
+	for strings.Contains(s, "  ") {
+		s = strings.ReplaceAll(s, "  ", " ")
 	}
-
-	// Handle map types
-	if mapType, ok := typeExpr.(*ast.MapType); ok {
-		schema.Type = "object"
-
-		// Get the value type of the map
-		valueType, valueProp := goTypeToJSONType(mapType.Value, structs, file)
-
-		// Set additionalProperties to describe the map value type
-		if valueProp != nil {
-			schema.AdditionalProperties = valueProp
-		} else {
-			schema.AdditionalProperties = &JSONProperty{
-				Type: valueType,
-			}
-		}
-	} else {
-		// For other type aliases, convert the underlying type
-		jsonType, prop := goTypeToJSONType(typeExpr, structs, file)
-		schema.Type = jsonType
-		if prop != nil && prop.Properties != nil {
-			schema.Properties = prop.Properties
-		}
-	}
-
-	return schema
+	s = strings.TrimSpace(s)
+	// Remove leading comment markers if any remain
+	s = strings.TrimPrefix(s, "// ")
+	return s
 }
 
-// generateMonitorSchemas generates JSON schemas for all monitor endpoints
-func generateMonitorSchemas(serverPath, outputDir string, dryRun bool) error {
-	// Parse monitor.go
-	structs, typeAliases, file, err := parseMonitorStructs(serverPath)
-	if err != nil {
-		return err
+// capitalize uppercases the first letter.
+func capitalize(s string) string {
+	if len(s) == 0 {
+		return s
 	}
-
-	endpoints := getMonitorEndpoints()
-	schemasDir := filepath.Join(outputDir, "src/schemas/server/monitor/v1")
-
-	if !dryRun {
-		if err := os.MkdirAll(schemasDir, 0755); err != nil {
-			return fmt.Errorf("failed to create schemas directory: %w", err)
-		}
-	}
-
-	for _, endpoint := range endpoints {
-		// Skip endpoints without struct definitions
-		if endpoint.OptionsStruct == "" && endpoint.ResponseStruct == "" {
-			// Generate minimal schemas for statsz, accstatz, idz
-			if err := generateMinimalSchema(endpoint.Name, "request", schemasDir, dryRun); err != nil {
-				return err
-			}
-			if err := generateMinimalSchema(endpoint.Name, "response", schemasDir, dryRun); err != nil {
-				return err
-			}
-			continue
-		}
-
-		// Generate request schema (Options struct)
-		if endpoint.OptionsStruct != "" {
-			if structType, ok := structs[endpoint.OptionsStruct]; ok {
-				schema := structToJSONSchema(endpoint.OptionsStruct, structType, structs, file)
-				schema.Description = fmt.Sprintf("Request options for %s monitoring endpoint", endpoint.Name)
-
-				filename := filepath.Join(schemasDir, endpoint.Name+"_request.json")
-				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
-					return err
-				}
-			}
-		} else {
-			// No options struct - generate empty schema
-			if err := generateMinimalSchema(endpoint.Name, "request", schemasDir, dryRun); err != nil {
-				return err
-			}
-		}
-
-		// Generate response schema
-		if endpoint.ResponseStruct != "" {
-			if structType, ok := structs[endpoint.ResponseStruct]; ok {
-				schema := structToJSONSchema(endpoint.ResponseStruct, structType, structs, file)
-				schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpoint.Name)
-
-				filename := filepath.Join(schemasDir, endpoint.Name+"_response.json")
-				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
-					return err
-				}
-			} else if typeExpr, ok := typeAliases[endpoint.ResponseStruct]; ok {
-				// Handle type aliases like map types
-				schema := typeAliasToJSONSchema(endpoint.ResponseStruct, typeExpr, structs, file)
-				schema.Description = fmt.Sprintf("Response from %s monitoring endpoint", endpoint.Name)
-
-				filename := filepath.Join(schemasDir, endpoint.Name+"_response.json")
-				if err := writeJSONSchema(schema, filename, dryRun); err != nil {
-					return err
-				}
-			}
-		} else {
-			// No response struct - generate empty schema
-			if err := generateMinimalSchema(endpoint.Name, "response", schemasDir, dryRun); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
+	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-// generateMinimalSchema creates a minimal schema for endpoints without dedicated structs
-func generateMinimalSchema(endpoint, schemaType, outputDir string, dryRun bool) error {
-	schema := JSONSchema{
-		Schema:      "http://json-schema.org/draft-07/schema#",
-		ID:          fmt.Sprintf("https://nats.io/schemas/server/monitor/v1/%s_%s.json", endpoint, schemaType),
-		Title:       fmt.Sprintf("io.nats.server.monitor.v1.%s_%s", endpoint, schemaType),
-		Description: fmt.Sprintf("%s for %s monitoring endpoint", strings.Title(schemaType), endpoint),
-		Type:        "object",
-		Properties:  make(map[string]JSONProperty),
-	}
+// -------------------------------------------------------------------
+// File writing
+// -------------------------------------------------------------------
 
-	filename := filepath.Join(outputDir, fmt.Sprintf("%s_%s.json", endpoint, schemaType))
-	return writeJSONSchema(schema, filename, dryRun)
-}
-
-// writeJSONSchema writes a JSON schema to a file
 func writeJSONSchema(schema JSONSchema, filename string, dryRun bool) error {
 	data, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal schema: %w", err)
 	}
 
+	// Append newline
+	data = append(data, '\n')
+
 	if dryRun {
 		fmt.Printf("Would write to: %s\n", filename)
-		fmt.Println(string(data))
+		fmt.Print(string(data))
 		return nil
 	}
 
@@ -1050,11 +1355,55 @@ func writeJSONSchema(schema JSONSchema, filename string, dryRun bool) error {
 		return fmt.Errorf("failed to write schema %s: %w", filename, err)
 	}
 
-	fmt.Printf("✓ Generated schema: %s\n", filename)
+	fmt.Printf("Generated schema: %s\n", filename)
 	return nil
 }
 
+func generateFromTemplate(tmplPath, outPath string, data interface{}, dryRun bool) error {
+	tmpl, err := template.ParseFiles(tmplPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse template %s: %w", tmplPath, err)
+	}
+
+	if dryRun {
+		fmt.Printf("Would write to: %s\n", outPath)
+		return tmpl.Execute(os.Stdout, data)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	f, err := os.Create(outPath)
+	if err != nil {
+		return fmt.Errorf("failed to create file %s: %w", outPath, err)
+	}
+	defer f.Close()
+
+	if err := tmpl.Execute(f, data); err != nil {
+		return fmt.Errorf("failed to execute template: %w", err)
+	}
+
+	fmt.Printf("Generated: %s\n", outPath)
+	return nil
+}
+
+// -------------------------------------------------------------------
+// Main generation pipeline
+// -------------------------------------------------------------------
+
 func generateDocs(serverPath, outputDir string, dryRun bool) error {
+	// Build TypeRegistry from all monitor source files
+	fmt.Println("Building type registry...")
+	registry := NewTypeRegistry()
+	for _, sourceFile := range monitorSourceFiles {
+		path := filepath.Join(serverPath, sourceFile)
+		if err := registry.ParseFile(path); err != nil {
+			return fmt.Errorf("failed to parse %s: %w", sourceFile, err)
+		}
+	}
+	fmt.Printf("  Registered %d types\n", len(registry.types))
+
 	// Parse JetStream errors
 	fmt.Println("Parsing JetStream errors...")
 	jsErrors, err := parseJSErrors(serverPath)
@@ -1062,7 +1411,7 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 		return err
 	}
 
-	// Parse system errors
+	// Parse system errors (AST-based)
 	fmt.Println("Parsing system errors...")
 	sysErrors, err := parseSystemErrors(serverPath)
 	if err != nil {
@@ -1111,42 +1460,11 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 
 	// Generate monitor schemas
 	fmt.Println("Generating monitor endpoint schemas...")
-	if err := generateMonitorSchemas(serverPath, outputDir, dryRun); err != nil {
+	if err := generateMonitorSchemas(serverPath, outputDir, registry, dryRun); err != nil {
 		return err
 	}
 
-	fmt.Println("✓ Documentation generation complete!")
-	return nil
-}
-
-// generateFromTemplate renders a template to a file
-func generateFromTemplate(tmplPath, outPath string, data interface{}, dryRun bool) error {
-	tmpl, err := template.ParseFiles(tmplPath)
-	if err != nil {
-		return fmt.Errorf("failed to parse template %s: %w", tmplPath, err)
-	}
-
-	if dryRun {
-		fmt.Printf("Would write to: %s\n", outPath)
-		return tmpl.Execute(os.Stdout, data)
-	}
-
-	// Ensure directory exists
-	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	f, err := os.Create(outPath)
-	if err != nil {
-		return fmt.Errorf("failed to create file %s: %w", outPath, err)
-	}
-	defer f.Close()
-
-	if err := tmpl.Execute(f, data); err != nil {
-		return fmt.Errorf("failed to execute template: %w", err)
-	}
-
-	fmt.Printf("✓ Generated: %s\n", outPath)
+	fmt.Println("Documentation generation complete!")
 	return nil
 }
 
@@ -1156,14 +1474,11 @@ func main() {
 	dryRun := flag.Bool("dry-run", false, "Print output to stdout instead of writing files")
 	flag.Parse()
 
-	// Determine server path
 	serverPath := *serverPathFlag
 	if serverPath == "" {
-		// Try relative path first
 		if _, err := os.Stat(filepath.Join("..", "nats-server")); err == nil {
 			serverPath = filepath.Join("..", "nats-server")
 		} else {
-			// Try home directory
 			home, err := os.UserHomeDir()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -1173,7 +1488,6 @@ func main() {
 		}
 	}
 
-	// Verify server path exists
 	if _, err := os.Stat(serverPath); os.IsNotExist(err) {
 		fmt.Fprintf(os.Stderr, "Error: nats-server path does not exist: %s\n", serverPath)
 		fmt.Fprintf(os.Stderr, "Use -server flag to specify the correct path\n")

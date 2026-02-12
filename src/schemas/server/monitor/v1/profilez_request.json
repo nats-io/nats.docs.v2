@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/profilezoptions.json",
-  "title": "io.nats.server.monitor.v1.profilezoptions",
+  "$id": "https://nats.io/schemas/server/monitor/v1/profilez_request.json",
+  "title": "io.nats.server.monitor.v1.profilez_request",
   "description": "Request options for profilez monitoring endpoint",
   "type": "object",
   "properties": {
@@ -9,10 +9,15 @@
       "type": "integer"
     },
     "duration": {
-      "type": "object"
+      "type": "integer",
+      "$comment": "nanoseconds depicting a duration in time"
     },
     "name": {
       "type": "string"
     }
-  }
+  },
+  "required": [
+    "debug",
+    "name"
+  ]
 }

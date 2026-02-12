@@ -34,7 +34,7 @@ These headers enforce expected state conditions when publishing. If conditions a
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Rollup` | String | Indicates this message should replace previous messages. `sub` replaces all previous messages on the same subject, `all` replaces all messages in the stream |
+| `Nats-Rollup` | String | Indicates this message should replace previous messages. sub replaces all previous messages on the same subject, all replaces all messages in the stream |
 
 
 
@@ -50,7 +50,7 @@ These headers enforce expected state conditions when publishing. If conditions a
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-TTL` | Duration | Time-to-live for the message (e.g., "60s", "5m"). Message will be automatically removed after this duration |
+| `Nats-TTL` | Duration | Time-to-live for the message. Message will be automatically removed after this duration |
 
 
 
@@ -58,7 +58,7 @@ These headers enforce expected state conditions when publishing. If conditions a
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Incr` | String | Increment value for counter operations |
+| `Nats-Incr` | Number | Increment value for counter operations |
 | `Nats-Counter-Sources` | String | Sources for counter values in JSON format |
 
 
@@ -106,7 +106,7 @@ Headers for scheduled message delivery:
 | `Nats-Sequence` | Sequence number | Stream sequence number of the message |
 | `Nats-Time-Stamp` | String | Timestamp when the message was stored |
 | `Nats-Subject` | String | Original subject the message was published to |
-| `Nats-Last-Sequence` | Sequence number | Last sequence number in the stream when this message was delivered |
+| `Nats-Last-Sequence` | Sequence number | The sequence number of the precedent message either republished or in a batch of responses. 0 in the first message. |
 | `Nats-UpTo-Sequence` | Sequence number | Upper bound sequence for batch delivery |
 
 
@@ -127,10 +127,10 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Num-Pending` | String | Number of pending messages for the consumer |
-| `Nats-Pending-Messages` | String | Header: Nats-Pending-Messages |
-| `Nats-Pending-Bytes` | String | Header: Nats-Pending-Bytes |
-| `Nats-Pin-Id` | String | Header: Nats-Pin-Id |
+| `Nats-Num-Pending` | String | Number of messages pending in the multi/batched get response |
+| `Nats-Pending-Messages` | String | Number of pending messages for the pull request |
+| `Nats-Pending-Bytes` | String | Number of pending bytes for the pull request |
+| `Nats-Pin-Id` | String | Pin ID for the pull request |
 
 
 
@@ -138,7 +138,7 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Stream-Source` | Stream name | Information about the source stream in format: "stream-name > seq > subject" |
+| `Nats-Stream-Source` | String | Information about the source stream in format: stream-name > seq > subject |
 
 
 
@@ -158,7 +158,7 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Required-Api-Level` | String | Header: Nats-Required-Api-Level |
+| `Nats-Required-Api-Level` | String | JSRequiredApiLevel requires the API level of the responding server to have the specified minimum value. |
 
 
 
@@ -170,7 +170,7 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Marker-Reason` | String | Reason for the marker: `MaxAge`, `Purge`, or `Remove` |
+| `Nats-Marker-Reason` | String | Reason for the marker: MaxAge, Purge, or Remove |
 
 
 
@@ -182,8 +182,8 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Request-Info` | String | Header: Nats-Request-Info |
-| `Nats-Server-Xkey` | String | Header: Nats-Server-Xkey |
+| `Nats-Request-Info` | String | Client authorization information for the request |
+| `Nats-Server-Xkey` | String | Server X-Key for encrypted auth callout requests |
 
 
 
@@ -195,10 +195,10 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Trace-Dest` | String | Header: Nats-Trace-Dest |
-| `Nats-Trace-Hop` | String | Header: Nats-Trace-Hop |
-| `Nats-Trace-Origin-Account` | String | Header: Nats-Trace-Origin-Account |
-| `Nats-Trace-Only` | String | Header: Nats-Trace-Only |
+| `Nats-Trace-Dest` | String | Destination subject for message tracing |
+| `Nats-Trace-Hop` | String | Trace hop information |
+| `Nats-Trace-Origin-Account` | String | Origin account for message tracing |
+| `Nats-Trace-Only` | String | Indicates trace-only mode (message is not delivered) |
 
 
 
@@ -210,7 +210,7 @@ Headers used in pull request responses:
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `KV-Operation` | String | Header: KV-Operation |
+| `KV-Operation` | String |  |
 
 
 

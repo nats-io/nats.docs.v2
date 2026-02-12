@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/connzoptions.json",
-  "title": "io.nats.server.monitor.v1.connzoptions",
+  "$id": "https://nats.io/schemas/server/monitor/v1/connz_request.json",
+  "title": "io.nats.server.monitor.v1.connz_request",
   "description": "Request options for connz monitoring endpoint",
   "type": "object",
   "properties": {
@@ -34,12 +34,33 @@
       "description": "Offset is used for pagination. Connz() only returns connections starting at this offset from the global results."
     },
     "sort": {
-      "type": "object",
-      "description": "Sort indicates how the results will be sorted. Check SortOpt for possible values. Only the sort by connection ID (ByCid) is ascending, all others are descending."
+      "type": "string",
+      "description": "Sort indicates how the results will be sorted. Check SortOpt for possible values. Only the sort by connection ID (ByCid) is ascending, all others are descending.",
+      "enum": [
+        "cid",
+        "start",
+        "subs",
+        "pending",
+        "msgs_to",
+        "msgs_from",
+        "bytes_to",
+        "bytes_from",
+        "last",
+        "idle",
+        "uptime",
+        "stop",
+        "reason",
+        "rtt"
+      ]
     },
     "state": {
-      "type": "object",
-      "description": "Filter by connection state."
+      "type": "string",
+      "description": "Filter by connection state.",
+      "enum": [
+        "open",
+        "closed",
+        "all"
+      ]
     },
     "subscriptions": {
       "type": "boolean",
@@ -53,5 +74,19 @@
       "type": "string",
       "description": "Filter by username."
     }
-  }
+  },
+  "required": [
+    "acc",
+    "auth",
+    "cid",
+    "filter_subject",
+    "limit",
+    "mqtt_client",
+    "offset",
+    "sort",
+    "state",
+    "subscriptions",
+    "subscriptions_detail",
+    "user"
+  ]
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/accountz.json",
-  "title": "io.nats.server.monitor.v1.accountz",
+  "$id": "https://nats.io/schemas/server/monitor/v1/accountz_response.json",
+  "title": "io.nats.server.monitor.v1.accountz_response",
   "description": "Response from accountz monitoring endpoint",
   "type": "object",
   "properties": {
@@ -35,7 +35,11 @@
                 }
               },
               "revoked_activations": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "format": "date-time"
+                }
               }
             }
           }
@@ -63,7 +67,12 @@
               "tracking_header": {
                 "type": "object"
               }
-            }
+            },
+            "required": [
+              "invalid",
+              "share",
+              "tracking"
+            ]
           }
         },
         "is_system": {
@@ -82,16 +91,54 @@
           "type": "integer"
         },
         "mappings": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
         },
         "name_tag": {
           "type": "string"
         },
         "responses": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "invalid": {
+                "type": "boolean"
+              },
+              "latency": {
+                "type": "object"
+              },
+              "m1": {
+                "type": "object"
+              },
+              "share": {
+                "type": "boolean"
+              },
+              "tracking": {
+                "type": "boolean"
+              },
+              "tracking_header": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "invalid",
+              "share",
+              "tracking"
+            ]
+          }
         },
         "revoked_user": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "date-time"
+          }
         },
         "sublist_stats": {
           "type": "object"
@@ -100,7 +147,10 @@
           "type": "integer"
         },
         "tags": {
-          "type": "object"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "update_time": {
           "type": "string",
@@ -120,10 +170,24 @@
               "time_check": {
                 "type": "boolean"
               }
-            }
+            },
+            "required": [
+              "blocking",
+              "description",
+              "time_check"
+            ]
           }
         }
-      }
+      },
+      "required": [
+        "account_name",
+        "client_connections",
+        "complete",
+        "expired",
+        "jetstream_enabled",
+        "leafnode_connections",
+        "subscriptions"
+      ]
     },
     "accounts": {
       "type": "array",
@@ -141,5 +205,9 @@
     "system_account": {
       "type": "string"
     }
-  }
+  },
+  "required": [
+    "now",
+    "server_id"
+  ]
 }

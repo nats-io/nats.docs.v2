@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/jsinfo.json",
-  "title": "io.nats.server.monitor.v1.jsinfo",
+  "$id": "https://nats.io/schemas/server/monitor/v1/jsz_response.json",
+  "title": "io.nats.server.monitor.v1.jsz_response",
   "description": "Response from jsz monitoring endpoint",
   "type": "object",
   "properties": {
@@ -44,7 +44,10 @@
                       "raft_group": {
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "name"
+                    ]
                   }
                 },
                 "created": {
@@ -75,10 +78,18 @@
                 "stream_raft_group": {
                   "type": "string"
                 }
-              }
+              },
+              "required": [
+                "created",
+                "name"
+              ]
             }
           }
-        }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
       }
     },
     "bytes": {
@@ -106,45 +117,66 @@
       "type": "object",
       "properties": {
         "cluster_size": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Size is the known size of the cluster"
         },
         "leader": {
-          "type": "string"
+          "type": "string",
+          "description": "Leader is the server name of the cluster leader"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name is the name of the cluster"
         },
         "peer": {
-          "type": "string"
+          "type": "string",
+          "description": "Peer is unique ID of the leader"
         },
         "pending": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Pending is how many RAFT messages are not yet processed"
         },
         "replicas": {
           "type": "array",
+          "description": "Replicas is a list of known peers",
           "items": {
             "type": "object"
           }
         },
         "snapshot": {
           "type": "object",
+          "description": "Snapshot contains meta snapshot statistics",
           "properties": {
             "last_duration": {
-              "type": "object"
+              "type": "integer",
+              "description": "LastDuration is how long the last meta snapshot took",
+              "$comment": "nanoseconds depicting a duration in time"
             },
             "last_time": {
               "type": "string",
+              "description": "LastTime is when the last meta snapshot was taken",
               "format": "date-time"
             },
             "pending_entries": {
-              "type": "integer"
+              "type": "integer",
+              "description": "PendingEntries is the count of pending entries in the meta layer"
             },
             "pending_size": {
-              "type": "integer"
+              "type": "integer",
+              "description": "PendingSize is the size in bytes of pending entries in the meta layer"
             }
-          }
+          },
+          "required": [
+            "pending_entries",
+            "pending_size"
+          ]
         }
-      }
+      },
+      "required": [
+        "cluster_size",
+        "pending",
+        "snapshot"
+      ]
     },
     "now": {
       "type": "string",
@@ -162,5 +194,14 @@
     "total": {
       "type": "integer"
     }
-  }
+  },
+  "required": [
+    "bytes",
+    "consumers",
+    "messages",
+    "now",
+    "server_id",
+    "streams",
+    "total"
+  ]
 }

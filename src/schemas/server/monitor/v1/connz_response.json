@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/connz.json",
-  "title": "io.nats.server.monitor.v1.connz",
+  "$id": "https://nats.io/schemas/server/monitor/v1/connz_response.json",
+  "title": "io.nats.server.monitor.v1.connz_response",
   "description": "Response from connz monitoring endpoint",
   "type": "object",
   "properties": {
@@ -48,7 +48,8 @@
             "format": "date-time"
           },
           "mqtt_client": {
-            "type": "string"
+            "type": "string",
+            "description": "This is the MQTT client id"
           },
           "name": {
             "type": "string"
@@ -74,7 +75,10 @@
               "key": {
                 "type": "string"
               }
-            }
+            },
+            "required": [
+              "key"
+            ]
           },
           "reason": {
             "type": "string"
@@ -132,11 +136,20 @@
                 "subject": {
                   "type": "string"
                 }
-              }
+              },
+              "required": [
+                "cid",
+                "msgs",
+                "sid",
+                "subject"
+              ]
             }
           },
           "tags": {
-            "type": "object"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "tls_cipher_suite": {
             "type": "string"
@@ -173,7 +186,23 @@
           "version": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "cid",
+          "idle",
+          "in_bytes",
+          "in_msgs",
+          "ip",
+          "last_activity",
+          "out_bytes",
+          "out_msgs",
+          "pending_bytes",
+          "port",
+          "rtt",
+          "start",
+          "subscriptions",
+          "uptime"
+        ]
       }
     },
     "limit": {
@@ -195,5 +224,14 @@
     "total": {
       "type": "integer"
     }
-  }
+  },
+  "required": [
+    "connections",
+    "limit",
+    "now",
+    "num_connections",
+    "offset",
+    "server_id",
+    "total"
+  ]
 }

@@ -13,132 +13,140 @@ This page documents all non-JetStream errors that the NATS server can return to 
 
 | Error | Description |
 |-------|-------------|
-| `Authentication Error` | Authentication error |
-| `Authentication Expired` | Authentication expired |
-| `Authentication Timeout` | Authentication timeout |
-| `Proxy connection required` | Proxy connection required |
-| `Proxy is not trusted` | Proxy is not trusted |
+| `ErrAuthExpired` | ErrAuthExpired represents an expired authorization due to timeout. |
+| `ErrAuthProxyNotTrusted` | ErrAuthProxyNotTrusted represents an error condition on failed authentication due to a connection from a proxy not in the list of trusted proxies. |
+| `ErrAuthProxyRequired` | ErrAuthProxyRequired represents an error condition on failed authentication due to a connection not coming from a proxy. |
+| `ErrAuthTimeout` | ErrAuthTimeout represents an error condition on failed authorization due to timeout. |
+| `ErrAuthentication` | ErrAuthentication represents an error condition on failed authentication. |
+| `ErrRevocation` | ErrRevocation is returned when a credential has been revoked. |
+| `ErrServiceImportAuthorization` | ErrServiceImportAuthorization is returned when a service import is not authorized. |
+| `ErrStreamImportAuthorization` | ErrStreamImportAuthorization is returned when a stream import is not authorized. |
 
 
 ## Connection Limit Errors
 
 | Error | Description |
 |-------|-------------|
-| `Maximum Account Active Connections Exceeded` | Maximum account active connections exceeded |
-| `Maximum Connections Exceeded` | Maximum connections exceeded |
-| `Maximum subscriptions exceeded` | Maximum subscriptions exceeded |
-| `Subject has exceeded number of tokens limit` | Subject has exceeded number of tokens limit |
+| `ErrTooManyAccountConnections` | ErrTooManyAccountConnections signals that an account has reached its maximum number of active connections. |
+| `ErrTooManyConnections` | ErrTooManyConnections signals a client that the maximum number of connections supported by the server has been reached. |
+| `ErrTooManySubTokens` | ErrTooManySubTokens signals a client that the subject has too many tokens. |
+| `ErrTooManySubs` | ErrTooManySubs signals a client that the maximum number of subscriptions per connection has been reached. |
 
 
 ## Protocol and Payload Errors
 
 | Error | Description |
 |-------|-------------|
-| `Maximum Control Line Exceeded` | Maximum control line exceeded |
-| `Maximum Payload Exceeded` | Maximum payload exceeded |
+| `ErrBadClientProtocol` | ErrBadClientProtocol signals a client requested an invalid client protocol. |
+| `ErrBadMsgHeader` | ErrBadMsgHeader signals the parser detected a bad message header |
+| `ErrMaxControlLine` | ErrMaxControlLine represents an error condition when the control line is too big. |
+| `ErrMaxPayload` | ErrMaxPayload represents an error condition when the payload is too big. |
+| `ErrMsgHeadersNotSupported` | ErrMsgHeadersNotSupported signals the parser detected a message header but they are not supported on this server. |
+| `ErrNoRespondersRequiresHeaders` | ErrNoRespondersRequiresHeaders signals that a client needs to have headers on if they want no responders behavior. |
 
 
 ## Subject and Publishing Errors
 
 | Error | Description |
 |-------|-------------|
-| `Invalid publish subject` | Invalid publish subject |
-| `Invalid subject` | Invalid subject |
-| `Malformed subject` | Malformed subject |
-| `Reserved account` | Reserved account |
-| `Reserved internal subject` | Reserved internal subject |
-
-
-## Account Errors
-
-| Error | Description |
-|-------|-------------|
-| `Account exists` | Account exists |
-| `Account expired` | Account expired |
-| `Account resolver no new claims` | Account resolver no new claims |
-| `Account resolver update too soon` | Account resolver update too soon |
-| `Account validation failed` | Account validation failed |
-| `Service import not authorized` | Service import not authorized |
-| `Stream import already exists` | Stream import already exists |
-| `Stream import not authorized` | Stream import not authorized |
-| `Stream import prefix can not contain wildcard tokens` | Stream import prefix can not contain wildcard tokens |
-
-
-## Server Name and Cluster Errors
-
-| Error | Description |
-|-------|-------------|
-| `Duplicate server name` | Duplicate server name |
-
-
-## Wrong Port Connection Errors
-
-| Error | Description |
-|-------|-------------|
-| `Attempted to connect to gateway port` | Attempted to connect to gateway port |
-| `Attempted to connect to leaf node port` | Attempted to connect to leaf node port |
-| `Attempted to connect to route port` | Attempted to connect to route port |
-| `Attempted to connect to wrong port` | Attempted to connect to wrong port |
-
-
-## Gateway-Specific Errors
-
-| Error | Description |
-|-------|-------------|
-| `Gateway name cannot contain spaces` | Gateway name cannot contain spaces |
-| `Wrong gateway` | Wrong gateway |
-
-
-## Leafnode-Specific Errors
-
-| Error | Description |
-|-------|-------------|
-| `Leafnode loop detected` | Leafnode loop detected |
-| `Leafnodes disabled` | Leafnodes disabled |
-| `Remote leafnode has same cluster name` | Remote leafnode has same cluster name |
-
-
-## Connection State Errors
-
-| Error | Description |
-|-------|-------------|
-| `Connection closed` | Connection closed |
-| `Server is not running` | Server is not running |
+| `ErrBadPublishSubject` | ErrBadPublishSubject represents an error condition for an invalid publish subject. |
+| `ErrBadQualifier` | ErrBadQualifier is used to error on a bad qualifier for a transform. |
+| `ErrBadSubject` | ErrBadSubject represents an error condition for an invalid subject. |
+| `ErrInvalidMappingDestination` | ErrInvalidMappingDestination is used for all subject mapping destination errors |
+| `ErrInvalidMappingDestinationSubject` | ErrInvalidMappingDestinationSubject is used to error on a bad transform destination mapping |
+| `ErrMalformedSubject` | ErrMalformedSubject is returned when a subscription is made with a subject that does not conform to subject rules. |
+| `ErrMappingDestinationIndexOutOfRange` | ErrMappingDestinationIndexOutOfRange is returned when the mapping destination function is passed an out of range wildcard index value for one of it's arguments |
+| `ErrMappingDestinationInvalidArg` | ErrMappingDestinationInvalidArg is returned when the mapping destination function is passed and invalid argument |
+| `ErrMappingDestinationNotEnoughArgs` | ErrMappingDestinationNotEnoughArgs is returned when the mapping destination function is not passed enough arguments |
+| `ErrMappingDestinationNotSupportedForImport` | ErrMappingDestinationNotSupportedForImport is returned when you try to use a mapping function other than wildcard in a transform that needs to be reversible (i.e. an import) |
+| `ErrMappingDestinationNotUsingAllWildcards` | ErrMappingDestinationNotUsingAllWildcards is used to error on a transform destination not using all of the token wildcards |
+| `ErrMappingDestinationTooManyArgs` | ErrMappingDestinationTooManyArgs is returned when the mapping destination function is passed too many arguments |
+| `ErrNoTransforms` | ErrNoTransforms signals no subject transforms are available to map this subject. |
+| `ErrReservedAccount` | ErrReservedAccount represents a reserved account that can not be created. |
+| `ErrReservedPublishSubject` | ErrReservedPublishSubject represents an error condition when sending to a reserved subject, e.g. _SYS.&gt; |
+| `ErrUnknownMappingDestinationFunction` | ErrUnknownMappingDestinationFunction is returned when a subject mapping destination contains an unknown mustache-escaped mapping function. |
 
 
 ## TLS and Security Errors
 
 | Error | Description |
 |-------|-------------|
-| `Secure Connection - TLS Required` | Server requires TLS but client attempted non-TLS connection |
-| `TLS Handshake Error` | TLS handshake failed |
-| `Certificate Not Pinned` | Client certificate is not in the pinned certificates list |
+| `ErrCertNotPinned` | ErrCertNotPinned is returned when pinned certs are set and the certificate is not in it |
 
 
-## Route-Specific Errors
+## Account Errors
 
 | Error | Description |
 |-------|-------------|
-| `Duplicate Route` | Route already exists to this server |
-| `Route Authorization Violation` | Route connection failed authorization |
-| `Cluster Name From Remote Server Conflicts` | Remote route server has conflicting cluster name |
-| `Minimum Version Required` | Route connection does not meet minimum version requirement |
+| `ErrAccountExists` | ErrAccountExists is returned when an account is attempted to be registered but already exists. |
+| `ErrAccountExpired` | ErrAccountExpired is returned when an account has expired. |
+| `ErrAccountResolverSameClaims` | ErrAccountResolverSameClaims is returned when same claims have been fetched. |
+| `ErrAccountResolverUpdateTooSoon` | ErrAccountResolverUpdateTooSoon is returned when we attempt an update too soon to last request. |
+| `ErrAccountValidation` | ErrAccountValidation is returned when an account has failed validation. |
+| `ErrBadAccount` | ErrBadAccount represents a malformed or incorrect account. |
+| `ErrBadSampling` | ErrBadSampling is returned when the sampling for latency tracking is not 1 &gt;= sample &lt;= 100. |
+| `ErrBadServiceType` | ErrBadServiceType is returned when latency tracking is being applied to non-singleton response types. |
+| `ErrImportFormsCycle` | ErrImportFormsCycle is returned when an import would form a cycle. |
+| `ErrMissingAccount` | ErrMissingAccount is returned when an account does not exist. |
+| `ErrMissingService` | ErrMissingService is returned when an account does not have an exported service. |
+| `ErrNoAccountResolver` | ErrNoAccountResolver is returned when we attempt an update but do not have an account resolver. |
+| `ErrNoSysAccount` | ErrNoSysAccount is returned when an attempt to publish or subscribe is made when there is no internal system account defined. |
+| `ErrStreamImportBadPrefix` | ErrStreamImportBadPrefix is returned when a stream import prefix contains wildcards. |
+| `ErrStreamImportDuplicate` | ErrStreamImportDuplicate is returned when a stream import is a duplicate of one that already exists. |
 
 
-## Slow Consumer and Flow Control
+## Server Name and Cluster Errors
 
 | Error | Description |
 |-------|-------------|
-| `Slow Consumer` | Client is not consuming messages fast enough |
-| `Write Deadline Exceeded` | Write operation exceeded deadline |
+| `ErrClusterNameConfigConflict` | ErrClusterNameConfigConflict signals that the options for cluster name in cluster and gateway are in conflict. |
+| `ErrClusterNameHasSpaces` | ErrClusterNameHasSpaces signals that the cluster name contains spaces, which is not allowed. |
+| `ErrClusterNameRemoteConflict` | ErrClusterNameRemoteConflict signals that a remote server has a different cluster name. |
+| `ErrDuplicateServerName` | ErrDuplicateServerName is returned when processing a server remote connection and the server reports that this server name is already used in the cluster. |
+| `ErrGatewayNameHasSpaces` | ErrGatewayNameHasSpaces signals that the gateway name contains spaces, which is not allowed. |
+| `ErrLeafNodeHasSameClusterName` | ErrLeafNodeHasSameClusterName represents an error condition when a leafnode is a cluster and it has the same cluster name as the hub cluster. |
+| `ErrServerNameHasSpaces` | ErrServerNameHasSpaces signals that the server name contains spaces, which is not allowed. |
 
 
-## Configuration and Resolver Errors
+## Wrong Port Connection Errors
 
 | Error | Description |
 |-------|-------------|
-| `Account Resolver Missing` | Account resolver is not configured |
-| `System Account Not Configured` | System account is not properly configured |
-| `Credentials Revoked` | Client credentials have been revoked |
+| `ErrClientConnectedToLeafNodePort` | ErrClientConnectedToLeafNodePort represents an error condition when a client attempted to connect to the leaf node listen port. |
+| `ErrClientConnectedToRoutePort` | ErrClientConnectedToRoutePort represents an error condition when a client attempted to connect to the route listen port. |
+| `ErrClientOrRouteConnectedToGatewayPort` | ErrClientOrRouteConnectedToGatewayPort represents an error condition when a client or route attempted to connect to the Gateway port. |
+| `ErrConnectedToWrongPort` | ErrConnectedToWrongPort represents an error condition when a connection is attempted to the wrong listen port (for instance a LeafNode to a client port, etc...) |
+
+
+## Gateway-Specific Errors
+
+| Error | Description |
+|-------|-------------|
+| `ErrWrongGateway` | ErrWrongGateway represents an error condition when a server receives a connect request from a remote Gateway with a destination name that does not match the server's Gateway's name. |
+
+
+## Leafnode-Specific Errors
+
+| Error | Description |
+|-------|-------------|
+| `ErrLeafNodeDisabled` | ErrLeafNodeDisabled is when we disable leafnodes. |
+| `ErrLeafNodeLoop` | ErrLeafNodeLoop signals a leafnode is trying to register for a cluster we already have registered. |
+
+
+## Connection State Errors
+
+| Error | Description |
+|-------|-------------|
+| `ErrConnectionClosed` | ErrConnectionClosed represents an error condition on a closed connection. |
+| `ErrServerNotRunning` | ErrServerNotRunning is used to signal an error that a server is not running. |
+
+
+## Other Errors
+
+| Error | Description |
+|-------|-------------|
+| `ErrCycleSearchDepth` | ErrCycleSearchDepth is returned when we have exceeded our maximum search depth.. |
+| `ErrMinimumVersionRequired` | ErrMinimumVersionRequired is returned when a connection is not at the minimum version required. |
+| `ErrSubscribePermissionViolation` | ErrSubscribePermissionViolation is returned when processing of a subscription fails due to permissions. |
 
 

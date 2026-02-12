@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nats.io/schemas/server/monitor/v1/subsz.json",
-  "title": "io.nats.server.monitor.v1.subsz",
+  "$id": "https://nats.io/schemas/server/monitor/v1/subsz_response.json",
+  "title": "io.nats.server.monitor.v1.subsz_response",
   "description": "Response from subsz monitoring endpoint",
   "type": "object",
   "properties": {
@@ -47,11 +47,24 @@
           "subject": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "cid",
+          "msgs",
+          "sid",
+          "subject"
+        ]
       }
     },
     "total": {
       "type": "integer"
     }
-  }
+  },
+  "required": [
+    "limit",
+    "now",
+    "offset",
+    "server_id",
+    "total"
+  ]
 }
