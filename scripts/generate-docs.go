@@ -930,12 +930,28 @@ var supplementalErrors = []struct {
 	Description string
 	Category    string
 }{
+	// Authentication and Authorization
+	{"Authorization Violation", "Client attempted an operation that violates configured permissions", "Authentication and Authorization Errors"},
+	{"Authentication Timeout", "Client failed to authenticate within the configured timeout period", "Authentication and Authorization Errors"},
+	{"User Authentication Expired", "User JWT or credentials have expired", "Authentication and Authorization Errors"},
+	{"Account Authentication Expired", "Account authentication has expired", "Authentication and Authorization Errors"},
+	{"User Authentication Revoked", "User credentials have been revoked", "Authentication and Authorization Errors"},
 	{"Permissions Violation for Publish", "Client attempted to publish to a subject without permission", "Authentication and Authorization Errors"},
+	{"Permissions Violation for Subscription", "Client attempted to subscribe to a subject without permission", "Authentication and Authorization Errors"},
+	// Connection Limits
 	{"Connection Throttling Is Active", "Server is actively throttling new connections", "Connection Limit Errors"},
+	{"Maximum Clients Exceeded", "Server has reached its maximum number of allowed clients", "Connection Limit Errors"},
+	// Protocol and Payload
+	{"Maximum Payload Violation", "Published message exceeds the configured maximum payload size", "Protocol and Payload Errors"},
+	// Subject and Publishing
 	{"Invalid Subscription", "Subscription request is invalid", "Subject and Publishing Errors"},
+	// TLS and Security
 	{"Secure Connection - TLS Required", "Server requires TLS but client attempted non-TLS connection", "TLS and Security Errors"},
+	// Route
 	{"Route Authorization Violation", "Route connection failed authorization", "Route-Specific Errors"},
+	// Gateway
 	{"Connection to Gateway Rejected", "Gateway rejected the connection", "Gateway-Specific Errors"},
+	// Account
 	{"Failed Account Registration", "Failed to register client with account", "Account Errors"},
 }
 

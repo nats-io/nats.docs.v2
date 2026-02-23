@@ -21,7 +21,13 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrRevocation` | ErrRevocation is returned when a credential has been revoked. |
 | `ErrServiceImportAuthorization` | ErrServiceImportAuthorization is returned when a service import is not authorized. |
 | `ErrStreamImportAuthorization` | ErrStreamImportAuthorization is returned when a stream import is not authorized. |
+| `Authorization Violation` | Client attempted an operation that violates configured permissions |
+| `Authentication Timeout` | Client failed to authenticate within the configured timeout period |
+| `User Authentication Expired` | User JWT or credentials have expired |
+| `Account Authentication Expired` | Account authentication has expired |
+| `User Authentication Revoked` | User credentials have been revoked |
 | `Permissions Violation for Publish` | Client attempted to publish to a subject without permission |
+| `Permissions Violation for Subscription` | Client attempted to subscribe to a subject without permission |
 
 
 ## Connection Limit Errors
@@ -33,6 +39,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrTooManySubTokens` | ErrTooManySubTokens signals a client that the subject has too many tokens. |
 | `ErrTooManySubs` | ErrTooManySubs signals a client that the maximum number of subscriptions per connection has been reached. |
 | `Connection Throttling Is Active` | Server is actively throttling new connections |
+| `Maximum Clients Exceeded` | Server has reached its maximum number of allowed clients |
 
 
 ## Protocol and Payload Errors
@@ -45,6 +52,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | `ErrMaxPayload` | ErrMaxPayload represents an error condition when the payload is too big. |
 | `ErrMsgHeadersNotSupported` | ErrMsgHeadersNotSupported signals the parser detected a message header but they are not supported on this server. |
 | `ErrNoRespondersRequiresHeaders` | ErrNoRespondersRequiresHeaders signals that a client needs to have headers on if they want no responders behavior. |
+| `Maximum Payload Violation` | Published message exceeds the configured maximum payload size |
 
 
 ## Subject and Publishing Errors

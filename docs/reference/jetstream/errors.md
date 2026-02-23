@@ -130,6 +130,7 @@ This page contains a comprehensive list of all JetStream error codes and their d
 | 10195      | `JSConsumerOfflineReasonErrF`              | 500         | consumer is offline: `{err}`                                                         |
 | 10196      | `JSConsumerPriorityGroupWithPolicyNone`              | 400         | consumer can not have priority groups when policy is none                                                         |
 | 10197      | `JSConsumerPinnedTTLWithoutPriorityPolicyNone`              | 400         | PinnedTTL cannot be set when PriorityPolicy is none                                                         |
+| 10204      | `JSConsumerInvalidResetErr`              | 400         | invalid reset: `{err}`                                                         |
 
 
 ## Stream Errors
