@@ -740,12 +740,17 @@ func categorizeJSErrors(errors []JSError) []ErrorCategory {
 	return result
 }
 
-// wrapMDXCurlyBraces wraps {placeholder} patterns in backtick code spans so MDX
-// doesn't interpret them as JSX expressions.
-var curlyBracePattern = regexp.MustCompile(`\{([a-zA-Z_]+)\}`)
+// wrapMDXCurlyBraces wraps {placeholder} and {{template}} patterns in backtick
+// code spans so MDX doesn't interpret them as JSX expressions.
+var curlyBracePattern = regexp.MustCompile(`\{{1,2}[a-zA-Z_()]+\}{1,2}`)
 
 func wrapMDXCurlyBraces(s string) string {
-	return curlyBracePattern.ReplaceAllString(s, "`{$1}`")
+	return curlyBracePattern.ReplaceAllStringFunc(s, func(m string) string {
+		if strings.HasPrefix(m, "`") {
+			return m
+		}
+		return "`" + m + "`"
+	})
 }
 
 // escapeMDX wraps tokens containing characters that MDX would interpret as JSX
@@ -832,6 +837,8 @@ func parseSystemErrors(serverPath string) ([]SystemErrorCategory, error) {
 				errorString := extractErrorString(vs)
 				displayName := ""
 				if errorString != "" {
+					// Strip Go error wrapping prefix (%w: )
+					errorString = strings.TrimPrefix(errorString, "%w: ")
 					displayName = capitalize(errorString)
 				}
 
@@ -899,7 +906,7 @@ func categorizeSystemErrors(errors []SystemError) []SystemErrorCategory {
 			return strings.Contains(n, "Auth") || strings.Contains(n, "Permissions") || strings.Contains(n, "Revocation")
 		}},
 		{"Connection Limit Errors", func(n string) bool {
-			return (strings.Contains(n, "TooMany") && !strings.Contains(n, "Mapping")) ||
+			return (strings.Contains(n, "TooMany") && !strings.Contains(n, "Mapping") && !strings.Contains(n, "SubTokens")) ||
 				strings.Contains(n, "Maximum") || strings.Contains(n, "Throttl")
 		}},
 		{"Protocol and Payload Errors", func(n string) bool {
@@ -1022,6 +1029,13 @@ var supplementalErrors = []struct {
 	{"Connection to Gateway Rejected", "Gateway rejected the connection", "Gateway-Specific Errors"},
 	// Account
 	{"Failed Account Registration", "Failed to register client with account", "Account Errors"},
+	// Protocol and Payload (runtime errors without Err* constants)
+	{"Protocol Violation", "Client violated the NATS protocol", "Protocol and Payload Errors"},
+	{"Parser Error", "Server encountered an error parsing client protocol", "Protocol and Payload Errors"},
+	// TLS and Security
+	{"TLS Handshake Error", "TLS handshake with client failed", "TLS and Security Errors"},
+	// Route
+	{"Duplicate Route", "Route connection already exists to this server", "Route-Specific Errors"},
 	// Slow Consumer and Flow Control
 	{"Slow Consumer Detected", "Server detected a slow consumer that is not keeping up with message delivery", "Slow Consumer and Flow Control"},
 	{"Consumer Is Slow", "Consumer is processing messages too slowly", "Slow Consumer and Flow Control"},
@@ -1044,7 +1058,21 @@ func mergeSupplementalErrors(categories []SystemErrorCategory) []SystemErrorCate
 		catMap[cat.Name] = i
 	}
 
+	// Build a set of existing display names (case-insensitive) to avoid duplicates
+	existingDisplayNames := make(map[string]bool)
+	for _, cat := range categories {
+		for _, e := range cat.Errors {
+			if e.DisplayName != "" {
+				existingDisplayNames[strings.ToLower(e.DisplayName)] = true
+			}
+		}
+	}
+
 	for _, se := range supplementalErrors {
+		// Skip if an error with this display name already exists from Go constants
+		if existingDisplayNames[strings.ToLower(se.Name)] {
+			continue
+		}
 		entry := SystemError{
 			Name:        se.Name,
 			DisplayName: se.Name,
@@ -1347,7 +1375,7 @@ var headerValueTypeOverrides = map[string]string{
 	"JSBatchId":                 "Batch ID",
 	"JSResponseType":            "Response type string",
 	"MsgTraceDest":              "Subject",
-	"MsgTraceHop":               "Trace hop info",
+	"MsgTraceHop":               "Hop count",
 	"MsgTraceOriginAccount":     "Account name",
 	"MsgTraceOnly":              "Boolean flag",
 	"ClientInfoHdr":             "JSON-encoded client info",
@@ -1406,7 +1434,7 @@ var headerDescriptionData = map[string]string{
 	"JSLastConsumerSeq":         "Consumer's last delivered sequence",
 	"JSLastStreamSeq":           "Stream's last sequence at delivery time",
 	"JSConsumerStalled":         "Indicates consumer is stalled with delivery count",
-	"JSMsgRollup":               "Indicates this message should replace previous messages. sub replaces all previous messages on the same subject, all replaces all messages in the stream",
+	"JSMsgRollup":               "Indicates this message should replace previous messages. `sub` replaces all previous messages on the same subject, `all` replaces all messages in the stream",
 	"JSMsgSize":                 "Indicates the size of the message payload",
 	"JSResponseType":            "Type of response being sent",
 	"JSMessageTTL":              "Time-to-live for the message. Message will be automatically removed after this duration",
@@ -1431,10 +1459,10 @@ var headerDescriptionData = map[string]string{
 	"JSUpToSequence":            "Upper bound sequence for batch delivery",
 	"JSPullRequestPendingMsgs":  "Number of pending messages for the pull request",
 	"JSPullRequestPendingBytes": "Number of pending bytes for the pull request",
-	"JSPullRequestNatsPinId":    "Pin ID for the pull request",
+	"JSPullRequestNatsPinId":    "Priority group pin identifier for the pull request",
 	"JSRequiredApiLevel":        "Minimum API level required for the request",
 	"MsgTraceDest":              "Destination subject for message tracing",
-	"MsgTraceHop":               "Trace hop information",
+	"MsgTraceHop":               "Number of hops in the trace",
 	"MsgTraceOriginAccount":     "Origin account for message tracing",
 	"MsgTraceOnly":              "Indicates trace-only mode (message is not delivered)",
 	"ClientInfoHdr":             "Client authorization information for the request",
@@ -1829,6 +1857,7 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 		for _, cs := range closedStates {
 			closeErrors = append(closeErrors, SystemError{
 				Name:        cs.ConstName,
+				DisplayName: cs.Description, // Human-readable from String() method
 				Description: cs.Description,
 			})
 		}

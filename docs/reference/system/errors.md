@@ -22,7 +22,6 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | Service import not authorized | `ErrServiceImportAuthorization` | Returned when a service import is not authorized. |
 | Stream import not authorized | `ErrStreamImportAuthorization` | Returned when a stream import is not authorized. |
 | Authorization Violation | `Authorization Violation` | Client attempted an operation that violates configured permissions |
-| Authentication Timeout | `Authentication Timeout` | Client failed to authenticate within the configured timeout period |
 | User Authentication Expired | `User Authentication Expired` | User JWT or credentials have expired |
 | Account Authentication Expired | `Account Authentication Expired` | Account authentication has expired |
 | User Authentication Revoked | `User Authentication Revoked` | User credentials have been revoked |
@@ -36,7 +35,6 @@ This page documents all non-JetStream errors that the NATS server can return to 
 |-------|----------|-------------|
 | Maximum account active connections exceeded | `ErrTooManyAccountConnections` | That an account has reached its maximum number of active connections. |
 | Maximum connections exceeded | `ErrTooManyConnections` | A client that the maximum number of connections supported by the server has been reached. |
-| Subject has exceeded number of tokens limit | `ErrTooManySubTokens` | A client that the subject has too many tokens. |
 | Maximum subscriptions exceeded | `ErrTooManySubs` | A client that the maximum number of subscriptions per connection has been reached. |
 | Connection Throttling Is Active | `Connection Throttling Is Active` | Server is actively throttling new connections |
 | Maximum Clients Exceeded | `Maximum Clients Exceeded` | Server has reached its maximum number of allowed clients |
@@ -53,6 +51,8 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | Message headers not supported | `ErrMsgHeadersNotSupported` | The parser detected a message header but they are not supported on this server. |
 | No responders requires headers support | `ErrNoRespondersRequiresHeaders` | That a client needs to have headers on if they want no responders behavior. |
 | Maximum Payload Violation | `Maximum Payload Violation` | Published message exceeds the configured maximum payload size |
+| Protocol Violation | `Protocol Violation` | Client violated the NATS protocol |
+| Parser Error | `Parser Error` | Server encountered an error parsing client protocol |
 
 
 ## Subject and Publishing Errors
@@ -63,18 +63,19 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | Bad qualifier | `ErrBadQualifier` | Used to error on a bad qualifier for a transform. |
 | Invalid subject | `ErrBadSubject` | An error condition for an invalid subject. |
 | Invalid mapping destination | `ErrInvalidMappingDestination` | Used for all subject mapping destination errors |
-| %w: invalid transform | `ErrInvalidMappingDestinationSubject` | Used to error on a bad transform destination mapping |
+| Invalid transform | `ErrInvalidMappingDestinationSubject` | Used to error on a bad transform destination mapping |
 | Malformed subject | `ErrMalformedSubject` | Returned when a subscription is made with a subject that does not conform to subject rules. |
-| %w: wildcard index out of range | `ErrMappingDestinationIndexOutOfRange` | Returned when the mapping destination function is passed an out of range wildcard index value for one of it's arguments |
-| %w: function argument is invalid or in the wrong format | `ErrMappingDestinationInvalidArg` | Returned when the mapping destination function is passed and invalid argument |
-| %w: not enough arguments passed to the function | `ErrMappingDestinationNotEnoughArgs` | Returned when the mapping destination function is not passed enough arguments |
-| %w: the only mapping function allowed for import transforms is {{Wildcard()}} | `ErrMappingDestinationNotSupportedForImport` | Returned when you try to use a mapping function other than wildcard in a transform that needs to be reversible (i.e. an import) |
-| %w: not using all of the token wildcard(s) | `ErrMappingDestinationNotUsingAllWildcards` | Used to error on a transform destination not using all of the token wildcards |
-| %w: too many arguments passed to the function | `ErrMappingDestinationTooManyArgs` | Returned when the mapping destination function is passed too many arguments |
+| Wildcard index out of range | `ErrMappingDestinationIndexOutOfRange` | Returned when the mapping destination function is passed an out of range wildcard index value for one of it's arguments |
+| Function argument is invalid or in the wrong format | `ErrMappingDestinationInvalidArg` | Returned when the mapping destination function is passed and invalid argument |
+| Not enough arguments passed to the function | `ErrMappingDestinationNotEnoughArgs` | Returned when the mapping destination function is not passed enough arguments |
+| The only mapping function allowed for import transforms is `{{Wildcard()}}` | `ErrMappingDestinationNotSupportedForImport` | Returned when you try to use a mapping function other than wildcard in a transform that needs to be reversible (i.e. an import) |
+| Not using all of the token wildcard(s) | `ErrMappingDestinationNotUsingAllWildcards` | Used to error on a transform destination not using all of the token wildcards |
+| Too many arguments passed to the function | `ErrMappingDestinationTooManyArgs` | Returned when the mapping destination function is passed too many arguments |
 | No matching transforms available | `ErrNoTransforms` | No subject transforms are available to map this subject. |
 | Reserved account | `ErrReservedAccount` | A reserved account that can not be created. |
 | Reserved internal subject | `ErrReservedPublishSubject` | An error condition when sending to a reserved subject, e.g. `_SYS.>` |
-| %w: unknown function | `ErrUnknownMappingDestinationFunction` | Returned when a subject mapping destination contains an unknown mustache-escaped mapping function. |
+| Subject has exceeded number of tokens limit | `ErrTooManySubTokens` | A client that the subject has too many tokens. |
+| Unknown function | `ErrUnknownMappingDestinationFunction` | Returned when a subject mapping destination contains an unknown mustache-escaped mapping function. |
 | Invalid Subscription | `Invalid Subscription` | Subscription request is invalid |
 
 
@@ -84,6 +85,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 |-------|----------|-------------|
 | Certificate not pinned | `ErrCertNotPinned` | Returned when pinned certs are set and the certificate is not in it |
 | Secure Connection - TLS Required | `Secure Connection - TLS Required` | Server requires TLS but client attempted non-TLS connection |
+| TLS Handshake Error | `TLS Handshake Error` | TLS handshake with client failed |
 
 
 ## Account Errors
@@ -170,6 +172,7 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | Error | Constant | Description |
 |-------|----------|-------------|
 | Route Authorization Violation | `Route Authorization Violation` | Route connection failed authorization |
+| Duplicate Route | `Duplicate Route` | Route connection already exists to this server |
 
 
 ## Slow Consumer and Flow Control
@@ -181,17 +184,6 @@ This page documents all non-JetStream errors that the NATS server can return to 
 | Write Deadline Exceeded | `Write Deadline Exceeded` | Write operation to client exceeded the configured deadline |
 
 
-## Configuration and Resolver Errors
-
-| Error | Constant | Description |
-|-------|----------|-------------|
-| Account Resolver Missing | `Account Resolver Missing` | No account resolver configured for this server |
-| Account Resolver Update Too Soon | `Account Resolver Update Too Soon` | Account resolver update attempted before the minimum interval |
-| Account Resolver No New Claims | `Account Resolver No New Claims` | Account resolver received same claims, no update needed |
-| System Account Not Setup | `System Account Not Setup` | System account has not been configured on this server |
-| Credentials Have Been Revoked | `Credentials Have Been Revoked` | The supplied credentials have been revoked |
-
-
 ## Connection Close Reasons
 
 These are the reasons a client connection may be closed by the server.
@@ -199,42 +191,42 @@ They appear in monitoring data and disconnect events.
 
 | Error | Constant | Description |
 |-------|----------|-------------|
-| `ClientClosed` | `ClientClosed` | Client Closed |
-| `AuthenticationTimeout` | `AuthenticationTimeout` | Authentication Timeout |
-| `AuthenticationViolation` | `AuthenticationViolation` | Authentication Failure |
-| `TLSHandshakeError` | `TLSHandshakeError` | TLS Handshake Failure |
-| `SlowConsumerPendingBytes` | `SlowConsumerPendingBytes` | Slow Consumer (Pending Bytes) |
-| `SlowConsumerWriteDeadline` | `SlowConsumerWriteDeadline` | Slow Consumer (Write Deadline) |
-| `WriteError` | `WriteError` | Write Error |
-| `ReadError` | `ReadError` | Read Error |
-| `ParseError` | `ParseError` | Parse Error |
-| `StaleConnection` | `StaleConnection` | Stale Connection |
-| `ProtocolViolation` | `ProtocolViolation` | Protocol Violation |
-| `BadClientProtocolVersion` | `BadClientProtocolVersion` | Bad Client Protocol Version |
-| `WrongPort` | `WrongPort` | Incorrect Port |
-| `MaxAccountConnectionsExceeded` | `MaxAccountConnectionsExceeded` | Maximum Account Connections Exceeded |
-| `MaxConnectionsExceeded` | `MaxConnectionsExceeded` | Maximum Connections Exceeded |
-| `MaxPayloadExceeded` | `MaxPayloadExceeded` | Maximum Message Payload Exceeded |
-| `MaxControlLineExceeded` | `MaxControlLineExceeded` | Maximum Control Line Exceeded |
-| `MaxSubscriptionsExceeded` | `MaxSubscriptionsExceeded` | Maximum Subscriptions Exceeded |
-| `DuplicateRoute` | `DuplicateRoute` | Duplicate Route |
-| `RouteRemoved` | `RouteRemoved` | Route Removed |
-| `ServerShutdown` | `ServerShutdown` | Server Shutdown |
-| `AuthenticationExpired` | `AuthenticationExpired` | Authentication Expired |
-| `WrongGateway` | `WrongGateway` | Wrong Gateway |
-| `MissingAccount` | `MissingAccount` | Missing Account |
-| `Revocation` | `Revocation` | Credentials Revoked |
-| `InternalClient` | `InternalClient` | Internal Client |
-| `MsgHeaderViolation` | `MsgHeaderViolation` | Message Header Violation |
-| `NoRespondersRequiresHeaders` | `NoRespondersRequiresHeaders` | No Responders Requires Headers |
-| `ClusterNameConflict` | `ClusterNameConflict` | Cluster Name Conflict |
-| `DuplicateRemoteLeafnodeConnection` | `DuplicateRemoteLeafnodeConnection` | Duplicate Remote LeafNode Connection |
-| `DuplicateClientID` | `DuplicateClientID` | Duplicate Client ID |
-| `DuplicateServerName` | `DuplicateServerName` | Duplicate Server Name |
-| `MinimumVersionRequired` | `MinimumVersionRequired` | Minimum Version Required |
-| `ClusterNamesIdentical` | `ClusterNamesIdentical` | Cluster Names Identical |
-| `Kicked` | `Kicked` | Kicked |
-| `ProxyNotTrusted` | `ProxyNotTrusted` | Proxy Not Trusted |
-| `ProxyRequired` | `ProxyRequired` | Proxy Required |
+| Client Closed | `ClientClosed` | Client Closed |
+| Authentication Timeout | `AuthenticationTimeout` | Authentication Timeout |
+| Authentication Failure | `AuthenticationViolation` | Authentication Failure |
+| TLS Handshake Failure | `TLSHandshakeError` | TLS Handshake Failure |
+| Slow Consumer (Pending Bytes) | `SlowConsumerPendingBytes` | Slow Consumer (Pending Bytes) |
+| Slow Consumer (Write Deadline) | `SlowConsumerWriteDeadline` | Slow Consumer (Write Deadline) |
+| Write Error | `WriteError` | Write Error |
+| Read Error | `ReadError` | Read Error |
+| Parse Error | `ParseError` | Parse Error |
+| Stale Connection | `StaleConnection` | Stale Connection |
+| Protocol Violation | `ProtocolViolation` | Protocol Violation |
+| Bad Client Protocol Version | `BadClientProtocolVersion` | Bad Client Protocol Version |
+| Incorrect Port | `WrongPort` | Incorrect Port |
+| Maximum Account Connections Exceeded | `MaxAccountConnectionsExceeded` | Maximum Account Connections Exceeded |
+| Maximum Connections Exceeded | `MaxConnectionsExceeded` | Maximum Connections Exceeded |
+| Maximum Message Payload Exceeded | `MaxPayloadExceeded` | Maximum Message Payload Exceeded |
+| Maximum Control Line Exceeded | `MaxControlLineExceeded` | Maximum Control Line Exceeded |
+| Maximum Subscriptions Exceeded | `MaxSubscriptionsExceeded` | Maximum Subscriptions Exceeded |
+| Duplicate Route | `DuplicateRoute` | Duplicate Route |
+| Route Removed | `RouteRemoved` | Route Removed |
+| Server Shutdown | `ServerShutdown` | Server Shutdown |
+| Authentication Expired | `AuthenticationExpired` | Authentication Expired |
+| Wrong Gateway | `WrongGateway` | Wrong Gateway |
+| Missing Account | `MissingAccount` | Missing Account |
+| Credentials Revoked | `Revocation` | Credentials Revoked |
+| Internal Client | `InternalClient` | Internal Client |
+| Message Header Violation | `MsgHeaderViolation` | Message Header Violation |
+| No Responders Requires Headers | `NoRespondersRequiresHeaders` | No Responders Requires Headers |
+| Cluster Name Conflict | `ClusterNameConflict` | Cluster Name Conflict |
+| Duplicate Remote LeafNode Connection | `DuplicateRemoteLeafnodeConnection` | Duplicate Remote LeafNode Connection |
+| Duplicate Client ID | `DuplicateClientID` | Duplicate Client ID |
+| Duplicate Server Name | `DuplicateServerName` | Duplicate Server Name |
+| Minimum Version Required | `MinimumVersionRequired` | Minimum Version Required |
+| Cluster Names Identical | `ClusterNamesIdentical` | Cluster Names Identical |
+| Kicked | `Kicked` | Kicked |
+| Proxy Not Trusted | `ProxyNotTrusted` | Proxy Not Trusted |
+| Proxy Required | `ProxyRequired` | Proxy Required |
 
 

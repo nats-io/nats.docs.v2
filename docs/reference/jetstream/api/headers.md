@@ -37,7 +37,7 @@ These headers enforce expected state conditions when publishing. If conditions a
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Rollup` | `sub` or `all` | Indicates this message should replace previous messages. sub replaces all previous messages on the same subject, all replaces all messages in the stream |
+| `Nats-Rollup` | `sub` or `all` | Indicates this message should replace previous messages. `sub` replaces all previous messages on the same subject, `all` replaces all messages in the stream |
 
 
 
@@ -136,7 +136,7 @@ Headers used in pull request responses:
 | `Nats-Num-Pending` | Count | Number of pending messages for the consumer |
 | `Nats-Pending-Messages` | Count | Number of pending messages for the pull request |
 | `Nats-Pending-Bytes` | Size in bytes | Number of pending bytes for the pull request |
-| `Nats-Pin-Id` | NUID | Pin ID for the pull request |
+| `Nats-Pin-Id` | NUID | Priority group pin identifier for the pull request |
 
 
 
@@ -214,7 +214,7 @@ Headers used for message tracing and diagnostics.
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Trace-Dest` | Subject | Destination subject for message tracing |
-| `Nats-Trace-Hop` | Trace hop info | Trace hop information |
+| `Nats-Trace-Hop` | Hop count | Number of hops in the trace |
 | `Nats-Trace-Origin-Account` | Account name | Origin account for message tracing |
 | `Nats-Trace-Only` | Boolean flag | Indicates trace-only mode (message is not delivered) |
 

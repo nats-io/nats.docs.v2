@@ -129,3 +129,42 @@ These were identified during review but deemed lower priority or out of scope:
 - `package.json` — Updated npm scripts (removed personal path, added -strict)
 - `scripts/README.md` — Updated paths to use submodule
 - `README.md` — Updated prerequisite instructions
+
+---
+
+## Content Comparison: Old (main) vs New (generate-docs)
+
+### JetStream Errors (`docs/reference/jetstream/errors.md`)
+- **0 error codes lost** — every code in main is present
+- **12 new error codes added** (10193-10202 range)
+- **All descriptions preserved verbatim**
+- **11 codes recategorized** (e.g., JSNoMessageFoundErr: General → Message Errors)
+- **Same 9 categories + Appendix**
+
+### System Errors (`docs/reference/system/errors.md`)
+- **0 errors lost** after fixes — all 4 previously missing errors restored (Protocol Violation, Parser Error, TLS Handshake Error, Duplicate Route)
+- **~20 new Go-constant-backed errors** added (mapping, account, cluster errors)
+- **37 Connection Close Reasons** added (entirely new section)
+- **3-column format** now shows both user-friendly name and Go constant
+- **`%w:` Go format prefixes stripped** from display names
+- **Duplicates eliminated** between supplemental and Go constant entries
+- **`ErrTooManySubTokens` re-categorized** back to Subject and Publishing Errors
+- **"Configuration and Resolver Errors"** section consolidated into Account Errors and Auth Errors (entries not lost, just deduplicated)
+
+### Headers (`docs/reference/jetstream/api/headers.md`)
+- **0 headers lost** — all 37 headers from main present
+- **Same 7 sections and all subsections preserved**
+- **Fixes applied:** `Nats-Rollup` description backticks restored, `Nats-Pin-Id` "priority group" context restored, `Nats-Trace-Hop` "Number of hops" description restored
+- **Improvements:** `Nats-TTL` and `Nats-Schedule-TTL` now show example formats, `Nats-Consumer-Stalled` value corrected to "Reply subject", `KV-Operation` lists all three values, `Nats-Trace-Only` explains "message is not delivered"
+
+### Monitor Schemas (`src/schemas/server/monitor/v1/`)
+- **All 15 endpoints documented** with consistent import paths
+- **Critical fix:** `varz_response.json` structure fixed (properties at top level, not under `varz_v1`)
+- **Major improvement:** `jsz_response.json` expanded from 76 to 358 properties (opaque objects now fully defined)
+- **All request schemas correctly have NO `required` fields**
+- **Known limitations vs hand-curated jsm.go schemas:**
+  - `minimum` constraints not generated (Go types don't carry this metadata)
+  - Some connection-item fields lost descriptions (Go source lacks doc comments)
+  - `connz_request.json` `sort` enum may have fewer values
+  - `rtt` field type may differ (`string` in jsm.go vs `integer` from Go `time.Duration` type)
+  - These are inherent trade-offs of automated generation and can be addressed with schema overrides in a future pass
