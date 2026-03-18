@@ -1,0 +1,21 @@
+---
+title: System Errors
+sidebar_label: Errors
+description: NATS server non-JetStream errors for client, route, gateway, and leafnode connections
+---
+
+# System Errors
+
+This page documents all non-JetStream errors that the NATS server can return to clients, routes, gateways, and leafnode connections.
+
+{{range .Categories}}
+## {{.Name}}
+{{if eq .Name "Connection Close Reasons"}}
+These are the reasons a client connection may be closed by the server.
+They appear in monitoring data and disconnect events.
+{{end}}
+| Error | Constant | Description |
+|-------|----------|-------------|
+{{range .Errors}}| {{if .DisplayName}}{{.DisplayName}}{{else}}`{{.Name}}`{{end}} | `{{.Name}}` | {{.Description}} |
+{{end}}
+{{end}}

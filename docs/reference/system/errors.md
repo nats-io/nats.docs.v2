@@ -8,143 +8,225 @@ description: NATS server non-JetStream errors for client, route, gateway, and le
 
 This page documents all non-JetStream errors that the NATS server can return to clients, routes, gateways, and leafnode connections.
 
+
 ## Authentication and Authorization Errors
 
-| Error | Description |
-|-------|-------------|
-| `Authentication Error` | General authentication failure when client credentials are invalid or missing |
-| `Authentication Timeout` | Client failed to authenticate within the configured timeout period |
-| `Authentication Expired` | User authentication credentials have expired |
-| `Account Authentication Expired` | Account authentication has expired |
-| `Authorization Violation` | Client attempted an operation that violates configured permissions |
-| `User Authentication Expired` | User JWT or credentials have expired |
-| `User Authentication Revoked` | User credentials have been revoked |
-| `Permissions Violation for Subscription` | Client attempted to subscribe to a subject without permission |
-| `Permissions Violation for Publish` | Client attempted to publish to a subject without permission |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Authentication expired | `ErrAuthExpired` | An expired authorization due to timeout. |
+| Proxy is not trusted | `ErrAuthProxyNotTrusted` | An error condition on failed authentication due to a connection from a proxy not in the list of trusted proxies. |
+| Proxy connection required | `ErrAuthProxyRequired` | An error condition on failed authentication due to a connection not coming from a proxy. |
+| Authentication timeout | `ErrAuthTimeout` | An error condition on failed authorization due to timeout. |
+| Authentication error | `ErrAuthentication` | An error condition on failed authentication. |
+| Credentials have been revoked | `ErrRevocation` | Returned when a credential has been revoked. |
+| Service import not authorized | `ErrServiceImportAuthorization` | Returned when a service import is not authorized. |
+| Stream import not authorized | `ErrStreamImportAuthorization` | Returned when a stream import is not authorized. |
+| Authorization Violation | `Authorization Violation` | Client attempted an operation that violates configured permissions |
+| User Authentication Expired | `User Authentication Expired` | User JWT or credentials have expired |
+| Account Authentication Expired | `Account Authentication Expired` | Account authentication has expired |
+| User Authentication Revoked | `User Authentication Revoked` | User credentials have been revoked |
+| Permissions Violation for Publish | `Permissions Violation for Publish` | Client attempted to publish to a subject without permission |
+| Permissions Violation for Subscription | `Permissions Violation for Subscription` | Client attempted to subscribe to a subject without permission |
+
 
 ## Connection Limit Errors
 
-| Error | Description |
-|-------|-------------|
-| `Maximum Connections Exceeded` | Server has reached its maximum number of allowed connections |
-| `Maximum Account Active Connections Exceeded` | Account has reached its maximum number of allowed connections |
-| `Connection Throttling Is Active` | Server is actively throttling new connections |
-| `Maximum Subscriptions Exceeded` | Connection has reached its maximum number of allowed subscriptions |
-| `Maximum Clients Exceeded` | Server has reached its maximum number of allowed clients |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Maximum account active connections exceeded | `ErrTooManyAccountConnections` | That an account has reached its maximum number of active connections. |
+| Maximum connections exceeded | `ErrTooManyConnections` | A client that the maximum number of connections supported by the server has been reached. |
+| Maximum subscriptions exceeded | `ErrTooManySubs` | A client that the maximum number of subscriptions per connection has been reached. |
+| Connection Throttling Is Active | `Connection Throttling Is Active` | Server is actively throttling new connections |
+| Maximum Clients Exceeded | `Maximum Clients Exceeded` | Server has reached its maximum number of allowed clients |
+
 
 ## Protocol and Payload Errors
 
-| Error | Description |
-|-------|-------------|
-| `Maximum Payload Exceeded` | Message payload exceeds the configured maximum size |
-| `Maximum Control Line Exceeded` | Protocol control line exceeds the configured maximum size |
-| `Maximum Payload Violation` | Published message exceeds the configured maximum payload size |
-| `Invalid Client Protocol` | Client requested an unsupported protocol version |
-| `Protocol Violation` | Client violated the NATS protocol |
-| `Parser Error` | Error parsing the client protocol message |
-| `Bad Message Header Detected` | Malformed message header detected |
-| `Message Headers Not Supported` | Server does not support message headers |
-| `No Responders Requires Headers Support` | Client requested no-responders behavior but headers are not enabled |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Invalid client protocol | `ErrBadClientProtocol` | A client requested an invalid client protocol. |
+| Bad message header detected | `ErrBadMsgHeader` | The parser detected a bad message header |
+| Maximum control line exceeded | `ErrMaxControlLine` | An error condition when the control line is too big. |
+| Maximum payload exceeded | `ErrMaxPayload` | An error condition when the payload is too big. |
+| Message headers not supported | `ErrMsgHeadersNotSupported` | The parser detected a message header but they are not supported on this server. |
+| No responders requires headers support | `ErrNoRespondersRequiresHeaders` | That a client needs to have headers on if they want no responders behavior. |
+| Maximum Payload Violation | `Maximum Payload Violation` | Published message exceeds the configured maximum payload size |
+| Protocol Violation | `Protocol Violation` | Client violated the NATS protocol |
+| Parser Error | `Parser Error` | Server encountered an error parsing client protocol |
+
 
 ## Subject and Publishing Errors
 
-| Error | Description |
-|-------|-------------|
-| `Invalid Subject` | Subject contains invalid characters or format |
-| `Invalid Publish Subject` | Publish subject is malformed or invalid |
-| `Reserved Internal Subject` | Attempted to publish to a reserved system subject |
-| `Subject Has Exceeded Number of Tokens Limit` | Subject contains too many tokens (dot-separated segments) |
-| `Malformed Subject` | Subject does not conform to valid subject rules |
-| `Invalid Subscription` | Subscription request is invalid |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Invalid publish subject | `ErrBadPublishSubject` | An error condition for an invalid publish subject. |
+| Bad qualifier | `ErrBadQualifier` | Used to error on a bad qualifier for a transform. |
+| Invalid subject | `ErrBadSubject` | An error condition for an invalid subject. |
+| Invalid mapping destination | `ErrInvalidMappingDestination` | Used for all subject mapping destination errors |
+| Invalid transform | `ErrInvalidMappingDestinationSubject` | Used to error on a bad transform destination mapping |
+| Malformed subject | `ErrMalformedSubject` | Returned when a subscription is made with a subject that does not conform to subject rules. |
+| Wildcard index out of range | `ErrMappingDestinationIndexOutOfRange` | Returned when the mapping destination function is passed an out of range wildcard index value for one of it's arguments |
+| Function argument is invalid or in the wrong format | `ErrMappingDestinationInvalidArg` | Returned when the mapping destination function is passed and invalid argument |
+| Not enough arguments passed to the function | `ErrMappingDestinationNotEnoughArgs` | Returned when the mapping destination function is not passed enough arguments |
+| The only mapping function allowed for import transforms is `{{Wildcard()}}` | `ErrMappingDestinationNotSupportedForImport` | Returned when you try to use a mapping function other than wildcard in a transform that needs to be reversible (i.e. an import) |
+| Not using all of the token wildcard(s) | `ErrMappingDestinationNotUsingAllWildcards` | Used to error on a transform destination not using all of the token wildcards |
+| Too many arguments passed to the function | `ErrMappingDestinationTooManyArgs` | Returned when the mapping destination function is passed too many arguments |
+| No matching transforms available | `ErrNoTransforms` | No subject transforms are available to map this subject. |
+| Reserved account | `ErrReservedAccount` | A reserved account that can not be created. |
+| Reserved internal subject | `ErrReservedPublishSubject` | An error condition when sending to a reserved subject, e.g. `_SYS.>` |
+| Subject has exceeded number of tokens limit | `ErrTooManySubTokens` | A client that the subject has too many tokens. |
+| Unknown function | `ErrUnknownMappingDestinationFunction` | Returned when a subject mapping destination contains an unknown mustache-escaped mapping function. |
+| Invalid Subscription | `Invalid Subscription` | Subscription request is invalid |
+
 
 ## TLS and Security Errors
 
-| Error | Description |
-|-------|-------------|
-| `Secure Connection - TLS Required` | Server requires TLS but client attempted non-TLS connection |
-| `TLS Handshake Error` | TLS handshake failed |
-| `Certificate Not Pinned` | Client certificate is not in the pinned certificates list |
-| `Proxy Is Not Trusted` | Connection from proxy that is not in the trusted proxy list |
-| `Proxy Connection Required` | Server requires connections to come through a proxy |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Certificate not pinned | `ErrCertNotPinned` | Returned when pinned certs are set and the certificate is not in it |
+| Secure Connection - TLS Required | `Secure Connection - TLS Required` | Server requires TLS but client attempted non-TLS connection |
+| TLS Handshake Error | `TLS Handshake Error` | TLS handshake with client failed |
+
 
 ## Account Errors
 
-| Error | Description |
-|-------|-------------|
-| `Bad Account` | Account is malformed or incorrect |
-| `Account Missing` | Referenced account does not exist |
-| `Account Expired` | Account has expired |
-| `Failed Account Registration` | Failed to register client with account |
-| `Account Validation Failed` | Account failed validation checks |
-| `Service Missing` | Account does not have the requested exported service |
-| `Stream Import Not Authorized` | Stream import is not authorized |
-| `Service Import Not Authorized` | Service import is not authorized |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Account exists | `ErrAccountExists` | Returned when an account is attempted to be registered but already exists. |
+| Account expired | `ErrAccountExpired` | Returned when an account has expired. |
+| Account resolver no new claims | `ErrAccountResolverSameClaims` | Returned when same claims have been fetched. |
+| Account resolver update too soon | `ErrAccountResolverUpdateTooSoon` | Returned when we attempt an update too soon to last request. |
+| Account validation failed | `ErrAccountValidation` | Returned when an account has failed validation. |
+| Bad account | `ErrBadAccount` | A malformed or incorrect account. |
+| Bad sampling percentage, should be 1-100 | `ErrBadSampling` | Returned when the sampling for latency tracking is not 1 `>=` sample `<=` 100. |
+| Bad service response type | `ErrBadServiceType` | Returned when latency tracking is being applied to non-singleton response types. |
+| Import forms a cycle | `ErrImportFormsCycle` | Returned when an import would form a cycle. |
+| Account missing | `ErrMissingAccount` | Returned when an account does not exist. |
+| Service missing | `ErrMissingService` | Returned when an account does not have an exported service. |
+| Account resolver missing | `ErrNoAccountResolver` | Returned when we attempt an update but do not have an account resolver. |
+| System account not setup | `ErrNoSysAccount` | Returned when an attempt to publish or subscribe is made when there is no internal system account defined. |
+| Stream import prefix can not contain wildcard tokens | `ErrStreamImportBadPrefix` | Returned when a stream import prefix contains wildcards. |
+| Stream import already exists | `ErrStreamImportDuplicate` | Returned when a stream import is a duplicate of one that already exists. |
+| Failed Account Registration | `Failed Account Registration` | Failed to register client with account |
+
 
 ## Server Name and Cluster Errors
 
-| Error | Description |
-|-------|-------------|
-| `Duplicate Server Name` | Server name already exists in the cluster |
-| `Server Name Cannot Contain Spaces` | Server name contains invalid space characters |
-| `Cluster Name Cannot Contain Spaces` | Cluster name contains invalid space characters |
-| `Cluster Name Conflicts` | Cluster name conflicts between cluster and gateway definitions |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Cluster name conflicts between cluster and gateway definitions | `ErrClusterNameConfigConflict` | That the options for cluster name in cluster and gateway are in conflict. |
+| Cluster name cannot contain spaces | `ErrClusterNameHasSpaces` | That the cluster name contains spaces, which is not allowed. |
+| Cluster name from remote server conflicts | `ErrClusterNameRemoteConflict` | That a remote server has a different cluster name. |
+| Duplicate server name | `ErrDuplicateServerName` | Returned when processing a server remote connection and the server reports that this server name is already used in the cluster. |
+| Gateway name cannot contain spaces | `ErrGatewayNameHasSpaces` | That the gateway name contains spaces, which is not allowed. |
+| Remote leafnode has same cluster name | `ErrLeafNodeHasSameClusterName` | An error condition when a leafnode is a cluster and it has the same cluster name as the hub cluster. |
+| Server name cannot contain spaces | `ErrServerNameHasSpaces` | That the server name contains spaces, which is not allowed. |
+
 
 ## Wrong Port Connection Errors
 
-| Error | Description |
-|-------|-------------|
-| `Attempted to Connect to Route Port` | Client attempted to connect to the route port instead of client port |
-| `Attempted to Connect to Leaf Node Port` | Client attempted to connect to the leafnode port instead of client port |
-| `Attempted to Connect to Gateway Port` | Client or route attempted to connect to the gateway port |
-| `Attempted to Connect to Wrong Port` | Connection attempted on wrong port type |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Attempted to connect to leaf node port | `ErrClientConnectedToLeafNodePort` | An error condition when a client attempted to connect to the leaf node listen port. |
+| Attempted to connect to route port | `ErrClientConnectedToRoutePort` | An error condition when a client attempted to connect to the route listen port. |
+| Attempted to connect to gateway port | `ErrClientOrRouteConnectedToGatewayPort` | An error condition when a client or route attempted to connect to the Gateway port. |
+| Attempted to connect to wrong port | `ErrConnectedToWrongPort` | An error condition when a connection is attempted to the wrong listen port (for instance a LeafNode to a client port, etc...) |
 
-## Route-Specific Errors
-
-| Error | Description |
-|-------|-------------|
-| `Duplicate Route` | Route already exists to this server |
-| `Route Authorization Violation` | Route connection failed authorization |
-| `Cluster Name From Remote Server Conflicts` | Remote route server has conflicting cluster name |
-| `Minimum Version Required` | Route connection does not meet minimum version requirement |
 
 ## Gateway-Specific Errors
 
-| Error | Description |
-|-------|-------------|
-| `Wrong Gateway` | Gateway connection attempted to wrong gateway |
-| `Gateway Name Cannot Contain Spaces` | Gateway name contains invalid space characters |
-| `Connection to Gateway Rejected` | Gateway rejected the connection |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Wrong gateway | `ErrWrongGateway` | An error condition when a server receives a connect request from a remote Gateway with a destination name that does not match the server's Gateway's name. |
+| Connection to Gateway Rejected | `Connection to Gateway Rejected` | Gateway rejected the connection |
+
 
 ## Leafnode-Specific Errors
 
-| Error | Description |
-|-------|-------------|
-| `Leafnode Loop Detected` | Leafnode connection would create a loop |
-| `Remote Leafnode Has Same Cluster Name` | Leafnode cluster has the same name as the hub cluster |
-| `Leafnodes Disabled` | Server has leafnodes disabled |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Leafnodes disabled | `ErrLeafNodeDisabled` | When we disable leafnodes. |
+| Leafnode loop detected | `ErrLeafNodeLoop` | A leafnode is trying to register for a cluster we already have registered. |
 
-## Slow Consumer and Flow Control
-
-| Error | Description |
-|-------|-------------|
-| `Slow Consumer Detected` | Client is not processing messages fast enough |
-| `Consumer Is Slow` | Consumer cannot keep up with message rate |
-| `Write Deadline Exceeded` | Connection write operation exceeded timeout |
 
 ## Connection State Errors
 
-| Error | Description |
-|-------|-------------|
-| `Connection Closed` | Connection has been closed |
-| `Stale Connection` | Connection is stale and needs to be refreshed |
-| `Server Is Not Running` | Server is not currently running |
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Connection closed | `ErrConnectionClosed` | An error condition on a closed connection. |
+| Server is not running | `ErrServerNotRunning` | Used to signal an error that a server is not running. |
+| Stale Connection | `Stale Connection` | Connection is stale and will be closed |
 
-## Configuration and Resolver Errors
 
-| Error | Description |
-|-------|-------------|
-| `Account Resolver Missing` | No account resolver is configured |
-| `Account Resolver Update Too Soon` | Account resolver update attempted too frequently |
-| `Account Resolver No New Claims` | Account resolver returned same claims |
-| `System Account Not Setup` | System account is not configured |
-| `Credentials Have Been Revoked` | Client credentials have been revoked |
+## Other Errors
+
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Search cycle depth exhausted | `ErrCycleSearchDepth` | Returned when we have exceeded our maximum search depth.. |
+| Minimum version required | `ErrMinimumVersionRequired` | Returned when a connection is not at the minimum version required. |
+| Subscribe permission violation | `ErrSubscribePermissionViolation` | Returned when processing of a subscription fails due to permissions. |
+
+
+## Route-Specific Errors
+
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Route Authorization Violation | `Route Authorization Violation` | Route connection failed authorization |
+| Duplicate Route | `Duplicate Route` | Route connection already exists to this server |
+
+
+## Slow Consumer and Flow Control
+
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Slow Consumer Detected | `Slow Consumer Detected` | Server detected a slow consumer that is not keeping up with message delivery |
+| Consumer Is Slow | `Consumer Is Slow` | Consumer is processing messages too slowly |
+| Write Deadline Exceeded | `Write Deadline Exceeded` | Write operation to client exceeded the configured deadline |
+
+
+## Connection Close Reasons
+
+These are the reasons a client connection may be closed by the server.
+They appear in monitoring data and disconnect events.
+
+| Error | Constant | Description |
+|-------|----------|-------------|
+| Client Closed | `ClientClosed` | Client Closed |
+| Authentication Timeout | `AuthenticationTimeout` | Authentication Timeout |
+| Authentication Failure | `AuthenticationViolation` | Authentication Failure |
+| TLS Handshake Failure | `TLSHandshakeError` | TLS Handshake Failure |
+| Slow Consumer (Pending Bytes) | `SlowConsumerPendingBytes` | Slow Consumer (Pending Bytes) |
+| Slow Consumer (Write Deadline) | `SlowConsumerWriteDeadline` | Slow Consumer (Write Deadline) |
+| Write Error | `WriteError` | Write Error |
+| Read Error | `ReadError` | Read Error |
+| Parse Error | `ParseError` | Parse Error |
+| Stale Connection | `StaleConnection` | Stale Connection |
+| Protocol Violation | `ProtocolViolation` | Protocol Violation |
+| Bad Client Protocol Version | `BadClientProtocolVersion` | Bad Client Protocol Version |
+| Incorrect Port | `WrongPort` | Incorrect Port |
+| Maximum Account Connections Exceeded | `MaxAccountConnectionsExceeded` | Maximum Account Connections Exceeded |
+| Maximum Connections Exceeded | `MaxConnectionsExceeded` | Maximum Connections Exceeded |
+| Maximum Message Payload Exceeded | `MaxPayloadExceeded` | Maximum Message Payload Exceeded |
+| Maximum Control Line Exceeded | `MaxControlLineExceeded` | Maximum Control Line Exceeded |
+| Maximum Subscriptions Exceeded | `MaxSubscriptionsExceeded` | Maximum Subscriptions Exceeded |
+| Duplicate Route | `DuplicateRoute` | Duplicate Route |
+| Route Removed | `RouteRemoved` | Route Removed |
+| Server Shutdown | `ServerShutdown` | Server Shutdown |
+| Authentication Expired | `AuthenticationExpired` | Authentication Expired |
+| Wrong Gateway | `WrongGateway` | Wrong Gateway |
+| Missing Account | `MissingAccount` | Missing Account |
+| Credentials Revoked | `Revocation` | Credentials Revoked |
+| Internal Client | `InternalClient` | Internal Client |
+| Message Header Violation | `MsgHeaderViolation` | Message Header Violation |
+| No Responders Requires Headers | `NoRespondersRequiresHeaders` | No Responders Requires Headers |
+| Cluster Name Conflict | `ClusterNameConflict` | Cluster Name Conflict |
+| Duplicate Remote LeafNode Connection | `DuplicateRemoteLeafnodeConnection` | Duplicate Remote LeafNode Connection |
+| Duplicate Client ID | `DuplicateClientID` | Duplicate Client ID |
+| Duplicate Server Name | `DuplicateServerName` | Duplicate Server Name |
+| Minimum Version Required | `MinimumVersionRequired` | Minimum Version Required |
+| Cluster Names Identical | `ClusterNamesIdentical` | Cluster Names Identical |
+| Kicked | `Kicked` | Kicked |
+| Proxy Not Trusted | `ProxyNotTrusted` | Proxy Not Trusted |
+| Proxy Required | `ProxyRequired` | Proxy Required |
+
+

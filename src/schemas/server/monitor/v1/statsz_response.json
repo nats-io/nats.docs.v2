@@ -1,0 +1,780 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/statsz_response.json",
+  "title": "io.nats.server.monitor.v1.statsz_response",
+  "description": "Response from statsz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "active_accounts": {
+      "type": "integer"
+    },
+    "active_servers": {
+      "type": "integer"
+    },
+    "connections": {
+      "type": "integer"
+    },
+    "cores": {
+      "type": "integer"
+    },
+    "cpu": {
+      "type": "number"
+    },
+    "gateways": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "gwid": {
+            "type": "integer"
+          },
+          "inbound_connections": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "received": {
+            "type": "object",
+            "properties": {
+              "bytes": {
+                "type": "integer"
+              },
+              "gateways": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "leafs": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "msgs": {
+                "type": "integer"
+              },
+              "routes": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              }
+            },
+            "required": [
+              "bytes",
+              "msgs"
+            ]
+          },
+          "sent": {
+            "type": "object",
+            "properties": {
+              "bytes": {
+                "type": "integer"
+              },
+              "gateways": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "leafs": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "msgs": {
+                "type": "integer"
+              },
+              "routes": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              }
+            },
+            "required": [
+              "bytes",
+              "msgs"
+            ]
+          }
+        },
+        "required": [
+          "gwid",
+          "inbound_connections",
+          "name",
+          "received",
+          "sent"
+        ]
+      }
+    },
+    "gomaxprocs": {
+      "type": "integer"
+    },
+    "gomemlimit": {
+      "type": "integer"
+    },
+    "jetstream": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "Config is the active JetStream configuration",
+          "properties": {
+            "compress_ok": {
+              "type": "boolean",
+              "description": "CompressOK indicates if compression is supported"
+            },
+            "domain": {
+              "type": "string",
+              "description": "Domain is the JetStream domain"
+            },
+            "max_memory": {
+              "type": "integer",
+              "description": "MaxMemory is the maximum size of memory type streams"
+            },
+            "max_storage": {
+              "type": "integer",
+              "description": "MaxStore is the maximum size of file store type streams"
+            },
+            "store_dir": {
+              "type": "string",
+              "description": "StoreDir is where storage files are stored"
+            },
+            "strict": {
+              "type": "boolean",
+              "description": "Strict indicates if strict JSON parsing is performed"
+            },
+            "sync_always": {
+              "type": "boolean",
+              "description": "SyncAlways indicates flushes are done after every write"
+            },
+            "sync_interval": {
+              "type": "integer",
+              "description": "SyncInterval is how frequently we sync to disk in the background by calling fsync",
+              "$comment": "nanoseconds depicting a duration in time"
+            },
+            "unique_tag": {
+              "type": "string",
+              "description": "UniqueTag is the unique tag assigned to this instance"
+            }
+          },
+          "required": [
+            "max_memory",
+            "max_storage"
+          ]
+        },
+        "limits": {
+          "type": "object",
+          "description": "Limits are the configured JetStream limits",
+          "properties": {
+            "max_ack_pending": {
+              "type": "integer",
+              "description": "MaxAckPending is the server limit for maximum amount of outstanding Acks"
+            },
+            "max_batch_inflight_per_stream": {
+              "type": "integer",
+              "description": "MaxBatchInflightPerStream is the maximum amount of open batches per stream"
+            },
+            "max_batch_inflight_total": {
+              "type": "integer",
+              "description": "MaxBatchInflightTotal is the maximum amount of total open batches per server"
+            },
+            "max_batch_size": {
+              "type": "integer",
+              "description": "MaxBatchSize is the maximum amount of messages allowed in a batch publish to a Stream"
+            },
+            "max_batch_timeout": {
+              "type": "integer",
+              "description": "MaxBatchTimeout is the maximum time to receive the commit message after receiving the first message of a batch",
+              "$comment": "nanoseconds depicting a duration in time"
+            },
+            "max_duplicate_window": {
+              "type": "integer",
+              "description": "Duplicates is the maximum value for duplicate tracking on Streams",
+              "$comment": "nanoseconds depicting a duration in time"
+            },
+            "max_ha_assets": {
+              "type": "integer",
+              "description": "MaxHAAssets is the maximum of Streams and Consumers that may have more than 1 replica"
+            },
+            "max_request_batch": {
+              "type": "integer",
+              "description": "MaxRequestBatch is the maximum amount of updates that can be sent in a batch"
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "description": "Meta is information about the JetStream metalayer",
+          "properties": {
+            "cluster_size": {
+              "type": "integer",
+              "description": "Size is the known size of the cluster"
+            },
+            "leader": {
+              "type": "string",
+              "description": "Leader is the server name of the cluster leader"
+            },
+            "name": {
+              "type": "string",
+              "description": "Name is the name of the cluster"
+            },
+            "peer": {
+              "type": "string",
+              "description": "Peer is unique ID of the leader"
+            },
+            "pending": {
+              "type": "integer",
+              "description": "Pending is how many RAFT messages are not yet processed"
+            },
+            "replicas": {
+              "type": "array",
+              "description": "Replicas is a list of known peers",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "integer",
+                    "description": "Active is the timestamp it was last active",
+                    "$comment": "nanoseconds depicting a duration in time"
+                  },
+                  "cluster": {
+                    "type": "string",
+                    "description": "For migrations."
+                  },
+                  "current": {
+                    "type": "boolean",
+                    "description": "Current indicates if it was seen recently and fully caught up"
+                  },
+                  "lag": {
+                    "type": "integer",
+                    "description": "Lag is how many operations behind it is"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Name is the unique name for the peer"
+                  },
+                  "offline": {
+                    "type": "boolean",
+                    "description": "Offline indicates if it has not been seen recently"
+                  },
+                  "peer": {
+                    "type": "string",
+                    "description": "Peer is the unique ID for the peer"
+                  }
+                },
+                "required": [
+                  "active",
+                  "current",
+                  "name",
+                  "peer"
+                ]
+              }
+            },
+            "snapshot": {
+              "type": "object",
+              "description": "Snapshot contains meta snapshot statistics",
+              "properties": {
+                "last_duration": {
+                  "type": "integer",
+                  "description": "LastDuration is how long the last meta snapshot took",
+                  "$comment": "nanoseconds depicting a duration in time"
+                },
+                "last_time": {
+                  "type": "string",
+                  "description": "LastTime is when the last meta snapshot was taken",
+                  "format": "date-time"
+                },
+                "pending_entries": {
+                  "type": "integer",
+                  "description": "PendingEntries is the count of pending entries in the meta layer"
+                },
+                "pending_size": {
+                  "type": "integer",
+                  "description": "PendingSize is the size in bytes of pending entries in the meta layer"
+                }
+              },
+              "required": [
+                "pending_entries",
+                "pending_size"
+              ]
+            }
+          },
+          "required": [
+            "cluster_size",
+            "pending",
+            "snapshot"
+          ]
+        },
+        "stats": {
+          "type": "object",
+          "description": "Stats is the statistics for the JetStream server",
+          "properties": {
+            "accounts": {
+              "type": "integer"
+            },
+            "api": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "integer",
+                  "description": "Errors is the total API requests that resulted in error responses"
+                },
+                "inflight": {
+                  "type": "integer",
+                  "description": "Inflight are the number of API requests currently being served"
+                },
+                "level": {
+                  "type": "integer",
+                  "description": "Level is the active API level this server implements"
+                },
+                "total": {
+                  "type": "integer",
+                  "description": "Total is the total API requests received since start"
+                }
+              },
+              "required": [
+                "errors",
+                "level",
+                "total"
+              ]
+            },
+            "ha_assets": {
+              "type": "integer"
+            },
+            "memory": {
+              "type": "integer"
+            },
+            "reserved_memory": {
+              "type": "integer"
+            },
+            "reserved_storage": {
+              "type": "integer"
+            },
+            "storage": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "accounts",
+            "api",
+            "ha_assets",
+            "memory",
+            "reserved_memory",
+            "reserved_storage",
+            "storage"
+          ]
+        }
+      }
+    },
+    "mem": {
+      "type": "integer"
+    },
+    "received": {
+      "type": "object",
+      "properties": {
+        "bytes": {
+          "type": "integer"
+        },
+        "gateways": {
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "msgs": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bytes",
+            "msgs"
+          ]
+        },
+        "leafs": {
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "msgs": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bytes",
+            "msgs"
+          ]
+        },
+        "msgs": {
+          "type": "integer"
+        },
+        "routes": {
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "msgs": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bytes",
+            "msgs"
+          ]
+        }
+      },
+      "required": [
+        "bytes",
+        "msgs"
+      ]
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "received": {
+            "type": "object",
+            "properties": {
+              "bytes": {
+                "type": "integer"
+              },
+              "gateways": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "leafs": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "msgs": {
+                "type": "integer"
+              },
+              "routes": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              }
+            },
+            "required": [
+              "bytes",
+              "msgs"
+            ]
+          },
+          "rid": {
+            "type": "integer"
+          },
+          "sent": {
+            "type": "object",
+            "properties": {
+              "bytes": {
+                "type": "integer"
+              },
+              "gateways": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "leafs": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "msgs": {
+                "type": "integer"
+              },
+              "routes": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              }
+            },
+            "required": [
+              "bytes",
+              "msgs"
+            ]
+          }
+        },
+        "required": [
+          "pending",
+          "received",
+          "rid",
+          "sent"
+        ]
+      }
+    },
+    "sent": {
+      "type": "object",
+      "properties": {
+        "bytes": {
+          "type": "integer"
+        },
+        "gateways": {
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "msgs": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bytes",
+            "msgs"
+          ]
+        },
+        "leafs": {
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "msgs": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bytes",
+            "msgs"
+          ]
+        },
+        "msgs": {
+          "type": "integer"
+        },
+        "routes": {
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "msgs": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bytes",
+            "msgs"
+          ]
+        }
+      },
+      "required": [
+        "bytes",
+        "msgs"
+      ]
+    },
+    "slow_consumer_stats": {
+      "type": "object",
+      "properties": {
+        "clients": {
+          "type": "integer",
+          "description": "Clients is how many Clients were slow consumers"
+        },
+        "gateways": {
+          "type": "integer",
+          "description": "Gateways is how many Gateways were slow consumers"
+        },
+        "leafs": {
+          "type": "integer",
+          "description": "Leafs is how many Leafnodes were slow consumers"
+        },
+        "routes": {
+          "type": "integer",
+          "description": "Routes is how many Routes were slow consumers"
+        }
+      },
+      "required": [
+        "clients",
+        "gateways",
+        "leafs",
+        "routes"
+      ]
+    },
+    "slow_consumers": {
+      "type": "integer"
+    },
+    "stale_connection_stats": {
+      "type": "object",
+      "properties": {
+        "clients": {
+          "type": "integer",
+          "description": "Clients is how many Client connections became stale connections"
+        },
+        "gateways": {
+          "type": "integer",
+          "description": "Gateways is how many Gateway connections became stale connections"
+        },
+        "leafs": {
+          "type": "integer",
+          "description": "Leafs is how many Leafnode connections became stale connections"
+        },
+        "routes": {
+          "type": "integer",
+          "description": "Routes is how many Route connections became stale connections"
+        }
+      },
+      "required": [
+        "clients",
+        "gateways",
+        "leafs",
+        "routes"
+      ]
+    },
+    "stale_connections": {
+      "type": "integer"
+    },
+    "stalled_clients": {
+      "type": "integer"
+    },
+    "start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subscriptions": {
+      "type": "integer"
+    },
+    "total_connections": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "active_accounts",
+    "connections",
+    "cores",
+    "cpu",
+    "mem",
+    "received",
+    "sent",
+    "slow_consumers",
+    "start",
+    "subscriptions",
+    "total_connections"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/idz_response.json",
+  "title": "io.nats.server.monitor.v1.idz_response",
+  "description": "Response from idz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "cluster": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "flags": {
+      "type": "integer",
+      "description": "Generic capability flags"
+    },
+    "host": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "jetstream": {
+      "type": "boolean",
+      "description": "Whether JetStream is enabled (deprecated in favor of the `ServerCapability`)."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "name": {
+      "type": "string"
+    },
+    "seq": {
+      "type": "integer",
+      "description": "Sequence and Time from the remote server for this message."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ver": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "flags",
+    "host",
+    "id",
+    "jetstream",
+    "name",
+    "seq",
+    "time",
+    "ver"
+  ]
+}

@@ -1,8 +1,8 @@
 # Routez
 
 import JSONSchema from '@site/src/components/JSONSchema';
-import routezRequest from '@site/jsm.go/schemas/server/monitor/v1/routez_request.json';
-import routezResponse from '@site/jsm.go/schemas/server/monitor/v1/routez_response.json';
+import routezRequest from '@site/src/schemas/server/monitor/v1/routez_request.json';
+import routezResponse from '@site/src/schemas/server/monitor/v1/routez_response.json';
 
 ## Request Schema
 

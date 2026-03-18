@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/raftz_response.json",
+  "title": "io.nats.server.monitor.v1.raftz_response",
+  "description": "Response from raftz monitoring endpoint",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": {
+      "type": "object",
+      "properties": {
+        "applied": {
+          "type": "integer"
+        },
+        "catching_up": {
+          "type": "boolean"
+        },
+        "committed": {
+          "type": "integer"
+        },
+        "ever_had_leader": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "ipq_apply_len": {
+          "type": "integer"
+        },
+        "ipq_entry_len": {
+          "type": "integer"
+        },
+        "ipq_proposal_len": {
+          "type": "integer"
+        },
+        "ipq_resp_len": {
+          "type": "integer"
+        },
+        "leader": {
+          "type": "string"
+        },
+        "leader_since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observer": {
+          "type": "boolean"
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "peers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "known": {
+                "type": "boolean"
+              },
+              "last_replicated_index": {
+                "type": "integer"
+              },
+              "last_seen": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "known",
+              "name"
+            ]
+          }
+        },
+        "pindex": {
+          "type": "integer"
+        },
+        "pterm": {
+          "type": "integer"
+        },
+        "quorum_needed": {
+          "type": "integer"
+        },
+        "size": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        },
+        "system_account": {
+          "type": "boolean"
+        },
+        "term": {
+          "type": "integer"
+        },
+        "traffic_account": {
+          "type": "string"
+        },
+        "voted_for": {
+          "type": "string"
+        },
+        "wal": {
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "consumer_count": {
+              "type": "integer"
+            },
+            "deleted": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "first_seq": {
+              "type": "integer"
+            },
+            "first_ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "last_seq": {
+              "type": "integer"
+            },
+            "last_ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "lost": {
+              "type": "object",
+              "properties": {
+                "bytes": {
+                  "type": "integer"
+                },
+                "msgs": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "required": [
+                "bytes",
+                "msgs"
+              ]
+            },
+            "messages": {
+              "type": "integer"
+            },
+            "num_deleted": {
+              "type": "integer"
+            },
+            "num_subjects": {
+              "type": "integer"
+            },
+            "subjects": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            }
+          },
+          "required": [
+            "bytes",
+            "consumer_count",
+            "first_seq",
+            "first_ts",
+            "last_seq",
+            "last_ts",
+            "messages"
+          ]
+        },
+        "wal_error": {
+          "type": "string",
+          "description": "Error message, if any"
+        }
+      },
+      "required": [
+        "applied",
+        "committed",
+        "ever_had_leader",
+        "id",
+        "ipq_apply_len",
+        "ipq_entry_len",
+        "ipq_proposal_len",
+        "ipq_resp_len",
+        "peers",
+        "pindex",
+        "pterm",
+        "quorum_needed",
+        "size",
+        "state",
+        "system_account",
+        "term",
+        "traffic_account",
+        "wal"
+      ]
+    }
+  }
+}

@@ -2,27 +2,36 @@
 
 This document provides a comprehensive reference for all headers used in JetStream operations. These headers are used for message publishing, delivery, and various JetStream features.
 
+
 ## Message Publishing Headers
 
-Headers used when publishing messages to JetStream streams:
+Headers used when publishing messages to JetStream streams.
+
+
+
 
 ### Message Identification and Deduplication
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Msg-Id` | String | Unique message ID for deduplication. Messages with the same ID within the deduplication window will be rejected as duplicates. |
+| `Nats-Msg-Id` | Unique message ID | Unique message ID for deduplication. Messages with the same ID within the deduplication window will be rejected as duplicates. |
+| `Nats-Expected-Last-Msg-Id` | Message ID | Message will only be stored if the last message ID matches this value |
+
+
 
 ### Expected State Headers
 
 These headers enforce expected state conditions when publishing. If conditions are not met, the publish will fail.
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Expected-Stream` | Stream name | Verifies the message is being published to the expected stream |
 | `Nats-Expected-Last-Sequence` | Sequence number | Message will only be stored if the stream's last sequence matches this value |
 | `Nats-Expected-Last-Subject-Sequence` | Sequence number | Message will only be stored if the last sequence for this subject matches this value |
-| `Nats-Expected-Last-Subject-Sequence-Subject` | Subject string | Specifies the subject for the expected last subject sequence check |
-| `Nats-Expected-Last-Msg-Id` | Message ID | Message will only be stored if the last message ID matches this value |
+| `Nats-Expected-Last-Subject-Sequence-Subject` | Subject | Specifies the subject for the expected last subject sequence check |
+
+
 
 ### Message Rollup
 
@@ -30,17 +39,23 @@ These headers enforce expected state conditions when publishing. If conditions a
 |--------|-------|-------------|
 | `Nats-Rollup` | `sub` or `all` | Indicates this message should replace previous messages. `sub` replaces all previous messages on the same subject, `all` replaces all messages in the stream |
 
+
+
 ### Message Size
 
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Msg-Size` | Size in bytes | Indicates the size of the message payload |
 
+
+
 ### Message TTL
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-TTL` | Duration string | Time-to-live for the message (e.g., "60s", "5m"). Message will be automatically removed after this duration |
+| `Nats-TTL` | Duration string (e.g., `60s`, `5m`) | Time-to-live for the message. Message will be automatically removed after this duration |
+
+
 
 ### Counter Operations
 
@@ -49,115 +64,179 @@ These headers enforce expected state conditions when publishing. If conditions a
 | `Nats-Incr` | Number | Increment value for counter operations |
 | `Nats-Counter-Sources` | JSON | Sources for counter values in JSON format |
 
+
+
 ### Batch Operations
 
 Headers for atomic batch publishing:
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Batch-Id` | Batch ID | Unique identifier for the batch |
 | `Nats-Batch-Sequence` | Sequence number | Sequence number within the batch |
-| `Nats-Batch-Commit` | "1" | Marks the final message in a batch, triggering atomic commit |
+| `Nats-Batch-Commit` | `1` | Marks the final message in a batch, triggering atomic commit |
+
+
 
 ### Scheduled Messages
 
 Headers for scheduled message delivery:
 
+
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Schedule` | Cron expression | Schedule pattern for message delivery |
-| `Nats-Schedule-TTL` | Duration | Time-to-live for the schedule |
+| `Nats-Schedule-TTL` | Duration string (e.g., `60s`, `5m`) | Time-to-live for the schedule |
 | `Nats-Schedule-Target` | Subject | Target subject for scheduled delivery |
-| `Nats-Schedule-Next` | Timestamp or "purge" | Next scheduled time or purge indicator |
 | `Nats-Scheduler` | Scheduler ID | Identifier for the scheduler |
+| `Nats-Schedule-Next` | RFC3339 timestamp or `purge` | Next scheduled time or purge indicator |
+
+
+
+
 
 ## Message Delivery Headers
 
-Headers added by JetStream when delivering messages to consumers:
+Headers added by JetStream when delivering messages to consumers.
+
+
+
 
 ### Stream Information
 
 | Header | Value | Description |
 |--------|-------|-------------|
+| `Nats-Last-Stream` | Sequence number | Stream's last sequence at delivery time |
 | `Nats-Stream` | Stream name | Name of the stream the message came from |
-| `Nats-Subject` | Original subject | Original subject the message was published to |
 | `Nats-Sequence` | Sequence number | Stream sequence number of the message |
 | `Nats-Time-Stamp` | RFC3339 timestamp | Timestamp when the message was stored |
+| `Nats-Subject` | Subject | Original subject the message was published to |
 | `Nats-Last-Sequence` | Sequence number | Last sequence number in the stream when this message was delivered |
+| `Nats-UpTo-Sequence` | Sequence number | Upper bound sequence for batch delivery |
+
+
 
 ### Consumer Information
 
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Last-Consumer` | Sequence number | Consumer's last delivered sequence |
-| `Nats-Last-Stream` | Sequence number | Stream's last sequence at delivery time |
-| `Nats-Consumer-Stalled` | Delivery count | Indicates consumer is stalled with delivery count |
-| `Nats-Num-Pending` | Count | Number of pending messages for the consumer |
-| `Nats-UpTo-Sequence` | Sequence number | Upper bound sequence for batch delivery |
+| `Nats-Consumer-Stalled` | Reply subject | Indicates consumer is stalled with delivery count |
+
+
 
 ### Pull Request Headers
 
 Headers used in pull request responses:
 
+
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Pending-Messages` | Count | Number of pending messages available |
-| `Nats-Pending-Bytes` | Size in bytes | Total size of pending messages |
-| `Nats-Pin-Id` | NUID | Priority group pin identifier |
+| `Nats-Num-Pending` | Count | Number of pending messages for the consumer |
+| `Nats-Pending-Messages` | Count | Number of pending messages for the pull request |
+| `Nats-Pending-Bytes` | Size in bytes | Number of pending bytes for the pull request |
+| `Nats-Pin-Id` | NUID | Priority group pin identifier for the pull request |
+
+
 
 ### Source and Mirror Information
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Stream-Source` | Source info | Information about the source stream in format: "stream-name > seq > subject" |
+| `Nats-Stream-Source` | Stream source info | Information about the source stream in format: stream-name > seq > subject |
+
+
 
 ### Response Type
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Response-Type` | Response type | Type of response being sent |
+| `Nats-Response-Type` | Response type string | Type of response being sent |
+
+
+
+
 
 ## API Headers
 
-Headers used in JetStream API requests:
+Headers used in JetStream API requests and responses.
+
+
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Required-Api-Level` | API level | Minimum API level required for the request |
+| `Nats-Required-Api-Level` | API level number | Minimum API level required for the request |
+
+
+
+
 
 ## Marker Headers
 
-Headers for stream markers and lifecycle events:
+Headers used to mark special message types in streams.
+
+
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Marker-Reason` | Reason | Reason for the marker: `MaxAge`, `Purge`, or `Remove` |
+| `Nats-Marker-Reason` | `MaxAge`, `Purge`, or `Remove` | Reason for the marker: MaxAge, Purge, or Remove |
+
+
+
+
 
 ## Authentication and Authorization Headers
 
+Headers used for authentication callout and authorization.
+
+
+
+
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Server-Xkey` | XKey | Server's extended key for authentication callbacks |
-| `Nats-Request-Info` | Client info | Information about the requesting client |
+| `Nats-Request-Info` | JSON-encoded client info | Client authorization information for the request |
+| `Nats-Server-Xkey` | X-Key string | Server X-Key for encrypted auth callout requests |
+
+
+
+
 
 ## Message Tracing Headers
 
-Headers used for distributed message tracing:
+Headers used for message tracing and diagnostics.
+
+
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-Trace-Dest` | Destination | Trace destination subject |
+| `Nats-Trace-Dest` | Subject | Destination subject for message tracing |
 | `Nats-Trace-Hop` | Hop count | Number of hops in the trace |
-| `Nats-Trace-Origin-Account` | Account | Origin account for the trace |
-| `Nats-Trace-Only` | Flag | Indicates trace-only mode |
+| `Nats-Trace-Origin-Account` | Account name | Origin account for message tracing |
+| `Nats-Trace-Only` | Boolean flag | Indicates trace-only mode (message is not delivered) |
+
+
+
+
 
 ## Key-Value Store Headers
 
-Headers specific to Key-Value store operations:
+Headers used by the NATS Key-Value store built on JetStream.
+
+
+
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `KV-Operation` | Operation type | Type of KV operation (e.g., "PURGE") |
+| `KV-Operation` | `PUT`, `DEL`, or `PURGE` | Type of KV operation: PUT, DEL, or PURGE |
+
+
+
+
+
 
 ## Usage Examples
 

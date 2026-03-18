@@ -20,3 +20,7 @@ static/examples/snippets/*
 .idea/
 .vscode/
 
+# Generated JSON schemas are committed to git
+# They are generated from nats-server and should be regenerated when nats-server updates
+# Uncomment the line below if you want to regenerate them locally:
+# src/schemas/

@@ -147,6 +147,7 @@ npm start              # Start dev server (http://localhost:3000)
 npm run build          # Build production site
 npm run typecheck      # Run TypeScript type checking
 npm run fetch-examples # Fetch code examples from GitHub repos
+npm run generate-docs  # Generate reference docs from nats-server source
 npm run serve          # Serve production build locally
 npm run clear          # Clear Docusaurus cache
 ```
@@ -180,6 +181,47 @@ Not using SSH:
 ```bash
 GIT_USER=<Your GitHub username> npm run deploy
 ```
+
+### Generating Reference Documentation
+
+Some reference documentation is automatically generated from the nats-server source code. This ensures error codes, headers, and other reference material stays synchronized with the server implementation.
+
+**What gets generated:**
+- `docs/reference/jetstream/errors.md` - JetStream error codes
+- `docs/reference/system/errors.md` - System error messages
+- `docs/reference/jetstream/api/headers.md` - JetStream headers
+
+**Prerequisites:**
+- Go (to run the generation script)
+- nats-server available via git submodule (`./nats-server`) or cloned as a sibling directory
+
+```bash
+# Initialize the submodule
+git submodule update --init
+```
+
+**Generate documentation:**
+
+```bash
+# Generate all reference docs
+npm run generate-docs
+
+# Preview what would be generated (doesn't write files)
+npm run generate-docs:dry-run
+```
+
+**Custom nats-server location:**
+
+```bash
+go run scripts/generate-docs.go -server /path/to/nats-server
+```
+
+**When to regenerate:**
+- After updating nats-server to get new error codes or headers
+- When modifying generation templates in `scripts/templates/`
+- Before committing reference doc changes
+
+**Learn more:** See [GENERATION.md](./GENERATION.md) for complete documentation generation guide.
 
 ## Development
 

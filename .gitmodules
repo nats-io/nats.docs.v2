@@ -1,3 +1,6 @@
 [submodule "jsm.go"]
 	path = jsm.go
 	url = https://github.com/nats-io/jsm.go
+[submodule "nats-server"]
+	path = nats-server
+	url = https://github.com/nats-io/nats-server.git

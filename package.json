@@ -14,7 +14,10 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "fetch-examples": "node scripts/fetch-examples.js"
+    "fetch-examples": "node scripts/fetch-examples.js",
+    "generate-docs": "go run scripts/generate-docs.go -server ./nats-server",
+    "generate-docs:dry-run": "go run scripts/generate-docs.go -server ./nats-server -dry-run",
+    "generate-docs:build": "go run scripts/generate-docs.go -server ./nats-server -strict"
   },
   "dependencies": {
     "@docusaurus/core": "3.8.1",

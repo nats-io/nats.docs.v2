@@ -1,0 +1,34 @@
+# JetStream Errors
+
+This page contains a comprehensive list of all JetStream error codes and their descriptions, organized by category.
+
+{{range .Categories}}
+## {{.Name}}
+
+| Error Code | Constant                                     | HTTP Status | Description                                                                                  |
+| ---------- | -------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
+{{range .Errors}}| {{.ErrorCode}}      | `{{.Constant}}`              | {{.Code}}         | {{.Description}}                                                         |
+{{end}}
+{{end}}
+## Appendix
+
+### Additional Information
+
+Some errors include additional context:
+
+- **Help Text**: Some errors provide additional help information to guide troubleshooting
+- **Comments**: Internal comments about the error condition
+- **Deprecations**: Some errors deprecate older error codes
+- **Placeholders**: Errors with `F` suffix typically include placeholders (e.g., `{err}`, `{limit}`) that are replaced with actual values at runtime
+
+### HTTP Status Codes
+
+JetStream errors typically map to the following HTTP status codes:
+
+- **400 Bad Request**: Client error, invalid request or configuration
+- **404 Not Found**: Resource not found (stream, consumer, message)
+- **409 Conflict**: Conflicting operation or state
+- **412 Precondition Failed**: Required precondition not met
+- **429 Too Many Requests**: Rate limiting
+- **500 Internal Server Error**: Server-side error
+- **503 Service Unavailable**: Temporary unavailability or clustering issues
