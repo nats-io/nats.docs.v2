@@ -101,10 +101,81 @@
           "type": "string"
         },
         "wal": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "consumer_count": {
+              "type": "integer"
+            },
+            "deleted": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "first_seq": {
+              "type": "integer"
+            },
+            "first_ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "last_seq": {
+              "type": "integer"
+            },
+            "last_ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "lost": {
+              "type": "object",
+              "properties": {
+                "bytes": {
+                  "type": "integer"
+                },
+                "msgs": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "required": [
+                "bytes",
+                "msgs"
+              ]
+            },
+            "messages": {
+              "type": "integer"
+            },
+            "num_deleted": {
+              "type": "integer"
+            },
+            "num_subjects": {
+              "type": "integer"
+            },
+            "subjects": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            }
+          },
+          "required": [
+            "bytes",
+            "consumer_count",
+            "first_seq",
+            "first_ts",
+            "last_seq",
+            "last_ts",
+            "messages"
+          ]
         },
         "wal_error": {
-          "type": "object"
+          "type": "string",
+          "description": "Error message, if any"
         }
       },
       "required": [

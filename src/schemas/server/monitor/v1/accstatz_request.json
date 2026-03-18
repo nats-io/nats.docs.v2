@@ -14,9 +14,5 @@
     "include_unused": {
       "type": "boolean"
     }
-  },
-  "required": [
-    "accounts",
-    "include_unused"
-  ]
+  }
 }

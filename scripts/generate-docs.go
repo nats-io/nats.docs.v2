@@ -13,13 +13,19 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"unicode"
+	"unicode/utf8"
 )
 
 const (
-	natsServerPath = "../nats-server"
 	errorsJSONPath = "server/errors.json"
 	errorsGoPath   = "server/errors.go"
 )
+
+var strict bool
+
+// Collects unresolved type names during schema generation for diagnostics.
+var unresolvedTypes []string
 
 // Header source files - scanned in order to find all header constants
 var headerSourceFiles = []string{
@@ -31,11 +37,23 @@ var headerSourceFiles = []string{
 	"server/auth_callout.go",
 }
 
-// Monitor source files - parsed to build the TypeRegistry
+// Monitor source files - parsed to build the TypeRegistry.
+// Includes files that define types referenced from monitor response structs.
 var monitorSourceFiles = []string{
 	"server/monitor.go",
 	"server/monitor_sort_opts.go",
 	"server/events.go",
+	"server/stream.go",
+	"server/consumer.go",
+	"server/jetstream.go",
+	"server/opts.go",
+	"server/auth.go",
+	"server/accounts.go",
+	"server/sublist.go",
+	"server/store.go",
+	"server/jetstream_errors.go",
+	"server/jetstream_cluster.go",
+	"server/filestore.go",
 }
 
 // -------------------------------------------------------------------
@@ -159,6 +177,13 @@ func extractFields(st *ast.StructType, file *ast.File) []FieldInfo {
 				if id, ok := t.X.(*ast.Ident); ok {
 					fi.Name = id.Name
 				}
+			case *ast.SelectorExpr:
+				// External embedded types (e.g., sync.RWMutex) — skip,
+				// these are implementation details not serialized to JSON.
+				continue
+			}
+			if fi.Name == "" {
+				continue // Skip unrecognized embedded types
 			}
 			fields = append(fields, fi)
 			continue
@@ -168,13 +193,25 @@ func extractFields(st *ast.StructType, file *ast.File) []FieldInfo {
 
 		// Extract JSON tag
 		if field.Tag != nil {
-			jsonName, omitEmpty, omitZero, include := parseJSONTag(field.Tag.Value)
-			if !include {
+			jsonName, omitEmpty, omitZero, found, exclude := parseJSONTag(field.Tag.Value)
+			if exclude {
+				// json:"-" means explicitly excluded
 				continue
 			}
-			fi.JSONName = jsonName
-			fi.OmitEmpty = omitEmpty
-			fi.OmitZero = omitZero
+			if found {
+				fi.JSONName = jsonName
+				fi.OmitEmpty = omitEmpty
+				fi.OmitZero = omitZero
+			} else {
+				// Tag exists but has no json: key (e.g., yaml:"foo")
+				// encoding/json uses the Go field name in this case
+				fi.JSONName = fi.Name
+				fi.OmitEmpty = true
+			}
+		} else {
+			// No tag at all: Go's encoding/json uses the field name as-is
+			fi.JSONName = fi.Name
+			fi.OmitEmpty = true
 		}
 
 		// Extract description: doc comment first, then inline comment
@@ -293,9 +330,12 @@ type JSONProperty struct {
 // -------------------------------------------------------------------
 
 var externalTypes = map[string]JSONProperty{
-	"time.Time":     {Type: "string", Format: "date-time"},
-	"time.Duration": {Type: "integer", Comment: "nanoseconds depicting a duration in time"},
-	"jwt.TagList":   {Type: "array", Items: &JSONProperty{Type: "string"}},
+	"time.Time":          {Type: "string", Format: "date-time"},
+	"time.Duration":      {Type: "integer", Comment: "nanoseconds depicting a duration in time"},
+	"jwt.TagList":        {Type: "array", Items: &JSONProperty{Type: "string"}},
+	"jwt.AccountClaims":  {Type: "object", Description: "JWT account claims"},
+	"jwt.ServiceLatency": {Type: "object", Description: "JWT service latency configuration"},
+	"http.Header":        {Type: "object", Description: "HTTP headers", AdditionalProperties: &JSONProperty{Type: "array", Items: &JSONProperty{Type: "string"}}},
 }
 
 // Known int enum mappings for types that use iota + custom JSON marshaling
@@ -310,21 +350,25 @@ var knownIntEnumMappings = map[string][]string{
 // -------------------------------------------------------------------
 
 func goTypeToJSONSchema(expr ast.Expr, registry *TypeRegistry, depth int) JSONProperty {
+	return goTypeToJSONSchemaOpt(expr, registry, depth, false)
+}
+
+func goTypeToJSONSchemaOpt(expr ast.Expr, registry *TypeRegistry, depth int, allOptional bool) JSONProperty {
 	if depth > 10 {
 		return JSONProperty{Type: "object"}
 	}
 
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return resolveIdent(t.Name, registry, depth)
+		return resolveIdent(t.Name, registry, depth, allOptional)
 	case *ast.ArrayType:
-		itemProp := goTypeToJSONSchema(t.Elt, registry, depth+1)
+		itemProp := goTypeToJSONSchemaOpt(t.Elt, registry, depth+1, allOptional)
 		return JSONProperty{Type: "array", Items: &itemProp}
 	case *ast.MapType:
-		valProp := goTypeToJSONSchema(t.Value, registry, depth+1)
+		valProp := goTypeToJSONSchemaOpt(t.Value, registry, depth+1, allOptional)
 		return JSONProperty{Type: "object", AdditionalProperties: &valProp}
 	case *ast.StarExpr:
-		return goTypeToJSONSchema(t.X, registry, depth)
+		return goTypeToJSONSchemaOpt(t.X, registry, depth, allOptional)
 	case *ast.SelectorExpr:
 		return resolveSelectorExpr(t)
 	case *ast.InterfaceType:
@@ -333,7 +377,7 @@ func goTypeToJSONSchema(expr ast.Expr, registry *TypeRegistry, depth int) JSONPr
 	return JSONProperty{Type: "string"}
 }
 
-func resolveIdent(name string, registry *TypeRegistry, depth int) JSONProperty {
+func resolveIdent(name string, registry *TypeRegistry, depth int, allOptional bool) JSONProperty {
 	// Primitives
 	switch name {
 	case "string":
@@ -347,11 +391,14 @@ func resolveIdent(name string, registry *TypeRegistry, depth int) JSONProperty {
 		return JSONProperty{Type: "boolean"}
 	case "byte":
 		return JSONProperty{Type: "integer"}
+	case "error":
+		return JSONProperty{Type: "string", Description: "Error message, if any"}
 	}
 
 	// Check registry
 	info := registry.Resolve(name)
 	if info == nil {
+		unresolvedTypes = append(unresolvedTypes, name)
 		return JSONProperty{Type: "object"}
 	}
 
@@ -359,16 +406,16 @@ func resolveIdent(name string, registry *TypeRegistry, depth int) JSONProperty {
 	case TypeKindEnum:
 		return resolveEnum(info)
 	case TypeKindStruct:
-		return resolveStruct(info, registry, depth)
+		return resolveStruct(info, registry, depth, allOptional)
 	case TypeKindMap:
 		if mt, ok := info.Underlying.(*ast.MapType); ok {
-			valProp := goTypeToJSONSchema(mt.Value, registry, depth+1)
+			valProp := goTypeToJSONSchemaOpt(mt.Value, registry, depth+1, allOptional)
 			return JSONProperty{Type: "object", AdditionalProperties: &valProp}
 		}
 		return JSONProperty{Type: "object"}
 	case TypeKindAlias:
 		// Resolve the underlying type
-		return goTypeToJSONSchema(info.Underlying, registry, depth+1)
+		return goTypeToJSONSchemaOpt(info.Underlying, registry, depth+1, allOptional)
 	}
 
 	return JSONProperty{Type: "object"}
@@ -397,8 +444,8 @@ func resolveEnum(info *TypeInfo) JSONProperty {
 	return JSONProperty{Type: "string"}
 }
 
-func resolveStruct(info *TypeInfo, registry *TypeRegistry, depth int) JSONProperty {
-	props, required := buildStructProperties(info, registry, depth+1)
+func resolveStruct(info *TypeInfo, registry *TypeRegistry, depth int, allOptional bool) JSONProperty {
+	props, required := buildStructProperties(info, registry, depth+1, allOptional)
 	prop := JSONProperty{
 		Type:       "object",
 		Properties: props,
@@ -420,6 +467,7 @@ func resolveSelectorExpr(sel *ast.SelectorExpr) JSONProperty {
 		return prop
 	}
 
+	unresolvedTypes = append(unresolvedTypes, key)
 	return JSONProperty{Type: "object"}
 }
 
@@ -427,8 +475,9 @@ func resolveSelectorExpr(sel *ast.SelectorExpr) JSONProperty {
 // Struct → JSON Schema properties (handles embedding + required fields)
 // -------------------------------------------------------------------
 
-func buildStructProperties(info *TypeInfo, registry *TypeRegistry, depth int) (map[string]JSONProperty, []string) {
+func buildStructProperties(info *TypeInfo, registry *TypeRegistry, depth int, allOptional bool) (map[string]JSONProperty, []string) {
 	if depth > 10 {
+		fmt.Printf("  [depth-limit] Truncating at depth %d for type %s\n", depth, info.Name)
 		return nil, nil
 	}
 
@@ -439,8 +488,10 @@ func buildStructProperties(info *TypeInfo, registry *TypeRegistry, depth int) (m
 		if field.Embedded {
 			// Resolve embedded struct and merge its fields
 			embeddedInfo := registry.Resolve(field.Name)
-			if embeddedInfo != nil && embeddedInfo.Kind == TypeKindStruct {
-				embProps, embRequired := buildStructProperties(embeddedInfo, registry, depth+1)
+			if embeddedInfo == nil {
+				unresolvedTypes = append(unresolvedTypes, field.Name+" (embedded)")
+			} else if embeddedInfo.Kind == TypeKindStruct {
+				embProps, embRequired := buildStructProperties(embeddedInfo, registry, depth+1, allOptional)
 				for k, v := range embProps {
 					props[k] = v
 				}
@@ -451,10 +502,11 @@ func buildStructProperties(info *TypeInfo, registry *TypeRegistry, depth int) (m
 
 		jsonName := field.JSONName
 		if jsonName == "" {
-			jsonName = strings.ToLower(field.Name)
+			// Match encoding/json: use exact Go field name when no json tag
+			jsonName = field.Name
 		}
 
-		prop := goTypeToJSONSchema(field.Type, registry, depth)
+		prop := goTypeToJSONSchemaOpt(field.Type, registry, depth, allOptional)
 
 		if field.Description != "" {
 			prop.Description = field.Description
@@ -462,8 +514,8 @@ func buildStructProperties(info *TypeInfo, registry *TypeRegistry, depth int) (m
 
 		props[jsonName] = prop
 
-		// Fields without omitempty/omitzero are required
-		if !field.OmitEmpty && !field.OmitZero && jsonName != "" {
+		// Fields without omitempty/omitzero are required (but not for request schemas)
+		if !allOptional && !field.OmitEmpty && !field.OmitZero && jsonName != "" {
 			required = append(required, jsonName)
 		}
 	}
@@ -559,7 +611,8 @@ func generateMonitorSchemas(serverPath, outputDir string, registry *TypeRegistry
 }
 
 func typeInfoToSchema(info *TypeInfo, registry *TypeRegistry, endpointName, schemaType string) JSONSchema {
-	props, required := buildStructProperties(info, registry, 0)
+	allOptional := schemaType == "request"
+	props, required := buildStructProperties(info, registry, 0, allOptional)
 
 	schema := JSONSchema{
 		Schema:     "http://json-schema.org/draft-07/schema#",
@@ -597,7 +650,8 @@ func mapTypeInfoToSchema(info *TypeInfo, registry *TypeRegistry, endpointName, s
 	}
 
 	if mt, ok := info.Underlying.(*ast.MapType); ok {
-		valProp := goTypeToJSONSchema(mt.Value, registry, 0)
+		allOptional := schemaType == "request"
+		valProp := goTypeToJSONSchemaOpt(mt.Value, registry, 0, allOptional)
 		schema.AdditionalProperties = &valProp
 	}
 
@@ -673,8 +727,14 @@ func categorizeJSErrors(errors []JSError) []ErrorCategory {
 			delete(categories, fullName)
 		}
 	}
-	for name, errs := range categories {
-		result = append(result, ErrorCategory{Name: name, Errors: errs})
+	// Collect remaining categories in sorted order for deterministic output
+	var remaining []string
+	for name := range categories {
+		remaining = append(remaining, name)
+	}
+	sort.Strings(remaining)
+	for _, name := range remaining {
+		result = append(result, ErrorCategory{Name: name, Errors: categories[name]})
 	}
 
 	return result
@@ -728,8 +788,9 @@ func parseJSErrors(serverPath string) ([]ErrorCategory, error) {
 // -------------------------------------------------------------------
 
 type SystemError struct {
-	Name        string
-	Description string
+	Name        string // Go constant name (e.g., "ErrTooManyConnections")
+	DisplayName string // User-facing error string (e.g., "Maximum Connections Exceeded")
+	Description string // Description from doc comment
 }
 
 type SystemErrorCategory struct {
@@ -767,24 +828,32 @@ func parseSystemErrors(serverPath string) ([]SystemErrorCategory, error) {
 					continue
 				}
 
+				// Extract user-facing error string
+				errorString := extractErrorString(vs)
+				displayName := ""
+				if errorString != "" {
+					displayName = capitalize(errorString)
+				}
+
 				// Extract description from doc comment
 				var description string
 				if vs.Doc != nil {
 					description = cleanComment(vs.Doc.Text())
+					// Strip the "ErrFoo represents ..." prefix
+					description = cleanDocCommentDesc(name.Name, description)
 				} else if vs.Comment != nil {
 					description = cleanComment(vs.Comment.Text())
+					description = cleanDocCommentDesc(name.Name, description)
 				}
 
-				if description == "" {
-					// Fallback: use the error string itself
-					description = extractErrorString(vs)
-					if description != "" {
-						description = capitalize(description)
-					}
+				// If no doc comment, use the error string as description
+				if description == "" && displayName != "" {
+					description = displayName
 				}
 
 				allErrors = append(allErrors, SystemError{
 					Name:        name.Name,
+					DisplayName: escapeMDX(displayName),
 					Description: escapeMDX(description),
 				})
 			}
@@ -953,6 +1022,18 @@ var supplementalErrors = []struct {
 	{"Connection to Gateway Rejected", "Gateway rejected the connection", "Gateway-Specific Errors"},
 	// Account
 	{"Failed Account Registration", "Failed to register client with account", "Account Errors"},
+	// Slow Consumer and Flow Control
+	{"Slow Consumer Detected", "Server detected a slow consumer that is not keeping up with message delivery", "Slow Consumer and Flow Control"},
+	{"Consumer Is Slow", "Consumer is processing messages too slowly", "Slow Consumer and Flow Control"},
+	{"Write Deadline Exceeded", "Write operation to client exceeded the configured deadline", "Slow Consumer and Flow Control"},
+	// Connection State
+	{"Stale Connection", "Connection is stale and will be closed", "Connection State Errors"},
+	// Configuration and Resolver
+	{"Account Resolver Missing", "No account resolver configured for this server", "Configuration and Resolver Errors"},
+	{"Account Resolver Update Too Soon", "Account resolver update attempted before the minimum interval", "Configuration and Resolver Errors"},
+	{"Account Resolver No New Claims", "Account resolver received same claims, no update needed", "Configuration and Resolver Errors"},
+	{"System Account Not Setup", "System account has not been configured on this server", "Configuration and Resolver Errors"},
+	{"Credentials Have Been Revoked", "The supplied credentials have been revoked", "Configuration and Resolver Errors"},
 }
 
 // mergeSupplementalErrors adds curated protocol-level errors into the categorized
@@ -966,6 +1047,7 @@ func mergeSupplementalErrors(categories []SystemErrorCategory) []SystemErrorCate
 	for _, se := range supplementalErrors {
 		entry := SystemError{
 			Name:        se.Name,
+			DisplayName: se.Name,
 			Description: se.Description,
 		}
 		if idx, ok := catMap[se.Category]; ok {
@@ -1284,6 +1366,8 @@ var headerValueTypeOverrides = map[string]string{
 	"JSScheduleTarget":          "Subject",
 	"JSScheduler":               "Scheduler ID",
 	"JSScheduleNext":            "RFC3339 timestamp or `purge`",
+	"JSMessageTTL":              "Duration string (e.g., `60s`, `5m`)",
+	"JSScheduleTTL":             "Duration string (e.g., `60s`, `5m`)",
 	"KVOperation":               "`PUT`, `DEL`, or `PURGE`",
 	"JSMessageCounterSources":   "JSON",
 	"JSScheduleSource":          "Subject",
@@ -1468,10 +1552,16 @@ func buildHeaderSections(sections map[string][]Header, sectionOrder []string) []
 						delete(sectionHeaders, subsectionName)
 					}
 				}
-				for subsectionName, headers := range sectionHeaders {
+				// Collect remaining subsections in sorted order
+				var remainingSubs []string
+				for name := range sectionHeaders {
+					remainingSubs = append(remainingSubs, name)
+				}
+				sort.Strings(remainingSubs)
+				for _, subsectionName := range remainingSubs {
 					section.Subsections = append(section.Subsections, HeaderSubsection{
 						Name:    subsectionName,
-						Headers: headers,
+						Headers: sectionHeaders[subsectionName],
 					})
 				}
 			} else {
@@ -1555,8 +1645,11 @@ func getSubsectionDescription(sectionName, subsectionName string) string {
 // Helpers
 // -------------------------------------------------------------------
 
-// parseJSONTag parses a json struct tag and returns (fieldName, omitEmpty, omitZero, include).
-func parseJSONTag(tag string) (string, bool, bool, bool) {
+// parseJSONTag parses a json struct tag.
+// Returns (fieldName, omitEmpty, omitZero, found, exclude).
+// found=false means no json tag was present (field may have other tags like yaml).
+// exclude=true means json:"-" was explicitly set.
+func parseJSONTag(tag string) (string, bool, bool, bool, bool) {
 	tag = strings.Trim(tag, "`")
 	parts := strings.Fields(tag)
 
@@ -1566,7 +1659,7 @@ func parseJSONTag(tag string) (string, bool, bool, bool) {
 			jsonValue = strings.Trim(jsonValue, `"`)
 
 			if jsonValue == "-" {
-				return "", false, false, false
+				return "", false, false, true, true // found=true, exclude=true
 			}
 
 			segments := strings.Split(jsonValue, ",")
@@ -1582,11 +1675,11 @@ func parseJSONTag(tag string) (string, bool, bool, bool) {
 				}
 			}
 
-			return fieldName, omitEmpty, omitZero, true
+			return fieldName, omitEmpty, omitZero, true, false // found=true, exclude=false
 		}
 	}
 
-	return "", false, false, false
+	return "", false, false, false, false // no json tag found
 }
 
 // cleanComment strips Go comment markers and extra whitespace, and joins multi-line text.
@@ -1604,12 +1697,37 @@ func cleanComment(s string) string {
 	return s
 }
 
-// capitalize uppercases the first letter.
+// capitalize uppercases the first rune (UTF-8 safe).
 func capitalize(s string) string {
-	if len(s) == 0 {
+	if s == "" {
 		return s
 	}
-	return strings.ToUpper(s[:1]) + s[1:]
+	r, size := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[size:]
+}
+
+// cleanDocCommentDesc strips the Go constant name prefix from doc comments.
+// e.g., "ErrAuthentication represents an error condition on failed authentication."
+// becomes "Error condition on failed authentication."
+func cleanDocCommentDesc(constName, desc string) string {
+	// Common patterns: "ErrFoo represents ...", "ErrFoo is ...", "ErrFoo signals ..."
+	prefixes := []string{
+		constName + " represents ",
+		constName + " is ",
+		constName + " signals ",
+		constName + " indicates ",
+		constName + " returned ",
+		constName + " ",
+	}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(desc, prefix) {
+			remainder := strings.TrimPrefix(desc, prefix)
+			if remainder != "" {
+				return capitalize(remainder)
+			}
+		}
+	}
+	return desc
 }
 
 // -------------------------------------------------------------------
@@ -1650,18 +1768,18 @@ func generateFromTemplate(tmplPath, outPath string, data interface{}, dryRun boo
 		return tmpl.Execute(os.Stdout, data)
 	}
 
+	// Execute to buffer first to avoid partial files on error
+	var buf strings.Builder
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return fmt.Errorf("failed to execute template: %w", err)
+	}
+
 	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	f, err := os.Create(outPath)
-	if err != nil {
-		return fmt.Errorf("failed to create file %s: %w", outPath, err)
-	}
-	defer f.Close()
-
-	if err := tmpl.Execute(f, data); err != nil {
-		return fmt.Errorf("failed to execute template: %w", err)
+	if err := os.WriteFile(outPath, []byte(buf.String()), 0644); err != nil {
+		return fmt.Errorf("failed to write file %s: %w", outPath, err)
 	}
 
 	fmt.Printf("Generated: %s\n", outPath)
@@ -1766,27 +1884,101 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 		return err
 	}
 
+	// --- Post-generation validation ---
+	fmt.Println("\nValidating generation output...")
+	var warnings []string
+
+	totalJSErrors := 0
+	for _, cat := range jsErrors {
+		totalJSErrors += len(cat.Errors)
+	}
+	if totalJSErrors == 0 {
+		warnings = append(warnings, "No JetStream errors found")
+	} else {
+		fmt.Printf("  JetStream errors: %d across %d categories\n", totalJSErrors, len(jsErrors))
+	}
+
+	totalSysErrors := 0
+	for _, cat := range sysErrors {
+		totalSysErrors += len(cat.Errors)
+	}
+	if totalSysErrors == 0 {
+		warnings = append(warnings, "No system errors found")
+	} else {
+		fmt.Printf("  System errors: %d across %d categories\n", totalSysErrors, len(sysErrors))
+	}
+
+	totalHeaders := 0
+	for _, sec := range headers {
+		totalHeaders += len(sec.Headers)
+		for _, sub := range sec.Subsections {
+			totalHeaders += len(sub.Headers)
+		}
+	}
+	if totalHeaders == 0 {
+		warnings = append(warnings, "No headers found")
+	} else {
+		fmt.Printf("  Headers: %d across %d sections\n", totalHeaders, len(headers))
+	}
+
+	// Report unresolved types
+	if len(unresolvedTypes) > 0 {
+		unique := make(map[string]int)
+		for _, t := range unresolvedTypes {
+			unique[t]++
+		}
+		var sorted []string
+		for t := range unique {
+			sorted = append(sorted, t)
+		}
+		sort.Strings(sorted)
+		fmt.Printf("  Unresolved types (%d unique):\n", len(sorted))
+		for _, t := range sorted {
+			fmt.Printf("    %s (x%d)\n", t, unique[t])
+		}
+		if len(sorted) > 0 {
+			warnings = append(warnings, fmt.Sprintf("%d unresolved types in schemas", len(sorted)))
+		}
+	}
+
+	if len(warnings) > 0 {
+		fmt.Fprintf(os.Stderr, "\n--- Generation Warnings ---\n")
+		for _, w := range warnings {
+			fmt.Fprintf(os.Stderr, "  WARN: %s\n", w)
+		}
+		if strict {
+			return fmt.Errorf("generation completed with %d warnings (use without -strict to allow)", len(warnings))
+		}
+	}
+
 	fmt.Println("Documentation generation complete!")
 	return nil
 }
 
 func main() {
-	serverPathFlag := flag.String("server", "", "Path to nats-server repository (default: ../nats-server or ~/coding/nats-server)")
+	serverPathFlag := flag.String("server", "", "Path to nats-server repository")
 	outputDir := flag.String("output", ".", "Output directory for generated docs")
 	dryRun := flag.Bool("dry-run", false, "Print output to stdout instead of writing files")
+	strictFlag := flag.Bool("strict", false, "Treat warnings as errors (for CI)")
 	flag.Parse()
 
 	serverPath := *serverPathFlag
 	if serverPath == "" {
-		if _, err := os.Stat(filepath.Join("..", "nats-server")); err == nil {
-			serverPath = filepath.Join("..", "nats-server")
-		} else {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
+		// Try submodule first, then sibling directory
+		candidates := []string{
+			filepath.Join(".", "nats-server"),
+			filepath.Join("..", "nats-server"),
+		}
+		for _, candidate := range candidates {
+			if _, err := os.Stat(candidate); err == nil {
+				serverPath = candidate
+				break
 			}
-			serverPath = filepath.Join(home, "coding", "nats-server")
+		}
+		if serverPath == "" {
+			fmt.Fprintf(os.Stderr, "Error: nats-server not found. Looked in ./nats-server and ../nats-server\n")
+			fmt.Fprintf(os.Stderr, "Use -server flag to specify the correct path\n")
+			os.Exit(1)
 		}
 	}
 
@@ -1799,6 +1991,7 @@ func main() {
 	fmt.Printf("Using nats-server path: %s\n", serverPath)
 	fmt.Printf("Output directory: %s\n", *outputDir)
 
+	strict = *strictFlag
 	if err := generateDocs(serverPath, *outputDir, *dryRun); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)

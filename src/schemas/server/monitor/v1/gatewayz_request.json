@@ -25,12 +25,5 @@
       "type": "boolean",
       "description": "AccountSubscriptionsDetail indicates if subscription details should be included in the results. Note: This is used only if `Accounts` or `AccountName` are specified."
     }
-  },
-  "required": [
-    "account_name",
-    "accounts",
-    "name",
-    "subscriptions",
-    "subscriptions_detail"
-  ]
+  }
 }

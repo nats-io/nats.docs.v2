@@ -13,12 +13,12 @@ The script generates documentation files and JSON schemas:
 #### Documentation Files
 
 1. **docs/reference/jetstream/errors.md** - JetStream error codes and descriptions
-   - Source: `~/coding/nats-server/server/errors.json`
+   - Source: `./nats-server/server/errors.json` (via submodule)
    - Organized by category (Account, Stream, Consumer, etc.)
    - Curly braces in descriptions are escaped for MDX compatibility
 
 2. **docs/reference/system/errors.md** - System error messages
-   - Source: `~/coding/nats-server/server/errors.go`
+   - Source: `./nats-server/server/errors.go` (via submodule)
    - Categorized by error type (Authentication, Protocol, etc.)
 
 3. **docs/reference/jetstream/api/headers.md** - JetStream header reference
@@ -29,7 +29,7 @@ The script generates documentation files and JSON schemas:
 #### JSON Schemas
 
 4. **src/schemas/server/monitor/v1/*.json** - Monitor endpoint schemas (30 files)
-   - Source: `~/coding/nats-server/server/monitor.go`
+   - Source: `./nats-server/server/monitor.go` and related files (via submodule)
    - Request and response schemas for 15 monitor endpoints:
      - `varz`, `connz`, `routez`, `subsz`, `gatewayz`, `leafz`, `accountz`, `jsz`
      - `healthz`, `profilez`, `raftz`, `ipqueuesz`, `statsz`, `accstatz`, `idz`

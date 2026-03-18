@@ -15,9 +15,5 @@
     "name": {
       "type": "string"
     }
-  },
-  "required": [
-    "debug",
-    "name"
-  ]
+  }
 }

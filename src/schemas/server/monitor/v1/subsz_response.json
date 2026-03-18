@@ -5,12 +5,42 @@
   "description": "Response from subsz monitoring endpoint",
   "type": "object",
   "properties": {
+    "avg_fanout": {
+      "type": "number"
+    },
+    "cacheCnt": {
+      "type": "integer"
+    },
+    "cacheHits": {
+      "type": "integer"
+    },
+    "cache_hit_rate": {
+      "type": "number"
+    },
     "limit": {
+      "type": "integer"
+    },
+    "max_fanout": {
       "type": "integer"
     },
     "now": {
       "type": "string",
       "format": "date-time"
+    },
+    "num_cache": {
+      "type": "integer"
+    },
+    "num_inserts": {
+      "type": "integer"
+    },
+    "num_matches": {
+      "type": "integer"
+    },
+    "num_removes": {
+      "type": "integer"
+    },
+    "num_subscriptions": {
+      "type": "integer"
     },
     "offset": {
       "type": "integer"
@@ -56,13 +86,24 @@
         ]
       }
     },
+    "totFanout": {
+      "type": "integer"
+    },
     "total": {
       "type": "integer"
     }
   },
   "required": [
+    "avg_fanout",
+    "cache_hit_rate",
     "limit",
+    "max_fanout",
     "now",
+    "num_cache",
+    "num_inserts",
+    "num_matches",
+    "num_removes",
+    "num_subscriptions",
     "offset",
     "server_id",
     "total"

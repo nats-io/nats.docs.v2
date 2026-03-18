@@ -198,7 +198,6 @@
           "out_msgs",
           "pending_bytes",
           "port",
-          "rtt",
           "start",
           "subscriptions",
           "uptime"

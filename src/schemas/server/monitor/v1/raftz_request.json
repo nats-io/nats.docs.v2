@@ -11,9 +11,5 @@
     "group": {
       "type": "string"
     }
-  },
-  "required": [
-    "account",
-    "group"
-  ]
+  }
 }

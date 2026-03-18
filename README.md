@@ -193,12 +193,11 @@ Some reference documentation is automatically generated from the nats-server sou
 
 **Prerequisites:**
 - Go (to run the generation script)
-- nats-server repository cloned at `~/coding/nats-server`
+- nats-server available via git submodule (`./nats-server`) or cloned as a sibling directory
 
 ```bash
-# Clone nats-server if you don't have it
-cd ~/coding
-git clone https://github.com/nats-io/nats-server.git
+# Initialize the submodule
+git submodule update --init
 ```
 
 **Generate documentation:**

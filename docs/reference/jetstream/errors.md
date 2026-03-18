@@ -130,7 +130,6 @@ This page contains a comprehensive list of all JetStream error codes and their d
 | 10195      | `JSConsumerOfflineReasonErrF`              | 500         | consumer is offline: `{err}`                                                         |
 | 10196      | `JSConsumerPriorityGroupWithPolicyNone`              | 400         | consumer can not have priority groups when policy is none                                                         |
 | 10197      | `JSConsumerPinnedTTLWithoutPriorityPolicyNone`              | 400         | PinnedTTL cannot be set when PriorityPolicy is none                                                         |
-| 10204      | `JSConsumerInvalidResetErr`              | 400         | invalid reset: `{err}`                                                         |
 
 
 ## Stream Errors
@@ -224,7 +223,6 @@ This page contains a comprehensive list of all JetStream error codes and their d
 | 10147      | `JSSourceOverlappingSubjectFilters`              | 400         | source filters can not overlap                                                         |
 | 10155      | `JSStreamTransformInvalidSource`              | 400         | stream transform source: `{err}`                                                         |
 | 10187      | `JSSourceWithMsgSchedulesErr`              | 400         | stream source can not also schedule messages                                                         |
-| 10203      | `JSMessageSchedulesSourceInvalidErr`              | 400         | message schedules source is invalid                                                         |
 
 
 ## Message Errors

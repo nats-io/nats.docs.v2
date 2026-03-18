@@ -13,9 +13,5 @@
       "type": "boolean",
       "description": "SubscriptionsDetail indicates if subscription details should be included in the results"
     }
-  },
-  "required": [
-    "subscriptions",
-    "subscriptions_detail"
-  ]
+  }
 }

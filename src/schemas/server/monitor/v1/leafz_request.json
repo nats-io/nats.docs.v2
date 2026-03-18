@@ -12,9 +12,5 @@
       "type": "boolean",
       "description": "Subscriptions indicates that Leafz will return a leafnode's subscriptions"
     }
-  },
-  "required": [
-    "account",
-    "subscriptions"
-  ]
+  }
 }

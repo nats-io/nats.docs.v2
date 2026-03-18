@@ -53,7 +53,7 @@ These headers enforce expected state conditions when publishing. If conditions a
 
 | Header | Value | Description |
 |--------|-------|-------------|
-| `Nats-TTL` | Duration | Time-to-live for the message. Message will be automatically removed after this duration |
+| `Nats-TTL` | Duration string (e.g., `60s`, `5m`) | Time-to-live for the message. Message will be automatically removed after this duration |
 
 
 
@@ -87,9 +87,8 @@ Headers for scheduled message delivery:
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Nats-Schedule` | Cron expression | Schedule pattern for message delivery |
-| `Nats-Schedule-TTL` | Duration | Time-to-live for the schedule |
+| `Nats-Schedule-TTL` | Duration string (e.g., `60s`, `5m`) | Time-to-live for the schedule |
 | `Nats-Schedule-Target` | Subject | Target subject for scheduled delivery |
-| `Nats-Schedule-Source` | Subject | Source subject for scheduled message delivery |
 | `Nats-Scheduler` | Scheduler ID | Identifier for the scheduler |
 | `Nats-Schedule-Next` | RFC3339 timestamp or `purge` | Next scheduled time or purge indicator |
 

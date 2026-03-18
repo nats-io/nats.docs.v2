@@ -25,10 +25,5 @@
       "type": "string",
       "description": "Test the list against this subject. Needs to be literal since it signifies a publish subject. We will only return subscriptions that would match if a message was sent to this subject."
     }
-  },
-  "required": [
-    "limit",
-    "offset",
-    "subscriptions"
-  ]
+  }
 }

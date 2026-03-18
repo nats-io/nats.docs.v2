@@ -6,10 +6,38 @@
   "type": "object",
   "properties": {
     "export": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "import": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "now": {
       "type": "string",
@@ -33,13 +61,41 @@
             "type": "boolean"
           },
           "export": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "deny": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "idle": {
             "type": "string"
           },
           "import": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "deny": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "in_bytes": {
             "type": "integer"

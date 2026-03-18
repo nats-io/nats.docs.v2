@@ -74,19 +74,5 @@
       "type": "string",
       "description": "Filter by username."
     }
-  },
-  "required": [
-    "acc",
-    "auth",
-    "cid",
-    "filter_subject",
-    "limit",
-    "mqtt_client",
-    "offset",
-    "sort",
-    "state",
-    "subscriptions",
-    "subscriptions_detail",
-    "user"
-  ]
+  }
 }

@@ -11,9 +11,5 @@
     "filter": {
       "type": "string"
     }
-  },
-  "required": [
-    "all",
-    "filter"
-  ]
+  }
 }

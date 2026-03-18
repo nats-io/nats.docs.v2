@@ -9,8 +9,5 @@
       "type": "string",
       "description": "Account indicates that Accountz will return details for the account"
     }
-  },
-  "required": [
-    "account"
-  ]
+  }
 }
