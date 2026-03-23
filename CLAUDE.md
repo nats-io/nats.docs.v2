@@ -38,10 +38,17 @@ await nc.publish("hello", "Hello NATS!");
 
 ### Code Example Workflow
 
-**Using nats-example tags (preferred):**
+**MUST use `nats-example` tags for almost every code snippet:**
 ```mdx
 <div class="nats-example" data-type="basics-publish" data-languages="cli,go,rust"></div>
 ```
+
+**Only use inline `<Tabs groupId="lang">` when:**
+- The snippet is purely language-specific (e.g., a nats.js-only API)
+- The snippet is purely bash-specific (e.g., server configuration commands)
+- The example is trivial and doesn't warrant entries in client repos
+
+In all other cases, use `nats-example` tags and add examples to the multi-repo system.
 
 **Adding new examples:**
 
@@ -78,9 +85,6 @@ await nc.publish("hello", "Hello NATS!");
 nc.Publish("subject", []byte("hello"))
 // NATS-DOC-END
 ```
-
-**For inline examples:**
-Use manual `<Tabs groupId="lang">` when examples don't need to be in client repos. Still follow all tab rules.
 
 ## 🟡 SHOULD Rules (Best Practices)
 
