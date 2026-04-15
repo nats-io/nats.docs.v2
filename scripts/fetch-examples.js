@@ -83,7 +83,7 @@ const EXAMPLES_CONFIG = {
     "java": {
         repo: "nats-io/nats.java",
         branch: "main",
-        directory: "src/examples/java/io/nats/examples/natsIoDoc/",
+        directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
         examples: {
             "basics-publish": "BasicsPublish.java",
             "basics-subscribe": "BasicsSubscribe.java",
