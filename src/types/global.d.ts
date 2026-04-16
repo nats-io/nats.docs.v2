@@ -6,6 +6,7 @@ import type {
   requestReplyQueueGroupScenario,
   queueGroupScenario,
   fanOutScenario,
+  fanInScenario,
   toggleableSubscribersScenario,
   ToggleableSubscribersScenario as ToggleableSubscribersScenarioComponent,
   QueueGroupAnimated as QueueGroupAnimatedComponent,
@@ -32,6 +33,7 @@ declare global {
         requestReplyQueueGroup: typeof requestReplyQueueGroupScenario;
         queueGroup: typeof queueGroupScenario;
         fanOut: typeof fanOutScenario;
+        fanIn: typeof fanInScenario;
         toggleableSubscribers: typeof toggleableSubscribersScenario;
       };
     };
