@@ -31,6 +31,7 @@ if (ExecutionEnvironment.canUseDOM) {
         requestReplyQueueGroup: module.requestReplyQueueGroupScenario,
         queueGroup: module.queueGroupScenario,
         fanOut: module.fanOutScenario,
+        fanIn: module.fanInScenario,
         toggleableSubscribers: module.toggleableSubscribersScenario,
       },
     };

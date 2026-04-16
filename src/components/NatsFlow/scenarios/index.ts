@@ -4,6 +4,7 @@ export { requestReplyScatterGatherScenario } from './requestReplyScatterGather';
 export { requestReplyQueueGroupScenario } from './requestReplyQueueGroup';
 export { queueGroupScenario } from './queueGroup';
 export { fanOutScenario } from './fanOut';
+export { fanInScenario } from './fanIn';
 export { toggleableSubscribersScenario, ToggleableSubscribersScenario } from './toggleableSubscribers';
 export { QueueGroupAnimated } from './queueGroupAnimated';
 export { PublishSubscribeAnimated } from './publishSubscribeAnimated';

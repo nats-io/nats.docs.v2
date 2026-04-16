@@ -69,20 +69,12 @@ One publish, four independent reactions — no coordination needed.
 ### Fan-Out
 One publisher, multiple subscribers — perfect for event notification:
 
-```text
-                ┌──► Subscriber A
-Publisher ──────┼──► Subscriber B
-                └──► Subscriber C
-```
+<div class="nats-flow" data-scenario="fanOut" data-width="600" data-height="450"></div>
 
 ### Fan-In
 Multiple publishers, one subscriber — ideal for aggregation:
 
-```text
-Publisher A ──┐
-Publisher B ──┼────► Subscriber
-Publisher C ──┘
-```
+<div class="nats-flow" data-scenario="fanIn" data-width="600" data-height="450"></div>
 
 ## Subject Hierarchies
 
