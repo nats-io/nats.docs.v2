@@ -1,0 +1,1270 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/jsz_response.json",
+  "title": "io.nats.server.monitor.v1.jsz_response",
+  "description": "Response from jsz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "account_details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "accounts": {
+            "type": "integer"
+          },
+          "api": {
+            "type": "object",
+            "properties": {
+              "errors": {
+                "type": "integer",
+                "description": "Errors is the total API requests that resulted in error responses"
+              },
+              "inflight": {
+                "type": "integer",
+                "description": "Inflight are the number of API requests currently being served"
+              },
+              "level": {
+                "type": "integer",
+                "description": "Level is the active API level this server implements"
+              },
+              "total": {
+                "type": "integer",
+                "description": "Total is the total API requests received since start"
+              }
+            },
+            "required": [
+              "errors",
+              "level",
+              "total"
+            ]
+          },
+          "ha_assets": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "memory": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reserved_memory": {
+            "type": "integer"
+          },
+          "reserved_storage": {
+            "type": "integer"
+          },
+          "storage": {
+            "type": "integer"
+          },
+          "stream_detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cluster": {
+                  "type": "object",
+                  "properties": {
+                    "leader": {
+                      "type": "string"
+                    },
+                    "leader_since": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "raft_group": {
+                      "type": "string"
+                    },
+                    "replicas": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "active": {
+                            "type": "integer",
+                            "description": "Active is the timestamp it was last active",
+                            "$comment": "nanoseconds depicting a duration in time"
+                          },
+                          "cluster": {
+                            "type": "string",
+                            "description": "For migrations."
+                          },
+                          "current": {
+                            "type": "boolean",
+                            "description": "Current indicates if it was seen recently and fully caught up"
+                          },
+                          "lag": {
+                            "type": "integer",
+                            "description": "Lag is how many operations behind it is"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Name is the unique name for the peer"
+                          },
+                          "offline": {
+                            "type": "boolean",
+                            "description": "Offline indicates if it has not been seen recently"
+                          },
+                          "peer": {
+                            "type": "string",
+                            "description": "Peer is the unique ID for the peer"
+                          }
+                        },
+                        "required": [
+                          "active",
+                          "current",
+                          "name",
+                          "peer"
+                        ]
+                      }
+                    },
+                    "system_account": {
+                      "type": "boolean"
+                    },
+                    "traffic_account": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "allow_direct": {
+                      "type": "boolean",
+                      "description": "Allow higher performance, direct access to get individual messages. E.g. KeyValue"
+                    },
+                    "allow_msg_ttl": {
+                      "type": "boolean",
+                      "description": "AllowMsgTTL allows header initiated per-message TTLs. If disabled, then the `NATS-TTL` header will be ignored."
+                    },
+                    "allow_rollup_hdrs": {
+                      "type": "boolean",
+                      "description": "AllowRollup allows messages to be placed into the system and purge all older messages using a special msg header."
+                    },
+                    "compression": {
+                      "type": "string"
+                    },
+                    "consumer_limits": {
+                      "type": "object",
+                      "description": "The following defaults will apply to consumers when created against this stream, unless overridden manually. TODO(nat): Can/should we name these better?",
+                      "properties": {
+                        "inactive_threshold": {
+                          "type": "integer",
+                          "$comment": "nanoseconds depicting a duration in time"
+                        },
+                        "max_ack_pending": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "deny_delete": {
+                      "type": "boolean",
+                      "description": "DenyDelete will restrict the ability to delete messages."
+                    },
+                    "deny_purge": {
+                      "type": "boolean",
+                      "description": "DenyPurge will restrict the ability to purge messages."
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "discard": {
+                      "type": "integer"
+                    },
+                    "discard_new_per_subject": {
+                      "type": "boolean",
+                      "description": "Allow KV like semantics to also discard new on a per subject basis"
+                    },
+                    "duplicate_window": {
+                      "type": "integer",
+                      "$comment": "nanoseconds depicting a duration in time"
+                    },
+                    "first_seq": {
+                      "type": "integer"
+                    },
+                    "max_age": {
+                      "type": "integer",
+                      "$comment": "nanoseconds depicting a duration in time"
+                    },
+                    "max_bytes": {
+                      "type": "integer"
+                    },
+                    "max_consumers": {
+                      "type": "integer"
+                    },
+                    "max_msg_size": {
+                      "type": "integer"
+                    },
+                    "max_msgs": {
+                      "type": "integer"
+                    },
+                    "max_msgs_per_subject": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Metadata is additional metadata for the Stream.",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "mirror": {
+                      "type": "object",
+                      "properties": {
+                        "external": {
+                          "type": "object",
+                          "properties": {
+                            "api": {
+                              "type": "string"
+                            },
+                            "deliver": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "api",
+                            "deliver"
+                          ]
+                        },
+                        "filter_subject": {
+                          "type": "string"
+                        },
+                        "iname": {
+                          "type": "string",
+                          "description": "Internal"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "opt_start_seq": {
+                          "type": "integer"
+                        },
+                        "opt_start_time": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "subject_transforms": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "dest": {
+                                "type": "string"
+                              },
+                              "src": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "dest",
+                              "src"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ]
+                    },
+                    "mirror_direct": {
+                      "type": "boolean",
+                      "description": "Allow higher performance and unified direct access for mirrors as well."
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "no_ack": {
+                      "type": "boolean"
+                    },
+                    "num_replicas": {
+                      "type": "integer"
+                    },
+                    "placement": {
+                      "type": "object",
+                      "properties": {
+                        "cluster": {
+                          "type": "string"
+                        },
+                        "preferred": {
+                          "type": "string"
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "republish": {
+                      "type": "object",
+                      "description": "Allow republish of the message after being sequenced and stored.",
+                      "properties": {
+                        "dest": {
+                          "type": "string"
+                        },
+                        "headers_only": {
+                          "type": "boolean"
+                        },
+                        "src": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "dest"
+                      ]
+                    },
+                    "retention": {
+                      "type": "string"
+                    },
+                    "sealed": {
+                      "type": "boolean",
+                      "description": "Sealed will seal a stream so no messages can get out or in."
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "external": {
+                            "type": "object",
+                            "properties": {
+                              "api": {
+                                "type": "string"
+                              },
+                              "deliver": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "api",
+                              "deliver"
+                            ]
+                          },
+                          "filter_subject": {
+                            "type": "string"
+                          },
+                          "iname": {
+                            "type": "string",
+                            "description": "Internal"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "opt_start_seq": {
+                            "type": "integer"
+                          },
+                          "opt_start_time": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "subject_transforms": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "dest": {
+                                  "type": "string"
+                                },
+                                "src": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "dest",
+                                "src"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    },
+                    "storage": {
+                      "type": "string"
+                    },
+                    "subject_delete_marker_ttl": {
+                      "type": "integer",
+                      "description": "SubjectDeleteMarkerTTL sets the TTL of delete marker messages left behind by subject delete markers.",
+                      "$comment": "nanoseconds depicting a duration in time"
+                    },
+                    "subject_transform": {
+                      "type": "object",
+                      "description": "Allow applying a subject transform to incoming messages before doing anything else",
+                      "properties": {
+                        "dest": {
+                          "type": "string"
+                        },
+                        "src": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "dest",
+                        "src"
+                      ]
+                    },
+                    "subjects": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "template_owner": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "allow_direct",
+                    "allow_msg_ttl",
+                    "allow_rollup_hdrs",
+                    "compression",
+                    "consumer_limits",
+                    "deny_delete",
+                    "deny_purge",
+                    "discard",
+                    "max_age",
+                    "max_bytes",
+                    "max_consumers",
+                    "max_msgs",
+                    "max_msgs_per_subject",
+                    "mirror_direct",
+                    "name",
+                    "num_replicas",
+                    "retention",
+                    "sealed",
+                    "storage"
+                  ]
+                },
+                "consumer_detail": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ack_floor": {
+                        "type": "object",
+                        "properties": {
+                          "consumer_seq": {
+                            "type": "integer"
+                          },
+                          "last_active": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "stream_seq": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "consumer_seq",
+                          "stream_seq"
+                        ]
+                      },
+                      "cluster": {
+                        "type": "object",
+                        "properties": {
+                          "leader": {
+                            "type": "string"
+                          },
+                          "leader_since": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "raft_group": {
+                            "type": "string"
+                          },
+                          "replicas": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "active": {
+                                  "type": "integer",
+                                  "description": "Active is the timestamp it was last active",
+                                  "$comment": "nanoseconds depicting a duration in time"
+                                },
+                                "cluster": {
+                                  "type": "string",
+                                  "description": "For migrations."
+                                },
+                                "current": {
+                                  "type": "boolean",
+                                  "description": "Current indicates if it was seen recently and fully caught up"
+                                },
+                                "lag": {
+                                  "type": "integer",
+                                  "description": "Lag is how many operations behind it is"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "description": "Name is the unique name for the peer"
+                                },
+                                "offline": {
+                                  "type": "boolean",
+                                  "description": "Offline indicates if it has not been seen recently"
+                                },
+                                "peer": {
+                                  "type": "string",
+                                  "description": "Peer is the unique ID for the peer"
+                                }
+                              },
+                              "required": [
+                                "active",
+                                "current",
+                                "name",
+                                "peer"
+                              ]
+                            }
+                          },
+                          "system_account": {
+                            "type": "boolean"
+                          },
+                          "traffic_account": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "config": {
+                        "type": "object",
+                        "properties": {
+                          "ack_policy": {
+                            "type": "string"
+                          },
+                          "ack_wait": {
+                            "type": "integer",
+                            "$comment": "nanoseconds depicting a duration in time"
+                          },
+                          "backoff": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "$comment": "nanoseconds depicting a duration in time"
+                            }
+                          },
+                          "deliver_group": {
+                            "type": "string"
+                          },
+                          "deliver_policy": {
+                            "type": "string"
+                          },
+                          "deliver_subject": {
+                            "type": "string",
+                            "description": "Push based consumers."
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "direct": {
+                            "type": "boolean",
+                            "description": "Don't add to general clients."
+                          },
+                          "durable_name": {
+                            "type": "string"
+                          },
+                          "filter_subject": {
+                            "type": "string"
+                          },
+                          "filter_subjects": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "flow_control": {
+                            "type": "boolean"
+                          },
+                          "headers_only": {
+                            "type": "boolean"
+                          },
+                          "idle_heartbeat": {
+                            "type": "integer",
+                            "$comment": "nanoseconds depicting a duration in time"
+                          },
+                          "inactive_threshold": {
+                            "type": "integer",
+                            "description": "Ephemeral inactivity threshold.",
+                            "$comment": "nanoseconds depicting a duration in time"
+                          },
+                          "max_ack_pending": {
+                            "type": "integer"
+                          },
+                          "max_batch": {
+                            "type": "integer",
+                            "description": "Pull based options."
+                          },
+                          "max_bytes": {
+                            "type": "integer"
+                          },
+                          "max_deliver": {
+                            "type": "integer"
+                          },
+                          "max_expires": {
+                            "type": "integer",
+                            "$comment": "nanoseconds depicting a duration in time"
+                          },
+                          "max_waiting": {
+                            "type": "integer"
+                          },
+                          "mem_storage": {
+                            "type": "boolean",
+                            "description": "Force memory storage."
+                          },
+                          "metadata": {
+                            "type": "object",
+                            "description": "Metadata is additional metadata for the Consumer.",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "num_replicas": {
+                            "type": "integer",
+                            "description": "Generally inherited by parent stream and other markers, now can be configured directly."
+                          },
+                          "opt_start_seq": {
+                            "type": "integer"
+                          },
+                          "opt_start_time": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "pause_until": {
+                            "type": "string",
+                            "description": "PauseUntil is for suspending the consumer until the deadline.",
+                            "format": "date-time"
+                          },
+                          "priority_groups": {
+                            "type": "array",
+                            "description": "Priority groups",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "priority_policy": {
+                            "type": "string"
+                          },
+                          "priority_timeout": {
+                            "type": "integer",
+                            "$comment": "nanoseconds depicting a duration in time"
+                          },
+                          "rate_limit_bps": {
+                            "type": "integer",
+                            "description": "Bits per sec"
+                          },
+                          "replay_policy": {
+                            "type": "string"
+                          },
+                          "sample_freq": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "ack_policy",
+                          "deliver_policy",
+                          "num_replicas",
+                          "replay_policy"
+                        ]
+                      },
+                      "created": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "delivered": {
+                        "type": "object",
+                        "properties": {
+                          "consumer_seq": {
+                            "type": "integer"
+                          },
+                          "last_active": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "stream_seq": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "consumer_seq",
+                          "stream_seq"
+                        ]
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "num_ack_pending": {
+                        "type": "integer"
+                      },
+                      "num_pending": {
+                        "type": "integer"
+                      },
+                      "num_redelivered": {
+                        "type": "integer"
+                      },
+                      "num_waiting": {
+                        "type": "integer"
+                      },
+                      "pause_remaining": {
+                        "type": "integer",
+                        "$comment": "nanoseconds depicting a duration in time"
+                      },
+                      "paused": {
+                        "type": "boolean"
+                      },
+                      "priority_groups": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "group": {
+                              "type": "string"
+                            },
+                            "pinned_client_id": {
+                              "type": "string"
+                            },
+                            "pinned_ts": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          },
+                          "required": [
+                            "group"
+                          ]
+                        }
+                      },
+                      "push_bound": {
+                        "type": "boolean"
+                      },
+                      "stream_name": {
+                        "type": "string"
+                      },
+                      "ts": {
+                        "type": "string",
+                        "description": "TimeStamp indicates when the info was gathered",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "ack_floor",
+                      "created",
+                      "delivered",
+                      "name",
+                      "num_ack_pending",
+                      "num_pending",
+                      "num_redelivered",
+                      "num_waiting",
+                      "stream_name",
+                      "ts"
+                    ]
+                  }
+                },
+                "consumer_raft_groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "raft_group": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  }
+                },
+                "created": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "mirror": {
+                  "type": "object",
+                  "properties": {
+                    "active": {
+                      "type": "integer",
+                      "$comment": "nanoseconds depicting a duration in time"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "err_code": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    "external": {
+                      "type": "object",
+                      "properties": {
+                        "api": {
+                          "type": "string"
+                        },
+                        "deliver": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "api",
+                        "deliver"
+                      ]
+                    },
+                    "filter_subject": {
+                      "type": "string"
+                    },
+                    "lag": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "subject_transforms": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dest": {
+                            "type": "string"
+                          },
+                          "src": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "dest",
+                          "src"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "active",
+                    "lag",
+                    "name"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "active": {
+                        "type": "integer",
+                        "$comment": "nanoseconds depicting a duration in time"
+                      },
+                      "error": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "integer"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "err_code": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "code"
+                        ]
+                      },
+                      "external": {
+                        "type": "object",
+                        "properties": {
+                          "api": {
+                            "type": "string"
+                          },
+                          "deliver": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "api",
+                          "deliver"
+                        ]
+                      },
+                      "filter_subject": {
+                        "type": "string"
+                      },
+                      "lag": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "subject_transforms": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "dest": {
+                              "type": "string"
+                            },
+                            "src": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "dest",
+                            "src"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "active",
+                      "lag",
+                      "name"
+                    ]
+                  }
+                },
+                "state": {
+                  "type": "object",
+                  "properties": {
+                    "bytes": {
+                      "type": "integer"
+                    },
+                    "consumer_count": {
+                      "type": "integer"
+                    },
+                    "deleted": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "first_seq": {
+                      "type": "integer"
+                    },
+                    "first_ts": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "last_seq": {
+                      "type": "integer"
+                    },
+                    "last_ts": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "lost": {
+                      "type": "object",
+                      "properties": {
+                        "bytes": {
+                          "type": "integer"
+                        },
+                        "msgs": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "required": [
+                        "bytes",
+                        "msgs"
+                      ]
+                    },
+                    "messages": {
+                      "type": "integer"
+                    },
+                    "num_deleted": {
+                      "type": "integer"
+                    },
+                    "num_subjects": {
+                      "type": "integer"
+                    },
+                    "subjects": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "required": [
+                    "bytes",
+                    "consumer_count",
+                    "first_seq",
+                    "first_ts",
+                    "last_seq",
+                    "last_ts",
+                    "messages"
+                  ]
+                },
+                "stream_raft_group": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "created",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "accounts",
+          "api",
+          "ha_assets",
+          "id",
+          "memory",
+          "name",
+          "reserved_memory",
+          "reserved_storage",
+          "storage"
+        ]
+      }
+    },
+    "accounts": {
+      "type": "integer"
+    },
+    "api": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "integer",
+          "description": "Errors is the total API requests that resulted in error responses"
+        },
+        "inflight": {
+          "type": "integer",
+          "description": "Inflight are the number of API requests currently being served"
+        },
+        "level": {
+          "type": "integer",
+          "description": "Level is the active API level this server implements"
+        },
+        "total": {
+          "type": "integer",
+          "description": "Total is the total API requests received since start"
+        }
+      },
+      "required": [
+        "errors",
+        "level",
+        "total"
+      ]
+    },
+    "bytes": {
+      "type": "integer"
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "compress_ok": {
+          "type": "boolean",
+          "description": "CompressOK indicates if compression is supported"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain is the JetStream domain"
+        },
+        "max_memory": {
+          "type": "integer",
+          "description": "MaxMemory is the maximum size of memory type streams"
+        },
+        "max_storage": {
+          "type": "integer",
+          "description": "MaxStore is the maximum size of file store type streams"
+        },
+        "store_dir": {
+          "type": "string",
+          "description": "StoreDir is where storage files are stored"
+        },
+        "strict": {
+          "type": "boolean",
+          "description": "Strict indicates if strict JSON parsing is performed"
+        },
+        "sync_always": {
+          "type": "boolean",
+          "description": "SyncAlways indicates flushes are done after every write"
+        },
+        "sync_interval": {
+          "type": "integer",
+          "description": "SyncInterval is how frequently we sync to disk in the background by calling fsync",
+          "$comment": "nanoseconds depicting a duration in time"
+        },
+        "unique_tag": {
+          "type": "string",
+          "description": "UniqueTag is the unique tag assigned to this instance"
+        }
+      },
+      "required": [
+        "max_memory",
+        "max_storage"
+      ]
+    },
+    "consumers": {
+      "type": "integer"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "ha_assets": {
+      "type": "integer"
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "max_ack_pending": {
+          "type": "integer",
+          "description": "MaxAckPending is the server limit for maximum amount of outstanding Acks"
+        },
+        "max_duplicate_window": {
+          "type": "integer",
+          "description": "Duplicates is the maximum value for duplicate tracking on Streams",
+          "$comment": "nanoseconds depicting a duration in time"
+        },
+        "max_ha_assets": {
+          "type": "integer",
+          "description": "MaxHAAssets is the maximum of Streams and Consumers that may have more than 1 replica"
+        },
+        "max_request_batch": {
+          "type": "integer",
+          "description": "MaxRequestBatch is the maximum amount of updates that can be sent in a batch"
+        }
+      }
+    },
+    "memory": {
+      "type": "integer"
+    },
+    "messages": {
+      "type": "integer"
+    },
+    "meta_cluster": {
+      "type": "object",
+      "properties": {
+        "cluster_size": {
+          "type": "integer",
+          "description": "Size is the known size of the cluster"
+        },
+        "leader": {
+          "type": "string",
+          "description": "Leader is the server name of the cluster leader"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name is the name of the cluster"
+        },
+        "peer": {
+          "type": "string",
+          "description": "Peer is unique ID of the leader"
+        },
+        "pending": {
+          "type": "integer",
+          "description": "Pending is how many RAFT messages are not yet processed"
+        },
+        "replicas": {
+          "type": "array",
+          "description": "Replicas is a list of known peers",
+          "items": {
+            "type": "object",
+            "properties": {
+              "active": {
+                "type": "integer",
+                "description": "Active is the timestamp it was last active",
+                "$comment": "nanoseconds depicting a duration in time"
+              },
+              "cluster": {
+                "type": "string",
+                "description": "For migrations."
+              },
+              "current": {
+                "type": "boolean",
+                "description": "Current indicates if it was seen recently and fully caught up"
+              },
+              "lag": {
+                "type": "integer",
+                "description": "Lag is how many operations behind it is"
+              },
+              "name": {
+                "type": "string",
+                "description": "Name is the unique name for the peer"
+              },
+              "offline": {
+                "type": "boolean",
+                "description": "Offline indicates if it has not been seen recently"
+              },
+              "peer": {
+                "type": "string",
+                "description": "Peer is the unique ID for the peer"
+              }
+            },
+            "required": [
+              "active",
+              "current",
+              "name",
+              "peer"
+            ]
+          }
+        }
+      },
+      "required": [
+        "cluster_size",
+        "pending"
+      ]
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reserved_memory": {
+      "type": "integer"
+    },
+    "reserved_storage": {
+      "type": "integer"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "storage": {
+      "type": "integer"
+    },
+    "streams": {
+      "type": "integer"
+    },
+    "total": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "accounts",
+    "api",
+    "bytes",
+    "consumers",
+    "ha_assets",
+    "memory",
+    "messages",
+    "now",
+    "reserved_memory",
+    "reserved_storage",
+    "server_id",
+    "storage",
+    "streams",
+    "total"
+  ]
+}

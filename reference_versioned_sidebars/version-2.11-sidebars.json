@@ -1,0 +1,1573 @@
+{
+  "referenceSidebar": [
+    {
+      "type": "doc",
+      "id": "index",
+      "label": "Reference"
+    },
+    {
+      "type": "category",
+      "label": "Configuration",
+      "collapsed": true,
+      "link": {
+        "type": "doc",
+        "id": "config/index"
+      },
+      "items": [
+        "config/host",
+        "config/port",
+        "config/listen",
+        "config/client_advertise",
+        {
+          "type": "category",
+          "label": "tls",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/tls/index"
+          },
+          "items": [
+            "config/tls/cert_file",
+            "config/tls/key_file",
+            "config/tls/ca_file",
+            "config/tls/cipher_suites",
+            "config/tls/curve_preferences",
+            "config/tls/insecure",
+            "config/tls/timeout",
+            "config/tls/verify",
+            "config/tls/verify_and_map",
+            "config/tls/verify_cert_and_check_known_urls",
+            "config/tls/connection_rate_limit",
+            "config/tls/pinned_certs"
+          ]
+        },
+        "config/allow_non_tls",
+        {
+          "type": "category",
+          "label": "ocsp",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/ocsp/index"
+          },
+          "items": [
+            "config/ocsp/mode",
+            "config/ocsp/url",
+            "config/ocsp/urls"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "mqtt",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/mqtt/index"
+          },
+          "items": [
+            "config/mqtt/host",
+            "config/mqtt/port",
+            "config/mqtt/listen",
+            {
+              "type": "category",
+              "label": "tls",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/mqtt/tls/index"
+              },
+              "items": [
+                "config/mqtt/tls/cert_file",
+                "config/mqtt/tls/key_file",
+                "config/mqtt/tls/ca_file",
+                "config/mqtt/tls/cipher_suites",
+                "config/mqtt/tls/curve_preferences",
+                "config/mqtt/tls/insecure",
+                "config/mqtt/tls/timeout",
+                "config/mqtt/tls/verify",
+                "config/mqtt/tls/verify_and_map",
+                "config/mqtt/tls/verify_cert_and_check_known_urls",
+                "config/mqtt/tls/connection_rate_limit",
+                "config/mqtt/tls/pinned_certs"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "authorization",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/mqtt/authorization/index"
+              },
+              "items": [
+                "config/mqtt/authorization/username",
+                "config/mqtt/authorization/password",
+                "config/mqtt/authorization/token",
+                "config/mqtt/authorization/timeout"
+              ]
+            },
+            "config/mqtt/no_auth_user",
+            "config/mqtt/ack_wait",
+            "config/mqtt/max_ack_pending",
+            "config/mqtt/js_domain",
+            "config/mqtt/stream_replicas",
+            "config/mqtt/consumer_inactive_threshold"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "websocket",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/websocket/index"
+          },
+          "items": [
+            "config/websocket/host",
+            "config/websocket/port",
+            "config/websocket/listen",
+            "config/websocket/advertise",
+            {
+              "type": "category",
+              "label": "tls",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/websocket/tls/index"
+              },
+              "items": [
+                "config/websocket/tls/cert_file",
+                "config/websocket/tls/key_file",
+                "config/websocket/tls/ca_file",
+                "config/websocket/tls/cipher_suites",
+                "config/websocket/tls/curve_preferences",
+                "config/websocket/tls/insecure",
+                "config/websocket/tls/timeout",
+                "config/websocket/tls/verify",
+                "config/websocket/tls/verify_and_map",
+                "config/websocket/tls/verify_cert_and_check_known_urls",
+                "config/websocket/tls/connection_rate_limit",
+                "config/websocket/tls/pinned_certs"
+              ]
+            },
+            "config/websocket/no_tls",
+            "config/websocket/same_origin",
+            "config/websocket/allowed_origins",
+            "config/websocket/handshake_timeout",
+            "config/websocket/compress",
+            {
+              "type": "category",
+              "label": "authorization",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/websocket/authorization/index"
+              },
+              "items": [
+                "config/websocket/authorization/username",
+                "config/websocket/authorization/password",
+                "config/websocket/authorization/token",
+                "config/websocket/authorization/timeout"
+              ]
+            },
+            "config/websocket/jwt_token",
+            "config/websocket/no_auth_user"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "authorization",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/authorization/index"
+          },
+          "items": [
+            "config/authorization/username",
+            "config/authorization/password",
+            "config/authorization/token",
+            {
+              "type": "category",
+              "label": "users",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/authorization/users/index"
+              },
+              "items": [
+                "config/authorization/users/username",
+                "config/authorization/users/password",
+                "config/authorization/users/nkey",
+                {
+                  "type": "category",
+                  "label": "permissions",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/authorization/users/permissions/index"
+                  },
+                  "items": [
+                    {
+                      "type": "category",
+                      "label": "publish",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/authorization/users/permissions/publish/index"
+                      },
+                      "items": [
+                        "config/authorization/users/permissions/publish/allow",
+                        "config/authorization/users/permissions/publish/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "subscribe",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/authorization/users/permissions/subscribe/index"
+                      },
+                      "items": [
+                        "config/authorization/users/permissions/subscribe/allow",
+                        "config/authorization/users/permissions/subscribe/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "allow_responses",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/authorization/users/permissions/allow_responses/index"
+                      },
+                      "items": [
+                        "config/authorization/users/permissions/allow_responses/max",
+                        "config/authorization/users/permissions/allow_responses/expires"
+                      ]
+                    }
+                  ]
+                },
+                "config/authorization/users/allowed_connection_types"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "default_permissions",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/authorization/default_permissions/index"
+              },
+              "items": [
+                {
+                  "type": "category",
+                  "label": "publish",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/authorization/default_permissions/publish/index"
+                  },
+                  "items": [
+                    "config/authorization/default_permissions/publish/allow",
+                    "config/authorization/default_permissions/publish/deny"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "subscribe",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/authorization/default_permissions/subscribe/index"
+                  },
+                  "items": [
+                    "config/authorization/default_permissions/subscribe/allow",
+                    "config/authorization/default_permissions/subscribe/deny"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "allow_responses",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/authorization/default_permissions/allow_responses/index"
+                  },
+                  "items": [
+                    "config/authorization/default_permissions/allow_responses/max",
+                    "config/authorization/default_permissions/allow_responses/expires"
+                  ]
+                }
+              ]
+            },
+            "config/authorization/timeout",
+            {
+              "type": "category",
+              "label": "auth_callout",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/authorization/auth_callout/index"
+              },
+              "items": [
+                "config/authorization/auth_callout/issuer",
+                "config/authorization/auth_callout/account",
+                "config/authorization/auth_callout/users",
+                "config/authorization/auth_callout/key"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "category",
+          "label": "accounts",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/accounts/index"
+          },
+          "items": [
+            {
+              "type": "category",
+              "label": "users",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/users/index"
+              },
+              "items": [
+                "config/accounts/users/username",
+                "config/accounts/users/password",
+                "config/accounts/users/nkey",
+                {
+                  "type": "category",
+                  "label": "permissions",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/accounts/users/permissions/index"
+                  },
+                  "items": [
+                    {
+                      "type": "category",
+                      "label": "publish",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/accounts/users/permissions/publish/index"
+                      },
+                      "items": [
+                        "config/accounts/users/permissions/publish/allow",
+                        "config/accounts/users/permissions/publish/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "subscribe",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/accounts/users/permissions/subscribe/index"
+                      },
+                      "items": [
+                        "config/accounts/users/permissions/subscribe/allow",
+                        "config/accounts/users/permissions/subscribe/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "allow_responses",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/accounts/users/permissions/allow_responses/index"
+                      },
+                      "items": [
+                        "config/accounts/users/permissions/allow_responses/max",
+                        "config/accounts/users/permissions/allow_responses/expires"
+                      ]
+                    }
+                  ]
+                },
+                "config/accounts/users/allowed_connection_types"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "exports",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/exports/index"
+              },
+              "items": [
+                "config/accounts/exports/stream",
+                "config/accounts/exports/service",
+                "config/accounts/exports/accounts",
+                "config/accounts/exports/response_type"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "imports",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/imports/index"
+              },
+              "items": [
+                {
+                  "type": "category",
+                  "label": "stream",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/accounts/imports/stream/index"
+                  },
+                  "items": [
+                    "config/accounts/imports/stream/account",
+                    "config/accounts/imports/stream/subject"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "service",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/accounts/imports/service/index"
+                  },
+                  "items": [
+                    "config/accounts/imports/service/account",
+                    "config/accounts/imports/service/subject"
+                  ]
+                },
+                "config/accounts/imports/prefix",
+                "config/accounts/imports/to"
+              ]
+            },
+            "config/accounts/nkey",
+            {
+              "type": "category",
+              "label": "jetstream",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/jetstream/index"
+              },
+              "items": [
+                "config/accounts/jetstream/max_memory",
+                "config/accounts/jetstream/max_file",
+                "config/accounts/jetstream/max_streams",
+                "config/accounts/jetstream/max_consumers",
+                "config/accounts/jetstream/max_bytes_required",
+                "config/accounts/jetstream/memory_max_stream_bytes",
+                "config/accounts/jetstream/disk_max_stream_bytes",
+                "config/accounts/jetstream/max_ack_pending"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "default_permissions",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/default_permissions/index"
+              },
+              "items": [
+                {
+                  "type": "category",
+                  "label": "publish",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/accounts/default_permissions/publish/index"
+                  },
+                  "items": [
+                    "config/accounts/default_permissions/publish/allow",
+                    "config/accounts/default_permissions/publish/deny"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "subscribe",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/accounts/default_permissions/subscribe/index"
+                  },
+                  "items": [
+                    "config/accounts/default_permissions/subscribe/allow",
+                    "config/accounts/default_permissions/subscribe/deny"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "allow_responses",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/accounts/default_permissions/allow_responses/index"
+                  },
+                  "items": [
+                    "config/accounts/default_permissions/allow_responses/max",
+                    "config/accounts/default_permissions/allow_responses/expires"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "category",
+              "label": "mappings",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/mappings/index"
+              },
+              "items": [
+                "config/accounts/mappings/destination",
+                "config/accounts/mappings/weight",
+                "config/accounts/mappings/cluster"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "limits",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/limits/index"
+              },
+              "items": [
+                "config/accounts/limits/max_connections",
+                "config/accounts/limits/max_subscriptions",
+                "config/accounts/limits/max_payload",
+                "config/accounts/limits/max_leafnodes"
+              ]
+            }
+          ]
+        },
+        "config/no_auth_user",
+        "config/operator",
+        "config/trusted_keys",
+        {
+          "type": "category",
+          "label": "resolver",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/resolver/index"
+          },
+          "items": [
+            "config/resolver/type",
+            "config/resolver/dir",
+            "config/resolver/limit",
+            "config/resolver/ttl",
+            "config/resolver/interval",
+            "config/resolver/timeout",
+            "config/resolver/allow_delete",
+            "config/resolver/hard_delete"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "resolver_tls",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/resolver_tls/index"
+          },
+          "items": [
+            "config/resolver_tls/cert_file",
+            "config/resolver_tls/key_file",
+            "config/resolver_tls/ca_file",
+            "config/resolver_tls/cipher_suites",
+            "config/resolver_tls/curve_preferences",
+            "config/resolver_tls/insecure",
+            "config/resolver_tls/timeout",
+            "config/resolver_tls/verify",
+            "config/resolver_tls/verify_and_map",
+            "config/resolver_tls/verify_cert_and_check_known_urls",
+            "config/resolver_tls/connection_rate_limit",
+            "config/resolver_tls/pinned_certs"
+          ]
+        },
+        "config/resolver_preload",
+        "config/resolver_pinned_accounts",
+        "config/system_account",
+        "config/no_system_account",
+        {
+          "type": "category",
+          "label": "cluster",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/cluster/index"
+          },
+          "items": [
+            "config/cluster/name",
+            "config/cluster/host",
+            "config/cluster/port",
+            "config/cluster/listen",
+            {
+              "type": "category",
+              "label": "tls",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/cluster/tls/index"
+              },
+              "items": [
+                "config/cluster/tls/cert_file",
+                "config/cluster/tls/key_file",
+                "config/cluster/tls/ca_file",
+                "config/cluster/tls/cipher_suites",
+                "config/cluster/tls/curve_preferences",
+                "config/cluster/tls/insecure",
+                "config/cluster/tls/timeout",
+                "config/cluster/tls/verify",
+                "config/cluster/tls/verify_and_map",
+                "config/cluster/tls/verify_cert_and_check_known_urls",
+                "config/cluster/tls/connection_rate_limit",
+                "config/cluster/tls/pinned_certs"
+              ]
+            },
+            "config/cluster/advertise",
+            "config/cluster/no_advertise",
+            "config/cluster/routes",
+            "config/cluster/connect_retries",
+            {
+              "type": "category",
+              "label": "authorization",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/cluster/authorization/index"
+              },
+              "items": [
+                "config/cluster/authorization/username",
+                "config/cluster/authorization/password",
+                "config/cluster/authorization/token",
+                {
+                  "type": "category",
+                  "label": "users",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/cluster/authorization/users/index"
+                  },
+                  "items": [
+                    "config/cluster/authorization/users/username",
+                    "config/cluster/authorization/users/password",
+                    "config/cluster/authorization/users/nkey",
+                    {
+                      "type": "category",
+                      "label": "permissions",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/cluster/authorization/users/permissions/index"
+                      },
+                      "items": [
+                        {
+                          "type": "category",
+                          "label": "publish",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/cluster/authorization/users/permissions/publish/index"
+                          },
+                          "items": [
+                            "config/cluster/authorization/users/permissions/publish/allow",
+                            "config/cluster/authorization/users/permissions/publish/deny"
+                          ]
+                        },
+                        {
+                          "type": "category",
+                          "label": "subscribe",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/cluster/authorization/users/permissions/subscribe/index"
+                          },
+                          "items": [
+                            "config/cluster/authorization/users/permissions/subscribe/allow",
+                            "config/cluster/authorization/users/permissions/subscribe/deny"
+                          ]
+                        },
+                        {
+                          "type": "category",
+                          "label": "allow_responses",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/cluster/authorization/users/permissions/allow_responses/index"
+                          },
+                          "items": [
+                            "config/cluster/authorization/users/permissions/allow_responses/max",
+                            "config/cluster/authorization/users/permissions/allow_responses/expires"
+                          ]
+                        }
+                      ]
+                    },
+                    "config/cluster/authorization/users/allowed_connection_types"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "default_permissions",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/cluster/authorization/default_permissions/index"
+                  },
+                  "items": [
+                    {
+                      "type": "category",
+                      "label": "publish",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/cluster/authorization/default_permissions/publish/index"
+                      },
+                      "items": [
+                        "config/cluster/authorization/default_permissions/publish/allow",
+                        "config/cluster/authorization/default_permissions/publish/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "subscribe",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/cluster/authorization/default_permissions/subscribe/index"
+                      },
+                      "items": [
+                        "config/cluster/authorization/default_permissions/subscribe/allow",
+                        "config/cluster/authorization/default_permissions/subscribe/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "allow_responses",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/cluster/authorization/default_permissions/allow_responses/index"
+                      },
+                      "items": [
+                        "config/cluster/authorization/default_permissions/allow_responses/max",
+                        "config/cluster/authorization/default_permissions/allow_responses/expires"
+                      ]
+                    }
+                  ]
+                },
+                "config/cluster/authorization/timeout"
+              ]
+            },
+            "config/cluster/pool_size",
+            "config/cluster/accounts",
+            {
+              "type": "category",
+              "label": "compression",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/cluster/compression/index"
+              },
+              "items": [
+                "config/cluster/compression/mode",
+                "config/cluster/compression/rtt_thresholds"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "category",
+          "label": "gateway",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/gateway/index"
+          },
+          "items": [
+            "config/gateway/name",
+            "config/gateway/reject_unknown_cluster",
+            "config/gateway/host",
+            "config/gateway/port",
+            "config/gateway/listen",
+            {
+              "type": "category",
+              "label": "tls",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/gateway/tls/index"
+              },
+              "items": [
+                "config/gateway/tls/cert_file",
+                "config/gateway/tls/key_file",
+                "config/gateway/tls/ca_file",
+                "config/gateway/tls/cipher_suites",
+                "config/gateway/tls/curve_preferences",
+                "config/gateway/tls/insecure",
+                "config/gateway/tls/timeout",
+                "config/gateway/tls/verify",
+                "config/gateway/tls/verify_and_map",
+                "config/gateway/tls/verify_cert_and_check_known_urls",
+                "config/gateway/tls/connection_rate_limit",
+                "config/gateway/tls/pinned_certs"
+              ]
+            },
+            "config/gateway/advertise",
+            "config/gateway/connect_retries",
+            {
+              "type": "category",
+              "label": "authorization",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/gateway/authorization/index"
+              },
+              "items": [
+                "config/gateway/authorization/username",
+                "config/gateway/authorization/password",
+                "config/gateway/authorization/token",
+                {
+                  "type": "category",
+                  "label": "users",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/gateway/authorization/users/index"
+                  },
+                  "items": [
+                    "config/gateway/authorization/users/username",
+                    "config/gateway/authorization/users/password",
+                    "config/gateway/authorization/users/nkey",
+                    {
+                      "type": "category",
+                      "label": "permissions",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/gateway/authorization/users/permissions/index"
+                      },
+                      "items": [
+                        {
+                          "type": "category",
+                          "label": "publish",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/gateway/authorization/users/permissions/publish/index"
+                          },
+                          "items": [
+                            "config/gateway/authorization/users/permissions/publish/allow",
+                            "config/gateway/authorization/users/permissions/publish/deny"
+                          ]
+                        },
+                        {
+                          "type": "category",
+                          "label": "subscribe",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/gateway/authorization/users/permissions/subscribe/index"
+                          },
+                          "items": [
+                            "config/gateway/authorization/users/permissions/subscribe/allow",
+                            "config/gateway/authorization/users/permissions/subscribe/deny"
+                          ]
+                        },
+                        {
+                          "type": "category",
+                          "label": "allow_responses",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/gateway/authorization/users/permissions/allow_responses/index"
+                          },
+                          "items": [
+                            "config/gateway/authorization/users/permissions/allow_responses/max",
+                            "config/gateway/authorization/users/permissions/allow_responses/expires"
+                          ]
+                        }
+                      ]
+                    },
+                    "config/gateway/authorization/users/allowed_connection_types"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "default_permissions",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/gateway/authorization/default_permissions/index"
+                  },
+                  "items": [
+                    {
+                      "type": "category",
+                      "label": "publish",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/gateway/authorization/default_permissions/publish/index"
+                      },
+                      "items": [
+                        "config/gateway/authorization/default_permissions/publish/allow",
+                        "config/gateway/authorization/default_permissions/publish/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "subscribe",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/gateway/authorization/default_permissions/subscribe/index"
+                      },
+                      "items": [
+                        "config/gateway/authorization/default_permissions/subscribe/allow",
+                        "config/gateway/authorization/default_permissions/subscribe/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "allow_responses",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/gateway/authorization/default_permissions/allow_responses/index"
+                      },
+                      "items": [
+                        "config/gateway/authorization/default_permissions/allow_responses/max",
+                        "config/gateway/authorization/default_permissions/allow_responses/expires"
+                      ]
+                    }
+                  ]
+                },
+                "config/gateway/authorization/timeout"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "gateways",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/gateway/gateways/index"
+              },
+              "items": [
+                "config/gateway/gateways/name",
+                "config/gateway/gateways/url",
+                "config/gateway/gateways/urls",
+                {
+                  "type": "category",
+                  "label": "tls",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/gateway/gateways/tls/index"
+                  },
+                  "items": [
+                    "config/gateway/gateways/tls/cert_file",
+                    "config/gateway/gateways/tls/key_file",
+                    "config/gateway/gateways/tls/ca_file",
+                    "config/gateway/gateways/tls/cipher_suites",
+                    "config/gateway/gateways/tls/curve_preferences",
+                    "config/gateway/gateways/tls/insecure",
+                    "config/gateway/gateways/tls/timeout",
+                    "config/gateway/gateways/tls/verify",
+                    "config/gateway/gateways/tls/verify_and_map",
+                    "config/gateway/gateways/tls/verify_cert_and_check_known_urls",
+                    "config/gateway/gateways/tls/connection_rate_limit",
+                    "config/gateway/gateways/tls/pinned_certs"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "category",
+          "label": "leafnodes",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/leafnodes/index"
+          },
+          "items": [
+            "config/leafnodes/host",
+            "config/leafnodes/port",
+            "config/leafnodes/listen",
+            {
+              "type": "category",
+              "label": "tls",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/leafnodes/tls/index"
+              },
+              "items": [
+                "config/leafnodes/tls/cert_file",
+                "config/leafnodes/tls/key_file",
+                "config/leafnodes/tls/ca_file",
+                "config/leafnodes/tls/cipher_suites",
+                "config/leafnodes/tls/curve_preferences",
+                "config/leafnodes/tls/insecure",
+                "config/leafnodes/tls/timeout",
+                "config/leafnodes/tls/verify",
+                "config/leafnodes/tls/verify_and_map",
+                "config/leafnodes/tls/verify_cert_and_check_known_urls",
+                "config/leafnodes/tls/connection_rate_limit",
+                "config/leafnodes/tls/pinned_certs",
+                "config/leafnodes/tls/handshake_first"
+              ]
+            },
+            "config/leafnodes/advertise",
+            "config/leafnodes/no_advertise",
+            {
+              "type": "category",
+              "label": "authorization",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/leafnodes/authorization/index"
+              },
+              "items": [
+                "config/leafnodes/authorization/username",
+                "config/leafnodes/authorization/password",
+                "config/leafnodes/authorization/token",
+                {
+                  "type": "category",
+                  "label": "users",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/leafnodes/authorization/users/index"
+                  },
+                  "items": [
+                    "config/leafnodes/authorization/users/username",
+                    "config/leafnodes/authorization/users/password",
+                    "config/leafnodes/authorization/users/nkey",
+                    {
+                      "type": "category",
+                      "label": "permissions",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/leafnodes/authorization/users/permissions/index"
+                      },
+                      "items": [
+                        {
+                          "type": "category",
+                          "label": "publish",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/leafnodes/authorization/users/permissions/publish/index"
+                          },
+                          "items": [
+                            "config/leafnodes/authorization/users/permissions/publish/allow",
+                            "config/leafnodes/authorization/users/permissions/publish/deny"
+                          ]
+                        },
+                        {
+                          "type": "category",
+                          "label": "subscribe",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/leafnodes/authorization/users/permissions/subscribe/index"
+                          },
+                          "items": [
+                            "config/leafnodes/authorization/users/permissions/subscribe/allow",
+                            "config/leafnodes/authorization/users/permissions/subscribe/deny"
+                          ]
+                        },
+                        {
+                          "type": "category",
+                          "label": "allow_responses",
+                          "collapsed": true,
+                          "link": {
+                            "type": "doc",
+                            "id": "config/leafnodes/authorization/users/permissions/allow_responses/index"
+                          },
+                          "items": [
+                            "config/leafnodes/authorization/users/permissions/allow_responses/max",
+                            "config/leafnodes/authorization/users/permissions/allow_responses/expires"
+                          ]
+                        }
+                      ]
+                    },
+                    "config/leafnodes/authorization/users/allowed_connection_types"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "default_permissions",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/leafnodes/authorization/default_permissions/index"
+                  },
+                  "items": [
+                    {
+                      "type": "category",
+                      "label": "publish",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/leafnodes/authorization/default_permissions/publish/index"
+                      },
+                      "items": [
+                        "config/leafnodes/authorization/default_permissions/publish/allow",
+                        "config/leafnodes/authorization/default_permissions/publish/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "subscribe",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/leafnodes/authorization/default_permissions/subscribe/index"
+                      },
+                      "items": [
+                        "config/leafnodes/authorization/default_permissions/subscribe/allow",
+                        "config/leafnodes/authorization/default_permissions/subscribe/deny"
+                      ]
+                    },
+                    {
+                      "type": "category",
+                      "label": "allow_responses",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/leafnodes/authorization/default_permissions/allow_responses/index"
+                      },
+                      "items": [
+                        "config/leafnodes/authorization/default_permissions/allow_responses/max",
+                        "config/leafnodes/authorization/default_permissions/allow_responses/expires"
+                      ]
+                    }
+                  ]
+                },
+                "config/leafnodes/authorization/timeout"
+              ]
+            },
+            "config/leafnodes/min_version",
+            {
+              "type": "category",
+              "label": "compression",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/leafnodes/compression/index"
+              },
+              "items": [
+                "config/leafnodes/compression/mode",
+                "config/leafnodes/compression/rtt_thresholds"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "remotes",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/leafnodes/remotes/index"
+              },
+              "items": [
+                "config/leafnodes/remotes/url",
+                "config/leafnodes/remotes/no_randomize",
+                "config/leafnodes/remotes/account",
+                "config/leafnodes/remotes/credentials",
+                {
+                  "type": "category",
+                  "label": "tls",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/leafnodes/remotes/tls/index"
+                  },
+                  "items": [
+                    "config/leafnodes/remotes/tls/cert_file",
+                    "config/leafnodes/remotes/tls/key_file",
+                    "config/leafnodes/remotes/tls/ca_file",
+                    "config/leafnodes/remotes/tls/cipher_suites",
+                    "config/leafnodes/remotes/tls/curve_preferences",
+                    "config/leafnodes/remotes/tls/insecure",
+                    "config/leafnodes/remotes/tls/timeout",
+                    "config/leafnodes/remotes/tls/verify",
+                    "config/leafnodes/remotes/tls/verify_and_map",
+                    "config/leafnodes/remotes/tls/verify_cert_and_check_known_urls",
+                    "config/leafnodes/remotes/tls/connection_rate_limit",
+                    "config/leafnodes/remotes/tls/pinned_certs",
+                    "config/leafnodes/remotes/tls/handshake_first"
+                  ]
+                },
+                "config/leafnodes/remotes/hub",
+                "config/leafnodes/remotes/deny_imports",
+                "config/leafnodes/remotes/deny_exports",
+                "config/leafnodes/remotes/ws_compression",
+                "config/leafnodes/remotes/ws_no_masking",
+                "config/leafnodes/remotes/jetstream_cluster_migrate",
+                {
+                  "type": "category",
+                  "label": "compression",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/leafnodes/remotes/compression/index"
+                  },
+                  "items": [
+                    "config/leafnodes/remotes/compression/mode",
+                    "config/leafnodes/remotes/compression/rtt_thresholds"
+                  ]
+                }
+              ]
+            },
+            "config/leafnodes/reconnect"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "jetstream",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/jetstream/index"
+          },
+          "items": [
+            "config/jetstream/enabled",
+            "config/jetstream/store_dir",
+            "config/jetstream/max_memory_store",
+            "config/jetstream/max_file_store",
+            "config/jetstream/domain",
+            "config/jetstream/encryption_key",
+            "config/jetstream/cipher",
+            "config/jetstream/extension_hint",
+            {
+              "type": "category",
+              "label": "limits",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/jetstream/limits/index"
+              },
+              "items": [
+                "config/jetstream/limits/max_ack_pending",
+                "config/jetstream/limits/max_ha_assets",
+                "config/jetstream/limits/max_request_batch",
+                "config/jetstream/limits/duplicate_window"
+              ]
+            },
+            "config/jetstream/unique_tag",
+            "config/jetstream/max_outstanding_catchup",
+            "config/jetstream/sync_interval"
+          ]
+        },
+        "config/store_dir",
+        {
+          "type": "category",
+          "label": "mappings",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/mappings/index"
+          },
+          "items": [
+            "config/mappings/destination",
+            "config/mappings/weight",
+            "config/mappings/cluster"
+          ]
+        },
+        "config/debug",
+        "config/trace",
+        "config/trace_verbose",
+        "config/logtime",
+        "config/logtime_utc",
+        "config/logfile",
+        "config/logfile_size_limit",
+        "config/syslog",
+        "config/remote_syslog",
+        "config/server_name",
+        "config/server_tags",
+        "config/http",
+        "config/https",
+        "config/http_port",
+        "config/https_port",
+        "config/http_base_path",
+        "config/connect_error_reports",
+        "config/reconnect_error_reports",
+        "config/max_traced_msg_len",
+        "config/max_control_line",
+        "config/max_connections",
+        "config/max_payload",
+        "config/max_pending",
+        "config/max_subscriptions",
+        "config/max_subscription_tokens",
+        "config/ping_interval",
+        "config/ping_max",
+        "config/write_deadline",
+        "config/no_header_support",
+        "config/disable_sublist_cache",
+        "config/lame_duck_duration",
+        "config/lame_duck_grace_period",
+        "config/pidfile",
+        "config/ports_file_dir",
+        "config/prof_port",
+        "config/default_js_domain"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "JetStream",
+      "collapsed": true,
+      "link": {
+        "type": "doc",
+        "id": "jetstream/index"
+      },
+      "items": [
+        {
+          "type": "category",
+          "label": "API",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "jetstream/api/index"
+          },
+          "items": [
+            {
+              "type": "category",
+              "label": "Account",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "jetstream/api/account/index"
+              },
+              "items": [
+                "jetstream/api/account/info",
+                "jetstream/api/account/purge"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Stream",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "jetstream/api/stream/index"
+              },
+              "items": [
+                "jetstream/api/stream/create",
+                "jetstream/api/stream/update",
+                "jetstream/api/stream/delete",
+                "jetstream/api/stream/info",
+                "jetstream/api/stream/list",
+                "jetstream/api/stream/names",
+                "jetstream/api/stream/msg-get",
+                "jetstream/api/stream/msg-delete",
+                "jetstream/api/stream/purge",
+                "jetstream/api/stream/leader-stepdown",
+                "jetstream/api/stream/remove-peer",
+                "jetstream/api/stream/restore",
+                "jetstream/api/stream/snapshot",
+                "jetstream/api/stream/pub-ack"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Consumer",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "jetstream/api/consumer/index"
+              },
+              "items": [
+                "jetstream/api/consumer/create",
+                "jetstream/api/consumer/delete",
+                "jetstream/api/consumer/info",
+                "jetstream/api/consumer/list",
+                "jetstream/api/consumer/names",
+                "jetstream/api/consumer/get-next",
+                "jetstream/api/consumer/pause",
+                "jetstream/api/consumer/leader-stepdown",
+                "jetstream/api/consumer/unpin"
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Meta",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "jetstream/api/meta/index"
+              },
+              "items": [
+                "jetstream/api/meta/leader-stepdown",
+                "jetstream/api/meta/server-remove"
+              ]
+            },
+            {
+              "type": "doc",
+              "label": "Headers",
+              "id": "jetstream/api/headers"
+            }
+          ]
+        },
+        {
+          "type": "category",
+          "label": "Advisories",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "jetstream/advisory/index"
+          },
+          "items": [
+            "jetstream/advisory/api-audit",
+            "jetstream/advisory/api-limit-reached",
+            "jetstream/advisory/consumer-action",
+            "jetstream/advisory/consumer-group-pinned",
+            "jetstream/advisory/consumer-group-unpinned",
+            "jetstream/advisory/consumer-leader-elected",
+            "jetstream/advisory/consumer-pause",
+            "jetstream/advisory/consumer-quorum-lost",
+            "jetstream/advisory/domain-leader-elected",
+            "jetstream/advisory/max-deliver",
+            "jetstream/advisory/nak",
+            "jetstream/advisory/restore-complete",
+            "jetstream/advisory/restore-create",
+            "jetstream/advisory/server-out-of-space",
+            "jetstream/advisory/server-removed",
+            "jetstream/advisory/snapshot-complete",
+            "jetstream/advisory/snapshot-create",
+            "jetstream/advisory/stream-action",
+            "jetstream/advisory/stream-leader-elected",
+            "jetstream/advisory/stream-quorum-lost",
+            "jetstream/advisory/terminated"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "Metric",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "jetstream/metric/index"
+          },
+          "items": [
+            "jetstream/metric/consumer-ack"
+          ]
+        },
+        {
+          "type": "doc",
+          "label": "Errors",
+          "id": "jetstream/errors"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "System",
+      "collapsed": true,
+      "link": {
+        "type": "doc",
+        "id": "system/index"
+      },
+      "items": [
+        {
+          "type": "category",
+          "label": "Advisory",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "system/advisory/index"
+          },
+          "items": [
+            "system/advisory/account-connections",
+            "system/advisory/client-connect",
+            "system/advisory/client-disconnect"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "Metric",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "system/metric/index"
+          },
+          "items": [
+            "system/metric/service-latency"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "Monitoring",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "system/monitor/index"
+          },
+          "items": [
+            "system/monitor/varz",
+            "system/monitor/connz",
+            "system/monitor/subsz",
+            "system/monitor/routez",
+            "system/monitor/gatewayz",
+            "system/monitor/leafz",
+            "system/monitor/accountz",
+            "system/monitor/accstatz",
+            "system/monitor/jsz",
+            "system/monitor/healthz",
+            "system/monitor/statsz",
+            "system/monitor/ipqueuesz",
+            "system/monitor/idz",
+            "system/monitor/profilez",
+            "system/monitor/raftz"
+          ]
+        },
+        {
+          "type": "doc",
+          "label": "Errors",
+          "id": "system/errors"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Services",
+      "collapsed": true,
+      "link": {
+        "type": "doc",
+        "id": "services/index"
+      },
+      "items": [
+        "services/info-response",
+        "services/ping-response",
+        "services/stats-response"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Protocols",
+      "collapsed": true,
+      "link": {
+        "type": "doc",
+        "id": "protocols/index"
+      },
+      "items": [
+        "protocols/client",
+        "protocols/route",
+        "protocols/leafnode",
+        "protocols/gateway"
+      ]
+    }
+  ]
+}

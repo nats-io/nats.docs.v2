@@ -1,0 +1,18 @@
+{
+  "$comment": "Source of truth for reference-doc version → submodule-tag mapping. Edit when bumping a NATS major version. 'status' values: 'latest' (→ Docusaurus lastVersion), 'maintained' (normal), 'unmaintained' (→ 'unmaintained' banner).",
+  "latest": "2.12",
+  "versions": [
+    {
+      "name": "2.12",
+      "nats-server": "v2.12.4",
+      "jsm.go": "v0.3.0",
+      "status": "latest"
+    },
+    {
+      "name": "2.11",
+      "nats-server": "v2.11.9",
+      "jsm.go": "v0.2.4",
+      "status": "maintained"
+    }
+  ]
+}
