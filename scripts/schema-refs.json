@@ -957,6 +957,25 @@
       ]
     },
     {
+      "path": "jetstream/advisory/stream-batch-abandoned",
+      "title": "Stream Batch Abandoned",
+      "description": "An advisory sent when a stream abandons a batch.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.BATCH_ABANDONED.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "streamBatchAbandoned",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/stream_batch_abandoned.json"
+        }
+      ]
+    },
+    {
       "path": "jetstream/advisory/stream-leader-elected",
       "title": "Stream Leader Elected",
       "description": "New stream leader elected.",

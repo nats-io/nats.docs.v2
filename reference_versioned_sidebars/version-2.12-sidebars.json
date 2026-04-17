@@ -1448,6 +1448,7 @@
             "jetstream/advisory/snapshot-complete",
             "jetstream/advisory/snapshot-create",
             "jetstream/advisory/stream-action",
+            "jetstream/advisory/stream-batch-abandoned",
             "jetstream/advisory/stream-leader-elected",
             "jetstream/advisory/stream-quorum-lost",
             "jetstream/advisory/terminated"

@@ -36,7 +36,7 @@ const config: Config = {
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
-  
+
   // Global scripts
   scripts: [
     {
@@ -49,7 +49,7 @@ const config: Config = {
       type: 'module',
     }
   ],
-  
+
   plugins: [
     [
       "@signalwire/docusaurus-plugin-llms-txt",
@@ -176,7 +176,7 @@ const config: Config = {
           docsPluginId: "reference",
           position: "right",
           // Only appears when user is on a reference page. Versions come
-          // from reference_versions.json; labels from referenceVersions above.
+          // from scripts/doc-versions.json; labels from referenceVersions above.
         },
         {
           href: "https://github.com/nats-io",

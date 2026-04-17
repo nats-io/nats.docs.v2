@@ -354,7 +354,7 @@ To deliver the same message along with a reply subject:
 HMSG FOO.BAR 9 BAZ.69 34 45␍␊NATS/1.0␍␊FoodGroup: vegetable␍␊␍␊Hello World␍␊
 ```
 
-## PING/PONG
+## PING/PONG {#ping-pong}
 
 `PING` and `PONG` implement a simple keep-alive mechanism between client and server. Once a client establishes a connection to the NATS server, the server will continuously send `PING` messages to the client at a configurable interval. If the client fails to respond with a `PONG` message within the configured response interval, the server will terminate its connection. If your connection stays idle for too long, it is cut off.
 
@@ -385,7 +385,7 @@ PING
 Connection closed by foreign host.
 ```
 
-## +OK/ERR
+## +OK/ERR {#ok-err}
 
 When the `verbose` connection option is set to `true` (the default value), the server acknowledges each well-formed protocol message from the client with a `+OK` message. Most NATS clients set the `verbose` option to `false` using the [`CONNECT`](#connect) message
 

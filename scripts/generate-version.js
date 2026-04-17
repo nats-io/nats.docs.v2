@@ -337,7 +337,13 @@ function step_runSchemaRefs(version, paths) {
 }
 
 function step_buildSidebar(version, paths) {
-  const schemaRefs = JSON.parse(fs.readFileSync(SCHEMA_REFS, "utf8")).entries;
+  // Filter schema-refs to only entries whose schemas exist in this version's
+  // vendor dir — mirrors the filtering in generate-schema-refs.js.
+  const vendorDir = path.join(ROOT, "src/schemas/vendor", `v${version}`);
+  const allSchemaRefs = JSON.parse(fs.readFileSync(SCHEMA_REFS, "utf8")).entries;
+  const schemaRefs = allSchemaRefs.filter((e) =>
+    e.schemas.every((s) => fs.existsSync(path.join(vendorDir, s.import))),
+  );
 
   if (!fs.existsSync(paths.configSidebarTmp)) {
     throw new Error(`config sidebar not produced at ${paths.configSidebarTmp}`);
@@ -392,17 +398,51 @@ function generateOne(version, tmpDir) {
   checkoutTag(natsPath, version["nats-server"]);
   checkoutTag(jsmPath, version["jsm.go"]);
 
-  // Wipe version-specific output trees so renames/removals across majors
-  // don't leave ghost files behind.
-  rmrf(paths.outDocs);
-  rmrf(path.dirname(paths.outMonitorSchemas)); // wipe v<name>/server entirely
-  rmrf(paths.outJsmSchemas);
+  // Generate into staging directories (siblings of final paths, same
+  // filesystem) so a mid-pipeline failure does not leave partial output.
+  const stageDocs = paths.outDocs + ".staging";
+  const stageVendorRoot = path.join(ROOT, "src/schemas/vendor", `v${version.name}.staging`);
+  const stageMonitorSchemas = path.join(stageVendorRoot, "server/monitor/v1");
+  const stageJsmSchemas = path.join(stageVendorRoot, "jsm");
 
-  step_copyHandWritten(paths.outDocs);
-  step_runGenerateDocs(paths);
-  step_seedVarzResponse(paths);
-  step_runConfigGenerator(paths);
-  step_runSchemaRefs(version.name, paths);
+  // Clean any leftover staging dirs from a prior aborted run.
+  rmrf(stageDocs);
+  rmrf(stageVendorRoot);
+
+  const stagePaths = {
+    ...paths,
+    outDocs: stageDocs,
+    outMonitorSchemas: stageMonitorSchemas,
+    outJsmSchemas: stageJsmSchemas,
+  };
+
+  let stageOk = false;
+  try {
+    step_copyHandWritten(stagePaths.outDocs);
+    step_runGenerateDocs(stagePaths);
+    step_seedVarzResponse(stagePaths);
+    step_runConfigGenerator(stagePaths);
+    step_runSchemaRefs(version.name, stagePaths);
+    stageOk = true;
+  } finally {
+    if (!stageOk) {
+      log(`  cleaning up staging dirs after failure`);
+      rmrf(stageDocs);
+      rmrf(stageVendorRoot);
+    }
+  }
+
+  // All steps succeeded — swap staging into final locations.
+  fs.mkdirSync(path.dirname(paths.outDocs), { recursive: true });
+  rmrf(paths.outDocs);
+  fs.renameSync(stageDocs, paths.outDocs);
+
+  const vendorRoot = path.join(ROOT, "src/schemas/vendor", `v${version.name}`);
+  fs.mkdirSync(path.dirname(vendorRoot), { recursive: true });
+  rmrf(vendorRoot);
+  fs.renameSync(stageVendorRoot, vendorRoot);
+
+  // Sidebar is written after swap so it stays consistent with the docs tree.
   step_buildSidebar(version.name, paths);
 
   log(`    done: ${path.relative(ROOT, paths.outDocs)}`);
@@ -434,6 +474,12 @@ function readConfig() {
   catch (e) { die(`invalid JSON in ${CONFIG}: ${e.message}`); }
   if (!Array.isArray(cfg.versions) || cfg.versions.length === 0)
     die(`${CONFIG} must contain a non-empty 'versions' array`);
+  for (const [i, entry] of cfg.versions.entries()) {
+    for (const field of ["name", "nats-server", "jsm.go"]) {
+      if (typeof entry[field] !== "string" || entry[field].length === 0)
+        die(`${CONFIG}: versions[${i}] is missing required string field '${field}'`);
+    }
+  }
   return cfg;
 }
 

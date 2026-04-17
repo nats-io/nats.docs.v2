@@ -112,7 +112,7 @@ where:
 A+ SYS\r\n
 ```
 
-## A-
+## A- {#a-1}
 
 `A-` unsubscribes from all subjects for a specific account. Sent when a gateway no longer has any interest in an account.
 
@@ -164,7 +164,7 @@ RS+ ACC1 orders.new\r\n
 RS+ ACC1 orders.> fulfillment 5\r\n
 ```
 
-## RS-
+## RS- {#rs-1}
 
 `RS-` unsubscribes from the specified subject on the given account or indicates no interest. In optimistic mode, this prevents future message delivery for this subject.
 
@@ -265,7 +265,7 @@ The transition uses gateway commands in the INFO message:
 3. Gateway sends `gateway_cmd: 3` (All Subs Complete)
 4. Remote gateway switches to interest-only mode for that account
 
-## PING/PONG
+## PING/PONG {#ping-pong}
 
 `PING` and `PONG` implement keep-alive between gateways. Gateways continuously send `PING` messages at a configurable interval. Failure to respond with `PONG` within the configured timeout results in connection termination.
 
@@ -279,7 +279,7 @@ PING\r\n
 PONG\r\n
 ```
 
-## -ERR
+## -ERR {#err}
 
 The `-ERR` message indicates a protocol, authorization, or runtime error. Most errors result in the gateway closing the connection.
 

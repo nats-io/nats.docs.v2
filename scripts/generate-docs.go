@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -2121,10 +2122,15 @@ func main() {
 // falls back to ./<name> or ../<name>. Returns "" when nothing found.
 func resolveSubmodulePath(pathFlag, name string) string {
 	if pathFlag != "" {
-		if _, err := os.Stat(pathFlag); err == nil {
-			return pathFlag
+		if _, err := os.Stat(pathFlag); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				fmt.Fprintf(os.Stderr, "Warning: %s path %s does not exist\n", name, pathFlag)
+			} else {
+				fmt.Fprintf(os.Stderr, "Warning: %s path %s: %v\n", name, pathFlag, err)
+			}
+			return ""
 		}
-		return ""
+		return pathFlag
 	}
 	for _, candidate := range []string{filepath.Join(".", name), filepath.Join("..", name)} {
 		if _, err := os.Stat(candidate); err == nil {

@@ -137,15 +137,33 @@ function main() {
 
   fs.mkdirSync(opts.outDir, { recursive: true });
 
+  // Resolve the vendor directory for this version so we can skip entries
+  // whose schemas do not exist (e.g. v2.12-only advisories when generating
+  // for v2.11).
+  const vendorDir = path.join(ROOT, "src/schemas/vendor", `v${opts.version}`);
+
   let count = 0;
+  let skipped = 0;
   for (const entry of data.entries) {
+    // Skip entries whose schema files are missing from this version's vendor.
+    const missing = entry.schemas.filter(
+      (s) => !fs.existsSync(path.join(vendorDir, s.import)),
+    );
+    if (missing.length > 0) {
+      process.stderr.write(
+        `[schema-refs] skipping ${entry.path}: missing schemas ${missing.map((m) => m.import).join(", ")} in v${opts.version}\n`,
+      );
+      skipped++;
+      continue;
+    }
+
     const out = path.join(opts.outDir, `${entry.path}.md`);
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, renderEntry(entry, opts.version));
     count++;
   }
   process.stderr.write(
-    `[schema-refs] wrote ${count} files to ${path.relative(ROOT, opts.outDir)} (v${opts.version})\n`,
+    `[schema-refs] wrote ${count} files to ${path.relative(ROOT, opts.outDir)} (v${opts.version})${skipped ? `, skipped ${skipped}` : ""}\n`,
   );
 }
 

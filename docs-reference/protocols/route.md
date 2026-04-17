@@ -144,7 +144,7 @@ where:
 - `bytes`: Size of the payload in bytes
 - `payload`: The message payload data
 
-## PING/PONG
+## PING/PONG {#ping-pong}
 
 `PING` and `PONG` implement a simple keep-alive mechanism between servers. Once two servers establish a connection with each other, the NATS server will continuously send `PING` messages to other servers at a configurable interval. If another server fails to respond with a `PONG` message within the configured response interval, the server will terminate its connection. If your connection stays idle for too long, it is cut off.
 
@@ -160,7 +160,7 @@ PING\r\n
 PONG\r\n
 ```
 
-## -ERR
+## -ERR {#err}
 
 The `-ERR` message is used by the server indicate a protocol, authorization, or other runtime connection error to the client. Most of these errors result in the server closing the connection.
 

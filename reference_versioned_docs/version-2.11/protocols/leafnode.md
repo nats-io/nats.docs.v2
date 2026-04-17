@@ -143,7 +143,7 @@ With LNOCU (Leaf Node Origin Cluster Unsub) support, LS+ can include origin clus
 LS+ <subject> <queue_group> <weight> <origin_cluster>\r\n
 ```
 
-## LS-
+## LS- {#ls-1}
 
 `LS-` removes interest in a subject on the leafnode connection, optionally for a specific queue group.
 
@@ -359,7 +359,7 @@ Leafnodes support multiple authentication methods:
 - Auth Token
 - TLS client certificates
 
-## PING/PONG
+## PING/PONG {#ping-pong}
 
 `PING` and `PONG` implement keep-alive between leafnode and hub. Servers send `PING` messages at configurable intervals. Failure to respond with `PONG` results in connection termination.
 
@@ -373,7 +373,7 @@ PING\r\n
 PONG\r\n
 ```
 
-## -ERR
+## -ERR {#err}
 
 The `-ERR` message indicates a protocol, authorization, or runtime error. Most errors result in the leafnode connection being closed.
 
