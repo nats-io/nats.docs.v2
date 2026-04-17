@@ -33,7 +33,7 @@ Key points:
 - Messages are delivered to all active subscribers
 - If no subscribers exist, the message is simply discarded
 
-## Subscribing to Messages
+## Subscribing to Subjects
 
 Subscribers express interest in subjects to receive messages:
 
