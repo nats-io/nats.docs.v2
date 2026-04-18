@@ -120,31 +120,48 @@ const OUTPUT_DIR = path.join(__dirname, "..", "static", "examples", "snippets");
 /**
  * Fetch a file from GitHub
  */
-function fetchFromGitHub(repo, branch, filePath) {
+function fetchFromGitHub(repo, branch, filePath, redirectsLeft = 3) {
     return new Promise((resolve, reject) => {
         const url =
             `https://raw.githubusercontent.com/${repo}/${branch}/${filePath}`;
         console.log(`Fetching: ${url}`);
 
-        https.get(url, (response) => {
-            let data = "";
+        const req = https.get(url, (response) => {
+            const status = response.statusCode;
 
-            response.on("data", (chunk) => {
-                data += chunk;
-            });
-
-            response.on("end", () => {
-                if (response.statusCode === 200) {
-                    resolve(data);
-                } else {
-                    reject(
-                        new Error(
-                            `Failed to fetch ${url}: ${response.statusCode}`,
-                        ),
-                    );
+            if (status >= 300 && status < 400 && response.headers.location) {
+                response.resume();
+                if (redirectsLeft <= 0) {
+                    reject(new Error(`Too many redirects for ${url}`));
+                    return;
                 }
-            });
-        }).on("error", reject);
+                const loc = new URL(response.headers.location, url);
+                https.get(loc.toString(), (r2) => handle(r2, loc.toString()))
+                    .on("error", reject)
+                    .setTimeout(30000, function () { this.destroy(new Error(`Timeout fetching ${loc}`)); });
+                return;
+            }
+
+            handle(response, url);
+
+            function handle(resp, fromUrl) {
+                if (resp.statusCode !== 200) {
+                    resp.resume();
+                    reject(new Error(`Failed to fetch ${fromUrl}: ${resp.statusCode}`));
+                    return;
+                }
+                let data = "";
+                resp.setEncoding("utf8");
+                resp.on("data", (chunk) => { data += chunk; });
+                resp.on("end", () => resolve(data));
+                resp.on("error", reject);
+            }
+        });
+
+        req.on("error", reject);
+        req.setTimeout(30000, () => {
+            req.destroy(new Error(`Timeout fetching ${url}`));
+        });
     });
 }
 
@@ -266,10 +283,10 @@ async function fetchExample(results, metadata, language, config) {
         return;
     }
 
-    directory = ""
+    let directory = "";
     if (config.directory != null) {
-        directory = config.directory
-        console.log(`⌘ Examples Directory: ${directory}`)
+        directory = config.directory;
+        console.log(`⌘ Examples Directory: ${directory}`);
     }
 
     // Create language directory

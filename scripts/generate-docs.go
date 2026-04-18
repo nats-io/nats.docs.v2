@@ -1909,10 +1909,36 @@ func generateDocs(opts GenerateOptions) error {
 
 	// Generate headers doc
 	fmt.Println("Generating headers documentation...")
+	hasBatch, hasScheduled, hasCounter := false, false, false
+	check := func(h Header) {
+		switch {
+		case strings.HasPrefix(h.Name, "Nats-Batch"):
+			hasBatch = true
+		case strings.HasPrefix(h.Name, "Nats-Schedule"):
+			hasScheduled = true
+		case strings.HasPrefix(h.Name, "Nats-Counter"):
+			hasCounter = true
+		}
+	}
+	for _, sec := range headers {
+		for _, h := range sec.Headers {
+			check(h)
+		}
+		for _, sub := range sec.Subsections {
+			for _, h := range sub.Headers {
+				check(h)
+			}
+		}
+	}
 	if err := generateFromTemplate(
 		"scripts/templates/headers.md.tmpl",
 		filepath.Join(opts.DocsOut, "jetstream/api/headers.md"),
-		map[string]interface{}{"Sections": headers},
+		map[string]interface{}{
+			"Sections":     headers,
+			"HasBatch":     hasBatch,
+			"HasScheduled": hasScheduled,
+			"HasCounter":   hasCounter,
+		},
 		opts.DryRun,
 	); err != nil {
 		return err
@@ -2062,7 +2088,7 @@ func main() {
 	serverPathFlag := flag.String("server", "", "Path to nats-server repository (default: ./nats-server or ../nats-server)")
 	jsmPathFlag := flag.String("jsm", "", "Path to jsm.go repository (default: ./jsm.go or ../jsm.go)")
 	outputDir := flag.String("output", ".", "Legacy: base dir; prefixes defaults for -docs-out and -monitor-schemas-out")
-	docsOut := flag.String("docs-out", "", "Directory to write generated reference docs (default: <output>/docs/reference)")
+	docsOut := flag.String("docs-out", "", "Directory to write generated reference docs (required unless -dry-run; set by scripts/generate-version.js per version)")
 	monitorSchemasOut := flag.String("monitor-schemas-out", "", "Directory to write monitor JSON schemas (default: <output>/src/schemas/server/monitor/v1)")
 	jsmSchemasOut := flag.String("jsm-schemas-out", "", "If set, copy <jsm>/schemas/** here (for per-version snapshots)")
 	dryRun := flag.Bool("dry-run", false, "Print output to stdout instead of writing files")
@@ -2084,9 +2110,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Fill in defaults for new path flags from legacy -output when unset.
-	if *docsOut == "" {
-		*docsOut = filepath.Join(*outputDir, "docs/reference")
+	// Require explicit -docs-out except for dry-run (which writes to stdout).
+	// The legacy default (<output>/docs/reference) pointed at a path removed in
+	// the per-version generator migration; generate-version.js always sets this
+	// flag per version.
+	if *docsOut == "" && !*dryRun {
+		fmt.Fprintln(os.Stderr, "Error: -docs-out is required (use scripts/generate-version.js for per-version generation, or pass -dry-run)")
+		os.Exit(1)
 	}
 	if *monitorSchemasOut == "" {
 		*monitorSchemasOut = filepath.Join(*outputDir, "src/schemas/server/monitor/v1")

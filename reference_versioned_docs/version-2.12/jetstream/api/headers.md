@@ -278,3 +278,4 @@ Nats-Schedule-Target: notifications.email
 - The `Nats-Rollup` header is used in conjunction with the stream's `MaxMsgsPerSubject` setting
 - Batch operations require all messages in a batch to succeed or the entire batch is rejected
 - Counter operations are atomic and support distributed counters across clustered streams
+

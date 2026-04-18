@@ -199,30 +199,10 @@ Nats-Expected-Last-Sequence: 42
 Nats-Expected-Stream: my-stream
 ```
 
-### Batch Publishing
-```
-Nats-Batch-Id: batch-456
-Nats-Batch-Sequence: 1
-```
-For the last message in batch:
-```
-Nats-Batch-Id: batch-456
-Nats-Batch-Sequence: 10
-Nats-Batch-Commit: 1
-```
-
-### Scheduled Message
-```
-Nats-Schedule: 0 */5 * * * *
-Nats-Schedule-TTL: 24h
-Nats-Schedule-Target: notifications.email
-```
-
 ## Notes
 
 - Headers are case-sensitive
 - Some headers are set automatically by the server and should not be manually set by clients
 - Headers prefixed with `Nats-Expected-` are used for optimistic concurrency control
 - The `Nats-Rollup` header is used in conjunction with the stream's `MaxMsgsPerSubject` setting
-- Batch operations require all messages in a batch to succeed or the entire batch is rejected
-- Counter operations are atomic and support distributed counters across clustered streams
+
