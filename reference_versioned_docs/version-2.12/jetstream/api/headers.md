@@ -241,30 +241,30 @@ Headers used by the NATS Key-Value store built on JetStream.
 ## Usage Examples
 
 ### Publishing with Deduplication
-```
+```text
 Nats-Msg-Id: unique-message-123
 ```
 
 ### Publishing with Expected State
-```
+```text
 Nats-Expected-Last-Sequence: 42
 Nats-Expected-Stream: my-stream
 ```
 
 ### Batch Publishing
-```
+```text
 Nats-Batch-Id: batch-456
 Nats-Batch-Sequence: 1
 ```
 For the last message in batch:
-```
+```text
 Nats-Batch-Id: batch-456
 Nats-Batch-Sequence: 10
 Nats-Batch-Commit: 1
 ```
 
 ### Scheduled Message
-```
+```text
 Nats-Schedule: 0 */5 * * * *
 Nats-Schedule-TTL: 24h
 Nats-Schedule-Target: notifications.email

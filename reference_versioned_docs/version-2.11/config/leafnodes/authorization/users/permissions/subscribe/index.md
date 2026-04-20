@@ -18,8 +18,8 @@ have an optional second value declaring a queue name.
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`allow`](/reference/config/leafnodes/authorization/users/permissions/subscribe/allow) | List of subjects that are allowed to the client. | `string` | - | Yes |
-| [`deny`](/reference/config/leafnodes/authorization/users/permissions/subscribe/deny) | List of subjects that are denied to the client. | `string` | - | Yes |
+| [`allow`](/reference/2.11/config/leafnodes/authorization/users/permissions/subscribe/allow) | List of subjects that are allowed to the client. | `string` | - | Yes |
+| [`deny`](/reference/2.11/config/leafnodes/authorization/users/permissions/subscribe/deny) | List of subjects that are denied to the client. | `string` | - | Yes |
 ## Examples
 
 ### Allow subscribe on `foo`

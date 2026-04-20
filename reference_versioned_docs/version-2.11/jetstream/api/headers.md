@@ -189,12 +189,12 @@ Headers used by the NATS Key-Value store built on JetStream.
 ## Usage Examples
 
 ### Publishing with Deduplication
-```
+```text
 Nats-Msg-Id: unique-message-123
 ```
 
 ### Publishing with Expected State
-```
+```text
 Nats-Expected-Last-Sequence: 42
 Nats-Expected-Stream: my-stream
 ```

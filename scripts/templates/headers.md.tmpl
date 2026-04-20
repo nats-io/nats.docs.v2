@@ -35,30 +35,30 @@ This document provides a comprehensive reference for all headers used in JetStre
 ## Usage Examples
 
 ### Publishing with Deduplication
-```
+```text
 Nats-Msg-Id: unique-message-123
 ```
 
 ### Publishing with Expected State
-```
+```text
 Nats-Expected-Last-Sequence: 42
 Nats-Expected-Stream: my-stream
 ```
 
 {{if .HasBatch}}### Batch Publishing
-```
+```text
 Nats-Batch-Id: batch-456
 Nats-Batch-Sequence: 1
 ```
 For the last message in batch:
-```
+```text
 Nats-Batch-Id: batch-456
 Nats-Batch-Sequence: 10
 Nats-Batch-Commit: 1
 ```
 
 {{end}}{{if .HasScheduled}}### Scheduled Message
-```
+```text
 Nats-Schedule: 0 */5 * * * *
 Nats-Schedule-TTL: 24h
 Nats-Schedule-Target: notifications.email

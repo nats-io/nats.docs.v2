@@ -4,7 +4,7 @@ description: The NATS gateway protocol is used to connect multiple NATS clusters
 
 # Gateway
 
-Gateway connections enable NATS super-clusters by connecting multiple clusters together. The gateway protocol extends the [route protocol](/reference/protocols/route) with account-aware routing and interest-based optimizations. In the context of a super-cluster, gateways act as intelligent bridges that route messages between clusters based on account and subject interest.
+Gateway connections enable NATS super-clusters by connecting multiple clusters together. The gateway protocol extends the [route protocol](/reference/2.11/protocols/route) with account-aware routing and interest-based optimizations. In the context of a super-cluster, gateways act as intelligent bridges that route messages between clusters based on account and subject interest.
 
 ## Overview
 
