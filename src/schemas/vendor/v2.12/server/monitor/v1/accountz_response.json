@@ -1,0 +1,722 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/accountz_response.json",
+  "title": "io.nats.server.monitor.v1.accountz_response",
+  "description": "Response from accountz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "account_detail": {
+      "type": "object",
+      "properties": {
+        "account_name": {
+          "type": "string"
+        },
+        "client_connections": {
+          "type": "integer"
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "decoded_jwt": {
+          "type": "object",
+          "description": "JWT account claims"
+        },
+        "expired": {
+          "type": "boolean"
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "approved_accounts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "revoked_activations": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        },
+        "imports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "invalid": {
+                "type": "boolean"
+              },
+              "latency": {
+                "type": "object",
+                "description": "JWT service latency configuration"
+              },
+              "m1": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "header": {
+                    "type": "object",
+                    "description": "only contains header(s) triggering the measurement",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "requestor": {
+                    "type": "object",
+                    "properties": {
+                      "acc": {
+                        "type": "string"
+                      },
+                      "alts": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "client_id": {
+                        "type": "string",
+                        "description": "This is the MQTT client ID"
+                      },
+                      "client_type": {
+                        "type": "string"
+                      },
+                      "cluster": {
+                        "type": "string"
+                      },
+                      "host": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "issuer_key": {
+                        "type": "string"
+                      },
+                      "jwt": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "lang": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "name_tag": {
+                        "type": "string"
+                      },
+                      "nonce": {
+                        "type": "string"
+                      },
+                      "rtt": {
+                        "type": "integer",
+                        "$comment": "nanoseconds depicting a duration in time"
+                      },
+                      "server": {
+                        "type": "string"
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "stop": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "svc": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "user": {
+                        "type": "string"
+                      },
+                      "ver": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "responder": {
+                    "type": "object",
+                    "properties": {
+                      "acc": {
+                        "type": "string"
+                      },
+                      "alts": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "client_id": {
+                        "type": "string",
+                        "description": "This is the MQTT client ID"
+                      },
+                      "client_type": {
+                        "type": "string"
+                      },
+                      "cluster": {
+                        "type": "string"
+                      },
+                      "host": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "issuer_key": {
+                        "type": "string"
+                      },
+                      "jwt": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "lang": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "name_tag": {
+                        "type": "string"
+                      },
+                      "nonce": {
+                        "type": "string"
+                      },
+                      "rtt": {
+                        "type": "integer",
+                        "$comment": "nanoseconds depicting a duration in time"
+                      },
+                      "server": {
+                        "type": "string"
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "stop": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "svc": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "user": {
+                        "type": "string"
+                      },
+                      "ver": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "service": {
+                    "type": "integer",
+                    "$comment": "nanoseconds depicting a duration in time"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "type": "integer"
+                  },
+                  "system": {
+                    "type": "integer",
+                    "$comment": "nanoseconds depicting a duration in time"
+                  },
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "total": {
+                    "type": "integer",
+                    "$comment": "nanoseconds depicting a duration in time"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "service",
+                  "start",
+                  "status",
+                  "system",
+                  "timestamp",
+                  "total",
+                  "type"
+                ]
+              },
+              "share": {
+                "type": "boolean"
+              },
+              "tracking": {
+                "type": "boolean"
+              },
+              "tracking_header": {
+                "type": "object",
+                "description": "HTTP headers",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "invalid",
+              "share",
+              "tracking"
+            ]
+          }
+        },
+        "is_system": {
+          "type": "boolean"
+        },
+        "issuer_key": {
+          "type": "string"
+        },
+        "jetstream_enabled": {
+          "type": "boolean"
+        },
+        "jwt": {
+          "type": "string"
+        },
+        "leafnode_connections": {
+          "type": "integer"
+        },
+        "mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cluster": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "weight": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "subject",
+                "weight"
+              ]
+            }
+          }
+        },
+        "name_tag": {
+          "type": "string"
+        },
+        "responses": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "invalid": {
+                "type": "boolean"
+              },
+              "latency": {
+                "type": "object",
+                "description": "JWT service latency configuration"
+              },
+              "m1": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "header": {
+                    "type": "object",
+                    "description": "only contains header(s) triggering the measurement",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "requestor": {
+                    "type": "object",
+                    "properties": {
+                      "acc": {
+                        "type": "string"
+                      },
+                      "alts": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "client_id": {
+                        "type": "string",
+                        "description": "This is the MQTT client ID"
+                      },
+                      "client_type": {
+                        "type": "string"
+                      },
+                      "cluster": {
+                        "type": "string"
+                      },
+                      "host": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "issuer_key": {
+                        "type": "string"
+                      },
+                      "jwt": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "lang": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "name_tag": {
+                        "type": "string"
+                      },
+                      "nonce": {
+                        "type": "string"
+                      },
+                      "rtt": {
+                        "type": "integer",
+                        "$comment": "nanoseconds depicting a duration in time"
+                      },
+                      "server": {
+                        "type": "string"
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "stop": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "svc": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "user": {
+                        "type": "string"
+                      },
+                      "ver": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "responder": {
+                    "type": "object",
+                    "properties": {
+                      "acc": {
+                        "type": "string"
+                      },
+                      "alts": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "client_id": {
+                        "type": "string",
+                        "description": "This is the MQTT client ID"
+                      },
+                      "client_type": {
+                        "type": "string"
+                      },
+                      "cluster": {
+                        "type": "string"
+                      },
+                      "host": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "issuer_key": {
+                        "type": "string"
+                      },
+                      "jwt": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "lang": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "name_tag": {
+                        "type": "string"
+                      },
+                      "nonce": {
+                        "type": "string"
+                      },
+                      "rtt": {
+                        "type": "integer",
+                        "$comment": "nanoseconds depicting a duration in time"
+                      },
+                      "server": {
+                        "type": "string"
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "stop": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "svc": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "user": {
+                        "type": "string"
+                      },
+                      "ver": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "service": {
+                    "type": "integer",
+                    "$comment": "nanoseconds depicting a duration in time"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "type": "integer"
+                  },
+                  "system": {
+                    "type": "integer",
+                    "$comment": "nanoseconds depicting a duration in time"
+                  },
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "total": {
+                    "type": "integer",
+                    "$comment": "nanoseconds depicting a duration in time"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "service",
+                  "start",
+                  "status",
+                  "system",
+                  "timestamp",
+                  "total",
+                  "type"
+                ]
+              },
+              "share": {
+                "type": "boolean"
+              },
+              "tracking": {
+                "type": "boolean"
+              },
+              "tracking_header": {
+                "type": "object",
+                "description": "HTTP headers",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "invalid",
+              "share",
+              "tracking"
+            ]
+          }
+        },
+        "revoked_user": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "sublist_stats": {
+          "type": "object",
+          "properties": {
+            "avg_fanout": {
+              "type": "number"
+            },
+            "cacheCnt": {
+              "type": "integer"
+            },
+            "cacheHits": {
+              "type": "integer"
+            },
+            "cache_hit_rate": {
+              "type": "number"
+            },
+            "max_fanout": {
+              "type": "integer"
+            },
+            "num_cache": {
+              "type": "integer"
+            },
+            "num_inserts": {
+              "type": "integer"
+            },
+            "num_matches": {
+              "type": "integer"
+            },
+            "num_removes": {
+              "type": "integer"
+            },
+            "num_subscriptions": {
+              "type": "integer"
+            },
+            "totFanout": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "avg_fanout",
+            "cache_hit_rate",
+            "max_fanout",
+            "num_cache",
+            "num_inserts",
+            "num_matches",
+            "num_removes",
+            "num_subscriptions"
+          ]
+        },
+        "subscriptions": {
+          "type": "integer"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "update_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_result_jwt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "blocking": {
+                "type": "boolean"
+              },
+              "description": {
+                "type": "string"
+              },
+              "time_check": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "blocking",
+              "description",
+              "time_check"
+            ]
+          }
+        }
+      },
+      "required": [
+        "account_name",
+        "client_connections",
+        "complete",
+        "expired",
+        "jetstream_enabled",
+        "leafnode_connections",
+        "subscriptions"
+      ]
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "system_account": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "now",
+    "server_id"
+  ]
+}

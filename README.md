@@ -147,7 +147,7 @@ npm start              # Start dev server (http://localhost:3000)
 npm run build          # Build production site
 npm run typecheck      # Run TypeScript type checking
 npm run fetch-examples # Fetch code examples from GitHub repos
-npm run generate-docs  # Generate reference docs from nats-server source
+npm run generate-docs:all-versions  # Generate per-version reference docs (nats-server + jsm.go)
 npm run serve          # Serve production build locally
 npm run clear          # Clear Docusaurus cache
 ```
@@ -184,40 +184,42 @@ GIT_USER=<Your GitHub username> npm run deploy
 
 ### Generating Reference Documentation
 
-Some reference documentation is automatically generated from the nats-server source code. This ensures error codes, headers, and other reference material stays synchronized with the server implementation.
+Reference documentation is generated per NATS version from upstream source code. Each version checks out matching tags of both `nats-server` and `jsm.go` submodules (tag mapping in `scripts/doc-versions.json`), parses errors/headers/monitor schemas, vendors JSON schemas, and writes a version-scoped doc tree.
 
-**What gets generated:**
-- `docs/reference/jetstream/errors.md` - JetStream error codes
-- `docs/reference/system/errors.md` - System error messages
-- `docs/reference/jetstream/api/headers.md` - JetStream headers
+**What gets generated (per version):**
+- `reference_versioned_docs/version-<ver>/jetstream/errors.md`
+- `reference_versioned_docs/version-<ver>/system/errors.md`
+- `reference_versioned_docs/version-<ver>/jetstream/api/headers.md`
+- `reference_versioned_docs/version-<ver>/config/**` (from `tools/config-generator`)
+- `reference_versioned_docs/version-<ver>/**/*` (schema-refs pages from `scripts/schema-refs.json`)
+- `reference_versioned_sidebars/version-<ver>-sidebars.json`
+- `src/schemas/vendor/v<ver>/**` (vendored JSON schemas)
 
 **Prerequisites:**
-- Go (to run the generation script)
-- nats-server available via git submodule (`./nats-server`) or cloned as a sibling directory
+- Go + Node (to run the generators)
+- `nats-server` and `jsm.go` submodules initialized
 
 ```bash
-# Initialize the submodule
 git submodule update --init
 ```
 
 **Generate documentation:**
 
 ```bash
-# Generate all reference docs
-npm run generate-docs
+# Generate all versions listed in scripts/doc-versions.json
+npm run generate-docs:all-versions
 
-# Preview what would be generated (doesn't write files)
+# Or a single version
+npm run generate-docs:v2.11
+npm run generate-docs:v2.12
+
+# Dry-run the parser (stdout only; no docs-out required)
 npm run generate-docs:dry-run
 ```
 
-**Custom nats-server location:**
-
-```bash
-go run scripts/generate-docs.go -server /path/to/nats-server
-```
-
 **When to regenerate:**
-- After updating nats-server to get new error codes or headers
+- After bumping a version's tag in `scripts/doc-versions.json`
+- When adding or changing entries in `scripts/schema-refs.json`
 - When modifying generation templates in `scripts/templates/`
 - Before committing reference doc changes
 

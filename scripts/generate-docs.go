@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -559,9 +560,8 @@ func getMonitorEndpoints() []MonitorEndpoint {
 // Schema generation from TypeRegistry
 // -------------------------------------------------------------------
 
-func generateMonitorSchemas(serverPath, outputDir string, registry *TypeRegistry, dryRun bool) error {
+func generateMonitorSchemas(schemasDir string, registry *TypeRegistry, dryRun bool) error {
 	endpoints := getMonitorEndpoints()
-	schemasDir := filepath.Join(outputDir, "src/schemas/server/monitor/v1")
 
 	if !dryRun {
 		if err := os.MkdirAll(schemasDir, 0755); err != nil {
@@ -1818,12 +1818,23 @@ func generateFromTemplate(tmplPath, outPath string, data interface{}, dryRun boo
 // Main generation pipeline
 // -------------------------------------------------------------------
 
-func generateDocs(serverPath, outputDir string, dryRun bool) error {
+// GenerateOptions bundles all path-related flags so callers don't juggle
+// positional parameters as the set grows.
+type GenerateOptions struct {
+	ServerPath        string // path to nats-server repo (parsed)
+	JsmPath           string // path to jsm.go repo (currently used only for schema copy)
+	DocsOut           string // dir where generated .md files land (root of reference docs tree)
+	MonitorSchemasOut string // dir where monitor JSON schemas land
+	JsmSchemasOut     string // if non-empty, copy <JsmPath>/schemas/** here
+	DryRun            bool
+}
+
+func generateDocs(opts GenerateOptions) error {
 	// Build TypeRegistry from all monitor source files
 	fmt.Println("Building type registry...")
 	registry := NewTypeRegistry()
 	for _, sourceFile := range monitorSourceFiles {
-		path := filepath.Join(serverPath, sourceFile)
+		path := filepath.Join(opts.ServerPath, sourceFile)
 		if err := registry.ParseFile(path); err != nil {
 			return fmt.Errorf("failed to parse %s: %w", sourceFile, err)
 		}
@@ -1832,14 +1843,14 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 
 	// Parse JetStream errors
 	fmt.Println("Parsing JetStream errors...")
-	jsErrors, err := parseJSErrors(serverPath)
+	jsErrors, err := parseJSErrors(opts.ServerPath)
 	if err != nil {
 		return err
 	}
 
 	// Parse system errors (AST-based)
 	fmt.Println("Parsing system errors...")
-	sysErrors, err := parseSystemErrors(serverPath)
+	sysErrors, err := parseSystemErrors(opts.ServerPath)
 	if err != nil {
 		return err
 	}
@@ -1849,7 +1860,7 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 
 	// Parse connection close reasons (ClosedState enum)
 	fmt.Println("Parsing connection close reasons...")
-	closedStates, err := parseClosedStates(serverPath)
+	closedStates, err := parseClosedStates(opts.ServerPath)
 	if err != nil {
 		fmt.Printf("Warning: Could not parse ClosedState: %v\n", err)
 	} else if len(closedStates) > 0 {
@@ -1869,7 +1880,7 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 
 	// Parse headers
 	fmt.Println("Parsing headers...")
-	headers, err := parseHeaders(serverPath)
+	headers, err := parseHeaders(opts.ServerPath)
 	if err != nil {
 		return err
 	}
@@ -1878,9 +1889,9 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 	fmt.Println("Generating JetStream errors documentation...")
 	if err := generateFromTemplate(
 		"scripts/templates/jetstream-errors.md.tmpl",
-		filepath.Join(outputDir, "docs/reference/jetstream/errors.md"),
+		filepath.Join(opts.DocsOut, "jetstream/errors.md"),
 		map[string]interface{}{"Categories": jsErrors},
-		dryRun,
+		opts.DryRun,
 	); err != nil {
 		return err
 	}
@@ -1889,28 +1900,66 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 	fmt.Println("Generating system errors documentation...")
 	if err := generateFromTemplate(
 		"scripts/templates/system-errors.md.tmpl",
-		filepath.Join(outputDir, "docs/reference/system/errors.md"),
+		filepath.Join(opts.DocsOut, "system/errors.md"),
 		map[string]interface{}{"Categories": sysErrors},
-		dryRun,
+		opts.DryRun,
 	); err != nil {
 		return err
 	}
 
 	// Generate headers doc
 	fmt.Println("Generating headers documentation...")
+	hasBatch, hasScheduled, hasCounter := false, false, false
+	check := func(h Header) {
+		switch {
+		case strings.HasPrefix(h.Name, "Nats-Batch"):
+			hasBatch = true
+		case strings.HasPrefix(h.Name, "Nats-Schedule"):
+			hasScheduled = true
+		case strings.HasPrefix(h.Name, "Nats-Counter"):
+			hasCounter = true
+		}
+	}
+	for _, sec := range headers {
+		for _, h := range sec.Headers {
+			check(h)
+		}
+		for _, sub := range sec.Subsections {
+			for _, h := range sub.Headers {
+				check(h)
+			}
+		}
+	}
 	if err := generateFromTemplate(
 		"scripts/templates/headers.md.tmpl",
-		filepath.Join(outputDir, "docs/reference/jetstream/api/headers.md"),
-		map[string]interface{}{"Sections": headers},
-		dryRun,
+		filepath.Join(opts.DocsOut, "jetstream/api/headers.md"),
+		map[string]interface{}{
+			"Sections":     headers,
+			"HasBatch":     hasBatch,
+			"HasScheduled": hasScheduled,
+			"HasCounter":   hasCounter,
+		},
+		opts.DryRun,
 	); err != nil {
 		return err
 	}
 
 	// Generate monitor schemas
 	fmt.Println("Generating monitor endpoint schemas...")
-	if err := generateMonitorSchemas(serverPath, outputDir, registry, dryRun); err != nil {
+	if err := generateMonitorSchemas(opts.MonitorSchemasOut, registry, opts.DryRun); err != nil {
 		return err
+	}
+
+	// Optionally snapshot jsm.go schemas into a per-version location so that
+	// MDX imports of @site/.../jsm/... resolve to this version's schemas.
+	if opts.JsmSchemasOut != "" {
+		if opts.JsmPath == "" {
+			return fmt.Errorf("-jsm-schemas-out requires -jsm to be set")
+		}
+		fmt.Printf("Copying jsm.go schemas: %s -> %s\n", filepath.Join(opts.JsmPath, "schemas"), opts.JsmSchemasOut)
+		if err := copyJsmSchemas(opts.JsmPath, opts.JsmSchemasOut, opts.DryRun); err != nil {
+			return fmt.Errorf("failed to copy jsm.go schemas: %w", err)
+		}
 	}
 
 	// --- Post-generation validation ---
@@ -1984,45 +2033,139 @@ func generateDocs(serverPath, outputDir string, dryRun bool) error {
 	return nil
 }
 
+// copyJsmSchemas copies <jsmPath>/schemas/** into dst. Used to snapshot a
+// jsm.go version's JSON schemas under a per-version vendored path so that
+// generated MDX imports resolve to the correct version.
+func copyJsmSchemas(jsmPath, dst string, dryRun bool) error {
+	src := filepath.Join(jsmPath, "schemas")
+	info, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("stat %s: %w", src, err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("%s is not a directory", src)
+	}
+
+	return filepath.Walk(src, func(path string, fi os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		out := filepath.Join(dst, rel)
+
+		if fi.IsDir() {
+			if dryRun {
+				return nil
+			}
+			return os.MkdirAll(out, 0755)
+		}
+
+		// Skip non-regular files (symlinks etc).
+		if !fi.Mode().IsRegular() {
+			return nil
+		}
+
+		if dryRun {
+			fmt.Printf("Would copy: %s -> %s\n", path, out)
+			return nil
+		}
+
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(filepath.Dir(out), 0755); err != nil {
+			return err
+		}
+		return os.WriteFile(out, data, 0644)
+	})
+}
+
 func main() {
-	serverPathFlag := flag.String("server", "", "Path to nats-server repository")
-	outputDir := flag.String("output", ".", "Output directory for generated docs")
+	serverPathFlag := flag.String("server", "", "Path to nats-server repository (default: ./nats-server or ../nats-server)")
+	jsmPathFlag := flag.String("jsm", "", "Path to jsm.go repository (default: ./jsm.go or ../jsm.go)")
+	outputDir := flag.String("output", ".", "Legacy: base dir; prefixes defaults for -docs-out and -monitor-schemas-out")
+	docsOut := flag.String("docs-out", "", "Directory to write generated reference docs (required unless -dry-run; set by scripts/generate-version.js per version)")
+	monitorSchemasOut := flag.String("monitor-schemas-out", "", "Directory to write monitor JSON schemas (default: <output>/src/schemas/server/monitor/v1)")
+	jsmSchemasOut := flag.String("jsm-schemas-out", "", "If set, copy <jsm>/schemas/** here (for per-version snapshots)")
 	dryRun := flag.Bool("dry-run", false, "Print output to stdout instead of writing files")
 	strictFlag := flag.Bool("strict", false, "Treat warnings as errors (for CI)")
 	flag.Parse()
 
-	serverPath := *serverPathFlag
+	serverPath := resolveSubmodulePath(*serverPathFlag, "nats-server")
 	if serverPath == "" {
-		// Try submodule first, then sibling directory
-		candidates := []string{
-			filepath.Join(".", "nats-server"),
-			filepath.Join("..", "nats-server"),
-		}
-		for _, candidate := range candidates {
-			if _, err := os.Stat(candidate); err == nil {
-				serverPath = candidate
-				break
-			}
-		}
-		if serverPath == "" {
-			fmt.Fprintf(os.Stderr, "Error: nats-server not found. Looked in ./nats-server and ../nats-server\n")
-			fmt.Fprintf(os.Stderr, "Use -server flag to specify the correct path\n")
-			os.Exit(1)
-		}
-	}
-
-	if _, err := os.Stat(serverPath); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "Error: nats-server path does not exist: %s\n", serverPath)
+		fmt.Fprintf(os.Stderr, "Error: nats-server not found. Looked in ./nats-server and ../nats-server\n")
 		fmt.Fprintf(os.Stderr, "Use -server flag to specify the correct path\n")
 		os.Exit(1)
 	}
 
-	fmt.Printf("Using nats-server path: %s\n", serverPath)
-	fmt.Printf("Output directory: %s\n", *outputDir)
+	// jsm.go is only strictly required when -jsm-schemas-out is set; still
+	// try to resolve it so that the path is reported consistently.
+	jsmPath := resolveSubmodulePath(*jsmPathFlag, "jsm.go")
+	if *jsmSchemasOut != "" && jsmPath == "" {
+		fmt.Fprintf(os.Stderr, "Error: -jsm-schemas-out was set but jsm.go not found. Use -jsm to specify path\n")
+		os.Exit(1)
+	}
+
+	// Require explicit -docs-out except for dry-run (which writes to stdout).
+	// The legacy default (<output>/docs/reference) pointed at a path removed in
+	// the per-version generator migration; generate-version.js always sets this
+	// flag per version.
+	if *docsOut == "" && !*dryRun {
+		fmt.Fprintln(os.Stderr, "Error: -docs-out is required (use scripts/generate-version.js for per-version generation, or pass -dry-run)")
+		os.Exit(1)
+	}
+	if *monitorSchemasOut == "" {
+		*monitorSchemasOut = filepath.Join(*outputDir, "src/schemas/server/monitor/v1")
+	}
+
+	fmt.Printf("nats-server path:        %s\n", serverPath)
+	if jsmPath != "" {
+		fmt.Printf("jsm.go path:             %s\n", jsmPath)
+	}
+	fmt.Printf("Docs output:             %s\n", *docsOut)
+	fmt.Printf("Monitor schemas output:  %s\n", *monitorSchemasOut)
+	if *jsmSchemasOut != "" {
+		fmt.Printf("jsm.go schemas output:   %s\n", *jsmSchemasOut)
+	}
 
 	strict = *strictFlag
-	if err := generateDocs(serverPath, *outputDir, *dryRun); err != nil {
+
+	opts := GenerateOptions{
+		ServerPath:        serverPath,
+		JsmPath:           jsmPath,
+		DocsOut:           *docsOut,
+		MonitorSchemasOut: *monitorSchemasOut,
+		JsmSchemasOut:     *jsmSchemasOut,
+		DryRun:            *dryRun,
+	}
+	if err := generateDocs(opts); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// resolveSubmodulePath returns the given path if set and exists, otherwise
+// falls back to ./<name> or ../<name>. Returns "" when nothing found.
+func resolveSubmodulePath(pathFlag, name string) string {
+	if pathFlag != "" {
+		if _, err := os.Stat(pathFlag); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				fmt.Fprintf(os.Stderr, "Warning: %s path %s does not exist\n", name, pathFlag)
+			} else {
+				fmt.Fprintf(os.Stderr, "Warning: %s path %s: %v\n", name, pathFlag, err)
+			}
+			return ""
+		}
+		return pathFlag
+	}
+	for _, candidate := range []string{filepath.Join(".", name), filepath.Join("..", name)} {
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+	}
+	return ""
 }

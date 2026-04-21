@@ -1,0 +1,1513 @@
+{
+  "entries": [
+    {
+      "path": "jetstream/api/account/info",
+      "title": "Account Info",
+      "description": "Retrieves JetStream account information.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.INFO"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "accountInfoResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/account_info_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/account/purge",
+      "title": "Account Purge",
+      "description": "Purges all data for an account.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.ACCOUNT.PURGE"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "accountPurgeResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/account_purge_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/create",
+      "title": "Create Stream",
+      "description": "Creates a new stream with the specified configuration.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.CREATE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream to create.",
+      "schemas": [
+        {
+          "var": "streamCreateRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_create_request.json"
+        },
+        {
+          "var": "streamCreateResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_create_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/update",
+      "title": "Update Stream",
+      "description": "Updates an existing stream configuration.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.UPDATE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream to update.",
+      "schemas": [
+        {
+          "var": "streamUpdateRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_update_request.json"
+        },
+        {
+          "var": "streamUpdateResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_update_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/delete",
+      "title": "Delete Stream",
+      "description": "Deletes an existing stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.DELETE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream to delete.",
+      "schemas": [
+        {
+          "var": "streamDeleteResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_delete_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/info",
+      "title": "Stream Info",
+      "description": "Retrieves information about a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.INFO.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamInfoRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_info_request.json"
+        },
+        {
+          "var": "streamInfoResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_info_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/list",
+      "title": "List Streams",
+      "description": "Lists all streams.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.LIST"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "streamListRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_list_request.json"
+        },
+        {
+          "var": "streamListResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_list_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/names",
+      "title": "Stream Names",
+      "description": "Lists stream names.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.NAMES"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "streamNamesRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_names_request.json"
+        },
+        {
+          "var": "streamNamesResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_names_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/msg-get",
+      "title": "Get Message",
+      "description": "Retrieves a specific message from a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.MSG.GET.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamMsgGetRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_msg_get_request.json"
+        },
+        {
+          "var": "streamMsgGetResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_msg_get_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/msg-delete",
+      "title": "Delete Message",
+      "description": "Deletes a specific message from a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.MSG.DELETE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamMsgDeleteRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_msg_delete_request.json"
+        },
+        {
+          "var": "streamMsgDeleteResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_msg_delete_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/purge",
+      "title": "Purge Stream",
+      "description": "Purges messages from a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.PURGE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamPurgeRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_purge_request.json"
+        },
+        {
+          "var": "streamPurgeResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_purge_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/leader-stepdown",
+      "title": "Leader Stepdown",
+      "description": "Initiates leader stepdown for a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.LEADER.STEPDOWN.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamLeaderStepdownRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_leader_stepdown_request.json"
+        },
+        {
+          "var": "streamLeaderStepdownResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_leader_stepdown_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/remove-peer",
+      "title": "Remove Peer",
+      "description": "Removes a peer from a stream cluster.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.PEER.REMOVE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamRemovePeerRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_remove_peer_request.json"
+        },
+        {
+          "var": "streamRemovePeerResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_remove_peer_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/restore",
+      "title": "Restore Stream",
+      "description": "Restores a stream from a snapshot.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.RESTORE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamRestoreRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_restore_request.json"
+        },
+        {
+          "var": "streamRestoreResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_restore_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/snapshot",
+      "title": "Snapshot Stream",
+      "description": "Creates a snapshot of a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.SNAPSHOT.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamSnapshotRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_snapshot_request.json"
+        },
+        {
+          "var": "streamSnapshotResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_snapshot_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/pub-ack",
+      "title": "Publish Acknowledgement",
+      "description": "Publishes a message directly to a stream and receives an acknowledgement.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "Messages are published directly to the stream's subjects (as configured in the stream).\nThe acknowledgement is returned as a response to the publish operation.",
+      "schemas": [
+        {
+          "var": "pubAckResponse",
+          "label": "Schema",
+          "import": "jsm/jetstream/api/v1/pub_ack_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/create",
+      "title": "Create Consumer",
+      "description": "Creates a new consumer.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.CREATE.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name (optional).",
+      "schemas": [
+        {
+          "var": "consumerCreateRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_create_request.json"
+        },
+        {
+          "var": "consumerCreateResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_create_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/delete",
+      "title": "Delete Consumer",
+      "description": "Deletes a consumer.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.DELETE.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "schemas": [
+        {
+          "var": "consumerDeleteResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_delete_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/info",
+      "title": "Consumer Info",
+      "description": "Retrieves consumer information.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.INFO.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "schemas": [
+        {
+          "var": "consumerInfoResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_info_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/list",
+      "title": "List Consumers",
+      "description": "Lists consumers for a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.LIST.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "consumerListRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_list_request.json"
+        },
+        {
+          "var": "consumerListResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_list_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/names",
+      "title": "Consumer Names",
+      "description": "Lists consumer names for a stream.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.NAMES.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "consumerNamesRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_names_request.json"
+        },
+        {
+          "var": "consumerNamesResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_names_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/get-next",
+      "title": "Get Next Message",
+      "description": "Gets next message(s) from a consumer.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.MSG.NEXT.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "schemas": [
+        {
+          "var": "consumerGetnextRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_getnext_request.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/pause",
+      "title": "Pause Consumer",
+      "description": "Pauses or resumes a consumer.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.PAUSE.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "schemas": [
+        {
+          "var": "consumerPauseRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_pause_request.json"
+        },
+        {
+          "var": "consumerPauseResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_pause_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/leader-stepdown",
+      "title": "Leader Stepdown",
+      "description": "Initiates leader stepdown for a consumer.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.LEADER.STEPDOWN.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "schemas": [
+        {
+          "var": "consumerLeaderStepdownRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_leader_stepdown_request.json"
+        },
+        {
+          "var": "consumerLeaderStepdownResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_leader_stepdown_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/consumer/unpin",
+      "title": "Unpin Consumer",
+      "description": "Unpins a consumer group.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.UNPIN.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "schemas": [
+        {
+          "var": "consumerUnpinRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_unpin_request.json"
+        },
+        {
+          "var": "consumerUnpinResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_unpin_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/meta/leader-stepdown",
+      "title": "Meta Leader Stepdown",
+      "description": "Initiates meta-group leader stepdown.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.META.LEADER.STEPDOWN"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "metaLeaderStepdownRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/meta_leader_stepdown_request.json"
+        },
+        {
+          "var": "metaLeaderStepdownResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/meta_leader_stepdown_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/meta/server-remove",
+      "title": "Server Remove",
+      "description": "Removes a server from the JetStream cluster.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.META.SERVER.REMOVE"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "metaServerRemoveRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/meta_server_remove_request.json"
+        },
+        {
+          "var": "metaServerRemoveResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/meta_server_remove_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/api-audit",
+      "title": "API Audit",
+      "description": "JetStream API audit events.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.API"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "apiAudit",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/api_audit.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/api-limit-reached",
+      "title": "API Limit Reached",
+      "description": "API rate limit reached events.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.API.LIMIT_REACHED.{account}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{account}` is the account name.",
+      "schemas": [
+        {
+          "var": "apiLimitReached",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/api_limit_reached.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/consumer-action",
+      "title": "Consumer Action",
+      "description": "Consumer lifecycle events.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.CREATED.{stream}.{consumer}",
+        "$JS.EVENT.ADVISORY.CONSUMER.DELETED.{stream}.{consumer}"
+      ],
+      "subjectStyle": "fence",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "consumerAction",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/consumer_action.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/consumer-group-pinned",
+      "title": "Consumer Group Pinned",
+      "description": "Consumer group pinned to node.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.GROUP_PINNED.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "consumerGroupPinned",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/consumer_group_pinned.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/consumer-group-unpinned",
+      "title": "Consumer Group Unpinned",
+      "description": "Consumer group unpinned from node.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.GROUP_UNPINNED.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "consumerGroupUnpinned",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/consumer_group_unpinned.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/consumer-leader-elected",
+      "title": "Consumer Leader Elected",
+      "description": "New consumer leader elected.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.LEADER_ELECTED.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "consumerLeaderElected",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/consumer_leader_elected.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/consumer-pause",
+      "title": "Consumer Pause",
+      "description": "Consumer paused or resumed.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.PAUSE.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "consumerPause",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/consumer_pause.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/consumer-quorum-lost",
+      "title": "Consumer Quorum Lost",
+      "description": "Consumer lost quorum.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.QUORUM_LOST.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "consumerQuorumLost",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/consumer_quorum_lost.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/domain-leader-elected",
+      "title": "Domain Leader Elected",
+      "description": "New domain leader elected.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.DOMAIN.LEADER_ELECTED.{domain}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "domainLeaderElected",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/domain_leader_elected.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/max-deliver",
+      "title": "Max Deliveries Exceeded",
+      "description": "Message exceeded max delivery attempts.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.MAX_DELIVERIES.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "maxDeliver",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/max_deliver.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/nak",
+      "title": "Message Negative Acknowledgement",
+      "description": "Message negatively acknowledged.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.MSG_NAK.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "nak",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/nak.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/restore-complete",
+      "title": "Restore Complete",
+      "description": "Stream restore completed.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.RESTORE_COMPLETE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "restoreComplete",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/restore_complete.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/restore-create",
+      "title": "Restore Started",
+      "description": "Stream restore initiated.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.RESTORE_CREATE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "restoreCreate",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/restore_create.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/server-out-of-space",
+      "title": "Server Out of Space",
+      "description": "Server storage exhausted.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.SERVER.OUT_OF_STORAGE"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "serverOutOfSpace",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/server_out_of_space.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/server-removed",
+      "title": "Server Removed",
+      "description": "Server removed from cluster.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.SERVER.REMOVED"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "serverRemoved",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/server_removed.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/snapshot-complete",
+      "title": "Snapshot Complete",
+      "description": "Stream snapshot completed.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.SNAPSHOT_COMPLETE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "snapshotComplete",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/snapshot_complete.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/snapshot-create",
+      "title": "Snapshot Started",
+      "description": "Stream snapshot initiated.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.SNAPSHOT_CREATE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "snapshotCreate",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/snapshot_create.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/stream-action",
+      "title": "Stream Action",
+      "description": "Stream lifecycle events.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.CREATED.{stream}",
+        "$JS.EVENT.ADVISORY.STREAM.DELETED.{stream}",
+        "$JS.EVENT.ADVISORY.STREAM.UPDATED.{stream}"
+      ],
+      "subjectStyle": "fence",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "streamAction",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/stream_action.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/stream-batch-abandoned",
+      "title": "Stream Batch Abandoned",
+      "description": "An advisory sent when a stream abandons a batch.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.BATCH_ABANDONED.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "streamBatchAbandoned",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/stream_batch_abandoned.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/stream-leader-elected",
+      "title": "Stream Leader Elected",
+      "description": "New stream leader elected.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.LEADER_ELECTED.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "streamLeaderElected",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/stream_leader_elected.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/stream-quorum-lost",
+      "title": "Stream Quorum Lost",
+      "description": "Stream lost quorum.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.STREAM.QUORUM_LOST.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name.",
+      "schemas": [
+        {
+          "var": "streamQuorumLost",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/stream_quorum_lost.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/advisory/terminated",
+      "title": "Message Terminated",
+      "description": "Message terminated.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.ADVISORY.CONSUMER.MSG_TERMINATED.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "terminated",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/advisory/v1/terminated.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/metric/consumer-ack",
+      "title": "Consumer Acknowledgement Metric",
+      "description": "Consumer acknowledgement metrics.",
+      "kind": "metric",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$JS.EVENT.METRIC.CONSUMER.ACK.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
+      "schemas": [
+        {
+          "var": "consumerAck",
+          "label": "Event Schema",
+          "import": "jsm/jetstream/metric/v1/consumer_ack.json"
+        }
+      ]
+    },
+    {
+      "path": "system/advisory/account-connections",
+      "title": "Account Connections",
+      "description": "Account connection limit events.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$SYS.ACCOUNT.{account}.CONNECTIONS"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{account}` is the account name.",
+      "schemas": [
+        {
+          "var": "accountConnections",
+          "label": "Event Schema",
+          "import": "jsm/server/advisory/v1/account_connections.json"
+        }
+      ]
+    },
+    {
+      "path": "system/advisory/client-connect",
+      "title": "Client Connect",
+      "description": "Client connection events.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$SYS.ACCOUNT.{account}.CONNECT"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{account}` is the account name.",
+      "schemas": [
+        {
+          "var": "clientConnect",
+          "label": "Event Schema",
+          "import": "jsm/server/advisory/v1/client_connect.json"
+        }
+      ]
+    },
+    {
+      "path": "system/advisory/client-disconnect",
+      "title": "Client Disconnect",
+      "description": "Client disconnection events.",
+      "kind": "advisory",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$SYS.ACCOUNT.{account}.DISCONNECT"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{account}` is the account name.",
+      "schemas": [
+        {
+          "var": "clientDisconnect",
+          "label": "Event Schema",
+          "import": "jsm/server/advisory/v1/client_disconnect.json"
+        }
+      ]
+    },
+    {
+      "path": "system/metric/service-latency",
+      "title": "Service Latency",
+      "description": "Service latency metrics.",
+      "kind": "metric",
+      "subjectLabel": "Subscription Subject",
+      "subjects": [
+        "$SYS.SERVER.METRIC.SERVICE.LATENCY"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "serviceLatency",
+          "label": "Metric Schema",
+          "import": "jsm/server/metric/v1/service_latency.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/varz",
+      "title": "Varz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "varzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/varz_request.json"
+        },
+        {
+          "var": "varzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/varz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/connz",
+      "title": "Connz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "connzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/connz_request.json"
+        },
+        {
+          "var": "connzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/connz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/subsz",
+      "title": "Subsz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "subszRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/subsz_request.json"
+        },
+        {
+          "var": "subszResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/subsz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/routez",
+      "title": "Routez",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "routezRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/routez_request.json"
+        },
+        {
+          "var": "routezResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/routez_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/gatewayz",
+      "title": "Gatewayz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "gatewayzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/gatewayz_request.json"
+        },
+        {
+          "var": "gatewayzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/gatewayz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/leafz",
+      "title": "Leafz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "leafzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/leafz_request.json"
+        },
+        {
+          "var": "leafzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/leafz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/accountz",
+      "title": "Accountz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "accountzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/accountz_request.json"
+        },
+        {
+          "var": "accountzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/accountz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/accstatz",
+      "title": "Accstatz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "accstatzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/accstatz_request.json"
+        },
+        {
+          "var": "accstatzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/accstatz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/jsz",
+      "title": "JSz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "jszRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/jsz_request.json"
+        },
+        {
+          "var": "jszResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/jsz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/healthz",
+      "title": "Healthz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "healthzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/healthz_request.json"
+        },
+        {
+          "var": "healthzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/healthz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/statsz",
+      "title": "Statsz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "statszRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/statsz_request.json"
+        },
+        {
+          "var": "statszResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/statsz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/ipqueuesz",
+      "title": "IPQueuesz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "ipqueueszRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/ipqueuesz_request.json"
+        },
+        {
+          "var": "ipqueueszResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/ipqueuesz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/idz",
+      "title": "Idz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "idzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/idz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/profilez",
+      "title": "Profilez",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "profilezRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/profilez_request.json"
+        },
+        {
+          "var": "profilezResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/profilez_response.json"
+        }
+      ]
+    },
+    {
+      "path": "system/monitor/raftz",
+      "title": "Raftz",
+      "description": "",
+      "kind": "monitor",
+      "subjectLabel": "",
+      "subjects": [],
+      "subjectStyle": "inline",
+      "subjectProse": "",
+      "schemas": [
+        {
+          "var": "raftzRequest",
+          "label": "Request Schema",
+          "import": "server/monitor/v1/raftz_request.json"
+        },
+        {
+          "var": "raftzResponse",
+          "label": "Response Schema",
+          "import": "server/monitor/v1/raftz_response.json"
+        }
+      ]
+    },
+    {
+      "path": "services/info-response",
+      "title": "Info Response",
+      "description": "Service information and metadata response.",
+      "kind": "services",
+      "subjectLabel": "Request Subject",
+      "subjects": [
+        "$SRV.INFO"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Services respond to info requests on their specific subjects:\n- `$SRV.INFO.{service}` - Info for all instances of a service\n- `$SRV.INFO.{service}.{id}` - Info for a specific service instance",
+      "schemas": [
+        {
+          "var": "infoResponse",
+          "label": "Response Schema",
+          "import": "jsm/micro/v1/info_response.json"
+        }
+      ]
+    },
+    {
+      "path": "services/ping-response",
+      "title": "Ping Response",
+      "description": "Service health check response.",
+      "kind": "services",
+      "subjectLabel": "Request Subject",
+      "subjects": [
+        "$SRV.PING"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Services respond to ping requests on their specific subjects:\n- `$SRV.PING.{service}` - Ping all instances of a service\n- `$SRV.PING.{service}.{id}` - Ping a specific service instance",
+      "schemas": [
+        {
+          "var": "pingResponse",
+          "label": "Response Schema",
+          "import": "jsm/micro/v1/ping_response.json"
+        }
+      ]
+    },
+    {
+      "path": "services/stats-response",
+      "title": "Stats Response",
+      "description": "Service statistics and metrics response.",
+      "kind": "services",
+      "subjectLabel": "Request Subject",
+      "subjects": [
+        "$SRV.STATS"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Services respond to stats requests on their specific subjects:\n- `$SRV.STATS.{service}` - Statistics for all instances of a service\n- `$SRV.STATS.{service}.{id}` - Statistics for a specific service instance",
+      "schemas": [
+        {
+          "var": "statsResponse",
+          "label": "Response Schema",
+          "import": "jsm/micro/v1/stats_response.json"
+        }
+      ]
+    }
+  ]
+}

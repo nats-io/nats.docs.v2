@@ -1,7 +1,29 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import type { Options as DocsOptions } from "@docusaurus/plugin-content-docs";
 import natsFlowPlugin from "./src/plugins/nats-flow";
+import docVersions from "./scripts/doc-versions.json";
+
+// Build the versions config for the 'reference' docs plugin instance from
+// scripts/doc-versions.json — single source of truth for NATS-version →
+// {nats-server tag, jsm.go tag, status} mapping.
+//
+// status semantics:
+//   'latest'       — served at /reference/... (no version path prefix),
+//                     drives lastVersion
+//   'maintained'   — older but still supported; no banner
+//   'unmaintained' — shows the Docusaurus 'unmaintained' banner
+const referenceVersions: DocsOptions["versions"] = Object.fromEntries(
+  docVersions.versions.map((v) => [
+    v.name,
+    {
+      label: v.status === "latest" ? `${v.name} (latest)` : v.name,
+      path: v.status === "latest" ? "" : v.name,
+      ...(v.status === "unmaintained" ? { banner: "unmaintained" as const } : {}),
+    },
+  ]),
+);
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -14,7 +36,7 @@ const config: Config = {
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
-  
+
   // Global scripts
   scripts: [
     {
@@ -27,7 +49,7 @@ const config: Config = {
       type: 'module',
     }
   ],
-  
+
   plugins: [
     [
       "@signalwire/docusaurus-plugin-llms-txt",
@@ -39,6 +61,22 @@ const config: Config = {
       },
     ],
     natsFlowPlugin,
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "reference",
+        path: "docs-reference",
+        routeBasePath: "reference",
+        sidebarPath: "./sidebars-reference.ts",
+        // Reference content is always pinned to a released NATS major.
+        // The 'current' folder (docs-reference/) is a placeholder — never
+        // rendered. Cut a new version by running generate-version.js and
+        // adding an entry to scripts/doc-versions.json.
+        includeCurrentVersion: false,
+        lastVersion: docVersions.latest,
+        versions: referenceVersions,
+      } satisfies DocsOptions,
+    ],
   ],
 
   // Set the production url of your site here
@@ -132,6 +170,13 @@ const config: Config = {
           position: "left",
           label: "Reference",
           href: "/reference/",
+        },
+        {
+          type: "docsVersionDropdown",
+          docsPluginId: "reference",
+          position: "right",
+          // Only appears when user is on a reference page. Versions come
+          // from scripts/doc-versions.json; labels from referenceVersions above.
         },
         {
           href: "https://github.com/nats-io",

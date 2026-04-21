@@ -1,0 +1,18 @@
+{
+  "$comment": "Source of truth for reference-doc version → submodule-tag mapping. Edit when bumping a NATS major version. 'status' values: 'latest' (→ Docusaurus lastVersion), 'maintained' (normal), 'unmaintained' (→ 'unmaintained' banner). IMPORTANT: jsm.go schema tags do NOT track nats-server tags 1:1 — schemas can land in jsm.go before the matching server release stabilizes. When picking the jsm.go tag for NATS major N, pick the last tag BEFORE features of N+1 landed (e.g. for 2.11 use the last jsm.go tag before atomic-batches/counters/schedules schemas were added, otherwise those 2.12 fields render in 2.11 docs).",
+  "latest": "2.12",
+  "versions": [
+    {
+      "name": "2.12",
+      "nats-server": "v2.12.4",
+      "jsm.go": "v0.3.0",
+      "status": "latest"
+    },
+    {
+      "name": "2.11",
+      "nats-server": "v2.11.9",
+      "jsm.go": "v0.2.3",
+      "status": "maintained"
+    }
+  ]
+}

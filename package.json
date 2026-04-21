@@ -15,9 +15,10 @@
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
     "fetch-examples": "node scripts/fetch-examples.js",
-    "generate-docs": "go run scripts/generate-docs.go -server ./nats-server",
     "generate-docs:dry-run": "go run scripts/generate-docs.go -server ./nats-server -dry-run",
-    "generate-docs:build": "go run scripts/generate-docs.go -server ./nats-server -strict"
+    "generate-docs:v2.11": "node scripts/generate-version.js 2.11",
+    "generate-docs:v2.12": "node scripts/generate-version.js 2.12",
+    "generate-docs:all-versions": "node scripts/generate-version.js"
   },
   "dependencies": {
     "@docusaurus/core": "3.8.1",
