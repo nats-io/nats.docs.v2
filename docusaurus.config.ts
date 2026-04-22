@@ -60,6 +60,17 @@ const config: Config = {
         },
       },
     ],
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+        indexBlog: false,
+        docsRouteBasePath: ["/", "reference"],
+        docsDir: ["docs", "docs-reference"],
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+      },
+    ],
     natsFlowPlugin,
     [
       "@docusaurus/plugin-content-docs",
