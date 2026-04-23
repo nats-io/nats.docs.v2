@@ -35,6 +35,7 @@ This is the official documentation site for NATS, built using [Docusaurus](https
     npm init docusaurus
     # may also need 
     npm i @docusaurus/core@latest @docusaurus/preset-classic@latest @docusaurus/module-type-aliases@latest @docusaurus/tsconfig@latest @docusaurus/types@latest
+    npm i @docusaurus/faster
     ```
 
 ### Installation
