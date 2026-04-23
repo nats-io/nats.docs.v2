@@ -118,19 +118,10 @@ go get github.com/nats-io/nats.go
 ```
 
 </TabItem>
-<TabItem value="rust" label="Rust">
-
-```toml title="Cargo.toml"
-[dependencies]
-async-nats = "0.33"
-tokio = { version = "1", features = ["full"] }
-```
-
-</TabItem>
 <TabItem value="java" label="Java">
 
 Gradle
-```json
+```groovy
 dependencies {
   implementation 'io.nats:jnats:2.25.2'
 }
@@ -146,15 +137,24 @@ Maven
 ```
 
 </TabItem>
+<TabItem value="rust" label="Rust">
+
+```toml title="Cargo.toml"
+[dependencies]
+async-nats = "0.33"
+tokio = { version = "1", features = ["full"] }
+```
+
+</TabItem>
 </Tabs>
 
 ### Publisher Example
 
-<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,rust,java"></div>
+<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,java,rust"></div>
 
 ### Subscriber Example
 
-<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,rust,java"></div>
+<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,java,rust"></div>
 
 ### Running the Examples
 
@@ -200,6 +200,12 @@ go run publish.go
 ```
 
 </TabItem>
+<TabItem value="java" label="Java">
+
+> It's best to run the examples from your IDE or command line where java is installed.
+> See <a href="https://github.com/nats-io/nats.java/tree/main/examples/src/main/java/io/nats/examples/natsIoDoc">NATS Doc Examples</a>
+
+</TabItem>
 <TabItem value="rust" label="Rust">
 
 ```bash
@@ -211,14 +217,8 @@ cargo run --bin publish
 ```
 
 </TabItem>
-<TabItem value="java" label="Java">
-
-> It's best to run the examples from your ide or command line where java is installed.
-> See <a href="https://github.com/nats-io/nats.java/tree/main/examples/src/main/java/io/nats/examples/natsIoDoc">NATS Doc Examples</a>
-
-</TabItem>
 </Tabs>
-E
+
 ## Next Steps
 
 Congratulations! You've successfully:
