@@ -30,7 +30,12 @@ This is the official documentation site for NATS, built using [Docusaurus](https
 ### Requirements
 - **Node.js** 18 or higher
 - **npm** 8 or higher (comes with Node.js)
-- **docusaurus** latest version is fine
+- **docusaurus** make sure it's initialized 
+    ```
+    npm init docusaurus
+    # may also need 
+    npm i @docusaurus/core@latest @docusaurus/preset-classic@latest @docusaurus/module-type-aliases@latest @docusaurus/tsconfig@latest @docusaurus/types@latest
+    ```
 
 ### Installation
 
