@@ -4,6 +4,10 @@ import type * as Preset from "@docusaurus/preset-classic";
 import type { Options as DocsOptions } from "@docusaurus/plugin-content-docs";
 import natsFlowPlugin from "./src/plugins/nats-flow";
 import docVersions from "./scripts/doc-versions.json";
+import rehypeNatsExample from "./scripts/rehype-nats-example.mjs";
+import rehypeNatsFlow from "./scripts/rehype-nats-flow.mjs";
+import rehypeFlattenTabs from "./scripts/rehype-flatten-tabs.mjs";
+import rehypeStripHeadingAnchors from "./scripts/rehype-strip-heading-anchors.mjs";
 
 // Build the versions config for the 'reference' docs plugin instance from
 // scripts/doc-versions.json — single source of truth for NATS-version →
@@ -55,8 +59,28 @@ const config: Config = {
       "@signalwire/docusaurus-plugin-llms-txt",
       {
         depth: 5,
+        siteTitle: "NATS Documentation",
+        siteDescription:
+          "Connective Technology for Adaptive Edge & Distributed Systems — official NATS messaging documentation.",
+        includeOrder: [
+          "intro/**",
+          "what-is-nats/**",
+          "getting-started/**",
+          "concepts/**",
+          "guides/**",
+          "tutorials/**",
+          "reference/**",
+        ],
         content: {
           enableLlmsFullTxt: true,
+          enableMarkdownFiles: true,
+          includeVersionedDocs: false,
+          beforeDefaultRehypePlugins: [
+            rehypeNatsExample,
+            rehypeNatsFlow,
+            rehypeFlattenTabs,
+            rehypeStripHeadingAnchors,
+          ],
         },
       },
     ],
