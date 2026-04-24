@@ -202,8 +202,15 @@ go run publish.go
 </TabItem>
 <TabItem value="java" label="Java">
 
-> It's best to run the examples from your IDE or command line where java is installed.
-> See <a href="https://github.com/nats-io/nats.java/tree/main/examples/src/main/java/io/nats/examples/natsIoDoc">NATS Doc Examples</a>
+```text
+It's best to run the examples from your IDE or 
+command line where java is installed.
+
+See NATS Doc Examples at in the 
+nats.java project https://github.com/nats-io/nats.java
+under src/main/java/io/nats/examples/natsIoDoc
+```
+
 
 </TabItem>
 <TabItem value="rust" label="Rust">

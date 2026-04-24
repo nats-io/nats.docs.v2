@@ -34,7 +34,7 @@ Examples:
 
 4. **Use in documentation:**
    ```mdx
-   <div class="nats-example" data-type="[page]-[snippet]" data-languages="cli,go,rust"></div>
+   <div class="nats-example" data-type="[page]-[snippet]" data-languages="cli,js,go,python,java,rust,c#"></div>
    ```
 
 ## Why CLI Examples are Different

@@ -26,7 +26,7 @@ This decoupling gives you tremendous flexibility. Services can be added, removed
 
 You publish a message by sending it to a subject:
 
-<div class="nats-example" data-type="basics-publish" data-languages="cli,go,rust,java"></div>
+<div class="nats-example" data-type="basics-publish" data-languages="cli,go,java,rust"></div>
 
 Key points:
 - Publishers don't wait for acknowledgments (fire-and-forget)
@@ -37,7 +37,7 @@ Key points:
 
 Subscribers express interest in subjects to receive messages:
 
-<div class="nats-example" data-type="basics-subscribe" data-languages="cli,go,rust,java"></div>
+<div class="nats-example" data-type="basics-subscribe" data-languages="cli,go,java,rust"></div>
 
 ## When to Use Pub/Sub
 

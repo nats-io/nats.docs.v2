@@ -24,7 +24,7 @@ jobs:
       review_focus: |
         Additionally focus on:
         - NATS documentation style guide compliance (CLAUDE.md rules)
-        - Code example tabs use correct structure: CLI first with `default`, `groupId="lang"`, language order CLI > JS > Go > Python > Java > Rust > C#/.NET
+        - Code example tabs use correct structure: CLI first with `default`, `groupId="lang"`, language order CLI > JS > Go > Python > Java > Rust > C#
         - `nats-example` tags used instead of inline Tabs where appropriate
         - MDX validity: Tabs/TabItem imports present, code blocks specify language, no relative imports
         - Writing tone is welcoming and conversational, not dry or robotic
