@@ -28,7 +28,7 @@ export default function DocItemFooterWrapper(): ReactNode {
     `Read the NATS documentation page at ${absoluteUrl} and help me with it.`,
   )}`;
 
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
 
   const onCopy = async () => {
     try {
@@ -36,10 +36,12 @@ export default function DocItemFooterWrapper(): ReactNode {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopyState('copied');
+      setTimeout(() => setCopyState('idle'), 2000);
     } catch (err) {
       console.error('Copy as Markdown failed:', err);
+      setCopyState('failed');
+      setTimeout(() => setCopyState('idle'), 2000);
     }
   };
 
@@ -59,7 +61,11 @@ export default function DocItemFooterWrapper(): ReactNode {
           className="button button--secondary button--sm"
           aria-label="Copy this page as Markdown"
         >
-          {copied ? 'Copied!' : 'Copy as Markdown'}
+          {copyState === 'copied'
+            ? 'Copied!'
+            : copyState === 'failed'
+              ? 'Failed'
+              : 'Copy as Markdown'}
         </button>
         <a
           href={mdPath}

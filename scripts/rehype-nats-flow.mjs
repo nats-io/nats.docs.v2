@@ -74,8 +74,14 @@ function parseScenario(name) {
     edges.push({ source, target, label: labelMatch ? labelMatch[2] : null });
   }
 
+  const finalDescription = description ?? FALLBACKS[name] ?? null;
+  if (!description && !(name in FALLBACKS)) {
+    console.warn(
+      `[rehype-nats-flow] Scenario "${name}" (${file.path}) has no top-level description and no FALLBACKS entry. Markdown output will be generic.`,
+    );
+  }
   const parsed = {
-    description: description ?? FALLBACKS[name] ?? null,
+    description: finalDescription,
     edges: edges.map((e) => ({
       source: labels.get(e.source) ?? e.source,
       target: labels.get(e.target) ?? e.target,
