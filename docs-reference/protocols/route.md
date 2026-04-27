@@ -1,5 +1,7 @@
 ---
 description: The NATS route protocol is used to form a cluster of NATS servers.
+mdx:
+  format: md
 ---
 
 # Route 
