@@ -1,5 +1,7 @@
 ---
 description: The NATS leafnode protocol is used to create lightweight, unidirectional connections from edge servers to a central cluster.
+mdx:
+  format: md
 ---
 
 # Leafnode

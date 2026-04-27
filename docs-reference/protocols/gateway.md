@@ -1,5 +1,7 @@
 ---
 description: The NATS gateway protocol is used to connect multiple NATS clusters together.
+mdx:
+  format: md
 ---
 
 # Gateway

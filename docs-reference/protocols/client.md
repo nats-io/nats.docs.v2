@@ -1,5 +1,7 @@
 ---
 description: The NATS client protocol is used to communicate between the NATS server and clients.
+mdx:
+  format: md
 ---
 
 # Client 
