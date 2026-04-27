@@ -204,9 +204,9 @@ go run publish.go
 
 ```text
 It's best to run the examples from your IDE or 
-command line where java is installed.
+command line where Java is installed.
 
-See NATS Doc Examples at in the 
+See NATS Doc Examples in the 
 nats.java project https://github.com/nats-io/nats.java
 under src/main/java/io/nats/examples/natsIoDoc
 ```
