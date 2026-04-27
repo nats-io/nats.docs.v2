@@ -10,8 +10,8 @@ Welcome to the official documentation for **NATS** - a simple, secure and high-p
 
 ## Quick Start
 
-- **[What is NATS?](what-is-nats)** — Understand the fundamentals
-- **[Getting Started](getting-started)** — Install and send your first message
+- **[What is NATS?](./what-is-nats.md)** — Understand the fundamentals
+- **[Getting Started](./getting-started/index.md)** — Install and send your first message
 
 ## Community and Support
 
@@ -28,4 +28,4 @@ NATS has a vibrant and growing community:
 - Join our [Slack community](https://natsio.slack.com) for real-time help
 - Check out [examples and tutorials](https://github.com/nats-io/nats-examples)
 
-Ready to dive in? Start with **[What is NATS?](what-is-nats)** →
+Ready to dive in? Start with **[What is NATS?](./what-is-nats.md)** →
