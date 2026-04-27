@@ -118,6 +118,25 @@ go get github.com/nats-io/nats.go
 ```
 
 </TabItem>
+<TabItem value="java" label="Java">
+
+Gradle
+```groovy
+dependencies {
+  implementation 'io.nats:jnats:2.25.2'
+}
+```
+
+Maven
+```xml
+<dependency>
+    <groupId>io.nats</groupId>
+    <artifactId>jnats</artifactId>
+    <version>2.25.2</version>
+</dependency>
+```
+
+</TabItem>
 <TabItem value="rust" label="Rust">
 
 ```toml title="Cargo.toml"
@@ -131,11 +150,11 @@ tokio = { version = "1", features = ["full"] }
 
 ### Publisher Example
 
-<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,rust"></div>
+<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,java,rust"></div>
 
 ### Subscriber Example
 
-<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,rust"></div>
+<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,java,rust"></div>
 
 ### Running the Examples
 
@@ -163,10 +182,10 @@ nats request hello "Anyone there?" --timeout=2s
 
 ```bash
 # Terminal 1 - Start subscriber
-node subscriber.js
+node subscribe.js
 
 # Terminal 2 - Run publisher
-node publisher.js
+node publish.js
 ```
 
 </TabItem>
@@ -174,21 +193,34 @@ node publisher.js
 
 ```bash
 # Terminal 1 - Start subscriber
-go run subscriber.go
+go run subscribe.go
 
 # Terminal 2 - Run publisher
-go run publisher.go
+go run publish.go
 ```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```text
+It's best to run the examples from your IDE or 
+command line where Java is installed.
+
+See NATS Doc Examples in the 
+nats.java project https://github.com/nats-io/nats.java
+under src/main/java/io/nats/examples/natsIoDoc
+```
+
 
 </TabItem>
 <TabItem value="rust" label="Rust">
 
 ```bash
 # Terminal 1 - Start subscriber
-cargo run --bin subscriber
+cargo run --bin subscribe
 
 # Terminal 2 - Run publisher
-cargo run --bin publisher
+cargo run --bin publish
 ```
 
 </TabItem>
