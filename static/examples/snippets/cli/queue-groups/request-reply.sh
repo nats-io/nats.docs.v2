@@ -5,7 +5,7 @@ nats reply api.calculate --queue api-workers 'echo "Result from instance 1"'
 nats reply api.calculate --queue api-workers 'echo "Result from instance 2"'
 
 # Terminal 3: Service instance 3
-nats reply api.calculate --queue api-workers 'echo "User data from instance 3"'
+nats reply api.calculate --queue api-workers 'echo "Result from instance 3"'
 
 # Terminal 4: Make requests (load balanced across instances)
 nats request api.calculate ""
