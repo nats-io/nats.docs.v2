@@ -1,4 +1,4 @@
 #!/bin/bash
 
-# Subscribe to all messages under the "greet" subject hierarchy
-nats sub "greet.>"
+# Subscribe to all messages under the "weather.updates" subject
+nats sub "weather.updates"
