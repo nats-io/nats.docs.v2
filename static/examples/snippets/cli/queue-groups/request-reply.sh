@@ -1,5 +1,5 @@
 # Terminal 1: Service instance 1
-nats reply api.calculate --queue api-workers 'echo "User data from instance 1"'
+nats reply api.calculate --queue api-workers 'echo "Result from instance 1"'
 
 # Terminal 2: Service instance 2
 nats reply api.calculate --queue api-workers 'echo "User data from instance 2"'
