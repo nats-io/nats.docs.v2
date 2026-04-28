@@ -1,4 +1,4 @@
 #!/bin/bash
 
-# Publish a message to the "greet.bob" subject
-nats pub greet.bob "Hello Bob!"
+# Publish a message to the "weather.updates" subject
+nats pub weather.updates "Temperature: 72°F"

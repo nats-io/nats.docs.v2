@@ -141,7 +141,7 @@ Maven
 
 ```toml title="Cargo.toml"
 [dependencies]
-async-nats = "0.33"
+async-nats = "0.47.0"
 tokio = { version = "1", features = ["full"] }
 ```
 
