@@ -40,21 +40,39 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                     type: "category",
-                    label: "Persistence",
+                    label: "JetStream",
                     collapsed: false,
-                    items: ["concepts/jetstream"],
+                    items: [
+                        {
+                            type: "doc",
+                            id: "concepts/jetstream",
+                            label: "Streams",
+                        },
+                    ],
                 },
                 {
                     type: "category",
                     label: "Topology",
                     collapsed: false,
-                    items: ["concepts/topologies"],
+                    items: [
+                        {
+                            type: "doc",
+                            id: "concepts/topologies",
+                            label: "Single Server",
+                        },
+                    ],
                 },
                 {
                     type: "category",
                     label: "Security",
                     collapsed: false,
-                    items: ["concepts/security"],
+                    items: [
+                        {
+                            type: "doc",
+                            id: "concepts/security",
+                            label: "Passwords and Tokens",
+                        },
+                    ],
                 },
             ],
         },
