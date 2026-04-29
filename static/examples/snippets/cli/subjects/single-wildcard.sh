@@ -1,6 +1,12 @@
 # Subscribe using single token wildcard
-nats sub "weather.*.east"
+# Since each sub waits indefinitely,
+# try each sub with all the publishes
+nats sub "orders.*.shipped"
+nats sub "orders.*.placed"
+nats sub "orders.retail.*"
 
 # Publish to specific subjects
-nats pub weather.us.east "Temperature: 72F"
-nats pub weather.eu.east "Temperature: 18C"
+nats pub orders.wholesale.placed "Order W73737"
+nats pub orders.retail.placed "Order R65432"
+nats pub orders.wholesale.shipped "Order W73001"
+nats pub orders.retail.shipped "Order R65321"
