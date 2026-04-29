@@ -14,14 +14,14 @@ Best practices for building robust, maintainable systems with NATS. Each guide c
 
 ## Topics
 
-- **[Naming Conventions](./naming-conventions)** — subject naming, hierarchies, and organization
-- **[Error Handling](./error-handling)** — connection management, reconnection, and resilience
-- **[Message Design](./message-design)** — serialization, message sizes, and schema strategies
+- **Naming Conventions** — subject naming, hierarchies, and organization
+- **Error Handling** — connection management, reconnection, and resilience
+- **Message Design** — serialization, message sizes, and schema strategies
 
 ## Quick Reference
 
 | Problem | Solution |
 |---------|----------|
-| Messages lost before subscribers connect | Use [JetStream](/docs/jetstream) for persistence |
+| Messages lost before subscribers connect | Use [JetStream](/jetstream/overview) for persistence |
 | Too many unique subjects | Use wildcards and hierarchical naming |
-| Slow subscriber backs up | Process messages asynchronously or use [queue groups](/docs/concepts/queue-groups) |
+| Slow subscriber backs up | Process messages asynchronously or use [queue groups](/concepts/queue-groups) |

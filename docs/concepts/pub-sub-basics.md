@@ -92,7 +92,7 @@ For a deep dive into subjects, hierarchies, wildcards, and naming conventions, s
 
 ## How Delivery Works
 
-- **At-most-once delivery**: Core NATS delivers messages without persistence. If you need guaranteed delivery, that's what [JetStream](../jetstream) is for.
+- **At-most-once delivery**: Core NATS delivers messages without persistence. If you need guaranteed delivery, that's what [JetStream](./jetstream) is for.
 - **Active subscribers only**: Only subscribers connected when the message is published will receive it. Messages aren't stored for later.
 - **Every subscriber gets a copy**: Subscribing doesn't consume or remove messages — each subscriber independently receives its own copy.
 - **Message size**: NATS has a default max message size of 1MB (configurable). For large data, consider using object stores or passing references.
