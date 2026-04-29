@@ -64,7 +64,7 @@
       return;
     }
 
-    const { NatsFlow, ToggleableSubscribersScenario, QueueGroupAnimated, PublishSubscribeAnimated, SubjectsWildcardAnimated, scenarios } = components;
+    const { NatsFlow, ToggleableSubscribersScenario, QueueGroupAnimated, PublishSubscribeAnimated, SubjectsWildcardAnimated, JetStreamContrastAnimated, JetStreamConsumersAnimated, scenarios } = components;
 
     // Wait for React to be available
     const { React, ReactDOM } = await waitForReact();
@@ -116,6 +116,30 @@
         if (scenarioName === 'subjectsWildcardAnimated') {
           const root = ReactDOM.createRoot(container);
           const element = React.createElement(SubjectsWildcardAnimated, {
+            width,
+            height,
+          });
+          root.render(element);
+          container.setAttribute('data-initialized', 'true');
+          return;
+        }
+
+        // Special case: jetStreamContrastAnimated uses a custom animated component
+        if (scenarioName === 'jetStreamContrastAnimated') {
+          const root = ReactDOM.createRoot(container);
+          const element = React.createElement(JetStreamContrastAnimated, {
+            width,
+            height,
+          });
+          root.render(element);
+          container.setAttribute('data-initialized', 'true');
+          return;
+        }
+
+        // Special case: jetStreamConsumersAnimated uses a custom animated component
+        if (scenarioName === 'jetStreamConsumersAnimated') {
+          const root = ReactDOM.createRoot(container);
+          const element = React.createElement(JetStreamConsumersAnimated, {
             width,
             height,
           });
