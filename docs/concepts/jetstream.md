@@ -83,9 +83,10 @@ have acknowledged them, whichever comes first.
 A consumer is a cursor that reads messages from a stream. Multiple consumers can
 read from the same stream independently, each with its own position and state.
 Consumers can be configured as push-based (messages are pushed to them by the
-server) or pull-based (they request messages when ready). Consumers also support
-acknowledgments, allowing them to confirm receipt of messages and control the
-flow of messages from the stream.
+server) or pull-based (they request messages when ready). Pull-based consumers
+are typically the better fit for new applications because they let the consumer
+control its own flow. Consumers also support acknowledgments, allowing them to
+confirm receipt of messages and control the flow of messages from the stream.
 
 <div class="nats-flow" data-scenario="jetStreamConsumersAnimated" data-width="600" data-height="350"></div>
 
@@ -113,7 +114,7 @@ from the stream. The options include:
 
 ## Putting It Together
 
-<div class="nats-example" data-type="jetstream-basic" data-languages="cli,go,rust,java"></div>
+<div class="nats-example" data-type="jetstream-basic" data-languages="cli,go"></div>
 
 ## Beyond Streams and Consumers
 

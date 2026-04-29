@@ -236,6 +236,11 @@ function JetStreamConsumersAnimatedInner() {
     );
 }
 
-export function JetStreamConsumersAnimated() {
+// width / height are accepted for API parity with the NatsFlow loader and
+// peer scenarios, but the diagram self-sizes from the stream slot count
+// (the inner container uses width: fit-content), so they aren't applied.
+export function JetStreamConsumersAnimated(
+    _props: { width?: number; height?: number } = {},
+) {
     return <JetStreamConsumersAnimatedInner />;
 }
