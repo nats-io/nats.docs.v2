@@ -42,13 +42,13 @@ The subscriber with pattern `weather.*.east` receives messages from matching sub
 
 The `*` wildcard matches exactly one token. For example:
 
-- `weather.*.east` matches:
-  - `weather.us.east`
-  - `weather.eu.east`
-
 - `orders.*.shipped` matches:
   - `orders.retail.shipped`
   - `orders.wholesale.shipped`
+
+- `orders.retail.*` matches:
+  - `orders.retail.placed`
+  - `orders.retail.shipped`
 
 <div class="nats-example" data-type="subjects-single-wildcard" data-languages="cli,go,java,rust"></div>
 
