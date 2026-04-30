@@ -64,9 +64,9 @@ function SubjectsWildcardAnimatedInner({
 
   // Edges - all publishers to server, color-coded by match status
   // Stagger timing so each publisher sends at different times
-  // Use 12 second intervals so the full sequence plays before repeating
+  // Use 12-second intervals so the full sequence plays before repeating
   const edges: any[] = [
-    // Publisher 1: weather.us.east → MATCHES (sends first)
+    // Publisher 1: orders.retail.placed → MATCHES (sends first)
     {
       id: 'e-pub1-server',
       source: 'publisher-1',
@@ -77,12 +77,12 @@ function SubjectsWildcardAnimatedInner({
       data: {
         color: '#10b981', // Green - matches
         animated: true,
-        label: 'weather.us.east',
+        label: 'orders.retail.placed',
         delay: 0, // Starts immediately
-        interval: 12000, // Repeat every 12 seconds
+        interval: 10000, // Repeat every 10 seconds
       },
     },
-    // Publisher 2: weather.eu.east → MATCHES (sends second)
+    // Publisher 2: orders.retail.shipped → MATCHES (sends second)
     {
       id: 'e-pub2-server',
       source: 'publisher-2',
@@ -93,12 +93,12 @@ function SubjectsWildcardAnimatedInner({
       data: {
         color: '#3b82f6', // Blue - matches
         animated: true,
-        label: 'weather.eu.east',
+        label: 'orders.retail.shipped',
         delay: 3000, // Starts 3 seconds after publisher 1
-        interval: 12000, // Repeat every 12 seconds
+        interval: 10000, // Repeat every 10 seconds
       },
     },
-    // Publisher 3: weather.us.west → NO MATCH (sends third)
+    // Publisher 3: orders.wholesale.placed → NO MATCH (sends third)
     {
       id: 'e-pub3-server',
       source: 'publisher-3',
@@ -109,9 +109,9 @@ function SubjectsWildcardAnimatedInner({
       data: {
         color: '#ef4444', // Red - no match
         animated: true,
-        label: 'weather.us.west',
+        label: 'orders.wholesale.placed',
         delay: 6000, // Starts 6 seconds after publisher 1
-        interval: 12000, // Repeat every 12 seconds
+        interval: 10000, // Repeat every 10 seconds
       },
     },
     // Server to subscriber - only matching messages (green paths)
@@ -124,11 +124,11 @@ function SubjectsWildcardAnimatedInner({
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
-        color: '#10b981', // Green
+        color: '#10b981', // Green (from publisher 1)
         animated: true,
-        delay: 1500, // Starts after message reaches server from pub 1
-        interval: 12000, // Repeat every 12 seconds
-        label: 'weather.*.east',
+        delay: 2000, // Starts after message reaches server from pub 1
+        interval: 10000, // Repeat every 10 seconds
+        label: 'orders.retail.*',
       },
     },
     {
@@ -141,9 +141,9 @@ function SubjectsWildcardAnimatedInner({
       data: {
         color: '#3b82f6', // Blue (from publisher 2)
         animated: true,
-        delay: 4500, // Starts after message reaches server from pub 2
-        interval: 12000, // Repeat every 12 seconds
-        label: 'weather.*.east',
+        delay: 5000, // Starts after message reaches server from pub 2
+        interval: 10000, // Repeat every 10 seconds
+        label: 'orders.retail.*',
       },
     },
   ];
@@ -159,7 +159,7 @@ function SubjectsWildcardAnimatedInner({
           fontStyle: 'italic',
         }}
       >
-        Subscriber listens with wildcard <code>weather.*.east</code> where <code>*</code> matches exactly one token.
+        Subscriber listens with wildcard <code>orders.retail.*</code> where <code>*</code> matches exactly one token.
       </div>
 
       {/* Flow diagram */}
@@ -205,11 +205,11 @@ function SubjectsWildcardAnimatedInner({
           color: '#4b5563',
         }}
       >
-        <strong>Pattern: weather.*.east</strong>
+        <strong>Pattern: orders.retail.*</strong>
         <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
-          <li style={{ color: '#059669' }}>✓ <strong>weather.us.east</strong> matches (one token in middle)</li>
-          <li style={{ color: '#2563eb' }}>✓ <strong>weather.eu.east</strong> matches (one token in middle)</li>
-          <li style={{ color: '#dc2626' }}>✗ <strong>weather.us.west</strong> - different last token</li>
+          <li style={{ color: '#059669' }}>✓ <strong>orders.retail.placed</strong> matches first two tokens</li>
+          <li style={{ color: '#2563eb' }}>✓ <strong>orders.retail.shipped</strong> matches first two token</li>
+          <li style={{ color: '#dc2626' }}>✗ <strong>orders.wholesale.placed</strong> - different second token</li>
         </ul>
         <div style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
           Green and blue messages flow to subscriber; red message stops at server.
