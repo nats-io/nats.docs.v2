@@ -135,9 +135,3 @@ Track these metrics for queue groups:
 - [Subjects](./subjects) - Understanding subject-based messaging
 - [Request-Reply](./request-reply) - Synchronous communication patterns
 - [Publish-Subscribe](./pub-sub-basics) - One-to-many messaging
-
-## Try It Yourself
-
-Create a simple work distribution system:
-
-<div class="nats-example" data-type="queue-groups-try-it" data-languages="cli"></div>
