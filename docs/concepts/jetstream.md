@@ -7,8 +7,8 @@ description: NATS's built-in persistence and streaming layer
 
 Core NATS delivers messages only to subscribers connected at the moment of
 publication - at most once, never replayed. JetStream adds a persistence layer
-on top, giving you at-least-once delivery - messages survive restarts, can be
-replayed, and are tracked until they're acknowledged.
+on top, giving you at-least-once delivery - messages survive restarts and can
+be replayed.
 
 Core NATS already decouples publisher and subscriber from each other, where a
 publisher does not need to know about the subscriber. JetStream extends that
@@ -24,9 +24,10 @@ JetStream introduces three pieces working together:
   subjects.
 - A **consumer** is a server-side, stateful view of a stream - the server
   tracks how far a client has progressed, so applications don't have to.
-- A **client** is the application that connects to a consumer to receive
-  messages and acknowledge them. Each acknowledgment advances the consumer's
-  position in the stream.
+- A **client** is an application that connects to a consumer to receive
+  messages and acknowledge them. A consumer can be shared by multiple clients
+  to divide the work; each acknowledgment advances the consumer's position in
+  the stream.
 
 ## Streams
 
