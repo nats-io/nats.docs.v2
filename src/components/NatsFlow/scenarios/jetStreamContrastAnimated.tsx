@@ -103,7 +103,7 @@ function JetStreamContrastAnimatedInner({
             id: "subscriber",
             type: "subscriber",
             position: { x: 440, y: 150 },
-            data: { label: "Subscriber" },
+            data: { label: "Client" },
             style: {
                 opacity: subscriberOnline ? 1 : 0.3,
             },
@@ -147,12 +147,12 @@ function JetStreamContrastAnimatedInner({
     const description = (() => {
         if (mode === "core") {
             return subscriberOnline
-                ? "Subscriber is online. New messages flow through, but anything published while it was offline is gone."
-                : "Subscriber is offline. Messages reach the server but go nowhere.";
+                ? "Client is online. New messages flow through, but anything published while it was offline is gone."
+                : "Client is offline. Messages reach the server but go nowhere.";
         }
         return subscriberOnline
-            ? "Subscriber is online. The stream replays everything it missed."
-            : "Subscriber is offline. Messages accumulate in the stream.";
+            ? "Client is online. The stream replays everything it missed."
+            : "Client is offline. Messages accumulate in the stream.";
     })();
 
     const streamDots = storedCount > 0

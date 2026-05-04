@@ -80,9 +80,9 @@ function JetStreamConsumersAnimatedInner() {
                     fontStyle: "italic",
                 }}
             >
-                Three consumers reading the same{" "}
+                Three consumers — each a server-side cursor over the{" "}
                 <strong>ORDERS</strong>{" "}
-                stream — each at its own position, advancing independently.
+                stream — advance at their own pace as their clients ack messages.
             </div>
 
             <div

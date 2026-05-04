@@ -5,112 +5,53 @@ description: NATS's built-in persistence and streaming layer
 
 # JetStream
 
-Core NATS delivers messages only to subscribers actively connected when the
-message is published. While this covers many use cases, some applications
-require more robust messaging guarantees, such as:
+Core NATS delivers messages only to subscribers connected at the moment of
+publication - at most once, never replayed. JetStream adds a persistence layer
+on top, giving you at-least-once delivery - messages survive restarts, can be
+replayed, and are tracked until they're acknowledged.
 
-- **Message replay**: Consumers can retrieve past messages, not just new ones
-- **Acknowledgments**: Consumers confirm receipt so the server knows what's been processed.
-- **Durable storage**: Messages are stored on disk and survive server restarts
-- **Fault tolerance**: Messages are replicated across multiple servers for high
-  availability
-
-This is where JetStream comes in - NATS's built-in persistence and streaming
-layer, so you can build applications that need guaranteed delivery and message
-history.
+Core NATS already decouples publisher and subscriber from each other, where a
+publisher does not need to know about the subscriber. JetStream extends that
+decoupling to time - the two no longer need to be online at the same moment.
 
 <div class="nats-flow" data-scenario="jetStreamContrastAnimated" data-width="600" data-height="380"></div>
 
 ## How It Works
 
-JetStream introduces the concept of **streams** and **consumers**:
+JetStream introduces three pieces working together:
 
-- **Streams**: Named message stores that persist messages in memory or on disk.
-  This is where you can configure retention policies, replication, and storage
-  limits. Streams are bound to subjects, so messages published to those subjects
-  are stored in the stream.
-- **Consumers**: Stateful subscribers that can consume messages from a stream,
-  with support for acknowledgments, message replay, and durable state. Consumers
-  can be push-based (messages are pushed to them from the server) or pull-based
-  (they request messages when ready).
-
-The server persists messages published to stream subjects. Consumers retrieve
-them at their own pace and acknowledge receipt to manage flow.
+- A **stream** is a server-side store of messages, bound to one or more
+  subjects.
+- A **consumer** is a server-side, stateful view of a stream - the server
+  tracks how far a client has progressed, so applications don't have to.
+- A **client** is the application that connects to a consumer to receive
+  messages and acknowledge them. Each acknowledgment advances the consumer's
+  position in the stream.
 
 ## Streams
 
-A stream is a server-side log of messages, bound to one or more subjects. When
-you publish a message to a subject that matches the stream's subjects, it is
-appended to the stream along with a sequence number. Streams support different
-storage backends, retention policies, replication, and discard policies. Here,
-we'll only cover two of the most common configuration options.
-
-### Storage
-
-There are two storage options for streams:
-
-- **File storage**: Messages are persisted to disk, providing durability across
-  server restarts. This is the most common choice for production workloads.
-
-- **Memory storage**: Messages are stored in memory, providing lower latency but
-  no durability (messages are lost on server restart). This can be useful for
-  transient data or testing.
-
-### Retention Policies
-
-Retention policies determine how long messages are kept in a stream. The three
-main policies are:
-
-- **Limits**: Messages are retained until the stream reaches configured limits
-  (e.g., max messages, max bytes, max age). Once a limit is hit, older messages
-  are discarded to make room for new ones.
-- **Interest**: Messages are retained as long as there is at least one active
-  consumer interested in them. Once all interested consumers have acknowledged a
-  message, it is removed from the stream. If no consumer is interested, the
-  server discards it immediately.
-- **Work Queue**: Messages are retained until a consumer acknowledges them. This
-  is ideal for load balancing work across multiple consumers, as each message is
-  processed by only one consumer. When using this policy, consumers must not
-  have overlapping interests on subjects.
-
-Both Interest and Work Queue policies are additive to any configured limits. For
-example, if you have a stream with a max age of 24 hours and an Interest policy,
-messages will be retained for up to 24 hours or until all interested consumers
-have acknowledged them, whichever comes first.
+A stream is bound to one or more subject patterns. When a publisher sends a
+message to a matching subject, the server appends it to the stream and
+assigns it a sequence number. Streams are configurable for storage (memory
+or disk), retention (how long messages are kept), replication, and more.
 
 ## Consumers
 
-A consumer is a cursor that reads messages from a stream. Multiple consumers can
-read from the same stream independently, each with its own position and state.
-Consumers can be configured as push-based (messages are pushed to them by the
-server) or pull-based (they request messages when ready). Pull-based consumers
-are typically the better fit for new applications because they let the consumer
-control its own flow. Consumers also support acknowledgments, allowing them to
-confirm receipt of messages and control the flow of messages from the stream.
+A consumer is a server-side, stateful view of a stream that tracks how far a
+client has progressed. Multiple consumers can read the same stream
+independently, each with its own position. The server maintains that
+position so applications don't have to coordinate or remember it themselves.
 
 <div class="nats-flow" data-scenario="jetStreamConsumersAnimated" data-width="600" data-height="350"></div>
 
-### Acknowledgments and Redelivery
+The application that connects to a consumer - the **client** - receives
+messages and acknowledges each one. An acknowledgment advances the
+consumer's cursor - if a message isn't acknowledged in time, the server
+redelivers it, which is what gives you at-least-once delivery.
 
-When a consumer receives a message, it can acknowledge it to confirm receipt. If
-a message is not acknowledged within a configured timeout, the server treats it
-as unacknowledged and redelivers it. Consumers can also configure a maximum
-number of redelivery attempts before the server marks a message as failed.
-
-### Starting Position
-
-When a consumer is created, it can specify where to start consuming messages
-from the stream. The options include:
-
-- **All**: Start consuming from the beginning of the stream, including all past
-  messages.
-- **Last** and **Last Per Subject**: Start consuming from the most recent
-  message in the stream (or the most recent message for each subject).
-- **New**: Start consuming only new messages published after the consumer is
-  created.
-- **From Sequence**: Start consuming from a specific sequence number in the
-  stream.
-- **From Time**: Start consuming from a specific timestamp in the stream.
+A consumer can be configured to start reading from the beginning of the
+stream, from the latest message, from a specific sequence number, or from a
+specific time.
 
 ## Putting It Together
 
