@@ -34,19 +34,25 @@ function WildcardComparisonInner({
       id: 'publisher-1',
       type: 'publisher',
       position: { x: 0, y: 50 },
-      data: { label: 'Pub 1' },
+      data: { label: 'Smoke' },
     },
     {
       id: 'publisher-2',
       type: 'publisher',
-      position: { x: 0, y: 200 },
-      data: { label: 'Pub 2' },
+      position: { x: 0, y: 150 },
+      data: { label: 'Smoke Critical' },
     },
     {
       id: 'publisher-3',
       type: 'publisher',
+      position: { x: 0, y: 250 },
+      data: { label: 'Water' },
+    },
+    {
+      id: 'publisher-4',
+      type: 'publisher',
       position: { x: 0, y: 350 },
-      data: { label: 'Pub 3' },
+      data: { label: 'Water Critical' },
     },
     // NATS server in the middle
     {
@@ -57,22 +63,28 @@ function WildcardComparisonInner({
     },
     // Two subscribers with different wildcard patterns
     {
-      id: 'subscriber-star',
+      id: 'subscriber-alarm-star',
       type: 'subscriber',
-      position: { x: 600, y: 100 },
-      data: { label: 'Sub: weather.*.east' },
+      position: { x: 550, y: 80 },
+      data: { label: 'Sub: sensor.alarm.*' },
+    },
+    {
+      id: 'subscriber-star-star-critical',
+      type: 'subscriber',
+      position: { x: 550, y: 200 },
+      data: { label: 'Sub: sensor.*.*.critical' },
     },
     {
       id: 'subscriber-gt',
       type: 'subscriber',
-      position: { x: 600, y: 300 },
-      data: { label: 'Sub: weather.>' },
+      position: { x: 550, y: 320 },
+      data: { label: 'Sub: sensor.>' },
     },
   ];
 
   // Publishers to server
   const edges: any[] = [
-    // Publisher 1: weather.us.east (2 levels)
+    // Publisher 1: sensor.alarm.smoke (3 levels)
     {
       id: 'e-pub1-server',
       source: 'publisher-1',
@@ -83,12 +95,12 @@ function WildcardComparisonInner({
       data: {
         color: '#10b981', // Green
         animated: true,
-        label: 'weather.us.east',
-        delay: 0,
-        interval: 15000,
+        label: 'sensor.alarm.smoke',
+        delay: 1000,
+        interval: 14000,
       },
     },
-    // Publisher 2: weather.eu.east (2 levels)
+    // Publisher 2: sensor.alarm.smoke.critical (4 levels - only matches >)
     {
       id: 'e-pub2-server',
       source: 'publisher-2',
@@ -97,14 +109,14 @@ function WildcardComparisonInner({
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
-        color: '#3b82f6', // Blue
+        color: '#dc2626', // Red
         animated: true,
-        label: 'weather.eu.east',
+        label: 'sensor.alarm.smoke.critical',
         delay: 4000,
-        interval: 15000,
+        interval: 14000,
       },
     },
-    // Publisher 3: weather.us.east.boston (3 levels - only matches >)
+    // Publisher 3: sensor.alarm.water (3 levels)
     {
       id: 'e-pub3-server',
       source: 'publisher-3',
@@ -113,87 +125,140 @@ function WildcardComparisonInner({
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        color: '#3b82f6', // Blue
+        animated: true,
+        label: 'sensor.alarm.water',
+        delay: 7000,
+        interval: 14000,
+      },
+    },
+    // Publisher 4: sensor.alarm.water.critical (4 levels - only matches >)
+    {
+      id: 'e-pub4-server',
+      source: 'publisher-4',
+      target: 'server',
+      type: 'animated',
+      animated: true,
+      markerEnd: { type: MarkerType.ArrowClosed },
+      data: {
         color: '#f59e0b', // Orange
         animated: true,
-        label: 'weather.us.east.boston',
-        delay: 8000,
-        interval: 15000,
+        label: 'sensor.alarm.water.critical',
+        delay: 10000,
+        interval: 14000,
       },
     },
-
-    // Server to subscriber with * wildcard
-    // Matches pub1 and pub2 (exactly 3 tokens)
+    // Server to subscribers
     {
-      id: 'e-server-star-1',
+      id: 'e-server-star-from-smoke',
       source: 'server',
-      target: 'subscriber-star',
+      target: 'subscriber-alarm-star',
       type: 'animated',
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
-        color: '#10b981', // Green (from pub1)
+        color: '#10b981',
         animated: true,
-        delay: 1500,
-        interval: 15000,
+        delay: 3000,
+        interval: 14000,
       },
     },
     {
-      id: 'e-server-star-2',
-      source: 'server',
-      target: 'subscriber-star',
-      type: 'animated',
-      animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
-      data: {
-        color: '#3b82f6', // Blue (from pub2)
-        animated: true,
-        delay: 5500,
-        interval: 15000,
-      },
-    },
-
-    // Server to subscriber with > wildcard
-    // Matches all three publishers
-    {
-      id: 'e-server-gt-1',
+      id: 'e-server-gt-from-smoke',
       source: 'server',
       target: 'subscriber-gt',
       type: 'animated',
       animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
+      markerEnd: {type: MarkerType.ArrowClosed},
       data: {
-        color: '#10b981', // Green (from pub1)
+        color: '#10b981',
         animated: true,
-        delay: 1500,
-        interval: 15000,
+        delay: 3000,
+        interval: 14000,
       },
     },
     {
-      id: 'e-server-gt-2',
+        id: 'e-server-star-star-critical-from-smoke-critical',
+        source: 'server',
+        target: 'subscriber-star-star-critical',
+        type: 'animated',
+        animated: true,
+        markerEnd: {type: MarkerType.ArrowClosed},
+        data: {
+          color: '#dc2626',
+          animated: true,
+          delay: 6000,
+          interval: 14000,
+        },
+      },
+      {
+        id: 'e-server-gt-from-smoke-critical',
+        source: 'server',
+        target: 'subscriber-gt',
+        type: 'animated',
+        animated: true,
+        markerEnd: {type: MarkerType.ArrowClosed},
+        data: {
+          color: '#dc2626',
+          animated: true,
+          delay: 6000,
+          interval: 14000,
+        },
+      },
+    {
+      id: 'e-server-star-from-water',
       source: 'server',
-      target: 'subscriber-gt',
+      target: 'subscriber-alarm-star',
       type: 'animated',
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
-        color: '#3b82f6', // Blue (from pub2)
+        color: '#3b82f6',
         animated: true,
-        delay: 5500,
-        interval: 15000,
+        delay: 9000,
+        interval: 14000,
       },
     },
     {
-      id: 'e-server-gt-3',
+      id: 'e-server-gt-from-water',
       source: 'server',
       target: 'subscriber-gt',
       type: 'animated',
       animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
+      markerEnd: {type: MarkerType.ArrowClosed},
       data: {
-        color: '#f59e0b', // Orange (from pub3)
+        color: '#3b82f6',
         animated: true,
-        delay: 9500,
-        interval: 15000,
+        delay: 9000,
+        interval: 14000,
+      },
+    },
+    {
+      id: 'e-server-star-star-critical-from-water-critical',
+      source: 'server',
+      target: 'subscriber-star-star-critical',
+      type: 'animated',
+      animated: true,
+      markerEnd: {type: MarkerType.ArrowClosed},
+      data: {
+        color: '#f59e0b',
+        animated: true,
+        delay: 12000,
+        interval: 14000,
+      },
+    },
+    {
+      id: 'e-server-gt-from-water-critical',
+      source: 'server',
+      target: 'subscriber-gt',
+      type: 'animated',
+      animated: true,
+      markerEnd: {type: MarkerType.ArrowClosed},
+      data: {
+        color: '#f59e0b',
+        animated: true,
+        delay: 12000,
+        interval: 14000,
       },
     },
   ];
@@ -248,52 +313,46 @@ function WildcardComparisonInner({
       <div
         style={{
           marginTop: '12px',
+          padding: '12px',
+          backgroundColor: '#f9fafb',
+          borderRadius: '6px',
+          fontSize: '13px',
+          color: '#4b5563',
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'auto repeat(3, 1fr)',
           gap: '12px',
         }}
       >
-        {/* Single token wildcard explanation */}
-        <div
-          style={{
-            padding: '12px',
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #86efac',
-            borderRadius: '6px',
-            fontSize: '13px',
-          }}
-        >
-          <strong style={{ color: '#059669' }}>Pattern: weather.*.east</strong>
-          <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px', color: '#4b5563' }}>
-            <li style={{ color: '#059669' }}>✓ weather.us.east</li>
-            <li style={{ color: '#2563eb' }}>✓ weather.eu.east</li>
-            <li style={{ color: '#9ca3af' }}>✗ weather.us.east.boston (too many tokens)</li>
-          </ul>
-          <div style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
-            The <code>*</code> matches exactly one token
-          </div>
-        </div>
+        {/* Header row */}
+        <div style={{ color: '#000000' }}><strong>Subject</strong></div>
+        <div style={{ color: '#000000' }}><strong>sensor.alarm.*</strong></div>
+        <div style={{ color: '#000000' }}><strong>sensor.*.*.critical</strong></div>
+        <div style={{ color: '#000000' }}><strong>{'sensor.>'}</strong></div>
 
-        {/* Multi-token wildcard explanation */}
-        <div
-          style={{
-            padding: '12px',
-            backgroundColor: '#eff6ff',
-            border: '1px solid #93c5fd',
-            borderRadius: '6px',
-            fontSize: '13px',
-          }}
-        >
-          <strong style={{ color: '#2563eb' }}>Pattern: weather.&gt;</strong>
-          <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px', color: '#4b5563' }}>
-            <li style={{ color: '#059669' }}>✓ weather.us.east</li>
-            <li style={{ color: '#2563eb' }}>✓ weather.eu.east</li>
-            <li style={{ color: '#f59e0b' }}>✓ weather.us.east.boston</li>
-          </ul>
-          <div style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
-            The <code>&gt;</code> matches one or more tokens
-          </div>
-        </div>
+        {/* sensor.alarm.smoke */}
+        <div style={{ color: '#10b981' }}><strong>sensor.alarm.smoke</strong></div>
+        <div style={{ color: '#10b981' }}>✓</div>
+        <div style={{ color: '#9ca3af' }}>✗ (too few tokens)</div>
+        <div style={{ color: '#10b981' }}>✓</div>
+
+        {/* sensor.alarm.smoke.critical */}
+        <div style={{ color: '#dc2626' }}><strong>sensor.alarm.smoke.critical</strong></div>
+        <div style={{ color: '#9ca3af' }}>✗ (too many tokens)</div>
+        <div style={{ color: '#dc2626' }}>✓</div>
+        <div style={{ color: '#dc2626' }}>✓</div>
+
+        {/* sensor.alarm.water */}
+        <div style={{ color: '#2563eb' }}><strong>sensor.alarm.water</strong></div>
+        <div style={{ color: '#2563eb' }}>✓</div>
+        <div style={{ color: '#9ca3af' }}>✗ (too few tokens)</div>
+        <div style={{ color: '#2563eb' }}>✓</div>
+
+        {/* sensor.alarm.water.critical */}
+        <div style={{ color: '#f59e0b' }}><strong>sensor.alarm.water.critical</strong></div>
+        <div style={{ color: '#9ca3af' }}>✗ (too many tokens)</div>
+        <div style={{ color: '#f59e0b' }}>✓</div>
+        <div style={{ color: '#f59e0b' }}>✓</div>
+
       </div>
     </div>
   );

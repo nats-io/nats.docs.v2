@@ -22,12 +22,12 @@ In the animation above, `events.data` is the subject - it's the named channel th
 The `.` (dot) character creates a subject hierarchy, enabling logical grouping of related subjects. This hierarchical namespace helps organize your messaging architecture:
 
 ```
-orders.new
-orders.processed
-orders.shipped
-weather.us.east
-weather.us.west
-weather.eu.north
+orders.retail.placed
+orders.retail.shipped
+orders.retail.returned
+orders.wholesale.placed
+orders.wholesale.shipped
+orders.wholesale.returned
 ```
 
 ## Wildcards
@@ -36,52 +36,49 @@ NATS provides two wildcards for flexible subscription patterns. While publishers
 
 <div class="nats-flow" data-scenario="subjectsWildcardAnimated" data-width="700" data-height="450"></div>
 
-The subscriber with pattern `weather.*.east` receives messages from matching subjects (green and blue paths) but not from non-matching subjects (red path). The `*` wildcard matches exactly one token.
+The subscriber with pattern `orders.retail.*` receives messages from matching subjects (green and blue paths) but not from non-matching subjects (red path). The `*` wildcard matches exactly one token.
 
 ### Single Token Wildcard (`*`)
 
 The `*` wildcard matches exactly one token. For example:
 
-- `weather.*.east` matches:
-  - `weather.us.east`
-  - `weather.eu.east`
-
-- `orders.*.shipped` matches:
+- `orders.retail.*` matches:
+  - `orders.retail.placed`
   - `orders.retail.shipped`
-  - `orders.wholesale.shipped`
+  - `orders.retail.returned`
+
+- `orders.*.placed` matches:
+  - `orders.retail.placed`
+  - `orders.wholesale.placed`
 
 <div class="nats-example" data-type="subjects-single-wildcard" data-languages="cli,go,java,rust"></div>
 
 ### Multi-Token Wildcard (`>`)
 
-The `>` wildcard matches one or more tokens and can only appear at the end of a subject. For example:
+The `>` wildcard matches one or more tokens and can only appear at the end of a subject.
+If your domain is like this:
 
-- `weather.>` matches:
-  - `weather.us`
-  - `weather.us.east`
-  - `weather.eu.north.helsinki`
+```
+sensor.alarm.smoke                   # unqualified
+sensor.alarm.smoke.critical          # qualified
+sensor.alarm.water
+sensor.alarm.water.critical
+```
 
-- `orders.>` matches all subjects starting with `orders.`
+The `>` wildcard matches one or more tokens and can only appear at the end of a subject. 
+For example, `sensor.>` matches all sensor subjects
 
 <div class="nats-example" data-type="subjects-multi-wildcard" data-languages="cli,go,java,rust"></div>
 
-### Mixing Wildcards
-
-You can combine wildcards for more complex patterns:
-
-- `*.*.east.>` matches:
-  - `weather.us.east.boston`
-  - `traffic.us.east.newyork`
-
 ### Wildcard Comparison
 
-Here's a side-by-side comparison showing how `*` and `>` wildcards behave differently:
+You can combine wildcards for more complex patterns and compare how `*` and `>` wildcards behave differently:
 
 <WildcardComparison width={800} height={500} />
 
 The visualization demonstrates:
-- **Single token wildcard (`*`)**: Matches exactly one token, so `weather.*.east` receives messages from `weather.us.east` and `weather.eu.east`, but not `weather.us.east.boston` (too many tokens)
-- **Multi-token wildcard (`>`)**: Matches one or more tokens, so `weather.>` receives all three messages regardless of depth
+- **Single token wildcard** `*`: Matches exactly one token, as in `sensor.alarm.*` and `sensor.*.*.critical`
+- **Multi-token wildcard** `>`: Matches one or more tokens, as in `sensor.>`
 
 ## Subject Naming Conventions
 
