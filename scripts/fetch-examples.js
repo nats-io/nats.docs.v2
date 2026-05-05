@@ -36,6 +36,7 @@ const EXAMPLES_CONFIG = {
             "request-reply-no-responders": "examples/docs/request-reply-no-responders/main.go",
             "request-reply-headers": "examples/docs/request-reply-headers/main.go",
             "request-reply-calculator": "examples/docs/request-reply-calculator/main.go",
+            "jetstream-basic": "examples/docs/jetstream-basic/main.go"
         },
     },
     "rust": {

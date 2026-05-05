@@ -12,6 +12,8 @@ import type {
   QueueGroupAnimated as QueueGroupAnimatedComponent,
   PublishSubscribeAnimated as PublishSubscribeAnimatedComponent,
   SubjectsWildcardAnimated as SubjectsWildcardAnimatedComponent,
+  JetStreamContrastAnimated as JetStreamContrastAnimatedComponent,
+  JetStreamConsumersAnimated as JetStreamConsumersAnimatedComponent,
 } from '../components/NatsFlow';
 import type React from 'react';
 import type ReactDOM from 'react-dom/client';
@@ -26,6 +28,8 @@ declare global {
       QueueGroupAnimated: typeof QueueGroupAnimatedComponent;
       PublishSubscribeAnimated: typeof PublishSubscribeAnimatedComponent;
       SubjectsWildcardAnimated: typeof SubjectsWildcardAnimatedComponent;
+      JetStreamContrastAnimated: typeof JetStreamContrastAnimatedComponent;
+      JetStreamConsumersAnimated: typeof JetStreamConsumersAnimatedComponent;
       scenarios: {
         publishSubscribe: typeof publishSubscribeScenario;
         requestReply: typeof requestReplyScenario;

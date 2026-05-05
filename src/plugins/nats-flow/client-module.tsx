@@ -3,14 +3,16 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 if (ExecutionEnvironment.canUseDOM) {
-  // Globally suppress ResizeObserver errors (harmless React Flow warnings)
+  // Globally suppress ResizeObserver errors (harmless React Flow warnings).
+  // Registered with capture: true so we run before webpack-dev-server's
+  // overlay listener and can stopImmediatePropagation() in time.
   window.addEventListener('error', (e) => {
     if (e.message?.includes('ResizeObserver')) {
       e.stopImmediatePropagation();
       e.preventDefault();
       return false;
     }
-  });
+  }, { capture: true });
 
   // Make React available globally for the loader
   window.React = React;
@@ -24,6 +26,8 @@ if (ExecutionEnvironment.canUseDOM) {
       QueueGroupAnimated: module.QueueGroupAnimated,
       PublishSubscribeAnimated: module.PublishSubscribeAnimated,
       SubjectsWildcardAnimated: module.SubjectsWildcardAnimated,
+      JetStreamContrastAnimated: module.JetStreamContrastAnimated,
+      JetStreamConsumersAnimated: module.JetStreamConsumersAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,

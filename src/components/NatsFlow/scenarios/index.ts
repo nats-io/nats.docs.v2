@@ -10,3 +10,5 @@ export { QueueGroupAnimated } from './queueGroupAnimated';
 export { PublishSubscribeAnimated } from './publishSubscribeAnimated';
 export { SubjectsWildcardAnimated } from './subjectsWildcardAnimated';
 export { WildcardComparison } from './wildcardComparison';
+export { JetStreamContrastAnimated } from './jetStreamContrastAnimated';
+export { JetStreamConsumersAnimated } from './jetStreamConsumersAnimated';
