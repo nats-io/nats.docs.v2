@@ -126,12 +126,14 @@ const config: Config = {
   projectName: "nats.docs", // Usually your repo name.
 
   onBrokenLinks: "warn", // Changed from "throw" to allow production build
+  onBrokenMarkdownLinks: "warn",
 
-  markdown: {
-    hooks: {
-      onBrokenMarkdownLinks: "warn",
-    }
-  },
+  // This \/ is how it will need to be with newer versions of Docusaurus
+  // markdown: {
+  //   hooks: {
+  //     onBrokenMarkdownLinks: "warn",
+  //   }
+  // },
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
