@@ -660,7 +660,7 @@ In your MDX files:
 ```mdx
 ### Publisher Example
 
-<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,rust"></div>
+<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,java,rust,csharp"></div>
 ```
 
 Languages are shown in the order specified. CLI should always be first with `default` attribute.
@@ -677,7 +677,7 @@ Languages are shown in the order specified. CLI should always be first with `def
 6. **Commit and push** CLI example to this repo, other examples to `doc-examples` branch in client repos
 7. **Update** `scripts/fetch-examples.js` to register new Go/Rust/JS examples
 8. **Fetch examples**: `npm run fetch-examples` (pulls Go/Rust/JS from GitHub)
-9. **Use in docs**: Add `<div class="nats-example" data-type="..." data-languages="cli,js,go,rust"></div>`
+9. **Use in docs**: Add `<div class="nats-example" data-type="..." data-languages="cli,js,go,java,rust,csharp"></div>`
 10. **Test locally**: `npm start` and verify all tabs appear correctly
 
 **For CLI-only examples:**
