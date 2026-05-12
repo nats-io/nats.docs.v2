@@ -27,7 +27,7 @@ Use a single server for:
 
 A **cluster** is a group of NATS servers connected by routes, forming a full mesh. Clients connect to any server in the cluster — messages flow across routes to reach subscribers anywhere in the mesh. If one server goes down, clients reconnect to another and keep working.
 
-<div class="nats-flow" data-scenario="clusterTopology" data-width="700" data-height="450"></div>
+<div class="nats-flow" data-scenario="clusterTopology" data-width="800" data-height="450"></div>
 
 Reach for a cluster when you need:
 
