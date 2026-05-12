@@ -235,14 +235,12 @@ cargo run --bin publish
 </TabItem>
 <TabItem value="csharp" label="C#/.NET">
 
-```text
 It's best to run the examples from your IDE or
 command line where the .NET SDK is installed.
 
-Clone https://github.com/nats-io/nats.net and see
-the example projects under examples/ (e.g. Example.Core.PublishHeaders,
-Example.Core.SubscribeRaw).
-```
+Clone [nats-io/nats.net](https://github.com/nats-io/nats.net) and see
+the example projects under `examples/` (e.g. `Example.Core.PublishHeaders`,
+`Example.Core.SubscribeRaw`).
 
 </TabItem>
 </Tabs>
