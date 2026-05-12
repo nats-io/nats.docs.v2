@@ -146,6 +146,15 @@ tokio = { version = "1", features = ["full"] }
 ```
 
 </TabItem>
+<TabItem value="csharp" label="C#/.NET">
+
+```bash
+dotnet add package NATS.Net
+```
+
+See [NATS.Net on NuGet](https://www.nuget.org/packages/NATS.Net) for the latest version.
+
+</TabItem>
 </Tabs>
 
 ### Publisher Example
@@ -222,6 +231,16 @@ cargo run --bin subscribe
 # Terminal 2 - Run publisher
 cargo run --bin publish
 ```
+
+</TabItem>
+<TabItem value="csharp" label="C#/.NET">
+
+It's best to run the examples from your IDE or
+command line where the .NET SDK is installed.
+
+Clone [nats-io/nats.net](https://github.com/nats-io/nats.net) and see
+the example projects under `examples/` (e.g. `Example.Core.PublishHeaders`,
+`Example.Core.SubscribeRaw`).
 
 </TabItem>
 </Tabs>
