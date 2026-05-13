@@ -1,6 +1,6 @@
-import { MarkerType } from '@xyflow/react';
 import type { NatsFlowScenario } from '../types';
 
+const ROUTE_COLOR = '#1e40af';
 const LEAF_COLOR = '#9333ea';
 const CLIENT_COLOR = '#3b82f6';
 
@@ -8,68 +8,79 @@ export const leafnodeTopologyScenario: NatsFlowScenario = {
   description: 'Leaf nodes: lightweight edge servers that connect outward to a central hub cluster.',
   nodes: [
     {
-      id: 'edge-1',
-      type: 'publisher',
-      position: { x: 40, y: 80 },
-      data: { label: 'Edge App' },
+      id: 'cloud',
+      type: 'region',
+      position: { x: 40, y: 40 },
+      data: { label: 'Cloud', width: 400, height: 420 },
+      draggable: false,
+      selectable: false,
     },
     {
-      id: 'leaf-1',
+      id: 's1',
       type: 'server',
-      position: { x: 220, y: 80 },
+      position: { x: 180, y: 90 },
+      data: { label: 'NATS' },
+    },
+    {
+      id: 's2',
+      type: 'server',
+      position: { x: 80, y: 320 },
+      data: { label: 'NATS' },
+    },
+    {
+      id: 's3',
+      type: 'server',
+      position: { x: 280, y: 320 },
+      data: { label: 'NATS' },
+    },
+    {
+      id: 'leaf',
+      type: 'server',
+      position: { x: 620, y: 200 },
       data: { label: 'Leaf Node' },
     },
     {
-      id: 'edge-2',
+      id: 'edge-app',
       type: 'subscriber',
-      position: { x: 40, y: 320 },
+      position: { x: 800, y: 200 },
       data: { label: 'Edge App' },
-    },
-    {
-      id: 'leaf-2',
-      type: 'server',
-      position: { x: 220, y: 320 },
-      data: { label: 'Leaf Node' },
-    },
-    {
-      id: 'hub',
-      type: 'server',
-      position: { x: 480, y: 200 },
-      data: { label: 'Hub' },
     },
   ],
   edges: [
     {
-      id: 'edge1-leaf1',
-      source: 'edge-1',
-      target: 'leaf-1',
+      id: 's2-s1',
+      source: 's2',
+      target: 's1',
       type: 'animated',
-      markerEnd: { type: MarkerType.ArrowClosed },
-      data: { color: CLIENT_COLOR, animated: false },
+      data: { color: ROUTE_COLOR, animated: false, straight: true },
     },
     {
-      id: 'edge2-leaf2',
-      source: 'edge-2',
-      target: 'leaf-2',
+      id: 's1-s3',
+      source: 's1',
+      target: 's3',
       type: 'animated',
-      markerEnd: { type: MarkerType.ArrowClosed },
-      data: { color: CLIENT_COLOR, animated: false },
+      data: { color: ROUTE_COLOR, animated: false, straight: true },
     },
     {
-      id: 'leaf1-hub',
-      source: 'leaf-1',
-      target: 'hub',
+      id: 's2-s3',
+      source: 's2',
+      target: 's3',
       type: 'animated',
-      markerEnd: { type: MarkerType.ArrowClosed },
-      data: { color: LEAF_COLOR, animated: false, label: 'leaf' },
+      data: { color: ROUTE_COLOR, animated: false, straight: true },
     },
     {
-      id: 'leaf2-hub',
-      source: 'leaf-2',
-      target: 'hub',
+      id: 's3-leaf',
+      source: 's3',
+      target: 'leaf',
       type: 'animated',
-      markerEnd: { type: MarkerType.ArrowClosed },
-      data: { color: LEAF_COLOR, animated: false, label: 'leaf' },
+      data: { color: LEAF_COLOR, animated: false, straight: true, label: 'leaf' },
+    },
+    {
+      id: 'leaf-edge',
+      source: 'leaf',
+      target: 'edge-app',
+      type: 'animated',
+      data: { color: CLIENT_COLOR, animated: false, straight: true },
     },
   ],
 };

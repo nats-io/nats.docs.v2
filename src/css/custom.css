@@ -278,3 +278,10 @@ pre[class*="language-bash"] .token.comment {
 [data-theme='dark'] .nats-tab-panel .token.variable {
   color: #d16969;
 }
+/* Topology concept page images */
+.topology-image {
+  display: block;
+  margin: 2.5rem auto;
+  max-width: 100%;
+  height: auto;
+}
