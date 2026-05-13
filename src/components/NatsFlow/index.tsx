@@ -8,7 +8,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { PublisherNode, SubscriberNode, ServiceNode, ServerNode, RegionNode } from './nodes';
+import { PublisherNode, SubscriberNode, ServiceNode, ServerNode } from './nodes';
 import { AnimatedEdge } from './edges';
 import type { NatsFlowProps } from './types';
 
@@ -17,7 +17,6 @@ const nodeTypes: NodeTypes = {
   subscriber: SubscriberNode,
   service: ServiceNode,
   server: ServerNode,
-  region: RegionNode,
 };
 
 const edgeTypes: EdgeTypes = {

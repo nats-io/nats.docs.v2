@@ -12,8 +12,3 @@ export { SubjectsWildcardAnimated } from './subjectsWildcardAnimated';
 export { WildcardComparison } from './wildcardComparison';
 export { JetStreamContrastAnimated } from './jetStreamContrastAnimated';
 export { JetStreamConsumersAnimated } from './jetStreamConsumersAnimated';
-export { singleServerTopologyScenario } from './singleServerTopology';
-export { clusterTopologyScenario } from './clusterTopology';
-export { superclusterTopologyScenario } from './superclusterTopology';
-export { leafnodeTopologyScenario } from './leafnodeTopology';
-export { mixedTopologyScenario } from './mixedTopology';
