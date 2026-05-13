@@ -162,6 +162,7 @@ const EXAMPLES_CONFIG = {
             "request-reply-no-responders": "RequestReplyNoResponders.cs",
             "request-reply-headers": "RequestReplyHeaders.cs",
             "request-reply-calculator": "RequestReplyCalculator.cs",
+            "jetstream-basic": "JetStreamBasic.cs"
         },
     },
 };
