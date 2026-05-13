@@ -285,3 +285,12 @@ pre[class*="language-bash"] .token.comment {
   max-width: 100%;
   height: auto;
 }
+
+
+/* Security concept page images */
+.security-image {
+  display: block;
+  margin: 2.5rem auto;
+  max-width: 70%;
+  height: auto;
+}
