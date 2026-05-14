@@ -13,8 +13,11 @@ deployments.
 
 ## Accounts and Users
 
-Each NATS user belongs to an account, which acts as a tenant boundary — meaning
-that each account has its own isolated subject space.
+NATS is multitenant by design. Each NATS user belongs to an account — a
+self-contained tenant with its own isolated subject space, users, and
+permissions. Multiple tenants can share a single NATS deployment without ever
+seeing each other's traffic. Unrelated tenants can even use the same subject
+names without any risk of collision.
 
 <img src="/img/concepts/security-accounts-isolation.png" alt="NATS account boundary" class="security-image" />
 
@@ -51,6 +54,18 @@ Permissions are defined per user — either on the user in the server
 configuration, or embedded in the user's JWT. This allows for fine-grained
 access control, enabling you to restrict clients to only the subjects they need
 to interact with.
+
+A permissions block looks like this in the server config file:
+
+```conf
+permissions: {
+  publish: ["orders.>", "users.signup"]
+  subscribe: {
+    allow: "_INBOX.>"
+    deny: "secrets.>"
+  }
+}
+```
 
 ## Encryption
 
@@ -96,4 +111,3 @@ nats pub --user alice --password s3cret billing.invoice "nope"
 
 - [Subjects](./subjects) - the flexible addressing system that enables
   powerful filtering and routing capabilities.
-  
