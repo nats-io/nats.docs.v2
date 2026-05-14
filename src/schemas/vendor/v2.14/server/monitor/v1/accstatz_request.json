@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/accstatz_request.json",
+  "title": "io.nats.server.monitor.v1.accstatz_request",
+  "description": "Request options for accstatz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "include_unused": {
+      "type": "boolean"
+    }
+  }
+}

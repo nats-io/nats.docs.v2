@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/connz_response.json",
+  "title": "io.nats.server.monitor.v1.connz_response",
+  "description": "Response from connz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "authorized_user": {
+            "type": "string"
+          },
+          "cid": {
+            "type": "integer"
+          },
+          "idle": {
+            "type": "string"
+          },
+          "in_bytes": {
+            "type": "integer"
+          },
+          "in_msgs": {
+            "type": "integer"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "issuer_key": {
+            "type": "string"
+          },
+          "jwt": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "last_activity": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mqtt_client": {
+            "type": "string",
+            "description": "This is the MQTT client id"
+          },
+          "name": {
+            "type": "string"
+          },
+          "name_tag": {
+            "type": "string"
+          },
+          "out_bytes": {
+            "type": "integer"
+          },
+          "out_msgs": {
+            "type": "integer"
+          },
+          "pending_bytes": {
+            "type": "integer"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "proxy": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rtt": {
+            "type": "integer",
+            "description": "Internal"
+          },
+          "stalls": {
+            "type": "integer"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stop": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subscriptions": {
+            "type": "integer"
+          },
+          "subscriptions_list": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subscriptions_list_detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "account_tag": {
+                  "type": "string"
+                },
+                "cid": {
+                  "type": "integer"
+                },
+                "max": {
+                  "type": "integer"
+                },
+                "msgs": {
+                  "type": "integer"
+                },
+                "qgroup": {
+                  "type": "string"
+                },
+                "sid": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cid",
+                "msgs",
+                "sid",
+                "subject"
+              ]
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tls_cipher_suite": {
+            "type": "string"
+          },
+          "tls_first": {
+            "type": "boolean"
+          },
+          "tls_peer_certs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cert_sha256": {
+                  "type": "string"
+                },
+                "spki_sha256": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "tls_version": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "uptime": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cid",
+          "idle",
+          "in_bytes",
+          "in_msgs",
+          "ip",
+          "last_activity",
+          "out_bytes",
+          "out_msgs",
+          "pending_bytes",
+          "port",
+          "start",
+          "subscriptions",
+          "uptime"
+        ]
+      }
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "num_connections": {
+      "type": "integer"
+    },
+    "offset": {
+      "type": "integer"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "total": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "connections",
+    "limit",
+    "now",
+    "num_connections",
+    "offset",
+    "server_id",
+    "total"
+  ]
+}
