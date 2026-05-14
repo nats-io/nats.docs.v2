@@ -1,0 +1,230 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/routez_response.json",
+  "title": "io.nats.server.monitor.v1.routez_response",
+  "description": "Response from routez monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "export": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "import": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "num_routes": {
+      "type": "integer"
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "compression": {
+            "type": "string"
+          },
+          "did_solicit": {
+            "type": "boolean"
+          },
+          "export": {
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "deny": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "idle": {
+            "type": "string"
+          },
+          "import": {
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "deny": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "in_bytes": {
+            "type": "integer"
+          },
+          "in_msgs": {
+            "type": "integer"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "is_configured": {
+            "type": "boolean"
+          },
+          "last_activity": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "out_bytes": {
+            "type": "integer"
+          },
+          "out_msgs": {
+            "type": "integer"
+          },
+          "pending_size": {
+            "type": "integer"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "remote_id": {
+            "type": "string"
+          },
+          "remote_name": {
+            "type": "string"
+          },
+          "rid": {
+            "type": "integer"
+          },
+          "rtt": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subscriptions": {
+            "type": "integer"
+          },
+          "subscriptions_list": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subscriptions_list_detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "account_tag": {
+                  "type": "string"
+                },
+                "cid": {
+                  "type": "integer"
+                },
+                "max": {
+                  "type": "integer"
+                },
+                "msgs": {
+                  "type": "integer"
+                },
+                "qgroup": {
+                  "type": "string"
+                },
+                "sid": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cid",
+                "msgs",
+                "sid",
+                "subject"
+              ]
+            }
+          },
+          "uptime": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "did_solicit",
+          "idle",
+          "in_bytes",
+          "in_msgs",
+          "ip",
+          "is_configured",
+          "last_activity",
+          "out_bytes",
+          "out_msgs",
+          "pending_size",
+          "port",
+          "remote_id",
+          "remote_name",
+          "rid",
+          "start",
+          "subscriptions",
+          "uptime"
+        ]
+      }
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "server_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "now",
+    "num_routes",
+    "routes",
+    "server_id",
+    "server_name"
+  ]
+}
