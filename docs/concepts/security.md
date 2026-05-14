@@ -16,7 +16,7 @@ deployments.
 Each NATS user belongs to an account, which acts as a tenant boundary — meaning
 that each account has its own isolated subject space.
 
-<img src="/img/concepts/security-accounts-isolation.png" alt="NATS account boundary" className="security-image" />
+<img src="/img/concepts/security-accounts-isolation.png" alt="NATS account boundary" class="security-image" />
 
 Cross-account communication is possible but requires explicit configuration.
 
@@ -78,14 +78,14 @@ accounts {
 
 Start a server with this config:
 
-```sh
+```bash
 nats-server -c nats.conf
 ```
 
 Now try publishing a message — you'll see permissions in action:
 
 ```bash
-# works — alice can publish to orders.*
+# works — alice can publish to orders.>
 nats pub --user alice --password s3cret orders.created "hello"
 
 # fails — alice has no publish permission for billing.*
@@ -96,3 +96,4 @@ nats pub --user alice --password s3cret billing.invoice "nope"
 
 - [Subjects](./subjects) - the flexible addressing system that enables
   powerful filtering and routing capabilities.
+  
