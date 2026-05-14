@@ -23,7 +23,7 @@ Use a single server for:
 
 ## Cluster
 
-A **cluster** is a group of NATS servers connected by routes, forming a full mesh. Clients connect to any server in the cluster — messages flow across routes to reach subscribers anywhere in the mesh. If one server goes down, clients reconnect to another and keep working. With [JetStream](../jetstream), [streams](/reference/jetstream/api/stream) and [consumers](/reference/jetstream/api/consumer) can be replicated across nodes for durability.
+A **cluster** is a group of NATS servers connected by routes, forming a full mesh. Clients connect to any server in the cluster — messages flow across routes to reach subscribers anywhere in the mesh. If one server goes down, clients reconnect to another and keep working. With [JetStream](./jetstream), [streams](/reference/jetstream/api/stream) and [consumers](/reference/jetstream/api/consumer) can be replicated across nodes for durability.
 
 <img src="/img/topologies/cluster.png" alt="Cluster topology" class="topology-image" />
 
@@ -33,7 +33,7 @@ Reach for a cluster when you need:
 - More throughput than one server can handle
 - Production deployments
 - Rolling upgrades without downtime
-- [JetStream](../jetstream) replication for durable streams and consumers
+- [JetStream](./jetstream) replication for durable streams and consumers
 
 ## Super-Cluster
 
@@ -48,7 +48,7 @@ Super-clusters fit when you need:
 
 ## Leaf Nodes
 
-A **leaf node** is a NATS server that connects outward to a hub cluster, extending the namespace to places that can't (or shouldn't) be part of the main cluster. The leaf initiates the connection — from another server, a developer laptop, or a tiny edge device. To clients connected to the leaf, it looks just like a regular NATS server. [JetStream](../jetstream) [streams](/reference/jetstream/api/stream) can be mirrored or sourced across the leaf link when you need local copies of data.
+A **leaf node** is a NATS server that initiates an outbound connection to a remote NATS system — a single server, cluster, or super-cluster — and bridges subject interest between the two. Because the connection is established from the leaf side, the leaf can run anywhere with outbound network access: another datacenter, a developer laptop, or a tiny edge device. Clients connected to the leaf see a regular NATS server. [JetStream](./jetstream) [streams](/reference/jetstream/api/stream) can be mirrored or sourced across the leaf link when you need local copies of data.
 
 <img src="/img/topologies/leaf-node.png" alt="Leaf node topology" class="topology-image" />
 
