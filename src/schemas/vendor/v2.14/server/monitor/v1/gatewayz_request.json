@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/gatewayz_request.json",
+  "title": "io.nats.server.monitor.v1.gatewayz_request",
+  "description": "Request options for gatewayz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "account_name": {
+      "type": "string",
+      "description": "AccountName will limit the list of accounts to that account name (makes Accounts implicit)"
+    },
+    "accounts": {
+      "type": "boolean",
+      "description": "Accounts indicates if accounts with its interest should be included in the results."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name will output only remote gateways with this name"
+    },
+    "subscriptions": {
+      "type": "boolean",
+      "description": "AccountSubscriptions indicates if subscriptions should be included in the results. Note: This is used only if `Accounts` or `AccountName` are specified."
+    },
+    "subscriptions_detail": {
+      "type": "boolean",
+      "description": "AccountSubscriptionsDetail indicates if subscription details should be included in the results. Note: This is used only if `Accounts` or `AccountName` are specified."
+    }
+  }
+}

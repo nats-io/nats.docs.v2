@@ -18,6 +18,7 @@
     "generate-docs:dry-run": "go run scripts/generate-docs.go -server ./nats-server -dry-run",
     "generate-docs:v2.11": "node scripts/generate-version.js 2.11",
     "generate-docs:v2.12": "node scripts/generate-version.js 2.12",
+    "generate-docs:v2.14": "node scripts/generate-version.js 2.14",
     "generate-docs:all-versions": "node scripts/generate-version.js"
   },
   "dependencies": {
