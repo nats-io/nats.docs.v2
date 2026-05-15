@@ -32,6 +32,7 @@ const sidebars: SidebarsConfig = {
                 "concepts/request-reply",
                 "concepts/queue-groups",
                 "concepts/jetstream",
+                "concepts/topologies",
             ],
         },
     ],
