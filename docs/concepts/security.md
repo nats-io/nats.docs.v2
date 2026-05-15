@@ -42,11 +42,10 @@ configure one of the two methods below:
   can issue and revoke their own users independently, operator mode scales
   naturally to multi-tenant or large deployments where centralized credential
   management isn't practical.
-
-For more advanced setups, NATS also supports auth callouts, which allow you to
-delegate authentication to an application-defined NATS service which returns a
-signed JWT. This is useful for integrating with external identity providers
-(e.g., OIDC, LDAP) or implementing custom authentication logic.
+- **Auth callouts**: Delegate the authentication decision to an
+  application-defined NATS service that returns a signed JWT. This is useful for
+  advanced setups, like integrating with external identity providers (e.g.,
+  OIDC, LDAP) or implementing custom authentication logic.
 
 ## Authorization
 
