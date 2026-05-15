@@ -19,24 +19,29 @@ permissions. Multiple tenants can share a single NATS deployment without ever
 seeing each other's traffic. Unrelated tenants can even use the same subject
 names without any risk of collision.
 
-<img src="/img/concepts/security-accounts-isolation.png" alt="NATS account boundary" class="security-image" />
+<img src="/img/concepts/security-accounts-isolation.png" alt="NATS account isolation" class="security-image" />
 
 Cross-account communication is possible but requires explicit configuration.
 
 ## Authentication
 
 Authentication verifies the identity of clients connecting to the NATS server.
-There are two main ways to configure authentication:
+NATS doesn't require it by default, so production deployments should always
+configure one of the two methods below:
 
 - **Config-based authentication**: Define accounts, users, and credentials
   directly in the server configuration file. This is the simplest option for
   development and smaller deployments. There are several supported credential
-  types, including username/password, token authentication, NKeys, and TLS client
-  certificates.
-- **Decentralized authentication**: Each client provides a signed credential
-  (JWT) that the server can verify using a public key. This means there is no
-  central user list — accounts can issue their own credentials independently.
-  This makes it well-suited to larger deployments.
+  types, including username/password, token authentication, NKeys, and TLS
+  client certificates.
+- **Decentralized authentication (operator mode)**: NATS uses a hierarchical
+  trust chain — an **operator** signs **accounts**, and each **account** signs
+  its own **users**. Credentials are JWTs signed with NKey (Ed25519) keypairs.
+  The server only needs to trust the operator's public key — everything else
+  verifies cryptographically, with no server-side user list. Because accounts
+  can issue and revoke their own users independently, operator mode scales
+  naturally to multi-tenant or large deployments where centralized credential
+  management isn't practical.
 
 For more advanced setups, NATS also supports auth callouts, which allow you to
 delegate authentication to an application-defined NATS service which returns a
@@ -61,18 +66,42 @@ A permissions block looks like this in the server config file:
 permissions: {
   publish: ["orders.>", "users.signup"]
   subscribe: {
-    allow: "_INBOX.>"
-    deny: "secrets.>"
+    allow: "events.>"
+    deny: "events.audit.>"
   }
 }
 ```
 
+In this example, the user can publish to subjects under `orders.>` or exactly
+`users.signup` — anything else is denied, because the presence of an allow list
+closes off the rest. On the subscribe side, the user can read anything under
+`events.>`, except subjects under `events.audit.>`, since deny takes precedence
+over allow.
+
 ## Encryption
 
-NATS uses TLS to encrypt data in transit between client and server (and between
-servers in a cluster). You can configure TLS settings in the server
-configuration file, including specifying certificates, keys, and trusted
-certificate authorities.
+NATS encrypts data in transit with TLS. Each connection type in a NATS
+deployment can be secured independently:
+
+- Client ↔ server — the connection between applications and NATS servers.
+- Server ↔ server (cluster) — the routes that exchange messages between servers
+  within a single cluster.
+- Leaf nodes — connections from edge or downstream NATS servers to a parent
+  cluster.
+- Gateways — the connections between clusters in a super-cluster topology.
+
+Each connection type has its own TLS configuration, with support for certificate
+pinning, custom cipher suites, and mutual TLS (mTLS). When mTLS is enabled,
+client certificates double as authentication — the certificate identity becomes
+the user identity, tying the encryption layer directly into the authentication
+model.
+
+### Encryption at Rest
+
+Beyond in-transit encryption, JetStream streams can be encrypted on disk using
+AES or ChaCha20-Poly1305 ciphers. This protects message data persisted to disk
+against attackers with filesystem or physical access to the server. See
+JetStream encryption at rest for configuration.
 
 ## Try It Yourself
 
@@ -109,5 +138,5 @@ nats pub --user alice --password s3cret billing.invoice "nope"
 
 ## Related Concepts
 
-- [Subjects](./subjects) - the flexible addressing system that enables
-  powerful filtering and routing capabilities.
+- [Subjects](./subjects) - the flexible addressing system that enables powerful
+  filtering and routing capabilities.
