@@ -15,7 +15,6 @@ If you only want to pick a client and start building, jump to [Tier 1 clients](#
 The single broker process. One binary; clustering, JetStream persistence, leaf nodes, MQTT, and WebSocket are all configuration on the same process.
 
 - **[nats-server](https://github.com/nats-io/nats-server)** — Go. The NATS server itself.
-- **[jsm.go](https://github.com/nats-io/jsm.go)** — Go. JetStream management library; the canonical source of JetStream API JSON schemas used by tooling and reference docs.
 
 ## Clients
 
@@ -93,6 +92,10 @@ Exact module set differs per language — check each Orbit repo's README.
 
 - **[prometheus-nats-exporter](https://github.com/nats-io/prometheus-nats-exporter)** — Go. Prometheus exporter for `varz`, `connz`, `routez`, JetStream stats.
 - **[nats-surveyor](https://github.com/nats-io/nats-surveyor)** — Go. Cluster-wide monitoring; aggregates stats across servers and exposes them as Prometheus metrics. Pairs with the exporter for full-cluster observability.
+
+## Schemas & API definitions
+
+- **[jsm.go](https://github.com/nats-io/jsm.go)** — Go library and the canonical source of JetStream API JSON schemas used by tooling and the reference docs in this site. Most users do not depend on this directly.
 
 ## Bridges & integrations
 
