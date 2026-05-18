@@ -24,27 +24,27 @@ NATS clients come in three categories: Tier 1 (Synadia-maintained, track new ser
 
 These are the ones the NATS team ships first when a new server feature lands. If a tier 1 client is available for your language, prefer it.
 
-| Language | Repo | Notes |
-|---|---|---|
-| Go | [nats-io/nats.go](https://github.com/nats-io/nats.go) | Reference implementation |
-| JavaScript / TypeScript | [nats-io/nats.js](https://github.com/nats-io/nats.js) | Node, Deno, Bun, browser (WebSocket). Supersedes the now-archived `nats.node`, `nats.deno`, `nats.ws`, `nats.ts` |
-| Python | [nats-io/nats.py](https://github.com/nats-io/nats.py) | asyncio-based, Python 3 only |
-| Java | [nats-io/nats.java](https://github.com/nats-io/nats.java) | JVM; also usable from Kotlin / Scala |
-| Rust | [nats-io/nats.rs](https://github.com/nats-io/nats.rs) | The `async-nats` crate |
-| C# / .NET | [nats-io/nats.net](https://github.com/nats-io/nats.net) | .NET 6+. Modern async client. Legacy `nats.net.v1` still maintained for compatibility |
-| C | [nats-io/nats.c](https://github.com/nats-io/nats.c) | Embedded systems and FFI consumers |
+| Language | Repo |
+|---|---|
+| Go | [nats-io/nats.go](https://github.com/nats-io/nats.go) |
+| JavaScript / TypeScript | [nats-io/nats.js](https://github.com/nats-io/nats.js) |
+| Python | [nats-io/nats.py](https://github.com/nats-io/nats.py) |
+| Java | [nats-io/nats.java](https://github.com/nats-io/nats.java) |
+| Rust | [nats-io/nats.rs](https://github.com/nats-io/nats.rs) |
+| C# / .NET | [nats-io/nats.net](https://github.com/nats-io/nats.net) |
+| C | [nats-io/nats.c](https://github.com/nats-io/nats.c) |
 
 ### Tier 2 clients — Synadia-maintained, feature-lag possible
 
 Maintained by Synadia but not guaranteed to expose every new server feature on day one. Production-ready for the features they do cover; check the repo's README for current feature coverage.
 
-| Language | Repo | Notes |
-|---|---|---|
-| Zig | [nats-io/nats.zig](https://github.com/nats-io/nats.zig) | Newer addition |
-| Swift | [nats-io/nats.swift](https://github.com/nats-io/nats.swift) | iOS / macOS / server-side Swift |
-| Ruby | [nats-io/nats-pure.rb](https://github.com/nats-io/nats-pure.rb) | Pure Ruby. Preferred Ruby client |
-| Ruby (legacy) | [nats-io/nats.rb](https://github.com/nats-io/nats.rb) | EventMachine-based; legacy. Use `nats-pure.rb` for new code |
-| Elixir | [nats-io/nats.ex](https://github.com/nats-io/nats.ex) | Replaces the archived `elixir-nats` |
+| Language | Repo |
+|---|---|
+| Zig | [nats-io/nats.zig](https://github.com/nats-io/nats.zig) |
+| Swift | [nats-io/nats.swift](https://github.com/nats-io/nats.swift) |
+| Ruby | [nats-io/nats-pure.rb](https://github.com/nats-io/nats-pure.rb) |
+| Ruby (legacy) | [nats-io/nats.rb](https://github.com/nats-io/nats.rb) |
+| Elixir | [nats-io/nats.ex](https://github.com/nats-io/nats.ex) |
 
 ### Community clients
 
@@ -108,17 +108,3 @@ Exact module set differs per language — check each Orbit repo's README.
 - **[nginx-nats](https://github.com/nats-io/nginx-nats)** — C. NGINX module.
 - **[terraform-provider-jetstream](https://github.com/nats-io/terraform-provider-jetstream)** — Go. Manage JetStream resources as IaC.
 
-## Notable successions
-
-Old repo names still show up in search results and blog posts. Here is what they map to today.
-
-| Archived / legacy | Replaced by |
-|---|---|
-| `nats-streaming-server`, `stan.*` clients | JetStream (built into `nats-server`) |
-| `nats.node`, `nats.deno`, `nats.ws`, `nats.ts` | [nats.js](https://github.com/nats-io/nats.js) |
-| `nats-account-server` | Built-in NATS 2.x resolver + [nsc](https://github.com/nats-io/nsc) |
-| `nats-operator` | [nack](https://github.com/nats-io/nack) + [k8s](https://github.com/nats-io/k8s) Helm charts |
-| `elixir-nats` | [nats.ex](https://github.com/nats-io/nats.ex) |
-| `nats.py2` | [nats.py](https://github.com/nats-io/nats.py) (Python 3 only) |
-
-If you are starting fresh, ignore the left column.
