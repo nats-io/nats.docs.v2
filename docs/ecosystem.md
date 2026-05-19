@@ -86,7 +86,6 @@ Exact module set differs per language — check each Orbit repo's README.
 
 - **[k8s](https://github.com/nats-io/k8s)** — Official Helm charts for deploying `nats-server` clusters, surveyor, and related components.
 - **[nack](https://github.com/nats-io/nack)** — Kubernetes controllers and CRDs for managing JetStream streams, consumers, and KV/Object stores declaratively. Successor to the archived `nats-operator`.
-- **[nats-docker](https://github.com/nats-io/nats-docker)** — Official Docker images for `nats-server`.
 
 ## Observability
 
@@ -100,11 +99,8 @@ Exact module set differs per language — check each Orbit repo's README.
 ## Bridges & integrations
 
 - **[nats-kafka](https://github.com/nats-io/nats-kafka)** — Go. Kafka ↔ NATS bridge.
-- **[nats-jms-bridge](https://github.com/nats-io/nats-jms-bridge)** — Java. Request / reply bridge to JMS providers.
 - **[nats-spark-connector](https://github.com/nats-io/nats-spark-connector)** — Scala. Apache Spark structured-streaming source.
 - **[synadia-io/flink-connector-nats](https://github.com/synadia-io/flink-connector-nats)** — Java. Apache Flink connector.
-- **[spring-nats](https://github.com/nats-io/spring-nats)** — Java. Spring Cloud Stream binder.
 - **[nats-java-vertx-client](https://github.com/nats-io/nats-java-vertx-client)** — Java. Vert.x integration.
-- **[nginx-nats](https://github.com/nats-io/nginx-nats)** — C. NGINX module.
 - **[terraform-provider-jetstream](https://github.com/nats-io/terraform-provider-jetstream)** — Go. Manage JetStream resources as IaC.
 
