@@ -34,7 +34,7 @@ These are the ones the NATS team ships first when a new server feature lands. If
 | Python | [nats-io/nats.py](https://github.com/nats-io/nats.py) | asyncio-based, Python 3 only |
 | Java | [nats-io/nats.java](https://github.com/nats-io/nats.java) | JVM; usable from Kotlin and Scala |
 | Rust | [nats-io/nats.rs](https://github.com/nats-io/nats.rs) | The `async-nats` crate |
-| C# / .NET | [nats-io/nats.net](https://github.com/nats-io/nats.net) | .NET 6+. Modern async client. Legacy `nats.net.v1` still maintained for compatibility |
+| C# / .NET | [nats-io/nats.net](https://github.com/nats-io/nats.net) | .NET 6+. Modern async client |
 | C | [nats-io/nats.c](https://github.com/nats-io/nats.c) | Embedded systems and FFI consumers |
 
 ### Tier 2 clients — Synadia-maintained, feature-lag possible
@@ -132,7 +132,7 @@ Per-language implementations for issuing and verifying NATS account / user JWT c
 
 | Name | Description |
 |---|---|
-| [jsm.go](https://github.com/nats-io/jsm.go) | Canonical source of JetStream API JSON schemas used by tooling and the reference docs in this site. Most users do not depend on this directly |
+| [jsm.go](https://github.com/nats-io/jsm.go) | Canonical source of JetStream API JSON schemas used by tooling and the reference docs in this site. Also contains a Go JetStream management library (alternative to `nats.go` with a different API surface) |
 
 ## Bridges & integrations
 
