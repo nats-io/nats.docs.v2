@@ -19,6 +19,11 @@ const sidebars: SidebarsConfig = {
         },
         {
             type: "doc",
+            id: "ecosystem",
+            label: "The NATS Ecosystem",
+        },
+        {
+            type: "doc",
             id: "getting-started/index",
             label: "Getting Started",
         },

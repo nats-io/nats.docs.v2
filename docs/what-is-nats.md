@@ -35,6 +35,17 @@ NATS is a **messaging fabric** that connects all your applications and services:
 3. **Subscribers** - Applications that receive messages
 4. **Subjects** - Named channels for message organization
 
+## The NATS Ecosystem
+
+NATS ships as a small set of pieces you compose together: the server, a client for your language, and tooling you add as you need it.
+
+- **Server** — the single [`nats-server`](https://github.com/nats-io/nats-server) binary. Clustering, JetStream, leaf nodes, MQTT, and WebSocket are all configuration on the same process.
+- **Clients** — official Tier 1 clients exist for Go, JavaScript/TypeScript, Python, Java, Rust, C#/.NET, and C. Tier 2 clients (may lag on new server features) cover Zig, Swift, Ruby, and Elixir.
+- **Orbit** — optional per-language extension libraries with higher-level utilities and experimental features built on top of the core client.
+- **Tooling** — the `nats` CLI, `nsc` for identity, NACK and Helm charts for Kubernetes, Prometheus exporter, surveyor, bridges to Kafka / JMS / Spark / Flink, and a Terraform provider.
+
+See the [ecosystem page](ecosystem) for the full list with links.
+
 ## Key Differentiators
 
 ### 1. Simplicity First
