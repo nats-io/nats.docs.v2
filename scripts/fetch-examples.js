@@ -42,7 +42,7 @@ const EXAMPLES_CONFIG = {
     },
     "rust": {
         repo: "nats-io/nats.rs",
-        branch: "doc-examples",
+        branch: "main",
         directory: "async-nats/examples/",
         examples: {
             "basics-publish": "docs_basics_publish.rs",
