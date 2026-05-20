@@ -19,6 +19,11 @@ const sidebars: SidebarsConfig = {
         },
         {
             type: "doc",
+            id: "ecosystem",
+            label: "The NATS Ecosystem",
+        },
+        {
+            type: "doc",
             id: "getting-started/index",
             label: "Getting Started",
         },
@@ -33,6 +38,7 @@ const sidebars: SidebarsConfig = {
                 "concepts/queue-groups",
                 "concepts/jetstream",
                 "concepts/topologies",
+                "concepts/security",
             ],
         },
     ],
