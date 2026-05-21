@@ -254,7 +254,7 @@ const config: Config = {
             },
             {
               label: "Reference",
-              to: "/reference",
+              to: "/reference/",
             },
           ],
         },
