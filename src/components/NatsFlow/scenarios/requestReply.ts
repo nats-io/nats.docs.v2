@@ -76,7 +76,7 @@ export const requestReplyScenario: NatsFlowScenario = {
       data: {
         color: '#10b981',
         animated: true,
-        label: '_INBOX.nuid',
+        label: '_INBOX.<nuid>',
         labelOffset: 20,
         labelColor: '#10b981',
         delay: 3000,
@@ -97,7 +97,7 @@ export const requestReplyScenario: NatsFlowScenario = {
       data: {
         color: '#10b981',
         animated: true,
-        label: '_INBOX.nuid',
+        label: '_INBOX.<nuid>',
         labelOffset: 20,
         labelColor: '#10b981',
         delay: 4500,

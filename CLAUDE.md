@@ -40,7 +40,7 @@ await nc.publish("hello", "Hello NATS!");
 
 **MUST use `nats-example` tags for almost every code snippet:**
 ```mdx
-<div class="nats-example" data-type="basics-publish" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="basics-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
 ```
 
 **Only use inline `<Tabs groupId="lang">` when:**

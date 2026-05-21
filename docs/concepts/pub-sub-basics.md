@@ -26,7 +26,7 @@ This decoupling gives you tremendous flexibility. Services can be added, removed
 
 You publish a message by sending it to a subject:
 
-<div class="nats-example" data-type="basics-publish" data-languages="cli,go,java,rust"></div>
+<div class="nats-example" data-type="basics-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Key points:
 - Publishers don't wait for acknowledgments (fire-and-forget)
@@ -37,7 +37,7 @@ Key points:
 
 Subscribers express interest in subjects to receive messages:
 
-<div class="nats-example" data-type="basics-subscribe" data-languages="cli,go,java,rust"></div>
+<div class="nats-example" data-type="basics-subscribe" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 ## When to Use Pub/Sub
 
@@ -92,7 +92,7 @@ For a deep dive into subjects, hierarchies, wildcards, and naming conventions, s
 
 ## How Delivery Works
 
-- **At-most-once delivery**: Core NATS delivers messages without persistence. If you need guaranteed delivery, that's what [JetStream](../jetstream) is for.
+- **At-most-once delivery**: Core NATS delivers messages without persistence. If you need guaranteed delivery, that's what [JetStream](jetstream) is for.
 - **Active subscribers only**: Only subscribers connected when the message is published will receive it. Messages aren't stored for later.
 - **Every subscriber gets a copy**: Subscribing doesn't consume or remove messages — each subscriber independently receives its own copy.
 - **Message size**: NATS has a default max message size of 1MB (configurable). For large data, consider using object stores or passing references.

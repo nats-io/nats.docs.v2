@@ -159,11 +159,11 @@ See [NATS.Net on NuGet](https://www.nuget.org/packages/NATS.Net) for the latest 
 
 ### Publisher Example
 
-<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,java,rust"></div>
+<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 ### Subscriber Example
 
-<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,java,rust"></div>
+<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 ### Running the Examples
 
@@ -215,9 +215,8 @@ go run publish.go
 It's best to run the examples from your IDE or 
 command line where Java is installed.
 
-See NATS Doc Examples in the 
-nats.java project https://github.com/nats-io/nats.java
-under src/main/java/io/nats/examples/natsIoDoc
+Clone https://github.com/nats-io/nats.java
+and navigate to src/main/java/io/nats/examples/natsIoDoc
 ```
 
 
@@ -235,12 +234,13 @@ cargo run --bin publish
 </TabItem>
 <TabItem value="csharp" label="C#/.NET">
 
+```text
 It's best to run the examples from your IDE or
 command line where the .NET SDK is installed.
 
-Clone [nats-io/nats.net](https://github.com/nats-io/nats.net) and see
-the example projects under `examples/` (e.g. `Example.Core.PublishHeaders`,
-`Example.Core.SubscribeRaw`).
+Clone https://github.com/nats-io/nats.net
+and navigate to examples/Example.NatsIODocs
+```
 
 </TabItem>
 </Tabs>

@@ -32,7 +32,7 @@ cd ~/coding/new-nats.docs
 npm run fetch-examples
 
 # 6. Use in documentation
-# <div class="nats-example" data-type="[page]-[snippet]" data-languages="cli,go,rust"></div>
+# <div class="nats-example" data-type="[page]-[snippet]" data-languages="cli,js,go,python,java,rust,csharp"></div>
 ```
 
 ## Directory Structure
@@ -201,7 +201,7 @@ npm run fetch-examples
 
 Basic queue group example:
 
-<div class="nats-example" data-type="queue-groups-basic" data-languages="cli,go,rust"></div>
+<div class="nats-example" data-type="queue-groups-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
 ```
 
 ## Common Issues

@@ -170,7 +170,7 @@
         }
 
         // Load language components needed for NATS examples
-        const languages = ['bash', 'go', 'rust', 'java'];
+        const languages = ['bash', 'go', 'python', 'js', 'rust', 'java', 'csharp'];
         let loadedCount = 0;
 
         languages.forEach(lang => {
