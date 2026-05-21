@@ -18,6 +18,11 @@ import rehypeStripHeadingAnchors from "./scripts/rehype-strip-heading-anchors.mj
 //                     drives lastVersion
 //   'maintained'   — older but still supported; no banner
 //   'unmaintained' — shows the Docusaurus 'unmaintained' banner
+// Rehype plugins shared by every docs pipeline (preset-classic docs,
+// reference docs, llms-txt). Each pipeline re-uses the same plugin
+// instances; module-level caches inside the plugins are shared too.
+const SHARED_REHYPE_PLUGINS = [rehypeNatsExample, rehypeNatsFlow];
+
 const referenceVersions: DocsOptions["versions"] = Object.fromEntries(
   docVersions.versions.map((v) => [
     v.name,
@@ -72,8 +77,7 @@ const config: Config = {
           enableMarkdownFiles: true,
           includeVersionedDocs: false,
           beforeDefaultRehypePlugins: [
-            rehypeNatsExample,
-            rehypeNatsFlow,
+            ...SHARED_REHYPE_PLUGINS,
             rehypeFlattenTabs,
             rehypeStripHeadingAnchors,
           ],
@@ -106,7 +110,7 @@ const config: Config = {
         includeCurrentVersion: false,
         lastVersion: docVersions.latest,
         versions: referenceVersions,
-        beforeDefaultRehypePlugins: [rehypeNatsExample, rehypeNatsFlow],
+        beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
       } satisfies DocsOptions,
     ],
   ],
@@ -147,7 +151,7 @@ const config: Config = {
         docs: {
           routeBasePath: "",
           sidebarPath: "./sidebars.ts",
-          beforeDefaultRehypePlugins: [rehypeNatsExample, rehypeNatsFlow],
+          beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           // editUrl:

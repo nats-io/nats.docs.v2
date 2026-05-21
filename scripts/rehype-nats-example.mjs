@@ -21,7 +21,8 @@ const LANG_ORDER = ['cli', 'js', 'javascript', 'go', 'python', 'java', 'rust', '
 
 const TABS_COMPONENT = '__NatsExampleTabs';
 const TAB_ITEM_COMPONENT = '__NatsExampleTabItem';
-const IMPORT_SOURCE = `import ${TABS_COMPONENT} from '@theme/Tabs';\nimport ${TAB_ITEM_COMPONENT} from '@theme/TabItem';`;
+const CODE_BLOCK_COMPONENT = '__NatsExampleCodeBlock';
+const IMPORT_SOURCE = `import ${TABS_COMPONENT} from '@theme/Tabs';\nimport ${TAB_ITEM_COMPONENT} from '@theme/TabItem';\nimport ${CODE_BLOCK_COMPONENT} from '@theme/CodeBlock';`;
 
 let cache = null;
 
@@ -63,6 +64,9 @@ function orderedLanguages(requested, available) {
   return out;
 }
 
+// HAST <pre><code class="language-X"> — used by the llms-txt pipeline which
+// serializes back to Markdown (it picks up the language- class and emits
+// a fenced block).
 function codeBlockHastNode(code, fence) {
   return {
     type: 'element',
@@ -76,6 +80,17 @@ function codeBlockHastNode(code, fence) {
         children: [{ type: 'text', value: code }],
       },
     ],
+  };
+}
+
+// MDX JSX <CodeBlock language="X"> — used by the main docs pipeline so
+// Docusaurus's theme component handles Prism, copy button, dark/light theming.
+function codeBlockJsxNode(code, fence) {
+  return {
+    type: 'mdxJsxFlowElement',
+    name: CODE_BLOCK_COMPONENT,
+    attributes: [{ type: 'mdxJsxAttribute', name: 'language', value: fence }],
+    children: [{ type: 'text', value: code }],
   };
 }
 
@@ -107,7 +122,7 @@ function buildTabsReplacement(type, languages) {
       type: 'mdxJsxFlowElement',
       name: TAB_ITEM_COMPONENT,
       attributes,
-      children: [codeBlockHastNode(code, info.fence)],
+      children: [codeBlockJsxNode(code, info.fence)],
     });
   });
   return [
@@ -164,8 +179,12 @@ function getMdxAttr(node, name) {
 }
 
 function buildImportNode() {
+  // Shape matches Docusaurus's own mdxjsEsm construction in
+  // @docusaurus/mdx-loader/lib/remark/toc/utils.js: empty value (estree is
+  // the source of truth), explicit Program + sourceType.
   const program = acornParse(IMPORT_SOURCE, { ecmaVersion: 'latest', sourceType: 'module' });
-  return { type: 'mdxjsEsm', value: IMPORT_SOURCE, data: { estree: program } };
+  program.sourceType = 'module';
+  return { type: 'mdxjsEsm', value: '', data: { estree: program } };
 }
 
 function alreadyImported(tree) {
