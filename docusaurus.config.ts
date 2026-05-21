@@ -44,10 +44,6 @@ const config: Config = {
   // Global scripts
   scripts: [
     {
-      src: '/js/nats-example-loader-v2.js',
-      defer: true,
-    },
-    {
       src: '/js/nats-flow-loader.js',
       defer: true,
       type: 'module',
@@ -110,6 +106,7 @@ const config: Config = {
         includeCurrentVersion: false,
         lastVersion: docVersions.latest,
         versions: referenceVersions,
+        beforeDefaultRehypePlugins: [rehypeNatsExample, rehypeNatsFlow],
       } satisfies DocsOptions,
     ],
   ],
@@ -150,6 +147,7 @@ const config: Config = {
         docs: {
           routeBasePath: "",
           sidebarPath: "./sidebars.ts",
+          beforeDefaultRehypePlugins: [rehypeNatsExample, rehypeNatsFlow],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           // editUrl:
