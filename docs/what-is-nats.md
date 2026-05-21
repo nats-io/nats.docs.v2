@@ -92,6 +92,11 @@ NATS excels in scenarios requiring:
 - Configuration management
 - System orchestration
 
+### Agentic AI
+- Agent-to-agent communication with automatic service discovery
+- Real-time event streams for LLM inference and tool calls
+- Multi-region GPU inference routing with scale-to-zero
+
 
 ## What's Next?
 
