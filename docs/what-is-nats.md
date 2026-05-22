@@ -72,6 +72,11 @@ Built-in support for isolated messaging domains through accounts, enabling:
 
 NATS excels in scenarios requiring:
 
+### Agentic AI
+- Agent-to-agent communication with automatic service discovery
+- Real-time event streams for LLM inference and tool calls
+- Multi-region GPU inference routing with scale-to-zero
+
 ### Real-time Data Streaming
 - IoT telemetry collection
 - Financial market data distribution
@@ -91,7 +96,6 @@ NATS excels in scenarios requiring:
 - Remote procedure calls
 - Configuration management
 - System orchestration
-
 
 ## What's Next?
 
