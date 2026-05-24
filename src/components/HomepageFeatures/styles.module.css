@@ -53,16 +53,26 @@
 
 .docSectionCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-  border-color: var(--ifm-color-primary);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--card-accent, var(--ifm-color-primary)) 18%, transparent);
+  border-color: var(--card-accent, var(--ifm-color-primary));
 }
 
-.docSectionEmoji {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.docSectionIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card-accent, var(--ifm-color-primary)) 12%, transparent);
+  color: var(--card-accent, var(--ifm-color-primary));
+  margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.docSectionCard:hover .docSectionIcon {
+  background: color-mix(in srgb, var(--card-accent, var(--ifm-color-primary)) 22%, transparent);
+  transform: scale(1.05);
 }
 
 .docSectionTitle {
@@ -81,7 +91,7 @@
 
 .docSectionArrow {
   font-size: 1.5rem;
-  color: var(--ifm-color-primary);
+  color: var(--card-accent, var(--ifm-color-primary));
   font-weight: bold;
   transition: transform 0.2s ease;
 }

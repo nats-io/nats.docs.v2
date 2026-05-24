@@ -3,3 +3,6 @@ export { default as GuidesIcon } from './GuidesIcon';
 export { default as TutorialsIcon } from './TutorialsIcon';
 export { default as ReferenceIcon } from './ReferenceIcon';
 export { default as ReloadIcon } from './ReloadIcon';
+export { default as RocketIcon } from './RocketIcon';
+export { default as LightbulbIcon } from './LightbulbIcon';
+export { default as UsersIcon } from './UsersIcon';

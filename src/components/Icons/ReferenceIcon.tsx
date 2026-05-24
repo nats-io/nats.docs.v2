@@ -20,12 +20,10 @@ export default function ReferenceIcon({ className = '', width = 24, height = 24 
       strokeLinejoin="round"
       className={className}
     >
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-      <line x1="12" y1="6" x2="16" y2="6" />
-      <line x1="12" y1="10" x2="16" y2="10" />
-      <line x1="8" y1="6" x2="9" y2="6" />
-      <line x1="8" y1="10" x2="9" y2="10" />
+      <path d="m16 6 4 14" />
+      <path d="M12 6v14" />
+      <path d="M8 8v12" />
+      <path d="M4 4v16" />
     </svg>
   );
 }
