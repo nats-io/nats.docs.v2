@@ -1,27 +1,12 @@
 import React from 'react';
+import BaseIcon from './BaseIcon';
+import type { IconProps } from './types';
 
-interface IconProps {
-  className?: string;
-  width?: number;
-  height?: number;
-}
-
-export default function GuidesIcon({ className = '', width = 24, height = 24 }: IconProps) {
+export default function GuidesIcon(props: IconProps) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={width}
-      height={height}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
+    <BaseIcon {...props}>
       <circle cx="12" cy="12" r="10" />
       <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-    </svg>
+    </BaseIcon>
   );
 }

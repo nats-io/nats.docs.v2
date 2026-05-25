@@ -10,13 +10,8 @@ import {
   ReferenceIcon,
   UsersIcon,
 } from '@site/src/components/Icons';
+import type {IconProps} from '@site/src/components/Icons';
 import styles from './styles.module.css';
-
-type IconProps = {
-  className?: string;
-  width?: number;
-  height?: number;
-};
 
 type DocSection = {
   title: string;

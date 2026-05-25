@@ -1,3 +1,4 @@
+export type { IconProps } from './types';
 export { default as DocsIcon } from './DocsIcon';
 export { default as GuidesIcon } from './GuidesIcon';
 export { default as TutorialsIcon } from './TutorialsIcon';

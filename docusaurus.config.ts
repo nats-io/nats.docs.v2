@@ -152,6 +152,15 @@ const config: Config = {
           routeBasePath: "",
           sidebarPath: "./sidebars.ts",
           beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
+          // Internal design specs live under docs/superpowers/ but must not
+          // be built as public pages. Keep the Docusaurus defaults, plus this.
+          exclude: [
+            "**/_*.{js,jsx,ts,tsx,md,mdx}",
+            "**/_*/**",
+            "**/*.test.{js,jsx,ts,tsx}",
+            "**/__tests__/**",
+            "superpowers/**",
+          ],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           // editUrl:
