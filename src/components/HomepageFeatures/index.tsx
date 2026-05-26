@@ -1,20 +1,31 @@
-import type {ReactNode} from 'react';
+import type {ComponentType, CSSProperties, ReactNode} from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import Link from '@docusaurus/Link';
+import {
+  RocketIcon,
+  LightbulbIcon,
+  GuidesIcon,
+  TutorialsIcon,
+  ReferenceIcon,
+  UsersIcon,
+} from '@site/src/components/Icons';
+import type {IconProps} from '@site/src/components/Icons';
 import styles from './styles.module.css';
 
 type DocSection = {
   title: string;
-  emoji: string;
+  Icon: ComponentType<IconProps>;
   description: ReactNode;
   link: string;
+  accent: string;
 };
 
 const DocSections: DocSection[] = [
   {
     title: 'Getting Started',
-    emoji: '🚀',
+    Icon: RocketIcon,
+    accent: '#27AAE1',
     description: (
       <>
         New to NATS? Start here to learn the basics and get your first application running in minutes.
@@ -24,7 +35,8 @@ const DocSections: DocSection[] = [
   },
   {
     title: 'Concepts',
-    emoji: '💡',
+    Icon: LightbulbIcon,
+    accent: '#F59E0B',
     description: (
       <>
         Understand the core concepts and architecture behind NATS messaging patterns and JetStream.
@@ -34,7 +46,8 @@ const DocSections: DocSection[] = [
   },
   {
     title: 'Guides',
-    emoji: '📖',
+    Icon: GuidesIcon,
+    accent: '#8B5CF6',
     description: (
       <>
         Step-by-step guides for common tasks and patterns when building with NATS.
@@ -44,7 +57,8 @@ const DocSections: DocSection[] = [
   },
   {
     title: 'Tutorials',
-    emoji: '🎓',
+    Icon: TutorialsIcon,
+    accent: '#34A574',
     description: (
       <>
         Hands-on tutorials to help you learn by building real-world applications with NATS.
@@ -54,7 +68,8 @@ const DocSections: DocSection[] = [
   },
   {
     title: 'Reference',
-    emoji: '📚',
+    Icon: ReferenceIcon,
+    accent: '#375C93',
     description: (
       <>
         Complete reference documentation for server configuration, protocol details, and API specifications.
@@ -64,7 +79,8 @@ const DocSections: DocSection[] = [
   },
   {
     title: 'Community',
-    emoji: '👥',
+    Icon: UsersIcon,
+    accent: '#EC4899',
     description: (
       <>
         Join the NATS community on Slack, contribute on GitHub, or get help from fellow developers.
@@ -74,14 +90,19 @@ const DocSections: DocSection[] = [
   },
 ];
 
-function DocSectionCard({title, emoji, description, link}: DocSection) {
+function DocSectionCard({title, Icon, description, link, accent}: DocSection) {
   const isExternal = link.startsWith('http');
 
   return (
     <div className={clsx('col col--4', styles.docSection)}>
       <Link to={link} className={styles.docSectionLink}>
-        <div className={styles.docSectionCard}>
-          <div className={styles.docSectionEmoji}>{emoji}</div>
+        <div
+          className={styles.docSectionCard}
+          style={{['--card-accent' as string]: accent} as CSSProperties}
+        >
+          <div className={styles.docSectionIcon}>
+            <Icon width={28} height={28} />
+          </div>
           <Heading as="h3" className={styles.docSectionTitle}>{title}</Heading>
           <p className={styles.docSectionDescription}>{description}</p>
           <div className={styles.docSectionArrow}>
