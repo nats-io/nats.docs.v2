@@ -14,9 +14,9 @@ Best practices for building robust, maintainable systems with NATS. Each guide c
 
 ## Topics
 
-- **[Naming Conventions](./naming-conventions)** — subject naming, hierarchies, and organization
-- **[Error Handling](./error-handling)** — connection management, reconnection, and resilience
-- **[Message Design](./message-design)** — serialization, message sizes, and schema strategies
+- **Naming Conventions** — subject naming, hierarchies, and organization _(coming soon)_
+- **Error Handling** — connection management, reconnection, and resilience _(coming soon)_
+- **Message Design** — serialization, message sizes, and schema strategies _(coming soon)_
 
 ## Quick Reference
 

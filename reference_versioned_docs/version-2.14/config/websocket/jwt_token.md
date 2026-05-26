@@ -7,13 +7,12 @@ This setting is useful when generating NATS `Bearer` client JWTs as the
 result of some authentication mechanism. The HTTP server after correct
 authentication can issue a JWT for the user, that is set securely
 preventing access by unintended scripts. Note these JWTs must be
-[NATS JWTs][jwt].
+NATS JWTs.
 
 **Note:** If the client specifies a JWT in the `CONNECT` protocol,
 this option is ignored.
 
 [cookie]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies
-[jwt]: https://docs.nats.io/nats-server/configuration/securing_nats/jwt
 
 
 ## Types
