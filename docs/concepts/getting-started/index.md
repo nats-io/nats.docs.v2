@@ -254,10 +254,10 @@ Congratulations! You've successfully:
 
 ### What to explore next:
 
-1. **[Request-Reply Pattern](../concepts/request-reply)** - Synchronous communication
-2. **[Queue Groups](../concepts/queue-groups)** - Load balancing
-3. **[Subjects](../concepts/subjects)** - Understanding subject-based messaging
-4. **[Pub/Sub Basics](../concepts/pub-sub-basics)** - Core messaging patterns
+1. **[Request-Reply Pattern](../request-reply)** - Synchronous communication
+2. **[Queue Groups](../queue-groups)** - Load balancing
+3. **[Subjects](../subjects)** - Understanding subject-based messaging
+4. **[Pub/Sub Basics](../pub-sub-basics)** - Core messaging patterns
 
 ### Client Libraries
 

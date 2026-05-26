@@ -31,7 +31,7 @@ const DocSections: DocSection[] = [
         New to NATS? Start here to learn the basics and get your first application running in minutes.
       </>
     ),
-    link: '/intro',
+    link: '/concepts/intro',
   },
   {
     title: 'Concepts',
@@ -42,7 +42,7 @@ const DocSections: DocSection[] = [
         Understand the core concepts and architecture behind NATS messaging patterns and JetStream.
       </>
     ),
-    link: '/what-is-nats',
+    link: '/concepts/what-is-nats',
   },
   {
     title: 'Guides',

@@ -9,22 +9,22 @@ const sidebars: SidebarsConfig = {
     docsSidebar: [
         {
             type: "doc",
-            id: "intro",
+            id: "concepts/intro",
             label: "Welcome",
         },
         {
             type: "doc",
-            id: "what-is-nats",
+            id: "concepts/what-is-nats",
             label: "What is NATS?",
         },
         {
             type: "doc",
-            id: "ecosystem",
+            id: "concepts/ecosystem",
             label: "The NATS Ecosystem",
         },
         {
             type: "doc",
-            id: "getting-started/index",
+            id: "concepts/getting-started/index",
             label: "Getting Started",
         },
         {

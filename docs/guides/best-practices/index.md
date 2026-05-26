@@ -22,6 +22,6 @@ Best practices for building robust, maintainable systems with NATS. Each guide c
 
 | Problem | Solution |
 |---------|----------|
-| Messages lost before subscribers connect | Use [JetStream](/docs/jetstream) for persistence |
+| Messages lost before subscribers connect | Use [JetStream](/concepts/jetstream) for persistence |
 | Too many unique subjects | Use wildcards and hierarchical naming |
-| Slow subscriber backs up | Process messages asynchronously or use [queue groups](/docs/concepts/queue-groups) |
+| Slow subscriber backs up | Process messages asynchronously or use [queue groups](/concepts/queue-groups) |
