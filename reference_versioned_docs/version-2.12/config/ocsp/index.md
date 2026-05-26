@@ -16,6 +16,6 @@ server will not request staples even if `Must-Staple` is present.
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`mode`](/reference/config/ocsp/mode) | The OCSP stapling mode to adhere to. | `string` | - | Yes |
-| [`url`](/reference/config/ocsp/url) | An explicit override URL to request staples. | `string` | - | Yes |
-| [`urls`](/reference/config/ocsp/urls) | An explicit list of override URLs to request staples. | `string` | - | Yes |
+| [`mode`](/reference/2.12/config/ocsp/mode) | The OCSP stapling mode to adhere to. | `string` | - | Yes |
+| [`url`](/reference/2.12/config/ocsp/url) | An explicit override URL to request staples. | `string` | - | Yes |
+| [`urls`](/reference/2.12/config/ocsp/urls) | An explicit list of override URLs to request staples. | `string` | - | Yes |

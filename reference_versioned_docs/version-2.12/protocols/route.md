@@ -6,7 +6,7 @@ mdx:
 
 # Route 
 
-Route connections are used to form a cluster of NATS servers. The route protocol is very similar to the [client protocol](/reference/protocols/client). In the context of a cluster, it can be helpful to visualize a server being a proxy operating on behalf of its connected clients, subscribing, unsubscribing, sending and receiving messages.
+Route connections are used to form a cluster of NATS servers. The route protocol is very similar to the [client protocol](/reference/2.12/protocols/client). In the context of a cluster, it can be helpful to visualize a server being a proxy operating on behalf of its connected clients, subscribing, unsubscribing, sending and receiving messages.
 
 ## Overview
 
