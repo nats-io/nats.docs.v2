@@ -64,9 +64,6 @@ const config: Config = {
         siteDescription:
           "Connective Technology for Adaptive Edge & Distributed Systems — official NATS messaging documentation.",
         includeOrder: [
-          "intro/**",
-          "what-is-nats/**",
-          "getting-started/**",
           "concepts/**",
           "guides/**",
           "tutorials/**",
@@ -200,8 +197,8 @@ const config: Config = {
           type: "custom-docSidebar",
           sidebarId: "docsSidebar",
           position: "left",
-          label: "Docs",
-          href: "/intro/",
+          label: "Concepts",
+          href: "/concepts/intro/",
         },
         {
           type: "custom-docSidebar",
@@ -250,8 +247,8 @@ const config: Config = {
           title: "Documentation",
           items: [
             {
-              label: "Intro",
-              to: "/intro",
+              label: "Concepts",
+              to: "/concepts/intro",
             },
             {
               label: "Tutorials",

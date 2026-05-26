@@ -102,9 +102,9 @@ NATS excels in scenarios requiring:
 Now that you understand what NATS is, explore:
 
 - **[Getting Started Guide](getting-started)** - Set up your first NATS application
-- **[Pub/Sub Basics](concepts/pub-sub-basics)** - Deep dive into the publish-subscribe pattern
-- **[Request-Reply](concepts/request-reply)** - Learn synchronous communication patterns
-- **[Queue Groups](concepts/queue-groups)** - Implement load balancing
+- **[Pub/Sub Basics](pub-sub-basics)** - Deep dive into the publish-subscribe pattern
+- **[Request-Reply](request-reply)** - Learn synchronous communication patterns
+- **[Queue Groups](queue-groups)** - Implement load balancing
 
 ## Summary
 

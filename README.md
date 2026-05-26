@@ -72,18 +72,18 @@ This generates static content in the `build/` directory that can be served by an
 Documentation pages are located in the `docs/` directory and written in Markdown (`.md`) or MDX (`.mdx`).
 
 **To edit an existing page:**
-1. Find the file in `docs/` (e.g., `docs/getting-started/index.md`)
+1. Find the file in `docs/` (e.g., `docs/concepts/getting-started/index.md`)
 2. Make your changes
 3. Save the file - changes appear immediately in your browser (hot reload)
 4. Commit and push your changes
 
 **Example file locations:**
-- Getting Started: `docs/getting-started/index.md`
+- Getting Started: `docs/concepts/getting-started/index.md`
 - Concepts: `docs/concepts/*.md`
 - Reference: `docs/reference/*.md`
 
 **Note:** The `docs/` directory maps to the root URL path `/`. For example:
-- `docs/getting-started/index.md` → `http://localhost:3000/getting-started`
+- `docs/concepts/getting-started/index.md` → `http://localhost:3000/concepts/getting-started`
 - `docs/concepts/publish-subscribe.md` → `http://localhost:3000/concepts/publish-subscribe`
 
 ### Adding Code Examples
