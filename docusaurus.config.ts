@@ -124,14 +124,19 @@ const config: Config = {
   projectName: "nats.docs", // Usually your repo name.
 
   onBrokenLinks: "warn", // Changed from "throw" to allow production build
-  onBrokenMarkdownLinks: "warn",
 
-  // This \/ is how it will need to be with newer versions of Docusaurus
-  // markdown: {
-  //   hooks: {
-  //     onBrokenMarkdownLinks: "warn",
-  //   }
-  // },
+  markdown: {
+    hooks: {
+      // Migrated from the deprecated top-level `onBrokenMarkdownLinks`.
+      onBrokenMarkdownLinks: "warn",
+    },
+    // `future.v4: true` disables MDX-1 compat by default, which turns off the
+    // explicit `{#heading-id}` syntax. Keep just that one compat behavior on
+    // so existing heading anchors (e.g. ecosystem.md's #tier-1-clients) work.
+    mdx1Compat: {
+      headingIds: true,
+    },
+  },
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
