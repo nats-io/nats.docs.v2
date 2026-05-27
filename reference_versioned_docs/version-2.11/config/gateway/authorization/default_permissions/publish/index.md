@@ -19,8 +19,8 @@ to all other subjects.
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`allow`](/reference/2.11/config/gateway/authorization/default_permissions/publish/allow) | List of subjects that are allowed to the client. | `string` | - | Yes |
-| [`deny`](/reference/2.11/config/gateway/authorization/default_permissions/publish/deny) | List of subjects that are denied to the client. | `string` | - | Yes |
+| [`allow`](./allow.md) | List of subjects that are allowed to the client. | `string` | - | Yes |
+| [`deny`](./deny.md) | List of subjects that are denied to the client. | `string` | - | Yes |
 ## Examples
 
 ### Allow publish to `foo`
