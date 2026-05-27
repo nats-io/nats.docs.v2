@@ -110,6 +110,19 @@ const config: Config = {
         beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
       } satisfies DocsOptions,
     ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "learn",
+        path: "learn",
+        routeBasePath: "learn",
+        sidebarPath: "./sidebars-learn.ts",
+        // Long-form deep dives. Unversioned — concepts only; version-bound
+        // behavior is linked out to the versioned 'reference' instance.
+        includeCurrentVersion: true,
+        beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
+      } satisfies DocsOptions,
+    ],
   ],
 
   // Set the production url of your site here
@@ -207,10 +220,10 @@ const config: Config = {
         },
         {
           type: "custom-docSidebar",
-          sidebarId: "guidesSidebar",
+          sidebarId: "learnSidebar",
           position: "left",
-          label: "Guides",
-          href: "/guides/",
+          label: "Learn",
+          href: "/learn/",
         },
         {
           type: "custom-docSidebar",
@@ -256,12 +269,12 @@ const config: Config = {
               to: "/concepts/intro",
             },
             {
-              label: "Tutorials",
-              to: "/tutorials",
+              label: "Learn",
+              to: "/learn/",
             },
             {
-              label: "Guides",
-              to: "/guides",
+              label: "Tutorials",
+              to: "/tutorials",
             },
             {
               label: "Reference",

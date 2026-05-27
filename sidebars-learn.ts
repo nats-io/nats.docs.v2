@@ -1,0 +1,219 @@
+import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
+
+/**
+ * Sidebar for the 'learn' docs plugin instance.
+ *
+ * Learn holds long-form deep dives, organized into two halves:
+ *   - Develop — building applications with NATS (Core NATS + JetStream families)
+ *   - Operate — running, scaling, and securing NATS
+ *
+ * Unlike the reference sidebar (generated per-version by
+ * scripts/generate-version.js), this sidebar is authored by hand.
+ *
+ * Conventions:
+ * - Each deep dive lives in learn/<chapter>/ and is its own collapsible
+ *   category whose label links to that chapter's index page.
+ * - Page order is the explicit `items` order below, not _category_.json.
+ *
+ * Full structure + page rationale:
+ *   docs/superpowers/specs/2026-05-27-learn-deep-dives-section-design.md
+ *
+ * Status: JetStream is in progress; every other page is a structure-only
+ * stub. The Operate ops chapters (clustering, monitoring, backup,
+ * deployment) are scaffolded now and written in later cycles.
+ */
+const sidebars: SidebarsConfig = {
+  learnSidebar: [
+    {
+      type: "doc",
+      id: "index",
+      label: "Learn",
+    },
+    {
+      type: "category",
+      label: "Develop",
+      collapsed: false,
+      items: [
+        {
+          type: "category",
+          label: "Core NATS",
+          link: { type: "doc", id: "core-nats/index" },
+          items: [
+            "core-nats/publish-subscribe",
+            "core-nats/subjects-and-wildcards",
+            "core-nats/request-reply",
+            "core-nats/queue-groups",
+            "core-nats/scatter-gather",
+            "core-nats/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Services",
+          link: { type: "doc", id: "services/index" },
+          items: [
+            "services/your-first-service",
+            "services/endpoints-and-groups",
+            "services/discovery",
+            "services/observability",
+            "services/scaling",
+            "services/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Resilient Clients",
+          link: { type: "doc", id: "resilient-clients/index" },
+          items: [
+            "resilient-clients/connecting",
+            "resilient-clients/reconnection",
+            "resilient-clients/drain-and-shutdown",
+            "resilient-clients/slow-consumers",
+            "resilient-clients/request-reply-resilience",
+            "resilient-clients/tls-and-auth",
+            "resilient-clients/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "JetStream",
+          link: { type: "doc", id: "jetstream/index" },
+          items: [
+            "jetstream/why-a-stream",
+            "jetstream/your-first-stream",
+            "jetstream/publishing",
+            "jetstream/reading-back",
+            "jetstream/your-first-consumer",
+            "jetstream/filtering",
+            "jetstream/acknowledgment",
+            "jetstream/pull-consumers",
+            "jetstream/worker-pool",
+            "jetstream/priority-groups",
+            "jetstream/pausing",
+            "jetstream/push-vs-pull",
+            "jetstream/shaping-the-stream",
+            "jetstream/delivery-semantics",
+            "jetstream/message-ttl",
+            "jetstream/surviving-node-loss",
+            "jetstream/mirrors-and-sources",
+            "jetstream/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Key-Value Store",
+          link: { type: "doc", id: "key-value/index" },
+          items: [
+            "key-value/your-first-bucket",
+            "key-value/watching",
+            "key-value/history-and-revisions",
+            "key-value/ttl-and-limits",
+            "key-value/under-the-hood",
+            "key-value/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Object Store",
+          link: { type: "doc", id: "object-store/index" },
+          items: [
+            "object-store/your-first-object",
+            "object-store/chunking",
+            "object-store/metadata-and-links",
+            "object-store/watching-and-listing",
+            "object-store/under-the-hood",
+            "object-store/where-next",
+          ],
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Operate",
+      collapsed: false,
+      items: [
+        {
+          type: "category",
+          label: "Topologies",
+          link: { type: "doc", id: "topologies/index" },
+          items: [
+            "topologies/single-server",
+            "topologies/your-first-cluster",
+            "topologies/jetstream-in-a-cluster",
+            "topologies/super-clusters",
+            "topologies/leaf-nodes",
+            "topologies/putting-it-together",
+            "topologies/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Security",
+          link: { type: "doc", id: "security/index" },
+          items: [
+            "security/accounts-and-multitenancy",
+            "security/authentication-basics",
+            "security/operator-mode",
+            "security/authorization",
+            "security/cross-account",
+            "security/encryption",
+            "security/auth-callout",
+            "security/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Clustering & Replication",
+          link: { type: "doc", id: "clustering/index" },
+          items: [
+            "clustering/forming-a-cluster",
+            "clustering/raft-and-leaders",
+            "clustering/replication-and-r3",
+            "clustering/placement",
+            "clustering/scaling-and-peers",
+            "clustering/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Monitoring & Observability",
+          link: { type: "doc", id: "monitoring/index" },
+          items: [
+            "monitoring/monitoring-endpoints",
+            "monitoring/jetstream-health",
+            "monitoring/advisories-and-events",
+            "monitoring/prometheus-and-dashboards",
+            "monitoring/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Backup & Recovery",
+          link: { type: "doc", id: "backup-recovery/index" },
+          items: [
+            "backup-recovery/stream-backup-restore",
+            "backup-recovery/mirrors-and-sources",
+            "backup-recovery/disaster-recovery",
+            "backup-recovery/config-and-jwt-backup",
+            "backup-recovery/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Deployment & Upgrades",
+          link: { type: "doc", id: "deployment/index" },
+          items: [
+            "deployment/sizing-and-resources",
+            "deployment/kubernetes",
+            "deployment/config-management",
+            "deployment/rolling-upgrades",
+            "deployment/hardening",
+            "deployment/where-next",
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export default sidebars;
