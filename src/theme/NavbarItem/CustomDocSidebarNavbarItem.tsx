@@ -1,12 +1,13 @@
 import React from 'react';
 import DefaultNavbarItem from '@theme/NavbarItem/DefaultNavbarItem';
-import { DocsIcon, GuidesIcon, TutorialsIcon, ReferenceIcon } from '@site/src/components/Icons';
+import { DocsIcon, GuidesIcon, TutorialsIcon, LearnIcon, ReferenceIcon } from '@site/src/components/Icons';
 import type { Props } from '@theme/NavbarItem/DefaultNavbarItem';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string; width?: number; height?: number }>> = {
   'Docs': DocsIcon,
   'Guides': GuidesIcon,
   'Tutorials': TutorialsIcon,
+  'Learn': LearnIcon,
   'Reference': ReferenceIcon,
 };
 
