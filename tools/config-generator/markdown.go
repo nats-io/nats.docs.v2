@@ -171,12 +171,23 @@ func renderSections(w io.Writer, mc *MarkdownConfig, bpath string, t *TypeOption
 		for _, x := range s.Properties {
 			var path string
 			if mc.RelativeLinks {
-				path = x.Name
+				// Version-relative link to the direct child page. An explicit
+				// file path (resolved by Docusaurus against the source tree,
+				// not the rendered URL) keeps the link scoped to whichever doc
+				// version renders this page, so links never bleed across
+				// versions and no version segment has to be baked in. A child
+				// with nested properties is a directory (index.md); a leaf is
+				// a single .md file.
+				if hasNestedProps(x) {
+					path = "./" + x.Name + "/" + mc.IndexName
+				} else {
+					path = "./" + x.Name + ".md"
+				}
 			} else {
 				path = filepath.Join(bpath, x.Name)
-			}
-			if !mc.TrimIndexFile {
-				path = filepath.Join(path, mc.IndexName)
+				if !mc.TrimIndexFile {
+					path = filepath.Join(path, mc.IndexName)
+				}
 			}
 
 			desc := strings.ReplaceAll(x.Description, "\n", " ")

@@ -9,5 +9,5 @@ Exclusive of `service`.
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`account`](/reference/config/accounts/imports/stream/account) | Account name owning the export. | `string` | - | Yes |
-| [`subject`](/reference/config/accounts/imports/stream/subject) | The subject under which the stream or service is made accessible to the importing account. | `string` | - | Yes |
+| [`account`](./account.md) | Account name owning the export. | `string` | - | Yes |
+| [`subject`](./subject.md) | The subject under which the stream or service is made accessible to the importing account. | `string` | - | Yes |

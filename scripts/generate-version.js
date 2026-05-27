@@ -325,6 +325,11 @@ function step_runConfigGenerator(paths) {
       "-types", "./types",
       "-markdown",
       "-trimindex",
+      // Emit version-relative `./child.md` links between config pages so each
+      // version's links resolve within its own tree. Docusaurus rewrites them
+      // per-version automatically — no version segment is baked into the
+      // output, so flipping `latest` never requires relinking older versions.
+      "-relative",
       "-dir", path.relative(path.join(ROOT, "tools/config-generator"), configDir),
       "-base", "/reference/config",
       "-sidebar", path.relative(path.join(ROOT, "tools/config-generator"), paths.configSidebarTmp),
@@ -334,36 +339,6 @@ function step_runConfigGenerator(paths) {
 
 function step_runSchemaRefs(version, paths) {
   runCmd("node", ["scripts/generate-schema-refs.js", version, "--out", paths.outDocs]);
-}
-
-/** Rewrite absolute `/reference/X` links to `/reference/<version>/X` for
- *  non-latest versions. The latest version is served at /reference/* (no
- *  path prefix per docusaurus versioning), so its absolute links stay as-is;
- *  older versions are served at /reference/<name>/* and their bare
- *  /reference/X links would otherwise navigate the user into the latest
- *  version's content. Links that already include a version segment
- *  (/reference/2.11/..., /reference/2.12/...) are left untouched. */
-function step_versionizeAbsoluteRefLinks(version, paths, latestVersion) {
-  if (version === latestVersion) return;
-  const prefix = `/reference/${version}/`;
-  const re = /\/reference\/(?!\d+\.\d+\/)/g;
-  let touched = 0;
-  const walk = (dir) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const p = path.join(dir, entry.name);
-      if (entry.isDirectory()) walk(p);
-      else if (entry.isFile() && (entry.name.endsWith(".md") || entry.name.endsWith(".mdx"))) {
-        const before = fs.readFileSync(p, "utf8");
-        const after = before.replace(re, prefix);
-        if (after !== before) {
-          fs.writeFileSync(p, after);
-          touched++;
-        }
-      }
-    }
-  };
-  if (fs.existsSync(paths.outDocs)) walk(paths.outDocs);
-  log(`  versionized absolute /reference/ links in ${touched} files`);
 }
 
 function step_buildSidebar(version, paths) {
@@ -401,7 +376,7 @@ function step_buildSidebar(version, paths) {
 // orchestration
 // --------------------------------------------------------------------------
 
-function generateOne(version, tmpDir, latestVersion) {
+function generateOne(version, tmpDir) {
   log(`==> version ${version.name}`);
   log(`    nats-server: ${version["nats-server"]}`);
   log(`    jsm.go:      ${version["jsm.go"]}`);
@@ -453,7 +428,6 @@ function generateOne(version, tmpDir, latestVersion) {
     step_seedVarzResponse(stagePaths);
     step_runConfigGenerator(stagePaths);
     step_runSchemaRefs(version.name, stagePaths);
-    step_versionizeAbsoluteRefLinks(version.name, stagePaths, latestVersion);
     stageOk = true;
   } finally {
     if (!stageOk) {
@@ -535,7 +509,7 @@ function main() {
   let failed = false;
   try {
     for (const v of targets) {
-      try { generateOne(v, tmpDir, cfg.latest); }
+      try { generateOne(v, tmpDir); }
       catch (e) { log(`FAILED for ${v.name}: ${e.message}`); failed = true; }
     }
   } finally {

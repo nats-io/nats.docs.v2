@@ -13,11 +13,11 @@
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`max_memory`](/reference/config/accounts/jetstream/max_memory) | The maximum storage allowed across all memory-based assets. | `integer` | - | Yes |
-| [`max_file`](/reference/config/accounts/jetstream/max_file) | The maximum storage allowed across all file-based assets. | `integer` | - | Yes |
-| [`max_streams`](/reference/config/accounts/jetstream/max_streams) | The maximum number of streams allowed. | `integer` | - | Yes |
-| [`max_consumers`](/reference/config/accounts/jetstream/max_consumers) | The maximum number of consumers allowed. | `integer` | - | Yes |
-| [`max_bytes_required`](/reference/config/accounts/jetstream/max_bytes_required) | If true, requires all streams to have an explicit max bytes defined for both file and memory-based streams. | `boolean` | - | Yes |
-| [`memory_max_stream_bytes`](/reference/config/accounts/jetstream/memory_max_stream_bytes) | Maximum bytes any given memory-based stream is allowed to be allocated. | `integer` | - | Yes |
-| [`disk_max_stream_bytes`](/reference/config/accounts/jetstream/disk_max_stream_bytes) | Maximum bytes any given file-based stream is allowed to be allocated. | `integer` | - | Yes |
-| [`max_ack_pending`](/reference/config/accounts/jetstream/max_ack_pending) | The maximum ack pending count allowed to be set on any given consumer. | `integer` | - | Yes |
+| [`max_memory`](./max_memory.md) | The maximum storage allowed across all memory-based assets. | `integer` | - | Yes |
+| [`max_file`](./max_file.md) | The maximum storage allowed across all file-based assets. | `integer` | - | Yes |
+| [`max_streams`](./max_streams.md) | The maximum number of streams allowed. | `integer` | - | Yes |
+| [`max_consumers`](./max_consumers.md) | The maximum number of consumers allowed. | `integer` | - | Yes |
+| [`max_bytes_required`](./max_bytes_required.md) | If true, requires all streams to have an explicit max bytes defined for both file and memory-based streams. | `boolean` | - | Yes |
+| [`memory_max_stream_bytes`](./memory_max_stream_bytes.md) | Maximum bytes any given memory-based stream is allowed to be allocated. | `integer` | - | Yes |
+| [`disk_max_stream_bytes`](./disk_max_stream_bytes.md) | Maximum bytes any given file-based stream is allowed to be allocated. | `integer` | - | Yes |
+| [`max_ack_pending`](./max_ack_pending.md) | The maximum ack pending count allowed to be set on any given consumer. | `integer` | - | Yes |
