@@ -8,8 +8,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { PublisherNode, SubscriberNode, ServiceNode, ServerNode } from './nodes';
-import { AnimatedEdge } from './edges';
+import { PublisherNode, SubscriberNode, ServiceNode, ServerNode, ClientNode, LabelNode } from './nodes';
+import { AnimatedEdge, FloatingEdge } from './edges';
 import type { NatsFlowProps } from './types';
 
 const nodeTypes: NodeTypes = {
@@ -17,10 +17,13 @@ const nodeTypes: NodeTypes = {
   subscriber: SubscriberNode,
   service: ServiceNode,
   server: ServerNode,
+  client: ClientNode,
+  label: LabelNode,
 };
 
 const edgeTypes: EdgeTypes = {
   animated: AnimatedEdge,
+  floating: FloatingEdge,
 };
 
 // Suppress ResizeObserver errors (common with React Flow)
@@ -87,6 +90,8 @@ export function NatsFlow({
         nodesConnectable={false}
         elementsSelectable={false}
         zoomOnScroll={false}
+        zoomOnDoubleClick={false}
+        zoomOnPinch={false}
         panOnDrag={false}
         preventScrolling={false}
         minZoom={0.5}

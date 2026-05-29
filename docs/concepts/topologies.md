@@ -12,7 +12,7 @@ NATS scales by composing servers. The same server binary and the same client API
 
 The simplest possible NATS deployment: one server process. All clients connect to it directly.
 
-<img src="/img/topologies/single-server.png" alt="Single server topology" class="topology-image" />
+<div class="nats-flow" data-scenario="singleServer" data-width="600" data-height="350"></div>
 
 Use a single server for:
 
@@ -25,7 +25,7 @@ Use a single server for:
 
 A **cluster** is a group of NATS servers connected by routes, forming a full mesh. Clients connect to any server in the cluster — messages flow across routes to reach subscribers anywhere in the mesh. If one server goes down, clients reconnect to another and keep working. With [JetStream](./jetstream), [streams](/reference/jetstream/api/stream) and [consumers](/reference/jetstream/api/consumer) can be replicated across nodes for durability.
 
-<img src="/img/topologies/cluster.png" alt="Cluster topology" class="topology-image" />
+<div class="nats-flow" data-scenario="cluster" data-width="650" data-height="350"></div>
 
 Reach for a cluster when you need:
 
@@ -39,7 +39,7 @@ Reach for a cluster when you need:
 
 A **super-cluster** connects multiple clusters together with **gateways**. Each cluster operates independently — usually in its own region or cloud — and gateways only carry the traffic that has interest on the other side, keeping cross-region chatter to a minimum. Queue groups prefer local workers automatically (geo-affinity), so most messages stay close to home.
 
-<img src="/img/topologies/supercluster.png" alt="Super-cluster topology" class="topology-image" />
+<div class="nats-flow" data-scenario="superCluster" data-width="850" data-height="450"></div>
 
 Super-clusters fit when you need:
 
@@ -50,7 +50,7 @@ Super-clusters fit when you need:
 
 A **leaf node** is a NATS server that initiates an outbound connection to a remote NATS system — a single server, cluster, or super-cluster — and bridges subject interest between the two. Because the connection is established from the leaf side, the leaf can run anywhere with outbound network access: another datacenter, a developer laptop, or a tiny edge device. Clients connected to the leaf see a regular NATS server. [JetStream](./jetstream) [streams](/reference/jetstream/api/stream) can be mirrored or sourced across the leaf link when you need local copies of data.
 
-<img src="/img/topologies/leaf-node.png" alt="Leaf node topology" class="topology-image" />
+<div class="nats-flow" data-scenario="leafNode" data-width="700" data-height="350"></div>
 
 Leaf nodes are great for:
 
@@ -63,7 +63,7 @@ Leaf nodes are great for:
 
 Real deployments combine all of the above. Multiple clusters span regions and connect via gateways. Each cluster fans out to leaf nodes at edge sites, factories, or branch offices. Each leaf serves its local clients. Same client code everywhere.
 
-<img src="/img/topologies/massive-scale.png" alt="Massive scale topology" class="topology-image" />
+<div class="nats-flow" data-scenario="massiveScale" data-width="900" data-height="650"></div>
 
 A cluster of NATS servers sits in the middle. Each cluster server can host its own clients. Leaf nodes extend outwards — every leaf brings its own group of clients, hidden behind the leaf and isolated from the cluster's address space. The same pattern keeps composing: add more leaves, add more clients, add more cluster servers, add more clusters connected by gateways. Applications talk to NATS the same way regardless of where they sit.
 

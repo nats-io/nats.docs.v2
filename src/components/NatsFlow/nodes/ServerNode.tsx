@@ -2,10 +2,46 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 import { NatsIcon } from '../icons/NatsIcon';
+import LeafIcon from '../../Icons/LeafIcon';
 import type { NatsNodeData } from '../types';
 
 export function ServerNode({ data, selected }: NodeProps) {
   const nodeData = data as NatsNodeData;
+  const circular = (data as any).circular;
+
+  if (circular) {
+    return (
+      <div
+        style={{
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          border: `3px solid ${(data as any).borderColor || '#375C93'}`,
+          backgroundColor: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 2,
+        }}
+      >
+        {(data as any).icon === 'leaf'
+          ? <span style={{ color: (data as any).iconColor }}><LeafIcon width={24} height={24} /></span>
+          : <NatsIcon width={28} height={28} />}
+        <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', textAlign: 'center', lineHeight: 1.2 }}>
+          {nodeData.label}
+          {(data as any).subtitle && <div style={{ fontWeight: 400, fontSize: 11, color: '#6b7280' }}>{(data as any).subtitle}</div>}
+        </div>
+        <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
+        <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+        <Handle type="target" position={Position.Top} id="top-in" style={{ opacity: 0 }} />
+        <Handle type="source" position={Position.Top} id="top-out" style={{ opacity: 0 }} />
+        <Handle type="target" position={Position.Bottom} id="bottom-in" style={{ opacity: 0 }} />
+        <Handle type="source" position={Position.Bottom} id="bottom-out" style={{ opacity: 0 }} />
+      </div>
+    );
+  }
+
   return (
     <BaseNode selected={selected}>
       <div className="flex flex-col items-center gap-1">

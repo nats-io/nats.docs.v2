@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BaseEdge, EdgeLabelRenderer, type EdgeProps, getBezierPath } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, type EdgeProps, getBezierPath, getStraightPath } from '@xyflow/react';
 import type { AnimatedEdgeData } from '../types';
 
 interface Circle {
@@ -37,14 +37,9 @@ export function AnimatedEdge(props: EdgeProps) {
 
   const edgeData = data as AnimatedEdgeData;
 
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  });
+  const [edgePath, labelX, labelY] = edgeData?.straight
+    ? getStraightPath({ sourceX, sourceY, targetX, targetY })
+    : getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
 
   // Add a circle every interval (default 2 seconds) if animated
   useEffect(() => {
