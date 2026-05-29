@@ -3,7 +3,6 @@ import {
   type EdgeProps,
   useStore,
   getStraightPath,
-  Position,
   type XYPosition,
   type InternalNode,
 } from '@xyflow/react';
@@ -37,6 +36,7 @@ function getNodeIntersection(intersectionNode: InternalNode, targetNode: Interna
   const xx1 = (targetCenter.x - center.x) / (2 * w) - (targetCenter.y - center.y) / (2 * h);
   const yy1 = (targetCenter.x - center.x) / (2 * w) + (targetCenter.y - center.y) / (2 * h);
   const a = 1 / (Math.abs(xx1) + Math.abs(yy1));
+  if (!isFinite(a)) return { x: center.x, y: center.y };
   const xx3 = a * xx1;
   const yy3 = a * yy1;
 
@@ -74,7 +74,7 @@ export function FloatingEdge({ id, source, target, markerEnd, markerStart, data 
         stroke: color,
         strokeWidth: 2,
         fill: 'none',
-        strokeDasharray: (edgeData as any)?.dashed ? '8,6' : undefined,
+        strokeDasharray: edgeData?.dashed ? '8,6' : undefined,
       } as CSSProperties}
     />
   );
