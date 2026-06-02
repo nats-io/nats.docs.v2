@@ -7,3 +7,4 @@ export { default as ReloadIcon } from './ReloadIcon';
 export { default as RocketIcon } from './RocketIcon';
 export { default as LightbulbIcon } from './LightbulbIcon';
 export { default as UsersIcon } from './UsersIcon';
+export { default as LeafIcon } from './LeafIcon';

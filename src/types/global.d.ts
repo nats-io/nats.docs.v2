@@ -8,6 +8,11 @@ import type {
   fanOutScenario,
   fanInScenario,
   toggleableSubscribersScenario,
+  singleServerScenario,
+  clusterScenario,
+  superClusterScenario,
+  leafNodeScenario,
+  massiveScaleScenario,
   ToggleableSubscribersScenario as ToggleableSubscribersScenarioComponent,
   QueueGroupAnimated as QueueGroupAnimatedComponent,
   PublishSubscribeAnimated as PublishSubscribeAnimatedComponent,
@@ -39,6 +44,11 @@ declare global {
         fanOut: typeof fanOutScenario;
         fanIn: typeof fanInScenario;
         toggleableSubscribers: typeof toggleableSubscribersScenario;
+        singleServer: typeof singleServerScenario;
+        cluster: typeof clusterScenario;
+        superCluster: typeof superClusterScenario;
+        leafNode: typeof leafNodeScenario;
+        massiveScale: typeof massiveScaleScenario;
       };
     };
   }

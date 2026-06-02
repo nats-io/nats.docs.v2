@@ -37,6 +37,11 @@ if (ExecutionEnvironment.canUseDOM) {
         fanOut: module.fanOutScenario,
         fanIn: module.fanInScenario,
         toggleableSubscribers: module.toggleableSubscribersScenario,
+        singleServer: module.singleServerScenario,
+        cluster: module.clusterScenario,
+        superCluster: module.superClusterScenario,
+        leafNode: module.leafNodeScenario,
+        massiveScale: module.massiveScaleScenario,
       },
     };
 
