@@ -14,6 +14,13 @@ Core NATS already decouples publisher and subscriber from each other, where a
 publisher does not need to know about the subscriber. JetStream extends that
 decoupling to time - the two no longer need to be online at the same moment.
 
+:::tip Want the full chapter?
+This page is the short version. For a step-by-step, runnable walkthrough that
+builds an `ORDERS` stream from scratch — streams, consumers, acknowledgment,
+retention, and replication — see the
+[JetStream deep dive](/learn/jetstream).
+:::
+
 <div class="nats-flow" data-scenario="jetStreamContrastAnimated" data-width="600" data-height="380"></div>
 
 ## How It Works

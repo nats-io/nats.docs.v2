@@ -131,7 +131,7 @@ Good signals that pub-sub is still the right answer:
 - A missing message has no consequence beyond "wait for the next one."
 - The subscribers are always live during normal operation, and "the
   service crashed" is handled by another mechanism (a sync on
-  reconnect, a periodic refresh, a different durable channel).
+  reconnect, a periodic refresh, a separate durable store).
 
 If any of those stop being true, a stream is what you want.
 
