@@ -9,7 +9,8 @@ description: Long-form deep dives into NATS subsystems
 
 This section is the long-form half of the NATS documentation. Each deep
 dive walks through one subsystem from first encounter to working
-confidence, building up a single running scenario step by step.
+confidence, building up a single running scenario — the Acme `ORDERS`
+platform — step by step.
 
 Deep dives sit between two other layers of the docs:
 
@@ -20,27 +21,53 @@ Deep dives sit between two other layers of the docs:
   dives link out to Reference for the full surface area; Reference
   does not teach.
 
-## Available deep dives
+Every deep dive follows the same pattern: one running scenario, at most
+two new concepts per page, runnable examples in CLI and the client
+libraries, and Reference linked out for the long tail.
 
-### [JetStream](/learn/jetstream/)
+## Develop
 
-Streams, consumers, and the acknowledgment loop. Builds an `ORDERS`
-stream from scratch and grows it across eleven chapters. Read this if
-you want to actually understand how JetStream stores, replays, and
-delivers messages — not just which CLI flags to type.
+Building applications with NATS.
 
-## Coming later
+- **[Core NATS](/learn/core-nats/)** — the ephemeral foundation:
+  publish-subscribe, subjects and wildcards, request-reply, queue
+  groups, and scatter-gather.
+- **[Services](/learn/services/)** — the micro request-reply framework:
+  endpoints, groups, discovery, observability, and scaling.
+- **[Resilient Clients](/learn/resilient-clients/)** — production-grade
+  connections: reconnection, drain, slow consumers, request-reply
+  resilience, and TLS plus auth.
+- **[JetStream](/learn/jetstream/)** — the persistence layer: streams,
+  consumers, and the acknowledgment loop, built up from a single
+  `ORDERS` stream.
+- **[Key-Value Store](/learn/key-value/)** — buckets, watches, history
+  and revisions, TTLs, and how KV sits on top of a stream.
+- **[Object Store](/learn/object-store/)** — chunked blobs over
+  JetStream, with metadata, links, and listing.
 
-The Learn section is new. Sibling deep dives are planned for:
+## Operate
 
-- **Key-Value Store** — buckets, watches, history, and how KV sits on
-  top of a stream.
-- **Object Store** — chunked blobs over JetStream, with links and
-  metadata.
-- **Clustering & Operations** — what `R=3` actually buys you, leaders,
-  placement, backup and restore.
-- **Security** — accounts, JWT, NKeys, and how authorization composes.
+Running, scaling, and securing NATS.
 
-Each follows the same pattern as the JetStream deep dive: one running
-scenario, one concept per page, references linked out for the long
-tail.
+- **[Topologies](/learn/topologies/)** — the shapes: a single server
+  growing into a cluster, a super-cluster, and leaf nodes at the edge.
+- **[Security](/learn/security/)** — authentication, authorization, and
+  accounts: centralized and decentralized auth, TLS, and auth callout.
+- **[Clustering & Replication](/learn/clustering/)** — the mechanism
+  under a cluster: routes and gossip, RAFT and leaders, `R=3` quorum,
+  placement, and peer management.
+- **[Monitoring & Observability](/learn/monitoring/)** — the monitoring
+  endpoints, JetStream health, advisories and events, and Prometheus
+  with dashboards.
+- **[Backup & Recovery](/learn/backup-recovery/)** — stream snapshots,
+  mirrors for disaster recovery, a recovery runbook, and backing up
+  identity.
+- **[Deployment & Upgrades](/learn/deployment/)** — sizing, Kubernetes,
+  config management, rolling upgrades, and hardening.
+
+## Where to start
+
+New to NATS? Start with the [Core NATS deep dive](/learn/core-nats/) —
+it is the foundation every other chapter builds on. Already comfortable
+with the basics and here for persistence? Go straight to the
+[JetStream deep dive](/learn/jetstream/).

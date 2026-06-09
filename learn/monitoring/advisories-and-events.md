@@ -207,7 +207,7 @@ that charts them, and `nats server check` that fires when lag crosses a
 threshold.
 
 Continue to
-[4. Prometheus & dashboards](/learn/monitoring/prometheus-and-dashboards).
+[5. Prometheus & dashboards](/learn/monitoring/prometheus-and-dashboards).
 
 ## See also
 

@@ -154,10 +154,10 @@ enforces both — they fail loudly at create or edit time, not silently in
 production.
 
 **Retention to or from WorkQueue is locked after creation.** The earlier
-trap was about switching at all rewriting your history. There is a harder
-rule underneath it: the server lets you swap Limits and Interest on a
-live stream, but it flatly refuses any change that adds or removes
-WorkQueue. A stream that is not WorkQueue at creation can never become
+trap was about switching at all, and how that rewrites your history. There
+is a harder rule underneath it: the server lets you swap Limits and
+Interest on a live stream, but it flatly refuses any change that adds or
+removes WorkQueue. A stream that is not WorkQueue at creation can never become
 one, and a WorkQueue stream can never leave the policy.
 
 Do not plan a migration path that edits retention into or out of

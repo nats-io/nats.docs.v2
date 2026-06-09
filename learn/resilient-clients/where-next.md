@@ -85,7 +85,7 @@ into a framework with built-in retries. If you found yourself wrapping
 every `request()` in backoff, that is the next step.
 
 The [Monitoring deep dive](/learn/monitoring) watches the same connections
-from the server side — the `SlowConsumers` metric, the advisories, and the
+from the server side — the `slow_consumers` metric, the advisories, and the
 health endpoints that tell you a client is struggling before its users do.
 
 ## Where you are

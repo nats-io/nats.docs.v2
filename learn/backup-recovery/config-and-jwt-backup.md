@@ -19,7 +19,7 @@ the files that *are* your security layer off-site, encrypted; then it
 puts them back in a clean-room rebuild and proves the platform comes back
 to life.
 
-This chapter does not teach what an operator, account, or user *is* —
+This page does not teach what an operator, account, or user *is* —
 that model lives in
 [Security → Operator mode](/learn/security/operator-mode). Here you only
 learn which files carry that identity, how to carry them off-site, and

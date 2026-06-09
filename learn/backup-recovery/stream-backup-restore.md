@@ -86,7 +86,8 @@ restore that would land under a different name. A snapshot of `ORDERS`
 restores as `ORDERS`, never as `ORDERS_COPY`. That keeps a restore
 unambiguous — it is a rebuild of one stream, not a way to fork it. If you
 do need a second copy under a new name, restore to `ORDERS` first and
-then mirror or source it, which is the next page's job.
+then mirror or source it, which
+[Mirrors and sources](/learn/backup-recovery/mirrors-and-sources) covers.
 
 Restore also expects the stream not to already exist. It recreates the
 stream; it does not merge a snapshot into a live one. So a real recovery
@@ -130,8 +131,7 @@ copy under a different name, restore first and then mirror or source it —
 that.
 
 **Flow control can time out on slow disks or distant links.** The server
-waits a few seconds (default 5 seconds) for the client to acknowledge each
-chunk. On a slow
+waits a few seconds for the client to acknowledge each chunk. On a slow
 disk or a high-latency link the acknowledgment can arrive late, and the
 backup aborts with a flow-control timeout (`408 No Flow Response`). The
 fix is to send smaller chunks and a smaller window so each round trip is

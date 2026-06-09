@@ -216,11 +216,11 @@ loss of any single server in `east`.
 ## What does not belong on this page
 
 Replication does not cross a cluster boundary. When Acme adds the `west`
-cluster in the next chapter, an `R3` stream in `east` is still replicated
+cluster on the next page, an `R3` stream in `east` is still replicated
 only within `east` — gateways carry interest, not stream replicas.
 Copying stream data between clusters uses
 [mirrors and sources](/learn/jetstream/mirrors-and-sources), which the
-next chapter reaches.
+next page reaches.
 
 The mechanics underneath `R3` — how Raft elects a leader, how a majority
 keeps the log consistent, how a new leader is chosen when one dies, and

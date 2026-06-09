@@ -169,7 +169,7 @@ never touches the stream. Publishes keep landing while the `shipping`
 consumer sleeps, and they count against the stream's retention limits.
 A long pause on a stream with a tight `MaxMsgs` or `MaxBytes` can drop
 the oldest orders before the consumer ever wakes to read them. Size the
-stream for the longest pause you expect, or keep pauses short — see [8.
+stream for the longest pause you expect, or keep pauses short — see [13.
 Shaping the stream](/learn/jetstream/shaping-the-stream) for how limits
 decide who wins.
 

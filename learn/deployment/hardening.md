@@ -199,8 +199,8 @@ http: "127.0.0.1:8222"
 ```
 
 ```bash
-# Firewall: clients in, cluster/gateway between nodes only, monitor never.
-# Open 4222 to clients, 6222/7222 to the other east nodes, deny 8222 outright.
+# Firewall: clients in, cluster routes between nodes only, monitor never.
+# Open 4222 to clients, 6222 to the other east nodes, deny 8222 outright.
 ufw allow 4222/tcp
 ufw allow from 10.0.0.0/24 to any port 6222 proto tcp
 ufw deny 8222/tcp

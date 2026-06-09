@@ -65,7 +65,7 @@ That is a **put**: an unconditional write. It stores the value whether or
 not the key already exists, and it hands back the key's new **revision** —
 a number the bucket bumps on every write. The first write to a fresh key
 lands at revision 1. Revisions are how the bucket tracks change over time;
-page 4 builds on them, and for now the number is just a receipt.
+page 3 builds on them, and for now the number is just a receipt.
 
 Now read it back:
 
@@ -78,8 +78,9 @@ just the value bytes (`42`), which is usually what a program wants, but the
 full object is what the server actually sends.
 
 That shape is deliberate. The inventory service rarely wants only the
-count; it wants the count *and* the revision, because the next chapter uses
-that revision to decrement the value safely. The entry carries both in one
+count; it wants the count *and* the revision, because [history and
+revisions](/learn/key-value/history-and-revisions) uses that revision to
+decrement the value safely. The entry carries both in one
 read, so you never have to make a second call to learn which revision you
 just saw.
 

@@ -168,11 +168,11 @@ server does not know a worker died; it only knows the ack never came.
 Until the timer expires — 30 seconds by default — that order waits,
 pending and undelivered to anyone else. A short `AckWait` recovers
 faster but redelivers prematurely when honest work runs long, so tune
-it to your real processing time, not to your worst crash. The full set
-of in-flight tuning and redelivery options — `AckWait`, `MaxDeliver`,
-and backoff arrays — is documented in
+it to your real processing time, not to your worst crash. This page
+focuses on `MaxAckPending`; the full set of in-flight tuning and
+redelivery options — `AckWait`, `MaxDeliver`, and backoff arrays — is
+documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
-This page focused on `MaxAckPending`; see Reference for the full set.
 
 ## Where you are
 

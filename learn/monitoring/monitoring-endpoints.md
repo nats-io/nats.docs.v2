@@ -29,8 +29,8 @@ on-demand response.
 A **monitoring endpoint** is one HTTP path on that port. Each path
 returns a different slice of state. The four you will use most are
 `/varz` (the server itself), `/connz` (its clients), `/routez` (its
-cluster routes), and `/jsz` (its JetStream). Every path is a path, not
-a call into a client library — you reach it with any HTTP tool.
+cluster routes), and `/jsz` (its JetStream). Each one is an HTTP path,
+not a call into a client library — you reach it with any HTTP tool.
 
 <div class="nats-flow" data-scenario="monitoringEndpointsAnimated" data-width="600" data-height="350"></div>
 
@@ -97,7 +97,7 @@ curl -s 'http://localhost:8222/connz?acc=ORDERS&subs=true' | jq
     {
       "cid": 9,
       "account": "ORDERS",
-      "authorized_user": "analytics",
+      "authorized_user": "order-svc",
       "rtt": "388µs",
       "subscriptions_list": ["orders.shipped"]
     }
@@ -108,9 +108,8 @@ curl -s 'http://localhost:8222/connz?acc=ORDERS&subs=true' | jq
 Each entry names one client: its connection id (`cid`), the account and
 user it authenticated as, its round-trip time (`rtt`), and how many
 bytes are queued for it (`pending_bytes`). This is where you confirm
-that `order-svc`, `warehouse`, `notifications`, and the `packers` queue
-group are actually connected — and which subjects each one holds
-interest in.
+that the `ORDERS` account's services — connecting as `order-svc` — are
+actually connected, and which subjects each one holds interest in.
 
 The two counts at the top frame the page. `num_connections` is how many
 connections this response actually returned; `total` is how many matched
@@ -131,7 +130,7 @@ That returns the ten connections with the most data queued — the
 clients most likely to fall behind. The full set of `/connz`
 parameters is documented in
 [Reference → connz](/reference/system/monitor/connz). We use only
-`acc`, `subscriptions`, `sort`, and `limit` here.
+`acc`, `subs`, `sort`, and `limit` here.
 
 `/routez` answers the cluster question. Each entry is one **route** —
 the link from this node to another node in `east`. It reports the
@@ -284,7 +283,7 @@ left them unexplained. The next page reads the `shipping` consumer's
 state in full and turns those raw fields into the one number that says
 "the shipping consumer is behind": **lag**.
 
-Continue to [2. JetStream health](/learn/monitoring/jetstream-health).
+Continue to [3. JetStream health](/learn/monitoring/jetstream-health).
 
 ## See also
 

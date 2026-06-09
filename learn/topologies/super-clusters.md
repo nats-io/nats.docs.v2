@@ -40,7 +40,7 @@ This page introduces two ideas:
 ## A gateway joins clusters, not servers
 
 Inside a cluster, every server holds a **route** to every other server —
-the full mesh from the [previous chapter](/learn/topologies/your-first-cluster).
+the full mesh from the [previous page](/learn/topologies/your-first-cluster).
 A **gateway** is a different kind of connection. It joins one *cluster*
 to another *cluster*.
 
@@ -139,10 +139,9 @@ Each cluster keeps the `cluster {}` block and the client `port` it had
 before. The `gateway {}` block is additive. You are not rebuilding
 `east`; you are giving it a seam to `west`.
 
-A runnable two-cluster setup, with both clusters started and joined as a
-super-cluster, lives in
-[`gateway-config.sh`](#wiring-east-to-west). Run it to watch the gateway
-form on your own machine.
+The wiring above has a runnable form: a `gateway-config.sh` script stands
+up both clusters and joins them as a super-cluster, so you can watch the
+gateway form on your own machine.
 
 ## Confirm the super-cluster formed
 

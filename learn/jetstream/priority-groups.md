@@ -82,8 +82,8 @@ Configuration:
 
               Pull Mode: true
              Ack Policy: Explicit
-         Priority Policy: overflow
-          Priority Groups: [regions]
+        Priority Policy: overflow
+        Priority Groups: [regions]
 ```
 
 The threshold lives on the pull request, not on the consumer. A
@@ -93,9 +93,8 @@ messages. (`min_ack_pending` is the sibling threshold, measured against
 unacknowledged messages instead; either one being met triggers
 delivery.)
 
-The natscli `nats consumer next` command issues a plain pull and has no
-flag for these thresholds, so the overflow pull is shown from a client
-library:
+The `nats consumer next` command issues a plain pull and has no flag for
+these thresholds, so the overflow pull is shown from a client library:
 
 <div class="nats-example" data-type="learn-jetstream-priority-groups-overflowPull" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

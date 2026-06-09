@@ -20,7 +20,7 @@ mirror answers "what site can I fail over to". You will stand one up,
 watch how far it trails the original, and learn the one sentence that
 keeps a mirror from becoming a false sense of safety.
 
-This chapter applies a mirror to disaster recovery. It does not teach how
+This page applies a mirror to disaster recovery. It does not teach how
 a mirror replicates internally — the start position, the subject
 handling, the fan-in rules. That mechanism is taught in full at
 [Mirrors & sources](/learn/jetstream/mirrors-and-sources), and this page
@@ -241,7 +241,7 @@ for per failure class, and the exact steps to **promote** `ORDERS_DR`
 into a writable `ORDERS` when the `east` site is gone.
 
 Continue to
-[3. Disaster recovery](/learn/backup-recovery/disaster-recovery).
+[4. Disaster recovery](/learn/backup-recovery/disaster-recovery).
 
 ## See also
 

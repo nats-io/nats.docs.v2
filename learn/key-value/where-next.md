@@ -81,8 +81,8 @@ something multi-megabyte, start with
 
 The [Clustering & Replication deep dive](/learn/clustering) is where the
 `Replicas` field you saw named under the hood becomes real. It covers how
-a bucket survives node loss, where the replication mechanics behind that
-field are explained in full.
+a bucket survives node loss and explains the replication mechanics behind
+that field in full.
 
 There is one more direction worth a teaser. A bucket can be sourced from
 or mirrored into another bucket: a regional `EU_INVENTORY` bucket could

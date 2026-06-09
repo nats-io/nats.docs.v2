@@ -7,10 +7,11 @@ description: Watch a running NATS deployment — where the numbers come from, wh
 
 # Monitoring & Observability Deep Dive
 
-The four chapters before this one taught you to *build*: Core NATS,
-JetStream, Security, and Topologies. You now have a NATS deployment that
-works. This chapter is the first of the Operate half, and it teaches the
-next thing you need — how to *watch* that deployment while it runs.
+The Develop chapters taught you to *build* — Core NATS, JetStream, and
+the rest — and the Operate chapters before this one stood the result up:
+the Topologies and Security deep dives gave you a NATS deployment that
+runs. This chapter teaches the next thing you need — how to *watch* that
+deployment while it runs.
 
 Monitoring is strictly about observation. This chapter shows you where
 the numbers live, which ones tell you something is wrong, and how to put

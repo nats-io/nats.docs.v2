@@ -65,7 +65,7 @@ throughout this chapter — "we only cover the keys this deployment needs"
 
 ## Sibling deep dives
 
-This chapter is the runbook. It deliberately stops at the seam of four
+This chapter is the runbook. It deliberately stops at the seam of five
 other chapters and hands each its own job, so the cluster you built here
 carries straight into them.
 
@@ -84,7 +84,7 @@ The [Security deep dive](/learn/security) owns the **auth model** behind
 the credentials this chapter mounts. This chapter turns TLS on and points
 the server at a creds file;
 [operator-mode](/learn/security/operator-mode) is where the operator
-`ACME`, the accounts, and the JWTs that creds file carries are designed.
+`ACME`, the accounts, and the JWTs that the creds file carries are designed.
 
 The [Monitoring deep dive](/learn/monitoring) owns **what to watch** once
 the cluster is live. This chapter exposes `/healthz` and runs

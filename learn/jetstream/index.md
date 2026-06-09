@@ -26,7 +26,7 @@ By the end you will have:
 
 ## Who this is for
 
-You have read the [Core Concepts](/concepts/jetstream/) primer or are
+You have read the [Core Concepts](/concepts/jetstream) primer or are
 otherwise comfortable with NATS basics — publishing, subscribing,
 subjects, and queue groups. This chapter does not re-teach those.
 

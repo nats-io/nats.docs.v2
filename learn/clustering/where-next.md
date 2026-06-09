@@ -107,7 +107,7 @@ leaders, and the `ORDERS` stream at `R=3` are still running in your
 session exactly as you left them on the previous page. You can keep
 experimenting — kill a server and watch a re-election, add a fifth peer,
 move placement — or tear it all down with `nats stream rm ORDERS` and
-stopping the three servers when you are done.
+stop the three servers when you are done.
 
 You hold the core model: routes form the mesh, RAFT groups agree, a quorum
 commits each write, placement decides where the replicas live, and peer

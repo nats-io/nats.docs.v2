@@ -63,7 +63,7 @@ helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 helm install nats nats/nats -f values.yaml
 ```
 
-Two values are worth naming. `podManagementPolicy: Parallel` tells the
+Two things are worth naming. `podManagementPolicy: Parallel` tells the
 StatefulSet to start all three pods together. The default starts them in
 order, waiting for each to become ready before the next — which deadlocks
 a NATS cluster, because no single node is ready until it can see its

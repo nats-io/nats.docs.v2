@@ -33,7 +33,7 @@ the lid and shows you the stream that was there all along.
 - A warehouse dashboard that **watches** the bucket: it receives the
   current count of every key as a snapshot, then live updates as counts
   change.
-- A safe decrement of `widget-blue` from 42 to 41 using **compare-and-swap**,
+- A safe decrement of `widget-blue` from 41 to 40 using **compare-and-swap**,
   so two concurrent sales never lose a write.
 - A `flash-sale` key with a per-key **TTL** that expires on its own, and a
   feel for the bucket-wide limits that bound the whole thing.

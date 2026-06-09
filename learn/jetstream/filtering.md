@@ -70,7 +70,7 @@ position in it.
 
 Recall from the previous page that a consumer keeps a cursor — the
 sequence number of the last message it has delivered and had
-ack. That cursor belongs to the consumer, not to the stream.
+acknowledged. That cursor belongs to the consumer, not to the stream.
 Two consumers on one stream have two independent cursors.
 
 The cursor is the consumer's own bookkeeping. The server stores it
@@ -150,7 +150,7 @@ consumer's view; it never removes messages. After `analytics` reads
 `orders.shipped`, every `orders.created` and `orders.cancelled` message is
 still stored and still readable by `shipping`. Do not reach for a filter
 to prune a stream — what stays and what ages out is decided by the
-stream's limits, covered in [8. Shaping the stream](/learn/jetstream/shaping-the-stream),
+stream's limits, covered in [13. Shaping the stream](/learn/jetstream/shaping-the-stream),
 not by any consumer.
 
 **Overlapping filters within one consumer.** Overlap _between_ consumers
@@ -164,7 +164,7 @@ the create call fails. The filters on one consumer must be disjoint — the
 rule holds whether the stream uses limits, interest, or work-queue
 retention. How work-queue retention shapes delivery once filters are in
 place is covered in
-[9. Delivery semantics](/learn/jetstream/delivery-semantics).
+[14. Delivery semantics](/learn/jetstream/delivery-semantics).
 
 ## Where you are
 

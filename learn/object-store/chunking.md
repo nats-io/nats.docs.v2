@@ -125,8 +125,8 @@ carries its own protocol framing — headers and subject routing on top of
 the slice of bytes — so very small chunks waste storage on per-message
 overhead and slow puts and gets down. Set it too large and the chunk exceeds
 the backing stream's maximum message size, and the put fails outright: the
-chunk size is clamped to that stream limit, so an oversized value rejects
-the store rather than quietly splitting some other way. Do not tune the
+store rejects an oversized value rather than quietly splitting some other
+way. Do not tune the
 chunk size to chase a benchmark; the 128 KB default fits almost every
 file. If you must change it, stay well inside the stream's max message
 size — covered on

@@ -149,7 +149,7 @@ removing the layer above leaves a working deployment behind.
 
 One command surveys every layer. From a client with system-account
 access, `nats server list` reports each server, which cluster it
-belongs to, and its route, gateway, and leaf connection counts:
+belongs to, and its route and gateway connection counts:
 
 ```bash
 nats server list

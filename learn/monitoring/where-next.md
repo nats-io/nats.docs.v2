@@ -64,9 +64,9 @@ reach for most.
 
 ## Sibling deep dives
 
-This is the first chapter of the Operate half. The others pick up exactly
-where a metric stops: this chapter names the symptom, the Operate
-siblings own the fix.
+This chapter sits in the Operate half alongside its siblings. The others
+pick up exactly where a metric stops: this chapter names the symptom, the
+Operate siblings own the fix.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) is what you
 reach for when the lag you measured here will not drain on its own. It
@@ -100,8 +100,8 @@ leave the deployment running.
 You hold the core model: the live numbers come from the monitoring
 endpoints, lag comes from consumer state, the events you did not poll for
 come from advisories, and the history that turns a number into an alert
-comes from the exporter. That model is the floor for every other Operate
-chapter you will meet.
+comes from the exporter. Those four sources together are how you keep a
+NATS deployment observable in production.
 
 ## Production checklist
 
