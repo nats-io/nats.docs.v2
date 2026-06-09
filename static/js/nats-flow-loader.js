@@ -64,7 +64,7 @@
       return;
     }
 
-    const { NatsFlow, ToggleableSubscribersScenario, QueueGroupAnimated, PublishSubscribeAnimated, SubjectsWildcardAnimated, JetStreamContrastAnimated, JetStreamConsumersAnimated, scenarios } = components;
+    const { NatsFlow, ToggleableSubscribersScenario, scenarios } = components;
 
     // Wait for React to be available
     const { React, ReactDOM } = await waitForReact();
@@ -88,64 +88,21 @@
           return;
         }
 
-        // Special case: queueGroupAnimated uses a custom animated component
-        if (scenarioName === 'queueGroupAnimated') {
-          const root = ReactDOM.createRoot(container);
-          const element = React.createElement(QueueGroupAnimated, {
-            width,
-            height,
-          });
-          root.render(element);
-          container.setAttribute('data-initialized', 'true');
-          return;
-        }
-
-        // Special case: publishSubscribeAnimated uses a custom animated component
-        if (scenarioName === 'publishSubscribeAnimated') {
-          const root = ReactDOM.createRoot(container);
-          const element = React.createElement(PublishSubscribeAnimated, {
-            width,
-            height,
-          });
-          root.render(element);
-          container.setAttribute('data-initialized', 'true');
-          return;
-        }
-
-        // Special case: subjectsWildcardAnimated uses a custom animated component
-        if (scenarioName === 'subjectsWildcardAnimated') {
-          const root = ReactDOM.createRoot(container);
-          const element = React.createElement(SubjectsWildcardAnimated, {
-            width,
-            height,
-          });
-          root.render(element);
-          container.setAttribute('data-initialized', 'true');
-          return;
-        }
-
-        // Special case: jetStreamContrastAnimated uses a custom animated component
-        if (scenarioName === 'jetStreamContrastAnimated') {
-          const root = ReactDOM.createRoot(container);
-          const element = React.createElement(JetStreamContrastAnimated, {
-            width,
-            height,
-          });
-          root.render(element);
-          container.setAttribute('data-initialized', 'true');
-          return;
-        }
-
-        // Special case: jetStreamConsumersAnimated uses a custom animated component
-        if (scenarioName === 'jetStreamConsumersAnimated') {
-          const root = ReactDOM.createRoot(container);
-          const element = React.createElement(JetStreamConsumersAnimated, {
-            width,
-            height,
-          });
-          root.render(element);
-          container.setAttribute('data-initialized', 'true');
-          return;
+        // Generic: any "<name>Animated" data-scenario renders the matching
+        // PascalCase component exported on window.NatsFlow
+        // (e.g. "clusterMeshAnimated" -> ClusterMeshAnimated). New animated
+        // scenarios need NO edit here — just export the component from the
+        // NatsFlow barrel and register it in client-module.tsx.
+        if (scenarioName && scenarioName.endsWith('Animated')) {
+          const componentName = scenarioName.charAt(0).toUpperCase() + scenarioName.slice(1);
+          const AnimatedComponent = components[componentName];
+          if (typeof AnimatedComponent === 'function') {
+            const root = ReactDOM.createRoot(container);
+            root.render(React.createElement(AnimatedComponent, { width, height }));
+            container.setAttribute('data-initialized', 'true');
+            return;
+          }
+          console.error(`Unknown animated scenario: ${scenarioName} (expected component ${componentName} on window.NatsFlow)`);
         }
 
         const scenario = scenarios[scenarioName];

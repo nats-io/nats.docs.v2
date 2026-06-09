@@ -11,6 +11,8 @@ and encryption. For each of these, NATS provides flexible options to fit a wide
 range of use cases, from simple development environments to complex production
 deployments.
 
+For a runnable, step-by-step treatment, see the [Security deep dive](/learn/security).
+
 ## Accounts and Users
 
 NATS is multitenant by design. Each NATS user belongs to an account — a
@@ -135,7 +137,9 @@ nats pub --user alice --password s3cret orders.created "hello"
 nats pub --user alice --password s3cret billing.invoice "nope"
 ```
 
-## Related Concepts
+## Next steps
 
-- [Subjects](./subjects) - the flexible addressing system that enables powerful
-  filtering and routing capabilities.
+- [Security deep dive](/learn/security) — secure a deployment end to end
+- [Encryption & TLS](/learn/security/encryption) — secure connections in transit
+- [Operator mode](/learn/security/operator-mode) — decentralized JWT-based auth
+- [Subjects](./subjects) — the addressing system permissions are built on

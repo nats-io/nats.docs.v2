@@ -1,7 +1,92 @@
 ---
-title: "Key-Value Store"
+id: index
+title: Key-Value Store
+sidebar_position: 1
+description: Buckets, keys, watching, revisions, and TTL, built on the stream you already have
 ---
 
 # Key-Value Store
 
-{/* TODO(learn): stub — structure-only scaffold. Write this page. */}
+NATS gives you a key-value store, and it is not a separate database. A
+bucket is a JetStream stream named `KV_<bucket>` whose subjects are
+`$KV.<bucket>.>`; a key is the last token of that subject, and a value is
+a message on it. Everything in this chapter is that one stream wearing a
+friendlier face.
+
+That framing is the whole game, so hold onto it from the start. When you
+`put` a value you are appending a message. When you `get` a value you are
+reading the last message for a subject. When you `watch` a bucket you are
+opening a consumer. The friendly API — `put`, `get`, `watch`, `create`,
+`update`, TTL — is what you use day to day, and the stream underneath is
+what makes it work.
+
+This chapter teaches the abstraction first and reveals the stream last.
+Pages 1 through 4 teach you the key-value API on its own terms, so you
+can be productive without memorizing JetStream internals. Page 5 lifts
+the lid and shows you the stream that was there all along.
+
+## By the end you will have
+
+- An `INVENTORY` bucket whose keys are SKUs — `widget-blue`, `widget-red`,
+  `gadget-pro` — and whose values are stock counts the inventory service
+  reads and decrements.
+- A warehouse dashboard that **watches** the bucket: it receives the
+  current count of every key as a snapshot, then live updates as counts
+  change.
+- A safe decrement of `widget-blue` from 42 to 41 using **compare-and-swap**,
+  so two concurrent sales never lose a write.
+- A `flash-sale` key with a per-key **TTL** that expires on its own, and a
+  feel for the bucket-wide limits that bound the whole thing.
+- A clear picture of the `KV_INVENTORY` stream underneath — the subjects,
+  the direct read path, and the difference between delete and purge.
+
+## Who this is for
+
+You have read the [JetStream Deep Dive](/learn/jetstream) or the
+[Core Concepts → JetStream](/concepts/jetstream) primer, so the sentence
+"a stream stores messages" already means something to you. This chapter
+does not re-teach what a stream is, how a consumer tracks its position,
+or how acknowledgment works. Where you would want those, it names the gap
+and links back to [JetStream](/learn/jetstream).
+
+You do not need to know anything about key-value specifically. We start
+from "what is a bucket and why would you want one" and grow from there.
+
+## How to read it
+
+Each page introduces at most two new concepts. Pages build on the
+previous one: the same `INVENTORY` bucket is used throughout, and you can
+keep one terminal open through the whole chapter without resetting state.
+You create the bucket on page 1, add a watcher on page 2, decrement a key
+safely on page 3, give a key a TTL on page 4, and inspect the stream
+underneath on page 5.
+
+Key-value has many knobs — every bucket limit, every watch option, every
+header on the wire. Where a feature has a long list, the page covers only
+what you need to understand the concept. Because a bucket is created as a
+stream, the full set of bucket configuration options is documented in
+[Reference → Create Stream](/reference/jetstream/api/stream/create).
+
+## Map
+
+| # | Page | What you learn |
+|---|---|---|
+| 1 | [Your first bucket](./your-first-bucket) | Create `INVENTORY`, put and get `widget-blue`, and read its status |
+| 2 | [Watching](./watching) | Receive a snapshot of every key, then live changes as they happen |
+| 3 | [History and revisions](./history-and-revisions) | Track revisions, read history, and decrement safely with compare-and-swap |
+| 4 | [TTL and limits](./ttl-and-limits) | Expire a single key with a per-key TTL, and bound the bucket with limits |
+| 5 | [Under the hood](./under-the-hood) | See the `KV_INVENTORY` stream, the direct read, and delete versus purge |
+| 6 | [Where to go next](./where-next) | A map of what is beyond key-value, and one pre-production checklist |
+
+## Prerequisites
+
+You will need:
+
+- A working `nats-server` with JetStream enabled. The key-value store is
+  built on JetStream, so JetStream must be on. The simplest way is
+  `nats-server -js`.
+- The `nats` CLI installed and pointed at your server. The first page
+  uses only the CLI. Later pages add JavaScript, Go, Python, Java, Rust,
+  and C# examples for the same operations.
+
+Open a terminal, run `nats-server -js`, and turn the page.

@@ -145,6 +145,40 @@ WorkQueue interact with stream republish, mirrors, and sources — is
 documented in [Reference → Stream Configuration](/reference/jetstream/api/stream/create).
 We use only the three `retention` values here.
 
+## Pitfalls
+
+Two of these are specific to the non-default policies, and the server
+enforces both — they fail loudly at create or edit time, not silently in
+production.
+
+**Retention to or from WorkQueue is locked after creation.** The earlier
+trap was about switching at all rewriting your history. There is a harder
+rule underneath it: the server lets you swap Limits and Interest on a
+live stream, but it flatly refuses any change that adds or removes
+WorkQueue. A stream that is not WorkQueue at creation can never become
+one, and a WorkQueue stream can never leave the policy.
+
+Do not plan a migration path that edits retention into or out of
+WorkQueue. Create a new stream with the policy you want and move the
+data. The edit below is rejected with `stream configuration update can
+not change retention policy to/from workqueue`.
+
+<div class="nats-example" data-type="learn-jetstream-delivery-semantics-retentionSwitchRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**WorkQueue rejects consumers that overlap.** Because the first ack
+removes a message for everyone, the server will not let two consumers
+claim the same message. Adding a second unfiltered consumer, or two
+consumers whose filters collide, fails the create — `multiple
+non-filtered consumers not allowed on workqueue stream`, or `filtered
+consumer not unique on workqueue stream` for overlapping filters.
+
+Give each consumer a filter that partitions the subjects so no message
+belongs to two of them. A worker *pool* sharing one consumer is the
+other valid shape — see [9. A pool of
+workers](/learn/jetstream/worker-pool).
+
+<div class="nats-example" data-type="learn-jetstream-delivery-semantics-workqueueOverlap" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
 ## Where you are
 
 `ORDERS` is unchanged. It is still a Limits stream, still holds its

@@ -172,6 +172,42 @@ The full set of ack and replay policies is documented in
 [Reference → Consumer API](/reference/jetstream/api/consumer).
 We use only `explicit` and `instant` here.
 
+## Pitfalls
+
+The four responses and two controls are simple on their own. The traps
+live where they meet.
+
+**A plain nak loops as fast as the network.** A nak with no delay asks
+for redelivery in the same instant, so a transient failure retries
+immediately, fails again, and pins one worker on one message. Do not
+nak a transient failure bare; nak with a delay, or set a backoff on the
+consumer so the wait grows each round (covered above).
+
+**A poison message with no term path burns every attempt.** Without
+term, a malformed payload is nak'd over and over until MaxDeliver
+gives up — wasting the full delivery budget and blocking the worker
+behind it. When the code can tell no future attempt will succeed,
+answer term so the message exits the pending list at once instead of
+grinding through the limit.
+
+**MaxDeliver drops a message with no dead-letter.** When a message hits
+the delivery limit, the server removes it from the consumer's pending
+list and never delivers it again. The message stays in the stream, but
+the `shipping` consumer's normal output says nothing — the drop is easy
+to miss. JetStream has no built-in dead-letter queue. The drop is
+observable, though: the server publishes an advisory the moment a
+message exceeds its limit. Subscribe to it so a poison
+`order_id` does not vanish unnoticed:
+
+<div class="nats-example" data-type="learn-jetstream-acknowledgment-watchMaxDeliveries" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**AckWait shorter than real processing time causes double work.** If a
+job routinely takes longer than AckWait and the worker never sends
+in-progress, the server decides the worker died and redelivers a
+message that is still being processed — so two workers run the same
+order. Either raise AckWait to cover the slow case, or send in-progress
+to reset the timer while a long job runs (both covered above).
+
 ## Where you are
 
 The `shipping` consumer is unchanged in shape — still pull, still

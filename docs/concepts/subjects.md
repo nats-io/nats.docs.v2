@@ -9,6 +9,8 @@ import { WildcardComparison } from '@site/src/components/NatsFlow';
 
 NATS implements a subject-based messaging system where publishers and subscribers communicate through named channels called subjects. This provides a location-transparent, interest-based communication pattern that automatically routes messages across distributed NATS servers.
 
+For a runnable, step-by-step treatment, see the [Subjects and wildcards in the Core NATS deep dive](/learn/core-nats/subjects-and-wildcards).
+
 ## What is a Subject?
 
 A subject is a string of characters that forms a name which publishers and subscribers use to find each other. It acts as the address for message routing within NATS. Subjects are case-sensitive and can contain any UTF-8 characters except whitespace, tabs and line breaks. It's a good practice to use alphanumeric characters along with `-` (dash) and `_` (underscore) for readability.
@@ -171,3 +173,8 @@ nats pub demo.another.topic "Another topic"
 ```
 
 Each message published in Terminal 2 will be received by the wildcard subscription in Terminal 1, demonstrating how subject hierarchies and wildcards work together.
+
+## Next steps
+
+- [Subjects and wildcards in the Core NATS deep dive](/learn/core-nats/subjects-and-wildcards) — runnable, step-by-step walkthrough
+- [Subject-based authorization](/learn/security/authorization) — control access by subject pattern

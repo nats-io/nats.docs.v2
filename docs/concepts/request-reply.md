@@ -7,6 +7,8 @@ description: Synchronous communication pattern in NATS
 
 Request-Reply is a communication pattern that brings synchronous communication to NATS's asynchronous messaging system. It allows a client to send a request and wait for a response, building RPC-style interactions on top of the core publish-subscribe mechanism.
 
+For a runnable, step-by-step treatment, see the [request-reply chapter in the Core NATS deep dive](/learn/core-nats/request-reply).
+
 ## How Request-Reply Works
 
 Under the hood, request-reply uses NATS's publish-subscribe with these steps:
@@ -131,3 +133,8 @@ Use publish-subscribe when you need:
 Create a simple calculator service:
 
 <div class="nats-example" data-type="request-reply-calculator" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+## Next steps
+
+- [Request-reply in the Core NATS deep dive](/learn/core-nats/request-reply) — runnable, step-by-step walkthrough
+- [The Services framework](/learn/services) — build production request-reply services

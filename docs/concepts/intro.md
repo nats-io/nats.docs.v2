@@ -29,3 +29,8 @@ NATS has a vibrant and growing community:
 - Check out [examples and tutorials](https://github.com/nats-io/nats-examples)
 
 Ready to dive in? Start with **[What is NATS?](./what-is-nats.md)** →
+
+## Next steps
+
+- [Start with the Core NATS deep dive](/learn/core-nats) — hands-on, end-to-end walkthrough
+- [Browse the Learn section](/learn) — all guided deep-dive chapters

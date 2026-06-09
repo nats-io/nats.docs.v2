@@ -28,8 +28,8 @@ decides how the server serves pulls for that label.
 You set two fields when you create the consumer:
 
 - **`PriorityGroups`** — the list of group names the consumer supports.
-  Today a consumer has exactly one group. Naming more than one is an
-  error the server rejects.
+  Today a consumer acts on exactly one group; naming more than one is
+  accepted but only the first takes effect (see Pitfalls).
 - **`PriorityPolicy`** — the rule the server applies: `overflow`,
   `pinned_client`, or `prioritized`.
 
@@ -198,6 +198,45 @@ full set of priority-group options — every field including
 the advisories — is documented in
 [Reference → Consumer API](/reference/jetstream/api/consumer/info) and in
 [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md).
+
+## Pitfalls
+
+Priority groups have a small surface, but a few traps catch people who
+read the happy path and stop there.
+
+**One group per consumer.** A consumer acts on exactly one priority
+group today. The `--overflow-groups` and `--pinned-groups` flags take a
+comma list, so passing two looks legal — and the server accepts it — but
+it silently uses only the first group and ignores the rest. Multiple
+groups per consumer is reserved for a future server release. To split
+work by region or tier now, run separate consumers on the same stream,
+each with its own group, rather than reaching for multiple groups on
+one.
+
+<div class="nats-example" data-type="learn-jetstream-priority-groups-oneGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**`failover` is designed, not shipped.** As the overflow section noted,
+the `failover` timer from ADR-42 is silently ignored by NATS Server 2.14
+— no field parses it, and no error tells you. The trap for developers:
+a pull that relies on `failover` to step in below the threshold simply
+never fires. Use only `min_pending` and `min_ack_pending` for now, and
+treat `failover` as planned.
+
+**The pin is not a lock.** The server can switch the pinned client while
+that client still believes it holds the pin — a long-running handler can
+finish work the server already reassigned. Do not treat the pin as
+exclusive ownership. A pull that carries a now-stale `Nats-Pin-Id` comes
+back with a `423`; clear the stored ID and pull plain to rejoin the
+standby pool. If processing must never double up, lean on explicit acks
+and idempotent handlers, not on the pin alone.
+
+**A quiet pinned client keeps the pin.** The pin only resets when the
+pinned client pulls again within `--pinned-ttl`. A client that holds the
+pin but stops pulling — blocked on a slow handler, say — keeps every
+other client parked until the timeout fires. Keep each pull's `expires`
+comfortably under the pin timeout so the client always pulls again in
+time to renew. The cluster mechanics behind which node serves these
+pulls are covered in [clustering](/learn/clustering).
 
 ## Where you are
 

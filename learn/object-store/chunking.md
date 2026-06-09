@@ -1,7 +1,172 @@
 ---
-title: "Chunking"
+id: chunking
+title: 2. Chunking
+sidebar_position: 3
+description: How a large invoice is split into chunks, reassembled, and verified by its digest
 ---
 
-# Chunking
+# 2. Chunking
 
-{/* TODO(learn): stub — structure-only scaffold. Write this page. */}
+On the last page you put a small invoice into `INVOICES` and got it back.
+The bytes were small enough to feel atomic — one put, one get, done. But
+NATS messages have a size limit, and an invoice PDF can be far larger than
+any single message. So how did a file land in a message store at all?
+
+It did not land in one message. The store split it. This page is about
+that split: how an object becomes **chunks**, how get puts them back
+together, and what happens when a put fails partway through.
+
+## An object is split into chunks
+
+A **chunk** is one message holding a slice of an object. When you put an
+object, the store does not try to fit the whole file in a single message.
+It reads the bytes in order and cuts them at a fixed boundary called the
+**chunk size**, writing each slice as its own message. A 3 MB invoice
+becomes a sequence of chunk messages, not one giant one.
+
+The default chunk size is **128 KB**. You did nothing to enable splitting
+on the last page — the small invoice simply fit in a single chunk. A
+larger file crosses the boundary and produces several.
+
+Put a 3 MB invoice and read the chunk count back:
+
+<div class="nats-example" data-type="learn-object-store-chunking-putLarge" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+This stores `invoice-ord_9x3m.pdf`, the large invoice for one Acme order.
+The `nats object info` output now carries a `Chunks` field — the count of
+chunk messages the bytes were split into. At the 128 KB default, a 3 MB
+file lands in roughly 24 chunks.
+
+You never ask for chunks and you never see them as separate things after
+the fact. They are an implementation detail of how the store fits a file
+into a message log. The object you put and the object you get are the same
+bytes; the chunking happens in between.
+
+## Get reassembles and verifies
+
+A get is the split run backwards. The store reads the object's chunks in
+order, concatenates them, and hands you the reassembled bytes — exactly
+the file you put. You do not reassemble anything yourself; the convenience
+forms (get-to-bytes, get-to-file, get-to-stream) all give you a whole
+object.
+
+While it reassembles, the store does one more thing: it recomputes the
+SHA-256 **digest** over the bytes and compares it to the digest stored
+when the object was put. (You met the digest on the
+[last page](/learn/object-store/your-first-object): it is the integrity
+hash put computes as it stores.) If the two digests match, the bytes are
+intact and you get them. If they do not match — a chunk is missing or
+corrupted — the get fails instead of handing you a truncated file.
+
+That verification is why get is safe even though the bytes traveled as
+many separate messages. The digest is computed over the whole object, so a
+single missing or reordered chunk changes it and the get refuses to
+return.
+
+The put/get flow — chunks out, then a metadata message; metadata in, then
+the chunks, then the digest check — looks like this:
+
+<div class="nats-flow" data-scenario="objectPutGetAnimated" data-width="600" data-height="350"></div>
+
+The metadata message that follows the chunks carries the object's name,
+size, digest, and chunk count. We define what else it holds — descriptions,
+headers, links — on the [next page](/learn/object-store/metadata-and-links).
+For now it is enough to know the chunks come first and the metadata closes
+the put.
+
+## A failed put leaves no half-objects
+
+Chunks publish one after another, so a put is not instantaneous. A network
+drop or a crashed client can stop a put after some chunks have landed but
+before the rest do. What happens to the chunks that made it?
+
+They are purged. A put that fails mid-stream removes its partial chunks
+before it returns the error, so a failure leaves the store as it was, not
+half-written. There is no leftover sequence of orphan chunks for a later
+get to stumble on.
+
+This works because each put gets a **fresh identity**. The chunks of one
+put are tagged with a unique id generated for that put alone, separate from
+the object's name. When you put the same object name twice — a corrected
+invoice over a draft — the second put's chunks never overlap the first's.
+The store writes the new chunks under the new identity, swings the object's
+metadata to point at them, and the old chunks fall away. A re-put is a
+clean replacement, never a merge.
+
+So two failure modes you might fear do not happen. A put that dies partway
+does not leave a broken object behind, and a re-put does not splice new
+bytes into old ones. Either you get the whole object you put, or the get
+tells you that you cannot.
+
+## Choosing a chunk size
+
+The chunk size is a knob. You can set it per put, and it changes how many
+messages the object becomes:
+
+<div class="nats-example" data-type="learn-object-store-chunking-chunkSize" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The same 3 MB invoice splits into more messages at a smaller chunk size
+and fewer at a larger one. The default of 128 KB is a reasonable middle
+for most files, and most of the time you leave it alone.
+
+The full set of chunk-size options is documented in
+[Reference](/reference/). We only need the behavior here.
+
+## Pitfalls
+
+Two traps show up once objects get large. Each is scoped to this page:
+the chunk size, and the integrity check on get.
+
+**A chunk size at the extremes hurts.** Set it too small and a single file
+becomes thousands of tiny messages, each with its own framing overhead —
+more storage, slower puts and gets. Set it too large and the chunk exceeds
+the backing stream's maximum message size, and the put fails outright: the
+chunk size is clamped to that stream limit, so an oversized value rejects
+the store rather than quietly splitting some other way. Do not tune the
+chunk size to chase a benchmark; the 128 KB default fits almost every
+file. If you must change it, stay well inside the stream's max message
+size — covered on
+[Shaping the stream](/learn/jetstream/shaping-the-stream). Don't push the
+chunk size up to make "fewer messages" your goal — past the stream limit
+it stops storing anything.
+
+**Never trust the bytes before the get returns cleanly.** Because chunks
+publish asynchronously, an unchecked failure mid-put can leave an object
+that fails its digest check on the way back out. A get that hits a missing
+chunk or a digest mismatch errors — it does not hand you a truncated file.
+So always check the get result before you use the bytes, and re-put from
+the source on failure rather than shipping a partial invoice. Don't assume
+a put "worked" without confirming a get reassembles and verifies it.
+
+Guard the get on its outcome, and re-put on failure:
+
+<div class="nats-example" data-type="learn-object-store-chunking-verifyAfterGet" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+## Where you are
+
+You now have:
+
+- A large `invoice-ord_9x3m.pdf` stored across multiple chunks in
+  `INVOICES`, with a `Chunks` count you can read.
+- A mental model of put as split-then-store and get as
+  reassemble-then-verify.
+- The two guarantees that make that safe: a failed put purges its partial
+  chunks, and a re-put under a fresh identity never overlaps old bytes.
+
+The chunks carry the data. The metadata message that closes each put
+carries everything *about* the object — and that is the next page.
+
+## What is next
+
+The metadata message named the object, its size, and its digest. It can
+carry more: a human-readable **description**, HTTP-style **headers**, a
+free-form key/value map, and **links** from one object to another.
+
+Continue to [3. Metadata and links](/learn/object-store/metadata-and-links).
+
+## See also
+
+- [Your first object](/learn/object-store/your-first-object) — where put,
+  get, and the digest were introduced.
+- [Shaping the stream](/learn/jetstream/shaping-the-stream) — the backing
+  stream's maximum message size, which bounds the chunk size.

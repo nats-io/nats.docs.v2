@@ -134,6 +134,43 @@ subject, and the exact header semantics — is documented in
 [Reference → Per-Message TTL](/reference/jetstream/api/headers). We
 use only `AllowMsgTTL` and the `Nats-TTL` header here.
 
+## Pitfalls
+
+A few ways per-message TTL bites in practice.
+
+**A TTL header on a stream that never opted in fails the publish — it
+does not store the message untimed.** The server rejects the
+`Nats-TTL` header with a `per-message TTL is disabled` error
+(`err_code` 10166), and the publish returns no `PubAck`. The danger is
+assuming the message landed with its TTL when it never landed at all.
+Do check the `Allows Per-Message TTL` line in `nats stream info ORDERS`
+before you rely on the header; do not treat a TTL publish as
+fire-and-forget on a stream you have not confirmed opted in.
+
+<div class="nats-example"
+     data-type="learn-jetstream-message-ttl-ttl-on-disabled-stream"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**A short TTL deletes the message whether or not a consumer read it.**
+The TTL is a clock on the *stored copy*, not a delivery guarantee. If
+the `shipping` consumer is down or backed up when a 60-second
+`orders.cancelled` TTL fires, the server deletes the message unread and
+nobody ever processes the cancellation. Do size the TTL to outlast the
+slowest healthy consumer's lag; do not set a TTL shorter than the
+window in which the message still has to be acted on.
+
+**Enabling `AllowMsgTTL` leaves no trace when a TTL empties a
+subject — delete markers are a second, separate opt-in.** With only
+`AllowMsgTTL` on, an expired last-value-for-a-subject simply vanishes;
+a watcher sees no signal that it went. Delete markers fix that, but
+they need `SubjectDeleteMarkerTTL` set too — and once set, that value
+becomes a *floor*: a per-message `Nats-TTL` below it is silently raised
+to the floor, not rejected. Do set `--subject-del-markers-ttl` only
+when downstream consumers must learn that a value expired, and keep it
+at or below your shortest intended per-message TTL. The markers
+themselves are documented in
+[Reference → Per-Message TTL](/reference/jetstream/api/headers).
+
 ## Where you are
 
 `ORDERS` now has `AllowMsgTTL` enabled — a switch you cannot turn back
