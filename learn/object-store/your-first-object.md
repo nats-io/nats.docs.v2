@@ -107,11 +107,12 @@ and get as if they could not fail.
 are written as separate messages. If a put is interrupted partway — the
 process dies, the connection drops — the object can be left incomplete.
 The store guards against this on get: it verifies the reassembled bytes
-against the stored digest and returns an error on a mismatch. The trap is
-to ignore that error and use the bytes anyway. Do check the get
-result before you act on it; a mismatch means retry the get, and a
-repeated mismatch means the object is damaged and should be put again.
-Don't assume a put "worked" without a get confirming it round-trips.
+against the stored digest and returns `ErrDigestMismatch` on a mismatch.
+The trap is to ignore that error and use the bytes anyway. Do check the
+get result before you act on it; an `ErrDigestMismatch` means retry the
+get, and a repeated mismatch means the object is damaged and should be
+put again. Don't assume a put "worked" without a get confirming it
+round-trips.
 
 **Getting a missing object is an error, not empty bytes.** Ask for a name
 that was never put, or one that has been deleted, and get fails with a

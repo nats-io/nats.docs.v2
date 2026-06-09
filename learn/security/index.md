@@ -75,8 +75,10 @@ and subjects. This chapter does not re-teach those.
 
 It also assumes you have met JetStream, since the running scenario is the
 same `ORDERS` platform. If you have not, the
-[JetStream Deep Dive](/concepts/jetstream) primer is enough background.
-You do not need to have built the streams to follow the security work.
+[Core Concepts → JetStream](/concepts/jetstream) primer is enough
+background, and the [JetStream deep dive](/learn/jetstream) covers it in
+full. You do not need to have built the streams to follow the security
+work.
 
 ## How to read it
 

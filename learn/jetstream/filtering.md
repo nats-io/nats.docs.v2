@@ -58,9 +58,9 @@ Configuration:
        Replay Policy: Instant
 ```
 
-`Filter Subject: orders.shipped` is the whole point. Without a filter,
-that line reads `Filter Subject: ` (empty), meaning "every subject in
-the stream."
+`Filter Subject: orders.shipped` is the whole point. The `shipping`
+consumer has no filter, so its info output omits this line entirely —
+no filter line at all means "every subject in the stream."
 
 ## Two consumers, two positions
 
@@ -70,7 +70,7 @@ position in it.
 
 Recall from the previous page that a consumer keeps a cursor — the
 sequence number of the last message it has delivered and had
-ack. That cursor belongs to the consumer, not to the stream.
+acknowledged. That cursor belongs to the consumer, not to the stream.
 Two consumers on one stream have two independent cursors.
 
 The cursor is the consumer's own bookkeeping. The server stores it
@@ -150,19 +150,21 @@ consumer's view; it never removes messages. After `analytics` reads
 `orders.shipped`, every `orders.created` and `orders.cancelled` message is
 still stored and still readable by `shipping`. Do not reach for a filter
 to prune a stream — what stays and what ages out is decided by the
-stream's limits, covered in [8. Shaping the stream](/learn/jetstream/shaping-the-stream),
+stream's limits, covered in [13. Shaping the stream](/learn/jetstream/shaping-the-stream),
 not by any consumer.
 
-**Overlapping filters within one consumer.** Two separate consumers whose
-filters overlap each get their own full copy of the matching messages —
-that overlap is exactly the cheap fan-out this page relies on, and the
-stream's retention policy never changes it. What the server does reject is
-overlap _inside a single consumer_: if you give one consumer several filter
-subjects and any of them is a subset of another, the create call fails. The
-filters on one consumer must be disjoint, regardless of whether the stream
-uses limits, interest, or work-queue retention. How work-queue retention
-shapes message delivery once filters are in place is covered in
-[9. Delivery semantics](/learn/jetstream/delivery-semantics).
+**Overlapping filters within one consumer.** Overlap _between_ consumers
+is fine: two separate consumers whose filters match the same subject each
+get their own full copy of those messages. That is the cheap fan-out this
+page relies on, and no retention policy changes it.
+
+Overlap _inside_ one consumer is what the server rejects. If you give a
+single consumer several filter subjects and any one is a subset of another,
+the create call fails. The filters on one consumer must be disjoint — the
+rule holds whether the stream uses limits, interest, or work-queue
+retention. How work-queue retention shapes delivery once filters are in
+place is covered in
+[14. Delivery semantics](/learn/jetstream/delivery-semantics).
 
 ## Where you are
 

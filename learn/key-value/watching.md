@@ -85,7 +85,7 @@ makes runnable.
 
 Watching the whole bucket gives you every key. Often you want fewer. A
 watch takes an optional key filter, and that filter is a wildcard matched
-the same way subject tokens are: `*` matches a single token. (Keys map to
+just as in NATS subjects: `*` matches a single token. (Keys map to
 subject tokens — that is the [subjects](/concepts/subjects) model the
 backing stream is built on.)
 
@@ -100,10 +100,13 @@ watcher; a put to `widget-red` does. The filter applies to both halves,
 snapshot and live, so a filtered watch is a smaller, cheaper view of the
 bucket rather than a firehose you sift afterward.
 
-A watch has a few more options — replaying full history instead of just
-the current snapshot, ignoring deletes, or skipping the snapshot to see
-only updates. They tune the same two halves you just saw. The full set of
-watch options is documented in
+A watch supports a few more options, each tuning the same two halves you
+just saw: `IncludeHistory` replays the full history of every key instead
+of just the current snapshot, `IgnoreDeletes` skips deleted keys,
+`UpdatesOnly` drops the snapshot so you see only live changes, and
+`MetaOnly` sends each entry's metadata without its value. They are
+independent — you can combine them. The full set of watch options is
+documented in
 [Reference → Create Stream](/reference/jetstream/api/stream/create),
 which is the configuration the watch's consumer is built from.
 

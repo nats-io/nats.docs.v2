@@ -109,7 +109,8 @@ connections, `factory-1` declares a **remote** — the hub it dials.
 
 A remote lives in `leafnodes.remotes` and carries three things that
 matter for this page: the hub `urls`, the `credentials` that prove who
-the leaf is, and the `account` the leaf binds to on the hub.
+the leaf is, and the `account` the leaf's bridged interest joins
+locally.
 
 ```conf
 # factory-1.conf — a leaf that dials the east cluster
@@ -143,7 +144,8 @@ able to dial; the leaf tries them in turn.
 ## Where the leaf's traffic lands: the account field
 
 The `account` field finishes the picture of how the leaf bridges. It
-says which account on the hub the leaf's traffic belongs to.
+names which **local** account on the leaf the bridged link joins — the
+account a factory machine's traffic flows into on `factory-1` itself.
 
 An account is NATS's unit of subject isolation — its own flat space of
 subjects, separate from every other account. Acme runs the ORDERS
@@ -152,16 +154,25 @@ and Security chapters use. The leaf does not introduce the account
 concept; it reuses the existing `ORDERS` account and simply names which
 one its bridged interest joins.
 
-When `factory-1` binds its remote to `account: "ORDERS"`, every subject
-a factory machine publishes lands in the hub's `ORDERS` account, and
-every `orders.>` subscriber in that account on the hub can receive it.
-The factory floor and the cloud share one subject space because they
-share one account.
+Two accounts are in play, one on each end of the link. The `account`
+field above selects the account on the *leaf*; the `credentials` the
+remote presents decide which account the leaf attaches to on the *hub*.
+Acme names both `ORDERS`, so the leaf's local `ORDERS` account and the
+hub's `ORDERS` account become one shared subject space across the link.
+That symmetry is a choice, not a requirement — but it is the simple,
+common setup, and the one to reach for first.
 
-The `credentials` file is how the hub knows to allow that binding. It
-holds the leaf's user identity; the hub checks it against its own
-authorization before attaching the leaf to the `ORDERS` account. A
-factory cannot bind to an account it has no credentials for.
+With that binding in place, every subject a factory machine publishes
+into `factory-1`'s `ORDERS` account reaches every `orders.>` subscriber
+in the hub's `ORDERS` account, and vice versa. The factory floor and the
+cloud share one subject space because both ends of the link sit in an
+`ORDERS` account.
+
+The `credentials` file is how the hub knows which account to attach the
+leaf to, and that it is allowed at all. It holds the leaf's user
+identity; the hub checks it against its own authorization before
+attaching the leaf to the hub's `ORDERS` account. A factory cannot reach
+a hub account it has no credentials for.
 
 How those credentials are minted, and how the hub authorizes leaf
 connections, is the job of the [Security deep dive](/learn/security). We
@@ -248,9 +259,9 @@ from a config field doing exactly what it says — just not what you
 meant.
 
 **The leaf binds to the wrong account.** The `account` field on a remote
-decides which account on the hub the leaf's interest joins. Name the
-wrong account, or omit it and let the leaf fall back to the hub's
-default account, and the link still comes up green — but a factory
+decides which local account on the leaf the bridged link joins. Name the
+wrong account, or omit it and let the leaf fall back to its own default
+account (`$G`), and the link still comes up green — but a factory
 subject never matches a hub subscriber, because they sit in different
 accounts. Do not assume the binding; read it. The `Account` column in
 `nats server report leafnodes` shows the account the leaf actually

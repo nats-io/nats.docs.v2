@@ -226,7 +226,7 @@ happened.
 
 The next page subscribes to those announcements.
 
-Continue to [3. Advisories and events](/learn/monitoring/advisories-and-events).
+Continue to [4. Advisories & events](/learn/monitoring/advisories-and-events).
 
 ## See also
 

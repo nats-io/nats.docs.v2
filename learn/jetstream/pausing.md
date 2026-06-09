@@ -13,7 +13,7 @@ exactly where it was.
 
 You could delete the consumer and recreate it later. That throws away
 everything it tracked: which messages it acked, where its cursor sits.
-On the next page that is a heavy hammer for a light job.
+That is a heavy hammer for a light job.
 
 Pausing is the light job. A **paused** consumer stops receiving
 messages until a deadline you set, and keeps all of its state while it
@@ -48,6 +48,13 @@ The CLI accepts two forms for the deadline. A duration like `1h` or
 `30m` means "from now." A timestamp like `2026-05-22 14:30:00` means
 that exact wall-clock time. Either way the server stores an absolute
 deadline.
+
+Clients can also pause at creation time: set the `PauseUntil` field in
+the consumer config to a future moment, and the consumer starts life
+paused until that deadline. It is the same absolute deadline the CLI
+sets, just supplied when the consumer is first created. See
+[Reference → Consumer API](/reference/jetstream/api/consumer) for the
+field.
 
 The command confirms the pause and the time remaining:
 
@@ -162,7 +169,7 @@ never touches the stream. Publishes keep landing while the `shipping`
 consumer sleeps, and they count against the stream's retention limits.
 A long pause on a stream with a tight `MaxMsgs` or `MaxBytes` can drop
 the oldest orders before the consumer ever wakes to read them. Size the
-stream for the longest pause you expect, or keep pauses short — see [8.
+stream for the longest pause you expect, or keep pauses short — see [13.
 Shaping the stream](/learn/jetstream/shaping-the-stream) for how limits
 decide who wins.
 

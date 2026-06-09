@@ -64,9 +64,9 @@ reach for most.
 
 ## Sibling deep dives
 
-This is the first chapter of the Operate half. The others pick up exactly
-where a metric stops: this chapter names the symptom, the Operate
-siblings own the fix.
+This chapter sits in the Operate half alongside its siblings. The others
+pick up exactly where a metric stops: this chapter names the symptom, the
+Operate siblings own the fix.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) is what you
 reach for when the lag you measured here will not drain on its own. It
@@ -100,8 +100,8 @@ leave the deployment running.
 You hold the core model: the live numbers come from the monitoring
 endpoints, lag comes from consumer state, the events you did not poll for
 come from advisories, and the history that turns a number into an alert
-comes from the exporter. That model is the floor for every other Operate
-chapter you will meet.
+comes from the exporter. Those four sources together are how you keep a
+NATS deployment observable in production.
 
 ## Production checklist
 
@@ -114,7 +114,7 @@ back to the page that explains the why.
 
 - [ ] Alert on `connections` (active), not `total_connections` (lifetime); connection flapping inflates the lifetime count without anything being wrong.
 - [ ] Watch `slow_consumers` on `/varz`; a rising count is a reader that cannot keep up.
-- [ ] Scope a `/jsz` scrape with `?acc=ORDERS` and page it with `offset`/`limit`; the full `?accounts=true&streams=true&consumer=true` query is slow at scale and will time out.
+- [ ] Scope a `/jsz` scrape with `?acc=ORDERS` and page it with `offset`/`limit`; the full `?accounts=true&streams=true&consumers=true` query is slow at scale and will time out.
 - [ ] Restrict the monitoring port; it is unauthenticated by default — see [Security](/learn/security).
 
 ### JetStream health — see [Pitfalls](/learn/monitoring/jetstream-health#pitfalls)
@@ -125,14 +125,14 @@ back to the page that explains the why.
 
 ### Advisories and events — see [Pitfalls](/learn/monitoring/advisories-and-events#pitfalls)
 
-- [ ] Run a durable subscriber on `$JS.EVENT.ADVISORY.>`; advisories are transient, so if you are not subscribed when the event fires, you never learn it happened.
+- [ ] Persist advisories to a stream subscribed to `$JS.EVENT.ADVISORY.>`; advisories are transient, so if nothing durable is listening when the event fires, you never learn it happened.
 - [ ] Treat the `max_deliver` advisory as the only built-in signal a message was dropped; JetStream has no dead-letter queue, so subscribe or lose poison orders silently.
 - [ ] Read a leader-elected advisory as a flap report only; the *why* behind the election is [Clustering](/learn/clustering).
 
 ### Prometheus and dashboards — see [Pitfalls](/learn/monitoring/prometheus-and-dashboards#pitfalls)
 
 - [ ] Use `/healthz?js-meta-only=true` to check cluster quorum; `?js-server-only=true` checks only the local node and returns 200 even with no quorum.
-- [ ] Set explicit `nats server check` thresholds like `--pending-critical`; defaults do not know your SLA, and a check with no threshold never fires.
+- [ ] Set explicit `nats server check` thresholds like `--unprocessed-critical`; defaults do not know your SLA, and a check with no threshold never fires.
 - [ ] Put Prometheus behind the exporter; the exporter stores no history, so on its own you only ever see "now."
 
 ## See also

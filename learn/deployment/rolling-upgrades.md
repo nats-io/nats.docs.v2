@@ -58,7 +58,7 @@ the leadership has already transferred, and the stream never lost a
 quorum.
 
 Two settings control the timing. `lame_duck_grace_period` (default
-`100ms`) is how long the node waits before it starts kicking clients.
+`10s`) is how long the node waits before it starts kicking clients.
 `lame_duck_duration` (default `2m`, minimum `30s`) is the total window
 over which it spreads those kicks. The grace period must be shorter than
 the duration.

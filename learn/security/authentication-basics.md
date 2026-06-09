@@ -47,8 +47,9 @@ Recall the `ORDERS` account from the previous page. Its order service
 needs a user to connect as: `order-svc`.
 
 A centralized user lives inside an account's `users` array. Each entry
-names a credential and, by being nested in the account, an account.
-Here is the `ORDERS` account with one user:
+names a user with a `user` field, carries that user's credential, and —
+by being nested in the account — assigns the account. Here is the
+`ORDERS` account with one user:
 
 ```conf
 accounts {
@@ -90,7 +91,7 @@ connect call. The user publishes the canonical order message to
 
 The server matched the credentials, placed the connection in `ORDERS`,
 and accepted the publish. Wrong credentials would have been rejected
-at connect time with an authorization-violation error, before any
+at connect time with an `authorization violation` error, before any
 publish.
 
 A client offers credentials once, when it connects. Authentication
@@ -100,24 +101,29 @@ authorization — and it has its own [page](/learn/security/authorization).
 
 ### Other ways a user entry can authenticate
 
-`order-svc` used a password, but that same centralized user entry can
-carry a different credential. A `users` entry holds one of three —
-`password`, `token`, or `nkey` — and the server checks whichever it
-finds. The model is unchanged; only the field differs.
+`order-svc` used a password, but config auth offers three credential
+styles in all: user/password, nkey, and token. The first two live on a
+per-account `users` entry; the third sits at the server level. The model
+is unchanged; only the field differs.
 
 **user/password** is the pair you just used: the client sends a
 username and a password, and the server compares the password against
-the stored value. It is the style this chapter uses for centralized
-auth. **token** swaps the pair for a single shared secret with no
-username — any client presenting the right token is admitted as the
-user it maps to (when this chapter says "token" it always means this,
-never a JWT), handy for quick internal setups. **nkey** is a
+the stored value. It is the style this page uses for centralized
+auth. **nkey** is a
 public-key credential: the server stores only the user's public nkey,
 the client holds the matching private seed and proves ownership by
 signing a server-issued nonce, so nothing secret crosses the wire. We
 meet nkeys properly on the [decentralized
 authentication](/learn/security/decentralized-auth) page; here they are
 simply one more way to authenticate a config user.
+
+**token** is the odd one out: a single shared secret with no username,
+set on the server's top-level `authorization` block rather than on a
+per-account `users` entry —
+`authorization { token: "shared-secret-rotate-me" }`. Any client
+presenting the right token is admitted, which makes it a server-wide
+secret rather than a per-user one — handy for quick internal setups.
+(When this chapter says "token" it always means this, never a JWT.)
 
 ## A word on passwords
 
@@ -192,7 +198,7 @@ makes a handful of mistakes easy to make and easy to avoid.
 the default account. That is convenient on a laptop and dangerous on a
 shared network: anyone who can reach the port can publish and subscribe.
 Do not ship it. Give every server at least one user list, so an
-unauthenticated connect fails with an authorization-violation error
+unauthenticated connect fails with an `authorization violation` error
 instead of silently succeeding.
 
 **Leaving plaintext passwords in a deployed config.** The page covered

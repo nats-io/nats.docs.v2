@@ -2,7 +2,7 @@
 id: auth-callout
 title: "8. Auth Callout"
 sidebar_position: 9
-description: Delegate the authentication decision to an external service over $SYS.REQ.USER.AUTH, and the signed request and response that protect it
+description: Delegating the authentication decision to an external service over $SYS.REQ.USER.AUTH, and the signed request and response that protect it
 ---
 
 # 8. Auth Callout

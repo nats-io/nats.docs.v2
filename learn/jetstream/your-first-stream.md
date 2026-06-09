@@ -127,7 +127,7 @@ mystery values.
 - **Duplicate Tracking Window: 2m0s** — for two minutes after a
   message is stored, the server will refuse a second message with
   the same `Nats-Msg-Id` header. This is what makes publish
-  idempotent. Page 3 uses it.
+  idempotent. The [Publishing](/learn/jetstream/publishing) page uses it.
 
 The full set of stream configuration options is documented in
 [Reference → Create Stream](/reference/jetstream/api/stream/create).

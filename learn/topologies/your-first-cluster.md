@@ -149,7 +149,7 @@ each other.
 Ask the cluster what it looks like from the outside:
 
 ```bash
-nats server report --user east-overview
+nats server report
 ```
 
 The report lists all three servers as one cluster, each showing its route
@@ -247,9 +247,10 @@ details. These four bite most often when standing up `east`.
 nowhere to go when that server dies — it has no peer to reconnect to,
 and the reconnect described above never happens. Give every client the
 full list (`n1-east`, `n2-east`, `n3-east`), not one. Discovery fills in
-peers a server advertises, but the bootstrap list is your only safety net
-if the very first server is the one that is down. Do not lean on a single
-seed URL in production.
+the peers a server advertises (unless you have set `no_advertise: true`,
+which turns it off), but the bootstrap list is your only safety net if the
+very first server is the one that is down. Do not lean on a single seed
+URL in production.
 
 **Misspell a cluster name.** A typo in `name` does not raise an error.
 The server with the odd name simply forms its own cluster and never

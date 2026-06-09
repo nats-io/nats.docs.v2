@@ -123,6 +123,15 @@ surfaces on the disconnect/error callback from the
 Refresh credentials ahead of expiry and watch the auth-error rate so a stale
 JWT is caught before a reconnect needs it.
 
+**Rotate the creds file by opening a fresh connection, not in place.** The
+client reads the creds file once, at connect time. Overwriting that file with a
+new `.creds` while the connection is live changes nothing on the wire — the old
+identity stays in use until the connection cycles. Worse, if a reconnect happens
+to fire mid-rotation, it may read a half-written file and fail to authenticate.
+To rotate safely, open a new connection with the new creds and
+[drain](/learn/resilient-clients/drain-and-shutdown) the old one, so in-flight
+work finishes before the old identity goes away.
+
 A secure connect fails in two distinct ways — CA validation (the server
 certificate is not trusted) and authorization (the creds are wrong, expired,
 or revoked) — and they mean different things. Handle them as separate cases at

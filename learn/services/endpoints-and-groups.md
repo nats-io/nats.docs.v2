@@ -141,6 +141,13 @@ start a new one with the new layout. Decide the endpoint names and subjects
 before the service goes live, the same way you pick a stream name in
 JetStream: deliberately, the first time.
 
+You handle this by inspecting the shape, not editing it. Read back the
+running service to see exactly which endpoints, subjects, and queue groups
+it registered; to change any of them, stop the service and start a new one
+with the new layout:
+
+<div class="nats-example" data-type="learn-services-endpoints-and-groups-immutableEndpoints" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
 ## Where you are
 
 You now have:

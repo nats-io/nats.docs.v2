@@ -1,11 +1,11 @@
 ---
 id: disaster-recovery
-title: 3. Disaster recovery
+title: 4. Disaster recovery
 sidebar_position: 4
 description: A runbook that picks restore-from-snapshot or promote-the-mirror per failure class, then promotes ORDERS_DR cleanly
 ---
 
-# 3. Disaster recovery
+# 4. Disaster recovery
 
 You now hold two tools. A **snapshot** of `ORDERS` sits off-site under
 `./backups/orders/`, and a live **mirror**, `ORDERS_DR`, runs at `site2`.
@@ -69,7 +69,7 @@ the mirror relationship from its configuration.
 ```bash
 # At site2: edit ORDERS_DR so it is no longer a mirror.
 # Removing the mirror source makes the stream a standalone primary.
-nats --server nats://site2:4222 stream edit ORDERS_DR --mirror ""
+nats --server nats://site2:4222 stream edit ORDERS_DR --no-mirror
 ```
 
 Once the mirror config is gone, the stream stops following `east`. It still
@@ -146,10 +146,9 @@ gap. Always run the lag check first and only proceed at `Lag: 0`, or with a
 frozen lag you have consciously accepted as your recovery point. The
 do-don't is simple: do read the lag; do not skip step 1.
 
-You can make that check a gate. Read the mirror state, decide on the number,
-then promote — never the reverse:
-
-<div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-checkLag" data-languages="cli,js,go,python,java,rust,csharp"></div>
+You can make that check a gate. Run the lag check from
+[step 1 above](#step-1--verify-the-lag-is-zero), decide on the number, then
+promote — never the reverse.
 
 **R3 replication will not save you from a mistake.** A three-replica stream
 survives a node loss, but an accidental delete or a bad publish replicates to
@@ -186,7 +185,7 @@ they are — the operator JWT, the account JWTs, the nkeys, and the creds are
 gone. The next page backs up the **identity** plane.
 
 Continue to
-[4. Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup).
+[5. Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup).
 
 ## See also
 

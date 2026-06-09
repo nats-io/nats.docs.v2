@@ -82,8 +82,10 @@ Cluster Information:
 it is `current` (caught up) and how recently the leader heard from it. This is
 the `ORDERS` RAFT group, viewed from the outside.
 
-The exact RAFT group internals — log compaction, the `$NRG.*` subjects peers
-vote over, snapshot timing — are documented in
+For a live view of a group's RAFT state — its current term, who the leader is,
+and each peer's status — check the `/raftz` monitoring endpoint. The exact RAFT
+group internals it exposes — log compaction, the `$NRG.*` subjects peers vote
+over, snapshot timing — are documented in
 [Reference → /raftz](/reference/system/monitor/raftz). We only need the group,
 the leader, and the followers here.
 

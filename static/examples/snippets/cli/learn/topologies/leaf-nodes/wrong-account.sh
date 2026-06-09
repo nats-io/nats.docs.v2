@@ -13,7 +13,8 @@
 # First, confirm which account the leaf actually bound to on the hub.
 # The Account column is the binding from the remote — read it, do not
 # assume it. If it does not say ORDERS, the remote's account field is
-# wrong (or missing, which falls back to the default account).
+# wrong (or missing, in which case the leaf falls back to its own local
+# default account, $G, instead of ORDERS).
 nats --server nats://127.0.0.1:4222 server report leafnodes
 
 # Now send a request from the factory floor, against the leaf (4322).

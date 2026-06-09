@@ -214,8 +214,8 @@ nats-based resolver refuses to start without one. Omit it and
 `nats-server` exits at boot with `using nats based account resolver -
 the system account needs to be specified in configuration or the
 operator jwt`. The `--sys` flag on `nsc add operator` and the
-`system_account` line `nsc generate config` writes are what satisfy
-this — keep both.
+`system_account` line that `nsc generate config` writes are what
+satisfy this — keep both.
 
 **Leaking the `.creds` file.** The credentials file carries the user's
 private nkey seed, so anyone holding it *is* `order-svc` — no password

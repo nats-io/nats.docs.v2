@@ -30,8 +30,9 @@ A cluster does not run JetStream until you turn it on. Each server needs
 the `jetstream` block, and each needs a `store_dir` of its own so its
 copy of the data has somewhere to live.
 
-Here is `n1-east`, carrying the `cluster {}` block from the previous page
-and gaining a `jetstream {}` block:
+Here is `n1-east`, carrying the exact `cluster {}` block from the previous
+page — the seed server with no `routes` of its own — and gaining a
+`jetstream {}` block:
 
 ```conf
 # n1-east.conf
@@ -45,10 +46,6 @@ jetstream {
 cluster {
   name: east
   listen: 127.0.0.1:6222
-  routes: [
-    nats://127.0.0.1:6223
-    nats://127.0.0.1:6224
-  ]
 }
 ```
 
@@ -133,8 +130,9 @@ streams keep serving. This is exactly why Acme runs three, not two.
 
 An even count buys you nothing here. Two servers have no majority once
 one is gone; four tolerate the same single failure that three do, while
-costing an extra server. Production clusters run 3, 5, or 7 servers for
-this reason.
+costing an extra server. Production clusters run an odd count — typically
+3 or 5 — for this reason; a stream replicates across at most five servers,
+so five is the practical ceiling.
 
 The wire-level detail of how that majority vote works — the Raft
 protocol, election timing, and log replication — is documented in the
@@ -144,9 +142,10 @@ shape here: odd server count, majority rules, one coordinator.
 ## Make ORDERS survive a server loss
 
 A stream on a cluster picks how many copies of itself to keep. That count
-is its **replica factor**. One copy is `R1` — the single-server default
-you have run all along. Three copies is `R3`, the production floor, and a
-three-server cluster is exactly enough to hold them.
+is its **replica factor**. One copy is `R1` — the default a stream takes
+unless you ask for more, and the single-server behavior you have run all
+along. Three copies is `R3`, the production floor, and a three-server
+cluster is exactly enough to hold them.
 
 Raise `ORDERS` to three replicas, then ask the cluster what it did:
 
@@ -177,8 +176,8 @@ group — its own Raft group, separate from the meta group. Each stream
 gets one.
 
 `Leader: n1-east` is where the stream's writes land. One of the three
-copies takes every write to `ORDERS` first, then fans it out to the
-others; the `PubAck` comes back once a majority hold the message. The two
+copies takes every write to `ORDERS` first, then sends it to the other
+replicas; the `PubAck` comes back once a majority hold the message. The two
 `Replica` lines are the copies that follow. `current` means a copy has
 recently checked in and holds the same data; `seen` reports how long
 since it last reported. All three copies are in step.
@@ -217,11 +216,11 @@ loss of any single server in `east`.
 ## What does not belong on this page
 
 Replication does not cross a cluster boundary. When Acme adds the `west`
-cluster in the next chapter, an `R3` stream in `east` is still replicated
+cluster on the next page, an `R3` stream in `east` is still replicated
 only within `east` — gateways carry interest, not stream replicas.
 Copying stream data between clusters uses
 [mirrors and sources](/learn/jetstream/mirrors-and-sources), which the
-next chapter reaches.
+next page reaches.
 
 The mechanics underneath `R3` — how Raft elects a leader, how a majority
 keeps the log consistent, how a new leader is chosen when one dies, and
@@ -251,7 +250,8 @@ This audit has a runnable form. List every stream with one replica, then assert
 **An even server count buys nothing.** A majority needs more than half the
 group reachable, so four servers tolerate the same single loss that three do at
 the cost of an extra server, and two have no majority left once one is gone.
-Run an odd count — 3, 5, or 7 — never four or six.
+Run an odd count — 3 or 5, since a stream replicates across at most five
+servers — never four or six.
 
 **The meta leader and a stream's leader are not the same server.** The meta
 leader only places streams; each stream then handles its own writes wherever it

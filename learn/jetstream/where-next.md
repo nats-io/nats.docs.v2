@@ -118,6 +118,7 @@ explains the why.
 - [ ] Reach for `--all` only when you want the whole history; sample the tail with `--last`, `--since`, or `--start-sequence`.
 - [ ] Use a named, durable consumer for any read you must resume after a disconnect; an ephemeral one restarts from sequence 1.
 - [ ] Confirm `--all` versus `--new` matches the question — backlog or live traffic — before you run the command.
+- [ ] Pair `--all` with `--terminate-at-end` for a one-shot replay; on its own it drains the backlog then blocks waiting for more.
 
 ### Your first consumer — see [Pitfalls](/learn/jetstream/your-first-consumer#pitfalls)
 
@@ -181,7 +182,6 @@ explains the why.
 
 - [ ] Create a new stream to move to or from WorkQueue; the server locks that change on a live stream.
 - [ ] Give each WorkQueue consumer a disjoint filter, or share one consumer as a pool; overlapping consumers are rejected.
-- [ ] Monitor consumer health on an Interest stream; a stalled consumer keeps unacked messages from leaving and fills the disk.
 
 ### Per-message TTL — see [Pitfalls](/learn/jetstream/message-ttl#pitfalls)
 

@@ -61,8 +61,10 @@ nats pub orders.shipped '{"order_id":"ord_8w2k","customer":"acme-co","total_cent
 
 ## Publishing from a client library
 
-`nats pub` is convenient but it is not what your production code
-does. A client library publishes through the same wire protocol and
+`nats pub` is convenient, but it is not what your production code
+does.
+
+A client library publishes through the same wire protocol and
 gets back a `PubAck` — a small reply from the server confirming that
 the message was stored. The `PubAck` is the central artifact of
 JetStream publishing, and the next section is about reading it.
@@ -85,7 +87,7 @@ Two things to notice in any of those snippets:
 
 ## What a PubAck tells you
 
-A `PubAck` carries three useful pieces of information:
+A `PubAck` carries three core pieces of information:
 
 - **stream** — which stream stored the message. Helpful in tests and
   in logs; in normal code you already know.
@@ -95,6 +97,11 @@ A `PubAck` carries three useful pieces of information:
 - **duplicate** — `false` for a fresh write, `true` if the server
   recognized this message as a repeat. The next section explains how
   duplicate detection works.
+
+A `PubAck` can also carry a few situational fields — a `domain`, for
+instance, identifying the JetStream domain in a multi-tenant or
+leaf-node setup. The full list is in Reference; the three above are
+what day-to-day publishing code reads.
 
 Here is the same publish, now reading the `PubAck` back:
 
@@ -130,15 +137,12 @@ of this page is just: step 1 is now done.
 
 ## Idempotent publishing
 
-A real publisher retries on transient failures. Network hiccups,
-broker reconnections, timeouts — code retries the publish. Without
-help, that retry stores the same message twice.
-
-JetStream offers help. If the publish carries a `Nats-Msg-Id` header,
-the server keeps track of recently-seen IDs and refuses to store the
-same one twice. "Recently" means inside the **duplicate tracking
-window**, which is two minutes by default — you saw it in the stream
-config on the previous page.
+A real publisher retries on transient failures, and without help a
+retry stores the same message twice. JetStream's answer is the
+`Nats-Msg-Id` header: tag a publish with a stable ID, and the server
+refuses to store that ID twice within the stream's duplicate tracking
+window — the two-minute setting you saw in the config on the previous
+page. That is the `duplicate: true` case the `PubAck` reports.
 
 From the CLI you set the header with `--header`:
 
@@ -150,20 +154,16 @@ nats pub orders.created \
 
 Run that command twice. The first publish stores a new message. The
 second one returns a `PubAck` with `duplicate: true`, and the stream
-sequence does not advance.
-
-The same flag, from a client library:
+sequence does not advance. The same header, from a client library:
 
 <div class="nats-example"
      data-type="learn-jetstream-publishing-dedup"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-A safe rule: every retryable publish has a `Nats-Msg-Id`. The ID
-should be a stable identifier the producer can recompute — an order
-ID, a request ID, a hash of the payload. With that in place, retries
-are safe.
-
-The full set of publish-related headers is documented in
+The safe rule: every retryable publish carries a `Nats-Msg-Id` the
+producer can recompute — an order ID, a request ID, a hash of the
+payload. The full set of publish-related headers, and how to tune the
+tracking window, is documented in
 [Reference → JetStream Headers](/reference/jetstream/api/headers). We
 use only `Nats-Msg-Id` here.
 
@@ -181,7 +181,9 @@ for Reference:
   for optimistic concurrency. Documented in
   [Reference → JetStream Headers](/reference/jetstream/api/headers).
 - **Batch publish.** A way to land several messages atomically. Newer
-  servers only; see the same reference page.
+  servers only; the `PubAck` gains `batch` and `count` fields,
+  documented in
+  [Reference → Publish Acknowledgement](/reference/jetstream/api/stream/pub-ack).
 
 ## Pitfalls
 

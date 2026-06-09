@@ -20,7 +20,9 @@ link is back. By the end, `order-svc` and the JetStream consumers ride
 through a server going away without the application noticing.
 
 Two new ideas carry the page: **reconnect with backoff and jitter**, and
-the **reconnect buffer**. We define each before we use it.
+the **reconnect buffer**. We define each before we use it. The first
+starts with the state a dropped connection moves into — the RECONNECTING
+state — which the next section sets up before backoff builds on it.
 
 ## The disconnect, and the RECONNECTING state
 
@@ -128,6 +130,14 @@ moment the connection is back. The application calls `publish` as
 normal; the client absorbs the gap. The default size is 8 MB
 (`ReconnectBufSize`).
 
+Flush is not a delivery guarantee. On reconnect the client first
+restores its subscriptions, then re-sends the buffered publishes over the
+new connection in the order they were made — but each one is still a
+plain core publish, carrying the same at-most-once guarantee as any
+other. The buffer survives the gap; it does not turn a publish into a
+durable, acknowledged write. For the exact flush sequence and option
+knobs, see [Reference](/reference/).
+
 That buffer is bounded on purpose. If the outage runs long enough that
 publishes pile past 8 MB, the next publish fails rather than letting the
 client consume unbounded memory. In Go the error is
@@ -162,7 +172,7 @@ attempt, so a long outage is loud, not lethal:
 
 <div class="nats-example" data-type="learn-resilient-clients-reconnection-handle-reconnect-errors" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**A zero or fixed retry delay stampedes the survivor.** If you replace
+**A zero or fixed backoff stampedes the survivor.** If you replace
 the default backoff with a custom delay of zero, the client spins a tight
 CPU loop against a pool that is not ready. If you make it a fixed delay
 with no jitter, a fleet of clients that all lost the same server retry in

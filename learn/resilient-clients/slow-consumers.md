@@ -14,10 +14,11 @@ application itself can't keep up with the messages arriving for it.
 
 `warehouse` subscribes to `orders.>` and does real work per message —
 reserve stock, write a row, call an API. When orders arrive faster than
-that work finishes, the gap has to go somewhere. By default it goes into
-an unbounded in-memory queue, and a long enough burst drives the
-subscriber out of memory with no warning. This page bounds that queue and
-makes the overflow visible.
+that work finishes, the gap has to go somewhere. It goes into an in-memory
+queue whose default limits are generous — large enough that a high-rate or
+large-message workload can fill them and start dropping messages before you
+ever think to look. This page sizes that queue to *your* workload and makes
+the overflow visible.
 
 Two new ideas carry the page: the **subscription pending buffer** with
 its **pending limits**, and the **slow-consumer signal**. We define each
@@ -38,15 +39,18 @@ the buffer holds them while it catches up. This is normal and healthy.
 The problem is what the buffer does by default when the burst is *not*
 brief.
 
-By default the pending buffer is **unbounded**. If `warehouse` falls
-behind and stays behind, the buffer grows without limit, message after
-message, until the process runs out of memory and dies. Nothing warns
-you first. The subscriber simply consumes more and more memory and then
-disappears.
+By default the pending buffer has generous built-in limits — 500,000
+messages and 64 MB in the Go client, with similar defaults in the others.
+Those caps stop the buffer from growing without end, but they are sized
+for a typical workload, not yours. A high-rate subject or large messages
+can fill 64 MB in seconds, and a `warehouse` that stays behind hits that
+default and starts dropping messages — often well before you would have
+set a limit yourself. The defaults are a backstop, not a tuning.
 
 A **slow consumer** is a subscriber whose pending buffer fills faster
-than the handler drains it. The name is the fault. Left unbounded, a slow
-consumer is an out-of-memory crash waiting for a busy enough day.
+than the handler drains it. The name is the fault. On the default limits a
+slow consumer drops messages on a busy enough day; the fix is to set
+limits sized to your own workload, and to make the drops visible.
 
 ## Pending limits
 
@@ -72,9 +76,9 @@ everywhere in this chapter:
 Choosing the numbers is a sizing exercise, not a guess. A limit sized to
 roughly the handler's latency times the subject's peak rate gives the
 buffer enough room to ride out a normal burst without letting a stuck
-handler grow it forever. Too tight and you drop messages during traffic
-that the handler could have caught up on; too loose and you are back to
-unbounded in practice.
+handler hold an open-ended backlog. Too tight and you drop messages during
+traffic that the handler could have caught up on; too loose and you waste
+memory holding a backlog the handler will never catch up on.
 
 The full set of connection options is documented in
 [Reference](/reference/). We cover only the ones that change how a
@@ -96,8 +100,14 @@ handler catches up and the buffer has room, new messages arrive normally
 again. The signal tells you that, for this stretch, the application could
 not keep up and messages were lost.
 
+The callback is the live alert, but you can also inspect the state
+directly. The subscription's status becomes `SubscriptionSlowConsumer`
+when overflow occurs, and `PendingLimits()` reports the buffer's current
+message and byte counts — useful for a health check that watches how close
+a subscription is running to its limits before it starts dropping.
+
 That signal is only useful if something is listening for it. The async
-error callback is set on the connection, and it is the single place the
+error callback is set on the connection. It is the single place the
 client reports asynchronous problems that are not tied to one API call —
 a slow consumer, a permission violation, a protocol error. A connection
 with no async error callback throws these on the floor. Dropped messages
@@ -145,13 +155,14 @@ protect each individual member of that pool.
 A few traps turn a slow handler into a silent outage. Each is scoped to
 this page's two ideas: pending limits, and the slow-consumer signal.
 
-**An unbounded buffer is an out-of-memory crash in waiting.** The default
-pending buffer has no cap. A subscriber that falls behind during a busy
-hour grows its buffer until the process dies — and the crash, not the
-backlog, is the first thing you notice. Always set pending limits on a
-subscription that does real per-message work, and size them to the
-handler's latency and the subject's peak rate rather than leaving them
-open-ended.
+**The default limits are a backstop, not a tuning.** The pending buffer
+ships with generous defaults — 500,000 messages and 64 MB in the Go
+client — that a high-rate or large-message subject can fill in seconds. A
+subscriber that falls behind during a busy hour hits those defaults and
+starts dropping messages, often before you would have set a limit at all.
+Always set pending limits on a subscription that does real per-message
+work, and size them to the handler's latency and the subject's peak rate
+rather than relying on caps sized for someone else's workload.
 
 **A nil async error callback hides every dropped message.** Pending
 limits without a callback are half a fix: the buffer is bounded, but the
@@ -176,11 +187,12 @@ Watch the async-error rate and the disconnect rate separately.
 
 ## Where you are
 
-`warehouse`, `notifications`, and `analytics` no longer risk running out
-of memory when orders arrive faster than they can be handled. You have:
+`warehouse`, `notifications`, and `analytics` no longer drop orders
+silently when traffic outruns the handler. You have:
 
-- Pending limits that bound each subscription's in-memory buffer instead
-  of letting it grow without end.
+- Pending limits sized to each subscription's own workload, instead of
+  the generous one-size-fits-all defaults that drop messages on a busy
+  enough day.
 - An async error callback that surfaces the slow-consumer signal, so a
   dropped message is logged rather than lost in silence.
 - A clear line between a local overflow (drops messages, keeps the

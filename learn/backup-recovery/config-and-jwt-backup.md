@@ -1,11 +1,11 @@
 ---
 id: config-and-jwt-backup
-title: 4. Config and JWT backup
+title: 5. Config and JWT backup
 sidebar_position: 5
 description: Back up and restore the operator, accounts, creds, nkeys, and server config off-site so the identity plane survives a clean-room rebuild
 ---
 
-# 4. Config and JWT backup
+# 5. Config and JWT backup
 
 The last three pages protected the data: a snapshot to return to, a
 mirror to fail over to, a runbook to choose between them. But a restored
@@ -19,7 +19,7 @@ the files that *are* your security layer off-site, encrypted; then it
 puts them back in a clean-room rebuild and proves the platform comes back
 to life.
 
-This chapter does not teach what an operator, account, or user *is* —
+This page does not teach what an operator, account, or user *is* —
 that model lives in
 [Security → Operator mode](/learn/security/operator-mode). Here you only
 learn which files carry that identity, how to carry them off-site, and

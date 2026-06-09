@@ -110,20 +110,24 @@ So far TLS proves the *server* to the client. The reverse direction —
 the client proving itself to the server with its own certificate — is
 **mutual TLS (mTLS)**, the second and last concept of this page.
 
-mTLS turns on with one server field. `verify: true` demands a
-certificate from every connecting client and rejects any client whose
-certificate does not chain to `ca_file`. That proves the client holds a
-valid certificate, but it does not yet say *who* the client is.
+mTLS demands a certificate from every connecting client and rejects any
+client whose certificate does not chain to `ca_file`. That proves the
+client holds a valid certificate, but it does not yet say *who* the
+client is.
 
-The richer form does. Change `verify: true` to `verify_and_map: true`
-and the server does one more thing: it reads the **subject** of the
-client certificate — its distinguished name in RFC 2253 form — and uses
-that string as the NATS user.
+One server field gets you both halves at once. `verify_and_map: true`
+turns on certificate verification — the same check `verify: true`
+performs — and then does one more thing: it reads the **subject** of the
+client certificate, its distinguished name in RFC 2253 form, and uses
+that distinguished name as the NATS user. Verification and mapping are
+the same switch, not two you stack.
 
 With `verify_and_map`, the certificate *is* the credential. There is no
 password, no creds file to ship. The certificate the client already
-presents for the TLS handshake also names the user, and the server looks
-that name up in its user list.
+presents for the TLS handshake also names the user. The server matches
+that distinguished name against its user list — not a plain string
+compare, but a DN-aware match that tolerates differences in attribute
+spacing and ordering.
 
 Here is the server config that ties a client certificate to the
 `order-svc` identity. The `user` value is the certificate's distinguished
@@ -155,7 +159,9 @@ authorization {
 ```
 
 `order-svc` now connects by presenting its own certificate and key. It
-sends no other credential. The CLI passes the client certificate with
+sends no password and no creds file, because with `verify_and_map` on
+there is no second authentication step — the TLS handshake itself
+authenticates the client. The CLI passes the client certificate with
 `--tlscert` and its key with `--tlskey`:
 
 ```bash
@@ -171,10 +177,13 @@ The server reads `CN=order-svc,O=Acme` from the certificate, matches it
 to the user in the list, and applies that user's permissions. Identity
 and encryption arrive in the same handshake.
 
-A note on naming. `verify` and `verify_and_map` are not two independent
-switches you stack. Use `verify` when an external system already maps
-certificates to users, and `verify_and_map` when you want the
-certificate's subject to be the user. Pick one.
+A note on naming. `verify_and_map` is not a replacement for `verify`
+that drops certificate checking — it is `verify` *plus* mapping. Setting
+`verify_and_map: true` enables the same certificate verification that
+`verify: true` does, and on top of that maps the certificate subject to
+a user. You do not set both: `verify_and_map` is the superset. Reach for
+plain `verify` only when an external system already maps certificates to
+users and the server does not need to.
 
 ## Encryption at rest, in one line
 
@@ -209,15 +218,17 @@ publish succeeds, the server is not checking client certificates.
 
 <div class="nats-example" data-type="learn-security-encryption-verify-required" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**`verify_and_map` needs the certificate subject to match the user
-string exactly.** The server reads the certificate's distinguished name
-in RFC 2253 form and looks that string up in its user list. A
-certificate subject of `CN=order-svc,O=Acme` does not match a user
-written `CN=order-svc, O=Acme` (extra space) or one with the attributes
-in a different order. A mismatch is an authentication failure, not a
-warning. Do not hand-type the DN — read it back from the certificate
-with `openssl x509 -noout -subject` and paste that exact value into the
-`user` field.
+**`verify_and_map` needs the certificate subject to name a real user.**
+The server reads the certificate's distinguished name in RFC 2253 form
+and matches it against its user list. The match is DN-aware, not a raw
+string compare: `CN=order-svc,O=Acme` still matches a user written
+`CN=order-svc, O=Acme` (extra space) or `O=Acme,CN=order-svc`
+(attributes reordered). What it will not forgive is a different
+*value* — a typo in the name, a wrong attribute, or a user the list does
+not contain. That is an authentication failure, not a warning. Do not
+hand-type the DN — read it back from the certificate with
+`openssl x509 -noout -subject` and paste that value into the `user`
+field.
 
 **Each connection type carries its own TLS.** Turning on the top-level
 `tls {}` block secures client connections only. The cluster, leafnode,

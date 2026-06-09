@@ -107,7 +107,7 @@ leaders, and the `ORDERS` stream at `R=3` are still running in your
 session exactly as you left them on the previous page. You can keep
 experimenting — kill a server and watch a re-election, add a fifth peer,
 move placement — or tear it all down with `nats stream rm ORDERS` and
-stopping the three servers when you are done.
+stop the three servers when you are done.
 
 You hold the core model: routes form the mesh, RAFT groups agree, a quorum
 commits each write, placement decides where the replicas live, and peer
@@ -130,14 +130,14 @@ explains the why.
 ### Raft and leaders — see [Pitfalls](/learn/clustering/raft-and-leaders#pitfalls)
 
 - [ ] Treat a brief "no leader" window during failover as normal; an election takes seconds (the timer is 4–9s), not milliseconds.
-- [ ] Use `leader-stepdown` to move leadership, not to choose a successor; the next election is still quorum-based and the winner is not yours to pick.
+- [ ] Use `nats stream cluster step-down` to move leadership, not to choose a successor; the next election is still quorum-based and the winner is not yours to pick.
 - [ ] Track the meta leader and a stream leader as different groups; losing one is not losing the other.
 
 ### Replication and R=3 — see [Pitfalls](/learn/clustering/replication-and-r3#pitfalls)
 
 - [ ] Run at `R≥3` for anything you cannot lose; `R=1` has no copy, so a write is gone with its server.
 - [ ] Read from the leader when you need read-after-write; a replica may lag, so a Direct Get from a follower can return stale data.
-- [ ] Check the `Replicas` lag in `nats stream info` before assuming every copy is current.
+- [ ] Read a `PubAck` as quorum held, not full replication; before deliberately taking a server down, verify each replica shows `current` in `nats stream info`.
 
 ### Placement — see [Pitfalls](/learn/clustering/placement#pitfalls)
 

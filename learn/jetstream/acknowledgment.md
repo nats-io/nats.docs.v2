@@ -12,8 +12,9 @@ choice means every message it delivers must be answered. Nothing is
 considered done until the client says so.
 
 This page is about that answer. It has two halves: the four responses a
-client can give, and the server-side controls that decide what happens
-when an answer is late or negative.
+client can give — not just ack and nak, but also term, a client's "give
+up on this one," and in-progress, "still working" — and the server-side
+controls that decide what happens when an answer is late or never comes.
 
 ## Why the server waits for an answer
 
@@ -68,6 +69,10 @@ delay, then puts it back.
 
 <div class="nats-example" data-type="learn-jetstream-acknowledgment-nakWithDelay" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
+A nak hands the message back to the consumer, not to the worker that
+nak'd it. If several workers share one consumer, the redelivery can land
+on a different worker — see [worker pool](/learn/jetstream/worker-pool).
+
 A delayed nak backs off one redelivery at a time, under the client's
 control. For a delay schedule the server applies on its own — growing
 the wait on each successive attempt — you set a **backoff** on the
@@ -94,7 +99,7 @@ with a delay and let the delivery limit below decide.
 The four responses are the client's side. The server has two settings
 that frame them, both on the consumer.
 
-**AckWait** is the timer. If a delivery is neither acked, nakked, nor
+**AckWait** is the timer. If a delivery is neither ack'd, nak'd, nor
 kept alive with in-progress before AckWait elapses, the server treats
 it as a silent failure and redelivers. Thirty seconds is the default;
 shorten it for fast work, lengthen it for slow work.
@@ -105,7 +110,11 @@ which means unlimited — a message can be redelivered forever.
 
 These two cover the two ways a delivery can fail. AckWait catches the
 silent failure, where no answer arrives. MaxDeliver caps the loud
-failure, where a worker keeps nakking the same message.
+failure, where a worker keeps sending a nak on the same message.
+
+A timeout and a nak reach the same redelivery loop. Whichever triggers
+it, the backoff schedule below governs how long the server waits before
+the next attempt — backoff is not limited to naks.
 
 Set both on the consumer with `nats consumer edit`:
 

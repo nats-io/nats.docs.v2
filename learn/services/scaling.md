@@ -11,11 +11,14 @@ description: Run N instances of a service and let the default queue group balanc
 discovery, and keeps per-endpoint stats. So far one instance does all of
 that. This page runs more than one.
 
-The good news is that scaling needs nothing new. The framework already put
-every endpoint into a queue group on the [discovery](/learn/services/discovery)
-and [observability](/learn/services/observability) pages. That queue group is
-the entire scaling story. You start more copies of the service, and the server
-spreads requests across them.
+This page assumes you have read the [Core NATS](/learn/core-nats) deep dive —
+you know how [request-reply](/learn/core-nats/request-reply) and
+[queue groups](/learn/core-nats/queue-groups) work. Scaling needs nothing on top
+of that. The framework already put every endpoint into a queue group when you
+created the service (you saw this happen on the
+[first page](/learn/services/your-first-service)). That queue group is the entire
+scaling story. You start more copies of the service, and the server spreads
+requests across them.
 
 This page teaches two things: how running N instances load-balances for free,
 and how to stop an instance without dropping the work it is holding.
@@ -66,7 +69,7 @@ work, wrong for load balancing. Keep the queue group on when you want to scale.
 ## Stop an instance cleanly
 
 Scaling up is half the job. Scaling down — or rolling out a new version, or
-shutting a node for maintenance — means stopping an instance. Stopping it
+shutting an instance for maintenance — means stopping an instance. Stopping it
 abruptly drops any request it was mid-handle.
 
 The framework gives you a graceful stop. Calling `Stop()` on a service

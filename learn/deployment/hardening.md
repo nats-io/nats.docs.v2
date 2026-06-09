@@ -23,12 +23,17 @@ on* the transport security around them.
 ## TLS on every link
 
 A NATS server speaks to more than one kind of peer, and **each kind
-carries its own TLS configuration**. The top-level `tls {}` block secures
-client connections — `order-svc` publishing to `orders.created`. A
-separate `cluster { tls {} }` block secures the routes between
-`n1-east`, `n2-east`, and `n3-east`. A `gateway { tls {} }` block secures
-supercluster links. Turning on TLS for clients leaves the cluster routes
-plaintext until you configure the cluster block too.
+carries its own TLS block**. There are three:
+
+- **Client TLS** — the top-level `tls {}` block, securing client
+  connections like `order-svc` publishing to `orders.created`.
+- **Cluster TLS** — a separate `cluster { tls {} }` block, securing the
+  routes between `n1-east`, `n2-east`, and `n3-east`.
+- **Gateway TLS** — a `gateway { tls {} }` block, securing supercluster
+  links.
+
+These blocks are independent. Turning on TLS for clients leaves the
+cluster routes plaintext until you configure the cluster block too.
 
 This per-link split is the single most common hardening mistake: an
 operator secures clients, sees the encrypted client connection, and ships
@@ -140,7 +145,7 @@ every Linux capability** the server does not need:
 # /etc/systemd/system/nats-server.service (hardened)
 [Service]
 ExecStart=/usr/local/bin/nats-server -c /var/lib/nats/nats.conf
-ExecReload=/bin/kill -HUP $MAINPID
+ExecReload=/bin/kill -s HUP $MAINPID
 
 # 1. File descriptors: 2 FDs per stream plus gossip and client sockets.
 #    A large cluster exhausts the default 1024 quickly.
@@ -194,8 +199,8 @@ http: "127.0.0.1:8222"
 ```
 
 ```bash
-# Firewall: clients in, cluster/gateway between nodes only, monitor never.
-# Open 4222 to clients, 6222/7222 to the other east nodes, deny 8222 outright.
+# Firewall: clients in, cluster routes between nodes only, monitor never.
+# Open 4222 to clients, 6222 to the other east nodes, deny 8222 outright.
 ufw allow 4222/tcp
 ufw allow from 10.0.0.0/24 to any port 6222 proto tcp
 ufw deny 8222/tcp
@@ -257,18 +262,13 @@ ufw allow from 10.0.0.0/24 to any port 6222 proto tcp
 ufw deny 6222/tcp
 ```
 
-Once the ports are open and TLS is on every link, one authenticated publish
-proves the whole hardened path end to end — the client trusts the CA (so
-the link encrypts) and presents the `order-svc` credentials (so the server
-authenticates the user):
-
-<div class="nats-example" data-type="learn-deployment-hardening-credsConnect" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-A successful publish confirms the client link encrypts and the credentials
-authenticate. Run the same check from a node on the cluster network to
-confirm the routes came up — if a node still shows as an orphan after you
-allow 6222, its route handshake is failing on the firewall or on a missing
-or mismatched cluster certificate.
+Once the ports are open and TLS is on every link, the same authenticated
+publish from [Mount the credentials, prove the link](#mount-the-credentials-prove-the-link)
+proves the whole hardened path end to end. A successful publish confirms
+the client link encrypts and the credentials authenticate. Run that check
+from a node on the cluster network to confirm the routes came up — if a
+node still shows as an orphan after you allow 6222, its route handshake is
+failing on the firewall or on a missing or mismatched cluster certificate.
 
 ## Where you are
 

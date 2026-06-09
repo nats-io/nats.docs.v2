@@ -101,11 +101,11 @@ permission on its own.
 This is why a permission with no `allow` and no `deny` means
 unrestricted. There is no allow-list to close things off, and no deny
 entry to block anything, so every subject is open. That was
-`order-svc` before this page. A bare user is an open user.
+`order-svc` before this page: a user with no `permissions` block can do
+anything in its account.
 
-The lesson carries to every user you will write: a user with no
-permissions can do anything in its account. Authorization is opt-in,
-and the way you opt in is by writing an `allow` list.
+The lesson carries to every user you will write. Authorization is
+opt-in, and the way you opt in is by writing an `allow` list.
 
 ## Deny beats allow
 
@@ -205,7 +205,9 @@ failures account for most of it.
 
 **A subscribe deny silently breaks request-reply.** A request needs a reply,
 and the reply lands on a temporary inbox subject the client subscribes to
-before it publishes. That inbox lives under `_INBOX.` by default. A user with
+before it publishes. That inbox lives under `_INBOX.` by default — the prefix
+is configurable, but the default is what you allow against unless you have
+changed it. A user with
 `subscribe: { deny: [">"] }` — exactly what `order-svc` has on this page — can
 never create that subscription, so the reply has nowhere to go and the request
 times out with no responders. Do not lock a request/reply client out of its own
@@ -215,7 +217,11 @@ inbox: when a user makes requests, allow `_INBOX.>` on the subscribe side.
 
 The subscription is rejected with `Permissions Violation for Subscription to
 "_INBOX..."`, and the request itself returns a timeout. A pure publisher like
-`order-svc` does not need this; a service or a requester does.
+`order-svc` does not need this; a service or a requester does. The same trap
+runs the other way: a service that answers requests must be able to *publish*
+to the reply subject it was handed, so a publish `allow` list that omits those
+reply subjects leaves the request unanswered. Both pub and sub permissions have
+to account for the inbox subjects that request-reply rides on.
 
 **An allow-list that forgets a needed subject closes it off too.** Because an
 `allow` list denies everything not on it, a missing entry is a silent block,

@@ -72,7 +72,7 @@ When you set the `ORDERS` stream to R3 on the
 you saw the meta layer and the odd-server-count rule from the outside.
 How the replicas elect a leader, how a quorum is reached, how writes
 survive a failover, and how a stream is placed on specific servers — all
-of that is the next chapter.
+of that lives in the Clustering & Replication deep dive.
 
 The [Clustering & Replication](/learn/clustering) deep dive picks up
 exactly there. It stands up a real cluster and walks through Raft, leader
@@ -137,7 +137,7 @@ Security chapters build on.
 
 ## What is next
 
-Two chapters follow this one most directly. The
+Two deep dives carry this chapter the furthest. The
 [Clustering & Replication](/learn/clustering) deep dive teaches the
 mechanics inside a cluster — Raft, leaders, R3, and placement. The
 [Deployment](/learn/deployment) deep dive teaches how to run any of these
@@ -165,7 +165,7 @@ traffic — the thing to do, grouped by the page that explains why.
 **JetStream in a cluster** — see [Pitfalls](/learn/topologies/jetstream-in-a-cluster#pitfalls)
 
 - [ ] Audit replica counts and raise the streams that matter to R3 — a cluster alone is not HA.
-- [ ] Run 3, 5, or 7 servers, never an even count.
+- [ ] Run an odd count — 3 or 5 — never an even count; a stream replicates across at most five servers.
 - [ ] Read a stream's own leader from `nats stream info`, not from the meta-group summary.
 - [ ] Spread R3 replicas across independent failure domains, not one rack or zone.
 

@@ -45,8 +45,10 @@ recovery.
 The reason the majority matters is consensus: the replicas agree on
 the order of messages by majority vote, so the group stays consistent
 as long as more than half of its members are reachable. The mechanism
-is called Raft, and the [Clustering & Replication](/learn/clustering)
-deep dive walks through it on a real cluster.
+is called Raft — a consensus algorithm that keeps every server agreeing
+on the order of writes through that majority vote. The
+[Clustering & Replication](/learn/clustering) deep dive walks through it
+on a real cluster.
 
 You can go higher. **R=5** keeps five copies and tolerates two
 simultaneous server failures. Five is the maximum a stream supports.
@@ -69,9 +71,16 @@ group rather than piling onto one server.
 
 If the leader's server dies, the remaining replicas elect a new leader
 from among themselves, automatically. Writes pause for the short
-window of that election, then resume. No message is lost, because every
-message that received its `PubAck` already lived on a majority before
-the old leader went away.
+window of that election, then resume. No acked message is lost, because
+every message that received its `PubAck` already lived on a majority
+before the old leader went away.
+
+A publish that was in flight when the old leader crashed — sent, but
+not yet replicated to a majority and so not yet acked — is a different
+case. That write is lost, and the client never gets a `PubAck` for it.
+The fix is the client's job: treat a missing `PubAck` as a failed
+publish and retry it. The durability promise covers acked messages, not
+ones still in flight when a server dies.
 
 There is one failure mode to name. If so many servers are down that no
 majority remains — two of three gone — the group cannot elect a leader.
@@ -159,8 +168,9 @@ replica count rather than assuming it.
 
 **Setting an even replica count.** Fault tolerance comes from a
 majority, and a majority needs an odd number. R=2 still has a single
-point of failure: lose either copy and two-of-two is no longer a
-majority, so writes block. R=4 tolerates only one loss — the same as
+point of failure: lose either copy and you are left with one server out
+of two, which cannot form a majority, so writes block. R=4 tolerates
+only one loss — the same as
 R=3 — while paying for a fourth copy. Use odd counts: R=3 for the
 production floor, R=5 for state you cannot re-derive. Five is the
 maximum a stream supports.

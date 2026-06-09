@@ -1,11 +1,11 @@
 ---
 id: mirrors-and-sources
-title: 2. Mirrors as a DR tool
+title: 3. Mirrors as a DR tool
 sidebar_position: 3
 description: Stand up a cross-site mirror of ORDERS for disaster recovery, read its lag, and learn why a mirror is not a backup
 ---
 
-# 2. Mirrors as a DR tool
+# 3. Mirrors as a DR tool
 
 The last page gave you a **snapshot** — a point-in-time copy of `ORDERS`
 you can restore from. A snapshot is excellent at one thing: getting back
@@ -20,7 +20,7 @@ mirror answers "what site can I fail over to". You will stand one up,
 watch how far it trails the original, and learn the one sentence that
 keeps a mirror from becoming a false sense of safety.
 
-This chapter applies a mirror to disaster recovery. It does not teach how
+This page applies a mirror to disaster recovery. It does not teach how
 a mirror replicates internally — the start position, the subject
 handling, the fan-in rules. That mechanism is taught in full at
 [Mirrors & sources](/learn/jetstream/mirrors-and-sources), and this page
@@ -58,6 +58,13 @@ That single `--mirror ORDERS` flag is the whole DR setup from the data
 side. The server on `site2` opens a replication link to the upstream and
 begins pulling messages. Every order that lands in `ORDERS` on `east`
 shows up in `ORDERS_DR` on `site2` a short time later.
+
+Decide the topology before you run that command, because a mirror's
+configuration is fixed once the stream exists — you cannot re-point a
+running mirror at a different upstream or change what it copies in place.
+Changing it means deleting `ORDERS_DR` and recreating it, after which the
+messages re-replicate from the upstream. Plan the upstream, the site, and
+the subjects you want once, upfront.
 
 The full set of mirror configuration — start position, subject filtering,
 sourcing from many streams — is taught at
@@ -115,6 +122,13 @@ zero messages; a mirror that trails by thousands gives you an RPO of
 thousands. Read this number *before* you ever trust the mirror in a real
 failover. The disaster-recovery page makes "is lag zero?" the first step
 of promotion for exactly this reason.
+
+A failover is not the only time to look. A mirror that quietly stops
+keeping up is worth catching long before the day you need it, so watch
+`Lag` continuously rather than checking it once. The server surfaces the
+same `Lag` and `Active` fields through its monitoring endpoints for an
+alert to scrape — wiring that up is the [Monitoring](/learn/monitoring)
+chapter's job.
 
 ## A mirror is not a backup
 
@@ -186,18 +200,21 @@ nats --server nats://site2:4222 stream info ORDERS_DR | grep -A3 "Mirror Informa
 If `Lag` is non-zero or `Active` keeps climbing, the mirror is behind.
 Diagnose the link before a failover, never during one.
 
-**A mirror's config is effectively locked after creation.** You cannot
-re-point a running mirror at a different upstream or change what it copies
-in place — the mirror configuration is fixed once the stream exists. Plan
-the topology before you create `ORDERS_DR`. To change it, delete the
-mirror and recreate it; the messages re-replicate from the upstream.
+**A mirror's config is effectively locked after creation.** As the setup
+section warned, you cannot re-point a running mirror or change what it
+copies in place. Do not treat `ORDERS_DR` as something you will tune
+later — settle the upstream, the site, and the subjects upfront. To
+change any of them, delete the mirror and recreate it, and the messages
+re-replicate from the upstream.
 
-**Avoid a Work Queue upstream under a mirror.** A Work Queue stream
-deletes each message once a single consumer takes it, and the mirror's
-own replication acts as a consumer. The two guarantees fight, and you can
-lose messages from the upstream before the mirror has them. Use an
-upstream stream with `Limits` or `Interest` retention instead; the
-retention policies are covered at
+**Avoid a Work Queue upstream under a mirror.** A Work Queue stream is
+built to hand each message to exactly one consumer. To replicate, a
+mirror creates a hidden internal consumer on the upstream — and that
+consumer is a *direct* consumer that bypasses the work queue's
+subject-overlap check. So a regular worker and the mirror's consumer can
+both receive the same message, which is precisely the single-consumer
+guarantee the work queue exists to enforce. Use a `Limits` upstream
+instead; the retention policies are covered at
 [Mirrors & sources](/learn/jetstream/mirrors-and-sources).
 
 ## Where you are
@@ -224,7 +241,7 @@ for per failure class, and the exact steps to **promote** `ORDERS_DR`
 into a writable `ORDERS` when the `east` site is gone.
 
 Continue to
-[3. Disaster recovery](/learn/backup-recovery/disaster-recovery).
+[4. Disaster recovery](/learn/backup-recovery/disaster-recovery).
 
 ## See also
 
