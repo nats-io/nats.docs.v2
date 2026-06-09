@@ -70,7 +70,7 @@ position in it.
 
 Recall from the previous page that a consumer keeps a cursor — the
 sequence number of the last message it has delivered and had
-acknowledged. That cursor belongs to the consumer, not to the stream.
+ack. That cursor belongs to the consumer, not to the stream.
 Two consumers on one stream have two independent cursors.
 
 The cursor is the consumer's own bookkeeping. The server stores it
@@ -125,6 +125,45 @@ subject transforms — is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer). We
 use only a single `Filter Subject` here.
 
+## Pitfalls
+
+A filter is a small piece of config, but a wrong one fails quietly. Watch
+for these three.
+
+**A filter that matches nothing.** The server accepts any filter subject,
+even one that matches no message in the stream. A typo like
+`orders.shiped` creates a perfectly valid consumer that simply never
+receives anything. There is no error and no warning — only silence when
+you pull. Do not assume an empty pull means the stream is empty; first
+confirm the filter matches a subject the stream actually stores.
+
+<div class="nats-example"
+     data-type="learn-jetstream-filtering-filterMatchesNothing"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+When a pull comes back empty, run `nats consumer info` and read the
+`Filter Subject` line against the stream's subjects. A filter outside
+`orders.>` can never match.
+
+**Expecting a filter to delete from the stream.** A filter narrows one
+consumer's view; it never removes messages. After `analytics` reads
+`orders.shipped`, every `orders.created` and `orders.cancelled` message is
+still stored and still readable by `shipping`. Do not reach for a filter
+to prune a stream — what stays and what ages out is decided by the
+stream's limits, covered in [8. Shaping the stream](/learn/jetstream/shaping-the-stream),
+not by any consumer.
+
+**Overlapping filters within one consumer.** Two separate consumers whose
+filters overlap each get their own full copy of the matching messages —
+that overlap is exactly the cheap fan-out this page relies on, and the
+stream's retention policy never changes it. What the server does reject is
+overlap _inside a single consumer_: if you give one consumer several filter
+subjects and any of them is a subset of another, the create call fails. The
+filters on one consumer must be disjoint, regardless of whether the stream
+uses limits, interest, or work-queue retention. How work-queue retention
+shapes message delivery once filters are in place is covered in
+[9. Delivery semantics](/learn/jetstream/delivery-semantics).
+
 ## Where you are
 
 The `ORDERS` stream now has two consumers reading it:
@@ -140,7 +179,8 @@ other. The stream itself is untouched by either read.
 
 Both consumers so far have been read by a single client at a time. The
 next page puts several workers behind the one `shipping` consumer and
-distributes the load across them — JetStream's answer to the worker pool.
+distributes the load across them — a worker pool, the stream-based answer
+to core NATS queue groups.
 
 ## See also
 

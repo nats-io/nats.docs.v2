@@ -254,10 +254,11 @@ Congratulations! You've successfully:
 
 ### What to explore next:
 
-1. **[Request-Reply Pattern](../request-reply)** - Synchronous communication
-2. **[Queue Groups](../queue-groups)** - Load balancing
-3. **[Subjects](../subjects)** - Understanding subject-based messaging
-4. **[Pub/Sub Basics](../pub-sub-basics)** - Core messaging patterns
+- [Core NATS deep dive](/learn/core-nats) — hands-on path through the fundamentals
+- [JetStream deep dive](/learn/jetstream) — persistence and streaming
+- [The full Learn section](/learn) — guided, runnable chapters
+- [Request-Reply Pattern](../request-reply) — synchronous communication
+- [Subjects](../subjects) — understanding subject-based messaging
 
 ### Client Libraries
 

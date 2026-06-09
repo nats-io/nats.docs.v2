@@ -52,10 +52,10 @@ messages when it is ready for them, rather than having the server push
 them out unprompted. We use pull consumers throughout this chapter and
 explain why on a later page.
 
-`--ack explicit` sets the **acknowledgment policy**. Every message this
-consumer delivers must be individually acknowledged by the reader. The
-server will not consider a message handled until that acknowledgment —
-**ack** for short — arrives.
+`--ack explicit` sets the **acknowledgment policy** — the server will
+not consider a message handled until an **acknowledgment**, or **ack**
+for short, arrives. Every message this consumer delivers must be
+individually acked by the reader.
 
 `--durable shipping` (the name argument) makes the consumer durable. A
 named consumer survives restarts; an unnamed one does not.
@@ -183,6 +183,48 @@ to the next layers. The full set of consumer options is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 We use only explicit ack on a pull consumer here.
 
+## Pitfalls
+
+The ack/redeliver loop is reliable, but a few mistakes turn it against
+you. Each one below is concept-scoped to this consumer.
+
+**Ack Wait set too low.** Ack Wait is the deadline for an ack; its
+default is 30 seconds. Set it shorter than your slowest handler and the
+server redelivers a message that is still being processed, then
+redelivers again, producing a redelivery storm where every message is
+worked twice.
+
+Do not guess Ack Wait. Set it longer than your slowest message handler,
+with headroom:
+
+<div class="nats-example"
+     data-type="learn-jetstream-your-first-consumer-ackWait"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**Forgetting to ack.** A handler that processes a message but never
+acks looks identical to a crashed reader: the message stays in flight,
+Ack Wait elapses, and the server redelivers it — forever, since the
+default delivery limit is unlimited. The `shipping` consumer will hand
+you the same `ord_8w2k` order again and again.
+
+Always ack on the success path. If a message is genuinely unprocessable,
+do not just drop it — terminate it so it stops coming back (covered with
+the other reader responses in [Reference → Consumer
+Configuration](/reference/jetstream/api/consumer)).
+
+**Acking the same message twice.** Once you ack a message, the server
+advances the cursor past it. A second ack on the same message is
+meaningless, and most clients reject it locally with an error like
+*"message was already acknowledged"* rather than make the request. Ack
+each delivery exactly once, in one place in your handler.
+
+**Reusing a durable name with a different config.** A durable consumer
+is keyed by its name. Run `nats consumer add ORDERS shipping` again with
+different flags and the server returns *consumer already exists* — it
+will not silently reconfigure `shipping` out from under a running
+reader. To change a durable, edit it (`nats consumer edit`) instead of
+recreating it, or pick a new name.
+
 ## Where you are
 
 You now have:
@@ -206,7 +248,5 @@ how a **filter** turns one stream into independent views.
 ## See also
 
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
-  — every consumer option, including all four ack policies and push
-  consumers.
-- [Reference → Acknowledgments](/reference/jetstream/api/consumer)
-  — the full set of reader responses beyond `+ACK`.
+  — every consumer option, including all four ack policies, push
+  consumers, and the full set of reader responses beyond `+ACK`.

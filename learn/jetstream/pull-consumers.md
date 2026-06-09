@@ -117,6 +117,44 @@ The full set of pull request fields is documented in
 [Reference → Consumer API](/reference/jetstream/api/consumer/get-next).
 We use only `batch`, `expires`, `max_bytes`, and `idle_heartbeat` here.
 
+## Pitfalls
+
+A pull is forgiving, but a few defaults bite once `shipping` carries real
+order traffic. These are the ones worth knowing before you tune anything.
+
+**An empty fetch is normal, not an error.** When no orders are waiting,
+a fetch returns nothing once `expires` elapses — the server replies with
+a `404 No Messages` or `408 Request Timeout` status, and every client
+surfaces that as an empty batch (the CLI exits non-zero). A worker that
+treats an empty fetch as a failure crashes on a quiet stream. Loop: an
+empty result means "nothing right now," so wait and fetch again.
+
+<div class="nats-example"
+     data-type="learn-jetstream-pull-consumers-emptyFetch"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**A fetch with no expiry can stall.** Drop `expires` and a fetch waiting
+for a batch that never fills has no ceiling — the call hangs until enough
+orders arrive. Always set an expiry so a quiet stream returns control to
+your loop instead of blocking it. The CLI sets one for you from
+`--timeout`; in code, pass `expires` explicitly.
+
+**`MaxAckPending` too low stalls throughput.** This is the ceiling on
+un-acked messages the consumer will hand out before it waits for acks.
+Set it well below your batch size — say a batch of 100 against a ceiling
+of 10 — and the server delivers ten orders, then goes silent until your
+worker acks, no matter how large the batch you ask for. The default is
+1000; lower it only when you understand the in-flight count you want, and
+keep it at or above your batch size. The worker pool on the next page
+shares this single ceiling across every worker, so it matters even more
+there: see [9. A pool of workers](/learn/jetstream/worker-pool).
+
+**A batch too large blows up memory.** `batch` counts messages, not
+bytes, so a big batch against large orders can pull more into memory in
+one round than you expect. Pair `batch` with `max_bytes` so a single
+pull is bounded by size as well as count — whichever limit is hit first
+ends the pull.
+
 ## Where you are
 
 You still have one stream, `ORDERS`, and one pull consumer, `shipping`.

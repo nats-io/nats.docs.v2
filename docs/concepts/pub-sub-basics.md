@@ -9,6 +9,8 @@ description: The foundational messaging pattern in NATS — everything else buil
 
 Everything in NATS starts with publish-subscribe. A publisher sends a message to a subject, and every subscriber listening on that subject gets a copy. This is the foundation everything else builds on.
 
+For a runnable, step-by-step treatment, see the [Core NATS deep dive](/learn/core-nats).
+
 <div class="nats-flow" data-scenario="publishSubscribeAnimated" data-width="600" data-height="350"></div>
 
 Watch how messages flow as subscribers join. With no subscribers, messages reach the server but aren't delivered. As subscribers connect, each one receives a copy of every message.
@@ -114,11 +116,10 @@ nats pub demo.test.nested "Hierarchical subjects work!"
 
 You'll see each message arrive in Terminal 1 the instant it's published. Try opening a third terminal with another `nats sub 'demo.>'` — both subscribers will receive every message.
 
-## What's Next
+## Next steps
 
-Pub/sub is the foundation. Everything else in NATS builds on top of it:
-
-- **[Subjects](./subjects)** — the addressing system that makes pub/sub flexible
-- **[Queue Groups](./queue-groups)** — same pub/sub, but with built-in load balancing
-- **[Request-Reply](./request-reply)** — pub/sub with a reply subject for synchronous patterns
-- **[Best Practices](../guides/best-practices)** — naming, error handling, and message design tips
+- [Core NATS deep dive](/learn/core-nats) — the full runnable walkthrough
+- [Publish-subscribe, step by step](/learn/core-nats/publish-subscribe) — build pub/sub up from scratch
+- [Subjects](./subjects) — the addressing system that makes pub/sub flexible
+- [Queue Groups](./queue-groups) — same pub/sub, but with built-in load balancing
+- [Request-Reply](./request-reply) — pub/sub with a reply subject for synchronous patterns

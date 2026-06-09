@@ -131,6 +131,44 @@ The full set of stream limit options is documented in
 [Reference → Stream Configuration](/reference/jetstream/api/stream).
 We use only MaxAge, MaxBytes, and Discard here.
 
+## Pitfalls
+
+Limits are easy to set and easy to misread. Two traps account for most
+of the surprises.
+
+**Discard Old drops the oldest message silently.** Discard Old never
+fails a publish — when a limit is hit, the server removes the oldest
+message and the publish succeeds as if nothing happened. That is exactly
+the behavior you want for a rolling window, but it is silent data loss if
+you expected the stream to push back. Nothing warns the publisher; the
+order from eight days ago is simply gone. When you must keep history and
+would rather the publisher feel backpressure, switch to Discard New, then
+handle the rejected publish — it fails with `maximum bytes exceeded` (or
+`maximum messages exceeded`) instead of dropping anything:
+
+<div class="nats-example"
+     data-type="learn-jetstream-shaping-the-stream-discardNew"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The same silence applies to MaxAge and MaxBytes together. The two limits
+are independent, so whichever is reached first triggers the drop. A
+seven-day MaxAge does not guarantee seven days of history: if traffic
+spikes, MaxBytes can hit first and evict messages that are only hours
+old. Size MaxBytes for your peak, not your average, if the age window
+matters to you.
+
+**Whole-stream limits forget per-subject fairness.** MaxMsgs, MaxBytes,
+and MaxAge measure `ORDERS` as a whole, across every subject under
+`orders.>`. A flood of `orders.created` counts toward the same ceiling as
+`orders.shipped`, so Discard Old can evict a shipped order to make room
+for a created one — one noisy subject starves a quiet one. When each
+subject deserves its own retention, add a per-subject ceiling with
+`MaxMsgsPerSubject`:
+
+<div class="nats-example"
+     data-type="learn-jetstream-shaping-the-stream-perSubjectLimit"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
 ## Where you are
 
 You now have:

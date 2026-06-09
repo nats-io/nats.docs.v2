@@ -159,6 +159,54 @@ Using mirrors for disaster recovery — failing over to a mirror when the
 primary cluster is lost — is its own operational concern, covered in
 [Operate → Backup & Recovery](/learn/backup-recovery/mirrors-and-sources).
 
+## Pitfalls
+
+Mirrors and sources are a thin layer of config, but a few of their rules
+catch people the first time. Watch for these.
+
+**Treating a mirror as writable.** A mirror captures no subjects of its
+own, so there is nothing on the mirror's name for a publish to reach. A
+`nats pub` aimed at `ORDERS-ARCHIVE` does not error with "this is a
+mirror" — it comes back with `no responders available`, because no stream
+is listening on that name. Do not publish to the mirror; publish to the
+upstream `ORDERS` stream and let the mirror copy the message on its own.
+
+<div class="nats-example"
+     data-type="learn-jetstream-mirrors-and-sources-publishToMirror"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**Treating mirror contents as real-time.** A mirror is eventually
+consistent, not synchronous. The server reads the upstream through a
+hidden internal consumer, so under a write burst the mirror trails behind
+and its `Lag` climbs above `0`. Do not assume a message in `ORDERS` is
+already in `ORDERS-ARCHIVE` the instant it lands; read the `Lag` field
+first, and treat a lag that climbs and stays high as a sign the mirror
+cannot keep pace.
+
+<div class="nats-example"
+     data-type="learn-jetstream-mirrors-and-sources-mirrorLag"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**Combining a filter with a transform on one source.** On a single source
+or mirror entry, `filter_subject` and `subject_transforms` are mutually
+exclusive — the server rejects a config that sets both. Use
+`filter_subject` when you only need to select a subset of subjects, and
+`subject_transforms` when you also need to rewrite them (a transform
+filters and renames in one step). Do not reach for both fields on the
+same entry; pick the one that fits.
+
+**Cross-domain config that fails silently.** Reaching a stream in another
+account or JetStream domain needs the `external` block plus matching
+exports and imports on both sides — and each of the three subjects has a
+required type. The consumer API and flow-control subjects are *service*
+exports (they are request/reply), while the delivery subject is a *stream*
+export (messages flow one way). Get a type wrong and replication does not
+error loudly; the mirror simply never catches up. Do not eyeball the
+import types — verify each against
+[Reference → Stream Configuration](/reference/jetstream/api/stream/create),
+and treat the cross-account and cross-domain mechanics behind it as an
+account and authorization configuration concern, not a clustering one.
+
 ## Where you are
 
 You now have:

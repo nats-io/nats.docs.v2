@@ -90,12 +90,12 @@ three failures above stop being problems:
   stream, waiting.
 - The analytics service can be added a month later and read from the
   beginning of the stream. The history is right there.
-- A crashed worker leaves an un-acknowledged message in flight. The
+- A crashed worker leaves an unacked message in flight. The
   server redelivers it to another worker after a timeout.
 
 That last one — _redelivery_ — is what gives JetStream the property
 called **at-least-once delivery**. A message stays in flight until
-the consumer acknowledges it. We will work through the mechanics on
+the consumer acks it. We will work through the mechanics on
 the consumer pages.
 
 ## What does not change
@@ -134,6 +134,37 @@ Good signals that pub-sub is still the right answer:
   reconnect, a periodic refresh, a separate durable store).
 
 If any of those stop being true, a stream is what you want.
+
+## Pitfalls
+
+Two assumptions trip people up the first time they reach for a stream.
+
+**A stream is not a responder.** Capturing `orders.>` into the `ORDERS`
+stream stores every matching message. It does not make the subject
+answer requests. A caller that publishes a request and waits for a
+reply still gets _no responders_ when nobody is subscribed live — the
+stream sits silently behind the subject and never replies.
+
+Do not treat "the stream exists" as "someone will answer." If you need
+a reply, run a service that subscribes and responds; the stream is for
+storage and replay, not for request-reply.
+
+<div class="nats-example" data-type="learn-jetstream-why-a-stream-no-responders" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The message in that request still lands in the `ORDERS` stream. Getting
+it back out is a consumer's job, which we cover on the consumer pages —
+it is never a reply to the original publisher.
+
+**Reaching for a stream when pub-sub already works.** A stream is not
+free: it writes to disk by default, it has a single leader until you
+ask for more replicas, and it needs limits so it does not grow forever.
+Adding one to a flow where missing a message has no consequence buys
+you cost without buying you anything.
+
+Do not store what the next message supersedes. The signals for staying
+on plain pub-sub are listed under [When you do not need a
+stream](#when-you-do-not-need-a-stream) above; if none of them hold, a
+stream is the right call.
 
 ## What is next
 

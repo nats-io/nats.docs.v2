@@ -17,10 +17,15 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
  *
  * Full structure + page rationale:
  *   docs/superpowers/specs/2026-05-27-learn-deep-dives-section-design.md
+ *   Per-chapter design specs: docs/superpowers/specs/2026-06-0*-*-deep-dive-design.md
  *
- * Status: JetStream is in progress; every other page is a structure-only
- * stub. The Operate ops chapters (clustering, monitoring, backup,
- * deployment) are scaffolded now and written in later cycles.
+ * Status: all twelve chapters are written — Develop (Core NATS, Services,
+ * Resilient Clients, JetStream, Key-Value, Object Store) and Operate
+ * (Topologies, Security, Clustering, Monitoring, Backup & Recovery,
+ * Deployment). Each page follows the deep-dive conventions: pinned Acme
+ * ORDERS scenario, nats-example divs + committed CLI snippets, animated
+ * NatsFlow scenarios, per-page Pitfalls, and a Production checklist in
+ * each where-next.
  */
 const sidebars: SidebarsConfig = {
   learnSidebar: [
@@ -153,6 +158,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "security/accounts-and-multitenancy",
             "security/authentication-basics",
+            "security/decentralized-auth",
             "security/operator-mode",
             "security/authorization",
             "security/cross-account",

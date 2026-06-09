@@ -113,6 +113,47 @@ consumer does not have to start there — you will explore the other
 starting points later. Replaying from the beginning is simply the
 clearest way to see that the whole log is still there.
 
+## Pitfalls
+
+Reading a stream back is read-only and safe, but three habits bite the
+first time you point a replay at real data.
+
+**Replaying a huge stream from sequence 1.** `--all` starts the
+ephemeral consumer at sequence 1 and walks the entire log. On a
+three-message `ORDERS` stream that is instant. On a stream holding
+millions of orders it floods your terminal and your network for minutes.
+Reach for `--all` only when you genuinely want the whole history. To
+sample the tail instead, start near the end with `--last`, or from a
+point in time with `--since`, or from a known sequence with
+`--start-sequence`.
+
+**An ephemeral consumer disappearing mid-read.** The replay above uses
+an ephemeral consumer — one with no name you chose and no state that
+outlives your session. The server deletes it once it goes idle past its
+inactivity threshold, so if your reader stalls or its connection drops
+while paging through a long stream, the cursor is gone and a reconnect
+restarts from sequence 1. For a one-shot look that is fine. For a read
+you need to resume after an interruption, create a named, durable
+consumer instead — it keeps its cursor on the server across
+disconnects:
+
+<div class="nats-example"
+     data-type="learn-jetstream-reading-back-durable-replay"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The durable, ack-based reader is the subject of the
+[next page](/learn/jetstream/your-first-consumer); here it is only the
+fix for "my replay vanished halfway through."
+
+**`--all` vs `--new` confusion.** `--all` (the server's default
+`DeliverAll` start) hands you everything stored from sequence 1 first,
+then live messages. `--new` (`DeliverNew`) skips the backlog and
+delivers only messages published after the consumer is created. Picking
+`--new` when you meant to audit history silently shows you nothing of
+what is already stored; picking `--all` when you only wanted live
+traffic buries you in backlog. Decide which one matches the question you
+are asking before you run the command.
+
 ## Where you are
 
 Nothing about the stream changed on this page. You still have:

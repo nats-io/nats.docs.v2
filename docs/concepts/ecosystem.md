@@ -143,3 +143,9 @@ Per-language implementations for issuing and verifying NATS account / user JWT c
 | [synadia-io/flink-connector-nats](https://github.com/synadia-io/flink-connector-nats) | Apache Flink connector |
 | [nats-java-vertx-client](https://github.com/nats-io/nats-java-vertx-client) | Vert.x integration |
 | [terraform-provider-jetstream](https://github.com/nats-io/terraform-provider-jetstream) | Manage JetStream resources as IaC |
+
+## Next steps
+
+- [The Learn deep dives](/learn) — guided, hands-on path through NATS
+- [Resilient clients](/learn/resilient-clients) — handle reconnects and failures
+- [Services](/learn/services) — build request/reply microservices
