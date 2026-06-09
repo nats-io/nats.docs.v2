@@ -39,7 +39,9 @@ spaces**, and an object is split across both of them:
 - `$O.INVOICES.C.>` holds the **chunk** messages — the bytes of every
   object, one message per chunk.
 - `$O.INVOICES.M.>` holds the **metadata** messages — one `ObjectInfo` per
-  object, describing its name, size, chunk count, and digest.
+  object, describing its name, size, chunk count, and digest. That digest is the
+  SHA-256 from the put, stored as `SHA-256=<base64url(hash)>` — the exact string
+  a get re-computes the reassembled bytes against.
 
 So a single object is several chunk messages on the `.C.` subjects plus one
 metadata message on the `.M.` subjects. The chunk subject ends in a
@@ -74,10 +76,10 @@ the [Key-Value Store](/learn/key-value), not this one. The contrast the index
 drew holds all the way down to the header.
 
 The backing stream is configured to make rollup possible. `AllowRollup` is
-true so the header is honored; `Discard` is `New` so the stream rejects writes
-when full rather than dropping old chunks; `AllowDirect` is true so a get can
-read the latest metadata without a consumer. Here is the shape of that
-configuration:
+true so the header is honored; the discard policy is set to `new` so the stream
+rejects writes when full rather than dropping old chunks; `AllowDirect` is true
+so a get can read the latest metadata without a consumer. Here is the shape of
+that configuration:
 
 ```json
 {

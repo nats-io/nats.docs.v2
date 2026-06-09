@@ -7,9 +7,10 @@ description: Compose clusters, gateways, and leaf nodes into the full Acme topol
 
 # 6. Putting it together
 
-Five pages, five shapes. A single server, a cluster joined by routes, a
+Five pages, four shapes. A single server, a cluster joined by routes, a
 super-cluster joined by gateways, a leaf node bridging in from the
-edge. Each page added one shape and carried the last one forward.
+edge. Each page either added a shape or deepened one, and carried the
+last one forward.
 
 This page does not add a new shape. It shows how the shapes you already
 know stack into one deployment, and names the one property that stack

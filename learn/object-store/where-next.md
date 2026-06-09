@@ -117,8 +117,8 @@ the why.
 ### Chunking — see [Pitfalls](/learn/object-store/chunking#pitfalls)
 
 - [ ] Leave the chunk size at its default unless you have a reason; too small floods the stream with messages and overhead, too large can exceed the stream's max message size.
-- [ ] Let a failed put purge its own partial chunks and retry; do not try to clean up half-written objects by hand.
-- [ ] Treat a re-put as a fresh object identity, not an edit of the old chunks; the new chunks never overlap the old ones.
+- [ ] Check the get result before you use the bytes; an unchecked async put failure can leave an object that fails its digest check on the way back out.
+- [ ] Re-put from the source on a failed get rather than shipping a partial file; do not assume a put "worked" without a get that reassembles and verifies it.
 
 ### Metadata and links — see [Pitfalls](/learn/object-store/metadata-and-links#pitfalls)
 

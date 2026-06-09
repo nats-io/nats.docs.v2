@@ -34,8 +34,9 @@ no captured subjects of its own — its only job is to follow the
 upstream. The mirror rejects any `nats pub` aimed at it.
 
 A mirror keeps its own retention. The upstream might keep messages for
-seven days while the mirror keeps them forever. The copy follows the
-upstream's messages, not its limits.
+seven days while the mirror keeps them forever. The copy keeps all
+messages from upstream; the mirror's own retention limits decide what it
+stores locally.
 
 ## Build the ORDERS-ARCHIVE mirror
 
@@ -57,6 +58,9 @@ command for the archive:
 ```bash
 nats stream add ORDERS-ARCHIVE --mirror ORDERS
 ```
+
+By default a mirror starts from the very beginning of the upstream; the
+Reference covers controlling where replication starts.
 
 Right after creation the mirror catches up. Within moments it holds the
 same three orders that `ORDERS` does. Confirm it:
@@ -148,6 +152,12 @@ A mirror or source can copy a subset of subjects with a filter, rewrite
 subjects on the way through with a subject transform, or reach a stream
 in another account or JetStream domain. Each is one extra field on the
 mirror or source configuration.
+
+Reaching across an account or domain involves three subjects, and each
+has a required export type: the consumer API and flow-control subjects
+are *services* (they are request-reply), while delivery is a *stream*
+(messages flow one way). Getting a type wrong is a common trap — the
+Pitfalls below cover the failure mode.
 
 The full set of mirror and source options — `filter_subject`,
 `subject_transforms`, `opt_start_seq`, `external`, and the rest — is

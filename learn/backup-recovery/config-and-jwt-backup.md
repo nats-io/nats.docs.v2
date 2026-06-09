@@ -1,11 +1,11 @@
 ---
 id: config-and-jwt-backup
-title: 4. Config and JWT backup
+title: 5. Config and JWT backup
 sidebar_position: 5
 description: Back up and restore the operator, accounts, creds, nkeys, and server config off-site so the identity plane survives a clean-room rebuild
 ---
 
-# 4. Config and JWT backup
+# 5. Config and JWT backup
 
 The last three pages protected the data: a snapshot to return to, a
 mirror to fail over to, a runbook to choose between them. But a restored

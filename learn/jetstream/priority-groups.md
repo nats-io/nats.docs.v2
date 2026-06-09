@@ -33,10 +33,16 @@ You set two fields when you create the consumer:
 - **`PriorityPolicy`** — the rule the server applies: `overflow`,
   `pinned_client`, or `prioritized`.
 
+Both policies in this page use an explicit ack policy, and the examples
+create the consumers with `--ack explicit`. That is not incidental: each
+policy steers on what the server tracks per client — overflow on pending
+and unacked counts, pinned_client on which client is still pulling — and
+that tracking only exists when the consumer acknowledges its messages.
+
 Once a consumer has a policy, every pull must name its group. A pull
-that omits the group is rejected with `priority group is required for
-priority consumer`. The group on the pull and the group on the consumer
-have to match.
+that omits the group is rejected with `Bad Request - Priority Group
+missing`. The group on the pull and the group on the consumer have to
+match.
 
 That is the whole shape: a named group on the consumer, a policy that
 governs it, and pulls that opt into the group by name. The rest of this

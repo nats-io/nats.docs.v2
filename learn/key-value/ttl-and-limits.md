@@ -67,7 +67,8 @@ most:
   something bigger is rejected. Key-value values are meant to be small;
   large blobs belong in the [Object Store](/learn/object-store).
 - **History depth** — how many prior revisions each key keeps, which you
-  already met on the previous page. It caps at 64.
+  already met on the previous page. It caps at 64, and it doubles as a
+  per-key cap: it is the most messages any single key may hold.
 
 Here those limits are set on a throwaway `CACHE` bucket, so the numbers
 stand on their own and do not imply anything about `INVENTORY`:
@@ -128,15 +129,15 @@ only way to change one.
 
 <div class="nats-example" data-type="learn-key-value-ttl-and-limits-perKeyTTL" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**Limits discard, they do not warn.** A bucket at its max size does not
-reject the next put and tell you it is full. It makes room by removing the
-oldest value, then accepts the write. A `CACHE` bucket sized for the
-average load will quietly drop live entries off the back the moment a burst
-pushes it past the cap, and you find out when a get returns nothing. Size
-the bucket for the working set you actually need to hold, not the average,
-so a busy minute does not evict values you still want. The same goes for
-max value size: a put over the cap is rejected outright, so cap it above
-the largest value you legitimately store.
+**Limits reject, they do not make room.** A bucket at its max size does not
+remove an old value to fit a new one. It rejects the next put with an error
+and leaves every existing value in place. A `CACHE` bucket sized for the
+average load will start refusing writes the moment a burst pushes it to the
+cap, and the inventory service sees the error on the put, not later on a
+get. Size the bucket for the working set you actually need to hold, not the
+average, so a busy minute does not bounce writes you needed to land. The
+same goes for max value size: a put over the cap is rejected outright, so
+cap it above the largest value you legitimately store.
 
 ## Where you are
 

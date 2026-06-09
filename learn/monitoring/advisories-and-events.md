@@ -91,7 +91,7 @@ slipped through.
 One advisory deserves a special note. When the leader of a replicated
 stream or consumer changes, JetStream publishes a leader-elected advisory
 naming the new leader. You will see it in the same `$JS.EVENT.ADVISORY.>`
-subscription, and a flapping leader showing up here is worth an alert.
+subscription, and a flapping leader showing up here is worth watching.
 
 But this page stops at *observing* that it happened. *Why* a leader
 changed — how the election ran, what quorum is, which peer won — is
@@ -173,7 +173,7 @@ acknowledgment pattern covered in
 
 **A leader-elected advisory reports a flap, not its cause.** Seeing
 repeated leader-elected advisories for `ORDERS` tells you the cluster is
-unstable, and that is worth alerting on. It does not tell you why. Treat
+unstable, and that is worth watching. It does not tell you why. Treat
 the advisory as a symptom to watch and take the *why* — election timing,
 quorum, peer health — to
 [Clustering → RAFT and leaders](/learn/clustering/raft-and-leaders). Do
@@ -197,14 +197,14 @@ not depend on polling. You can:
 
 You have read state on demand from the monitoring port, computed lag from
 consumer state, and now received events you never asked for. The last
-lens turns all of it into stored history, charts, and alerts.
+lens turns all of it into stored history, charts, and threshold checks.
 
 ## What is next
 
 The next page wires the production loop: an **exporter** that scrapes
 `:8222`, **Prometheus** that stores the numbers as time series, **Grafana**
-that charts them, and `nats server check` that fires an alert when lag
-crosses a threshold.
+that charts them, and `nats server check` that fires when lag crosses a
+threshold.
 
 Continue to
 [4. Prometheus & dashboards](/learn/monitoring/prometheus-and-dashboards).

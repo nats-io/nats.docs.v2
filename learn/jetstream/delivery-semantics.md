@@ -125,11 +125,13 @@ Interest and WorkQueue each carry a failure mode worth knowing before
 you reach for them.
 
 **Interest can fill the disk silently.** A message is only removed once
-all consumers ack it. If a consumer stalls — a stuck worker, a service
-that is down — its unacked messages are never eligible to leave, and the
-stream grows until it hits its limits or runs out of room. Interest
-retention does not excuse you from setting limits; it makes monitoring
-consumer health more important, not less.
+all consumers ack it. The stream tracks the lowest ack position across
+*every* consumer and only deletes up to that point, so a single slow
+consumer holds up cleanup for the whole stream. If a consumer stalls — a
+stuck worker, a service that is down — its unacked messages are never
+eligible to leave, and the stream grows until it hits its limits or runs
+out of room. Interest retention does not excuse you from setting limits;
+it makes monitoring consumer health more important, not less.
 
 **WorkQueue is single-delivery, not shared-view.** The first ack removes
 the message for everyone, so two independent consumers on a WorkQueue

@@ -58,9 +58,9 @@ Configuration:
        Replay Policy: Instant
 ```
 
-`Filter Subject: orders.shipped` is the whole point. Without a filter,
-that line reads `Filter Subject: ` (empty), meaning "every subject in
-the stream."
+`Filter Subject: orders.shipped` is the whole point. The `shipping`
+consumer has no filter, so its info output omits this line entirely —
+no filter line at all means "every subject in the stream."
 
 ## Two consumers, two positions
 
@@ -153,15 +153,17 @@ to prune a stream — what stays and what ages out is decided by the
 stream's limits, covered in [8. Shaping the stream](/learn/jetstream/shaping-the-stream),
 not by any consumer.
 
-**Overlapping filters within one consumer.** Two separate consumers whose
-filters overlap each get their own full copy of the matching messages —
-that overlap is exactly the cheap fan-out this page relies on, and the
-stream's retention policy never changes it. What the server does reject is
-overlap _inside a single consumer_: if you give one consumer several filter
-subjects and any of them is a subset of another, the create call fails. The
-filters on one consumer must be disjoint, regardless of whether the stream
-uses limits, interest, or work-queue retention. How work-queue retention
-shapes message delivery once filters are in place is covered in
+**Overlapping filters within one consumer.** Overlap _between_ consumers
+is fine: two separate consumers whose filters match the same subject each
+get their own full copy of those messages. That is the cheap fan-out this
+page relies on, and no retention policy changes it.
+
+Overlap _inside_ one consumer is what the server rejects. If you give a
+single consumer several filter subjects and any one is a subset of another,
+the create call fails. The filters on one consumer must be disjoint — the
+rule holds whether the stream uses limits, interest, or work-queue
+retention. How work-queue retention shapes delivery once filters are in
+place is covered in
 [9. Delivery semantics](/learn/jetstream/delivery-semantics).
 
 ## Where you are

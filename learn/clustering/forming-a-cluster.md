@@ -62,9 +62,10 @@ own. That is **gossip**.
 
 Gossip is route discovery by INFO redistribution. When two servers form a
 route, each sends the other an **INFO** message — a small protocol frame
-that lists, among other things, the route URLs of every peer that server
-already knows. The receiver reads that list, notices any peer it has no
-route to yet, and dials it. Those new connections are implicit routes.
+carrying its own address. The receiver learns that peer exists and dials
+it. The trick is that a server then forwards that INFO to the other peers
+it already holds routes to, so each of them learns the new peer and dials
+it too. Those self-opened connections are implicit routes.
 
 Trace it on `east`. `n1-east` boots and waits. `n2-east` boots, dials its
 explicit route to `n1-east`, and the two exchange INFO. `n3-east` boots,
@@ -83,8 +84,9 @@ large: adding a fourth server later means giving it one route, to
 The wire-level detail of the INFO frame and the route handshake — every
 field a server advertises, the protocol verbs — is documented in
 [Reference → Route protocol](/reference/protocols/route). We only need the
-behavior here: one INFO carries the peer list, and the receiver dials what
-it is missing.
+behavior here: each INFO announces one peer's address, and a server
+forwards a new peer's INFO to the routes it already holds so they dial it
+too.
 
 ## Stand up the seed and two joiners
 
@@ -109,8 +111,10 @@ cluster {
 Three things in the `cluster {}` block carry the formation.
 
 `name` is the cluster identifier, `east`. Every server that should join
-must set the exact same name. A server with a different name does not join;
-it forms a separate cluster of its own.
+must set the exact same name. A route to a server whose name differs is
+closed the moment the names are compared, with no error surfaced to you;
+the odd server forms a separate cluster of its own. See
+[Pitfalls](#pitfalls) for how to catch this.
 
 `listen` is the route port this server accepts routes on — `6222`, one
 above the client port and never the same as it. This is the port peers
@@ -181,18 +185,18 @@ The report lists all three servers as one cluster, each with its route
 count:
 
 ```
-╭──────────────────────────────────────────────────────────────────────╮
-│                            Server Overview                             │
-├─────────┬─────────┬──────┬─────────┬─────┬───────┬──────┬─────┬────────┤
-│ Name    │ Cluster │ IP   │ Version │ JS  │ Conns │ Subs │ Rts │ Uptime │
-├─────────┼─────────┼──────┼─────────┼─────┼───────┼──────┼─────┼────────┤
-│ n1-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │   2 │  1m2s  │
-│ n2-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │   2 │  58s   │
-│ n3-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │   2 │  55s   │
-╰─────────┴─────────┴──────┴─────────┴─────┴───────┴──────┴─────┴────────╯
+╭─────────────────────────────────────────────────────────────────────────╮
+│                             Server Overview                                │
+├─────────┬─────────┬──────┬─────────┬─────┬───────┬──────┬────────┬────────┤
+│ Name    │ Cluster │ Host │ Version │ JS  │ Conns │ Subs │ Routes │ Uptime │
+├─────────┼─────────┼──────┼─────────┼─────┼───────┼──────┼────────┼────────┤
+│ n1-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │      2 │  1m2s  │
+│ n2-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │      2 │  58s   │
+│ n3-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │      2 │  55s   │
+╰─────────┴─────────┴──────┴─────────┴─────┴───────┴──────┴────────┴────────╯
 ```
 
-The `Rts` column reads `2` for every server: each holds a route to the
+The `Routes` column reads `2` for every server: each holds a route to the
 other two. You configured one explicit route per joiner; gossip supplied
 the rest. The `Cluster` column reads `east` on all three rows, so they
 joined the same cluster and not three lonely ones.
@@ -261,7 +265,7 @@ The `east` cluster is running and has discovered itself from one seed:
 - Each joiner carried one explicit route to `n1-east`; gossip opened the
   implicit routes that complete the mesh, so every server holds a route to
   the other two.
-- `nats server report` shows all three under cluster `east` with `Rts: 2`.
+- `nats server report` shows all three under cluster `east` with `Routes: 2`.
 
 The servers can now reach each other. What they cannot yet do is *agree* —
 decide together which server owns a stream, and keep that decision when one

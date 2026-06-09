@@ -129,12 +129,13 @@ explains the why.
 ### TTL and limits — see [Pitfalls](/learn/key-value/ttl-and-limits#pitfalls)
 
 - [ ] Set a per-key TTL at create time only; passing a TTL to put or update does not change it, so delete then create to change a key's TTL.
-- [ ] Size the bucket for the working set, not the average; a bucket at its byte limit silently drops the oldest to make room.
+- [ ] Size the bucket for the working set, not the average; a bucket at its byte limit rejects the next put with an error instead of making room by dropping old values.
 
 ### Under the hood — see [Pitfalls](/learn/key-value/under-the-hood#pitfalls)
 
 - [ ] Reach for purge, not delete, when you must actually drop prior revisions; delete leaves a marker and keeps history.
 - [ ] Use the key-value API, never raw `nats pub` to `$KV.INVENTORY.>` or hand edits to the `KV_INVENTORY` config; the backing stream is managed and the rollup and marker headers must stay correct.
+- [ ] Keep keys to legal subject tokens, since a key becomes the last token of `$KV.INVENTORY.<key>`; a name with a `:` or two dots in a row is rejected.
 
 ## See also
 

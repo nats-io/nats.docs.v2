@@ -45,8 +45,8 @@ snapshot carries the messages but forgets the consumers reading them.
 With it, the snapshot also records each durable consumer's config and
 delivery position — the **consumer state**. Restore that snapshot and the
 `shipping` and `analytics` consumers come back exactly where they left
-off, not at the start of the stream. For a real recovery you almost
-always want `--consumers`.
+off, not at the start of the stream. For recovery of a production stream,
+use `--consumers`.
 
 ## How the snapshot streams off the server
 
@@ -71,7 +71,7 @@ We only need the behavior here.
 
 ## Restore rebuilds the stream
 
-A snapshot is only useful if you can turn it back into a stream.
+A snapshot earns its keep when you turn it back into a stream.
 **Restore** reads a snapshot directory and recreates the stream from it:
 same messages, same sequence numbers, same configuration. If the snapshot
 included consumer state, restore brings the consumers back too.
@@ -97,22 +97,22 @@ is: confirm the broken stream is gone (or remove it), then restore.
 A restore you did not check is a guess. The last step is always to read
 the rebuilt stream's state back and confirm it matches the source.
 
-<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verify-counts" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verifyCounts" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Look at the `State` block. `Messages` and `Last Sequence` must match the
-stream you snapshotted, and `Active Consumers` should show `shipping` and
+stream you snapshotted, and `Active Consumers` shows `shipping` and
 `analytics` back if you used `--consumers`. Matching counts are your proof
 that the archive is real — not the fact that the backup command exited
 zero.
 
 ## Pitfalls
 
-Four traps catch people the first time they snapshot a real stream. Each
-is scoped to this page's two operations: snapshot and restore.
+Four common pitfalls, each scoped to this page's two operations: snapshot
+and restore.
 
 **Memory streams cannot be snapshotted.** A snapshot reads a stream's
 on-disk files, so a stream with `Storage: Memory` has nothing to read.
-The backup fails with `memory stream not supported`. If a stream is worth
+The backup fails with `memory streams do not support snapshots`. If a stream is worth
 backing up, it is worth file storage — set `Storage: File` when you
 create it. Do not discover this during an incident; check the storage
 type before you rely on a snapshot:
@@ -130,7 +130,8 @@ copy under a different name, restore first and then mirror or source it —
 that.
 
 **Flow control can time out on slow disks or distant links.** The server
-waits a few seconds for the client to acknowledge each chunk. On a slow
+waits a few seconds (default 5 seconds) for the client to acknowledge each
+chunk. On a slow
 disk or a high-latency link the acknowledgment can arrive late, and the
 backup aborts with a flow-control timeout (`408 No Flow Response`). The
 fix is to send smaller chunks and a smaller window so each round trip is

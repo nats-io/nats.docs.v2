@@ -25,8 +25,9 @@ It reads the bytes in order and cuts them at a fixed boundary called the
 becomes a sequence of chunk messages, not one giant one.
 
 The default chunk size is **128 KB**. You did nothing to enable splitting
-on the last page — the small invoice simply fit in a single chunk. A
-larger file crosses the boundary and produces several.
+on the last page — your small invoice fit within a single chunk, well
+under that 128 KB boundary, so there was nothing to split. A larger file
+crosses the boundary and produces several chunks.
 
 Put a 3 MB invoice and read the chunk count back:
 
@@ -51,8 +52,8 @@ forms (get-to-bytes, get-to-file, get-to-stream) all give you a whole
 object.
 
 While it reassembles, the store does one more thing: it recomputes the
-SHA-256 **digest** over the bytes and compares it to the digest stored
-when the object was put. (You met the digest on the
+SHA-256 **digest** over the bytes and compares it to the digest the store
+recorded during the put. (You met the digest on the
 [last page](/learn/object-store/your-first-object): it is the integrity
 hash put computes as it stores.) If the two digests match, the bytes are
 intact and you get them. If they do not match — a chunk is missing or
@@ -85,10 +86,11 @@ before it returns the error, so a failure leaves the store as it was, not
 half-written. There is no leftover sequence of orphan chunks for a later
 get to stumble on.
 
-This works because each put gets a **fresh identity**. The chunks of one
-put are tagged with a unique id generated for that put alone, separate from
-the object's name. When you put the same object name twice — a corrected
-invoice over a draft — the second put's chunks never overlap the first's.
+This works because each put gets a fresh **NUID** — a unique identifier
+generated for that put alone, separate from the object's name. The chunks
+of one put are tagged with this fresh identity. When you put the same
+object name twice — a corrected invoice over a draft — the second put's
+chunks never overlap the first's.
 The store writes the new chunks under the new identity, swings the object's
 metadata to point at them, and the old chunks fall away. A re-put is a
 clean replacement, never a merge.
@@ -118,8 +120,10 @@ Two traps show up once objects get large. Each is scoped to this page:
 the chunk size, and the integrity check on get.
 
 **A chunk size at the extremes hurts.** Set it too small and a single file
-becomes thousands of tiny messages, each with its own framing overhead —
-more storage, slower puts and gets. Set it too large and the chunk exceeds
+becomes thousands of tiny messages. Each chunk is a NATS message that
+carries its own protocol framing — headers and subject routing on top of
+the slice of bytes — so very small chunks waste storage on per-message
+overhead and slow puts and gets down. Set it too large and the chunk exceeds
 the backing stream's maximum message size, and the put fails outright: the
 chunk size is clamped to that stream limit, so an oversized value rejects
 the store rather than quietly splitting some other way. Do not tune the
@@ -130,13 +134,14 @@ size — covered on
 chunk size up to make "fewer messages" your goal — past the stream limit
 it stops storing anything.
 
-**Never trust the bytes before the get returns cleanly.** Because chunks
+**Always check the get result before you use the bytes.** A failed get
+won't hand you a truncated file, so verify success first. Because chunks
 publish asynchronously, an unchecked failure mid-put can leave an object
 that fails its digest check on the way back out. A get that hits a missing
-chunk or a digest mismatch errors — it does not hand you a truncated file.
-So always check the get result before you use the bytes, and re-put from
-the source on failure rather than shipping a partial invoice. Don't assume
-a put "worked" without confirming a get reassembles and verifies it.
+chunk or a digest mismatch errors instead of returning. So check the get
+result, and re-put from the source on failure rather than shipping a
+partial invoice. Don't assume a put "worked" without confirming a get
+reassembles and verifies it.
 
 Guard the get on its outcome, and re-put on failure:
 

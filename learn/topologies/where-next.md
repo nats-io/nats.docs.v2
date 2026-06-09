@@ -165,7 +165,7 @@ traffic — the thing to do, grouped by the page that explains why.
 **JetStream in a cluster** — see [Pitfalls](/learn/topologies/jetstream-in-a-cluster#pitfalls)
 
 - [ ] Audit replica counts and raise the streams that matter to R3 — a cluster alone is not HA.
-- [ ] Run 3, 5, or 7 servers, never an even count.
+- [ ] Run an odd count — 3 or 5 — never an even count; a stream replicates across at most five servers.
 - [ ] Read a stream's own leader from `nats stream info`, not from the meta-group summary.
 - [ ] Spread R3 replicas across independent failure domains, not one rack or zone.
 

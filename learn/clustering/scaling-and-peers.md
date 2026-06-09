@@ -43,9 +43,10 @@ read for data it does not have.
 So the new peer **catches up** first. Catchup is how a behind or new
 peer streams the entries it is missing: the leader feeds it the log from
 where it is short, the peer applies each entry into its stream store,
-and its lag shrinks toward zero. Until then, the new peer is an
-observer — present in the set, replicating, but not yet relied on for
-quorum.
+and its lag shrinks toward zero. Lag here is just a count — how many
+entries behind the leader's log the peer still is. Until then, the new
+peer is an observer — present in the set, replicating, but not yet relied
+on for quorum.
 
 This observer step is the whole safety of a scale-up. Adding `n4-east`
 to an `R=3` group does not put a half-empty replica in the voting path
@@ -95,7 +96,7 @@ lands on a peer that stays.
 
 One membership change happens at a time. While a peer add or remove is
 committing, the group refuses a second one with a
-`server member change already in progress` error. This is deliberate:
+`cluster member change is in progress` error. This is deliberate:
 two overlapping changes to who is in the voting set are exactly how a
 group talks itself out of a quorum. Let one finish, confirm a leader,
 then start the next.
@@ -104,7 +105,7 @@ That confirmation is the rule that keeps a shrink safe. After a
 `peer-remove`, re-read the group and check three things before you touch
 it again: the dropped peer is gone, a named leader is back, and the
 remaining replicas report zero lag. Removing one peer from an `R=3`
-group leaves two — still a quorum of the now three-member set — so the
+group leaves two — still a majority (2) of the original three — so the
 stream keeps a leader throughout. Removing a second before the first
 settles is where it goes wrong, which the Pitfalls below make concrete.
 

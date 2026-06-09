@@ -47,7 +47,8 @@ port `:8222`, tell it which collectors to enable, and it serves its own
 prometheus-nats-exporter -jsz=all -port 7777 http://localhost:8222
 ```
 
-A **scrape** is one poll of an endpoint. When Prometheus scrapes the
+A **scrape** is one request to an endpoint that fetches its current
+numbers. When Prometheus scrapes the
 exporter's `:7777`, the exporter scrapes the NATS node's `:8222`,
 transforms the JSON into metrics, and hands them back. The exporter holds
 no history of its own — it answers each scrape from a fresh read of the
@@ -57,7 +58,7 @@ The JetStream collector turns the consumer state you already know into
 named time series. The lag field `num_pending` becomes
 `nats_consumer_num_pending`; redeliveries become
 `nats_consumer_num_redelivered`; the stream message count becomes
-`nats_stream_messages`. The names follow the wire fields you read on the
+`nats_stream_total_messages`. The names follow the wire fields you read on the
 last page, with a `nats_` prefix.
 
 ```
@@ -65,7 +66,7 @@ last page, with a `nats_` prefix.
 nats_consumer_num_pending{account="ORDERS",stream_name="ORDERS",consumer_name="shipping"} 20
 nats_consumer_num_ack_pending{account="ORDERS",stream_name="ORDERS",consumer_name="shipping"} 5
 nats_consumer_num_redelivered{account="ORDERS",stream_name="ORDERS",consumer_name="shipping"} 3
-nats_stream_messages{account="ORDERS",stream_name="ORDERS"} 1000
+nats_stream_total_messages{account="ORDERS",stream_name="ORDERS"} 1000
 ```
 
 The numbers in braces are **labels** — the dimensions that tell one
@@ -165,11 +166,11 @@ check only reports the symptom. The mechanics live in
 
 **A check with no threshold never fires.** `nats server check consumer`
 has defaults, but the defaults do not know your SLA. A check run without
-`--pending-critical` will sit at OK while the `shipping` consumer's lag
+`--unprocessed-critical` will sit at OK while the `shipping` consumer's lag
 climbs past anything you would care about, because nothing told it where
 the line is. Always set explicit thresholds that match what the orders
 deployment can tolerate — the `checkConsumer` example above pins
-`--pending-critical 100` for exactly this reason. A silent check is worse
+`--unprocessed-critical 100` for exactly this reason. A silent check is worse
 than no check, because it looks like coverage.
 
 **The exporter keeps no time series.** The exporter is stateless: every

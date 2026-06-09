@@ -95,8 +95,9 @@ three failures above stop being problems:
 
 That last one — _redelivery_ — is what gives JetStream the property
 called **at-least-once delivery**. A message stays in flight until
-the consumer acks it. We will work through the mechanics on
-the consumer pages.
+the consumer acks it. A consumer is the server-side reader that pulls
+messages out of a stream; we build the first one a few pages from
+now. We will work through the redelivery mechanics there too.
 
 ## What does not change
 
@@ -178,3 +179,5 @@ and see how stored messages differ from sent messages.
   overview of the same material.
 - [Core Concepts → Publish & Subscribe](/concepts/pub-sub-basics) —
   the layer this chapter builds on.
+- [Reference → Stream Configuration](/reference/jetstream/api/stream/create) —
+  the full set of stream limits and options the next pages configure.

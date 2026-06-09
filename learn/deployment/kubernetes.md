@@ -205,10 +205,28 @@ not to delete and retry the pod.
 **A ConfigMap edit does not reload the server by itself.** Editing the
 config the NATS Helm chart renders changes the file, but the running
 `nats-server` keeps its old config until something sends it a SIGHUP. The
-chart includes the config reloader sidecar to do exactly that — without it, a
-config change sits inert until the pod restarts. Turning a ConfigMap
-change into a live reload is its own subject, covered on
+chart includes the **config reloader sidecar** — the
+`nats-server-config-reloader` container, enabled by default — to do
+exactly that; without it, a config change sits inert until the pod
+restarts. Turning a ConfigMap change into a live reload is its own
+subject, covered on
 [Config management](/learn/deployment/config-management).
+
+**A flapping readiness probe during a rebalance is normal.** When
+JetStream moves R3 replicas between pods — after a restart, or when you
+scale — the readiness probe can briefly report a pod as not-ready even
+though the cluster is healthy. The probe is doing its job: it pulls a
+pod out of the service rotation while that pod catches up. You can watch
+it happen:
+
+```bash
+kubectl describe pod nats-0
+# Events: ... Readiness probe failed ... then recovers as the replica syncs
+```
+
+Do not restart the pod chasing it. If the flapping is frequent enough to
+disrupt clients, raise the readiness probe's `failureThreshold` in
+`values.yaml` so a mid-rebalance blip does not pull the pod out.
 
 **Never mix CLI and CRD management of the same stream.** The NACK
 controller continuously reconciles the CRD against the cluster. If you

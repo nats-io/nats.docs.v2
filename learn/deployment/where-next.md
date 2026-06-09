@@ -119,11 +119,11 @@ that explains the why.
 
 ### Sizing & resources — see [Pitfalls](/learn/deployment/sizing-and-resources#pitfalls)
 
-- [ ] Set `max_store` to a size the disk can actually hold; an oversized limit lets JetStream error on publish instead of failing fast. Test small (`maxBytes: 10Gi`) and watch `df -h`.
-- [ ] Keep `max_payload` at or below `max_pending`; a `max_payload` larger than `max_pending` refuses the server start. Hold `max_pending` at roughly 10x your peak message size.
-- [ ] Raise the file-descriptor limit before start (`ulimit -n 800000`); a big cluster spends two FDs per stream plus gossip and exhausts the default cap.
-- [ ] Upgrade operator-mode clusters atomically; JWT account limits are not honored before v2.10, so a mixed-version cluster enforces them inconsistently.
-- [ ] Read the live limits with `nats account info` before sizing, rather than guessing at `MaxMemory`/`MaxStore`/`MaxStreams`.
+- [ ] Set `max_file_store` to a size the disk can actually hold; an oversized limit lets JetStream error mid-publish instead of failing fast. Test small (`10GB`) and watch `df -h`.
+- [ ] Keep `max_payload` at or below `max_pending`; a `max_payload` larger than `max_pending` refuses the server start. Hold `max_pending` at `≥ 10×` your peak message size.
+- [ ] Raise the file-descriptor limit before the process starts (`ulimit -n 800000`); a big cluster spends about two FDs per stream plus routes and gossip and exhausts the default cap.
+- [ ] Upgrade operator-mode clusters atomically — all nodes to v2.10+, never a rolling upgrade; pre-v2.10 servers do not enforce JWT account limits, so a mixed-version cluster enforces them inconsistently.
+- [ ] Read the live limits with `nats account info` before sizing, so you plan against the limits the server actually enforces.
 
 ### Kubernetes — see [Pitfalls](/learn/deployment/kubernetes#pitfalls)
 
@@ -138,7 +138,7 @@ that explains the why.
 - [ ] Write include paths as absolute paths; an include resolves relative to the config file's directory, not the working directory.
 - [ ] Fit a SIGHUP inside the graceful window; a reload during a rebalance can interrupt leadership transfer.
 - [ ] Monitor TLS cert expiry as you rotate it; a rotation without monitoring leaves old connections hung on an expired cert.
-- [ ] Trim oversized streams by hand after lowering `MaxStore`; a reload does not evict data, so new writes fail until an admin trims.
+- [ ] Trim oversized streams by hand after lowering `max_file`; a reload changes the ceiling, not the contents, so new writes fail until an admin trims.
 - [ ] Dry-run every config change with `nats-server -c nats.conf -t` before you reload it.
 
 ### Rolling upgrades — see [Pitfalls](/learn/deployment/rolling-upgrades#pitfalls)
