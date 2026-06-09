@@ -136,6 +136,44 @@ per-attempt backoff arrays — is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 We use only `MaxAckPending` here.
 
+## Pitfalls
+
+A pool of workers turns two consumer settings — `AckWait` and
+`MaxAckPending` — into things you feel. Here is what bites.
+
+**A redelivered order ships twice if the worker is not idempotent.**
+The pool gives you at-least-once delivery: when one worker crashes
+mid-message, the order comes back to another after `AckWait`. If your
+worker performs its side effect — charging a card, printing a label —
+before it acks, that side effect runs again on the redelivery. Key
+every effect by `order_id` so a second delivery of `ord_8w2k` is a
+no-op, not a double shipment. Watch redelivery on the pool:
+
+<div class="nats-example"
+     data-type="learn-jetstream-worker-pool-redelivery-count"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**A low `MaxAckPending` starves a large pool.** The cap is shared
+across the whole consumer, not per worker. Set it to 3 and only three
+messages are ever in flight, so a ten-worker pool leaves seven workers
+idle no matter how much is stored. Size the cap to at least your worker
+count, with headroom:
+
+<div class="nats-example"
+     data-type="learn-jetstream-worker-pool-max-pending"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**A crashed worker holds its in-flight message until `AckWait`.** The
+server does not know a worker died; it only knows the ack never came.
+Until the timer expires — 30 seconds by default — that order waits,
+pending and undelivered to anyone else. A short `AckWait` recovers
+faster but redelivers prematurely when honest work runs long, so tune
+it to your real processing time, not to your worst crash. The full set
+of in-flight tuning and redelivery options — `AckWait`, `MaxDeliver`,
+and backoff arrays — is documented in
+[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
+This page focused on `MaxAckPending`; see Reference for the full set.
+
 ## Where you are
 
 You now have:

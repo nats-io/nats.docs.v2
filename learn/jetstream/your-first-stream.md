@@ -157,6 +157,42 @@ needed for the running scenario; the [Reference → Create
 Stream](/reference/jetstream/api/stream/create) covers them in the
 `mirror` and `sources` fields of the stream configuration.
 
+## Pitfalls
+
+Three traps catch people on their very first stream. Each one is easy
+to avoid once you have seen it.
+
+**Unlimited defaults grow forever.** With `--defaults`, `Maximum
+Messages`, `Maximum Bytes`, and `Maximum Age` are all `unlimited`. The
+`ORDERS` stream then keeps every order it ever stored until the disk
+fills, and a full disk takes the server down with it. Do not leave a
+production stream unbounded — set at least one limit so old orders age
+out on their own.
+
+Check the limits, then cap the stream:
+
+<div class="nats-example" data-type="learn-jetstream-your-first-stream-checkLimits" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The full set of storage limits is documented on the [Shaping the
+stream](/learn/jetstream/shaping-the-stream) page. Here you only need
+to know that the defaults set none.
+
+**A stream name is permanent.** There is no rename. `nats stream edit`
+has no `--name` flag, and the server rejects any update that changes an
+existing stream's name with `stream configuration name must match
+original`. The only way to "rename" `ORDERS` is to delete it and create
+a new stream — which loses every order already stored. Pick the name
+deliberately the first time:
+
+<div class="nats-example" data-type="learn-jetstream-your-first-stream-renameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**Retention is hard to switch after data exists.** The default
+`Retention Policy: Limits` can later move to `Interest`, but the server
+refuses to switch an existing stream to or from `WorkQueue`. Choose the
+retention policy when there are no messages to migrate, not after orders
+are flowing. The three policies and when to reach for each live on the
+[Delivery semantics](/learn/jetstream/delivery-semantics) page.
+
 ## Where you are
 
 You now have:

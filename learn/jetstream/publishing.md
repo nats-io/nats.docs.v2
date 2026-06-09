@@ -183,6 +183,42 @@ for Reference:
 - **Batch publish.** A way to land several messages atomically. Newer
   servers only; see the same reference page.
 
+## Pitfalls
+
+Three traps catch people on their first publish into a stream. Each one
+follows directly from what this page taught.
+
+**Ignoring the `PubAck`.** A publish call returns a `PubAck`, and code
+that throws it away cannot tell a stored message from a lost one. The
+trap is subtle from the CLI: plain `nats pub` is a core NATS publish, so
+it prints `Published N bytes` whether or not a stream captured the
+subject — that line is not proof of storage. Do not trust it. Read the
+`PubAck` back: in code, check the return value; from the CLI, use
+`nats req` so the server's reply is visible.
+
+<div class="nats-example"
+     data-type="learn-jetstream-publishing-confirmStored"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+A reply showing `stream` and `seq` confirms the write. A timeout means
+no stream captured the subject, and the message was never stored.
+
+**Retrying without a `Nats-Msg-Id`.** A publisher that retries on a
+timeout — and every robust publisher does — stores the message twice
+unless the retry carries the same `Nats-Msg-Id`. The duplicate tracking
+window is two minutes by default, so a retry that arrives later than that
+also double-stores. Do not retry a bare publish. Give every retryable
+publish a stable `Nats-Msg-Id` the producer can recompute, as shown in
+[Idempotent publishing](#idempotent-publishing) above.
+
+**Treating "published" as "delivered".** A `PubAck` means the stream
+stored the message, not that any consumer processed it. Code that marks
+an order shipped the moment the `PubAck` returns is acting on a write
+that no shipping logic has seen yet. Do not couple business outcomes to
+the publish. The delivery and ack half of the story lives on the
+[next page](/learn/jetstream/reading-back) and in
+[your first consumer](/learn/jetstream/your-first-consumer).
+
 ## Where you are
 
 The `ORDERS` stream now has three messages. The publisher confirmed

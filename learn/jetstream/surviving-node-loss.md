@@ -141,6 +141,39 @@ tag-based steering, and per-account replica limits — is documented in
 the [Clustering & Replication](/learn/clustering) deep dive. We change
 only the replica count here.
 
+## Pitfalls
+
+These are the failures that bite when a stream meets its first dead
+server.
+
+**Trusting R=1 in production.** An R=1 stream has exactly one copy. Lose
+that server's disk and the `ORDERS` stream is gone — every message,
+every consumer's position. There is no recovery, because there was no
+second copy to recover from. R=3 is the production floor; R=1 belongs on
+a laptop. Before you trust a stream with real orders, confirm its
+replica count rather than assuming it.
+
+<div class="nats-example"
+     data-type="learn-jetstream-surviving-node-loss-check-replicas"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**Setting an even replica count.** Fault tolerance comes from a
+majority, and a majority needs an odd number. R=2 still has a single
+point of failure: lose either copy and two-of-two is no longer a
+majority, so writes block. R=4 tolerates only one loss — the same as
+R=3 — while paying for a fourth copy. Use odd counts: R=3 for the
+production floor, R=5 for state you cannot re-derive. Five is the
+maximum a stream supports.
+
+**Reading failover from a single-node demo.** Replicas only exist
+across servers, so a one-server laptop cannot show leader election or
+survive a node loss — and `nats stream edit ORDERS --replicas=3` is
+rejected outright, because there are not three servers to hold the three
+copies. Do not conclude a stream is fault-tolerant from a green
+single-node run. Prove failover on a real cluster, which the
+[Clustering & Replication](/learn/clustering) deep dive walks through
+end to end.
+
 ## Where you are
 
 Nothing about your local `ORDERS` stream changed on this page. It is

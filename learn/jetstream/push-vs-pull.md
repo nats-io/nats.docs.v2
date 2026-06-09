@@ -148,6 +148,47 @@ This command is here so you recognize a push consumer when you see one,
 not as a pattern to copy. The `shipping` consumer remains pull, and so
 should anything you build next.
 
+## Pitfalls
+
+These traps cluster around reaching for push when pull is the right tool,
+and around the one push feature people most often misread.
+
+**Choosing push for new work.** Push feels simpler — the server hands you
+messages, no fetch loop to write. That instinct is now the wrong one: push
+consumers are deprecated, and the `nats` CLI prints a warning the moment it
+meets one. Do not start a new service on push to save a few lines; reach for
+pull, and write the consume loop. If you inherit a push consumer, plan to
+migrate, because the server refuses to flip it in place — `nats consumer
+edit` fails with `can not update push consumer to pull based`. Migration
+means delete the push consumer and recreate it as pull.
+
+<div class="nats-example"
+     data-type="learn-jetstream-push-vs-pull-migrate-to-pull"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**Trusting push to pace itself.** A pull consumer cannot outrun a slow
+worker — the batch size is the brake, as page 8 covered. A push consumer
+has no such brake: the server pushes the moment a message is stored, and a
+consumer that falls behind becomes a slow consumer the server may
+disconnect. The push answer is flow control and idle heartbeats, the
+machinery named earlier on this page — extra moving parts that pull does
+not need. Do not run a push consumer on a hot stream without flow control
+enabled; better yet, use pull, where the pacing is free.
+
+**Reading a deliver group as a worker pool.** A deliver group is a core
+NATS queue group on the deliver subject — nothing more. It splits load
+*only* among subscribers that join that queue group. A plain subscriber to
+the same deliver subject ignores the group and receives the full firehose,
+so two unwitting subscribers each get every message instead of sharing.
+Subscribe with the matching group, not bare; or, for new code, use a shared
+pull consumer from [page 9](/learn/jetstream/worker-pool), where one
+consumer name already splits the stream across workers with no group to get
+wrong.
+
+<div class="nats-example"
+     data-type="learn-jetstream-push-vs-pull-deliver-group-bind"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
 ## Where you are
 
 You still have one stream, `ORDERS`, and one pull consumer, `shipping`.

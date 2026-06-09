@@ -8,6 +8,8 @@ description: How NATS servers can be arranged — from a single process to globa
 
 NATS scales by composing servers. The same server binary and the same client APIs work across every shape — you change the deployment topology, not your application. Start with one server. Add more when you need to. Stretch across regions. Push to the edge. Mix it all.
 
+For a runnable, step-by-step treatment that grows one server into a cluster, a super-cluster, and out to leaf nodes at the edge, see the [Topologies deep dive](/learn/topologies).
+
 ## Single Server
 
 The simplest possible NATS deployment: one server process. All clients connect to it directly.
@@ -67,10 +69,10 @@ Real deployments combine all of the above. Multiple clusters span regions and co
 
 A cluster of NATS servers sits in the middle. Each cluster server can host its own clients. Leaf nodes extend outwards — every leaf brings its own group of clients, hidden behind the leaf and isolated from the cluster's address space. The same pattern keeps composing: add more leaves, add more clients, add more cluster servers, add more clusters connected by gateways. Applications talk to NATS the same way regardless of where they sit.
 
-## What's Next
+## Next steps
 
-This page is intentionally light on detail. For the protocol-level deep dives:
-
+- [Topologies deep dive](/learn/topologies) — grow these shapes hands-on
+- [Clustering & replication](/learn/clustering) — the mechanism behind the mesh
 - [Route protocol](/reference/protocols/route) — how cluster servers talk to each other
 - [Gateway protocol](/reference/protocols/gateway) — how clusters talk across a super-cluster
 - [Leafnode protocol](/reference/protocols/leafnode) — how leaf nodes connect to a hub

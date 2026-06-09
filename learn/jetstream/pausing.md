@@ -135,6 +135,37 @@ emits are documented in
 [Reference → Consumer API](/reference/jetstream/api/consumer). We use only
 the pause and resume commands here.
 
+## Pitfalls
+
+Three traps come up the first time you lean on pausing.
+
+**A paused consumer looks like a stall.** A paused `shipping` consumer
+delivers nothing — which is exactly what a broken consumer also does.
+Without checking, you cannot tell a deliberate pause from an outage.
+Before you debug a "stuck" consumer, run `nats consumer info ORDERS
+shipping` and read the `Paused Until Deadline` line. If it is there, the
+consumer is asleep on purpose, not failing.
+
+**A deadline in the past is a no-op.** Pause stores an absolute moment.
+If that moment has already passed, there is nothing to wait for, so the
+server leaves the consumer running. The CLI catches this and tells you
+plainly instead of pretending the pause worked. Pause with a duration
+like `1h` — it is always measured from now, so it can never land in the
+past.
+
+<div class="nats-example"
+     data-type="learn-jetstream-pausing-pastDeadline"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**Pausing does not stop publishers.** Pause is a consumer setting; it
+never touches the stream. Publishes keep landing while the `shipping`
+consumer sleeps, and they count against the stream's retention limits.
+A long pause on a stream with a tight `MaxMsgs` or `MaxBytes` can drop
+the oldest orders before the consumer ever wakes to read them. Size the
+stream for the longest pause you expect, or keep pauses short — see [8.
+Shaping the stream](/learn/jetstream/shaping-the-stream) for how limits
+decide who wins.
+
 ## Where you are
 
 The `shipping` consumer has been paused until a deadline and then

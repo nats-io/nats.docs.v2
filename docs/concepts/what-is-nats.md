@@ -97,17 +97,16 @@ NATS excels in scenarios requiring:
 - Configuration management
 - System orchestration
 
-## What's Next?
-
-Now that you understand what NATS is, explore:
-
-- **[Getting Started Guide](getting-started)** - Set up your first NATS application
-- **[Pub/Sub Basics](pub-sub-basics)** - Deep dive into the publish-subscribe pattern
-- **[Request-Reply](request-reply)** - Learn synchronous communication patterns
-- **[Queue Groups](queue-groups)** - Implement load balancing
-
 ## Summary
 
 NATS provides the connective tissue for modern distributed systems. Its simplicity, performance, and flexibility make it an ideal choice for organizations building cloud-native applications, IoT systems, or microservices architectures.
 
 Whether you're connecting a handful of services or building a global messaging infrastructure, NATS scales with your needs while maintaining its core principles of simplicity and performance.
+
+## Next steps
+
+- [Core NATS deep dive](/learn/core-nats) — go hands-on with the messaging fundamentals
+- [The full Learn section](/learn) — guided chapters across every NATS topic
+- [Getting Started Guide](getting-started) — set up your first NATS application
+- [Pub/Sub Basics](pub-sub-basics) — deep dive into the publish-subscribe pattern
+- [Request-Reply](request-reply) — learn synchronous communication patterns

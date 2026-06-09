@@ -11,6 +11,8 @@ In standard publish-subscribe, every subscriber receives every message. Queue gr
 
 Watch how each message (animated dot) flows to only one worker, even though all three are subscribed. NATS automatically distributes the load.
 
+For a runnable, step-by-step treatment, see the [Queue groups in the Core NATS deep dive](/learn/core-nats/queue-groups).
+
 ## How It Works
 
 Queue groups operate at the subject level - subscribers still filter messages by subject, but NATS adds distribution logic:
@@ -130,8 +132,10 @@ Track these metrics for queue groups:
 - Processing latency
 - Error rates
 
-## Related Concepts
+## Next steps
 
-- [Subjects](./subjects) - Understanding subject-based messaging
-- [Request-Reply](./request-reply) - Synchronous communication patterns
-- [Publish-Subscribe](./pub-sub-basics) - One-to-many messaging
+- [Queue groups in the Core NATS deep dive](/learn/core-nats/queue-groups) — runnable, step-by-step walkthrough
+- [Services](/learn/services) — queue-group load balancing for services
+- [JetStream worker pools](/learn/jetstream/worker-pool) — durable work distribution at scale
+- [Request-Reply](./request-reply) — synchronous communication patterns
+- [Publish-Subscribe](./pub-sub-basics) — one-to-many messaging
