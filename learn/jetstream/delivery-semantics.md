@@ -125,11 +125,13 @@ Interest and WorkQueue each carry a failure mode worth knowing before
 you reach for them.
 
 **Interest can fill the disk silently.** A message is only removed once
-all consumers ack it. If a consumer stalls — a stuck worker, a service
-that is down — its unacked messages are never eligible to leave, and the
-stream grows until it hits its limits or runs out of room. Interest
-retention does not excuse you from setting limits; it makes monitoring
-consumer health more important, not less.
+all consumers ack it. The stream tracks the lowest ack position across
+*every* consumer and only deletes up to that point, so a single slow
+consumer holds up cleanup for the whole stream. If a consumer stalls — a
+stuck worker, a service that is down — its unacked messages are never
+eligible to leave, and the stream grows until it hits its limits or runs
+out of room. Interest retention does not excuse you from setting limits;
+it makes monitoring consumer health more important, not less.
 
 **WorkQueue is single-delivery, not shared-view.** The first ack removes
 the message for everyone, so two independent consumers on a WorkQueue
@@ -152,10 +154,10 @@ enforces both — they fail loudly at create or edit time, not silently in
 production.
 
 **Retention to or from WorkQueue is locked after creation.** The earlier
-trap was about switching at all rewriting your history. There is a harder
-rule underneath it: the server lets you swap Limits and Interest on a
-live stream, but it flatly refuses any change that adds or removes
-WorkQueue. A stream that is not WorkQueue at creation can never become
+trap was about switching at all, and how that rewrites your history. There
+is a harder rule underneath it: the server lets you swap Limits and
+Interest on a live stream, but it flatly refuses any change that adds or
+removes WorkQueue. A stream that is not WorkQueue at creation can never become
 one, and a WorkQueue stream can never leave the policy.
 
 Do not plan a migration path that edits retention into or out of

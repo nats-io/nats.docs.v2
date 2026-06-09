@@ -64,9 +64,10 @@ groups can not be used with push consumers`. As JetStream grows, the new
 capabilities land on pull first, and some only on pull.
 
 There is one more reason, and it is the decisive one for new code: push
-consumers are deprecated. The server and the `nats` CLI both warn when
-they find one, and they will be removed in a future release. New code
-should not create a push consumer.
+consumers are deprecated. The `nats` CLI warns when it subscribes to one —
+`push consumers are deprecated and will be removed in a future release` —
+and the client libraries mark the push API the same way. New code should
+not create a push consumer.
 
 ## The decision
 
@@ -140,9 +141,10 @@ makes the consumer a push consumer:
      data-type="learn-jetstream-push-vs-pull-push-create"
      data-languages="cli"></div>
 
-Run it and the CLI prints a deprecation warning before the consumer is
-created — the same warning you will see whenever the tooling meets a push
-consumer. Treat that warning as the signal to use pull instead.
+The consumer is created without complaint. The deprecation warning comes
+later, when you subscribe to it: `nats sub` against a push consumer prints
+`push consumers are deprecated and will be removed in a future release`.
+Treat that warning as the signal to use pull instead.
 
 This command is here so you recognize a push consumer when you see one,
 not as a pattern to copy. The `shipping` consumer remains pull, and so
@@ -155,12 +157,12 @@ and around the one push feature people most often misread.
 
 **Choosing push for new work.** Push feels simpler — the server hands you
 messages, no fetch loop to write. That instinct is now the wrong one: push
-consumers are deprecated, and the `nats` CLI prints a warning the moment it
-meets one. Do not start a new service on push to save a few lines; reach for
-pull, and write the consume loop. If you inherit a push consumer, plan to
-migrate, because the server refuses to flip it in place — `nats consumer
-edit` fails with `can not update push consumer to pull based`. Migration
-means delete the push consumer and recreate it as pull.
+consumers are deprecated, and the `nats` CLI prints a warning whenever it
+subscribes to one. Do not start a new service on push to save a few lines;
+reach for pull, and write the consume loop. If you inherit a push consumer,
+plan to migrate, because the server refuses to flip it in place — `nats
+consumer edit` fails with `can not update push consumer to pull based`.
+Migration means delete the push consumer and recreate it as pull.
 
 <div class="nats-example"
      data-type="learn-jetstream-push-vs-pull-migrate-to-pull"
@@ -169,15 +171,16 @@ means delete the push consumer and recreate it as pull.
 **Trusting push to pace itself.** A pull consumer cannot outrun a slow
 worker — the batch size is the brake, as page 8 covered. A push consumer
 has no such brake: the server pushes the moment a message is stored, and a
-consumer that falls behind becomes a slow consumer the server may
-disconnect. The push answer is flow control and idle heartbeats, the
-machinery named earlier on this page — extra moving parts that pull does
-not need. Do not run a push consumer on a hot stream without flow control
-enabled; better yet, use pull, where the pacing is free.
+subscriber that falls behind trips the server's **slow consumer** guard —
+the connection is closed and counted in the `slow_consumers` monitoring
+stat. The push answer is flow control and idle heartbeats, the machinery
+named earlier on this page — extra moving parts that pull does not need. Do
+not run a push consumer on a hot stream without flow control enabled;
+better yet, use pull, where the pacing is free.
 
 **Reading a deliver group as a worker pool.** A deliver group is a core
-NATS queue group on the deliver subject — nothing more. It splits load
-*only* among subscribers that join that queue group. A plain subscriber to
+NATS queue group on the deliver subject — nothing more. It distributes
+messages among subscribers that join the group, but a plain subscriber to
 the same deliver subject ignores the group and receives the full firehose,
 so two unwitting subscribers each get every message instead of sharing.
 Subscribe with the matching group, not bare; or, for new code, use a shared

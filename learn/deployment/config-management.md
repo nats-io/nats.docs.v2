@@ -66,9 +66,9 @@ ORDERS: {
 }
 ```
 
-The per-region files hold the subjects each region publishes — the
-`orders.us.created` and `orders.eu.created` splits from the sizing page —
-so a region's routing can be reviewed and changed on its own.
+The per-region files hold the routing each region owns, so a region's
+configuration can be reviewed and changed on its own without touching the
+main config or another region's file.
 
 Because the path is relative to the config file's directory, the includes
 above resolve to `/etc/nats/accounts/orders.conf` and so on. Launch the

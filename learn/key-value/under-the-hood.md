@@ -37,9 +37,9 @@ written in stream terms:
 - **Max Msgs Per Subject: `1`** — this *is* the history depth. You raised it to
   keep prior revisions; the bucket's history is the stream keeping more than one
   message per subject.
-- **Discard Policy: `New`** — a full bucket rejects the newest write rather than
-  silently dropping the oldest of an active key. This is why limits matter: the
-  bucket protects what it holds.
+- **Discard Policy: `New`** — once the bucket hits a limit, it rejects the
+  newest write rather than silently dropping older messages to make room. This is
+  why limits matter: the bucket protects what it already holds.
 - **Allow Direct: `true`** — get does not open a consumer. More on that next.
 - **Allow Rollup: `true`** — purge replaces a key's whole subject with one
   message. More on that below.
@@ -58,9 +58,9 @@ set any of these by hand; the client mapped your bucket settings onto them.
 
 ## Get reads the last message, with no consumer
 
-Reading a value does not replay the stream and does not open a consumer. It uses
-**direct get**: the server returns the last message on a subject straight from
-storage. The request goes to `$JS.API.DIRECT.GET.<stream>.<subject>` — for our
+Reading a value does not replay the stream. It does not open a consumer either.
+It uses **direct get**: the server returns the last message on a subject straight
+from storage. The request goes to `$JS.API.DIRECT.GET.<stream>.<subject>` — for our
 key, `$JS.API.DIRECT.GET.KV_INVENTORY.$KV.INVENTORY.widget-blue` — and the
 server answers with the latest message there. That last message is the current
 value, its sequence is the revision, and its store time is the entry timestamp.
@@ -108,7 +108,7 @@ taught in this chapter.
 
 ## Pitfalls
 
-Seeing the stream invites two tempting mistakes. Both come from treating the
+Seeing the stream invites a few tempting mistakes. Most come from treating the
 backing stream as something you operate directly.
 
 **Delete does not remove history; only purge does.** It is easy to read "I
@@ -133,6 +133,16 @@ put and a purge you meant never happens. The stream is built with `Deny Delete`
 on for exactly this reason — to keep the API the only door. Use `nats kv put`,
 not `nats pub`; use `nats kv del` and `nats kv purge`, not stream message
 deletion.
+
+**A key has to be a legal subject token.** Now that you can see a key becomes
+the last token of `$KV.INVENTORY.<key>`, the name rules make sense: a key may
+contain only letters, digits, and `-`, `/`, `_`, `=`, and `.`, with no leading
+or trailing dot and no two dots in a row, because anything else would be an
+illegal subject. An order id like `ord:8w2k` carries a colon, so it cannot be a
+key, and the bucket rejects the write instead of storing a broken key. This is
+the same validation introduced on
+[Your first bucket](/learn/key-value/your-first-bucket#pitfalls); the backing
+stream is why it exists.
 
 ## Where you are
 

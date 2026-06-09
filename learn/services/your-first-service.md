@@ -49,7 +49,7 @@ that answers the in-stock question.
 
 <div class="nats-example" data-type="learn-services-your-first-service-addService" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Two details are worth naming. First, the endpoint joins the framework's
+Two details matter. First, the endpoint joins the framework's
 default **queue group**, `"q"`, automatically. That is the same queue
 group mechanism from [Core NATS](/learn/core-nats/queue-groups): if you
 run more than one copy of this service, each request goes to exactly one
@@ -109,8 +109,9 @@ handler blindly parses them and the caller sent garbage, the parse fails
 and — depending on the language — the handler can panic, return nothing,
 or leave the caller waiting out a timeout. Do not assume the payload is
 well-formed. Parse it, and on failure respond with a **service error**
-instead: a response that carries `Nats-Service-Error` and a numeric
-`Nats-Service-Error-Code` (use `400` for bad input). The caller then sees
+instead: a response that carries `Nats-Service-Error` and a
+`Nats-Service-Error-Code` header whose value is always safe to parse as a
+number (use `400` for bad input). The caller then sees
 a clear "bad request" rather than a hang, and the service stays up for
 the next caller.
 
@@ -129,8 +130,10 @@ underscore — no dots or spaces), and the `Version` must be valid SemVer.
 A `Name` of `Order Inventory` (with a space) or a `Version` of `v1`
 (not SemVer) fails the `AddService` call outright — the service never
 starts. Do not discover this in production: pick a valid `Name` and a
-real SemVer `Version` (`1.0.0`) the first time. The full character rules
-are in [Reference](/reference/).
+real SemVer `Version` (`1.0.0`) the first time. The same goes for any
+`Metadata` you attach — it is immutable once set, so there is no editing
+it after creation; you stop the service and start a new one. The full
+character rules are in [Reference](/reference/).
 
 ## Where you are
 

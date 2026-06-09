@@ -45,7 +45,7 @@ Create a durable consumer named `shipping` on the `ORDERS` stream:
      data-type="learn-jetstream-your-first-consumer-create"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Three flags carry the meaning here.
+Three things carry the meaning here.
 
 `--pull` makes this a **pull consumer**. The reader asks the server for
 messages when it is ready for them, rather than having the server push
@@ -57,8 +57,9 @@ not consider a message handled until an **acknowledgment**, or **ack**
 for short, arrives. Every message this consumer delivers must be
 individually acked by the reader.
 
-`--durable shipping` (the name argument) makes the consumer durable. A
-named consumer survives restarts; an unnamed one does not.
+The consumer name `shipping` — a positional argument, not a flag — makes
+the consumer durable. A named consumer survives restarts; an unnamed one
+does not.
 
 Look at what you created:
 
@@ -95,7 +96,15 @@ Message** is how far the server has handed messages out.
 **Acknowledgment Floor** is how far the reader has acked. Right now both
 are zero: nothing delivered, nothing acked.
 
+The **Ack Wait** field in the `Configuration` block — `30.00s` here — is
+the redelivery deadline. The next section explains how it drives the
+ack/redeliver loop.
+
 ## The ack/redeliver loop
+
+The animation below shows this in-flight state and the redelivery loop:
+a message handed to a reader, held until it is acked, and sent again if
+the ack never arrives.
 
 <div class="nats-flow" data-scenario="jetStreamConsumersAnimated" data-width="600" data-height="380"></div>
 

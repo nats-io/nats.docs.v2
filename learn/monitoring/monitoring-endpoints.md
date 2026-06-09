@@ -29,8 +29,8 @@ on-demand response.
 A **monitoring endpoint** is one HTTP path on that port. Each path
 returns a different slice of state. The four you will use most are
 `/varz` (the server itself), `/connz` (its clients), `/routez` (its
-cluster routes), and `/jsz` (its JetStream). Every path is a path, not
-a call into a client library — you reach it with any HTTP tool.
+cluster routes), and `/jsz` (its JetStream). Each one is an HTTP path,
+not a call into a client library — you reach it with any HTTP tool.
 
 <div class="nats-flow" data-scenario="monitoringEndpointsAnimated" data-width="600" data-height="350"></div>
 
@@ -75,10 +75,10 @@ result, so you fetch only the slice you care about.
 
 `/connz` lists the connected clients. On its own it returns every
 connection on the node. Scope it to the `ORDERS` account with `?acc=`,
-and ask for each connection's subscriptions with `?subscriptions=true`:
+and ask for each connection's subscriptions with `?subs=true`:
 
 ```bash
-curl -s 'http://localhost:8222/connz?acc=ORDERS&subscriptions=true' | jq
+curl -s 'http://localhost:8222/connz?acc=ORDERS&subs=true' | jq
 ```
 
 ```json
@@ -97,7 +97,7 @@ curl -s 'http://localhost:8222/connz?acc=ORDERS&subscriptions=true' | jq
     {
       "cid": 9,
       "account": "ORDERS",
-      "authorized_user": "analytics",
+      "authorized_user": "order-svc",
       "rtt": "388µs",
       "subscriptions_list": ["orders.shipped"]
     }
@@ -108,23 +108,29 @@ curl -s 'http://localhost:8222/connz?acc=ORDERS&subscriptions=true' | jq
 Each entry names one client: its connection id (`cid`), the account and
 user it authenticated as, its round-trip time (`rtt`), and how many
 bytes are queued for it (`pending_bytes`). This is where you confirm
-that `order-svc`, `warehouse`, `notifications`, and the `packers` queue
-group are actually connected — and which subjects each one holds
-interest in.
+that the `ORDERS` account's services — connecting as `order-svc` — are
+actually connected, and which subjects each one holds interest in.
+
+The two counts at the top frame the page. `num_connections` is how many
+connections this response actually returned; `total` is how many matched
+the query in all. They are equal here because four connections fit in
+one response, but once you add `?limit` and `?offset` to page a long
+list, `total` stays put while `num_connections` shrinks to the page
+size.
 
 When a node carries hundreds of connections, page through them. `?limit`
 caps the result, `?offset` skips ahead, and `?sort` orders the list — by
 idle time, pending bytes, or subscription count:
 
 ```bash
-curl -s 'http://localhost:8222/connz?sort=ByPending&limit=10' | jq
+curl -s 'http://localhost:8222/connz?sort=pending&limit=10' | jq
 ```
 
 That returns the ten connections with the most data queued — the
 clients most likely to fall behind. The full set of `/connz`
 parameters is documented in
 [Reference → connz](/reference/system/monitor/connz). We use only
-`acc`, `subscriptions`, `sort`, and `limit` here.
+`acc`, `subs`, `sort`, and `limit` here.
 
 `/routez` answers the cluster question. Each entry is one **route** —
 the link from this node to another node in `east`. It reports the
@@ -238,8 +244,8 @@ curl -s http://localhost:8222/varz \
 { "live": 4, "lifetime": 118, "dropped": 0 }
 ```
 
-**An unscoped `/jsz` is slow at scale.** Asking for everything —
-`/jsz?accounts=true&streams=true&consumer=true` — walks every account,
+**An unscoped `/jsz` is slow at scale.** Asking for full detail —
+`/jsz?accounts=true&streams=true&consumers=true` — walks every account,
 stream, and consumer on the node and serializes the lot. On the four
 Acme entities that is instant; on a node with thousands of consumers it
 can take long enough that a scrape times out and you get *no* data. Do
@@ -277,7 +283,7 @@ left them unexplained. The next page reads the `shipping` consumer's
 state in full and turns those raw fields into the one number that says
 "the shipping consumer is behind": **lag**.
 
-Continue to [2. JetStream health](/learn/monitoring/jetstream-health).
+Continue to [3. JetStream health](/learn/monitoring/jetstream-health).
 
 ## See also
 

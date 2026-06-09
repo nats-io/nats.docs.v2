@@ -8,7 +8,7 @@ description: Read the per-endpoint stats the framework keeps for you, and signal
 # 5. Observability
 
 Your `OrderInventory` service answers on `orders.inventory.check`, and the
-[discovery page](/learn/services/discovery) let you enumerate it and target a
+[discovery page](/learn/services/discovery) lets you enumerate it and target a
 single instance by ID. So far you can find the service. This page lets you see
 how it is doing.
 
@@ -59,12 +59,12 @@ nats service stats OrderInventory
 ```
 
 ```
-╭───────────────────────────────────────────────────────────────────────╮
-│                          OrderInventory Statistics                      │
-├──────────────────────┬──────────┬────────┬───────────┬─────────────────┤
+╭────────────────────────────────────────────────────────────────────────╮
+│                       OrderInventory Statistics                        │
+├──────────────────────┬──────────┬──────────┬─────────┬─────────────────┤
 │ ID                   │ Endpoint │ Requests │ Errors  │ Avg Time        │
 ├──────────────────────┼──────────┼──────────┼─────────┼─────────────────┤
-│ NCXY...A9             │ check    │        3 │       0 │ 412µs           │
+│ NCXY...A9            │ check    │        3 │       0 │ 412µs           │
 ╰──────────────────────┴──────────┴──────────┴─────────┴─────────────────╯
 ```
 

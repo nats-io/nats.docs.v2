@@ -85,7 +85,7 @@ into a framework with built-in retries. If you found yourself wrapping
 every `request()` in backoff, that is the next step.
 
 The [Monitoring deep dive](/learn/monitoring) watches the same connections
-from the server side — the `SlowConsumers` metric, the advisories, and the
+from the server side — the `slow_consumers` metric, the advisories, and the
 health endpoints that tell you a client is struggling before its users do.
 
 ## Where you are
@@ -126,15 +126,14 @@ that explains the why.
 
 - [ ] Drain last, not first; a publish after `Drain()` returns `ErrConnectionDraining` and never sends.
 - [ ] Size the drain timeout to your slowest handler's latency; a timeout shorter than the handler discards the remaining in-flight work.
-- [ ] Watch the server's `ldm` lame-duck signal so a client stops publishing and reconnects elsewhere before the server closes the link.
 - [ ] Ack JetStream in-flight messages before a core drain; a connection drain does not handle a consumer's ack position for you.
 
 ### Slow Consumers — see [Pitfalls](/learn/resilient-clients/slow-consumers#pitfalls)
 
-- [ ] Always call `SetPendingLimits` on an async subscription; the default buffer is unbounded and grows until the process is killed.
-- [ ] Always set the async-error callback; a nil one hides every dropped message and the slow-consumer signal with it.
-- [ ] Size the pending limit to handler latency times message rate; limits too tight on a high-rate subject drop honest traffic.
-- [ ] Tell a local drop apart from a server-side disconnect; an `ErrSlowConsumer` in the error callback and a connection closed by the server's write deadline are tuned separately.
+- [ ] Always set pending limits on a subscription that does real per-message work; the generous defaults (500,000 messages, 64 MB) are a backstop, not a tuning, and a high-rate subject fills them in seconds.
+- [ ] Size the pending limit to the handler's latency and the subject's peak rate, not to caps sized for someone else's workload.
+- [ ] Always set the async-error callback and log the slow-consumer error loudly; a nil one drops every overflow message silently.
+- [ ] Tell a local drop apart from a server-side disconnect; watch the async-error rate and the disconnect rate separately, since each points at a different fix.
 
 ### Request-Reply Resilience — see [Pitfalls](/learn/resilient-clients/request-reply-resilience#pitfalls)
 

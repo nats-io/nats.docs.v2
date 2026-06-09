@@ -103,26 +103,31 @@ will and will not change.
 target's bucket and name at creation time; it does not pin the target alive.
 Delete the target and the link is left dangling — a get on the link
 traverses to a deleted object and fails with `ErrObjectNotFound`. The link
-still exists; its destination does not. Do not assume `addLink` keeps the
-target around. Do verify the target exists before you depend on the link, or
-prefer a bucket link for loose coupling so a single deleted object cannot
-strand it.
+still exists; its destination does not. Renames break a link the same way:
+because the link holds the old name, renaming the target leaves the link
+pointing at a name that no longer resolves. Do not assume `addLink` keeps the
+target around or follows it under a rename. Do verify the target exists before
+you depend on the link, or prefer a bucket link for loose coupling so a single
+deleted or renamed object cannot strand it.
 
 You can see the failure and the safe check side by side. Delete the invoice,
 get the now-stale label link, then confirm the target with `info`:
 
 <div class="nats-example" data-type="learn-object-store-metadata-and-links-staleLink" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**`UpdateMeta` changes the description, headers, and metadata — not the
-chunk size or the link.** Updating metadata rewrites only the name,
-description, headers, and metadata map. If you hand `UpdateMeta` a new chunk
-size or a new link target, it is silently kept — no error, no change. The
-chunk size is fixed when the bytes are written, and a link target is fixed
-when the link is created. Do not expect `UpdateMeta` to re-chunk an object
-or to repoint a link. To change the chunk size, delete the object and put it
-again. To change a link target, delete the link and add a new one. And do
-not rename onto a name already in use: renaming an object to an existing,
-non-deleted name fails with `ErrObjectAlreadyExists`.
+**`UpdateMeta` changes the name, description, headers, and metadata — not the
+chunk size or the link.** Updating metadata rewrites the name, description,
+headers, and metadata map. Changing the name renames the object in place. If
+you hand `UpdateMeta` a new chunk size or a new link target, those fields are
+discarded without error or notification — the call succeeds but neither is
+stored. The chunk size is fixed when the bytes are written, and a link target
+is fixed when the link is created. Do not expect `UpdateMeta` to re-chunk an
+object or to change a link target. To change the chunk size, delete the object
+and put it again. To change a link target, delete the link and add a new one.
+And do not rename onto a name already in use: renaming an object to an
+existing, non-deleted name fails with `ErrObjectAlreadyExists`. You *can*
+rename onto a name that was deleted — that reclaims the name for the renamed
+object.
 
 ## Where you are
 

@@ -27,7 +27,8 @@ nobody else. The subject `orders.shipped` in `ORDERS` and a subject
 `orders.shipped` in another account are two different subjects that
 happen to share a name.
 
-This is stronger than permissions, which we cover later in the chapter.
+This is stronger than permissions, which the
+[Authorization](/learn/security/authorization) page covers.
 Permissions narrow what one user may do inside its account. An account
 boundary is absolute: the message simply does not cross.
 
@@ -152,8 +153,8 @@ report on them, belong with operations; we point to
 [Reference](/reference/) for the field list rather than tour them here.
 
 An account can also **export** a subject for another account to
-**import**. That is the one deliberate hole in the wall, and it has its
-own page later in the chapter.
+**import**. That is the one deliberate hole in the wall, and the
+[Cross-Account](/learn/security/cross-account) page covers it.
 
 The full set of account configuration options is documented in
 [Reference](/reference/). We use only `users` here.

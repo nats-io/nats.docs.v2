@@ -40,7 +40,7 @@ This page introduces two ideas:
 ## A gateway joins clusters, not servers
 
 Inside a cluster, every server holds a **route** to every other server —
-the full mesh from the [previous chapter](/learn/topologies/your-first-cluster).
+the full mesh from the [previous page](/learn/topologies/your-first-cluster).
 A **gateway** is a different kind of connection. It joins one *cluster*
 to another *cluster*.
 
@@ -84,12 +84,13 @@ traffic across the gateway.
 A gateway is configured with a `gateway {}` block. The block names the
 local cluster and lists the remote clusters to reach.
 
-Here is the `gateway {}` block for the three `east` servers. It declares
-the local gateway name `east`, the port this server listens on for
-inbound gateway connections, and a `gateways` array pointing at `west`:
+Here is the `gateway {}` block for the `east` servers. It declares the
+local gateway name `east`, the port this server listens on for inbound
+gateway connections, and a `gateways` array pointing at `west`:
 
 ```conf
-# east gateway block — same on n1-east, n2-east, n3-east
+# east gateway block — the name and the gateways list are shared
+# by n1-east, n2-east, n3-east; each server picks its own port.
 gateway {
   name: "east"
   port: 7222
@@ -104,19 +105,26 @@ Two things to read carefully.
 
 The `name` field identifies the *cluster*, not the server. Every server
 in `east` uses the identical gateway name `east`. A server's own entry
-in the `gateways` array is ignored automatically, so you can share one
-gateway block across all three `east` servers.
+in the `gateways` array is ignored automatically, so the `name` and the
+`gateways` list are identical across all three `east` servers — only the
+`port` each one listens on differs.
 
 The `gateways` array lists every remote cluster, each with its `name`
 and the `urls` to reach its gateway listeners. Listing all three `west`
 URLs gives the connection somewhere to land if one `west` server is
-down.
+down — which is also the hint that each remote server runs its own
+gateway listener on its own port. The `port` line above is per server:
+in a real deployment `n1-east`, `n2-east`, and `n3-east` each bind a
+distinct gateway port, and the three `west` URLs point at three distinct
+`west` listeners. The shared part is the `name` and the `gateways` list,
+not the port.
 
 The `west` servers get the mirror-image block — local name `west`,
 pointing back at the `east` gateway URLs:
 
 ```conf
-# west gateway block — same on n1-west, n2-west, n3-west
+# west gateway block — name and gateways list shared by
+# n1-west, n2-west, n3-west; each server picks its own port.
 gateway {
   name: "west"
   port: 7322
@@ -131,10 +139,9 @@ Each cluster keeps the `cluster {}` block and the client `port` it had
 before. The `gateway {}` block is additive. You are not rebuilding
 `east`; you are giving it a seam to `west`.
 
-A runnable two-cluster setup, with both clusters started and joined as a
-super-cluster, lives in
-[`gateway-config.sh`](#wiring-east-to-west). Run it to watch the gateway
-form on your own machine.
+The wiring above has a runnable form: a `gateway-config.sh` script stands
+up both clusters and joins them as a super-cluster, so you can watch the
+gateway form on your own machine.
 
 ## Confirm the super-cluster formed
 
@@ -178,9 +185,9 @@ serve. If every `east` worker is down, an order published in `east` has
 no local subscriber — so geo-affinity falls through and the message
 crosses the gateway to a remote cluster that has an interested worker.
 When more than one remote cluster has a worker for the queue group, NATS
-forwards across every gateway with interest, and the queue-group rule
-still applies on the far side, so the order reaches exactly one worker.
-No work is lost; it just travels.
+forwards across every gateway with interest. The queue-group rule still
+applies on the far side, so the order reaches exactly one worker. No work
+is lost; it just travels.
 
 You can watch this local-first behavior with a queue subscriber running
 in each region:

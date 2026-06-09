@@ -77,7 +77,9 @@ a tag no server advertises.
 With the servers tagged, constrain `ORDERS` to land only on servers
 carrying both `region:us-east` and `disk:ssd`. The CLI flag is `--tag`,
 passed once per required tag; the client libraries set `Placement.Tags` to
-a list:
+a list. The example also names the cluster with `--cluster east` — a no-op
+in a single cluster, shown so the syntax is familiar when you place across
+clusters later:
 
 <div class="nats-example" data-type="learn-clustering-placement-placeTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -91,9 +93,11 @@ When placement lists more than one tag, a server qualifies only if it
 carries *every* tag in the list. The match is an intersection, not a union:
 `region:us-east` **and** `disk:ssd`, never either-or.
 
-This is the trap worth internalizing. Ask for a tag that no server carries
-— a typo, a tag you meant to add but did not — and the intersection is
-empty. No server qualifies, and the meta leader refuses the stream with:
+The match folds case: `disk:ssd`, `disk:SSD`, and `disk:Ssd` are the same
+tag. Spelling, though, is exact — `disk:sdd` matches nothing. So the trap is
+not case but typos. Ask for a tag that no server carries — a misspelling, a
+tag you meant to add but did not — and the intersection is empty. No server
+qualifies, and the meta leader refuses the stream with:
 
 ```
 nats: error: no suitable peers for placement
@@ -115,7 +119,16 @@ which of them starts as leader: the **preferred leader**.
 The preferred leader is a hint passed at placement time, naming the server
 you would like to lead the new group. The meta leader honors it when it can
 — most usefully during scale-up, when you are adding a stream and want its
-leader on a specific server from the start.
+leader on a specific server from the start. On a fresh group it shapes the
+*initial* leader assignment, sparing you a stepdown to move leadership to
+where you wanted it in the first place.
+
+The field is `Placement.Preferred` (a server name) in the client libraries.
+The CLI does not set it on `stream add`; you nudge leadership toward a
+server after the fact with `nats stream cluster step-down --preferred
+<server>`. Its full syntax lives in
+[Reference](/reference/jetstream/api/stream). We only need to know it is a
+hint here.
 
 The word *hint* is load-bearing. The preferred leader applies to the
 initial placement only. Once the group is running, leadership is decided by
@@ -130,35 +143,36 @@ leadership for the life of the stream.
 Two traps catch people the first time they place a stream. Both come from
 treating placement as more forgiving than it is.
 
-**Tags are an intersection and case-sensitive.** `ssd` is not `SSD`, and
-asking for a tag no server carries leaves the meta leader with nothing to
-pick — the stream fails with `no suitable peers for placement` rather than
-falling back to any server. Do not guess at tag spelling. Read the tags
-back from the servers first, then place against exactly what they
-advertise.
+**Tags are an intersection; a missing tag fails the placement.** Asking for
+a tag no server carries leaves the meta leader with nothing to pick — the
+stream fails with `no suitable peers for placement` rather than falling back
+to any server. Matching folds case, so `ssd` and `SSD` are the same tag, but
+spelling is exact — `sdd` matches nothing. Do not guess at tag spelling.
+Read the tags back from the servers first, then place against exactly what
+they advertise.
 
 Verify the tags exist before you trust a placement, and watch the placement
 either succeed or name the missing tag:
 
 <div class="nats-example" data-type="learn-clustering-placement-verifyTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**Preferred leader is a hint, not a lock.** Set a preferred leader and you
-shape the initial election only. The moment that server dies, the next
-election is quorum-based and random among the survivors — it will not hold
-the leader on, or return it to, your preferred server. Do not build an
-operational assumption ("the leader is always `n1-east`") on the preferred
-field. If you need leadership somewhere specific *now*, move it explicitly
-with `leader-stepdown` from the [Raft and leaders](/learn/clustering/raft-and-leaders)
-page, and re-check it after any failover.
+**Preferred leader is a hint, not a lock.** Use it to shape the *initial*
+leader of a fresh group. Do not build an operational assumption ("the
+leader is always `n1-east`") on it — the moment that server dies, the next
+election is quorum-based and random among the survivors. If you need
+leadership somewhere specific *now*, move it explicitly with `nats stream
+cluster step-down --preferred <server>` (see [Raft and
+leaders](/learn/clustering/raft-and-leaders)), and re-check after any
+failover.
 
 ## Where you are
 
 The `ORDERS` stream is no longer placed wherever the meta leader felt like
 putting it. You tagged `n1-east`, `n2-east`, and `n3-east`, and constrained
 the stream to servers carrying both `region:us-east` and `disk:ssd`. You
-know the tag match is an intersection and case-sensitive, that a missing
-tag yields `no suitable peers for placement`, and that the preferred leader
-shapes only the first election.
+know the tag match is an intersection that folds case, that a missing or
+misspelled tag yields `no suitable peers for placement`, and that the
+preferred leader shapes only the first election.
 
 The cluster is still three servers. Nothing on this page changed the peer
 count.

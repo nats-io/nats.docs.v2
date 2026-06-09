@@ -134,7 +134,7 @@ group links back to the page that explains the why.
 - [ ] Pair every mirror with snapshots; a mirror is not a backup, and a delete or corruption on the upstream follows straight to the copy.
 - [ ] Plan the mirror topology upfront; a mirror's config is effectively locked after creation, so changing it means delete and recreate.
 - [ ] Read the `Lag` field before trusting a mirror; replication is eventually consistent, not synchronous.
-- [ ] Avoid Work Queue retention on a mirrored upstream; the replication consumer bypasses the single-consumer guarantee, so use Limits or Interest.
+- [ ] Avoid Work Queue retention on a mirrored upstream; the mirror's internal consumer bypasses the work queue's subject-overlap check and breaks the single-consumer guarantee, so use Limits.
 
 ### Disaster recovery — see [Pitfalls](/learn/backup-recovery/disaster-recovery#pitfalls)
 

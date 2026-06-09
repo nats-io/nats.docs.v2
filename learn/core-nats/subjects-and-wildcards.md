@@ -132,9 +132,10 @@ depth, regardless of region or action. One subscription covers it:
   prefix.
 
 Because `>` matches a token *and everything after it*, it only makes
-sense at the end. `orders.>.created` is invalid and the server will
-reject it — there is no way to anchor a tail wildcard in the middle and
-still know where it stops.
+sense at the end. `orders.>.created` is invalid and the server rejects
+it immediately with a validation error when you subscribe — there is no
+way to anchor a tail wildcard in the middle and still know where it
+stops.
 
 This is the difference to keep: `*` is a placeholder for one token in a
 known shape; `>` is "everything from here down."
@@ -164,9 +165,9 @@ backlog so a late subscriber can catch up is what
 Acme can name subjects almost anything. Two prefixes are spoken for.
 
 Subjects beginning with `$` belong to the server and its subsystems —
-`$SYS` for system events, `$JS`, `$KV`, and `$SRV` for the JetStream,
-Key-Value, and Services subsystems. Do not publish application messages
-under `$`.
+`$SYS` for system events, and `$JS`, `$KV`, `$O`, and `$SRV` for the
+JetStream, Key-Value, Object-Store, and Services subsystems. Do not
+publish application messages under `$`.
 
 The `_INBOX` prefix is reserved for reply subjects that clients generate
 automatically. You do not pick `_INBOX` names yourself, and you do not

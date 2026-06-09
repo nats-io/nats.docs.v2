@@ -15,12 +15,13 @@ This page adds the two ideas that make concurrent writes safe. The first
 is the **revision**: every key carries a revision that counts its writes,
 and `history` keeps the prior ones. The second is **compare-and-swap (CAS)**: a write
 that only succeeds if the key still holds the revision you read. Together
-they let the inventory service decrement `widget-blue` from 42 to 41
+they let the inventory service decrement `widget-blue` from 41 to 40
 without ever losing a sale.
 
-You still have the `INVENTORY` bucket from the first page, with
-`widget-blue` set to 42, and the warehouse dashboard from the watching
-page is still attached. We build on both.
+You still have the `INVENTORY` bucket from the first page. After the live
+update on the watching page, `widget-blue` sits at 41 — its second
+revision — and the warehouse dashboard from that page is still attached.
+We build on both.
 
 ## Every put bumps the revision
 
@@ -60,8 +61,8 @@ a short, fixed-length trail behind each key.
 ## Compare-and-swap: writing without locks
 
 Here is the problem `put` cannot solve. Two copies of the inventory
-service both sell a `widget-blue`. Both read the count as 42. Both compute
-41. Both put 41. Two sales happened, but the count only dropped by one.
+service both sell a `widget-blue`. Both read the count as 41. Both compute
+40. Both put 40. Two sales happened, but the count only dropped by one.
 One write clobbered the other, and a unit of stock vanished from the
 books.
 
@@ -134,7 +135,7 @@ for update with the revision instead. Put for "set it to this"; update for
 You now have:
 
 - An `INVENTORY` bucket whose `widget-blue` key has been decremented from
-  42 to 41 with a CAS update, not a blind put.
+  41 to 40 with a CAS update, not a blind put.
 - The ability to read a key's history and reason about its revision.
 - A working model of optimistic concurrency: read the revision, write on
   that condition, retry on mismatch.

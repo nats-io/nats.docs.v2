@@ -96,11 +96,16 @@ The reverse never happens by accident: a per-message TTL only ever
 makes a message expire *sooner* than `MaxAge` would, never later — with
 one explicit exception.
 
-That exception is the literal value `never`. A message published with
+## How to make a message permanent
+
+Now and then a single message has to outlive everything around it — a
+schema definition the rest of the stream depends on, or a baseline
+snapshot you replay newcomers against. You want that one message exempt
+from the stream's `MaxAge`, not just delayed.
+
+The literal value `never` does exactly that. A message published with
 `Nats-TTL: never` is exempt from expiration, including the stream's
-`MaxAge`. It stays until something deletes it by hand. Use it for the
-rare message that must outlive everything around it — a schema
-definition, a baseline snapshot.
+`MaxAge`. It stays until something deletes it by hand.
 
 ## TTL is about storage, not delivery
 
@@ -118,21 +123,19 @@ makes sense if the consumer that cares about cancellations reads within
 that minute. Set the TTL shorter than the window in which the message
 still matters, but long enough for a healthy consumer to keep up.
 
-## A few rules worth knowing up front
+## Two ways a TTL publish can fail
 
-The duration has a floor. The smallest valid `Nats-TTL` is one second.
-A sub-second value, or a literal `0`, is rejected, and the publish
-fails with an invalid-TTL error instead of being stored.
+The duration has a floor of one second. The server rejects a sub-second
+or zero `Nats-TTL` with an *invalid-TTL* error (`err_code` 10165) and
+stores nothing — the message never lands.
 
-A `Nats-TTL` header on a stream that has not opted in is also rejected,
-with a TTL-disabled error. The header is never silently ignored — a
-publish either honors the TTL or fails loudly.
+A valid `Nats-TTL` on a stream that has not opted in fails differently:
+the server rejects it with a *TTL-disabled* error (`err_code` 10166).
+Same outcome — no message stored — but a different cause, so the two
+error codes are worth telling apart when you read a failed `PubAck`.
 
-The full set of TTL behavior — the `SubjectDeleteMarkerTTL` setting,
-the delete markers the server leaves behind when a TTL empties a
-subject, and the exact header semantics — is documented in
-[Reference → Per-Message TTL](/reference/jetstream/api/headers). We
-use only `AllowMsgTTL` and the `Nats-TTL` header here.
+Either way the header is never silently ignored. A TTL publish either
+honors the TTL or fails loudly.
 
 ## Pitfalls
 
@@ -152,24 +155,20 @@ fire-and-forget on a stream you have not confirmed opted in.
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **A short TTL deletes the message whether or not a consumer read it.**
-The TTL is a clock on the *stored copy*, not a delivery guarantee. If
-the `shipping` consumer is down or backed up when a 60-second
-`orders.cancelled` TTL fires, the server deletes the message unread and
-nobody ever processes the cancellation. Do size the TTL to outlast the
-slowest healthy consumer's lag; do not set a TTL shorter than the
-window in which the message still has to be acted on.
+The TTL is a clock on the *stored copy*, not a delivery guarantee. The
+clock runs independently of any consumer: if the TTL fires while the
+`shipping` consumer is down, backed up, or even reading slowly
+mid-batch, the server deletes the message and nobody processes the
+cancellation. A consumer holding a message in flight does not pause its
+TTL. Do size the TTL to outlast the slowest healthy consumer's lag; do
+not set a TTL shorter than the window in which the message still has to
+be acted on.
 
-**Enabling `AllowMsgTTL` leaves no trace when a TTL empties a
-subject — delete markers are a second, separate opt-in.** With only
-`AllowMsgTTL` on, an expired last-value-for-a-subject simply vanishes;
-a watcher sees no signal that it went. Delete markers fix that, but
-they need `SubjectDeleteMarkerTTL` set too — and once set, that value
-becomes a *floor*: a per-message `Nats-TTL` below it is silently raised
-to the floor, not rejected. Do set `--subject-del-markers-ttl` only
-when downstream consumers must learn that a value expired, and keep it
-at or below your shortest intended per-message TTL. The markers
-themselves are documented in
-[Reference → Per-Message TTL](/reference/jetstream/api/headers).
+**Enabling `AllowMsgTTL` is a one-way door.** You can turn the feature
+on with `nats stream edit ORDERS --allow-msg-ttl`, but the server
+refuses to turn it back off — the downgrade is rejected. Do enable it
+deliberately, knowing the stream carries the capability for life; do
+not flip it on to test something and expect to revert.
 
 ## Where you are
 

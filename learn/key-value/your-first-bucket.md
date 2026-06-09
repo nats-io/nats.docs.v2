@@ -44,8 +44,9 @@ stream — `INVENTORY` becomes `KV_INVENTORY`.
 The second is `--history 1`. **History** is how many prior values the
 bucket keeps for each key. One means the bucket holds only the current
 value of a key and forgets the rest. That is the default and all the
-inventory service needs to start. Page 3 raises it so a key remembers
-where it has been; for now, one is enough.
+inventory service needs to start. The depth can go as high as 64, but no
+higher; page 3 raises it so a key remembers where it has been, and for now,
+one is enough.
 
 You did not set any other configuration. A bucket has the same long list
 of stream knobs underneath, all filled with sensible defaults. The full
@@ -64,7 +65,7 @@ That is a **put**: an unconditional write. It stores the value whether or
 not the key already exists, and it hands back the key's new **revision** —
 a number the bucket bumps on every write. The first write to a fresh key
 lands at revision 1. Revisions are how the bucket tracks change over time;
-page 4 builds on them, and for now the number is just a receipt.
+page 3 builds on them, and for now the number is just a receipt.
 
 Now read it back:
 
@@ -77,8 +78,9 @@ just the value bytes (`42`), which is usually what a program wants, but the
 full object is what the server actually sends.
 
 That shape is deliberate. The inventory service rarely wants only the
-count; it wants the count *and* the revision, because the next chapter uses
-that revision to decrement the value safely. The entry carries both in one
+count; it wants the count *and* the revision, because [history and
+revisions](/learn/key-value/history-and-revisions) uses that revision to
+decrement the value safely. The entry carries both in one
 read, so you never have to make a second call to learn which revision you
 just saw.
 
@@ -105,22 +107,20 @@ not an empty value.** Reaching straight for the value bytes works only
 when the key exists. A key that was never put does not return an empty
 entry; it returns a key-not-found error. Those are two different
 situations: an empty value is a value, and a missing key is the absence of
-one. Do not treat a failed get as "the count is zero." Check the error
-first, then read the value:
-
-<div class="nats-example" data-type="learn-key-value-your-first-bucket-getValue" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-The last line of that example gets a SKU that was never stocked. The get
-fails, and the program decides what a missing SKU means instead of reading
-a stale or zero count by accident.
+one. Do not treat a failed get as "the count is zero." The get example
+above ends with exactly this case: its last line gets a SKU that was never
+stocked, the get fails, and the program decides what a missing SKU means
+instead of reading a stale or zero count by accident. Check the error
+first, then read the value.
 
 **Bucket and key names are validated.** A bucket name may contain only
-letters, digits, dash, and underscore. A key is more permissive — letters,
-digits, and the characters `-`, `/`, `_`, `=`, and `.` — but nothing
-beyond that set, and no leading or trailing dot. An order id like
-`ord:8w2k` has a colon, so it cannot be a key; the server rejects the
-write rather than storing a broken key. Pick names from the allowed set,
-and reach for an underscore or dash where you would have used a colon:
+letters, digits, dash, and underscore, and it cannot be empty. A key is
+more permissive — letters, digits, and the characters `-`, `/`, `_`, `=`,
+and `.` — but nothing beyond that set, no leading or trailing dot, and no
+two dots in a row (`a..b` is rejected even though `a.b` is fine). An order
+id like `ord:8w2k` has a colon, so it cannot be a key; the server rejects
+the write rather than storing a broken key. Pick names from the allowed
+set, and reach for an underscore or dash where you would have used a colon:
 
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-nameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

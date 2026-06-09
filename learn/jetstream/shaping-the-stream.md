@@ -169,6 +169,12 @@ subject deserves its own retention, add a per-subject ceiling with
      data-type="learn-jetstream-shaping-the-stream-perSubjectLimit"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
+Under Discard Old, a per-subject ceiling evicts the oldest message *for
+that subject* once it fills. Under Discard New, it rejects the publish
+with `maximum messages per subject exceeded` — a third rejection string
+alongside the whole-stream `maximum bytes exceeded` and
+`maximum messages exceeded`.
+
 ## Where you are
 
 You now have:

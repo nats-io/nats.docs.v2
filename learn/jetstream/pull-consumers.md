@@ -85,12 +85,10 @@ Your function runs once per message. It acks on success. The library
 handles the pull requests, refills them as they drain, and keeps going
 until you stop it. This is the shape most order-processing workers want.
 
-## The knobs that bound a pull
+## The two knobs that bound a pull
 
-Both patterns issue the same underlying pull request, and that request
-carries a few fields that bound how much a single pull pulls. You rarely
-set all of them, but knowing the four that matter keeps throughput and
-latency predictable.
+Both patterns issue the same underlying pull request, and two fields on
+that request decide how much a single pull pulls:
 
 - **batch** — the maximum number of messages this pull may return. A
   bigger batch means fewer round trips and higher throughput. A smaller
@@ -99,23 +97,14 @@ latency predictable.
 - **expires** — how long the server holds the pull open waiting for
   messages before it returns what it has. This is the timeout you saw in
   the fetch above. It bounds latency on a quiet stream.
-- **max_bytes** — a cap on the total bytes a pull may return, applied
-  alongside `batch`. Whichever limit is hit first ends the pull. Useful
-  when message sizes vary and you care about memory per round, not just
-  message count.
-- **idle_heartbeat** — when the stream is quiet and the server has
-  nothing to deliver, it emits an empty heartbeat message at this
-  interval. The client uses the heartbeats to tell "no messages yet"
-  apart from "the connection died." Miss several in a row and the client
-  knows the pull has stalled.
 
-Client libraries pick sensible defaults for all four. The consume
-pattern in particular sets a batch, an expiry, and a heartbeat for you,
-so a plain consume loop already behaves well without tuning.
+Client libraries pick sensible defaults for both, and the consume
+pattern keeps a batch and an expiry in flight for you, so a plain
+consume loop already behaves well without tuning.
 
 The full set of pull request fields is documented in
 [Reference → Consumer API](/reference/jetstream/api/consumer/get-next).
-We use only `batch`, `expires`, `max_bytes`, and `idle_heartbeat` here.
+We use only `batch` and `expires` here.
 
 ## Pitfalls
 
@@ -141,19 +130,19 @@ your loop instead of blocking it. The CLI sets one for you from
 
 **`MaxAckPending` too low stalls throughput.** This is the ceiling on
 un-acked messages the consumer will hand out before it waits for acks.
-Set it well below your batch size — say a batch of 100 against a ceiling
-of 10 — and the server delivers ten orders, then goes silent until your
-worker acks, no matter how large the batch you ask for. The default is
-1000; lower it only when you understand the in-flight count you want, and
-keep it at or above your batch size. The worker pool on the next page
-shares this single ceiling across every worker, so it matters even more
-there: see [9. A pool of workers](/learn/jetstream/worker-pool).
+If you mistakenly set it well below your batch size — say a ceiling of 10
+against a batch of 100 — the server delivers ten orders, then goes silent
+until your worker acks, no matter how large the batch you ask for. Keep
+it at or above your batch size. The default is 1000; lower it only when
+you understand the in-flight count you want. The worker pool page shares
+this single ceiling across every worker, so it matters even more there:
+see [the worker pool page](/learn/jetstream/worker-pool).
 
 **A batch too large blows up memory.** `batch` counts messages, not
 bytes, so a big batch against large orders can pull more into memory in
-one round than you expect. Pair `batch` with `max_bytes` so a single
-pull is bounded by size as well as count — whichever limit is hit first
-ends the pull.
+one round than you expect. The Reference link below covers a companion
+field, `max_bytes`, that caps the total size a pull may return —
+whichever limit is hit first ends the pull.
 
 ## Where you are
 
@@ -161,7 +150,7 @@ You still have one stream, `ORDERS`, and one pull consumer, `shipping`.
 What changed is how you drive it. You can fetch a bounded batch when your
 code wants each round, or consume a continuous flow when you want a
 long-running worker. Either way, you can bound a single pull with
-`batch`, `expires`, `max_bytes`, and `idle_heartbeat`.
+`batch` and `expires`.
 
 ## What is next
 
@@ -176,5 +165,5 @@ matter, since the pool shares one ceiling between every worker.
 - [Reference → Consumer API](/reference/jetstream/api/consumer/get-next)
   — every field of a pull request, including `no_wait` and the
   `min_pending` controls this page left out.
-- [9. A pool of workers](/learn/jetstream/worker-pool) — sharing one
+- [The worker pool page](/learn/jetstream/worker-pool) — sharing one
   pull consumer across many workers.

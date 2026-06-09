@@ -115,7 +115,7 @@ clearest way to see that the whole log is still there.
 
 ## Pitfalls
 
-Reading a stream back is read-only and safe, but three habits bite the
+Reading a stream back is read-only and safe, but a few habits bite the
 first time you point a replay at real data.
 
 **Replaying a huge stream from sequence 1.** `--all` starts the
@@ -129,12 +129,13 @@ point in time with `--since`, or from a known sequence with
 
 **An ephemeral consumer disappearing mid-read.** The replay above uses
 an ephemeral consumer — one with no name you chose and no state that
-outlives your session. The server deletes it once it goes idle past its
-inactivity threshold, so if your reader stalls or its connection drops
-while paging through a long stream, the cursor is gone and a reconnect
-restarts from sequence 1. For a one-shot look that is fine. For a read
-you need to resume after an interruption, create a named, durable
-consumer instead — it keeps its cursor on the server across
+outlives your session. The server actively garbage-collects an idle
+ephemeral consumer once it has been inactive for a configurable period
+(the `inactive_threshold`), so if your reader stalls or its connection
+drops while paging through a long stream, the cursor is gone and a
+reconnect restarts from sequence 1. For a one-shot look that is fine.
+For a read you need to resume after an interruption, create a named,
+durable consumer instead — it keeps its cursor on the server across
 disconnects:
 
 <div class="nats-example"
@@ -147,12 +148,20 @@ fix for "my replay vanished halfway through."
 
 **`--all` vs `--new` confusion.** `--all` (the server's default
 `DeliverAll` start) hands you everything stored from sequence 1 first,
-then live messages. `--new` (`DeliverNew`) skips the backlog and
-delivers only messages published after the consumer is created. Picking
-`--new` when you meant to audit history silently shows you nothing of
-what is already stored; picking `--all` when you only wanted live
-traffic buries you in backlog. Decide which one matches the question you
-are asking before you run the command.
+then keeps the subscription open for live messages. `--new`
+(`DeliverNew`) skips the backlog and delivers only messages published
+after the consumer is created. Picking `--new` when you meant to audit
+history silently shows you nothing of what is already stored; picking
+`--all` when you only wanted live traffic buries you in backlog. Decide
+which one matches the question you are asking before you run the command.
+
+**Expecting `--all` to replay and then exit.** On its own, `--all`
+drains the backlog and then *blocks*, waiting for the next message
+forever — it is a long-lived subscription, not a one-shot dump. The
+replay command at the top of this page pairs it with `--terminate-at-end`
+precisely so it returns once the stored messages are drained. Drop that
+flag and the command hangs after the last stored message until you
+interrupt it.
 
 ## Where you are
 

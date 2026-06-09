@@ -128,10 +128,9 @@ to go away. A client that watches for it can stop publishing and proactively
 reconnect to another server in the pool before the link is cut, rather than
 waiting to be disconnected.
 
-That is one linked line, not a section: detecting lame duck is a callback
-your client sets, the same shape as the reconnect callbacks from the last
-page. *Why* a server enters lame duck — a rolling upgrade, a node drain —
-is a server-side decision covered in
+Detecting lame duck is a callback your client sets, the same shape as the
+reconnect callbacks from the last page. *Why* a server enters lame duck —
+a rolling upgrade, a node drain — is a server-side decision covered in
 [Topologies](/learn/topologies/your-first-cluster). Here it is simply a
 hint the client may act on.
 
