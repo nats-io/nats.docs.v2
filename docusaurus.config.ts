@@ -331,7 +331,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} The NATS Authors. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Synadia Communications, Inc. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.oneLight,
