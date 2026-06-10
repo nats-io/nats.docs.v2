@@ -123,6 +123,20 @@ const config: Config = {
         beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
       } satisfies DocsOptions,
     ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "tutorials",
+        path: "tutorials",
+        routeBasePath: "tutorials",
+        sidebarPath: "./sidebars-tutorials.ts",
+        // Learning-oriented, hand-held walkthroughs (Diataxis tutorials).
+        // Unversioned; each tutorial hands off to the versioned reference and
+        // the Learn deep dives for the "why".
+        includeCurrentVersion: true,
+        beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
+      } satisfies DocsOptions,
+    ],
   ],
 
   // Set the production url of your site here
