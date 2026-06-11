@@ -9,8 +9,8 @@ description: Roll a new server version through the ORDERS cluster with lame-duck
 
 The previous page changed the cluster's config without dropping a
 connection. A new server *version* is a harder problem. The binary
-itself has to change, which means the process has to restart — and a
-restart, done carelessly, drops every client on that node and can leave
+itself has to change, which means the process has to restart. Done
+carelessly, a restart drops every client on that node and can leave
 the `ORDERS` stream a node short of quorum.
 
 This page rolls a new version through `nats-0`, `nats-1`, and `nats-2`
@@ -26,8 +26,8 @@ to it discovers the loss only when its next write fails. Any stream
 replica that node was leading goes leaderless until the cluster elects a
 replacement.
 
-**Lame-duck mode** turns that abrupt stop into an orderly handover. A
-node in lame-duck mode announces it is going away, hands off its work,
+Lame-duck mode turns that abrupt stop into an orderly handover. A
+node in lame-duck mode announces it's going away, hands off its work,
 and lets clients move *before* the process exits. The mechanism is
 specified in the server's ADR-5; here you only need what the operator
 triggers and what it does.
@@ -46,12 +46,13 @@ That one signal kicks off a sequence inside the node:
    connected client. A modern client reads that as "reconnect
    elsewhere" and dials another node.
 2. It closes its client listener, so no *new* connection lands on a node
-   that is on its way out.
+   that's on its way out.
 3. It transfers any Raft leadership it holds to another replica, so no
    stream is left leaderless.
 4. It shuts down its JetStream assets cleanly, flushing to disk.
-5. It kicks remaining clients in waves — after a short grace period, then
-   periodically — so they reconnect spread out rather than all at once.
+5. It kicks remaining clients in waves, first after a short grace period
+   and then periodically, so they reconnect spread out rather than all at
+   once.
 
 Only after that does the process exit. The clients have already moved,
 the leadership has already transferred, and the stream never lost a
@@ -72,10 +73,10 @@ lame_duck_duration: "2m"
 Set the duration to comfortably cover how long your clients take to
 reconnect *and* how long JetStream needs to move leadership off this
 node. A duration shorter than the rebalance drops clients before the
-stream has caught up. We come back to that trap in
+stream has caught up. We'll come back to that trap in
 [Pitfalls](#pitfalls).
 
-On Kubernetes you do not send the signal by hand. The NATS Helm chart
+On Kubernetes you don't send the signal by hand. The NATS Helm chart
 wires lame-duck mode into the pod's `preStop` hook, so a normal
 `kubectl rollout restart` triggers it for you:
 
@@ -97,8 +98,8 @@ node to drain before sending the kill.
 ## Upgrade order
 
 Lame-duck mode makes *one* node leave gracefully. Rolling a new version
-across all three is about the *order* you take them in — and the order is
-not arbitrary.
+across all three is about the *order* you take them in, and that order
+isn't arbitrary.
 
 One node in the cluster is the **meta-leader**: the Raft leader for the
 cluster's own metadata, the node that coordinates where streams and
@@ -132,19 +133,19 @@ systemctl restart nats-server                  # picks up the new binary
 #    before moving to the next node — re-run nats stream info ORDERS.
 ```
 
-Step 3 is the gate. A node that has restarted is not done until its
-`ORDERS` replica has caught up, because taking the next node down while
-this one is still syncing leaves the stream one healthy replica short.
+Step 3 is the gate. A restarted node isn't done until its `ORDERS`
+replica has caught up, because taking the next node down while this one
+is still syncing leaves the stream one healthy replica short.
 
 Take the meta-leader (`nats-1`) **last**, with the same three steps. When
 it enters lame-duck mode it transfers metadata leadership to one of the
 two already-upgraded nodes, the brief election runs once, and the whole
 cluster is on the new version.
 
-There is one more guardrail on Kubernetes. A `PodDisruptionBudget` (PDB)
+There's one more guardrail on Kubernetes. A `PodDisruptionBudget` (PDB)
 caps how many pods may be down at once. With `minAvailable: 2`, Kubernetes
-will never voluntarily evict two of the three pods together, so a node
-drain can never cost the R3 stream its quorum:
+won't voluntarily evict two of the three pods together, so a node drain
+can never cost the R3 stream its quorum:
 
 ```yaml
 # pod-disruption-budget.yaml — never let the cluster drop below 2 nodes
@@ -165,8 +166,8 @@ and the rejoin on the new version.
 
 <div class="nats-flow" data-scenario="lameDuckUpgradeAnimated" data-width="600" data-height="350"></div>
 
-The keys this page touches — `lame_duck_duration` and
-`lame_duck_grace_period` — are the only two you must set for a safe roll.
+The two keys this page touches, `lame_duck_duration` and
+`lame_duck_grace_period`, are the only ones you must set for a safe roll.
 The full set of server configuration options is documented in
 [Reference → Configuration](/reference/config). We only cover the keys
 this deployment needs here.
@@ -175,7 +176,7 @@ this deployment needs here.
 
 A node leaving in lame-duck mode is a non-event for a well-behaved
 client. The `INFO ldm:true` broadcast tells the client to reconnect, and
-every NATS client library reconnects automatically — it dials another
+every NATS client library reconnects automatically: it dials another
 node in the cluster, resubscribes, and resumes.
 
 You can watch this happen. Subscribe `warehouse` to `orders.created` in
@@ -192,15 +193,15 @@ version upgrade is invisible to `warehouse`, `notifications`, and
 
 ## Pitfalls
 
-A few traps turn a clean rolling upgrade into an outage. Each is scoped
-to this page's two ideas: lame-duck timing, and upgrade order.
+A few traps turn a clean rolling upgrade into an outage. All of them
+come back to this page's two ideas: lame-duck timing and upgrade order.
 
 **A `lame_duck_duration` shorter than the rebalance drops clients early.**
 If you set the duration to `30s` but JetStream needs `45s` to move the
 `ORDERS` leadership and resync replicas off the node, the node kicks its
 clients and exits while the stream is still catching up. Measure how long
 a real drain takes on your cluster first, then set the duration above it
-with margin. Do not pick the minimum just because it is the minimum.
+with margin. Don't pick the minimum just because it's the minimum.
 
 **Upgrading the meta-leader without draining it blocks stream ops for
 30–60s.** Restart the meta-leader directly and the cluster has no leader
@@ -215,27 +216,27 @@ you never take down two replicas at once:
 
 **Evicting pods without a PDB can drain all three at once.** A node
 drain, a cluster autoscaler, or a careless `kubectl delete` can take two
-or three pods together if nothing stops it, and two nodes down loses the
+or three pods together if nothing stops it, and two nodes down costs the
 R3 stream its quorum. Set a `PodDisruptionBudget` with `minAvailable: 2`
-so Kubernetes refuses to voluntarily evict past one pod. Do not rely on
+so Kubernetes refuses to voluntarily evict past one pod. Don't rely on
 doing the steps slowly by hand — make the budget enforce it.
 
 **A reconnect storm on lame-duck spikes the surviving nodes.** When a
 node broadcasts `INFO ldm:true`, all of its clients reconnect at roughly
 the same moment, and a thundering herd can overwhelm the two nodes still
 up. The grace period and duration already spread the kicks; on top of
-that, stagger the upgrade across ordinals — finish one node and let it
-rejoin before starting the next — rather than draining several at once.
+that, stagger the upgrade across ordinals, finishing one node and letting
+it rejoin before starting the next, rather than draining several at once.
 
 ## Where you are
 
 The `ORDERS` cluster can now take a new server version without losing the
 stream or dropping a client:
 
-- Each node leaves through **lame-duck mode** — `SIGUSR2` (or the K8s
+- Each node leaves through lame-duck mode: `SIGUSR2` (or the K8s
   `preStop` hook) makes it broadcast `INFO ldm:true`, transfer leadership,
   flush JetStream, and move clients before exiting.
-- You roll the **non-leaders first and the meta-leader last**, gating on
+- You roll the non-leaders first and the meta-leader last, gating on
   each node returning as a `current` replica.
 - A `PodDisruptionBudget` of `minAvailable: 2` keeps the R3 stream's
   quorum safe even under involuntary eviction.
@@ -243,7 +244,7 @@ stream or dropping a client:
 Clients reconnect on their own, so `warehouse`, `notifications`, and
 `analytics` ride the upgrade out without code changes.
 
-## What is next
+## What's next
 
 The cluster is sized, deployed, configurable, and upgradable. The last
 operational step is **hardening** it: TLS on every link, the `ACME`

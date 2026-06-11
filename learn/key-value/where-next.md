@@ -12,9 +12,9 @@ gives you a key-value store on top of it. You end it with an `INVENTORY`
 bucket: keys that are SKUs, values that are stock counts, a warehouse
 dashboard watching for changes, safe decrements through compare-and-swap,
 a key that expires on its own, and a clear view of the stream underneath.
-That is the whole arc.
+That's the whole arc.
 
-This page does not teach anything new. It collects the model you built
+This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
@@ -26,7 +26,7 @@ key-value words map onto the JetStream words.
 
 A **bucket** is a stream. When you create `INVENTORY` you create a stream
 named `KV_INVENTORY` on the subjects `$KV.INVENTORY.>`. Every bucket limit
-you set — history depth, max bytes, max value size — is a stream limit.
+you set (history depth, max bytes, max value size) is a stream limit.
 
 A **key** is a subject token. The key `widget-blue` is the last token of
 the subject `$KV.INVENTORY.widget-blue`. The wildcard watch `widget-*` is
@@ -39,7 +39,7 @@ A **revision** is a sequence number. Each put bumps the key's revision
 because each message lands at the next sequence in the stream. History is
 the prior messages the stream still holds for that subject.
 
-A **watch** is a consumer. It is an ephemeral, ordered consumer that
+A **watch** is a consumer. It's an ephemeral, ordered consumer that
 replays the current value of every matching key, then streams live
 changes.
 
@@ -51,13 +51,13 @@ consumer. Everything else in this chapter is a refinement of that mapping.
 The chapter is unversioned and concept-first. The exact flags, defaults,
 and ranges live in **Reference**, which is versioned and exhaustive. When
 you need the precise type of a config field or the full list of bucket
-options, that is where to look.
+options, that's where to look.
 
 Because a bucket is created as a stream, the authoritative knob list is
 the stream-create reference. The full set of bucket configuration options
 is documented in
 [Reference → Create Stream](/reference/jetstream/api/stream/create), and
-the direct read path you met under the hood is documented in
+the direct read path you met under the hood lives in
 [Reference → Get Stream Message](/reference/jetstream/api/stream/msg-get).
 
 ## Sibling deep dives
@@ -67,7 +67,7 @@ straight into the chapters around it.
 
 The [JetStream deep dive](/learn/jetstream) is the chapter underneath this
 one. Every time this chapter said "that is a stream limit" or "a watch is
-a consumer," that is where the mechanism is taught in full —
+a consumer," that's where the mechanism is taught in full:
 [why a stream](/learn/jetstream/why-a-stream),
 [delivery semantics](/learn/jetstream/delivery-semantics), and the
 [per-message TTL](/learn/jetstream/message-ttl) that per-key TTL rides on.
@@ -84,42 +84,42 @@ The [Clustering & Replication deep dive](/learn/clustering) is where the
 a bucket survives node loss and explains the replication mechanics behind
 that field in full.
 
-There is one more direction worth a teaser. A bucket can be sourced from
+There's one more direction worth a teaser. A bucket can be sourced from
 or mirrored into another bucket: a regional `EU_INVENTORY` bucket could
 source from `INVENTORY` so both hold the same keys, kept in sync by a
-subject transform from `$KV.SRC.>` to `$KV.DST.>`. The chapter does not
-build it, because the mechanism is the JetStream one — see
+subject transform from `$KV.SRC.>` to `$KV.DST.>`. The chapter doesn't
+build it, because the mechanism is the JetStream one; see
 [mirrors and sources](/learn/jetstream/mirrors-and-sources).
 
 ## Where you are
 
-This is the end of the chapter — the whole arc is complete, and no new
-scenario state is introduced here. The `INVENTORY` bucket, its watcher,
+This is the end of the chapter. The whole arc is complete, and this page
+adds no new scenario state. The `INVENTORY` bucket, its watcher,
 its history, and the `flash-sale` key are still in your session exactly as
 you left them under the hood. You can keep experimenting with them, or
-tear the bucket down with `nats kv rm INVENTORY` when you are done.
+tear the bucket down with `nats kv rm INVENTORY` when you're done.
 
 You hold the core model: a bucket is a stream, a key is a subject token, a
 put is a message, a revision is a sequence, and a watch is a consumer.
-That mapping is the floor for every key-value feature you will meet.
+That mapping is the floor for every key-value feature you'll meet.
 
 ## Production checklist
 
 Every page in this chapter closed with a Pitfalls section. This collects
-the action items from all of them in one place — a last pass before you
+the action items from all of them in one place: a last pass before you
 trust a bucket with real inventory. Each group links back to the page that
 explains the why.
 
 ### Your first bucket — see [Pitfalls](/learn/key-value/your-first-bucket#pitfalls)
 
-- [ ] Check that an entry exists before reading its value; a key-not-found is not the same as an empty value, and reading the value of a missing entry trips up.
+- [ ] Check that an entry exists before reading its value; a key-not-found isn't the same as an empty value, and reading the value of a missing entry trips up.
 - [ ] Keep bucket names to alphanumerics, dashes, and underscores; the server rejects anything else.
 - [ ] Keep keys to alphanumerics and `-/_=.` with no leading or trailing dot; an order id with a `:` or a leading dot is rejected as a key.
 
 ### Watching — see [Pitfalls](/learn/key-value/watching#pitfalls)
 
 - [ ] Consume the end-of-initial-data nil entry; ignoring it or stopping the loop at the snapshot boundary misses every live update.
-- [ ] Treat a watch as live state, not a query; it is an ephemeral consumer that ends with the process, so use get or history for a point read.
+- [ ] Treat a watch as live state, not a query; it's an ephemeral consumer that ends with the process, so use get or history for a point read.
 
 ### History and revisions — see [Pitfalls](/learn/key-value/history-and-revisions#pitfalls)
 

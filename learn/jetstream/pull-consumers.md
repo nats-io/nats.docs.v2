@@ -32,18 +32,18 @@ the call is done. To keep going, you fetch again.
 
 **Consume** sets up a continuous flow. You hand it a function, and the
 library issues pull requests in the background, replenishing them as
-messages arrive, calling your function for each message. It does not
-return after a batch — it runs until you stop it.
+messages arrive, calling your function for each message. It doesn't
+return after a batch; it runs until you stop it.
 
-The rule of thumb: reach for **fetch** when your code wants control over
-each round (a cron job that drains what is waiting, a request handler
-that grabs a few messages). Reach for **consume** when you want a
+The rule of thumb: reach for fetch when your code wants control over
+each round (a cron job that drains what's waiting, a request handler
+that grabs a few messages). Reach for consume when you want a
 long-running worker that processes messages as fast as they arrive. Most
 services want consume.
 
 ## Fetch a batch
 
-A fetch names a batch size and a timeout. Here is a worker asking for up
+A fetch names a batch size and a timeout. Here's a worker asking for up
 to ten messages, willing to wait two seconds for them to show up:
 
 <div class="nats-example"
@@ -73,9 +73,9 @@ a time on the consumer page.
 
 ## Consume a continuous flow
 
-A long-running worker should not loop on fetch by hand. The consume
+A long-running worker shouldn't loop on fetch by hand. The consume
 pattern does the looping for you, keeping pull requests in flight so a
-new message is delivered the instant it is stored in the stream:
+new message is delivered the instant it's stored in the stream:
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-consumeContinuous"
@@ -90,11 +90,11 @@ until you stop it. This is the shape most order-processing workers want.
 Both patterns issue the same underlying pull request, and two fields on
 that request decide how much a single pull pulls:
 
-- **batch** — the maximum number of messages this pull may return. A
+- **batch**: the maximum number of messages this pull may return. A
   bigger batch means fewer round trips and higher throughput. A smaller
   batch means lower latency per message and less work lost if the worker
   dies mid-batch.
-- **expires** — how long the server holds the pull open waiting for
+- **expires**: how long the server holds the pull open waiting for
   messages before it returns what it has. This is the timeout you saw in
   the fetch above. It bounds latency on a quiet stream.
 
@@ -102,7 +102,7 @@ Client libraries pick sensible defaults for both, and the consume
 pattern keeps a batch and an expiry in flight for you, so a plain
 consume loop already behaves well without tuning.
 
-The full set of pull request fields is documented in
+For the full set of pull request fields, see
 [Reference → Consumer API](/reference/jetstream/api/consumer/get-next).
 We use only `batch` and `expires` here.
 
@@ -112,27 +112,28 @@ A pull is forgiving, but a few defaults bite once `shipping` carries real
 order traffic. These are the ones worth knowing before you tune anything.
 
 **An empty fetch is normal, not an error.** When no orders are waiting,
-a fetch returns nothing once `expires` elapses — the server replies with
+a fetch returns nothing once `expires` elapses: the server replies with
 a `404 No Messages` or `408 Request Timeout` status, and every client
 surfaces that as an empty batch (the CLI exits non-zero). A worker that
-treats an empty fetch as a failure crashes on a quiet stream. Loop: an
-empty result means "nothing right now," so wait and fetch again.
+treats an empty fetch as a failure crashes on a quiet stream. Keep
+looping: an empty result means "nothing right now," so wait and fetch
+again.
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-emptyFetch"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **A fetch with no expiry can stall.** Drop `expires` and a fetch waiting
-for a batch that never fills has no ceiling — the call hangs until enough
+for a batch that never fills has no ceiling: the call hangs until enough
 orders arrive. Always set an expiry so a quiet stream returns control to
 your loop instead of blocking it. The CLI sets one for you from
 `--timeout`; in code, pass `expires` explicitly.
 
 **`MaxAckPending` too low stalls throughput.** This is the ceiling on
 un-acked messages the consumer will hand out before it waits for acks.
-If you mistakenly set it well below your batch size — say a ceiling of 10
-against a batch of 100 — the server delivers ten orders, then goes silent
-until your worker acks, no matter how large the batch you ask for. Keep
+If you set it well below your batch size (say a ceiling of ten against
+a batch of 100), the server delivers ten orders, then goes silent
+until your worker acks, no matter how large a batch you ask for. Keep
 it at or above your batch size. The default is 1000; lower it only when
 you understand the in-flight count you want. The worker pool page shares
 this single ceiling across every worker, so it matters even more there:
@@ -141,7 +142,7 @@ see [the worker pool page](/learn/jetstream/worker-pool).
 **A batch too large blows up memory.** `batch` counts messages, not
 bytes, so a big batch against large orders can pull more into memory in
 one round than you expect. The Reference link below covers a companion
-field, `max_bytes`, that caps the total size a pull may return —
+field, `max_bytes`, that caps the total size a pull may return;
 whichever limit is hit first ends the pull.
 
 ## Where you are
@@ -152,11 +153,11 @@ code wants each round, or consume a continuous flow when you want a
 long-running worker. Either way, you can bound a single pull with
 `batch` and `expires`.
 
-## What is next
+## What's next
 
 The next page puts several workers on the `shipping` consumer at once
-and watches the server split the stream between them — a pool of
-workers sharing one cursor. That is also where `MaxAckPending`, the
+and watches the server split the stream between them: a pool of
+workers sharing one cursor. That's also where `MaxAckPending`, the
 ceiling on un-acked messages across the whole consumer, starts to
 matter, since the pool shares one ceiling between every worker.
 

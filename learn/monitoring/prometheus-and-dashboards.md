@@ -8,36 +8,36 @@ description: Scrape the monitoring port into Prometheus time series, chart them 
 # 5. Prometheus & dashboards
 
 Every number so far is a snapshot. You `curl` the monitoring port and you
-see "now." You read the `shipping` consumer's state and you learn it is
+see "now." You read the `shipping` consumer's state and you learn it's
 20 orders behind *at this instant*. None of it is stored. Refresh the
 query a minute later and the old value is gone, with no record of whether
 the lag is climbing or shrinking.
 
-This page closes that gap. It takes the same numbers — the lag, the
-in-flight count, the redeliveries you already know how to read — and
+This page closes that gap. It takes the same numbers you already know how
+to read (the lag, the in-flight count, the redeliveries) and
 turns them into a production loop: an exporter that scrapes the
 monitoring port, Prometheus that stores the result as time series, Grafana
 that charts it, and a check that alerts before a person has to look.
 
 We add no new entities. The `east` cluster, the `ORDERS` stream, and the
-`shipping` consumer are all from the earlier chapters. We attach a new
-piece of plumbing — the exporter — outside NATS, and watch the orders
+`shipping` consumer are all from the earlier chapters. We attach one new
+piece of plumbing, the exporter, outside NATS, and watch the orders
 deployment from one more angle.
 
 ## The exporter turns one-shot JSON into time series
 
-The monitoring port serves JSON when you ask for it. Prometheus does not
-read NATS JSON — it reads its own metrics format, and it pulls that
+The monitoring port serves JSON when you ask for it. Prometheus doesn't
+read NATS JSON; it reads its own metrics format, and it pulls that
 format on a schedule. Bridging the two is one job, and one program does
-it: **prometheus-nats-exporter**, the program that scrapes the
+it: **prometheus-nats-exporter**, which scrapes the
 monitoring port and re-exposes the numbers as Prometheus metrics.
 
-A **time series** is a single named number recorded repeatedly over time
-— the thing Prometheus stores. Where `/jsz` gave you `num_pending` once,
+A **time series** is a single named number recorded repeatedly over
+time, and it's what Prometheus stores. Where `/jsz` gave you `num_pending` once,
 the time series `nats_consumer_num_pending` is that same lag value
 sampled every scrape, so you can see it rise.
 
-The exporter runs *external* to NATS. You point it at a node's monitoring
+The exporter runs *outside* NATS. You point it at a node's monitoring
 port `:8222`, tell it which collectors to enable, and it serves its own
 `/metrics` endpoint on `:7777`:
 
@@ -51,7 +51,7 @@ A **scrape** is one request to an endpoint that fetches its current
 numbers. When Prometheus scrapes the
 exporter's `:7777`, the exporter scrapes the NATS node's `:8222`,
 transforms the JSON into metrics, and hands them back. The exporter holds
-no history of its own — it answers each scrape from a fresh read of the
+no history of its own; it answers each scrape from a fresh read of the
 monitoring port.
 
 The JetStream collector turns the consumer state you already know into
@@ -69,12 +69,12 @@ nats_consumer_num_redelivered{account="ORDERS",stream_name="ORDERS",consumer_nam
 nats_stream_total_messages{account="ORDERS",stream_name="ORDERS"} 1000
 ```
 
-The numbers in braces are **labels** — the dimensions that tell one
+The pairs in braces are **labels**, the dimensions that tell one
 series from another. Each metric is tagged with `account`, `stream_name`,
 and `consumer_name`, so Prometheus can keep the `ORDERS` account's
 `shipping` lag separate from the `analytics` lag, and from any other
 account's. The pinned snapshot's 20 waiting, 5 in-flight, and 3
-redelivered survive the round trip exactly, now as labelled series.
+redelivered survive the round trip exactly, now as labeled series.
 
 The full set of exporter metrics and labels is documented in
 [Reference](/reference/). We only need the consumer-lag series here.
@@ -108,9 +108,9 @@ Grafana publishes community dashboards for NATS that read a Prometheus
 data source out of the box; you import one and point it at your
 Prometheus.
 
-Watch the whole loop run — the exporter scrapes the node, Prometheus
+Watch the whole loop run: the exporter scrapes the node, Prometheus
 stores the rising lag, Grafana charts it, and the check fires when the
-series crosses its threshold:
+series crosses its threshold.
 
 <div class="nats-flow" data-scenario="metricsScrapeAnimated" data-width="600" data-height="350"></div>
 
@@ -126,8 +126,8 @@ the line:
 
 The same checks back **nats-surveyor**, a service that wraps
 `nats server report` and `nats server check` across a whole deployment
-and exposes the result for Prometheus to scrape — a fuller alternative to
-running the exporter against one node at a time.
+and exposes the result for Prometheus to scrape. It's a fuller
+alternative to running the exporter against one node at a time.
 
 The full set of metric names, check flags, and surveyor options is
 documented in [Reference](/reference/). The service-latency metrics that
@@ -137,7 +137,7 @@ let you chart request/reply timing belong with services, in
 ## Pitfalls
 
 Three traps catch teams the first time they wire NATS into Prometheus and
-Grafana. Each is scoped to this page's two concepts: the exporter, and
+Grafana. Each stays within this page's two concepts: the exporter, and
 the alert-and-chart layer behind it.
 
 **A node-local health check passes even with no quorum.** A
@@ -160,45 +160,45 @@ curl -s -o /dev/null -w "%{http_code}\n" \
   "http://localhost:8222/healthz?js-meta-only=true"
 ```
 
-*Why* the cluster lost quorum is not a monitoring question — the health
+*Why* the cluster lost quorum isn't a monitoring question; the health
 check only reports the symptom. The mechanics live in
 [Clustering → raft and leaders](/learn/clustering/raft-and-leaders).
 
 **A check with no threshold never fires.** `nats server check consumer`
-has defaults, but the defaults do not know your SLA. A check run without
+has defaults, but the defaults don't know your SLA. A check run without
 `--unprocessed-critical` will sit at OK while the `shipping` consumer's lag
-climbs past anything you would care about, because nothing told it where
+climbs past anything you'd care about, because nothing told it where
 the line is. Always set explicit thresholds that match what the orders
-deployment can tolerate — the `checkConsumer` example above pins
+deployment can tolerate; the `checkConsumer` example above pins
 `--unprocessed-critical 100` for exactly this reason. A silent check is worse
 than no check, because it looks like coverage.
 
 **The exporter keeps no time series.** The exporter is stateless: every
 scrape is a fresh read of `:8222`, and the moment you stop scraping, the
 past is gone. Without Prometheus behind it, `nats_consumer_num_pending`
-is the same one-shot "now" you started this page trying to escape — you
+is the same one-shot "now" you started this page trying to escape: you
 gain a metrics format, not a record. Do not treat the exporter alone as
-monitoring. It is the bridge; Prometheus is the memory. Run both, or you
-are back to refreshing a query by hand.
+monitoring. It's the bridge; Prometheus is the memory. Run both, or
+you're back to refreshing a query by hand.
 
 ## Where you are
 
 You now have the full production loop around the orders deployment. The
 exporter scrapes the monitoring port `:8222` and re-exposes the
 `shipping` consumer's lag as the time series `nats_consumer_num_pending`,
-labelled by `account`, `stream_name`, and `consumer_name`. Prometheus
+labeled by `account`, `stream_name`, and `consumer_name`. Prometheus
 scrapes the exporter on its own interval and stores that time series.
 Grafana charts it, so a climbing lag shows as a rising line. And
 `nats server check` raises a CRITICAL on its own when the lag crosses a
 threshold you set.
 
-You have watched the `shipping` consumer fall behind four ways now: as
+You've watched the `shipping` consumer fall behind four ways now: as
 `num_pending` on `/jsz`, as lag computed from the consumer's state, as a
 `max_deliver` advisory, and as a rising time series on a Grafana panel.
-That is the chapter's whole game — the same symptom, observed from every
+That's the chapter's whole game: the same symptom, observed from every
 angle a running deployment offers.
 
-## What is next
+## What's next
 
 The next page recaps the four lenses, points to where the *fixes* for
 what you observe live, and collects every page's Pitfalls into one
@@ -209,8 +209,8 @@ Continue to [Where to go next](/learn/monitoring/where-next).
 ## See also
 
 - [JetStream health](/learn/monitoring/jetstream-health) — the raw
-  consumer state these time series are built from.
+  consumer state these time series are built from
 - [Services → observability](/learn/services/observability) — the
-  service-latency metrics for request/reply timing.
+  service-latency metrics for request/reply timing
 - [Reference](/reference/) — the exhaustive list of exporter metric
-  names, labels, and check flags.
+  names, labels, and check flags

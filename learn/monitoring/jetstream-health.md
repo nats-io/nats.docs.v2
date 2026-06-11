@@ -9,18 +9,18 @@ description: Read stream and consumer state, then compute lag, in-flight, and re
 
 The previous page showed you the monitoring port and named `/jsz` as the
 JetStream lens. That endpoint counts streams and consumers, but a count
-does not tell you whether the `shipping` consumer is keeping up. To answer
-that you read *state* — the live numbers JetStream keeps for the stream
-and for each consumer — and you turn a few of them into one number: lag.
+doesn't tell you whether the `shipping` consumer is keeping up. To answer
+that you read *state*, the live numbers JetStream keeps for the stream
+and for each consumer, and you turn a few of them into one number: lag.
 
 This page introduces two ideas. The first is **stream and consumer
 state**: what the server reports about an `ORDERS` stream and its
-`shipping` consumer right now. The second is **lag** — a single number,
+`shipping` consumer right now. The second is **lag**: a single number,
 computed from two of those fields, that says how far behind the consumer
 has fallen.
 
-This page reads state. It does not re-explain what a stream, a consumer,
-or an ack is — the [JetStream deep dive](/learn/jetstream) owns those
+This page reads state. It doesn't re-explain what a stream, a consumer,
+or an ack is; the [JetStream deep dive](/learn/jetstream) owns those
 definitions, and this page assumes them.
 
 **Entering:** the `east` cluster is up, the `ORDERS` stream has been
@@ -31,7 +31,7 @@ taking orders, and the `shipping` consumer has fallen behind. You can hit
 
 Every stream keeps a small block of **state** separate from its
 configuration. The configuration is what you asked for when you created
-the stream. The state is what is actually in it at this moment, and it
+the stream. The state is what's actually in it at this moment, and it
 changes with every published order.
 
 Read it with `nats stream info`, or fetch the same fields from any client:
@@ -56,8 +56,8 @@ Three fields carry the weight here.
 
 **Messages** (`messages`) is how many orders the stream holds. **Last
 Sequence** (`last_seq`) is the sequence number assigned to the newest
-order — `1000` in our snapshot. Every published order gets the next
-sequence, so `last_seq` only ever climbs. You will use it in a moment to
+order, `1000` in our snapshot. Every published order gets the next
+sequence, so `last_seq` only ever climbs. You'll use it in a moment to
 measure how far any consumer is behind. **Num Subjects** (`num_subjects`)
 is how many distinct subjects the stream has seen: `orders.created`,
 `orders.shipped`, `orders.cancelled`, and one regional subject make four.
@@ -69,7 +69,7 @@ The full set of stream state fields is documented in
 
 ## Consumer state: the cursor and the gap
 
-A consumer keeps its own state. Where the stream state describes what is
+A consumer keeps its own state. Where the stream state describes what's
 *stored*, the consumer state describes how far one reader has *gotten*.
 Read it with `nats consumer info`, or with `consumer_info` from any
 client:
@@ -92,23 +92,23 @@ State:
 Four fields describe the consumer's progress, and each one means
 something precise.
 
-**Last Delivered Message** carries `delivered.stream_seq` — the stream
+**Last Delivered Message** carries `delivered.stream_seq`: the stream
 sequence of the last order the server handed to a `shipping` worker. In
-the snapshot it is `980`. The stream's `last_seq` is `1000`. The gap
+the snapshot it's `980`. The stream's `last_seq` is `1000`. The gap
 between them is the heart of this page.
 
 **Acknowledgment Floor** (`ack_floor.stream_seq`) is the sequence below
-which every order has been acked. Orders `981` through `1000` have not
-been delivered yet; orders `976` through `980` were delivered but are not
+which every order has been acked. Orders `981` through `1000` haven't
+been delivered yet; orders `976` through `980` were delivered but aren't
 all acked. That second group is the next field.
 
-**Outstanding Acks** is the count of orders delivered but not yet acked —
-**in-flight** (`num_ack_pending`). Five `shipping` workers are holding
-five orders, working on them, and have not confirmed them back. In-flight
-is not lag. It is work in progress.
+**Outstanding Acks** counts orders delivered but not yet acked, also
+called **in-flight** (`num_ack_pending`). Five `shipping` workers are
+holding five orders, working on them, and haven't confirmed them back.
+In-flight is not lag; it's work in progress.
 
 **Redelivered Messages** (`num_redelivered`) counts how many orders the
-server has had to deliver more than once since the consumer was created —
+server has had to deliver more than once since the consumer was created:
 three so far. A redelivery happens when a worker takes an order and never
 acks it, so the server hands it to someone else.
 
@@ -119,8 +119,8 @@ need the four above.
 ## Lag is a number you compute
 
 The most important health signal for a consumer is **lag**: the number of
-orders the stream holds that this consumer has not yet been delivered. It
-is the gap you saw a moment ago, written as one number:
+orders the stream holds that haven't been delivered to this consumer yet.
+It's the gap you saw a moment ago, written as one number:
 
 ```
 lag = stream.last_seq − consumer.delivered.stream_seq
@@ -132,20 +132,20 @@ For the pinned snapshot:
 lag = 1000 − 980 = 20
 ```
 
-Twenty orders are waiting for a `shipping` worker to fetch them. That is
+Twenty orders are waiting for a `shipping` worker to fetch them. That's
 what "the shipping consumer is behind" means as a number. A pull consumer
 also reports this same value directly as **Unprocessed Messages**
 (`num_pending`), so most of the time you read it off `nats consumer info`
 rather than subtracting by hand. You compute it yourself when you want to
-cross-check that the reported number is fresh — a point the Pitfalls
+cross-check that the reported number is fresh, a point the Pitfalls
 return to.
 
 Three numbers now tell the whole story of the `shipping` consumer:
 
-- **lag = 20** — orders waiting, never delivered (`num_pending`).
-- **in-flight = 5** — orders delivered, not yet acked (`num_ack_pending`).
-- **redelivered = 3** — orders the server had to hand out again
-  (`num_redelivered`).
+- **lag = 20**: orders waiting, never delivered (`num_pending`)
+- **in-flight = 5**: orders delivered, not yet acked (`num_ack_pending`)
+- **redelivered = 3**: orders the server had to hand out again
+  (`num_redelivered`)
 
 A healthy consumer keeps lag near zero and redelivery flat. Lag climbing
 while `last_seq` climbs means orders arrive faster than `shipping`
@@ -160,9 +160,9 @@ pulses back as a redelivery.
 
 <div class="nats-flow" data-scenario="consumerLagAnimated" data-width="600" data-height="350"></div>
 
-Watching lag is the job. Deciding what to do about a lag that will not
-come down — adding `shipping` workers, or sizing the deployment — belongs
-to the [worker pool](/learn/jetstream/worker-pool) page and the
+Watching lag is the job. Deciding what to do about a lag that won't come
+down (adding `shipping` workers, or sizing the deployment) belongs to the
+[worker pool](/learn/jetstream/worker-pool) page and the
 [deployment](/learn/deployment) chapter. This page names the symptom; the
 fix lives there.
 
@@ -173,11 +173,11 @@ state, and reading lag from it. Each one is a number that lies if you
 read it without context.
 
 **Pull-consumer lag is only fresh when a client is fetching.** A pull
-consumer reports `num_pending` based on what it knows the last time a
+consumer reports `num_pending` based on what it knew the last time a
 worker asked for messages. If every `shipping` worker has crashed, no one
 is fetching, and the number can sit stale at its last value while orders
-keep arriving. Do not trust a flat `num_pending` as proof the consumer is
-healthy — cross-check it. Compute lag yourself from the two source fields
+keep arriving. Don't trust a flat `num_pending` as proof the consumer is
+healthy; cross-check it. Compute lag yourself from the two source fields
 and compare:
 
 <div class="nats-example" data-type="learn-monitoring-jetstream-health-consumerState" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -190,15 +190,15 @@ reported number is stale and the workers are gone.
 already holds; `num_pending` counts orders no worker has taken yet.
 Reading one for the other hides a real problem: a handler that fetches
 orders and then hangs shows a steady, non-zero in-flight count while lag
-quietly grows behind it. Do not collapse the two into one "behind"
-number. Read both, every time — rising in-flight means a stuck handler,
+quietly grows behind it. Don't collapse the two into one "behind"
+number. Read both, every time: rising in-flight means a stuck handler,
 rising lag means not enough handlers.
 
 **A filtered consumer's lag counts only its subjects.** The `analytics`
-consumer filters `orders.shipped`. Its `num_pending` counts only shipped
-orders it has not seen — not the whole stream. An empty pending on a
-filtered consumer does not mean the `ORDERS` stream is empty; it means
-nothing on *that filter* is waiting. Do not read a filtered consumer's
+consumer filters `orders.shipped`. Its `num_pending` counts only the
+shipped orders it hasn't seen, not the whole stream. An empty pending on
+a filtered consumer doesn't mean the `ORDERS` stream is empty; it means
+nothing on *that filter* is waiting. Don't read a filtered consumer's
 lag as a stream-wide number. Compare it against the stream's per-subject
 counts, not against `last_seq`.
 
@@ -207,21 +207,21 @@ counts, not against `last_seq`.
 You can now read the live state of the `ORDERS` stream and its `shipping`
 consumer, and you can turn it into the three numbers that matter:
 
-- **lag = 20** — orders waiting, from
-  `last_seq − delivered.stream_seq`, also reported as `num_pending`.
-- **in-flight = 5** — orders delivered but not acked (`num_ack_pending`).
-- **redelivered = 3** — orders handed out more than once
-  (`num_redelivered`).
+- **lag = 20**: orders waiting, from
+  `last_seq − delivered.stream_seq`, also reported as `num_pending`
+- **in-flight = 5**: orders delivered but not acked (`num_ack_pending`)
+- **redelivered = 3**: orders handed out more than once
+  (`num_redelivered`)
 
 You know which field is which, and you know lag and in-flight are
 different measurements that move for different reasons.
 
-## What is next
+## What's next
 
-State is something you have to ask for — you poll `/jsz` or run
+State is something you have to ask for: you poll `/jsz` or run
 `nats consumer info` and read the answer. Some events never show up in a
 poll. When a poison order exhausts its deliveries, the server announces
-it once, on a subject, and if you are not listening you never learn it
+it once, on a subject, and if you're not listening you never learn it
 happened.
 
 The next page subscribes to those announcements.
@@ -231,8 +231,8 @@ Continue to [4. Advisories & events](/learn/monitoring/advisories-and-events).
 ## See also
 
 - [Reference → consumer API](/reference/jetstream/api/consumer) — every
-  consumer state field and its type.
+  consumer state field and its type
 - [Worker pool](/learn/jetstream/worker-pool) — how a pool of `shipping`
-  workers shares the lag.
+  workers shares the lag
 - [Monitoring endpoints](/learn/monitoring/monitoring-endpoints) — the
-  `/jsz` endpoint these numbers come from.
+  `/jsz` endpoint these numbers come from

@@ -8,7 +8,7 @@ description: How a large invoice is split into chunks, reassembled, and verified
 # 2. Chunking
 
 On the last page you put a small invoice into `INVOICES` and got it back.
-The bytes were small enough to feel atomic — one put, one get, done. But
+The bytes were small enough to feel atomic: one put, one get, done. But
 NATS messages have a size limit, and an invoice PDF can be far larger than
 any single message. So how did a file land in a message store at all?
 
@@ -19,13 +19,13 @@ together, and what happens when a put fails partway through.
 ## An object is split into chunks
 
 A **chunk** is one message holding a slice of an object. When you put an
-object, the store does not try to fit the whole file in a single message.
+object, the store doesn't try to fit the whole file in a single message.
 It reads the bytes in order and cuts them at a fixed boundary called the
 **chunk size**, writing each slice as its own message. A 3 MB invoice
 becomes a sequence of chunk messages, not one giant one.
 
 The default chunk size is **128 KB**. You did nothing to enable splitting
-on the last page — your small invoice fit within a single chunk, well
+on the last page: your small invoice fit within a single chunk, well
 under that 128 KB boundary, so there was nothing to split. A larger file
 crosses the boundary and produces several chunks.
 
@@ -34,71 +34,72 @@ Put a 3 MB invoice and read the chunk count back:
 <div class="nats-example" data-type="learn-object-store-chunking-putLarge" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 This stores `invoice-ord_9x3m.pdf`, the large invoice for one Acme order.
-The `nats object info` output now carries a `Chunks` field — the count of
+The `nats object info` output now carries a `Chunks` field: the count of
 chunk messages the bytes were split into. At the 128 KB default, a 3 MB
 file lands in roughly 24 chunks.
 
 You never ask for chunks and you never see them as separate things after
-the fact. They are an implementation detail of how the store fits a file
+the fact. They're an implementation detail of how the store fits a file
 into a message log. The object you put and the object you get are the same
 bytes; the chunking happens in between.
 
 ## Get reassembles and verifies
 
 A get is the split run backwards. The store reads the object's chunks in
-order, concatenates them, and hands you the reassembled bytes — exactly
-the file you put. You do not reassemble anything yourself; the convenience
+order, concatenates them, and hands you the reassembled bytes, exactly
+the file you put. You don't reassemble anything yourself; the convenience
 forms (get-to-bytes, get-to-file, get-to-stream) all give you a whole
 object.
 
 While it reassembles, the store does one more thing: it recomputes the
 SHA-256 **digest** over the bytes and compares it to the digest the store
 recorded during the put. (You met the digest on the
-[last page](/learn/object-store/your-first-object): it is the integrity
+[last page](/learn/object-store/your-first-object): it's the integrity
 hash put computes as it stores.) If the two digests match, the bytes are
-intact and you get them. If they do not match — a chunk is missing or
-corrupted — the get fails instead of handing you a truncated file.
+intact and you get them. If they don't match (a chunk is missing or
+corrupted), the get fails instead of handing you a truncated file.
 
 That verification is why get is safe even though the bytes traveled as
 many separate messages. The digest is computed over the whole object, so a
 single missing or reordered chunk changes it and the get refuses to
 return.
 
-The put/get flow — chunks out, then a metadata message; metadata in, then
-the chunks, then the digest check — looks like this:
+The put/get flow looks like this: a put sends the chunks out, then a
+metadata message; a get reads the metadata in, then the chunks, then runs
+the digest check.
 
 <div class="nats-flow" data-scenario="objectPutGetAnimated" data-width="600" data-height="350"></div>
 
 The metadata message that follows the chunks carries the object's name,
-size, digest, and chunk count. We define what else it holds — descriptions,
-headers, links — on the [next page](/learn/object-store/metadata-and-links).
-For now it is enough to know the chunks come first and the metadata closes
+size, digest, and chunk count. We define what else it holds (descriptions,
+headers, links) on the [next page](/learn/object-store/metadata-and-links).
+For now it's enough to know the chunks come first and the metadata closes
 the put.
 
 ## A failed put leaves no half-objects
 
-Chunks publish one after another, so a put is not instantaneous. A network
+Chunks publish one after another, so a put isn't instantaneous. A network
 drop or a crashed client can stop a put after some chunks have landed but
 before the rest do. What happens to the chunks that made it?
 
-They are purged. A put that fails mid-stream removes its partial chunks
+They're purged. A put that fails mid-stream removes its partial chunks
 before it returns the error, so a failure leaves the store as it was, not
-half-written. There is no leftover sequence of orphan chunks for a later
+half-written. There's no leftover sequence of orphan chunks for a later
 get to stumble on.
 
-This works because each put gets a fresh **NUID** — a unique identifier
+This works because each put gets a fresh **NUID**: a unique identifier
 generated for that put alone, separate from the object's name. The chunks
 of one put are tagged with this fresh identity. When you put the same
-object name twice — a corrected invoice over a draft — the second put's
+object name twice (a corrected invoice over a draft), the second put's
 chunks never overlap the first's.
 The store writes the new chunks under the new identity, swings the object's
 metadata to point at them, and the old chunks fall away. A re-put is a
 clean replacement, never a merge.
 
-So two failure modes you might fear do not happen. A put that dies partway
-does not leave a broken object behind, and a re-put does not splice new
+So two failure modes you might fear don't happen. A put that dies partway
+doesn't leave a broken object behind, and a re-put doesn't splice new
 bytes into old ones. Either you get the whole object you put, or the get
-tells you that you cannot.
+tells you that you can't.
 
 ## Choosing a chunk size
 
@@ -121,17 +122,17 @@ the chunk size, and the integrity check on get.
 
 **A chunk size at the extremes hurts.** Set it too small and a single file
 becomes thousands of tiny messages. Each chunk is a NATS message that
-carries its own protocol framing — headers and subject routing on top of
-the slice of bytes — so very small chunks waste storage on per-message
+carries its own protocol framing (headers and subject routing on top of
+the slice of bytes), so very small chunks waste storage on per-message
 overhead and slow puts and gets down. Set it too large and the chunk exceeds
 the backing stream's maximum message size, and the put fails outright: the
 store rejects an oversized value rather than quietly splitting some other
-way. Do not tune the
+way. Don't tune the
 chunk size to chase a benchmark; the 128 KB default fits almost every
 file. If you must change it, stay well inside the stream's max message
-size — covered on
+size, covered on
 [Shaping the stream](/learn/jetstream/shaping-the-stream). Don't push the
-chunk size up to make "fewer messages" your goal — past the stream limit
+chunk size up to make "fewer messages" your goal; past the stream limit
 it stops storing anything.
 
 **Always check the get result before you use the bytes.** A failed get
@@ -159,9 +160,9 @@ You now have:
   chunks, and a re-put under a fresh identity never overlaps old bytes.
 
 The chunks carry the data. The metadata message that closes each put
-carries everything *about* the object — and that is the next page.
+carries everything *about* the object — and that's the next page.
 
-## What is next
+## What's next
 
 The metadata message named the object, its size, and its digest. It can
 carry more: a human-readable **description**, HTTP-style **headers**, a
@@ -171,7 +172,7 @@ Continue to [3. Metadata and links](/learn/object-store/metadata-and-links).
 
 ## See also
 
-- [Your first object](/learn/object-store/your-first-object) — where put,
-  get, and the digest were introduced.
+- [Your first object](/learn/object-store/your-first-object) — where you
+  met put, get, and the digest.
 - [Shaping the stream](/learn/jetstream/shaping-the-stream) — the backing
   stream's maximum message size, which bounds the chunk size.

@@ -21,12 +21,12 @@ Every page in this chapter belongs to one of three pillars. Naming them
 up front gives you a place to file each new mechanism as it arrives.
 
 **Authentication** answers _who are you_. A connecting application
-presents some proof of identity — a password, a token, an nkey, or a
-JWT — and the server decides whether to admit it. Pages 2 through 4 and
+presents some proof of identity (a password, a token, an nkey, or a
+JWT), and the server decides whether to admit it. Pages 2 through 4 and
 page 8 are about authentication.
 
-**Authorization** answers _what may you do_. Once admitted, a user is
-allowed to publish and subscribe only to the subjects you grant it.
+**Authorization** answers _what may you do_. Once admitted, a user can
+publish and subscribe only to the subjects you grant it.
 Everything else is denied. Page 5 is about authorization.
 
 **Encryption** answers _is the wire safe_. TLS protects each connection
@@ -35,7 +35,7 @@ serve as the identity itself. Page 7 is about encryption.
 
 ## Accounts are the frame around all three
 
-The three pillars do not float free. They are scoped by a fourth idea
+The three pillars don't float free. They're scoped by a fourth idea
 that comes first: the **account**.
 
 An account is an isolated tenant. Each account has its own users, its
@@ -48,16 +48,16 @@ So the full sentence is this. A **user** authenticates into an
 **account**, where **permissions** decide what it may do, over a
 connection that **TLS** keeps safe.
 
-## What you will have built
+## What you'll have built
 
-By the end of this chapter you will have secured the order platform two
+By the end of this chapter you'll have secured the order platform two
 different ways, both producing the same running system.
 
-- Two accounts, `ORDERS` and `ANALYTICS`, that cannot see each other's
+- Two accounts, `ORDERS` and `ANALYTICS`, that can't see each other's
   traffic by default.
 - A user `order-svc` in `ORDERS` that may publish `orders.>` and nothing
   else, and a user `analytics-reader` in `ANALYTICS` that may read only
-  the orders it is shown.
+  the orders it's shown.
 - A deliberate bridge: `ORDERS` **exports** the subject `orders.shipped`
   and `ANALYTICS` **imports** it, so analytics sees shipped orders and
   no other order events.
@@ -69,24 +69,24 @@ different ways, both producing the same running system.
 
 ## Who this is for
 
-You have read the [Core Concepts → Security](/concepts/security) primer
-or are otherwise comfortable with NATS basics — publishing, subscribing,
-and subjects. This chapter does not re-teach those.
+You've read the [Core Concepts → Security](/concepts/security) primer
+or are otherwise comfortable with NATS basics: publishing, subscribing,
+and subjects. This chapter doesn't re-teach those.
 
-It also assumes you have met JetStream, since the running scenario is the
-same `ORDERS` platform. If you have not, the
+It also assumes you've met JetStream, since the running scenario is the
+same `ORDERS` platform. If you haven't, the
 [Core Concepts → JetStream](/concepts/jetstream) primer is enough
 background, and the [JetStream deep dive](/learn/jetstream) covers it in
-full. You do not need to have built the streams to follow the security
+full. You don't need to have built the streams to follow the security
 work.
 
 ## How to read it
 
 Each page introduces at most two new concepts. Pages build on the
-previous one: the same accounts and users are carried forward, and each
+previous one: the same accounts and users carry forward, and each
 page states exactly how the configuration changes from the last.
 
-Security in NATS has many knobs — cipher suites, every JWT claim, every
+Security in NATS has many knobs: cipher suites, every JWT claim, every
 resolver type. Where a feature has a long list, the page covers only
 what you need to understand the concept and links to
 [Reference](/reference/) for the rest.
@@ -103,11 +103,11 @@ what you need to understand the concept and links to
 | 6 | [Cross-account](./cross-account) | Exports and imports that share one subject across tenants |
 | 7 | [Encryption & TLS](./encryption) | TLS per connection type and mutual TLS identity mapping |
 | 8 | [Auth callout](./auth-callout) | Delegating the authentication decision to an external service |
-| 9 | [Where to go next](./where-next) | A map of what is beyond this chapter |
+| 9 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 
-You will need:
+You'll need:
 
 - A working `nats-server`. The early pages run it with a config file you
   edit by hand; later pages add `nsc` for operator mode. Both ship with

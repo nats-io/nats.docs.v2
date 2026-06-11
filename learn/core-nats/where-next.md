@@ -12,10 +12,10 @@ no guarantee anyone was subscribed. You end it with `warehouse`,
 `notifications`, and `analytics` reading the order subjects, an
 `inventory` service answering requests on `orders.inventory.check`, a
 `packers` queue group sharing the load on `orders.created`, and three
-`shipping.quote` providers answering one scatter-gather request. That is
+`shipping.quote` providers answering one scatter-gather request. That's
 the whole Acme ORDERS world, built on core NATS alone.
 
-This page does not teach anything new. It collects the model you built
+This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
@@ -31,7 +31,7 @@ hierarchy of subjects at once.
 
 **Interest** is what makes a message move. The server keeps an in-memory
 graph of which subscribers want which subjects, and a published message
-goes to every interested subscriber — or to nobody, in which case it is
+goes to every interested subscriber, or to nobody, in which case it's
 discarded. No interest, no copy, no trace.
 
 A **reply subject** turns one-way publish into a two-way exchange. The
@@ -44,22 +44,22 @@ A **queue group** is how many subscribers share one subject's load. Each
 message goes to exactly one member of the group, chosen by the server,
 with no broker or coordinator deciding for you.
 
-Subject, interest, reply subject, queue group. Scatter-gather is not a
-fifth idea — it is a reply subject with the first-answer-wins step
+Subject, interest, reply subject, queue group. Scatter-gather isn't a
+fifth idea: it's a reply subject with the first-answer-wins step
 removed, gathering every responder instead of one. Everything in core
 NATS is those four mechanics arranged differently.
 
 ## The one thing core does not do
 
-Core NATS does not remember. A message exists only while it is in flight
-to a live subscriber. The moment it is delivered — or discarded for lack
-of interest — it is gone. That property has a name you met on the first
+Core NATS does not remember. A message exists only while it's in flight
+to a live subscriber. The moment it's delivered, or discarded for lack
+of interest, it's gone. That property has a name you met on the first
 page: **at-most-once** delivery.
 
-This is a deliberate floor, not a missing feature. It is what makes core
+This is a deliberate floor, not a missing feature. It's what makes core
 NATS fast and what keeps a publisher from blocking on subscribers that
 are slow or offline. For the Acme ORDERS world, though, an order that
-arrives while the warehouse is restarting is an order lost — and that is
+arrives while the warehouse is restarting is an order lost. That's
 exactly the gap the next chapter fills.
 
 The [JetStream deep dive](/learn/jetstream) adds a server-side store on
@@ -79,7 +79,7 @@ The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
 needed the behavior here; that page has the bytes.
 
 The [Reference root](/reference/) is the entry point for everything
-else — every flag and default, versioned in full.
+else: every flag and default, versioned in full.
 
 ## Sibling deep dives
 
@@ -87,9 +87,9 @@ Core NATS is the foundation. The other chapters build directly on the
 four mechanics you just learned.
 
 The [Services deep dive](/learn/services) takes request-reply and queue
-groups — the two patterns from pages 3 and 4 — and wraps them in a
+groups (the two patterns from pages 3 and 4) and wraps them in a
 framework that adds discovery, schemas, and built-in metrics. If you find
-yourself hand-rolling many request-reply responders, that is the chapter
+yourself hand-rolling many request-reply responders, that's the chapter
 to read next. Start with
 [your first service](/learn/services/your-first-service).
 
@@ -103,29 +103,29 @@ moment you move off a single local server.
 
 The [Topologies deep dive](/learn/topologies/super-clusters) explains how
 the interest graph you met on page 1 stretches across clustered and
-geographically separated servers — including how a queue group prefers a
+geographically separated servers, including how a queue group prefers a
 local member when the same group spans regions.
 
-The [Security deep dive](/learn/security) covers who is allowed to
+The [Security deep dive](/learn/security) covers who's allowed to
 publish or subscribe to which subjects. The subject hierarchy from page 2
 is also the unit of permission, so the addressing you designed is the
 same thing you secure.
 
 ## Where you are
 
-This is the end of the chapter. The whole arc is complete, and no new
-scenario state is introduced here. Your local `nats-server`, the three
+This is the end of the chapter. The whole arc is complete, and this
+page adds no new scenario state. Your local `nats-server`, the three
 order subscribers, the `inventory` service, the `packers` queue group,
 and the `shipping.quote` providers are all still as you left them on the
-previous page. Keep experimenting, or stop the server when you are done —
-core NATS held nothing on disk, so there is nothing to clean up.
+previous page. Keep experimenting, or stop the server when you're done:
+core NATS held nothing on disk, so there's nothing to clean up.
 
 You hold the core model: a subject is an address, interest decides who
 receives, a reply subject makes the exchange two-way, and a queue group
 shares the load. That model is the floor every other NATS feature stands
 on.
 
-## What is next
+## What's next
 
 If you only follow one link, follow this one: the
 [JetStream deep dive](/learn/jetstream) is what core NATS becomes when a
@@ -145,7 +145,7 @@ Each group links back to the page that explains the why.
 - [ ] Flush or drain before a short-lived publisher exits, so buffered
   messages reach the server.
 - [ ] Process messages fast enough (or hand off to a worker) so a slow
-  subscriber is not cut off.
+  subscriber isn't cut off.
 
 ### Subjects & wildcards — see [Pitfalls](/learn/core-nats/subjects-and-wildcards#pitfalls)
 
@@ -162,14 +162,14 @@ Each group links back to the page that explains the why.
 - [ ] Pass a timeout on every request, sized to the responder's work plus
   the round-trip.
 - [ ] Branch on no responders separately from a timeout.
-- [ ] Gather explicitly when more than one service may answer; do not
+- [ ] Gather explicitly when more than one service may answer; don't
   assume exactly one reply.
 - [ ] Keep the reply path fast, or spread responders across a queue group.
 
 ### Queue groups — see [Pitfalls](/learn/core-nats/queue-groups#pitfalls)
 
 - [ ] Give every member the byte-for-byte identical queue group name.
-- [ ] Do not expect ordering or an even split; keep strictly-ordered work
+- [ ] Don't expect ordering or an even split; keep strictly-ordered work
   on a single subscriber.
 - [ ] Make a member's work safe to repeat, since core NATS does not
   redeliver after a hand-off.

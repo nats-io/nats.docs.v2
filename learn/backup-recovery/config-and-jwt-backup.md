@@ -19,10 +19,10 @@ the files that *are* your security layer off-site, encrypted; then it
 puts them back in a clean-room rebuild and proves the platform comes back
 to life.
 
-This page does not teach what an operator, account, or user *is* —
-that model lives in
+This page doesn't teach what an operator, account, or user *is*; that
+model lives in
 [Security → Operator mode](/learn/security/operator-mode). Here you only
-learn which files carry that identity, how to carry them off-site, and
+learn which files carry that identity, how to get them off-site, and
 how to restore them.
 
 ## Identity is a handful of files
@@ -33,8 +33,8 @@ the platform in a different way.
 
 The first group is the **nsc tree** under `~/.nsc`. This is where the
 `nsc` tool keeps the trust chain it built in the Security chapter. Two
-kinds of file matter here. A **JWT** is the signed identity token — for
-the operator, for each account. An **nkey** is the private signing key
+kinds of file matter here. A **JWT** is the signed identity token: one
+for the operator, one for each account. An **nkey** is the private signing key
 that produced that signature. The layout for the Acme world:
 
 ```text
@@ -46,13 +46,13 @@ that produced that signature. The layout for the Acme world:
 ~/.nsc/nkeys/ACME/ANALYTICS/ANALYTICS.nk   # ANALYTICS account nkey
 ```
 
-The JWTs are public — they only assert identity, they sign nothing. The
+The JWTs are public; they only assert identity, they sign nothing. The
 nkeys are secret. An nkey is the private key that produced a JWT's
 signature, so an nkey leaked is identity forged, and an nkey lost is
 identity lost. Treat the `nkeys` subtree like a password vault.
 
 The second group is the **creds files**. A `.creds` file is a user's JWT
-and nkey concatenated into one file — the thing a client points at to
+and nkey concatenated into one file: the thing a client points at to
 connect. Each service has one:
 
 ```text
@@ -64,11 +64,11 @@ The exact path under the tree depends on how `nsc` was configured, but
 `nsc list users` will print it. These are the files `order-svc` and
 `analytics-reader` present at connect time.
 
-The third group is the **server config** — the `nats-server.conf` the
-running cluster reads. It is not identity itself, but it points at all of
+The third group is the **server config**, the `nats-server.conf` the
+running cluster reads. It isn't identity itself, but it points at all of
 it: where the operator JWT lives, where the account resolver is, the TLS
 files, and the JetStream store directory. Restore the keys without the
-config and the server does not know to trust them.
+config and the server doesn't know to trust them.
 
 ```conf
 # /etc/nats/nats-server.conf — what ties the identity together
@@ -84,12 +84,12 @@ jetstream {
 }
 ```
 
-The `resolver` block is the **account resolver** — the server component
+The `resolver` block is the **account resolver**, the server component
 that serves account JWTs to itself when a user connects. Note its `dir`:
 that directory is a cache of account JWTs, and it matters at restore time.
-The full set of resolver options is documented in
-[Reference → Resolver](/reference/config/resolver). You only need to know
-the cache exists.
+The full set of resolver options lives in
+[Reference → Resolver](/reference/config/resolver). For now you only need
+to know the cache exists.
 
 ## Back it up: tar, encrypt, ship off-site
 
@@ -115,9 +115,9 @@ aws s3 cp acme-identity-2026-06-04.tar.gz.enc \
   s3://acme-dr/identity/acme-identity-2026-06-04.tar.gz.enc
 ```
 
-The archive is dated, like the snapshot directory on page 2. That date is
-not decoration. If you rotate the operator key — re-sign the chain under
-a new operator nkey — an older archive points at the *previous* operator,
+The archive is dated, like the snapshot directory on page 2. That date
+isn't decoration. If you rotate the operator key (re-sign the chain under
+a new operator nkey), an older archive points at the *previous* operator,
 and a server restored from it trusts a chain nobody signs anymore. Tag
 each backup with the day the identity was current so you can match an
 archive to the operator version it belongs to.
@@ -131,7 +131,7 @@ cron line keeps the identity copy as fresh as the data copy:
 ```
 
 The passphrase that `openssl` prompts for is itself a secret. Store it
-somewhere other than the bucket holding the archive — an archive and its
+somewhere other than the bucket holding the archive. An archive and its
 key in the same place is a single point of failure, not a backup.
 
 ## Restore it: extract, clear the cache, verify
@@ -163,8 +163,8 @@ where the tools expect them.
 Now the step that the naive restore skips. The account resolver keeps a
 local cache of account JWTs in its `dir` (the `/etc/nats/jwt` from the
 config above). If that cache still holds the *old* account JWTs from
-before the failure — for example an `ORDERS` account with stale
-permissions — the server keeps serving the old identity even though the
+before the failure (say, an `ORDERS` account with stale
+permissions), the server keeps serving the old identity even though the
 new JWTs are on disk. Clear the cache so the restored JWTs win:
 
 ```bash
@@ -192,13 +192,13 @@ identity that gates it.
 ## Pitfalls
 
 Three traps hit teams the first time they back up identity rather than
-data. Each one is scoped to this page's two concepts: backing the files
+data. Each one stays inside this page's two jobs: backing the files
 up, and restoring them.
 
-**An nkey lost is identity lost.** There is no recovery path for a lost
-nkey — no reset link, no support ticket that regenerates it. The nkey is
-the private key that signs the chain, and without it you cannot sign a
-new account or rotate a user. Do not treat the `~/.nsc/nkeys` subtree as
+**An nkey lost is identity lost.** There's no recovery path for a lost
+nkey: no reset link, no support ticket that regenerates it. The nkey is
+the private key that signs the chain, and without it you can't sign a
+new account or rotate a user. Don't treat the `~/.nsc/nkeys` subtree as
 ordinary config you can rebuild; back it up encrypted and off-site, and
 guard the passphrase like a password.
 
@@ -224,18 +224,18 @@ openssl enc -d -aes-256-cbc -pbkdf2 \
 
 **A stale account-resolver cache serves old permissions after a
 restore.** Restoring the nsc tree puts the new account JWTs on disk, but
-the resolver keeps serving whatever is in its `dir` cache until you clear
+the resolver keeps serving whatever's in its `dir` cache until you clear
 it. The symptom is maddening: the files are correct, `nsc list accounts`
 looks right, yet connections behave as if the old permissions are still
 in force. Clear the cache (`rm -rf /etc/nats/jwt/*`) and restart before
 you trust a restored identity.
 
 **An un-backed-up operator rotation orphans the archive.** If you rotate
-the `ACME` operator — re-sign the chain under a fresh operator nkey — and
+the `ACME` operator (re-sign the chain under a fresh operator nkey) and
 your last off-site backup predates the rotation, that archive restores a
 server trusting an operator nobody signs accounts under anymore. Tag
 every backup with the operator version or timestamp, and take a fresh
-backup immediately after any rotation, so an archive and the live
+backup right after any rotation, so an archive and the live
 operator never drift apart.
 
 ## Where you are
@@ -243,7 +243,7 @@ operator never drift apart.
 The identity plane is now recoverable. You have an off-site, encrypted
 archive of the `ACME` operator JWT and nkey, the `ORDERS` and
 `ANALYTICS` account JWTs and nkeys, the `order-svc` and
-`analytics-reader` creds, and the server config — dated to the operator
+`analytics-reader` creds, and the server config, dated to the operator
 version it belongs to. And you have a restore procedure that extracts it,
 clears the stale resolver cache, restarts, and verifies a real client
 connects.
@@ -253,9 +253,9 @@ page 3, the whole platform now survives a clean-room rebuild: the data
 comes back from a snapshot, the site comes back from the mirror, and the
 identity that gates both comes back from this archive.
 
-## What is next
+## What's next
 
-Every protective copy is now in place — snapshot, mirror, runbook, and
+Every protective copy is now in place: snapshot, mirror, runbook, and
 identity. The last page recaps the whole game and collects every page's
 pitfalls into one production checklist you run before you trust the
 platform with someone else's orders.

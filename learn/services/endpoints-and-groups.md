@@ -9,16 +9,16 @@ description: Give a service more than one endpoint, and organize endpoints under
 
 The previous page gave you a running `OrderInventory` service with exactly
 one endpoint, `check`, answering on `orders.inventory.check`. One service,
-one handler, one subject. That is the smallest useful shape.
+one handler, one subject. That's the smallest useful shape.
 
 Real services rarely stay that small. A service usually answers more than
 one kind of request, and once it does you want those subjects organized
 rather than scattered. This page adds the two pieces that do that: a
-service can hold **multiple endpoints**, and a **group** gives a set of
+service can hold multiple endpoints, and a group gives a set of
 endpoints a shared subject prefix.
 
-By the end you will have a second service, `ShippingQuote`, alongside
-`OrderInventory`, and you will know how to lay out several endpoints under
+By the end you'll have a second service, `ShippingQuote`, alongside
+`OrderInventory`, and you'll know how to lay out several endpoints under
 one prefix.
 
 ## A service can hold multiple endpoints
@@ -38,7 +38,7 @@ explicitly:
 
 Two services now run against the same `nats-server`. `OrderInventory`
 answers on `orders.inventory.check`; `ShippingQuote` answers on
-`shipping.quote`. Each is independent — its own name, its own version, its
+`shipping.quote`. Each is independent: its own name, its own version, its
 own discovery. The framework gave each a unique service ID without you
 asking.
 
@@ -49,14 +49,14 @@ which is the common case once subjects carry structure like
 `orders.inventory.check`.
 
 The handler contract is unchanged from the last page: `req.Data()` in,
-`req.Respond()` out. Adding endpoints does not change how a single request
-is served — it only adds more named handlers to the same running service.
+`req.Respond()` out. Adding endpoints doesn't change how a single request
+is served; it only adds more named handlers to the same running service.
 
 ## A group is a subject prefix
 
 Once a service grows past one endpoint, the subjects start to repeat. Two
 inventory endpoints would naturally be `orders.inventory.check` and
-`orders.inventory.reserve` — same `orders.inventory` stem, twice. A
+`orders.inventory.reserve`: the same `orders.inventory` stem, twice. A
 **group** captures that stem once.
 
 `AddGroup("orders.inventory")` returns a group, and any endpoint you add
@@ -67,24 +67,24 @@ write the prefix once and the framework joins it to each endpoint name.
 
 <div class="nats-example" data-type="learn-services-endpoints-and-groups-addGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The subject a caller sends to is always `{group}.{endpoint}`. There is no
-separate routing layer — the group is purely a way to build the subject. A
-client that knows the subject does not need to know whether the endpoint
+The subject a caller sends to is always `{group}.{endpoint}`. There's no
+separate routing layer; the group is just a way to build the subject. A
+client that knows the subject doesn't need to know whether the endpoint
 was added directly or through a group. The wire looks identical either way.
 
 Groups also nest. A group added inside another group combines both
 prefixes, so the subject becomes `{outer}.{inner}.{endpoint}`. You rarely
 need more than one level for a service this size, but the prefixes stack
-the way you would expect.
+the way you'd expect.
 
 ## A group can set the queue group
 
-Every endpoint joins a **queue group** — the load-balancing group that
+Every endpoint joins a **queue group**, the load-balancing group that
 makes the server deliver each request to exactly one member. The default
-name is `"q"`, and you have been using it without touching it: all
+name is `"q"`, and you've been using it without touching it: all
 instances of `OrderInventory` share `"q"`, so a request goes to one of
 them, not all of them. The queue group mechanism itself lives in
-[Core NATS](/learn/core-nats/queue-groups); here it is just the default a
+[Core NATS](/learn/core-nats/queue-groups); here it's just the default a
 service endpoint already uses.
 
 The queue group is set at three levels, and each level overrides the one
@@ -112,8 +112,8 @@ connection, two named handlers chosen by subject.
 
 ## Pitfalls
 
-Two traps come with endpoints and groups. Both are about the queue group
-and about what cannot be undone.
+Two traps come with endpoints and groups: one about the queue group, one
+about what can't be undone.
 
 **Disabling the queue group turns an endpoint into broadcast.** Overriding
 the queue group changes *who* load-balances with whom. Disabling it
@@ -121,7 +121,7 @@ entirely is a sharper change: an endpoint with no queue group is a plain
 subscription, so **every instance** receives **every** request instead of
 one instance receiving each. For a request-reply endpoint that means the
 caller gets one reply per instance and the rest are noise. Do not disable
-the queue group to "make sure a request is handled" — that is exactly what
+the queue group to "make sure a request is handled": that's exactly what
 the default `"q"` already guarantees, with one handler, not N. Disable it
 only when you genuinely want all instances to act, which is rare for a
 service that responds.
@@ -129,13 +129,13 @@ service that responds.
 You control this with one option. Override the queue group when you want a
 subset of endpoints to load-balance separately; never disable it on an
 endpoint that responds. Send a request and inspect the endpoint to confirm
-which queue group it joined — the default `"q"`, an override, or none:
+which queue group it joined (the default `"q"`, an override, or none):
 
 <div class="nats-example" data-type="learn-services-endpoints-and-groups-customQueueGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**Endpoints are immutable once added.** There is no remove. You cannot
+**Endpoints are immutable once added.** There's no remove. You can't
 detach an endpoint, rename it, or change its subject on a running service.
-The same holds for the metadata you attach to a service or endpoint — it is
+The same holds for the metadata you attach to a service or endpoint: it's
 fixed at creation. If a service's shape needs to change, you stop it and
 start a new one with the new layout. Decide the endpoint names and subjects
 before the service goes live, the same way you pick a stream name in
@@ -143,8 +143,8 @@ JetStream: deliberately, the first time.
 
 You handle this by inspecting the shape, not editing it. Read back the
 running service to see exactly which endpoints, subjects, and queue groups
-it registered; to change any of them, stop the service and start a new one
-with the new layout:
+it registered; to change any of them, stop the service and start a
+replacement:
 
 <div class="nats-example" data-type="learn-services-endpoints-and-groups-immutableEndpoints" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -160,14 +160,14 @@ You now have:
 - A group to give related endpoints a shared subject prefix, and the three
   levels at which a queue group can be set.
 
-Both services still do exactly what their Core NATS responders did. They
-have only gained structure — names, subjects, and the framework's
+Both services still do exactly what their Core NATS responders did.
+They've only gained structure: names, subjects, and the framework's
 load-balancing default underneath.
 
-## What is next
+## What's next
 
 Two services are running, each with its own name and endpoints. The next
-page asks the server what is out there: the `$SRV` discovery verbs let any
+page asks the server what's out there: the `$SRV` discovery verbs let any
 client learn which services exist, what endpoints they expose, and which
 instances are answering.
 

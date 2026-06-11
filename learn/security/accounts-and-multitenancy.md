@@ -10,10 +10,10 @@ description: How an account isolates a tenant's subject space, and the two accou
 The order platform from the JetStream chapter has more than one team
 reading from it. The order service publishes the orders. A separate
 analytics team wants to count shipments. They run different code, they
-have different owners, and they should not be able to read each other's
+have different owners, and they shouldn't be able to read each other's
 private traffic.
 
-A single flat subject space cannot express that. Every connection on a
+A single flat subject space can't express that. Every connection on a
 plain server sees every subject. This page introduces the wall that
 separates them.
 
@@ -30,12 +30,12 @@ happen to share a name.
 This is stronger than permissions, which the
 [Authorization](/learn/security/authorization) page covers.
 Permissions narrow what one user may do inside its account. An account
-boundary is absolute: the message simply does not cross.
+boundary is absolute: the message does not cross.
 
 The order platform needs two of these tenants:
 
-- `ORDERS` — the order service's account. Its user publishes `orders.>`.
-- `ANALYTICS` — a read-only account. Its user wants `orders.shipped`.
+- `ORDERS`: the order service's account. Its user publishes `orders.>`.
+- `ANALYTICS`: a read-only account. Its user wants `orders.shipped`.
 
 We build both in a minimal config file now. Sharing one subject across
 the boundary comes later, on the [Cross-Account](/learn/security/cross-account)
@@ -48,16 +48,16 @@ They have reserved names that begin with `$`.
 
 The first is **`$G`**, the global account. Every connection on a server
 with no `accounts` block lands in `$G`. The single flat subject space
-you started with is not the absence of accounts — it is one account
+you started with isn't the absence of accounts: it's one account
 named `$G` holding everything.
 
 The second is **`$SYS`**, the system account. The server publishes its
 own monitoring and management events here, on subjects like
-`$SYS.SERVER.>`. Ordinary accounts cannot read or publish those
+`$SYS.SERVER.>`. Ordinary accounts can't read or publish those
 subjects. Keeping server internals in their own account is why a tenant
 never accidentally sees another tenant's connection events.
 
-Both accounts are created for you. You do not declare `$G` or `$SYS` to
+Both accounts are created for you. You don't declare `$G` or `$SYS` to
 get them, and you avoid the `$` prefix when you name your own accounts.
 
 The full set of system-account subjects and events is documented in
@@ -69,7 +69,7 @@ A NATS server reads its configuration from a `nats.conf` file. To
 declare accounts, you add a top-level `accounts` block. Each entry names
 an account and lists the users that belong to it.
 
-Here is the smallest config that gives the order platform its two
+Here's the smallest config that gives the order platform its two
 tenants. Save it as `nats.conf`:
 
 ```conf
@@ -89,7 +89,7 @@ accounts {
 
 Three things are happening in that block.
 
-Each named entry — `ORDERS`, `ANALYTICS` — is one account. The name is
+Each named entry (`ORDERS`, `ANALYTICS`) is one account. The name is
 the tenant's identity. It appears in cross-account permissions later and in
 the server's own logs.
 
@@ -97,11 +97,11 @@ Inside each account, `users` lists who may connect as that tenant. A
 **user** is an authentication identity. The user `order-svc` belongs to
 `ORDERS`; the user `analytics-reader` belongs to `ANALYTICS`. A user
 lives in exactly one account, and connecting as that user places the
-**client** — the connecting application — inside that account's subject
+**client**, the connecting application, inside that account's subject
 space.
 
-The `user` and `password` fields are one way to prove who you are. They
-are the simplest credential, and the only one we need to demonstrate
+The `user` and `password` fields are one way to prove who you are.
+They're the simplest credential, and the only one we need to demonstrate
 isolation. The full range of credential types is the subject of the next
 page, [Authentication Basics](/learn/security/authentication-basics);
 treat the passwords here as placeholders.
@@ -114,7 +114,7 @@ nats-server -c nats.conf
 
 The `-c` flag points the server at the file. Because the config defines
 an `accounts` block, the server no longer puts connections in `$G` by
-default — every client must now name a user that exists in one of the two
+default. Every client must now name a user that exists in one of the two
 accounts.
 
 ## Watching the wall hold
@@ -137,8 +137,8 @@ the message immediately, because both sides are now in `ORDERS`. The
 boundary is the account, not the subject.
 
 This is the isolation guarantee in one experiment: identical subject,
-different accounts, no crossing. Letting exactly one subject through —
-deliberately — is what the [Cross-Account](/learn/security/cross-account)
+different accounts, no crossing. Letting exactly one subject through,
+deliberately, is what the [Cross-Account](/learn/security/cross-account)
 page is for.
 
 ## What we are not configuring yet
@@ -147,13 +147,13 @@ An account can carry more than a user list. Two capabilities are worth
 naming now so you know they exist, even though this page leaves them
 out.
 
-An account can set **limits** — how many connections it allows, how much
+An account can set **limits**: how many connections it allows, how much
 JetStream storage it may use. Those limits, and the server events that
 report on them, belong with operations; we point to
 [Reference](/reference/) for the field list rather than tour them here.
 
 An account can also **export** a subject for another account to
-**import**. That is the one deliberate hole in the wall, and the
+**import**. That's the one deliberate hole in the wall, and the
 [Cross-Account](/learn/security/cross-account) page covers it.
 
 The full set of account configuration options is documented in
@@ -162,19 +162,19 @@ The full set of account configuration options is documented in
 ## Pitfalls
 
 A few account mistakes only surface in production. Each one is easy to
-avoid once you know it is there.
+avoid once you know it's there.
 
 **`no_auth_user` quietly reopens the door.** Setting `no_auth_user`
 admits unauthenticated clients as the named user, placing them in that
 user's account. Point it at a user in `$G` and every anonymous client
 lands in the global account again, undoing the wall you just built. Do
-name a deliberately narrow user, and do not point it at a wide-open
+name a deliberately narrow user, and don't point it at a wide-open
 account. The server also rejects `no_auth_user` together with a trusted
 operator, so it never applies in operator mode.
 
 **Forgetting a reachable system account.** Define your own `accounts`
 block and the server still creates `$SYS`, but with no user inside it you
-cannot connect there. The server's monitoring and management events on
+can't connect there. The server's monitoring and management events on
 `$SYS.SERVER.>` become unreachable, so `nats server account info` and
 event tooling go dark. Do declare a `SYS` account with a user and set
 `system_account: SYS`. The example below proves a tenant user sees only
@@ -188,7 +188,7 @@ that ordinary tenants can never touch.
 
 **Assuming a shared subject name means shared delivery.** Two accounts
 can both use `orders.shipped` and still never exchange a message — the
-name is shared, the subject space is not. Do not reach for a matching
+name is shared, the subject space is not. Don't reach for a matching
 name to connect tenants. Letting one subject cross the boundary is a
 deliberate act covered on the
 [Cross-Account](/learn/security/cross-account) page.
@@ -201,16 +201,16 @@ Your `nats.conf` now defines two isolated tenants:
 - `ANALYTICS`, holding the user `analytics-reader`.
 - Plus `$G` and `$SYS`, which the server always provides.
 
-A publish in one account does not reach the other. You proved it: the
+A publish in one account doesn't reach the other. You proved it: the
 same subject name in two accounts is two different subjects, and nothing
 crosses the boundary on its own.
 
-## What is next
+## What's next
 
 The accounts exist, but the passwords above are placeholders. The next
 page, [Authentication Basics](/learn/security/authentication-basics),
-covers how `order-svc` actually proves who it is — user and password,
-token, or nkey — all from the same config file.
+covers how `order-svc` actually proves who it is: user and password,
+token, or nkey, all from the same config file.
 
 ## See also
 

@@ -9,7 +9,7 @@ description: Read a stream with a durable consumer, acknowledge each message, an
 
 In the [previous tutorial](/tutorials/first-stream) you stored messages in a
 **stream**. Now you'll read them with a durable **consumer**: pull each
-**message**, acknowledge it, then stop and start again and watch the consumer
+message, acknowledge it, then stop and start again and watch the consumer
 pick up exactly where it left off — no message read twice, none skipped.
 
 <div class="nats-flow" data-scenario="jetStreamConsumersAnimated" data-width="600" data-height="350"></div>
@@ -18,13 +18,13 @@ pick up exactly where it left off — no message read twice, none skipped.
 
 - The `nats` CLI installed.
 - A `nats-server` running with JetStream enabled, and the `EVENTS` stream with a
-  few messages in it — exactly what you set up in
+  few messages in it, which is what you set up in
   [Tutorial 4: Persist messages with JetStream](/tutorials/first-stream). Keep
   that server running.
 
 ## Step 1: Start from a clean set of three messages
 
-So the sequence numbers in this tutorial line up exactly, start the `EVENTS`
+So the sequence numbers in this tutorial line up, start the `EVENTS`
 stream from a known state. First clear out whatever it holds from Tutorial 4:
 
 ```bash
@@ -82,7 +82,7 @@ Configuration:
               Ack Policy: Explicit
 ```
 
-Naming the consumer `worker` makes it **durable** — the server keeps it (and its
+Naming the consumer `worker` makes it **durable**: the server keeps it (and its
 place in the stream) by name after you stop pulling.
 
 ## Step 3: Pull and acknowledge a message
@@ -101,9 +101,9 @@ You should see the first message, followed by the acknowledgment:
 Acknowledged message
 ```
 
-`{"page":"/home"}` is the message body — the first one you published. `pending: 2`
+`{"page":"/home"}` is the message body, the first one you published. `pending: 2`
 tells you two more messages are waiting, and the `Acknowledged message` line
-confirms the server recorded that you are done with this one.
+confirms the server recorded that you're done with this one.
 
 Run the same command once more to read and acknowledge the second message:
 
@@ -137,7 +137,7 @@ pull will hand you message 3.
 ## Step 5: Restart and resume
 
 Now simulate a restart. Stop the server with `Ctrl+C` in its terminal, then
-start it again exactly as you did in Tutorial 4 so it reads the stream and
+start it again the same way you did in Tutorial 4 so it reads the stream and
 consumer back from where it stored them:
 
 ```bash
@@ -167,11 +167,11 @@ read every message. Nothing was redelivered, and nothing was missed.
 ## What you built
 
 A durable consumer that pulls messages from a stream, acknowledges each one, and
-resumes after a restart — so your reader always picks up exactly where it left
+resumes after a restart, so your reader always picks up exactly where it left
 off, with nothing read twice and nothing skipped.
 
 ## Next
 
 - Next tutorial: [Build a tiny state store with Key-Value](/tutorials/key-value).
-- Now understand the why — acknowledgment, redelivery, and how the cursor
-  works: [JetStream deep dive: Your first consumer](/learn/jetstream/your-first-consumer).
+- Now understand the why (acknowledgment, redelivery, and how the cursor
+  works): [JetStream deep dive: Your first consumer](/learn/jetstream/your-first-consumer).
