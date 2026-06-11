@@ -2,12 +2,12 @@
 id: work-queue
 title: "3. Share work across workers"
 sidebar_position: 4
-description: Use a queue group to split a workload across two workers, so each message is handled by exactly one of them
+description: Use a queue group to split a workload across two workers, so each message goes to exactly one of them
 ---
 
-In this tutorial you run two workers that share one subject and watch the
-server split the work between them. You publish six messages to `tasks`,
-and each message is handled by exactly one worker — never both. That is a
+In this tutorial you'll run two workers that share one subject and watch
+the server split the work between them. You'll publish six messages to
+`tasks`, and each one goes to exactly one worker — never both. That's a
 **queue group**: a pool of subscribers that share a name and divide the
 load.
 
@@ -15,7 +15,7 @@ load.
 
 ## What you'll need
 
-- `nats-server` and the `nats` CLI installed. If you have not installed
+- `nats-server` and the `nats` CLI installed. If you haven't installed
   them yet, do the [Hello NATS](/tutorials/hello-nats) tutorial first.
 - Four terminal windows: one for the server, two for the workers, and one
   to publish.
@@ -66,14 +66,14 @@ You should see the same waiting line:
 17:42:18 Subscribing on tasks
 ```
 
-You now have two workers in one group. Both terminals are idle — neither
+You now have two workers in one group. Both terminals are idle; neither
 has received anything yet.
 
 ## Step 4: Publish the work
 
 In the fourth terminal, publish six messages to `tasks`. The `--count`
-flag sends the publish six times, and `{{ Count }}` is replaced with the
-message number:
+flag repeats the publish six times, and the CLI replaces `{{ Count }}`
+with the message number:
 
 <div class="nats-example" data-type="tutorials-work-queue-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -90,8 +90,8 @@ You should see the publisher confirm one line per message:
 
 ## Step 5: Watch the split
 
-Look at your two worker terminals. The six messages are divided between
-them — each worker receives some, and no message appears in both. One
+Look at your two worker terminals. The six messages are split between
+them: each worker receives some, and no message appears in both. One
 terminal might show:
 
 ```
@@ -132,7 +132,7 @@ in each terminal to stop.
 
 Two workers shared the `tasks` subject through the `workers` queue group,
 and the server delivered each message to exactly one of them. Add a third
-worker with the same command and the group resizes itself — the work
+worker with the same command and the group resizes itself. The work
 spreads across all three with no extra setup.
 
 ## Next

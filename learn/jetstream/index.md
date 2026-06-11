@@ -8,36 +8,36 @@ description: Streams, consumers, and the acknowledgment loop, built up step by s
 # JetStream Deep Dive
 
 JetStream is the persistence layer of NATS. This chapter walks through
-it the way you would build up understanding by writing real code:
-start with a single stream, add one consumer at a time, learn the
+it the way you'd build understanding by writing real code:
+start with a single stream, add one consumer at a time, and learn the
 trade-offs as they come up.
 
-By the end you will have:
+By the end you'll have:
 
-- An `ORDERS` stream that captures order events on the subjects
-  `orders.created`, `orders.shipped`, and `orders.cancelled`.
-- A `shipping` consumer that pulls work from that stream, acknowledges
+- an `ORDERS` stream that captures order events on the subjects
+  `orders.created`, `orders.shipped`, and `orders.cancelled`
+- a `shipping` consumer that pulls work from that stream, acknowledges
   each order it processes, and survives a worker restart without
-  losing or duplicating completed work.
-- A second `analytics` consumer that filters the same stream for
-  `orders.shipped` only, replaying from any point in time.
-- A working mental model of acknowledgment, retention, and
-  replication.
+  losing or duplicating completed work
+- a second `analytics` consumer that filters the same stream for
+  `orders.shipped` only, replaying from any point in time
+- a working mental model of acknowledgment, retention, and
+  replication
 
 ## Who this is for
 
-You have read the [Core Concepts](/concepts/jetstream) primer or are
-otherwise comfortable with NATS basics — publishing, subscribing,
-subjects, and queue groups. This chapter does not re-teach those.
+You've read the [Core Concepts](/concepts/jetstream) primer or are
+otherwise comfortable with NATS basics: publishing, subscribing,
+subjects, and queue groups. This chapter doesn't re-teach those.
 
-You do not need to know anything about JetStream specifically. We
+You don't need to know anything about JetStream specifically. We
 start from "what is a stream and why would you want one" and grow
 from there.
 
 ## How to read it
 
 Each page introduces at most two new concepts. Pages build on the
-previous one: the same `ORDERS` stream is used throughout, and you
+previous one: you'll use the same `ORDERS` stream throughout, and you
 can keep one terminal open through the whole chapter without
 resetting state.
 
@@ -49,7 +49,7 @@ links to [Reference](/reference/) for the rest.
 
 | # | Page | What you learn |
 |---|---|---|
-| 1 | [Why a stream](./why-a-stream) | What core NATS does not give you, and why a stream is the answer |
+| 1 | [Why a stream](./why-a-stream) | What core NATS doesn't give you, and why a stream is the answer |
 | 2 | [Your first stream](./your-first-stream) | Create the `ORDERS` stream and read its anatomy |
 | 3 | [Publishing](./publishing) | Publish into a stream and understand the `PubAck` contract |
 | 4 | [Reading back the stream](./reading-back) | Replay stored messages with an ephemeral consumer |
@@ -66,14 +66,14 @@ links to [Reference](/reference/) for the rest.
 | 15 | [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
 | 16 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
 | 17 | [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
-| 18 | [Where to go next](./where-next) | A map of what is beyond this chapter |
+| 18 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 
-You will need:
+You'll need:
 
 - A working `nats-server` with JetStream enabled. The simplest way is
-  `nats-server -js` — see [Getting Started](/concepts/getting-started/).
+  `nats-server -js` (see [Getting Started](/concepts/getting-started/)).
 - The `nats` CLI installed and pointed at your server. The first few
   pages use only the CLI. Later pages add JavaScript, Go, Python,
   Java, Rust, and C# client examples for the same operations.

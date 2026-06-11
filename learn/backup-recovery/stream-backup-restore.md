@@ -8,27 +8,27 @@ description: Take a point-in-time snapshot of the ORDERS stream, restore it byte
 # 1. Stream backup and restore
 
 The `ORDERS` stream holds every order Acme has ever taken. Replication
-keeps it available when a node dies, but it does not protect you from a
+keeps it available when a node dies, but it doesn't protect you from a
 mistake: a fat-fingered `nats stream purge`, a bad migration, a logic bug
 that deletes the wrong messages. To recover from those you need a copy
-the cluster cannot touch — a point in time you can return to.
+the cluster can't touch — a point in time you can return to.
 
 This page makes that copy and proves it works. It introduces two
-operations: taking a **snapshot** of `ORDERS`, and **restoring** the
+operations: taking a snapshot of `ORDERS`, and restoring the
 stream from one. Nothing else.
 
 ## A snapshot is a point-in-time copy
 
 A **snapshot** is a complete copy of a stream as it exists at one
-instant: every message, the stream's configuration, and — if you ask for
-it — the state of its consumers. The server takes the snapshot and
+instant: every message, the stream's configuration, and, if you ask for
+it, the state of its consumers. The server takes the snapshot and
 streams it to you in chunks; the CLI writes those chunks to a directory.
 
 That directory holds two things. A `backup.json` file records the
-stream's configuration and state — its subjects, retention, limits, and
+stream's configuration and state: its subjects, retention, limits, and
 sequence range. Alongside it, `stream.tar.s2` is the messages
-themselves, packed into a tarball and compressed with S2. Together they
-are everything needed to recreate the stream from scratch.
+themselves, packed into a tarball and compressed with S2. Together
+they're everything you need to recreate the stream from scratch.
 
 Take a snapshot of `ORDERS` into a dated, off-site directory:
 
@@ -37,20 +37,20 @@ Take a snapshot of `ORDERS` into a dated, off-site directory:
 The directory name carries the date on purpose. A snapshot is a point in
 time, and naming it `2026-06-04` makes that explicit. Tomorrow's snapshot
 goes in `2026-06-05`, and you keep a ladder of them under
-`./backups/orders/`. We make that automatic later; here it is one
+`./backups/orders/`. We make that automatic later; here it's one
 command.
 
 The `--consumers` flag matters more than it looks. Without it, the
 snapshot carries the messages but forgets the consumers reading them.
 With it, the snapshot also records each durable consumer's config and
-delivery position — the **consumer state**. Restore that snapshot and the
+delivery position: the **consumer state**. Restore that snapshot and the
 `shipping` and `analytics` consumers come back exactly where they left
 off, not at the start of the stream. For recovery of a production stream,
 use `--consumers`.
 
 ## How the snapshot streams off the server
 
-A snapshot is not one big download. The server cuts the tarball into
+A snapshot isn't one big download. The server cuts the tarball into
 chunks and pushes them to an inbox subject one at a time, waiting for the
 client to acknowledge each chunk before sending the next. That
 backpressure keeps a large stream from overwhelming a slow disk or a
@@ -61,11 +61,11 @@ high-latency link.
 The request lands on the snapshot API, the server answers with the
 config and state, and then the message chunks flow to the inbox with an
 ack per chunk until the tarball and `backup.json` are written to the
-backup store. The two knobs that govern this — chunk size and window
-size — have sensible defaults, and you only reach for them when the
+backup store. The two knobs that govern this, chunk size and window
+size, have sensible defaults, and you only reach for them when the
 defaults time out. We meet them in the [Pitfalls](#pitfalls).
 
-The full set of snapshot request options is documented in
+The full set of snapshot request options lives in
 [Reference → Snapshot Stream](/reference/jetstream/api/stream/snapshot).
 We only need the behavior here.
 
@@ -84,18 +84,18 @@ One rule shapes how you use restore: **the stream name cannot change on
 restore.** The name lives in `backup.json`, and the server rejects a
 restore that would land under a different name. A snapshot of `ORDERS`
 restores as `ORDERS`, never as `ORDERS_COPY`. That keeps a restore
-unambiguous — it is a rebuild of one stream, not a way to fork it. If you
+unambiguous: it's a rebuild of one stream, not a way to fork it. If you
 do need a second copy under a new name, restore to `ORDERS` first and
 then mirror or source it, which
 [Mirrors and sources](/learn/backup-recovery/mirrors-and-sources) covers.
 
 Restore also expects the stream not to already exist. It recreates the
-stream; it does not merge a snapshot into a live one. So a real recovery
+stream; it doesn't merge a snapshot into a live one. So a real recovery
 is: confirm the broken stream is gone (or remove it), then restore.
 
 ## Verify the counts
 
-A restore you did not check is a guess. The last step is always to read
+A restore you didn't check is a guess. The last step is always to read
 the rebuilt stream's state back and confirm it matches the source.
 
 <div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verifyCounts" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -114,19 +114,19 @@ and restore.
 **Memory streams cannot be snapshotted.** A snapshot reads a stream's
 on-disk files, so a stream with `Storage: Memory` has nothing to read.
 The backup fails with `memory streams do not support snapshots`. If a stream is worth
-backing up, it is worth file storage — set `Storage: File` when you
-create it. Do not discover this during an incident; check the storage
+backing up, it's worth file storage: set `Storage: File` when you
+create it. Don't discover this during an incident; check the storage
 type before you rely on a snapshot:
 
 <div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-backup" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 If that command errors on a memory stream, recreate the stream with file
-storage before it holds anything you cannot lose.
+storage before it holds anything you can't lose.
 
 **The stream name cannot change on restore.** As above, the server
 rejects a restore that would rename the stream with `stream name may not
 be changed during restore`. Restore to the original name. If you need a
-copy under a different name, restore first and then mirror or source it —
+copy under a different name, restore first and then mirror or source it;
 [Mirrors and sources](/learn/backup-recovery/mirrors-and-sources) covers
 that.
 
@@ -145,26 +145,26 @@ nats stream backup ORDERS ./backups/orders/2026-06-04 \
 
 **`--no-consumers` silently drops consumer state.** Skip `--consumers`
 (or pass `--no-consumers`) and the snapshot carries messages only. The
-restore rebuilds the stream with no consumers — and nothing warns you
+restore rebuilds the stream with no consumers, and nothing warns you
 until `shipping` is missing in production. Use `--consumers` for a full
-recovery unless you intend to recreate every consumer by hand.
+recovery unless you plan to recreate every consumer by hand.
 
 ## Where you are
 
 You now have:
 
-- A dated, off-site snapshot of `ORDERS` under `./backups/orders/` —
+- A dated, off-site snapshot of `ORDERS` under `./backups/orders/`:
   `backup.json` plus a compressed `stream.tar.s2`.
 - A restore procedure that rebuilds the stream byte-identical, under its
   original name, with its consumers intact.
 - A verification step that proves the restore by matching message counts.
 
 This is your recovery point: the instant you can return to after an
-accidental delete or a logic error. It is not, on its own, protection
-against losing the whole site — for that you need a live copy somewhere
+accidental delete or a logic error. On its own, though, it won't protect
+you from losing the whole site. For that you need a live copy somewhere
 else.
 
-## What is next
+## What's next
 
 The next page stands up that live copy. A **mirror** of `ORDERS` at a
 second site keeps a continuously updated copy you can fail over to, and

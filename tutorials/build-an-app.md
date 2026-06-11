@@ -10,10 +10,10 @@ import TabItem from '@theme/TabItem';
 
 # 7. Capstone: build a small NATS app
 
-In this tutorial you build one small, runnable app that pulls together everything
-from the earlier tutorials. The app connects to NATS, **publishes** order events
-into a JetStream **stream**, and answers a **request** that reports how many
-orders it has seen. You run it once and watch all three patterns work together:
+This is the capstone: one small, runnable app that combines everything from
+the earlier tutorials. It connects to NATS, publishes order events into a
+JetStream stream, and answers a request that reports how many orders it has
+seen. Run it once and watch all three patterns work together:
 publish/subscribe, request/reply, and a stream that keeps your messages.
 
 ## What you'll need

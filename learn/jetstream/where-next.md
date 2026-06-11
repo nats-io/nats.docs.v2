@@ -10,9 +10,9 @@ description: Recap the JetStream mental model and point to what comes after this
 You started this chapter with a publisher shouting into the void and no
 one guaranteed to be listening. You end it with an `ORDERS` stream, a
 handful of consumers reading it at their own pace, and a mirror keeping a
-permanent copy. That is the whole arc.
+permanent copy. That's the whole arc.
 
-This page does not teach anything new. It collects the model you built
+This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
@@ -36,19 +36,19 @@ consumer acks, the message stays in flight, and the server redelivers it
 after a timeout. The ack is what turns "the message was stored" into
 "the work is done."
 
-Stream, consumer, ack. Everything else in this chapter — filtering,
-worker pools, retention, mirrors — is a refinement of those three.
+Stream, consumer, ack. Everything else in this chapter (filtering,
+worker pools, retention, mirrors) is a refinement of those three.
 
 ## Where the details live now
 
 The chapter is unversioned and concept-first. The exact flags, defaults,
 and ranges live in **Reference**, which is versioned and exhaustive. When
 you need the precise type of a config field or the full list of consumer
-options, that is where to look.
+options, that's where to look.
 
 The [Reference root](/reference/) is the entry point. The handoff
-phrases throughout this chapter — "the full set of options is documented
-in Reference" — all point into it.
+phrases throughout this chapter ("the full set of options is documented
+in Reference") all point into it.
 
 ## Sibling deep dives
 
@@ -70,7 +70,7 @@ than this chapter's single page on surviving node loss. It covers how
 during a node failure.
 
 The [Monitoring deep dive](/learn/monitoring) covers how to watch a
-stream and its consumers in production — advisories, health endpoints,
+stream and its consumers in production: advisories, health endpoints,
 and the metrics that tell you a consumer is falling behind.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) covers the
@@ -79,20 +79,20 @@ mirrors you met on the previous page for disaster recovery.
 
 ## Where you are
 
-This is the end of the chapter — the whole arc is complete, and no new
-scenario state is introduced here. The `ORDERS` stream, its consumers,
+This is the end of the chapter. The arc is complete, and this page
+introduces no new scenario state. The `ORDERS` stream, its consumers,
 and its mirror are still running in your session exactly as you left them
 on the previous page. You can keep experimenting with them, or tear them
-down with `nats stream rm ORDERS` when you are done.
+down with `nats stream rm ORDERS` when you're done.
 
 You hold the core model: a stream stores messages, a consumer reads them
 at its own pace, and an ack closes the loop. That model is the floor for
-every other JetStream feature you will meet.
+every other JetStream feature you'll meet.
 
 ## Production checklist
 
 Every page in this chapter closed with a Pitfalls section. This collects
-the action items from all of them in one place — a last pass before you
+the action items from all of them in one place: a last pass before you
 trust a stream with real orders. Each group links back to the page that
 explains the why.
 
@@ -104,20 +104,20 @@ explains the why.
 ### Your first stream — see [Pitfalls](/learn/jetstream/your-first-stream#pitfalls)
 
 - [ ] Set at least one limit (`MaxAge`, `MaxBytes`, or `MaxMsgs`) so an unbounded stream never fills the disk.
-- [ ] Pick the stream name deliberately the first time; there is no rename, only delete-and-recreate.
+- [ ] Pick the stream name deliberately the first time; there's no rename, only delete-and-recreate.
 - [ ] Choose the retention policy before messages flow; switching to or from WorkQueue on a live stream is rejected.
 
 ### Publishing — see [Pitfalls](/learn/jetstream/publishing#pitfalls)
 
-- [ ] Read the `PubAck` back; a plain `nats pub` line is not proof the message was stored.
-- [ ] Give every retryable publish a stable `Nats-Msg-Id` so a retry does not double-store.
+- [ ] Read the `PubAck` back; a plain `nats pub` line isn't proof the message was stored.
+- [ ] Give every retryable publish a stable `Nats-Msg-Id` so a retry doesn't double-store.
 - [ ] Wait for delivery and ack before acting on a business outcome; a `PubAck` means stored, not processed.
 
 ### Reading back — see [Pitfalls](/learn/jetstream/reading-back#pitfalls)
 
 - [ ] Reach for `--all` only when you want the whole history; sample the tail with `--last`, `--since`, or `--start-sequence`.
 - [ ] Use a named, durable consumer for any read you must resume after a disconnect; an ephemeral one restarts from sequence 1.
-- [ ] Confirm `--all` versus `--new` matches the question — backlog or live traffic — before you run the command.
+- [ ] Confirm `--all` versus `--new` matches the question (backlog or live traffic) before you run the command.
 - [ ] Pair `--all` with `--terminate-at-end` for a one-shot replay; on its own it drains the backlog then blocks waiting for more.
 
 ### Your first consumer — see [Pitfalls](/learn/jetstream/your-first-consumer#pitfalls)
@@ -137,14 +137,14 @@ explains the why.
 
 - [ ] Nak a transient failure with a delay, or set a backoff, instead of a bare nak that loops at network speed.
 - [ ] Term a poison message the moment the code knows no attempt will succeed, rather than burning the delivery budget.
-- [ ] Subscribe to the max-deliveries advisory so a dropped message does not vanish unnoticed; JetStream has no dead-letter queue.
-- [ ] Raise AckWait or send in-progress for long jobs so a slow handler does not trigger double work.
+- [ ] Subscribe to the max-deliveries advisory so a dropped message doesn't vanish unnoticed; JetStream has no dead-letter queue.
+- [ ] Raise AckWait or send in-progress for long jobs so a slow handler doesn't trigger double work.
 
 ### Pull consumers — see [Pitfalls](/learn/jetstream/pull-consumers#pitfalls)
 
 - [ ] Treat an empty fetch as "nothing right now" and loop; never as an error that crashes the worker.
 - [ ] Always set an `expires` on a fetch so a quiet stream returns control instead of stalling.
-- [ ] Keep `MaxAckPending` at or above your batch size so it does not throttle throughput.
+- [ ] Keep `MaxAckPending` at or above your batch size so it doesn't throttle throughput.
 - [ ] Pair `batch` with `max_bytes` so a single pull is bounded by size as well as count.
 
 ### A pool of workers — see [Pitfalls](/learn/jetstream/worker-pool#pitfalls)
@@ -156,7 +156,7 @@ explains the why.
 ### Priority groups — see [Pitfalls](/learn/jetstream/priority-groups#pitfalls)
 
 - [ ] Run one priority group per consumer; passing more than one silently uses only the first.
-- [ ] Drive failover with `min_pending` or `min_ack_pending`; the ADR-42 `failover` timer is not yet shipped.
+- [ ] Drive failover with `min_pending` or `min_ack_pending`; the ADR-42 `failover` timer isn't shipped yet.
 - [ ] Lean on explicit acks and idempotent handlers, not the pin, to keep work from doubling up; the pin is not a lock.
 - [ ] Keep each pull's `expires` comfortably under `--pinned-ttl` so a pinned client renews in time.
 
@@ -168,7 +168,7 @@ explains the why.
 
 ### Push vs pull — see [Pitfalls](/learn/jetstream/push-vs-pull#pitfalls)
 
-- [ ] Start new work on a pull consumer; push consumers are deprecated and cannot be flipped to pull in place.
+- [ ] Start new work on a pull consumer; push consumers are deprecated and can't be flipped to pull in place.
 - [ ] Enable flow control if you must run an inherited push consumer on a hot stream; better yet, migrate to pull.
 - [ ] Subscribe with the matching deliver group, not bare; a plain subscriber receives the full firehose.
 
@@ -192,8 +192,8 @@ explains the why.
 ### Surviving node loss — see [Pitfalls](/learn/jetstream/surviving-node-loss#pitfalls)
 
 - [ ] Confirm the replica count before trusting a stream with real orders; R=1 has no copy to recover from.
-- [ ] Use odd replica counts — R=3 for the production floor, R=5 for state you cannot re-derive.
-- [ ] Prove failover on a real cluster; a green single-node run cannot show leader election or a node loss.
+- [ ] Use odd replica counts: R=3 for the production floor, R=5 for state you can't re-derive.
+- [ ] Prove failover on a real cluster; a green single-node run can't show leader election or a node loss.
 
 ### Mirrors and sources — see [Pitfalls](/learn/jetstream/mirrors-and-sources#pitfalls)
 

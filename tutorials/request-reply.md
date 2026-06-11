@@ -10,7 +10,7 @@ description: Build a tiny responder service and call it with a request that gets
 In [Hello NATS](/tutorials/hello-nats) a publisher sent a message and never
 heard back. This time you'll build a two-way conversation: a small **responder**
 that answers questions on a subject, and a **request** that calls it and gets
-exactly one reply back. By the end you'll start a `time` service in one terminal
+exactly one reply. By the end you'll start a `time` service in one terminal
 and ask it for the time from another.
 
 <div class="nats-flow" data-scenario="requestReply" data-width="600" data-height="350"></div>
@@ -48,7 +48,7 @@ Leave this terminal running. It's now a service waiting to answer.
 
 Open your second terminal and call the service. `nats request` publishes one
 message on `time` and waits for a single reply, up to the global `--timeout`
-(5 seconds by default).
+(five seconds by default).
 
 <div class="nats-example"
      data-type="tutorials-request-reply-request"
@@ -96,7 +96,7 @@ Start the responder again and the same request succeeds.
 ## What you built
 
 You ran a `time` responder and called it with a request, getting exactly one
-reply back per call, all over NATS with no shared address between the two sides.
+reply per call, all over NATS with no shared address between the two sides.
 
 ## Next
 

@@ -8,8 +8,8 @@ description: Constrain where a stream's replicas live using cluster and server t
 # 4. Placement
 
 By now the `ORDERS` stream runs `R=3` on the `east` cluster, and the meta
-leader chose which three servers hold it. So far you have not had a say in
-that choice — the meta leader picked any three servers with room.
+leader chose which three servers hold it. So far you haven't had a say in
+that choice: the meta leader picked any three servers with room.
 
 This page gives you the say. It constrains *where* a stream's replicas
 land: onto a named cluster, or onto servers carrying labels you assign.
@@ -25,7 +25,7 @@ the meta leader must honor your constraint or refuse to create the stream.
 
 Placement has two levers. The first is the **cluster**: name a cluster and
 every replica must live there. In a single cluster like `east` this is a
-no-op — there is only one cluster to choose. It earns its keep across
+no-op, since there's only one cluster to choose. It earns its keep across
 clusters, where a stream is pinned to one region; that cross-cluster story
 lives in [Super-clusters](/learn/topologies/super-clusters), not here.
 
@@ -35,8 +35,8 @@ The second lever is the one that matters inside `east`: **tags**.
 
 A **tag** is a label you attach to a server in its configuration. The
 server advertises its tags to the rest of the cluster, and placement uses
-them to pick servers. A tag is freeform text — a region, a disk class, a
-hardware tier — whatever distinction you want placement to respect.
+them to pick servers. A tag is freeform text: a region, a disk class, a
+hardware tier, whatever distinction you want placement to respect.
 
 You set tags with `server_tags` in each server's config. Give the three
 production servers a region tag and a disk-class tag:
@@ -68,23 +68,23 @@ a server actually carries the tags you expect:
 nats --server nats://127.0.0.1:4222 server info
 ```
 
-The output lists the server's tags. Read them back — do not assume the
-config took. A typo in `server_tags` is silent until a placement asks for
-a tag no server advertises.
+The output lists the server's tags. Read them back rather than assuming
+the config took. A typo in `server_tags` is silent until a placement asks
+for a tag no server advertises.
 
 ### Placing the stream on tagged servers
 
 With the servers tagged, constrain `ORDERS` to land only on servers
 carrying both `region:us-east` and `disk:ssd`. The CLI flag is `--tag`,
 passed once per required tag; the client libraries set `Placement.Tags` to
-a list. The example also names the cluster with `--cluster east` — a no-op
+a list. The example also names the cluster with `--cluster east`, a no-op
 in a single cluster, shown so the syntax is familiar when you place across
 clusters later:
 
 <div class="nats-example" data-type="learn-clustering-placement-placeTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The meta leader now picks three servers that carry *both* tags. Read the
-result in the `Cluster` block of `nats stream info ORDERS` — the leader and
+result in the `Cluster` block of `nats stream info ORDERS`: the leader and
 the two other peers are all servers you tagged.
 
 ## Tag matching is an intersection
@@ -94,17 +94,17 @@ carries *every* tag in the list. The match is an intersection, not a union:
 `region:us-east` **and** `disk:ssd`, never either-or.
 
 The match folds case: `disk:ssd`, `disk:SSD`, and `disk:Ssd` are the same
-tag. Spelling, though, is exact — `disk:sdd` matches nothing. So the trap is
-not case but typos. Ask for a tag that no server carries — a misspelling, a
-tag you meant to add but did not — and the intersection is empty. No server
-qualifies, and the meta leader refuses the stream with:
+tag. Spelling, though, is exact, so `disk:sdd` matches nothing. The trap
+isn't case but typos. Ask for a tag that no server carries (a misspelling,
+or a tag you meant to add but didn't) and the intersection is empty. No
+server qualifies, and the meta leader refuses the stream with:
 
 ```
 nats: error: no suitable peers for placement
 ```
 
 The same error appears if you ask for three replicas but only two servers
-carry the required tags. Placement does not relax the constraint to fit the
+carry the required tags. Placement doesn't relax the constraint to fit the
 replica count; it fails so you notice.
 
 The full set of placement and server-tag options is documented in
@@ -117,24 +117,24 @@ Placement decides which servers hold the replicas. A separate field decides
 which of them starts as leader: the **preferred leader**.
 
 The preferred leader is a hint passed at placement time, naming the server
-you would like to lead the new group. The meta leader honors it when it can
-— most usefully during scale-up, when you are adding a stream and want its
+you'd like to lead the new group. The meta leader honors it when it can,
+most usefully during scale-up, when you're adding a stream and want its
 leader on a specific server from the start. On a fresh group it shapes the
 *initial* leader assignment, sparing you a stepdown to move leadership to
 where you wanted it in the first place.
 
 The field is `Placement.Preferred` (a server name) in the client libraries.
-The CLI does not set it on `stream add`; you nudge leadership toward a
+The CLI doesn't set it on `stream add`; you nudge leadership toward a
 server after the fact with `nats stream cluster step-down --preferred
 <server>`. Its full syntax lives in
-[Reference](/reference/jetstream/api/stream). We only need to know it is a
+[Reference](/reference/jetstream/api/stream). We only need to know it's a
 hint here.
 
 The word *hint* is load-bearing. The preferred leader applies to the
-initial placement only. Once the group is running, leadership is decided by
-RAFT elections, which you met on [Raft and leaders](/learn/clustering/raft-and-leaders).
+initial placement only. Once the group is running, RAFT elections decide
+leadership, as you saw on [Raft and leaders](/learn/clustering/raft-and-leaders).
 If the preferred server later dies, the next election picks a leader from
-the surviving quorum at random — it does not wait for your preferred server
+the surviving quorum at random; it doesn't wait for your preferred server
 to return. Use the preferred leader to shape the *start*, never to pin
 leadership for the life of the stream.
 
@@ -144,10 +144,10 @@ Two traps catch people the first time they place a stream. Both come from
 treating placement as more forgiving than it is.
 
 **Tags are an intersection; a missing tag fails the placement.** Asking for
-a tag no server carries leaves the meta leader with nothing to pick — the
+a tag no server carries leaves the meta leader with nothing to pick: the
 stream fails with `no suitable peers for placement` rather than falling back
 to any server. Matching folds case, so `ssd` and `SSD` are the same tag, but
-spelling is exact — `sdd` matches nothing. Do not guess at tag spelling.
+spelling is exact — `sdd` matches nothing. Don't guess at tag spelling.
 Read the tags back from the servers first, then place against exactly what
 they advertise.
 
@@ -157,8 +157,8 @@ either succeed or name the missing tag:
 <div class="nats-example" data-type="learn-clustering-placement-verifyTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **Preferred leader is a hint, not a lock.** Use it to shape the *initial*
-leader of a fresh group. Do not build an operational assumption ("the
-leader is always `n1-east`") on it — the moment that server dies, the next
+leader of a fresh group. Don't build an operational assumption ("the
+leader is always `n1-east`") on it; the moment that server dies, the next
 election is quorum-based and random among the survivors. If you need
 leadership somewhere specific *now*, move it explicitly with `nats stream
 cluster step-down --preferred <server>` (see [Raft and
@@ -177,7 +177,7 @@ preferred leader shapes only the first election.
 The cluster is still three servers. Nothing on this page changed the peer
 count.
 
-## What is next
+## What's next
 
 Changing the peer count is the next page. **Scaling and peer management**
 grows the group by adding a fourth server, watches a new peer catch up

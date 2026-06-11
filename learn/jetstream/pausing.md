@@ -8,12 +8,12 @@ description: Stop delivery to a consumer until a deadline, then resume where it 
 # 11. Pausing a consumer
 
 The `shipping` consumer has been running fine. Sometimes you want it to
-stop for a while — not forever, just for a window — and then pick up
+stop for a while (not forever, just for a window) and then pick up
 exactly where it was.
 
 You could delete the consumer and recreate it later. That throws away
 everything it tracked: which messages it acked, where its cursor sits.
-That is a heavy hammer for a light job.
+That's a heavy hammer for a light job.
 
 Pausing is the light job. A **paused** consumer stops receiving
 messages until a deadline you set, and keeps all of its state while it
@@ -24,8 +24,8 @@ waits.
 Pausing changes one thing: the server stops handing messages to the
 consumer.
 
-Everything else stays put. The cursor — the sequence number the
-consumer has worked up to — does not move. Acked messages stay acked.
+Everything else stays put. The cursor, the sequence number the
+consumer has worked up to, doesn't move. Acked messages stay acked.
 Redelivery counters stay as they were. When the pause ends, delivery
 resumes from the exact position it stopped at.
 
@@ -34,8 +34,8 @@ forgets. A paused consumer remembers, and waits.
 
 ## Pause until a deadline
 
-A pause is not open-ended. You pause a consumer *until* a moment in
-time. When that moment arrives, the consumer resumes on its own — no
+A pause isn't open-ended. You pause a consumer *until* a moment in
+time. When that moment arrives, the consumer resumes on its own, no
 second command needed.
 
 Pause the `shipping` consumer for one hour:
@@ -51,7 +51,7 @@ deadline.
 
 Clients can also pause at creation time: set the `PauseUntil` field in
 the consumer config to a future moment, and the consumer starts life
-paused until that deadline. It is the same absolute deadline the CLI
+paused until that deadline. It's the same absolute deadline the CLI
 sets, just supplied when the consumer is first created. See
 [Reference → Consumer API](/reference/jetstream/api/consumer) for the
 field.
@@ -64,7 +64,7 @@ Paused ORDERS > shipping until 2026-05-22 11:14:22 (59m58s)
 
 While the consumer is paused, the stream keeps accepting publishes as
 normal. Messages pile up behind the cursor, waiting. The pause stops
-delivery, not storage — the stream does not care that a consumer is
+delivery, not storage: the stream doesn't care that a consumer is
 asleep.
 
 ## Check the pause from consumer info
@@ -86,7 +86,7 @@ State:
                 Acknowledgment Floor: Consumer sequence: 12 Stream sequence: 12
 ```
 
-The cursor values — last delivered, acknowledgment floor — are exactly
+The cursor values (last delivered, acknowledgment floor) are exactly
 where they were before the pause. The consumer is holding its place.
 
 ## Resume early
@@ -108,12 +108,12 @@ Resuming before the deadline and letting the deadline expire reach the
 same end state: a running consumer at the same cursor. The only
 difference is who decides the timing — you, or the clock.
 
-## Why you would reach for this
+## Why you'd reach for this
 
 Two patterns drive most pauses.
 
-The first is a **maintenance window**. A downstream system — the
-warehouse API, a database — goes offline for a planned upgrade. Rather
+The first is a **maintenance window**. A downstream system, say the
+warehouse API or a database, goes offline for a planned upgrade. Rather
 than let the `shipping` consumer deliver messages no worker can process,
 you pause it until the window closes. The messages wait in the stream;
 the consumer resumes on schedule.
@@ -131,11 +131,11 @@ place.
 
 Pause runs on the consumer's leader, and the leader holds the timer
 that fires at the deadline. If the leader changes while a consumer is
-paused, the new leader inherits the deadline and resumes on time. You do
-not have to re-issue the pause.
+paused, the new leader inherits the deadline and resumes on time. You
+don't have to re-issue the pause.
 
-Pausing consumers requires NATS Server 2.11 or later. On an older
-server the command is rejected with a clear message.
+Pausing consumers requires NATS Server 2.11 or later. An older
+server rejects the command with a clear message.
 
 The full `PauseUntil` API and the consumer pause advisory the server
 emits are documented in
@@ -147,17 +147,17 @@ the pause and resume commands here.
 Three traps come up the first time you lean on pausing.
 
 **A paused consumer looks like a stall.** A paused `shipping` consumer
-delivers nothing — which is exactly what a broken consumer also does.
-Without checking, you cannot tell a deliberate pause from an outage.
+delivers nothing, which is exactly what a broken consumer also does.
+Without checking, you can't tell a deliberate pause from an outage.
 Before you debug a "stuck" consumer, run `nats consumer info ORDERS
-shipping` and read the `Paused Until Deadline` line. If it is there, the
+shipping` and read the `Paused Until Deadline` line. If it's there, the
 consumer is asleep on purpose, not failing.
 
 **A deadline in the past is a no-op.** Pause stores an absolute moment.
-If that moment has already passed, there is nothing to wait for, so the
+If that moment has already passed, there's nothing to wait for, so the
 server leaves the consumer running. The CLI catches this and tells you
 plainly instead of pretending the pause worked. Pause with a duration
-like `1h` — it is always measured from now, so it can never land in the
+like `1h`: it's always measured from now, so it can't land in the
 past.
 
 <div class="nats-example"
@@ -169,20 +169,20 @@ never touches the stream. Publishes keep landing while the `shipping`
 consumer sleeps, and they count against the stream's retention limits.
 A long pause on a stream with a tight `MaxMsgs` or `MaxBytes` can drop
 the oldest orders before the consumer ever wakes to read them. Size the
-stream for the longest pause you expect, or keep pauses short — see [13.
+stream for the longest pause you expect, or keep pauses short. See [13.
 Shaping the stream](/learn/jetstream/shaping-the-stream) for how limits
 decide who wins.
 
 ## Where you are
 
 The `shipping` consumer has been paused until a deadline and then
-resumed. Through both, its cursor stayed exactly where it was — no
+resumed. Through both, its cursor stayed exactly where it was: no
 messages were lost, none were redelivered by mistake.
 
 The stream is unchanged. The consumer is running again, at the same
 position it held before the pause.
 
-## What is next
+## What's next
 
 So far every consumer in this chapter has been a pull consumer. The next
 page steps back to ask the larger question: when does a [push

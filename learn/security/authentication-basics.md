@@ -8,7 +8,7 @@ description: Centralized config-based authentication and the three credential ty
 # 2. Authentication Basics
 
 The previous page gave `ORDERS` and `ANALYTICS` their own isolated
-subject spaces. Nobody is using them yet. A connection still has to
+subject spaces. Nobody's using them yet. A connection still has to
 prove who it is before the server will place it in an account.
 
 That proof is **authentication**: the server deciding which user a
@@ -18,12 +18,13 @@ list of valid users lives in the server's own config file.
 ## Centralized authentication
 
 In **centralized authentication**, the server holds the full list of
-users in its configuration. Every username, every password, every
-account assignment sits in one place: `nats.conf` on the server.
+users in its configuration. Every username, password, and account
+assignment sits in one place: `nats.conf` on the server.
 
-This is config-based. When a connection presents credentials, the
-server walks its config list, finds the matching user, and admits the
-connection into that user's account. No external service is consulted.
+It's all config. When a connection presents credentials, the server
+walks its config list, finds the matching user, and admits the
+connection into that user's account. It never consults an external
+service.
 
 <div class="nats-flow" data-scenario="centralizedAuthAnimated" data-width="600" data-height="380"></div>
 
@@ -33,13 +34,13 @@ into the user's account; a mismatch is rejected.
 
 Centralized authentication is the right tool when one team owns the
 server config and the user list is small and slow to change. It lives
-entirely in one file, so it is the easiest model to read and reason
+entirely in one file, so it's the easiest model to read and reason
 about.
 
-It does not scale to many independent tenants editing their own users.
+It doesn't scale to many independent tenants editing their own users.
 Every change is a server-config change. The [next
 page](/learn/security/decentralized-auth) covers the model that solves
-that. For now, one team, one config, one user list.
+that. For now, one team and one config file.
 
 ## Giving order-svc a credential
 
@@ -47,8 +48,8 @@ Recall the `ORDERS` account from the previous page. Its order service
 needs a user to connect as: `order-svc`.
 
 A centralized user lives inside an account's `users` array. Each entry
-names a user with a `user` field, carries that user's credential, and —
-by being nested in the account — assigns the account. Here is the
+names a user with a `user` field, carries that user's credential, and
+assigns the account by being nested inside it. Here's the
 `ORDERS` account with one user:
 
 ```conf
@@ -77,13 +78,13 @@ Start the server with that config:
 nats-server -c nats.conf
 ```
 
-The `-c` flag points the server at the config file. Once it is
+The `-c` flag points the server at the config file. Once it's
 running, `order-svc` can connect.
 
 ## Connecting as order-svc
 
 A client authenticates by sending its credentials at connect time. On
-the CLI that is two flags; in a client library it is two fields on the
+the CLI that's two flags; in a client library it's two fields on the
 connect call. The user publishes the canonical order message to
 `orders.created`:
 
@@ -96,38 +97,38 @@ publish.
 
 A client offers credentials once, when it connects. Authentication
 decides the user for the whole life of that connection. What the user
-may then publish or subscribe to is a separate question —
-authorization — and it has its own [page](/learn/security/authorization).
+may then publish or subscribe to is a separate question:
+authorization, which has its own [page](/learn/security/authorization).
 
 ### Other ways a user entry can authenticate
 
 `order-svc` used a password, but config auth offers three credential
 styles in all: user/password, nkey, and token. The first two live on a
 per-account `users` entry; the third sits at the server level. The model
-is unchanged; only the field differs.
+doesn't change; only the field differs.
 
 **user/password** is the pair you just used: the client sends a
 username and a password, and the server compares the password against
-the stored value. It is the style this page uses for centralized
+the stored value. It's the style this page uses for centralized
 auth. **nkey** is a
 public-key credential: the server stores only the user's public nkey,
 the client holds the matching private seed and proves ownership by
 signing a server-issued nonce, so nothing secret crosses the wire. We
 meet nkeys properly on the [decentralized
-authentication](/learn/security/decentralized-auth) page; here they are
-simply one more way to authenticate a config user.
+authentication](/learn/security/decentralized-auth) page; here they're
+just one more way to authenticate a config user.
 
 **token** is the odd one out: a single shared secret with no username,
 set on the server's top-level `authorization` block rather than on a
-per-account `users` entry —
+per-account `users` entry:
 `authorization { token: "shared-secret-rotate-me" }`. Any client
 presenting the right token is admitted, which makes it a server-wide
-secret rather than a per-user one — handy for quick internal setups.
+secret rather than a per-user one. Handy for quick internal setups.
 (When this chapter says "token" it always means this, never a JWT.)
 
 ## A word on passwords
 
-The config above stored `order-svc`'s password in plaintext. That is
+The config above stored `order-svc`'s password in plaintext. That's
 fine for a laptop and wrong for a server anyone can read.
 
 The server agrees. On startup it scans the user list, and if any
@@ -149,12 +150,12 @@ nats server passwd
 ```
 
 It prompts for a password and prints a hash that begins with `$2a$`,
-`$2b$`, `$2x$`, or `$2y$` — the prefix the server uses to recognize a
-hash. Add `--generate` to have it invent a strong passphrase and hash
+`$2b$`, `$2x$`, or `$2y$` (the prefix the server uses to recognize a
+hash). Add `--generate` to have it invent a strong passphrase and hash
 it in one step.
 
 Paste the hash into the config in place of the plaintext password.
-A bcrypt value is written without surrounding quotes; the server
+Write the bcrypt value without surrounding quotes; the server
 detects the `$2a$`-style prefix and treats the whole string as the
 stored hash:
 
@@ -168,7 +169,7 @@ accounts {
 }
 ```
 
-The warning is now gone, and `order-svc` connects exactly as before —
+The warning is now gone, and `order-svc` connects exactly as before:
 the client still sends the same plaintext password. Only the stored
 form changed.
 
@@ -195,7 +196,7 @@ makes a handful of mistakes easy to make and easy to avoid.
 
 **Running with no authentication in production.** A server with no
 `authorization` and no per-account `users` admits every connection into
-the default account. That is convenient on a laptop and dangerous on a
+the default account. That's convenient on a laptop and dangerous on a
 shared network: anyone who can reach the port can publish and subscribe.
 Do not ship it. Give every server at least one user list, so an
 unauthenticated connect fails with an `authorization violation` error
@@ -207,8 +208,8 @@ or bcrypt` on startup and you replace the raw value with a `nats server
 passwd` hash. The pitfall is treating that warning as noise. On any
 server someone else can read, store the bcrypt hash, not the plaintext.
 
-**Committing credentials to git.** A `nats.conf` with a password — even a
-bcrypt hash — is a secret. Once it lands in history, rotating the
+**Committing credentials to git.** A `nats.conf` with a password (even a
+bcrypt hash) is a secret. Once it lands in history, rotating the
 password is the only real fix, because the old value lives in every
 clone. Keep the credential out of the committed file: reference an
 environment variable or a secret store, and add the real config to
@@ -237,13 +238,13 @@ You have:
 - `order-svc` publishing the canonical order message to
   `orders.created`.
 
-The credential list lives entirely in the server config — one team,
+The credential list lives entirely in the server config: one team,
 one file.
 
-## What is next
+## What's next
 
 The next page keeps the same two accounts and the same two users but
-moves the trust out of the config file. You will see how an
+moves the trust out of the config file. You'll see how an
 **operator** signs accounts, accounts sign users, and the server ends
 up trusting a single public key instead of a list of passwords.
 

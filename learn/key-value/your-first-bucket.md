@@ -39,18 +39,18 @@ Two things matter here.
 The first is the **bucket name**: `INVENTORY`. Bucket names are
 case-sensitive identifiers, and they show up in every command and every
 error message in this chapter. The name maps straight onto the backing
-stream — `INVENTORY` becomes `KV_INVENTORY`.
+stream: `INVENTORY` becomes `KV_INVENTORY`.
 
 The second is `--history 1`. **History** is how many prior values the
 bucket keeps for each key. One means the bucket holds only the current
-value of a key and forgets the rest. That is the default and all the
+value of a key and forgets the rest. That's the default and all the
 inventory service needs to start. The depth can go as high as 64, but no
-higher; page 3 raises it so a key remembers where it has been, and for now,
+higher; page 3 raises it so a key remembers where it's been, and for now,
 one is enough.
 
-You did not set any other configuration. A bucket has the same long list
+You didn't set any other configuration. A bucket has the same long list
 of stream knobs underneath, all filled with sensible defaults. The full
-set of bucket configuration options is documented in [Reference → Create
+set of bucket configuration options lives in [Reference → Create
 Stream](/reference/jetstream/api/stream/create), since a bucket is created
 as a stream. We use only `History` here.
 
@@ -61,8 +61,8 @@ SKU, and the **value** is the count stored as bytes:
 
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-putValue" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-That is a **put**: an unconditional write. It stores the value whether or
-not the key already exists, and it hands back the key's new **revision** —
+That's a **put**: an unconditional write. It stores the value whether or
+not the key already exists, and it hands back the key's new **revision**,
 a number the bucket bumps on every write. The first write to a fresh key
 lands at revision 1. Revisions are how the bucket tracks change over time;
 page 3 builds on them, and for now the number is just a receipt.
@@ -71,8 +71,8 @@ Now read it back:
 
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-getValue" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Here is the one surprise of this page. A **get** does not return a bare
-value. It returns an **entry** — the value together with its revision and
+Here's the one surprise of this page. A **get** doesn't return a bare
+value. It returns an **entry**: the value together with its revision and
 the time it was written. The CLI's `--raw` flag strips the entry down to
 just the value bytes (`42`), which is usually what a program wants, but the
 full object is what the server actually sends.
@@ -100,27 +100,27 @@ it directly.
 ## Pitfalls
 
 Two traps catch people on their very first bucket. Each is easy to avoid
-once you have seen it.
+once you've seen it.
 
 **A get returns an entry, not a value — and a missing key is an error,
 not an empty value.** Reaching straight for the value bytes works only
-when the key exists. A key that was never put does not return an empty
+when the key exists. A key that was never put doesn't return an empty
 entry; it returns a key-not-found error. Those are two different
 situations: an empty value is a value, and a missing key is the absence of
-one. Do not treat a failed get as "the count is zero." The get example
+one. Don't treat a failed get as "the count is zero." The get example
 above ends with exactly this case: its last line gets a SKU that was never
 stocked, the get fails, and the program decides what a missing SKU means
 instead of reading a stale or zero count by accident. Check the error
 first, then read the value.
 
 **Bucket and key names are validated.** A bucket name may contain only
-letters, digits, dash, and underscore, and it cannot be empty. A key is
-more permissive — letters, digits, and the characters `-`, `/`, `_`, `=`,
-and `.` — but nothing beyond that set, no leading or trailing dot, and no
+letters, digits, dash, and underscore, and it can't be empty. A key is
+more permissive (letters, digits, and the characters `-`, `/`, `_`, `=`,
+and `.`), but nothing beyond that set, no leading or trailing dot, and no
 two dots in a row (`a..b` is rejected even though `a.b` is fine). An order
-id like `ord:8w2k` has a colon, so it cannot be a key; the server rejects
+id like `ord:8w2k` has a colon, so it can't be a key; the server rejects
 the write rather than storing a broken key. Pick names from the allowed
-set, and reach for an underscore or dash where you would have used a colon:
+set, and reach for an underscore or dash where you'd have used a colon:
 
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-nameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -133,10 +133,10 @@ You now have:
 - The ability to put a value, get back its entry, and read the bucket's
   status.
 
-## What is next
+## What's next
 
 The next page puts the **warehouse dashboard** on the bucket: a watch that
-streams every stock change live, starting with a snapshot of what is
+streams every stock change live, starting with a snapshot of what's
 already there.
 
 Continue to [2. Watching](/learn/key-value/watching).

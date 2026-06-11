@@ -7,10 +7,10 @@ description: Create your first stream, publish to it, and replay stored messages
 
 # 4. Persist messages with JetStream
 
-So far your messages have been fleeting: a subscriber that is not listening at
+So far your messages have been fleeting: a subscriber that isn't listening at
 the moment you publish never sees them. In this tutorial you turn on JetStream,
 create a **stream** that stores messages durably, publish a few, and then
-**replay** them back from the very beginning. By the end you will have proof that
+**replay** them from the very beginning. By the end you'll have proof that
 the messages survived, sitting in storage, ready to read again.
 
 <div class="nats-flow" data-scenario="jetStreamContrastAnimated" data-width="600" data-height="350"></div>
@@ -18,7 +18,7 @@ the messages survived, sitting in storage, ready to read again.
 ## What you'll need
 
 - `nats-server` and the `nats` CLI installed (from [Hello NATS](/tutorials/hello-nats)).
-- A terminal. You will start the server in one and run commands in another.
+- A terminal. You'll start the server in one and run commands in another.
 
 ## Step 1: Start the server with JetStream
 
@@ -42,7 +42,7 @@ Leave this running. Open a second terminal for the remaining steps.
 
 In the second terminal, create a stream named `EVENTS` that captures every
 subject beginning with `events.`. The `--defaults` flag fills in sensible
-starting values so you are not prompted for anything.
+starting values so you aren't prompted for anything.
 
 <div class="nats-example" data-type="tutorials-first-stream-create" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -95,7 +95,7 @@ State:
 ## Step 4: Replay the stored messages
 
 Now read the messages back. This replays every message the stream holds, oldest
-first, starting from the very first one. Nothing is removed — replaying a stream
+first, starting from the very first one. Nothing is removed: replaying a stream
 is a read.
 
 <div class="nats-example" data-type="tutorials-first-stream-replay" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -113,20 +113,19 @@ You should see all three messages, in the order they were published:
 {"page":"/pricing"}
 ```
 
-The command then exits on its own, because it stops once it has read everything
-stored. Run it again and you will see the same three messages: the stream still
-has them.
+The command exits on its own once it's read everything stored. Run it again
+and you'll see the same three messages: the stream still has them.
 
 ## What you built
 
 You enabled JetStream, created the `EVENTS` stream, published three messages into
-it, and replayed all three back from storage — and they were still there to read
+it, and replayed all three back from storage. And they were still there to read
 again afterward.
 
 ## Next
 
 - Next tutorial: [Read a stream with a durable consumer](/tutorials/stream-consumer)
-  — a reader that tracks what it has processed and resumes after a restart.
+  — a reader that tracks what it's processed and resumes after a restart.
 - Understand how this works: the [JetStream deep dive](/learn/jetstream) explains
   what a stream really is, and [Your first stream](/learn/jetstream/your-first-stream)
   walks through every value JetStream filled in for you.

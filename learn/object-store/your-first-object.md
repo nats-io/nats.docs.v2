@@ -9,9 +9,9 @@ description: Put a file into the INVOICES bucket and get it back
 
 Acme's `order-svc` already publishes order messages into the `ORDERS`
 stream. But an order produces more than a message. Once payment clears it
-produces an invoice PDF — a file that is too large and too binary to ride
-along as a message payload. That file needs a home, and the `warehouse`
-service needs to fetch it back before it ships the box.
+produces an invoice PDF: a file too large and too binary to ride along as
+a message payload. That file needs a home, and the `warehouse` service
+needs to fetch it back before it ships the box.
 
 That home is an **object store**. This page creates Acme's first bucket,
 stores one invoice in it, and gets that invoice back. Two operations,
@@ -23,8 +23,8 @@ A **bucket** is a named object store. An **object** is one stored file:
 a name and its bytes. The bucket for this chapter is `INVOICES`, and it
 will hold invoice PDFs for Acme's orders.
 
-A bucket is backed by a JetStream stream — the same streams you built in
-the [JetStream deep dive](/learn/jetstream). You do not create that
+A bucket is backed by a JetStream stream, the same kind you built in
+the [JetStream deep dive](/learn/jetstream). You don't create that
 stream yourself; creating the bucket creates it for you. Everything you
 already know about streams still applies underneath, and this chapter
 points back to it rather than re-teaching it.
@@ -41,7 +41,7 @@ digits, underscores, and dashes only. `INVOICES` is fine.
 
 **Put** is the store verb. You hand the store an object name and its
 bytes, and the store keeps them. The bytes can come from a file on disk,
-from memory, or from a stream you read as you go — every client offers
+from memory, or from a stream you read as you go. Every client offers
 the convenient forms.
 
 Here `order-svc` puts the invoice for order `ord_8w2k`:
@@ -51,12 +51,12 @@ Here `order-svc` puts the invoice for order `ord_8w2k`:
 Three things happen inside that one call.
 
 First, the store splits the bytes into pieces. Each piece is one message.
-You will meet that splitting properly on the [next page](/learn/object-store/chunking);
-for now it is enough to know a large file does not become one giant
+You'll meet that splitting properly on the [next page](/learn/object-store/chunking);
+for now it's enough to know a large file doesn't become one giant
 message.
 
 Second, as the bytes flow past, the store computes a running **SHA-256
-digest** — a fixed-size fingerprint of the exact bytes you put. A digest
+digest**, a fixed-size fingerprint of the exact bytes you put. A digest
 is a one-way hash: the same bytes always produce the same digest, and any
 change to the bytes produces a different one.
 
@@ -73,15 +73,15 @@ to ship `ord_8w2k`:
 
 <div class="nats-example" data-type="learn-object-store-your-first-object-get" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Get is not a blind read. The store reads the object's metadata record,
+Get isn't a blind read. The store reads the object's metadata record,
 streams the pieces back in order, reassembles them, and recomputes the
 SHA-256 digest of what it reassembled. Only if that digest matches the
-one recorded on put does get return the bytes. If the two differ — a
-piece went missing, a transfer was cut short — get returns an error
+one recorded on put does get return the bytes. If the two differ (a
+piece went missing, a transfer was cut short), get returns an error
 instead of a corrupt file.
 
-That is the contract of an object store: what you get is byte-for-byte
-what you put, or you get an error. There is no quiet truncation to debug
+That's the contract of an object store: what you get is byte-for-byte
+what you put, or you get an error. There's no quiet truncation to debug
 in production three weeks later.
 
 ## Watch put and get flow
@@ -101,11 +101,11 @@ digest to check them against.
 ## Pitfalls
 
 Two traps catch people on their first object. Both come from treating put
-and get as if they could not fail.
+and get as if they couldn't fail.
 
 **A digest mismatch means do not use the bytes.** The pieces of an object
-are written as separate messages. If a put is interrupted partway — the
-process dies, the connection drops — the object can be left incomplete.
+are written as separate messages. If a put is interrupted partway (the
+process dies, the connection drops), the object can be left incomplete.
 The store guards against this on get: it verifies the reassembled bytes
 against the stored digest and returns `ErrDigestMismatch` on a mismatch.
 The trap is to ignore that error and use the bytes anyway. Do check the
@@ -116,13 +116,13 @@ round-trips.
 
 **Getting a missing object is an error, not empty bytes.** Ask for a name
 that was never put, or one that has been deleted, and get fails with a
-not-found error — it does not hand back an empty file. The `warehouse`
-must treat "invoice not found" as a real branch: the invoice may simply
-not be produced yet. Do check for the not-found case and retry or wait;
+not-found error; it doesn't hand back an empty file. The `warehouse`
+must treat "invoice not found" as a real branch: the invoice may not
+have been produced yet. Do check for the not-found case and retry or wait;
 don't ship the order on the assumption that an absent invoice is an empty
 one.
 
-Here is the not-found path, and the safe check that precedes a get:
+Here's the not-found path, and the safe check that precedes a get:
 
 <div class="nats-example" data-type="learn-object-store-your-first-object-getMissing" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -143,10 +143,10 @@ You now have:
 The session is live. The next pages add to this exact bucket rather than
 starting over.
 
-## What is next
+## What's next
 
 Put split the invoice into pieces and get reassembled them. The next page
-names that mechanism — **chunking** — and stores an invoice large enough
+names that mechanism, **chunking**, and stores an invoice large enough
 to span many chunks, so you can read the chunk count for yourself.
 
 Continue to [2. Chunking](/learn/object-store/chunking).

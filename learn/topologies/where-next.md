@@ -10,22 +10,22 @@ description: Recap the four composable shapes and point to the mechanics, operat
 You started this chapter with one `nats-server` on `localhost` serving
 Acme's ORDERS workload. You end it with that same workload running on a
 two-cluster super-cluster that fans out to a leaf at the factory floor.
-The deployment grew the whole time. The application never changed.
+The deployment grew the whole time; the application never changed.
 
-This page does not teach anything new. It collects the model you built
+This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
 ## The whole chapter in one idea
 
-NATS scales by **composing servers**. You did not swap binaries or
-rewrite Acme's publisher to grow the deployment — you wired more
+NATS scales by **composing servers**. You didn't swap binaries or
+rewrite Acme's publisher to grow the deployment; you wired more
 `nats-server` processes together into bigger shapes.
 
 There are four shapes, and they stack.
 
 A **single server** is one `nats-server` process. Clients connect to it
-directly. It is the right tool for development and small workloads, and a
+directly. It's the right tool for development and small workloads, and a
 single point of failure everywhere else.
 
 A **cluster** is servers joined by **routes** into a full mesh. Clients
@@ -52,26 +52,26 @@ The point worth carrying out of this chapter is that Acme's ORDERS
 publisher and consumer are identical on all four shapes.
 
 A client that publishes `orders.created` and consumes the `ORDERS`
-stream does not know whether it is talking to a single dev server, a
+stream doesn't know whether it's talking to a single dev server, a
 server in the `east` cluster, a super-cluster spanning `east` and `west`,
 or the leaf at `factory-1`. It connects, publishes, and subscribes the
 same way.
 
-That is the payoff of separating the application from the topology. You
+That's the payoff of separating the application from the topology. You
 size and shape the deployment for the operational need in front of you,
 and the code you already wrote keeps working.
 
 ## What this chapter deliberately left out
 
-This chapter taught the **shapes and wiring** — routes, gateways, and
-leaf remotes. It did not teach the **mechanics** that run inside a
+This chapter taught the shapes and wiring: routes, gateways, and
+leaf remotes. It didn't teach the mechanics that run inside a
 cluster once JetStream is replicated across it.
 
 When you set the `ORDERS` stream to R3 on the
 [JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster) page,
 you saw the meta layer and the odd-server-count rule from the outside.
 How the replicas elect a leader, how a quorum is reached, how writes
-survive a failover, and how a stream is placed on specific servers — all
+survive a failover, and how a stream is placed on specific servers: all
 of that lives in the Clustering & Replication deep dive.
 
 The [Clustering & Replication](/learn/clustering) deep dive picks up
@@ -91,8 +91,8 @@ for a workload.
 
 Once a topology is live, you watch it with the
 [Monitoring](/learn/monitoring) deep dive. The monitoring endpoints this
-chapter used to inspect a topology — routes, gateways, and leaf
-connections — are the same ones you scrape in production to know the mesh
+chapter used to inspect a topology (routes, gateways, and leaf
+connections) are the same ones you scrape in production to know the mesh
 is healthy and traffic is flowing where you expect.
 
 ## Securing a leaf
@@ -101,8 +101,8 @@ The [Leaf nodes](/learn/topologies/leaf-nodes) page attached `factory-1`
 to the `east` cluster and bound it to an account, but kept the
 credentials side light.
 
-A leaf opens a connection across a trust boundary — often the public
-internet — so authenticating that connection and scoping what the leaf
+A leaf opens a connection across a trust boundary, often the public
+internet, so authenticating that connection and scoping what the leaf
 can publish and subscribe is not optional in production. The
 [Security](/learn/security) deep dive covers leaf authentication,
 accounts, and the credentials a leaf remote presents to its hub.
@@ -113,75 +113,75 @@ This chapter is unversioned and concept-first. The exact fields,
 defaults, and message formats of each connection live in **Reference**,
 which is versioned and exhaustive.
 
-When you need the precise protocol behind a shape, that is where to look:
+When you need the precise protocol behind a shape, that's where to look:
 
-- [Route protocol](/reference/protocols/route) — how cluster servers talk
-  to each other over a route.
-- [Gateway protocol](/reference/protocols/gateway) — how clusters
-  exchange interest across a super-cluster.
-- [Leafnode protocol](/reference/protocols/leafnode) — how a leaf
-  connects to and bridges interest with its hub.
+- [Route protocol](/reference/protocols/route): how cluster servers talk
+  to each other over a route
+- [Gateway protocol](/reference/protocols/gateway): how clusters
+  exchange interest across a super-cluster
+- [Leafnode protocol](/reference/protocols/leafnode): how a leaf
+  connects to and bridges interest with its hub
 
 ## Where you are
 
 This is the end of the chapter. The whole growth story is complete: one
 dev server `n1`, then the `east` cluster of `n1-east`/`n2-east`/`n3-east`,
 then the super-cluster joining `east` and `west` by gateways, then the
-`factory-1` leaf at the edge. No new scenario state is introduced here.
+`factory-1` leaf at the edge. This page introduces no new scenario state.
 
 You hold the core model: the same binary and the same client code compose
-into four shapes — single server, cluster, super-cluster, and leaf node —
+into four shapes (single server, cluster, super-cluster, and leaf node),
 and you wire each shape up with routes, gateways, and leaf remotes. That
 model is the foundation the Clustering, Deployment, Monitoring, and
 Security chapters build on.
 
-## What is next
+## What's next
 
 Two deep dives carry this chapter the furthest. The
 [Clustering & Replication](/learn/clustering) deep dive teaches the
-mechanics inside a cluster — Raft, leaders, R3, and placement. The
+mechanics inside a cluster: Raft, leaders, R3, and placement. The
 [Deployment](/learn/deployment) deep dive teaches how to run any of these
 shapes in production.
 
 ## Production checklist
 
-Each shape in this chapter ends with a **Pitfalls** section. This is those
-traps collected as one pass over a deployment before it carries real
-traffic — the thing to do, grouped by the page that explains why.
+Each shape in this chapter ends with a **Pitfalls** section. Here are
+those traps collected into one pass over a deployment before it carries
+real traffic: the thing to do, grouped by the page that explains why.
 
-**Single server** — see [Pitfalls](/learn/topologies/single-server#pitfalls)
+**Single server**: see [Pitfalls](/learn/topologies/single-server#pitfalls)
 
 - [ ] Move production workloads off a single server before a reboot can drop orders in flight.
 - [ ] Set `http_port: 8222` from day one so `/varz` is there when something breaks.
-- [ ] Plan for horizontal growth, not a bigger box — vertical scaling has a ceiling.
+- [ ] Plan for horizontal growth, not a bigger box; vertical scaling has a ceiling.
 
-**Cluster** — see [Pitfalls](/learn/topologies/your-first-cluster#pitfalls)
+**Cluster**: see [Pitfalls](/learn/topologies/your-first-cluster#pitfalls)
 
 - [ ] Give every client the full server list, never a single seed URL.
 - [ ] Set the same `name` on all servers, then confirm they joined as one cluster.
 - [ ] Bind the cluster port to a private interface and firewall it off the open internet.
 - [ ] Run an odd server count once you replicate a stream.
 
-**JetStream in a cluster** — see [Pitfalls](/learn/topologies/jetstream-in-a-cluster#pitfalls)
+**JetStream in a cluster**: see [Pitfalls](/learn/topologies/jetstream-in-a-cluster#pitfalls)
 
-- [ ] Audit replica counts and raise the streams that matter to R3 — a cluster alone is not HA.
-- [ ] Run an odd count — 3 or 5 — never an even count; a stream replicates across at most five servers.
+- [ ] Audit replica counts and raise the streams that matter to R3; a cluster alone is not HA.
+- [ ] Run an odd count (three or five), never an even count; a stream replicates across at most five servers.
 - [ ] Read a stream's own leader from `nats stream info`, not from the meta-group summary.
 - [ ] Spread R3 replicas across independent failure domains, not one rack or zone.
 
-**Super-cluster** — see [Pitfalls](/learn/topologies/super-clusters#pitfalls)
+**Super-cluster**: see [Pitfalls](/learn/topologies/super-clusters#pitfalls)
 
 - [ ] Join regions with a `gateway {}` block, never a `cluster {}` stretched across them.
 - [ ] Match each gateway `name` exactly, then confirm both directions show up.
 - [ ] Place a queue subscriber for each workload in every region that produces it.
 
-**Leaf nodes** — see [Pitfalls](/learn/topologies/leaf-nodes#pitfalls)
+**Leaf nodes**: see [Pitfalls](/learn/topologies/leaf-nodes#pitfalls)
 
 - [ ] Set the leaf's `account` explicitly and verify it in `nats server report leafnodes`.
 - [ ] Put `remotes` on the egress-only side and `leafnodes { listen }` on the hub.
 - [ ] Give a leaf its own JetStream `domain` when it needs a distinct local store.
 
-**Composing shapes** — see [Pitfalls](/learn/topologies/putting-it-together#pitfalls)
+**Composing shapes**: see [Pitfalls](/learn/topologies/putting-it-together#pitfalls)
 
 - [ ] Bind each leaf to its own dedicated account so leaves never leak into each other.
 - [ ] Use accounts, not another route or gateway, when you need a wall between deployment parts.
@@ -189,9 +189,9 @@ traffic — the thing to do, grouped by the page that explains why.
 
 ## See also
 
-- [Operate → Clustering & Replication](/learn/clustering) — the mechanics
-  inside a cluster: Raft, leader election, replication, and placement.
-- [Operate → Deployment](/learn/deployment) — running these shapes in
-  production on Kubernetes, with rolling upgrades and sizing.
-- [Core Concepts → Topologies](/concepts/topologies) — the five-minute
-  overview of the same four shapes.
+- [Operate → Clustering & Replication](/learn/clustering): the mechanics
+  inside a cluster (Raft, leader election, replication, and placement)
+- [Operate → Deployment](/learn/deployment): running these shapes in
+  production on Kubernetes, with rolling upgrades and sizing
+- [Core Concepts → Topologies](/concepts/topologies): the five-minute
+  overview of the same four shapes

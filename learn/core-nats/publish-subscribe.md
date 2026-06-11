@@ -49,20 +49,20 @@ You need one local `nats-server` running for the rest of this chapter:
 nats-server
 ```
 
-That is the whole deployment. No flags, no persistence, no cluster.
+That's the whole deployment. No flags, no persistence, no cluster.
 Leave it running and add services to it as the chapter grows.
 
 ## Publishing a message
 
 A **publisher** is a client that sends a message to a subject. The
-warehouse does not subscribe to anything yet, so start by publishing
+warehouse doesn't subscribe to anything yet, so start by publishing
 one `orders.created` message:
 
 <div class="nats-example" data-type="learn-core-nats-publish-subscribe-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The publish call returns immediately. It does not wait for a
-subscriber, it does not report how many subscribers received the
-message, and it does not report whether any did. This is
+The publish call returns immediately. It doesn't wait for a
+subscriber, and it doesn't tell you how many subscribers received the
+message, or whether any did. This is
 **fire-and-forget**: the publisher hands the message to the server and
 moves on.
 
@@ -83,8 +83,8 @@ message. Run a second subscriber for `notifications` and a third for
 `analytics`, each on `orders.created`, and every one of them receives
 its own copy of the next publish.
 
-A subscriber does not consume or remove the message. Subscribing is
-not taking from a queue. Each subscriber gets an independent copy, and
+A subscriber doesn't consume or remove the message. Subscribing isn't
+taking from a queue. Each subscriber gets an independent copy, and
 one subscriber receiving a message takes nothing away from another.
 
 If you want one subscriber to see *all* order subjects at once, it can
@@ -94,7 +94,7 @@ is where we explain it.
 
 ## The interest graph
 
-The server tracks who is subscribed to what in an in-memory structure
+The server tracks who's subscribed to what in an in-memory structure
 called the **interest graph**. Each subscription adds an entry; each
 disconnect removes it.
 
@@ -119,13 +119,13 @@ coordinates, and the publisher never changes.
 
 Publish to `orders.created` while no service is subscribed. The
 publish still succeeds, and the message is discarded. The server
-finds no matching entry in the interest graph, so there is nothing to
+finds no matching entry in the interest graph, so there's nothing to
 deliver to, and the message is dropped on the floor.
 
-This is the behavior to internalize: a publish with no interest is not
-an error and not a stored backlog. It is a silent no-op. The publisher
-cannot tell the difference between "delivered to three subscribers" and
-"delivered to nobody" — both look like a successful publish.
+This is the behavior to internalize: a publish with no interest isn't
+an error and isn't a stored backlog. It's a silent no-op. The publisher
+can't tell the difference between "delivered to three subscribers" and
+"delivered to nobody": both look like a successful publish.
 
 That gap matters for orders. If the warehouse is restarting when an
 `orders.created` message is published, that message is gone, and no
@@ -135,22 +135,22 @@ dive](/learn/jetstream/why-a-stream) is the layer that adds it.
 
 ## At-most-once delivery
 
-Core NATS delivers each message **at-most-once**. A subscriber that is
+Core NATS delivers each message **at-most-once**. A subscriber that's
 connected and interested when the message is published gets it once. A
-subscriber that is absent, slow, or disconnected at that instant gets
-it zero times. There is no second attempt.
+subscriber that's absent, slow, or disconnected at that instant gets
+it zero times. There's no second attempt.
 
-At-most-once is a precise promise, so it is worth stating what it rules
-out. Core NATS does not retry a missed message. It does not detect or
-suppress duplicates. It does not guarantee that two subscribers see
+At-most-once is a precise promise, so it's worth stating what it rules
+out. Core NATS doesn't retry a missed message, doesn't detect or
+suppress duplicates, and doesn't guarantee that two subscribers see
 messages in the same order under load. Each of those is a property you
 add with [JetStream](/learn/jetstream), not something core provides.
 
 At-most-once is the right guarantee for a large class of messages:
 telemetry you sample, cache invalidations, a live dashboard feed. For
 those, a missed message costs nothing because another is already on
-the way. For an order that must be packed exactly once, it is not
-enough — and that is the boundary this chapter respects.
+the way. For an order that must be packed exactly once, it isn't
+enough. That's the boundary this chapter respects.
 
 ## The 1 MB payload limit
 
@@ -162,11 +162,11 @@ the ceiling before it ever publishes.
 Exceeding the limit is not a soft failure. If a client publishes a
 payload larger than `max_payload`, the server rejects it and closes the
 connection. The Acme order payload is a few hundred bytes, so this
-never bites here — but a service that tries to ship a large blob inside
+never bites here, but a service that tries to ship a large blob inside
 a message will hit it.
 
-The fix is not a bigger payload. For large data, publish a reference —
-an object-store key or a URL — and let the receiver fetch the bytes out
+The fix isn't a bigger payload. For large data, publish a reference
+(an object-store key or a URL) and let the receiver fetch the bytes out
 of band. Subjects are cheap; large messages are not.
 
 The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
@@ -190,10 +190,10 @@ nats pub orders.created '{"order_id":"ord_2zr9","customer":"globex","total_cents
 nats pub orders.created '{"order_id":"ord_5kq1","customer":"initech","total_cents":1500,"ts":"2026-05-22T10:14:29Z"}'
 ```
 
-Terminal 1 prints each message the instant it is published. Now stop
+Terminal 1 prints each message the instant it's published. Now stop
 the subscriber in Terminal 1 with Ctrl-C, publish a fourth message,
 and restart the subscriber. The fourth message never appears. It was
-published into an empty interest graph and discarded. That is
+published into an empty interest graph and discarded. That's
 at-most-once, demonstrated.
 
 ## Pitfalls
@@ -203,9 +203,9 @@ None of them is a bug; each is a direct consequence of the model this
 page just described.
 
 **Publishing over the limit drops your connection.** A payload larger
-than `max_payload` is not truncated or queued — the server rejects it
+than `max_payload` isn't truncated or queued: the server rejects it
 and closes the connection. The Acme order payload is tiny, but a service
-that tries to ship a large blob inside a message hits this. Do not guess
+that tries to ship a large blob inside a message hits this. Don't guess
 the ceiling: ask the server for it, then keep payloads under it and pass
 a reference for anything large.
 
@@ -224,10 +224,10 @@ nc.Flush() // wait until the server has the message, then exit
 nc.Close()
 ```
 
-**A slow subscriber gets cut off.** A subscriber that cannot keep up
+**A slow subscriber gets cut off.** A subscriber that can't keep up
 with the rate of matching messages builds a backlog on the server. Past
 a threshold the server stops protecting it, logs `Slow Consumer
-Detected`, and closes its connection — the other subscribers are
+Detected`, and closes its connection. The other subscribers are
 unaffected. The fix lives in the client: process messages fast enough,
 or hand them to a worker. [Resilient clients →
 Slow consumers](/learn/resilient-clients/slow-consumers) covers the
@@ -244,12 +244,12 @@ talking over core publish-subscribe:
 - A message published with no interest is discarded, and delivery is
   at-most-once.
 
-## What is next
+## What's next
 
 Right now every service subscribes to one exact subject. The next page,
 [Subjects & wildcards](/learn/core-nats/subjects-and-wildcards), shows
 how subjects form a hierarchy and how a subscriber uses `*` and `>` to
-match many subjects at once — including regional orders like
+match many subjects at once, including regional orders like
 `orders.us.created`.
 
 ## See also

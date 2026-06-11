@@ -12,16 +12,16 @@ one server, `n1`, on a laptop. That server publishes `orders.*` and holds
 the `ORDERS` stream. It also has one fatal property: if it stops, the whole
 ORDERS system stops with it.
 
-This page fixes that. It stands up the production cluster `east` —
-three servers, `n1-east`, `n2-east`, and `n3-east` — and shows a client
+This page fixes that. You'll stand up the production cluster `east`
+(three servers: `n1-east`, `n2-east`, and `n3-east`) and watch a client
 ride through the loss of one of them without missing a beat.
 
-The application does not change. The same publish to `orders.created`, the
+The application doesn't change. The same publish to `orders.created`, the
 same `ORDERS` stream, the same payload. What changes is the deployment
 underneath it.
 
-This page introduces two ideas: a **cluster** is a set of servers joined by
-**routes**, and a client connects to any one of those servers and fails
+This page introduces two ideas: a cluster is a set of servers joined by
+routes, and a client connects to any one of those servers and fails
 over to another when its server dies.
 
 ## What a cluster is
@@ -32,13 +32,13 @@ in the cluster can reach a subscriber connected to any other server in the
 cluster.
 
 The servers connect to each other over **routes**. A route is a
-server-to-server connection, distinct from the client connections you have
+server-to-server connection, distinct from the client connections you've
 used so far. Clients connect on the client port (4222); servers connect to
 each other on a separate cluster port (6222).
 
 Every server holds a route to every other server, so each is one hop from
-all the rest. With three servers that is three routes. There is no central
-coordinator and no single server the others depend on — each is a peer. A
+all the rest. With three servers that's three routes. There's no central
+coordinator and no single server the others depend on; each is a peer. A
 message a server receives over a route is delivered to that server's own
 clients and forwarded no further, because one hop is always enough to reach
 anyone.
@@ -53,11 +53,11 @@ config and the shape here.
 ## Configure three servers
 
 Each server in `east` needs the same cluster name and its own pair of
-ports. The cluster name is what binds them into one cluster — servers with
+ports. The cluster name is what binds them into one: servers with
 matching names form a cluster together, and a mismatched name silently
 forms a separate one.
 
-Here is `n1-east`. The others point at it first to find the cluster.
+Here's `n1-east`. The others point at it first to find the cluster.
 
 ```conf title="n1-east.conf"
 server_name: n1-east
@@ -104,21 +104,21 @@ cluster {
 Three fields do the work in each `cluster {}` block.
 
 `name` is the cluster identifier. It must be `east` on all three servers,
-or they will not join.
+or they won't join.
 
-`listen` is the address and port this server accepts routes on. It is the
-cluster port — `6222`, `6223`, `6224` — and it is separate from the client
+`listen` is the address and port this server accepts routes on. It's the
+cluster port (`6222`, `6223`, `6224`), separate from the client
 port in `listen` at the top of the file.
 
 `routes` is the list of peers to actively connect to. Only `n2-east` and
-`n3-east` carry it, and both point only at `n1-east` on `6222`. They do not
+`n3-east` carry it, and both point only at `n1-east` on `6222`. They don't
 list each other.
 
 ## The routes complete themselves
 
-You configured `n2-east` and `n3-east` with a single route each — to
-`n1-east`. Yet the result is three servers each holding a route to the
-other two. The routes you did not write appear on their own.
+You configured `n2-east` and `n3-east` with a single route each, pointing
+at `n1-east`. Yet the result is three servers each holding a route to the
+other two. The routes you didn't write appear on their own.
 
 When a server connects to a route you wrote, it learns about every other
 server that peer already knows, and connects to those too. So when
@@ -177,7 +177,7 @@ For a single server's view, ask it directly:
 nats server info n1-east
 ```
 
-This shows the server's own perspective — its client port, its routes, and
+This shows the server's own perspective: its client port, its routes, and
 the cluster name it belongs to.
 
 ## A client connects to any server
@@ -185,7 +185,7 @@ the cluster name it belongs to.
 Your application connects to a server, not to "the cluster." But it can be
 handed several servers and treat them as interchangeable.
 
-A client connects to one of the servers it is given. From that one
+A client connects to one of the servers it's given. From that one
 connection it can publish `orders.created` and have a consumer on any
 server in `east` receive it, because the routes carry the message to
 wherever the interest is.
@@ -194,8 +194,8 @@ The server also tells the client about its peers. On connect, a server
 sends an INFO message that includes the other servers' client URLs. The
 client now knows about all three even if you only configured one.
 
-This discovery is what makes the next part work. The client does not need
-the full server list baked into its config — it gets the rest from the
+This discovery is what makes the next part work. The client doesn't need
+the full server list baked into its config; it gets the rest from the
 server it reached.
 
 ## Survive a server loss
@@ -208,33 +208,33 @@ client reconnects to a survivor and keeps publishing.
      data-type="learn-topologies-your-first-cluster-failover"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-When the server holding the client's connection stops, the client does not
-fail. It picks another server from the list it knows — the ones you gave it
-plus the ones it discovered — and reconnects there. Publishing resumes on
+When the server holding the client's connection stops, the client doesn't
+fail. It picks another server from the list it knows (the ones you gave it
+plus the ones it discovered) and reconnects there. Publishing resumes on
 the new connection.
 
 From the application's point of view, a brief reconnect happened and then
-everything continued. The orders kept flowing. That is what the cluster
+everything continued. The orders kept flowing. That's what the cluster
 buys: the loss of one server is a reconnect, not an outage.
 
 One control governs whether discovery works. If a server sets
 `no_advertise: true`, it stops telling clients about its peers, and a
-client knows only the URLs you configured by hand. Leave it off — the
-default — and failover spans the whole cluster automatically.
+client knows only the URLs you configured by hand. Leave it off (the
+default) and failover spans the whole cluster automatically.
 
 ## What this page does not cover
 
 The cluster you built carries plain `orders.*` traffic across routes today.
-It does not yet replicate the `ORDERS` stream. The stream is still
-`Replicas: 1` on whichever server holds it — lose that server and the
+It doesn't yet replicate the `ORDERS` stream. The stream is still
+`Replicas: 1` on whichever server holds it: lose that server and the
 stream is still gone, even though the cluster survives.
 
 Making the stream itself fault-tolerant is JetStream's job, and it brings
 its own moving parts: a meta layer, an odd server count for a quorum, and a
 leader per stream. Those belong to the [next page](/learn/topologies/jetstream-in-a-cluster).
 
-The deeper mechanics behind that quorum — Raft, leader election, where
-replicas land — are not topology questions at all. They live in the
+The deeper mechanics behind that quorum (Raft, leader election, where
+replicas land) aren't topology questions at all. They live in the
 [Clustering & Replication](/learn/clustering) deep dive. This chapter wires
 the shape; that chapter explains the consensus running inside it.
 
@@ -244,16 +244,16 @@ A cluster is forgiving to set up and unforgiving about a handful of
 details. These four bite most often when standing up `east`.
 
 **Hand a client only one server URL.** A client given a single URL has
-nowhere to go when that server dies — it has no peer to reconnect to,
+nowhere to go when that server dies: it has no peer to reconnect to,
 and the reconnect described above never happens. Give every client the
 full list (`n1-east`, `n2-east`, `n3-east`), not one. Discovery fills in
-the peers a server advertises (unless you have set `no_advertise: true`,
+the peers a server advertises (unless you've set `no_advertise: true`,
 which turns it off), but the bootstrap list is your only safety net if the
-very first server is the one that is down. Do not lean on a single seed
+very first server is the one that's down. Don't lean on a single seed
 URL in production.
 
-**Misspell a cluster name.** A typo in `name` does not raise an error.
-The server with the odd name simply forms its own cluster and never
+**Misspell a cluster name.** A typo in `name` doesn't raise an error.
+The server with the odd name forms its own cluster and never
 joins `east`, leaving you with two clusters that look like one until a
 message fails to cross. (On the wire the server rejects the route with
 `cluster name does not match`.) Set the same `name` on all three, then
@@ -264,18 +264,18 @@ confirm they joined as one before trusting the cluster.
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 If every row shows `east`, the cluster is whole. A stray name or a
-missing row means a server went its own way — fix the config and restart it.
+missing row means a server went its own way; fix the config and restart it.
 
 **Expose the cluster port to the world.** The cluster `listen` port
 (6222) accepts route connections from other servers, not clients. Reachable
-from the open internet, it is an entry point into your messaging fabric.
+from the open internet, it's an entry point into your messaging fabric.
 The configs above bind it to `127.0.0.1` for local work; in production bind
 it to a private interface and firewall it, and keep client traffic on 4222.
 
 **Plan for an even server count.** A cluster of two or four servers works
 fine for plain `orders.*` traffic, but the moment you replicate the
-`ORDERS` stream you want an *odd* count — an even set has no clean majority
-to keep a stream writable when one server is lost. That is a JetStream
+`ORDERS` stream you want an *odd* count: an even set has no clean majority
+to keep a stream writable when one server is lost. That's a JetStream
 concern, covered on the [next page](/learn/topologies/jetstream-in-a-cluster);
 the consensus math behind it lives in
 [Clustering & Replication](/learn/clustering). For a pure routing cluster,
@@ -287,14 +287,14 @@ Acme has grown from one dev server to a three-server production cluster:
 
 - The cluster `east` runs `n1-east`, `n2-east`, and `n3-east` locally, on
   client ports 4222/4223/4224 and cluster ports 6222/6223/6224.
-- The three servers are joined by routes — every server holds a route to
+- The three servers are joined by routes: every server holds a route to
   every other, built from pointing each one at `n1-east`.
 - A client connects to any server, discovers the rest, and fails over to a
   survivor when its server dies.
 - The `ORDERS` stream is still single-copy; the cluster protects the
   messaging fabric, not yet the stored data.
 
-## What is next
+## What's next
 
 The next page turns on JetStream across `east` and makes the `ORDERS`
 stream survive a server loss the way the cluster already does:

@@ -8,7 +8,7 @@ description: Run several workers off one consumer, and what happens when one cra
 # 9. A pool of workers
 
 The `shipping` consumer works. One worker pulls a message, ships the
-order, acks. But one worker is a bottleneck — it processes one message
+order, acks. But one worker is a bottleneck: it processes one message
 at a time, and your warehouse has more than one packer.
 
 This page scales `shipping` out to three workers. Nothing about the
@@ -17,13 +17,13 @@ consumer changes. You just point three processes at it.
 ## One consumer, many workers
 
 A consumer is a named cursor on the stream. It lives on the server. It
-does not belong to whichever process created it.
+doesn't belong to whichever process created it.
 
 That means any number of processes can pull from the same consumer at
 the same time. They share the cursor. The server hands each pending
 message to exactly one of them.
 
-This is the whole trick. To get a pool of workers, you run the same
+That's the whole trick. To get a pool of workers, you run the same
 pull loop in several processes, all naming the same consumer:
 
 <div class="nats-example"
@@ -71,23 +71,23 @@ difference matters.
 
 A queue group balances **live** messages across core NATS subscribers.
 The balancing happens at delivery time, with no storage behind it. A
-subscriber that is offline when a message arrives misses it, and
+subscriber that's offline when a message arrives misses it, and
 nothing redelivers.
 
 A worker pool balances **stored** messages across processes sharing one
 consumer. The balancing happens against the stream. A message waits in
-the stream until some worker pulls it and acks it. A worker that is
-offline simply does not pull — the message waits for one that does.
+the stream until some worker pulls it and acks it. A worker that's
+offline doesn't pull; the message waits for one that does.
 
 Same shape on the surface, different guarantees underneath. The worker
 pool is the durable version.
 
 ## When a worker crashes mid-message
 
-Here is the failure that the stream makes safe.
+Here's the failure the stream makes safe.
 
 A worker pulls a message and starts shipping the order. Halfway
-through — before it acks — the process dies. The message was already
+through, before it acks, the process dies. The message was already
 delivered to that worker. In core NATS, it would be gone.
 
 It is not gone. An unacked message is still pending on the consumer.
@@ -107,16 +107,16 @@ never zero times, even though the first attempt failed.
 ## Capping how much is in flight
 
 Three workers can each be holding a message at once. A bigger pool
-holds more messages in flight at once. There is a ceiling on this, and
-it is worth knowing before you grow the pool.
+holds more in flight. There's a ceiling on this, and it's worth
+knowing before you grow the pool.
 
-The ceiling is `MaxAckPending` — the number of delivered-but-unacked
+The ceiling is `MaxAckPending`: the number of delivered-but-unacked
 messages the consumer will allow across the whole pool. Its default is
 1000. When the pool reaches that many messages in flight, the server
 stops handing out new ones until some get acked.
 
 `MaxAckPending` is shared by every worker on the consumer, not
-per-worker. Five workers do not get 1000 each; they get 1000 between
+per-worker. Five workers don't get 1000 each; they get 1000 between
 them. The cap is a property of the consumer, so it governs the pool as
 a whole.
 
@@ -131,20 +131,20 @@ waiting for a slot to free up. Too high and a slow ack leaves a large
 backlog of in-flight messages that all redeliver at once if a batch of
 workers dies together.
 
-The full set of in-flight and redelivery options — `AckWait` tuning,
-per-attempt backoff arrays — is documented in
+The full set of in-flight and redelivery options (`AckWait` tuning,
+per-attempt backoff arrays) lives in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 We use only `MaxAckPending` here.
 
 ## Pitfalls
 
-A pool of workers turns two consumer settings — `AckWait` and
-`MaxAckPending` — into things you feel. Here is what bites.
+A pool of workers turns two consumer settings, `AckWait` and
+`MaxAckPending`, into things you feel. Here's what bites.
 
-**A redelivered order ships twice if the worker is not idempotent.**
+**A redelivered order ships twice if the worker isn't idempotent.**
 The pool gives you at-least-once delivery: when one worker crashes
 mid-message, the order comes back to another after `AckWait`. If your
-worker performs its side effect — charging a card, printing a label —
+worker performs its side effect (charging a card, printing a label)
 before it acks, that side effect runs again on the redelivery. Key
 every effect by `order_id` so a second delivery of `ord_8w2k` is a
 no-op, not a double shipment. Watch redelivery on the pool:
@@ -164,13 +164,13 @@ count, with headroom:
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **A crashed worker holds its in-flight message until `AckWait`.** The
-server does not know a worker died; it only knows the ack never came.
-Until the timer expires — 30 seconds by default — that order waits,
+server doesn't know a worker died; it only knows the ack never came.
+Until the timer expires (30 seconds by default), that order waits,
 pending and undelivered to anyone else. A short `AckWait` recovers
 faster but redelivers prematurely when honest work runs long, so tune
 it to your real processing time, not to your worst crash. This page
 focuses on `MaxAckPending`; the full set of in-flight tuning and
-redelivery options — `AckWait`, `MaxDeliver`, and backoff arrays — is
+redelivery options (`AckWait`, `MaxDeliver`, and backoff arrays) is
 documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 
@@ -186,12 +186,12 @@ You now have:
 - A name for the ceiling on concurrency: `MaxAckPending`, shared across
   the pool.
 
-The pool scales by adding processes. The consumer does not care how
+The pool scales by adding processes. The consumer doesn't care how
 many there are.
 
-## What is next
+## What's next
 
-Right now the server decides which worker gets the next message — it
+Right now the server decides which worker gets the next message; it
 spreads them across whoever is asking. The next page,
 [Priority groups](/learn/jetstream/priority-groups), gives you control
 over that: pinning work to one worker, or letting a backup take over

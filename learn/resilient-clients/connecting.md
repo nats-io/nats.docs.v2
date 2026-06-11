@@ -8,26 +8,26 @@ description: Open order-svc with a name, a server pool, and a connect timeout, a
 # 1. Connecting
 
 Every resilient connection starts the same way: a client opens it. So far
-`order-svc` has connected with nothing but a server URL — a bare default
-connection. That works on a laptop. It is the wrong starting point for
+`order-svc` has connected with nothing but a server URL, a bare default
+connection. That works on a laptop. It's the wrong starting point for
 production, because the very first thing a connection does is the part most
 likely to fail: finding a server, agreeing on terms, and proving who it is.
 
 This page opens `order-svc`'s connection deliberately. It adds two things to
-the bare default: a small set of **connection options** that name the
+the bare default: a small set of connection options that name the
 connection and point it at more than one server, and an understanding of the
-**connect handshake** — the short conversation the client and server have
+connect handshake, the short conversation the client and server have
 before the first message moves. Get these right and every later mechanism in
 this chapter has a solid connection to build on.
 
 ## Connection options
 
-A **connection option** is a setting you pass at connect time. It is fixed
-for the life of the connection — you choose it when you open the connection,
+A **connection option** is a setting you pass at connect time. It's fixed
+for the life of the connection: you choose it when you open the connection,
 not while messages flow. Three of them matter before anything else.
 
 The first is the **connection name**. By default a connection is anonymous:
-the server sees a client, but cannot tell which application it is. Naming the
+the server sees a client, but can't tell which application it is. Naming the
 connection `order-svc` makes it identifiable in `nats server report
 connections` and in the server logs, so when something goes wrong you can
 find the right connection instead of guessing.
@@ -35,10 +35,10 @@ find the right connection instead of guessing.
 The second is the **server pool**: the list of server URLs the client may
 connect to. With one URL, a client has one place to go, and if that server is
 unreachable the connect fails. With several URLs the client has choices. It
-tries them until one answers, which is failover at connect time — before a
+tries them until one answers, which is failover at connect time, before a
 single message is sent.
 
-Here is `order-svc` opening a named connection to a single server, the
+Here's `order-svc` opening a named connection to a single server, the
 laptop setup from Core NATS:
 
 <div class="nats-example" data-type="learn-resilient-clients-connecting-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -58,12 +58,12 @@ tries `n1`. That randomization spreads connections evenly across the servers
 instead of stacking every client on whichever URL happens to be first in the
 list.
 
-You can turn randomization off with a single option — the wording is some
-variant of `NoRandomize` in every client — when you deliberately want a
+You can turn randomization off with a single option (every client calls it
+some variant of `NoRandomize`) when you deliberately want a
 preferred-server order. Most applications should leave it on so that a
-restart of every `order-svc` instance does not hammer one server.
+restart of every `order-svc` instance doesn't hammer one server.
 
-`order-svc` opens against the `n1`/`n2`/`n3` cluster — used here only as a
+`order-svc` opens against the `n1`/`n2`/`n3` cluster, used here only as a
 pool of three URLs the client can reach, not as a thing this chapter
 explains:
 
@@ -76,16 +76,16 @@ as a fact: three URLs the client may dial.
 
 ## The connect timeout bounds the dial
 
-Dialing a server is not instant. The client resolves the hostname, opens a
-TCP socket, and waits for the server to answer. Any of those steps can hang —
-a wrong DNS entry, a firewall that drops packets, a server that is up but
+Dialing a server isn't instant. The client resolves the hostname, opens a
+TCP socket, and waits for the server to answer. Any of those steps can hang:
+a wrong DNS entry, a firewall that drops packets, a server that's up but
 overloaded. Without a bound, the client waits indefinitely.
 
 The **connect timeout** is that bound. It caps how long a single dial may
 block before the client gives up and tries the next URL in the pool. The
-default is short — two seconds in most clients — which is enough for a
+default is short (two seconds in most clients), which is enough for a
 healthy network and quick to move past a dead server. Set it deliberately
-when your network is slower than that, or leave the default when it is not.
+when your network is slower than that, or leave the default when it isn't.
 
 The timeout and a server pool work together. A pool gives the client
 somewhere else to go; the timeout decides how long it waits before going
@@ -93,13 +93,13 @@ there. One unreachable server in the pool costs you one timeout, then the
 client moves on.
 
 The full set of connection options is documented in
-[Reference](/reference/). We cover only the ones that change how a connection
-behaves under fault here.
+[Reference](/reference/); here we cover only the ones that change how a
+connection behaves under fault.
 
 ## The connect handshake
 
 Naming a connection and pointing it at a pool decides *where* the client
-goes. The **connect handshake** is *what happens* when it gets there — the
+goes. The **connect handshake** is *what happens* when it gets there: the
 short conversation that turns a TCP socket into a working NATS connection.
 
 It runs in four steps, in order:
@@ -116,16 +116,16 @@ It runs in four steps, in order:
    `-ERR`. After `+OK`, the connection is **CONNECTED** and messages may
    flow.
 
-Picture the handshake — and the two end states it can reach, CONNECTED or
+Picture the handshake and the two end states it can reach, CONNECTED or
 rejected:
 
 <div class="nats-flow" data-scenario="connectHandshakeAnimated" data-width="600" data-height="350"></div>
 
-Two fields in that `INFO` message change how the client behaves, so they are
+Two fields in that `INFO` message change how the client behaves, so they're
 worth naming.
 
 `auth_required` tells the client whether the server demands credentials. If
-it is true and the client has none, the handshake ends in `-ERR` and the
+it's true and the client has none, the handshake ends in `-ERR` and the
 connection never reaches CONNECTED. Supplying those credentials is the job of
 [TLS & Auth](/learn/resilient-clients/tls-and-auth) later in this chapter;
 here you only need to know the server announces the requirement up front, in
@@ -134,7 +134,7 @@ the handshake.
 `max_payload` is the largest single message the server will accept, one
 megabyte by default. The client reads it from `INFO` and enforces it
 locally: a publish larger than `max_payload` fails *before* it leaves the
-client, rather than being sent and rejected. That is why an oversized
+client, rather than being sent and rejected. That's why an oversized
 `orders.created` event fails fast — the client already knows the limit.
 
 ## Pitfalls
@@ -145,9 +145,9 @@ session later.
 
 **One URL is a single point of failure at connect time.** A connection
 opened against a single server has nowhere to go if that server is
-unreachable, and the connect simply fails. Do not hardcode one URL for a
-production client. Pass the whole pool — several URLs, or several IPs behind
-one name — so the client can fail over while it is still connecting.
+unreachable, and the connect fails. Don't hardcode one URL for a
+production client. Pass the whole pool (several URLs, or several IPs behind
+one name) so the client can fail over while it's still connecting.
 
 **A blocked dial with no timeout hangs the startup.** If DNS resolution or
 the TCP dial stalls and no connect timeout is set short, the client waits far
@@ -157,8 +157,8 @@ single slow server costs one timeout, not the whole startup.
 
 **An oversized message fails the publish, not the connect.** A message larger
 than the server's `max_payload` (one megabyte by default) is refused by the
-client itself, before it is sent. The connection is fine; the publish is the
-thing that fails. Do not treat that error as a connection problem — keep
+client itself, before it's sent. The connection is fine; the publish is the
+thing that fails. Don't treat that error as a connection problem. Keep
 messages under `max_payload`, and for large bodies store the blob elsewhere
 and publish a reference.
 
@@ -172,20 +172,20 @@ reach any server in the pool at all:
 
 `order-svc` now opens its connection deliberately:
 
-- It carries a **name** (`order-svc`), so the server can identify it.
-- It points at a **server pool** — `n1`/`n2`/`n3` — randomized by default, so
-  one unreachable server is not fatal at connect time.
-- It bounds each dial with a **connect timeout**, so a blocked server costs
+- It carries a name (`order-svc`), so the server can identify it.
+- It points at a server pool (`n1`/`n2`/`n3`), randomized by default, so
+  one unreachable server isn't fatal at connect time.
+- It bounds each dial with a connect timeout, so a blocked server costs
   one timeout and no more.
 
-And you can read the **connect handshake**: TCP, the server's `INFO`, the
-client's `CONNECT`, and the `+OK` that means CONNECTED — plus what
+And you can read the connect handshake: TCP, the server's `INFO`, the
+client's `CONNECT`, and the `+OK` that means CONNECTED, plus what
 `auth_required` and `max_payload` in `INFO` mean for the client.
 
-## What is next
+## What's next
 
 The connection is open. The next fault to survive is the server going away
-*after* it is open. [Reconnection](/learn/resilient-clients/reconnection)
+*after* it's open. [Reconnection](/learn/resilient-clients/reconnection)
 makes `order-svc` cycle the same pool with backoff and jitter, and buffer its
 publishes until it rejoins.
 
