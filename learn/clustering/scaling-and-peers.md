@@ -9,53 +9,52 @@ description: Add a peer with catchup, remove one safely, and keep quorum while y
 
 The `ORDERS` stream runs at `R=3` on `n1-east`, `n2-east`, and
 `n3-east`, placed where the [Placement](/learn/clustering/placement)
-page pinned it. That peer set is not frozen. You can grow it to move a
-replica onto a new server, or shrink it to retire one — without taking
-the stream down, and without losing the agreement the rest of this
-chapter built.
+page pinned it. That peer set isn't frozen. You can grow it to move a
+replica onto a new server, or shrink it to retire one, without taking
+the stream down or losing the agreement the rest of this chapter built.
 
 This page changes the membership of a RAFT group while it keeps serving.
 A **peer** here is a RAFT-group member, as it has been since
 [Raft and leaders](/learn/clustering/raft-and-leaders): one server's
 role inside the `ORDERS` group. Growing or shrinking that set is **peer
-management**, and it introduces this page's two concepts: **peer add**
-with catchup, and **peer remove** with migration.
+management**, and it comes in two halves: **peer add** with catchup, and
+**peer remove** with migration.
 
 <div class="nats-flow" data-scenario="peerScalingAnimated" data-width="600" data-height="350"></div>
 
 The animation shows both halves: a fourth server joins, streams the
-entries it is missing, and only then counts toward quorum; later one
+entries it's missing, and only then counts toward quorum; later one
 peer is removed and drops its RAFT subscriptions while the rest carry
 on.
 
 ## Peer add: a new peer catches up before it counts
 
 You add capacity to a group by adding a peer. When you grow the
-`ORDERS` group onto a fourth server — call it `n4-east` — the leader
+`ORDERS` group onto a fourth server (call it `n4-east`), the leader
 proposes the addition as a membership-change entry, replicates it to the
 current quorum, and broadcasts the new peer set. `n4-east` is now a
 member.
 
-It is not yet a useful one. A brand-new peer holds none of the stream's
-history. It cannot vote on a write it has never seen and cannot answer a
-read for data it does not have.
+It isn't a useful one yet. A brand-new peer holds none of the stream's
+history. It can't vote on a write it's never seen and can't answer a
+read for data it doesn't have.
 
 So the new peer **catches up** first. Catchup is how a behind or new
-peer streams the entries it is missing: the leader feeds it the log from
-where it is short, the peer applies each entry into its stream store,
-and its lag shrinks toward zero. Lag here is just a count — how many
+peer streams the entries it's missing: the leader feeds it the log from
+where it's short, the peer applies each entry into its stream store,
+and its lag shrinks toward zero. Lag here is just a count: how many
 entries behind the leader's log the peer still is. Until then, the new
-peer is an observer — present in the set, replicating, but not yet relied
-on for quorum.
+peer is an observer, present in the set and replicating, but not yet
+relied on for quorum.
 
 This observer step is the whole safety of a scale-up. Adding `n4-east`
-to an `R=3` group does not put a half-empty replica in the voting path
+to an `R=3` group doesn't put a half-empty replica in the voting path
 the instant it joins. The group keeps committing on the peers that
 already have the data while `n4-east` fills in behind them. Only once
 its lag reaches zero does it carry the same weight as the others.
 
 You watch the catchup in the same place you read everything else about
-the group — the `Cluster` block of `nats stream info`:
+the group, the `Cluster` block of `nats stream info`:
 
 ```bash
 nats --server nats://127.0.0.1:4222 stream info ORDERS
@@ -97,7 +96,7 @@ lands on a peer that stays.
 One membership change happens at a time. While a peer add or remove is
 committing, the group refuses a second one with a
 `cluster member change is in progress` error. This is deliberate:
-two overlapping changes to who is in the voting set are exactly how a
+two overlapping changes to who's in the voting set are exactly how a
 group talks itself out of a quorum. Let one finish, confirm a leader,
 then start the next.
 
@@ -105,8 +104,8 @@ That confirmation is the rule that keeps a shrink safe. After a
 `peer-remove`, re-read the group and check three things before you touch
 it again: the dropped peer is gone, a named leader is back, and the
 remaining replicas report zero lag. Removing one peer from an `R=3`
-group leaves two — still a majority (2) of the original three — so the
-stream keeps a leader throughout. Removing a second before the first
+group leaves two, and two is still a majority of the original three, so
+the stream keeps a leader throughout. Removing a second before the first
 settles is where it goes wrong, which the Pitfalls below make concrete.
 
 The full set of peer-management and stream-assignment operations is
@@ -115,37 +114,37 @@ add, remove, and the verify step here.
 
 ## Pitfalls
 
-Three traps catch people the first time they resize a live group. Each
-one is scoped to this page's two concepts: peer add with catchup, and
+Three traps catch people the first time they resize a live group. All
+three live inside this page's two concepts: peer add with catchup, and
 peer remove with migration.
 
 **Removing two peers from an `R=3` group at once loses quorum.** An
-`R=3` group needs a majority — two of three — to elect a leader and
+`R=3` group needs a majority (two of three) to elect a leader and
 commit a write. Drop one peer and two remain, which is still a quorum of
 the three-member set. Drop a second before the first removal has settled
-and only one peer is left, which cannot form a majority of three: the
-group goes leaderless and the stream stops committing. Do not batch
+and only one peer is left, which can't form a majority of three: the
+group goes leaderless and the stream stops committing. Don't batch
 removals. Remove one peer, wait for a named leader and zero lag, then
 remove the next.
 
-The handling is the verify step itself — remove exactly one, then read
+The handling is the verify step itself. Remove exactly one, then read
 the `Cluster` block back before going further:
 
 <div class="nats-example" data-type="learn-clustering-scaling-and-peers-peerRemove" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-If that second `stream info` shows `no leader`, stop. You have lost
+If that second `stream info` shows `no leader`, stop. You've lost
 quorum, and the fix is to restore a peer, not remove another.
 
-**A freshly added peer is not safe until its lag is zero.** When you add
+**A freshly added peer isn't safe until its lag is zero.** When you add
 `n4-east`, it joins the set immediately but holds none of the stream's
-history. While it catches up it is an observer, not a full member of the
+history. While it catches up it's an observer, not a full member of the
 quorum. If you kill another server mid-catchup, you can drop below the
-peers that actually hold the data and stall the group. Do not treat a
+peers that actually hold the data and stall the group. Don't treat a
 new peer as a working replica until `nats stream info` shows it
-`current` with zero lag — that is when catchup is done.
+`current` with zero lag. That's when catchup is done.
 
-**Do not remove the only remaining peer.** `peer-remove` does not warn
-you when the peer you are dropping is the last copy of the stream's data.
+**Do not remove the only remaining peer.** `peer-remove` doesn't warn
+you when the peer you're dropping is the last copy of the stream's data.
 Removing it destroys that replica. On an `R=3` group you have margin;
 once a group has been shrunk to a single peer, a `peer-remove` of that
 peer is a delete, not a migration. Know the current replica count from
@@ -168,9 +167,9 @@ The `ORDERS` stream is back on `n1-east`, `n2-east`, and `n3-east`, the
 same three peers it started on — but now you can grow or shrink that set
 on purpose.
 
-## What is next
+## What's next
 
-You have walked the whole mechanism: routes form the mesh, RAFT groups
+You've walked the whole mechanism: routes form the mesh, RAFT groups
 agree, a quorum commits each write, placement decides where replicas
 live, and peer management grows the set safely. The last page collects
 the recap, points to where the exhaustive detail lives, and gathers

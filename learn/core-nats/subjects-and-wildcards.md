@@ -12,7 +12,7 @@ subscribed to it. That subject was a flat name. This page gives the
 subject some structure and lets a subscriber match a whole family of
 them at once.
 
-Acme is opening regional fulfilment. Orders no longer all look the same:
+Acme is opening regional fulfillment. Orders no longer all look the same:
 a US order and an EU order need to land somewhere a regional service can
 tell them apart. The subject is where that distinction lives.
 
@@ -21,7 +21,7 @@ tell them apart. The subject is where that distinction lives.
 A **subject** is a string the server uses to match publishers to
 subscribers. You already used one: `orders.created`.
 
-The `.` (dot) is not decoration. It splits the subject into **tokens**.
+The `.` (dot) isn't decoration. It splits the subject into **tokens**.
 `orders.created` is two tokens, `orders` then `created`. The server
 treats each token as a separate unit when it matches.
 
@@ -37,44 +37,44 @@ orders.eu.cancelled
 
 Each of those is three tokens. The first token groups them all under
 `orders`. The second token says which region. The third says what
-happened. Nothing in the server is configured to know "region" means
-anything — the meaning lives entirely in the names Acme chose.
+happened. The server isn't configured to know "region" means anything;
+the meaning lives entirely in the names Acme chose.
 
 A few rules govern what a token may contain.
 
 Subjects are **case-sensitive**. `Orders.created` and `orders.created`
-are two different subjects. A publisher to one will not reach a
+are two different subjects. A publisher to one won't reach a
 subscriber on the other.
 
-Tokens are split by single dots only. Spaces, tabs, and line breaks are
-not allowed anywhere in a subject. Stick to letters, digits, `-`, and
-`_` inside a token and you will never be surprised.
+Tokens are split by single dots only. Spaces, tabs, and line breaks
+aren't allowed anywhere in a subject. Stick to letters, digits, `-`, and
+`_` inside a token and you'll never be surprised.
 
 ## Subjects are essentially free
 
 Acme just invented four new subjects without telling the server first.
-That is allowed, and it costs almost nothing.
+That's allowed, and it costs almost nothing.
 
-The server keeps an **interest graph** — the in-memory record of which
+The server keeps an **interest graph**: the in-memory record of which
 subjects have subscribers, from the previous page. It only holds an
 entry for a subject once something subscribes to it. A subject nobody
 listens to has no presence on the server at all.
 
-So you do not declare subjects, allocate them, or clean them up. You
+So you don't declare subjects, allocate them, or clean them up. You
 publish to a name and the name exists for as long as that publish takes.
 A system can use millions of distinct subjects without the server
 slowing down, because matching walks the token tree rather than scanning
 every subscription.
 
 This is why subject design is cheap to get right. Put the region in the
-subject, put the order ID in the subject if you want — the server does
-not charge you per name.
+subject, put the order ID in the subject if you want; the server
+doesn't charge you per name.
 
 ## Wildcards: subscribe to many subjects at once
 
 A publisher always names one full subject. `nats pub` to
-`orders.*.created` is not "publish to every region" — it would publish
-to the literal subject containing a `*`, which is not what anyone wants.
+`orders.*.created` isn't "publish to every region": it would publish
+to the literal subject containing a `*`, which nobody wants.
 Wildcards are a **subscriber-only** tool.
 
 A **wildcard** is a token in a subscription that matches more than one
@@ -100,14 +100,14 @@ separately, it subscribes once to `orders.*.created`:
 
 The `*` sits in the region position. Walk through what it catches:
 
-- `orders.us.created` — matches. `*` takes the single token `us`.
-- `orders.eu.created` — matches. `*` takes the single token `eu`.
-- `orders.created` — does **not** match. There is no token in the
-  region position; `*` needs exactly one.
-- `orders.us.west.created` — does **not** match. Two tokens sit where
+- `orders.us.created` matches: `*` takes the single token `us`.
+- `orders.eu.created` matches: `*` takes the single token `eu`.
+- `orders.created` does **not** match: there's no token in the
+  region position, and `*` needs exactly one.
+- `orders.us.west.created` does **not** match: two tokens sit where
   `*` allows only one.
 
-The position of `*` is fixed; the token in it is free. That is the whole
+The position of `*` is fixed; the token in it is free. That's the whole
 rule. You can also use more than one: `orders.*.*` matches any
 three-token subject under `orders`, with both middle and last tokens
 free.
@@ -124,16 +124,16 @@ depth, regardless of region or action. One subscription covers it:
 
 `orders.>` reaches the entire hierarchy under `orders`:
 
-- `orders.created` — matches. `>` takes the one token `created`.
-- `orders.us.created` — matches. `>` takes the two tokens `us.created`.
-- `orders.us.west.created` — matches. `>` takes all three remaining
+- `orders.created` matches: `>` takes the one token `created`.
+- `orders.us.created` matches: `>` takes the two tokens `us.created`.
+- `orders.us.west.created` matches: `>` takes all three remaining
   tokens.
-- `orders` — does **not** match. `>` needs at least one token after the
+- `orders` does **not** match: `>` needs at least one token after the
   prefix.
 
 Because `>` matches a token *and everything after it*, it only makes
 sense at the end. `orders.>.created` is invalid and the server rejects
-it immediately with a validation error when you subscribe — there is no
+it immediately with a validation error when you subscribe. There's no
 way to anchor a tail wildcard in the middle and still know where it
 stops.
 
@@ -142,7 +142,7 @@ known shape; `>` is "everything from here down."
 
 ## A wildcard subscriber is a real subscriber
 
-A wildcard does not change the delivery model from the last page. It
+A wildcard doesn't change the delivery model from the last page. It
 changes which subjects count as a match, nothing else.
 
 The audit service on `orders.>` is just another interested subscriber.
@@ -150,27 +150,26 @@ When Acme publishes `orders.us.created`, every matching subscriber gets
 its own copy: the warehouse on `orders.created` does *not* (different
 subject now), the regional analytics on `orders.*.created` does, and the
 audit service on `orders.>` does. The server fans one publish out to all
-of them. Delivery is still at-most-once: a subscriber that is offline
+of them. Delivery is still at-most-once: a subscriber that's offline
 when the message is published does not receive it, and nothing replays
 it later.
 
 That "nothing replays it later" is the ceiling of core NATS. A wildcard
-lets a service that joins now see everything published *from now on* — it
-does not let a service that joins now see what it missed. Capturing the
-backlog so a late subscriber can catch up is what
-[JetStream](/learn/jetstream) adds.
+lets a service that joins now see everything published *from now on*,
+not what it missed before joining. Capturing the backlog so a late
+subscriber can catch up is what [JetStream](/learn/jetstream) adds.
 
 ## Reserved prefixes to stay clear of
 
 Acme can name subjects almost anything. Two prefixes are spoken for.
 
-Subjects beginning with `$` belong to the server and its subsystems —
+Subjects beginning with `$` belong to the server and its subsystems:
 `$SYS` for system events, and `$JS`, `$KV`, `$O`, and `$SRV` for the
-JetStream, Key-Value, Object-Store, and Services subsystems. Do not
+JetStream, Key-Value, Object-Store, and Services subsystems. Don't
 publish application messages under `$`.
 
 The `_INBOX` prefix is reserved for reply subjects that clients generate
-automatically. You do not pick `_INBOX` names yourself, and you do not
+automatically. You don't pick `_INBOX` names yourself, and you don't
 publish business messages there. The next page, on request-reply, shows
 exactly what `_INBOX` is for.
 
@@ -196,7 +195,7 @@ nats pub orders.shipped    '{"order_id":"ord_8w2k","customer":"acme-co","total_c
 
 All three arrive in Terminal 1. Now restart Terminal 1 with
 `nats sub "orders.*.created"` and re-run Terminal 2: only the two
-`*.created` messages arrive — `orders.shipped` no longer matches.
+`*.created` messages arrive; `orders.shipped` no longer matches.
 
 The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
 [Reference → Client protocol](/reference/protocols/client). We only need
@@ -208,23 +207,23 @@ A few subject mistakes bite quietly. Here are the ones to watch on this
 page.
 
 **`>` only works as the last token.** The multi-token wildcard means
-"this token and everything after it," so there is no way to anchor it in
-the middle. `orders.>.created` is not a valid subscription pattern, and
+"this token and everything after it," so there's no way to anchor it in
+the middle. `orders.>.created` isn't a valid subscription pattern, and
 the server rejects it rather than guessing where the tail stops. When you
-want a free token in the middle and a fixed token at the end, that is the
+want a free token in the middle and a fixed token at the end, that's the
 job of `*`: subscribe to `orders.*.created`, not `orders.>.created`.
 
-**Publishers cannot publish "to a wildcard."** Wildcards are a
+**Publishers can't publish "to a wildcard."** Wildcards are a
 subscriber-only tool. A publisher always names one fully-qualified
-subject. The trap is that publishing to `orders.*.created` does not fail
-loudly — the `*` is taken as a literal character, so the message lands on
+subject. The trap is that publishing to `orders.*.created` doesn't fail
+loudly: the `*` is taken as a literal character, so the message lands on
 the odd subject `orders.*.created` and every regional subscriber misses
 it. Publish the real subject (`orders.us.created`); reserve `*` and `>`
 for `nats sub` and the subscribe call in your client.
 
-**An over-broad `orders.>` pulls more than you want.** It is tempting to
+**An over-broad `orders.>` pulls more than you want.** It's tempting to
 subscribe to `orders.>` and filter in code, but that subscriber then
-receives *every* order message at every depth — shipped, cancelled,
+receives *every* order message at every depth: shipped, cancelled,
 every region, forever. Subscribe to the narrowest pattern that covers
 your need: `orders.*.created` for regional new-order analytics, the exact
 subject for a single concern. Narrow interest keeps unwanted traffic off
@@ -253,13 +252,13 @@ Acme's order traffic now has a shape:
   hierarchy.
 
 Subjects address messages; wildcards let one subscriber match a family
-of them. That is the addressing layer everything else in core NATS uses.
+of them. That's the addressing layer everything else in core NATS uses.
 
-## What is next
+## What's next
 
 So far every message flows one way: a publisher speaks, subscribers
 listen, nobody answers. The next page,
-[Request-reply](/learn/core-nats/request-reply), adds a reply path —
+[Request-reply](/learn/core-nats/request-reply), adds a reply path:
 Acme builds an inventory service that *answers* a question on
 `orders.inventory.check`, using a reserved `_INBOX` subject you just met.
 

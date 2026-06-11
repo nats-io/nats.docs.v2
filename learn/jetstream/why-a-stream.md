@@ -11,11 +11,11 @@ Before adding anything new, look at what core NATS already does. A
 publisher publishes to a subject. Anyone subscribed to that subject
 right now receives the message. Nobody else does. Nobody ever will.
 
-That is enough for a lot of systems. Telemetry that you sample, chat
-typing indicators, cache invalidations — anything where missing a
+That's enough for a lot of systems. Telemetry that you sample, chat
+typing indicators, cache invalidations: anything where missing a
 message is fine because another one is coming.
 
-It is not enough for order events.
+It's not enough for order events.
 
 ## The scenario
 
@@ -29,7 +29,7 @@ orders.shipped
 orders.cancelled
 ```
 
-The payload is a small JSON object — the same shape across every
+The payload is a small JSON object, the same shape across every
 example in this chapter:
 
 ```json
@@ -59,11 +59,11 @@ Now ask the harder questions.
 **What happens when the warehouse service restarts?** It disconnects
 for ten seconds while the new process boots. During those ten
 seconds, three new orders come in. The new process subscribes when it
-starts — and it never sees those three orders. The publisher already
+starts and never sees those three orders. The publisher already
 moved on. The messages are gone.
 
 **What happens when the analytics service is added a month later?**
-It cares about every order from the last thirty days. Core NATS has
+It cares about every order from the last 30 days. Core NATS has
 no way to deliver them. They were never stored anywhere it can ask.
 
 **What happens when the warehouse worker crashes mid-pack?** It
@@ -86,24 +86,24 @@ The stream is the missing piece. Once messages live in a stream, the
 three failures above stop being problems:
 
 - The warehouse can restart, then ask the server to replay messages
-  it missed. The messages were never gone — they were stored in the
+  it missed. The messages were never gone; they were stored in the
   stream, waiting.
 - The analytics service can be added a month later and read from the
   beginning of the stream. The history is right there.
 - A crashed worker leaves an unacked message in flight. The
   server redelivers it to another worker after a timeout.
 
-That last one — _redelivery_ — is what gives JetStream the property
+That last one, _redelivery_, is what gives JetStream the property
 called **at-least-once delivery**. A message stays in flight until
 the consumer acks it. A consumer is the server-side reader that pulls
-messages out of a stream; we build the first one a few pages from
-now. We will work through the redelivery mechanics there too.
+messages out of a stream; we'll build the first one a few pages from
+now and work through the redelivery mechanics there.
 
 ## What does not change
 
-A stream does not change the way core NATS publishes and subscribes.
+A stream doesn't change the way core NATS publishes and subscribes.
 The wire protocol is the same. A publisher still calls publish on a
-subject and does not know who, if anyone, is listening. The
+subject and doesn't know who, if anyone, is listening. The
 difference is on the server: the message also lands in any streams
 that capture matching subjects.
 
@@ -111,19 +111,19 @@ This matters because a subject can be captured by a stream and
 listened to directly at the same time. A monitoring dashboard can
 keep subscribing to `orders.>` over plain core NATS for a live feed,
 while the warehouse, notifications, and analytics services read from
-the `ORDERS` stream for reliable processing. The publisher does not
+the `ORDERS` stream for reliable processing. The publisher doesn't
 need to know.
 
-A stream is also not infinite. It has limits — how many messages it
-keeps, for how long, and on disk or in memory. Those limits are what
-makes a stream a finite, manageable resource instead of an
-ever-growing log. We will configure them on a later page.
+A stream also isn't infinite. It has limits: how many messages it
+keeps, for how long, and on disk or in memory. Those limits make a
+stream a finite, manageable resource instead of an ever-growing log.
+We'll configure them on a later page.
 
 ## When you do not need a stream
 
-Reaching for a stream is not free. Streams use disk (or memory), they
-have a leader, they need cleaning up. If your messages truly do not
-need to survive a restart, do not introduce one.
+Reaching for a stream isn't free. Streams use disk (or memory), they
+have a leader, they need cleaning up. If your messages truly don't
+need to survive a restart, don't introduce one.
 
 Good signals that pub-sub is still the right answer:
 
@@ -141,35 +141,35 @@ If any of those stop being true, a stream is what you want.
 Two assumptions trip people up the first time they reach for a stream.
 
 **A stream is not a responder.** Capturing `orders.>` into the `ORDERS`
-stream stores every matching message. It does not make the subject
+stream stores every matching message. It doesn't make the subject
 answer requests. A caller that publishes a request and waits for a
-reply still gets _no responders_ when nobody is subscribed live — the
+reply still gets _no responders_ when nobody is subscribed live; the
 stream sits silently behind the subject and never replies.
 
-Do not treat "the stream exists" as "someone will answer." If you need
+Don't treat "the stream exists" as "someone will answer." If you need
 a reply, run a service that subscribes and responds; the stream is for
 storage and replay, not for request-reply.
 
 <div class="nats-example" data-type="learn-jetstream-why-a-stream-no-responders" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The message in that request still lands in the `ORDERS` stream. Getting
-it back out is a consumer's job, which we cover on the consumer pages —
-it is never a reply to the original publisher.
+it back out is a consumer's job, which we cover on the consumer pages.
+It's never a reply to the original publisher.
 
-**Reaching for a stream when pub-sub already works.** A stream is not
+**Reaching for a stream when pub-sub already works.** A stream isn't
 free: it writes to disk by default, it has a single leader until you
-ask for more replicas, and it needs limits so it does not grow forever.
+ask for more replicas, and it needs limits so it doesn't grow forever.
 Adding one to a flow where missing a message has no consequence buys
 you cost without buying you anything.
 
-Do not store what the next message supersedes. The signals for staying
+Don't store what the next message supersedes. The signals for staying
 on plain pub-sub are listed under [When you do not need a
 stream](#when-you-do-not-need-a-stream) above; if none of them hold, a
 stream is the right call.
 
-## What is next
+## What's next
 
-The next page creates the `ORDERS` stream — one CLI command and a
+The next page creates the `ORDERS` stream: one CLI command and a
 look at what the server reports back. After that we publish into it
 and see how stored messages differ from sent messages.
 

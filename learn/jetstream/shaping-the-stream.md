@@ -9,7 +9,7 @@ description: Control stream size and age with limits, and decide what happens wh
 
 The `ORDERS` stream you created back on page 2 has no limits. It keeps
 every message forever, on however much disk the server has. That was
-fine for learning. It is not fine for production.
+fine for learning. It's not fine for production.
 
 A stream with no limits is a slow-motion outage. Orders keep arriving,
 the stream keeps growing, and one day the disk fills. Nothing warns you
@@ -24,9 +24,9 @@ a limit is reached. Set the ceiling, then decide who wins under pressure.
 
 A stream under the default **Limits** retention policy keeps messages
 until a limit forces it to drop them. You saw that policy in the config
-printout on page 2. A limit is a single idea — a ceiling on the stream —
-expressed through any of three knobs, depending on what you measure the
-stream by:
+printout on page 2. A limit is one idea, a ceiling on the stream, and
+you express it through any of three knobs, depending on what you
+measure the stream by:
 
 - **MaxAge** caps how old a message may get. Set it to seven days and a
   message is removed roughly seven days after it was stored. This is the
@@ -41,7 +41,7 @@ stream by:
   when message count, rather than size or age, is what you reason about.
 
 The three knobs are independent and all active at once. Whichever one is
-hit first triggers a drop. You do not have to set all three — set the
+hit first triggers a drop. You don't have to set all three: set the
 ones that match how you think about the stream, and leave the rest
 unlimited.
 
@@ -77,18 +77,18 @@ Configuration:
  Maximum Message Size: unlimited
 ```
 
-`Maximum Messages` is still `unlimited` — you set only age and bytes.
-The stream is now a finite, managed resource: it cannot outgrow a
-gigabyte, and it cannot hold anything older than a week.
+`Maximum Messages` is still `unlimited`, because you set only age and
+bytes. The stream is now a finite, managed resource: it can't outgrow a
+gigabyte, and it can't hold anything older than a week.
 
 ## The Discard policy: who wins under pressure
 
-The limit was the first idea. The **Discard policy** is the second, and
+The limit was the first idea. The Discard policy is the second, and
 it answers one question: at the moment a new message would push the
 stream past a limit, who wins — the new message or the old one? It has
 two settings.
 
-**Discard Old** is the default, and it is what you have right now. When a
+**Discard Old** is the default, and it's what you have right now. When a
 limit is hit, the server drops the *oldest* messages to make room for the
 new one. The publish always succeeds. The stream behaves like a rolling
 window: newest messages in, oldest messages out.
@@ -104,28 +104,28 @@ order from eight days ago is the one to drop, not today's. Leave the
 default in place.
 
 Discard New earns its keep when dropping an old message would lose data
-you are required to keep, and you would rather the publisher feel
-backpressure than lose history. The publisher must then handle the
-rejected publish, which is why it is the less common default.
+you're required to keep, and you'd rather the publisher feel
+backpressure than lose history. The publisher then has to handle the
+rejected publish, which is why it's the less common choice.
 
 ## Limits belong to the stream, not the consumer
 
-A limit drops a message for everyone. When MaxAge removes a message, it
-is gone from the stream, and every consumer reading that stream loses
+A limit drops a message for everyone. When MaxAge removes a message,
+it's gone from the stream, and every consumer reading that stream loses
 access to it at once.
 
 This is why limits and consumers are separate decisions. The `shipping`
-consumer's cursor and the `analytics` consumer's filter do not protect a
+consumer's cursor and the `analytics` consumer's filter don't protect a
 message from the stream's limits. If a consumer is too slow and a message
-ages out before that consumer reads it, the message is gone. We return to
-that risk on the next page, where the retention policy itself changes.
+ages out before that consumer reads it, the message is gone. We'll return
+to that risk on the next page, where the retention policy itself changes.
 
 ## What we are not covering here
 
 A stream can also limit messages *per subject* rather than across the
-whole stream — useful when `orders.>` should keep, say, the last hundred
-messages for each individual subject. That is the `MaxMsgsPerSubject`
-option.
+whole stream, which is useful when `orders.>` should keep, say, the last
+hundred messages for each individual subject. That's the
+`MaxMsgsPerSubject` option.
 
 The full set of stream limit options is documented in
 [Reference → Stream Configuration](/reference/jetstream/api/stream).
@@ -137,13 +137,13 @@ Limits are easy to set and easy to misread. Two traps account for most
 of the surprises.
 
 **Discard Old drops the oldest message silently.** Discard Old never
-fails a publish — when a limit is hit, the server removes the oldest
-message and the publish succeeds as if nothing happened. That is exactly
-the behavior you want for a rolling window, but it is silent data loss if
+fails a publish: when a limit is hit, the server removes the oldest
+message and the publish succeeds as if nothing happened. That's exactly
+what you want for a rolling window, but it's silent data loss if
 you expected the stream to push back. Nothing warns the publisher; the
-order from eight days ago is simply gone. When you must keep history and
-would rather the publisher feel backpressure, switch to Discard New, then
-handle the rejected publish — it fails with `maximum bytes exceeded` (or
+order from eight days ago is just gone. When you must keep history and
+would rather the publisher feel backpressure, switch to Discard New and
+handle the rejected publish. It fails with `maximum bytes exceeded` (or
 `maximum messages exceeded`) instead of dropping anything:
 
 <div class="nats-example"
@@ -161,7 +161,7 @@ matters to you.
 and MaxAge measure `ORDERS` as a whole, across every subject under
 `orders.>`. A flood of `orders.created` counts toward the same ceiling as
 `orders.shipped`, so Discard Old can evict a shipped order to make room
-for a created one — one noisy subject starves a quiet one. When each
+for a created one: one noisy subject starves a quiet one. When each
 subject deserves its own retention, add a per-subject ceiling with
 `MaxMsgsPerSubject`:
 
@@ -171,7 +171,7 @@ subject deserves its own retention, add a per-subject ceiling with
 
 Under Discard Old, a per-subject ceiling evicts the oldest message *for
 that subject* once it fills. Under Discard New, it rejects the publish
-with `maximum messages per subject exceeded` — a third rejection string
+with `maximum messages per subject exceeded`, a third rejection string
 alongside the whole-stream `maximum bytes exceeded` and
 `maximum messages exceeded`.
 
@@ -179,19 +179,19 @@ alongside the whole-stream `maximum bytes exceeded` and
 
 You now have:
 
-- An `ORDERS` stream capped at a 7-day MaxAge and a 1 GiB MaxBytes
-  ceiling.
-- The three messages from earlier still stored — editing limits does not
-  drop messages that already sit within them.
+- an `ORDERS` stream capped at a seven-day MaxAge and a 1 GiB MaxBytes
+  ceiling
+- the three messages from earlier still stored (editing limits doesn't
+  drop messages that already sit within them)
 - Discard Old in place, so a future limit drops the oldest order, never
-  the newest.
+  the newest
 
-## What is next
+## What's next
 
 You set *limits* under the default Limits retention policy. The next page
-steps up to the policy choice itself: Limits versus Interest versus
-WorkQueue — the three retention policies, and which one to reach for per
-use case.
+steps up to the policy choice itself: the three retention policies,
+Limits versus Interest versus WorkQueue, and which one to reach for
+when.
 
 ## See also
 

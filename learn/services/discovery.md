@@ -12,8 +12,8 @@ Your `OrderInventory` service answers on `orders.inventory.check`, and
 those subjects in advance. This page removes that requirement.
 
 Every service the framework creates also answers a second, automatic set
-of subjects — the **discovery verbs**. Through them, a caller can ask the
-running system what services exist, what each one answers, and how it is
+of subjects: the **discovery verbs**. Through them, a caller can ask the
+running system what services exist, what each one answers, and how it's
 doing, without anyone hard-coding a subject or maintaining a registry on
 the side.
 
@@ -27,15 +27,15 @@ Discovery is **learning what services exist and what they answer** through
 a fixed set of subjects under the `$SRV` prefix. Every service answers
 three verbs there:
 
-- **PING** — is anyone there? The reply carries the service name, instance
+- **PING**: is anyone there? The reply carries the service name, instance
   id, and version. Use it to find services and measure round-trip time.
-- **INFO** — what does it answer? The reply adds the description and the
+- **INFO**: what does it answer? The reply adds the description and the
   list of endpoints, each with its subject and queue group.
-- **STATS** — how is it doing? The reply adds per-endpoint counters. We
-  read those on the next page; here we only note that the verb exists.
+- **STATS**: how's it doing? The reply adds per-endpoint counters. We
+  read those on the next page; for now, it's enough to know the verb exists.
 
-The verbs are uppercase, and so are their subjects. A service does not
-publish to `$SRV` itself — it subscribes there and replies to your
+The verbs are uppercase, and so are their subjects. A service doesn't
+publish to `$SRV` itself; it subscribes there and replies to your
 requests, the same request-reply you already know.
 
 ## Three levels of address
@@ -51,7 +51,7 @@ one instance:
 
 The same three levels work for `PING` and `STATS`. The first level is how
 you enumerate an unfamiliar system. The second narrows to one service
-name. The third reaches a single **instance** — one running copy of a
+name. The third reaches a single **instance**: one running copy of a
 service, identified by the **service id** the framework generated for it.
 
 Ask `OrderInventory` to describe itself at the name level, and read the
@@ -60,8 +60,8 @@ endpoint list out of the reply:
 <div class="nats-example" data-type="learn-services-discovery-discoverInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The reply tells you the `check` endpoint listens on
-`orders.inventory.check` in queue group `"q"`. That is the same fact you
-configured by hand earlier — but now any caller can read it back from the
+`orders.inventory.check` in queue group `"q"`. That's the same fact you
+configured by hand earlier, but now any caller can read it back from the
 live service instead of trusting documentation.
 
 The `$SRV.PING`/`INFO`/`STATS` wire format and JSON response schemas are
@@ -69,31 +69,31 @@ documented in [Reference](/reference/). We only need the behavior here.
 
 ## Discovery is broadcast, not load-balanced
 
-Here is the one surprise on this page. The endpoints you built answer in a
+Here's the one surprise on this page. The endpoints you built answer in a
 **queue group**, so each request goes to exactly one instance. The
 discovery verbs do **not**. A `$SRV.INFO.OrderInventory` request reaches
 *every* instance named `OrderInventory`, and every one of them replies.
 
-That is deliberate. The point of discovery is to see the whole picture —
+That's deliberate. The point of discovery is to see the whole picture:
 all three instances, not whichever one happened to answer first. So a
-caller does not wait for a single reply; it waits a short deadline and
+caller doesn't wait for a single reply; it waits a short deadline and
 collects however many responses arrive in that window.
 
 <div class="nats-flow" data-scenario="serviceDiscoveryAnimated" data-width="600" data-height="350"></div>
 
 The animation shows it: one `$SRV.INFO.OrderInventory` request fans out to
 all three instances, and three INFO replies come back. The single targeted
-query at the end — `$SRV.STATS.OrderInventory.id2` — reaches only `id2`,
+query at the end, `$SRV.STATS.OrderInventory.id2`, reaches only `id2`,
 because the third address level pins the request to one instance.
 
 ## Targeting one instance
 
-When you already know an id — from a PING or INFO reply — you can address
+When you already know an id (from a PING or INFO reply), you can address
 that instance alone. This is how you inspect or compare a single copy of a
-service that is running many.
+service that's running many.
 
-The third level reaches exactly one instance, so a single reply is
-expected and no deadline loop is needed:
+The third level reaches exactly one instance, so you expect a single
+reply and don't need a deadline loop:
 
 <div class="nats-example" data-type="learn-services-discovery-targetInstance" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -111,7 +111,7 @@ nats service ping
 ```
 
 These run the same `$SRV` requests under the hood and gather the replies
-by deadline. They are the fastest way to see what is running while you
+by deadline. They're the fastest way to see what's running while you
 develop; the programmatic verbs above are what your own tooling uses.
 
 ## Pitfalls
@@ -119,24 +119,24 @@ develop; the programmatic verbs above are what your own tooling uses.
 Two traps catch people the first time they query discovery. Both come from
 the broadcast behavior above.
 
-**Discovery is broadcast — a single reply is not the whole answer.** A
+**Discovery is broadcast: a single reply is not the whole answer.** A
 plain request returns the first response and stops. Against
 `$SRV.INFO.OrderInventory` that gives you one instance and silently hides
-the rest, so a fleet of five looks like a fleet of one. Do not treat a
+the rest, so a fleet of five looks like a fleet of one. Don't treat a
 discovery request like a normal request-reply call. Wait a deadline and
 collect every reply, exactly as the CLI does:
 
 <div class="nats-example" data-type="learn-services-discovery-discoverInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The reverse holds too: when you want one specific instance, use the
-`$SRV.STATS.OrderInventory.<id>` level instead of filtering a broadcast —
-it reaches that instance directly and returns one reply.
+`$SRV.STATS.OrderInventory.<id>` level instead of filtering a broadcast.
+It reaches that instance directly and returns one reply.
 
-**`$SRV` is a reserved subject prefix — do not publish to it yourself.**
+**`$SRV` is a reserved subject prefix: do not publish to it yourself.**
 The framework owns the entire `$SRV` tree; services subscribe there to
 answer PING, INFO, and STATS. Publishing your own messages under `$SRV`
 collides with that machinery and corrupts what callers discover. Keep your
-own subjects under your own prefixes — `orders.*`, `shipping.*` — and let
+own subjects under your own prefixes (`orders.*`, `shipping.*`) and let
 the framework own `$SRV`. Who may even see `$SRV` across account
 boundaries is a separate question, covered in
 [Security](/learn/security).
@@ -150,12 +150,12 @@ by its id. You also know the catch: discovery is broadcast, so you gather
 replies by deadline rather than taking the first one.
 
 `OrderInventory` and `ShippingQuote` are still running. Nothing about them
-changed — you simply learned to ask them what they are.
+changed; you just learned to ask them what they are.
 
-## What is next
+## What's next
 
-INFO told you *what* a service answers. The STATS verb tells you *how it
-is doing* — request counts, error counts, and processing time per
+INFO told you *what* a service answers. The STATS verb tells you *how
+it's doing*: request counts, error counts, and processing time per
 endpoint. The next page reads those counters and shows how a handler
 records an error.
 

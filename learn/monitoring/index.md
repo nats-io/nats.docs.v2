@@ -7,23 +7,23 @@ description: Watch a running NATS deployment — where the numbers come from, wh
 
 # Monitoring & Observability Deep Dive
 
-The Develop chapters taught you to *build* — Core NATS, JetStream, and
-the rest — and the Operate chapters before this one stood the result up:
+The Develop chapters taught you to *build* (Core NATS, JetStream, and
+the rest), and the Operate chapters before this one stood the result up:
 the Topologies and Security deep dives gave you a NATS deployment that
-runs. This chapter teaches the next thing you need — how to *watch* that
+runs. This chapter teaches the next thing you need: how to *watch* that
 deployment while it runs.
 
 Monitoring is strictly about observation. This chapter shows you where
-the numbers live, which ones tell you something is wrong, and how to put
+the numbers live, which ones tell you something's wrong, and how to put
 them in front of a person before a customer notices. It never tells you
 how to *change* the deployment in response. When a number says "scale
 this" or "back this up," the page names the symptom and links the
 Operate chapter that owns the fix.
 
-We do not build anything new. We take the fully grown Acme ORDERS
-deployment — the three-node `east` cluster, the `ORDERS` stream, and the
-`shipping` and `analytics` consumers you stood up in the earlier
-chapters — and we observe it. The whole chapter follows one story: the
+We don't build anything new. We take the fully grown Acme ORDERS
+deployment you stood up in the earlier chapters (the three-node `east`
+cluster, the `ORDERS` stream, and the `shipping` and `analytics`
+consumers) and observe it. The whole chapter follows one story: the
 `shipping` consumer falls behind, and you watch that happen four
 different ways.
 
@@ -33,7 +33,7 @@ different ways.
   and cluster state, and read connection and route counts for the
   `ORDERS` account.
 - Read the live **state** of the `ORDERS` stream and its `shipping`
-  consumer, and computed **lag** — how far behind the consumer is — as a
+  consumer, and computed **lag**, how far behind the consumer is, as a
   single number.
 - Subscribed to **advisories** and **system events** so you learn about
   events you never actively queried for, like a poison order exhausting
@@ -45,22 +45,22 @@ different ways.
 
 ## Who this is for
 
-You have worked through the [JetStream deep dive](/learn/jetstream) and
+You've worked through the [JetStream deep dive](/learn/jetstream) and
 the [Topologies deep dive](/learn/topologies). You know what a stream, a
-consumer, an ack, and a cluster are — this chapter reads their *state*,
-it does not re-explain them. If "consumer lag" or "the `east` cluster"
+consumer, an ack, and a cluster are. This chapter reads their *state*;
+it doesn't re-explain them. If "consumer lag" or "the `east` cluster"
 needs a refresher, those chapters own the definitions.
 
-You do not need to know anything about running NATS in production. That
-is exactly what this chapter starts from: you can build, and now you
-need to watch.
+You don't need to know anything about running NATS in production.
+That's exactly what this chapter starts from: you can build, and now
+you need to watch.
 
 ## How to read it
 
 Each page introduces at most two new concepts and carries one running
 session forward. You keep the `east` cluster running, then query it,
-then attach a subscription, then attach an exporter — page by page, the
-same Acme deployment observed from one more angle each time.
+then attach a subscription, then attach an exporter. Page by page, it's
+the same Acme deployment, observed from one more angle each time.
 
 Each page traces every metric back to its source: the endpoint that
 serves it or the subject it arrives on. Where a feature has an
@@ -86,7 +86,7 @@ comes from the
 
 ## Prerequisites
 
-You will need:
+You'll need:
 
 - The grown Acme deployment from the earlier chapters running locally:
   the three-node `east` cluster (`n1-east`, `n2-east`, `n3-east`), the
@@ -106,8 +106,8 @@ Bring up the `east` cluster, leave it running, and turn to
 ## See also
 
 - [Topologies deep dive](/learn/topologies) — the `east` cluster this
-  chapter observes.
+  chapter observes
 - [JetStream deep dive](/learn/jetstream) — the `ORDERS` stream and the
-  `shipping` consumer whose state this chapter reads.
+  `shipping` consumer whose state this chapter reads
 - [Reference → monitoring endpoints](/reference/system/monitor) — the
-  exhaustive field-by-field layer behind every number here.
+  exhaustive field-by-field layer behind every number here

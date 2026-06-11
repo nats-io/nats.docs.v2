@@ -12,26 +12,26 @@ defaults: a single URL, no name, no plan for a server going away. You end
 it with an `order-svc` that opens against a server pool, reconnects with
 backoff and jitter, drains in-flight work on shutdown, bounds its
 subscribers' memory, retries requests safely, and presents credentials
-over a CA-validated link. That is the whole arc.
+over a CA-validated link. That's the whole arc.
 
-This page does not teach anything new. It collects the model you built
+This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
 ## The whole game in one sentence
 
-Every page in this chapter moved the same object — the **connection** —
+Every page in this chapter moved the same object, the **connection**,
 through one more state safely. If you remember nothing else, remember
 that.
 
-The connection is a **state machine**. It lives somewhere in a small set
-of states — DISCONNECTED, CONNECTING, CONNECTED, RECONNECTING, DRAINING,
-CLOSED — and every fault this chapter survives is one well-defined edge
+The connection is a **state machine**. It lives in a small set of
+states: DISCONNECTED, CONNECTING, CONNECTED, RECONNECTING, DRAINING,
+CLOSED. Every fault this chapter survives is one well-defined edge
 between them. A server dying moves a CONNECTED client to RECONNECTING. A
 SIGTERM moves it to DRAINING and then CLOSED. A blocked dial keeps it in
 CONNECTING until the timeout fires.
 
-Each page added exactly one transition the Acme clients could not handle
+Each page added exactly one transition the Acme clients couldn't handle
 before. Connecting taught the CONNECTING → CONNECTED edge and the
 handshake that walks it. Reconnection taught the CONNECTED → RECONNECTING
 → CONNECTED loop with backoff and jitter. Drain & Shutdown taught the
@@ -42,20 +42,20 @@ buffer grow without bound. Request-Reply Resilience made a single
 the edge into CONNECTED so the link is encrypted and the client is who it
 claims to be.
 
-Six mechanisms, one machine. Everything else — the exact flags, the
-defaults, the per-language spelling — is a refinement of those edges.
+Six mechanisms, one machine. Everything else is a refinement of those
+edges: the exact flags, the defaults, the per-language spelling.
 
 ## Where the details live now
 
 The chapter is unversioned and concept-first. The exact option names,
 defaults, and ranges live in **Reference**, which is versioned and
 exhaustive. When you need the precise type of a connection option or the
-full list of error codes a `-ERR` can carry, that is where to look.
+full list of error codes a `-ERR` can carry, that's where to look.
 
-The full set of connection options is documented in
-[Reference](/reference/). We covered only the ones that change how a
-connection behaves under fault here; the handoff phrases throughout this
-chapter all point into that root.
+[Reference](/reference/) documents the full set of connection options.
+Here we covered only the ones that change how a connection behaves under
+fault; the handoff phrases throughout this chapter all point into that
+root.
 
 ## Sibling deep dives
 
@@ -65,7 +65,7 @@ it named the gap and linked out. Those links lead to the deep dives that
 own what this one only consumes.
 
 The [Topologies deep dive](/learn/topologies) explains the server pool
-this chapter only connects to — why a server goes away, how the
+this chapter only connects to: why a server goes away, how the
 `n1`/`n2`/`n3` cluster forms, and what a client's disconnect looks like
 from the server side. Resilient Clients treats "the server is gone" as a
 fact; Topologies tells you why.
@@ -78,20 +78,20 @@ repeated or resumed.
 
 The [Security deep dive](/learn/security) issues the credentials and the
 CA this chapter loads. TLS & Auth *consumes* the `order-svc` `.creds` and
-the cluster CA; Security shows how the credentials and the CA are created.
+the cluster CA; Security shows how both are created.
 
 The [Services deep dive](/learn/services) builds the request-reply pattern
 into a framework with built-in retries. If you found yourself wrapping
-every `request()` in backoff, that is the next step.
+every `request()` in backoff, that's the next step.
 
 The [Monitoring deep dive](/learn/monitoring) watches the same connections
-from the server side — the `slow_consumers` metric, the advisories, and the
+from the server side: the `slow_consumers` metric, the advisories, and the
 health endpoints that tell you a client is struggling before its users do.
 
 ## Where you are
 
-This is the end of the chapter — the whole arc is complete, and no new
-scenario state is introduced here. The `order-svc` publisher, the
+This is the end of the chapter. The arc is complete, and this page adds
+no new scenario state. The `order-svc` publisher, the
 `warehouse`, `notifications`, and `analytics` subscribers, and the
 JetStream consumers are still running in your session exactly as you left
 them on the previous page, now with production connection options on every
@@ -104,23 +104,23 @@ the floor for running any NATS client in production.
 ## Production checklist
 
 Every page in this chapter closed with a Pitfalls section. This collects
-the action items from all of them in one place — a last pass before you
+the action items from all of them in one place: a last pass before you
 trust a connection with real orders. Each group links back to the page
 that explains the why.
 
 ### Connecting — see [Pitfalls](/learn/resilient-clients/connecting#pitfalls)
 
-- [ ] Pass the whole server pool — several URLs, or several IPs behind one name — so a single unreachable server is not fatal at connect time.
+- [ ] Pass the whole server pool (several URLs, or several IPs behind one name) so a single unreachable server isn't fatal at connect time.
 - [ ] Set a deliberate connect timeout so a blocked dial costs one timeout, not a hung startup that looks dead.
-- [ ] Keep messages under the server's `max_payload` and store large bodies elsewhere; an oversized publish fails before it is sent, and that is not a connection problem.
+- [ ] Keep messages under the server's `max_payload` and store large bodies elsewhere; an oversized publish fails before it's sent, and that's not a connection problem.
 
 ### Reconnection — see [Pitfalls](/learn/resilient-clients/reconnection#pitfalls)
 
-- [ ] Set `MaxReconnect` to `-1` on a long-lived service so a long outage does not exhaust the default 60 attempts and leave the connection CLOSED.
+- [ ] Set `MaxReconnect` to `-1` on a long-lived service so a long outage doesn't exhaust the default 60 attempts and leave the connection CLOSED.
 - [ ] Watch the reconnect-error callback so a long outage is loud in your logs, not a silent give-up.
 - [ ] Keep a non-zero wait and always keep jitter; a zero or fixed delay either spins the CPU or stampedes the survivor in lockstep.
 - [ ] Catch `ErrReconnectBufExceeded` and back off publishing; the reconnect buffer is 8 MB, not infinite, and the publish that overflows it fails.
-- [ ] Lower the ping interval under heavy load so a wedged connection is caught in seconds, not the default two minutes.
+- [ ] Lower the ping interval under heavy load so you catch a wedged connection in seconds, not the default two minutes.
 
 ### Drain & Shutdown — see [Pitfalls](/learn/resilient-clients/drain-and-shutdown#pitfalls)
 
@@ -146,7 +146,7 @@ that explains the why.
 
 - [ ] Load credentials from a file or environment and never commit a `.creds` to source.
 - [ ] Always supply the CA certificate in production; skip-verify TLS encrypts the link but authenticates nothing.
-- [ ] Refresh a credentials JWT before it expires, or monitor the auth-error rate, so an expired token does not silently break the next reconnect.
+- [ ] Refresh a credentials JWT before it expires, or monitor the auth-error rate, so an expired token doesn't silently break the next reconnect.
 - [ ] Rotate credentials with a fresh connection and drain the old one; reloading a creds file mid-connection races the live link.
 
 ## See also

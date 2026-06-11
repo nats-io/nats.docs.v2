@@ -12,25 +12,25 @@ HTTP port on each NATS server. Before you reach for Prometheus or
 Grafana, you can ask a running node what it sees, right now, with a
 plain `curl`. This page is where the numbers come from on the wire.
 
-We observe the `east` cluster you already have running — `n1-east`,
-`n2-east`, `n3-east` — and nothing more. You will query one node's
-monitoring port, read who is connected and how the cluster is wired,
+We observe the `east` cluster you already have running (`n1-east`,
+`n2-east`, `n3-east`) and nothing more. You'll query one node's
+monitoring port, read who's connected and how the cluster is wired,
 and meet `/jsz`, the JetStream lens the next page leans on.
 
 ## The monitoring port serves JSON on demand
 
 Each NATS server exposes a **monitoring port**. By default it listens
 on `:8222`, separate from the `:4222` clients use. It speaks plain HTTP,
-and it answers only when you ask — nothing is pushed. You send a `GET`,
+and it answers only when you ask; nothing is pushed. You send a `GET`,
 the server returns a JSON snapshot of its state at that instant, and the
-connection closes. That is the whole model: a synchronous request, an
+connection closes. That's the whole model: a synchronous request, an
 on-demand response.
 
 A **monitoring endpoint** is one HTTP path on that port. Each path
-returns a different slice of state. The four you will use most are
+returns a different slice of state. The four you'll use most are
 `/varz` (the server itself), `/connz` (its clients), `/routez` (its
 cluster routes), and `/jsz` (its JetStream). Each one is an HTTP path,
-not a call into a client library — you reach it with any HTTP tool.
+not a call into a client library, so any HTTP tool can reach it.
 
 <div class="nats-flow" data-scenario="monitoringEndpointsAnimated" data-width="600" data-height="350"></div>
 
@@ -56,7 +56,7 @@ curl -s http://localhost:8222/varz | jq
 ```
 
 Three counters earn a second look. `connections` is how many clients
-are connected **right now** — here, the four Acme services. The
+are connected *right now*: here, the four Acme services. The
 `total_connections` next to it is the count since the server started, so
 it only ever goes up. And `slow_consumers` is the number of clients the
 server has disconnected for not keeping up; on a healthy node it stays
@@ -108,31 +108,31 @@ curl -s 'http://localhost:8222/connz?acc=ORDERS&subs=true' | jq
 Each entry names one client: its connection id (`cid`), the account and
 user it authenticated as, its round-trip time (`rtt`), and how many
 bytes are queued for it (`pending_bytes`). This is where you confirm
-that the `ORDERS` account's services — connecting as `order-svc` — are
+that the `ORDERS` account's services, connecting as `order-svc`, are
 actually connected, and which subjects each one holds interest in.
 
 The two counts at the top frame the page. `num_connections` is how many
 connections this response actually returned; `total` is how many matched
-the query in all. They are equal here because four connections fit in
+the query in all. They're equal here because four connections fit in
 one response, but once you add `?limit` and `?offset` to page a long
 list, `total` stays put while `num_connections` shrinks to the page
 size.
 
 When a node carries hundreds of connections, page through them. `?limit`
-caps the result, `?offset` skips ahead, and `?sort` orders the list — by
+caps the result, `?offset` skips ahead, and `?sort` orders the list by
 idle time, pending bytes, or subscription count:
 
 ```bash
 curl -s 'http://localhost:8222/connz?sort=pending&limit=10' | jq
 ```
 
-That returns the ten connections with the most data queued — the
+That returns the ten connections with the most data queued: the
 clients most likely to fall behind. The full set of `/connz`
 parameters is documented in
 [Reference → connz](/reference/system/monitor/connz). We use only
 `acc`, `subs`, `sort`, and `limit` here.
 
-`/routez` answers the cluster question. Each entry is one **route** —
+`/routez` answers the cluster question. Each entry is one **route**:
 the link from this node to another node in `east`. It reports the
 remote node's id, the link's round-trip time, and how much data is
 pending on it:
@@ -151,10 +151,10 @@ curl -s http://localhost:8222/routez | jq
 }
 ```
 
-On a healthy three-node cluster, `n1-east` reports two routes — one to
+On a healthy three-node cluster, `n1-east` reports two routes, one to
 each peer. A missing route or a climbing `rtt` is your first sign a node
-has dropped off the mesh. *Why* a route breaks — and how leadership
-moves when it does — belongs to [Clustering](/learn/clustering); the
+has dropped off the mesh. *Why* a route breaks, and how leadership
+moves when it does, belongs to [Clustering](/learn/clustering); the
 endpoint only tells you *that* it broke.
 
 ## /jsz is the JetStream lens
@@ -184,7 +184,7 @@ curl -s 'http://localhost:8222/jsz?acc=ORDERS&streams=true' | jq
 ```
 
 That `last_seq: 1000` and the consumer numbers under it are the raw
-material for **lag** — how far behind the `shipping` consumer is. This
+material for **lag**: how far behind the `shipping` consumer is. This
 page only points `/jsz` out as the JetStream lens. Reading lag,
 in-flight, and redelivery out of it is the whole job of the next page,
 [JetStream health](/learn/monitoring/jetstream-health). The full set of
@@ -193,11 +193,11 @@ in-flight, and redelivery out of it is the whole job of the next page,
 
 ## A note on /healthz
 
-One more endpoint is worth knowing now, even though it does not return
+One more endpoint is worth knowing now, even though it doesn't return
 state to read. A **health check** is a `/healthz` query whose answer is
-just ok or error: a `200` when the node is healthy, a `503` when it is
-not. It is built for an orchestrator — a Kubernetes liveness probe, a
-load balancer — that wants a yes/no, not JSON to parse.
+just ok or error: a `200` when the node is healthy, a `503` when it
+isn't. It's built for an orchestrator (a Kubernetes liveness probe, a
+load balancer) that wants a yes/no, not JSON to parse.
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8222/healthz
@@ -207,8 +207,8 @@ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8222/healthz
 200
 ```
 
-`/healthz` takes parameters that narrow what "healthy" means —
-JetStream-only, this-server-only, a specific stream or consumer — and
+`/healthz` takes parameters that narrow what "healthy" means
+(JetStream-only, this-server-only, a specific stream or consumer), and
 those distinctions matter for cluster checks. We meet them again on the
 [Prometheus and dashboards](/learn/monitoring/prometheus-and-dashboards)
 page, where a check that asks the wrong question is its own Pitfall. The
@@ -224,8 +224,8 @@ endpoints and their parameters.
 **Alert on `connections`, not `total_connections`.** The two counters
 on `/varz` look interchangeable and are not. `connections` is the live
 count; `total_connections` is every connection since the process
-started and only climbs. A client that reconnects in a loop — a crash
-loop, a flaky network — barely moves `connections` but inflates
+started and only climbs. A client that reconnects in a loop (a crash
+loop, a flaky network) barely moves `connections` but inflates
 `total_connections` fast. Alert on the lifetime counter and you page
 someone at 3am for a number that was always going to grow. Alert on
 `connections` for capacity, and watch `slow_consumers` for clients the
@@ -244,20 +244,20 @@ curl -s http://localhost:8222/varz \
 { "live": 4, "lifetime": 118, "dropped": 0 }
 ```
 
-**An unscoped `/jsz` is slow at scale.** Asking for full detail —
-`/jsz?accounts=true&streams=true&consumers=true` — walks every account,
+**An unscoped `/jsz` is slow at scale.** Asking for full detail
+(`/jsz?accounts=true&streams=true&consumers=true`) walks every account,
 stream, and consumer on the node and serializes the lot. On the four
-Acme entities that is instant; on a node with thousands of consumers it
+Acme entities that's instant; on a node with thousands of consumers it
 can take long enough that a scrape times out and you get *no* data. Do
 not fetch the whole tree on a schedule. Scope to one account with
 `?acc=ORDERS`, and page large results with `?offset` and `?limit`.
 
 **The monitoring port is unauthenticated by default.** Anyone who can
 reach `:8222` can read `/connz` and see your users, subjects, and
-traffic. That is fine on a laptop and a leak in production. Locking the
-port down — TLS, an allow-list, system-account access — is a security
+traffic. That's fine on a laptop and a leak in production. Locking the
+port down (TLS, an allow-list, system-account access) is a security
 concern, not a monitoring one, and it lives in
-[Security](/learn/security). Name it now so you do not expose `:8222`
+[Security](/learn/security). Name it now so you don't expose `:8222`
 to the open internet by accident.
 
 ## Where you are
@@ -265,23 +265,23 @@ to the open internet by accident.
 You can now query any node in the `east` cluster on its monitoring port
 `:8222` and read its state on demand:
 
-- `/varz` for the server — version, live `connections`, `slow_consumers`.
-- `/connz?acc=ORDERS` for the clients — who is connected, as which user,
-  holding interest in which subjects.
-- `/routez` for the cluster — the routes from this node to its peers.
-- `/jsz` for JetStream — the streams and consumers, and the raw numbers
-  the next page turns into lag.
+- `/varz` for the server: version, live `connections`, `slow_consumers`
+- `/connz?acc=ORDERS` for the clients: who's connected, as which user,
+  holding interest in which subjects
+- `/routez` for the cluster: the routes from this node to its peers
+- `/jsz` for JetStream: the streams and consumers, and the raw numbers
+  the next page turns into lag
 
 You also know that every endpoint takes parameters to filter and page
 the result, that `/healthz` answers a yes/no health check, and that the
 port is open by default.
 
-## What is next
+## What's next
 
 `/jsz` handed you a stream's `last_seq` and a consumer's numbers but
 left them unexplained. The next page reads the `shipping` consumer's
 state in full and turns those raw fields into the one number that says
-"the shipping consumer is behind": **lag**.
+"the shipping consumer is behind": lag.
 
 Continue to [3. JetStream health](/learn/monitoring/jetstream-health).
 

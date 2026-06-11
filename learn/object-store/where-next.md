@@ -11,9 +11,9 @@ You started this chapter with files that were too large or too binary to
 ride on a plain message and nowhere to put them. You end it with an
 `INVOICES` bucket holding chunked invoices, each one carrying metadata and a
 link, with `analytics` watching for new arrivals and the `OBJ_INVOICES`
-stream visible underneath. That is the whole arc.
+stream visible underneath. That's the whole arc.
 
-This page does not teach anything new. It collects the model you built into
+This page doesn't teach anything new. It collects the model you built into
 one place and points you at the chapters and Reference that take it further.
 
 ## The whole game in three words
@@ -23,7 +23,7 @@ nothing else, remember these.
 
 A **bucket** is a named object store. You `put` a file into it by name and
 `get` it back by name, and you never touch the messages underneath. The
-bucket is the friendly surface — `put`, `get`, `list`, `watch`, `link` — over
+bucket is the friendly surface (`put`, `get`, `list`, `watch`, `link`) over
 a single JetStream stream named `OBJ_<bucket>`.
 
 A **chunk** is one slice of an object. A put splits the bytes at the chunk
@@ -35,23 +35,23 @@ handing you the bytes.
 A **rollup** is what keeps the bucket current rather than historical. Each
 metadata write carries a rollup header, so the stream keeps only the latest
 metadata per object name. Re-put an object and you get one current
-description, not a revision history — that is the line between the object
+description, not a revision history. That's the line between the object
 store and key-value.
 
-Bucket, chunk, rollup. Everything else in this chapter — metadata, links,
-watch, list, soft delete — is a refinement of those three.
+Bucket, chunk, rollup. Everything else in this chapter (metadata, links,
+watch, list, soft delete) is a refinement of those three.
 
 ## Where the details live now
 
 The chapter is unversioned and concept-first. The exact flags, defaults, and
 ranges live in **Reference**, which is versioned and exhaustive. When you
 need the precise chunk-size range, the full `ObjectInfo` field list, or the
-exact watch options, that is where to look.
+exact watch options, that's where to look.
 
 The full set of object store configuration options is documented in
 [Reference](/reference/). We only need the behavior here. The handoff phrases
-throughout this chapter — "the full set of options is documented in
-Reference" — all point into it.
+throughout this chapter ("the full set of options is documented in
+Reference") all point into it.
 
 ## Sibling deep dives
 
@@ -60,24 +60,24 @@ abstractions, so the chapters around it all connect to the model you just
 built.
 
 The [JetStream deep dive](/learn/jetstream) is the layer everything here
-rests on. When you want to understand the `OBJ_INVOICES` stream as a stream —
-its consumers, its retention, its direct get — that is the chapter that
+rests on. When you want to understand the `OBJ_INVOICES` stream as a stream
+(its consumers, its retention, its direct get), that's the chapter that
 teaches it from the ground up.
 
 The [Key-Value deep dive](/learn/key-value) is the sibling store for the
 other shape of data. Where the object store keeps large chunked files and
 only the latest metadata, key-value keeps small structured values and a full
-revision history per key. When you need versioning of a value, that is where
+revision history per key. When you need versioning of a value, that's where
 to go, and its [watching page](/learn/key-value/watching) shows the per-key
-watch the object store does not have.
+watch the object store doesn't have.
 
 The [Clustering & Replication deep dive](/learn/clustering) covers what
-`replicas` means for the backing stream — how `R=3` survives a node loss,
+`replicas` means for the backing stream: how `R=3` survives a node loss,
 how placement works, and what an object store looks like spread across a
 cluster.
 
 The [Monitoring deep dive](/learn/monitoring) covers how to watch the backing
-stream in production — its size, its growth, and the signals that tell you a
+stream in production: its size, its growth, and the signals that tell you a
 bucket is filling faster than you expected.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) covers the
@@ -90,35 +90,35 @@ export, and permission model applies to them directly.
 
 ## Where you are
 
-This is the end of the chapter — the whole arc is complete, and no new
-scenario state is introduced here. The `INVOICES` bucket, its invoices, the
+This is the end of the chapter. The whole arc is complete, and this page
+adds no new scenario state. The `INVOICES` bucket, its invoices, the
 `label-ord_8w2k.png` link, and the `analytics` watcher are still running in
 your session exactly as you left them on the previous page. You can keep
 experimenting with them, or tear them down with `nats object rm INVOICES`
-when you are done.
+when you're done.
 
 You hold the core model: a bucket stores files as chunks, a digest proves
 the bytes survived the round trip, and a rollup keeps the metadata current.
-That model is the floor for every other object store feature you will meet.
+That model is the floor for every other object store feature you'll meet.
 
 ## Production checklist
 
 Every page in this chapter closed with a Pitfalls section. This collects the
-action items from all of them in one place — a last pass before you trust a
+action items from all of them in one place: a last pass before you trust a
 bucket with real invoices. Each group links back to the page that explains
 the why.
 
 ### Your first object — see [Pitfalls](/learn/object-store/your-first-object#pitfalls)
 
 - [ ] Check the result and error of every get before you use the bytes; a put that fails mid-stream leaves an incomplete object that fails the digest check.
-- [ ] Retry a failed get or put with backoff rather than treating one attempt as proof; a `put` is not "done" until you confirm it.
+- [ ] Retry a failed get or put with backoff rather than treating one attempt as proof; a `put` isn't "done" until you confirm it.
 - [ ] Treat `ErrObjectNotFound` as a normal outcome on a missing or deleted name, not a crash.
 
 ### Chunking — see [Pitfalls](/learn/object-store/chunking#pitfalls)
 
 - [ ] Leave the chunk size at its default unless you have a reason; too small floods the stream with messages and overhead, too large can exceed the stream's max message size.
 - [ ] Check the get result before you use the bytes; an unchecked async put failure can leave an object that fails its digest check on the way back out.
-- [ ] Re-put from the source on a failed get rather than shipping a partial file; do not assume a put "worked" without a get that reassembles and verifies it.
+- [ ] Re-put from the source on a failed get rather than shipping a partial file; don't assume a put "worked" without a get that reassembles and verifies it.
 
 ### Metadata and links — see [Pitfalls](/learn/object-store/metadata-and-links#pitfalls)
 
@@ -130,7 +130,7 @@ the why.
 
 - [ ] Use watch to learn what changed, then issue a separate get for the bytes; watch delivers metadata only, never the chunk data.
 - [ ] Never try to read a large payload off the watch channel; the bytes live on a different subject entirely.
-- [ ] Treat an empty bucket as an empty result, not an error; list returns `ErrNoObjectsFound` when there is nothing to list.
+- [ ] Treat an empty bucket as an empty result, not an error; list returns `ErrNoObjectsFound` when there's nothing to list.
 
 ### Under the hood — see [Pitfalls](/learn/object-store/under-the-hood#pitfalls)
 

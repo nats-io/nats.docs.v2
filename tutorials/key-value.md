@@ -83,7 +83,7 @@ The watch first replays the current value, then waits:
 [2026-06-09 10:14:22] PUT profiles > sue.color: blue
 ```
 
-Leave the watch running. Here is the flow you've just set up: a writer puts
+Leave the watch running. Here's the flow you've just set up: a writer puts
 a value, and the watcher receives it live.
 
 <div class="nats-flow" data-scenario="kvWatchAnimated" data-width="600" data-height="350"></div>
@@ -101,7 +101,7 @@ green
 ```
 
 Switch to the watch terminal. A new line appears the instant the change
-landed:
+lands:
 
 ```
 [2026-06-09 10:15:03] PUT profiles > sue.color: green

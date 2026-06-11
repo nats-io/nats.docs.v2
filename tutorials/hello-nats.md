@@ -11,16 +11,16 @@ import TabItem from '@theme/TabItem';
 # 1. Hello NATS
 
 In this tutorial you install NATS, start a server, and send your first
-message. You will subscribe to a **subject** in one terminal, publish a
-message to it from another, and watch it arrive. By the end you will
-have a working NATS server on your machine and have moved a message
-through it both from the CLI and from a client.
+message. You'll subscribe to a **subject** in one terminal, publish a
+message to it from another, and watch it arrive. By the end you'll
+have a working NATS server on your machine, and you'll have moved a
+message through it from both the CLI and a client.
 
 ## What you'll need
 
-- A terminal you can open two or three tabs in.
-- Permission to install software (Homebrew, a download, or Docker).
-- About 10 minutes.
+- a terminal you can open two or three tabs in
+- permission to install software (Homebrew, a download, or Docker)
+- about ten minutes
 
 ## Step 1: Install the NATS server and CLI
 
@@ -125,12 +125,12 @@ the message and printed it:
 Hello NATS!
 ```
 
-That is one message making the round trip: published to a subject,
+That's one message making the round trip: published to a subject,
 matched against the subscriber's interest, and delivered.
 
 ## Step 5: See the flow
 
-Here is an animation of the publish-to-subscriber path you just ran:
+Here's an animation of the publish-to-subscriber path you just ran:
 
 <div class="nats-flow" data-scenario="publishSubscribeAnimated" data-width="600" data-height="350"></div>
 
@@ -140,7 +140,7 @@ delivers a fresh copy to every active subscriber on the subject.
 
 ## What you built
 
-You have a running NATS server and have sent your first message
+You have a running NATS server, and you've sent your first message
 through it: one terminal subscribed to the `greet` subject, another
 published to it, and the message arrived. The same pub/sub works from
 any NATS client, which is what the code tabs above show.
@@ -149,7 +149,7 @@ any NATS client, which is what the code tabs above show.
 
 - Build a responder you can call and get an answer back:
   [Request-Reply](/tutorials/request-reply).
-- Understand how publish-subscribe really works — the interest graph,
-  delivery guarantees, and wildcards: the
+- Understand how publish-subscribe really works (the interest graph,
+  delivery guarantees, and wildcards): the
   [Core NATS deep dive](/learn/core-nats), or the shorter
   [publish-subscribe primer](/concepts/pub-sub-basics).
