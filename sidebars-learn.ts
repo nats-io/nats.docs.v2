@@ -20,7 +20,7 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
  *   Per-chapter design specs: docs/superpowers/specs/2026-06-0*-*-deep-dive-design.md
  *
  * Status: all twelve chapters are written — Develop (Core NATS, Services,
- * Resilient Clients, JetStream, Key-Value, Object Store) and Operate
+ * JetStream, Resilient Clients, Key-Value, Object Store) and Operate
  * (Topologies, Security, Clustering, Monitoring, Backup & Recovery,
  * Deployment). Each page follows the deep-dive conventions: pinned Acme
  * ORDERS scenario, nats-example divs + committed CLI snippets, animated
@@ -67,20 +67,6 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
-          label: "Resilient Clients",
-          link: { type: "doc", id: "resilient-clients/index" },
-          items: [
-            "resilient-clients/connecting",
-            "resilient-clients/reconnection",
-            "resilient-clients/drain-and-shutdown",
-            "resilient-clients/slow-consumers",
-            "resilient-clients/request-reply-resilience",
-            "resilient-clients/tls-and-auth",
-            "resilient-clients/where-next",
-          ],
-        },
-        {
-          type: "category",
           label: "JetStream",
           link: { type: "doc", id: "jetstream/index" },
           items: [
@@ -102,6 +88,20 @@ const sidebars: SidebarsConfig = {
             "jetstream/surviving-node-loss",
             "jetstream/mirrors-and-sources",
             "jetstream/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "Resilient Clients",
+          link: { type: "doc", id: "resilient-clients/index" },
+          items: [
+            "resilient-clients/connecting",
+            "resilient-clients/reconnection",
+            "resilient-clients/drain-and-shutdown",
+            "resilient-clients/slow-consumers",
+            "resilient-clients/request-reply-resilience",
+            "resilient-clients/tls-and-auth",
+            "resilient-clients/where-next",
           ],
         },
         {

@@ -34,12 +34,12 @@ Build applications with NATS.
   groups, and scatter-gather.
 - **[Services](/learn/services/)** the micro request-reply
   framework: endpoints, groups, discovery, observability, and scaling.
-- **[Resilient Clients](/learn/resilient-clients/)**
-  production-grade connections: reconnection, drain, slow consumers,
-  request-reply resilience, and TLS plus auth.
 - **[JetStream](/learn/jetstream/)** the persistence layer:
   streams, consumers, and the acknowledgment loop, built up from a
   single `ORDERS` stream.
+- **[Resilient Clients](/learn/resilient-clients/)**
+  production-grade connections: reconnection, drain, slow consumers,
+  request-reply resilience, and TLS plus auth.
 - **[Key-Value Store](/learn/key-value/)** buckets,
   watches, history and revisions, TTLs, and how KV sits on top of a
   stream.
