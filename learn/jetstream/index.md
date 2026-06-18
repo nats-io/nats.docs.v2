@@ -7,43 +7,19 @@ description: Streams, consumers, and the acknowledgment loop, built up step by s
 
 # JetStream Deep Dive
 
-JetStream is the persistence layer of NATS. This chapter walks through
-it the way you'd build understanding by writing real code:
-start with a single stream, add one consumer at a time, and learn the
-trade-offs as they come up.
+JetStream is the persistence layer of NATS: it stores messages so they can
+be replayed later, survive a restart, and be redelivered until a consumer
+acknowledges them.
 
-By the end you'll have:
-
-- an `ORDERS` stream that captures order events on the subjects
-  `orders.created`, `orders.shipped`, and `orders.cancelled`
-- a `shipping` consumer that pulls work from that stream, acknowledges
-  each order it processes, and survives a worker restart without
-  losing or duplicating completed work
-- a second `analytics` consumer that filters the same stream for
-  `orders.shipped` only, replaying from any point in time
-- a working mental model of acknowledgment, retention, and
-  replication
+This chapter builds that up a page at a time around one running example,
+the Acme `ORDERS` platform, with a single server running from the first
+page to the last. Nothing resets between pages.
 
 ## Who this is for
 
-You've read the [Core Concepts](/concepts/jetstream) primer or are
-otherwise comfortable with NATS basics: publishing, subscribing,
-subjects, and queue groups. This chapter doesn't re-teach those.
-
-You don't need to know anything about JetStream specifically. We
-start from "what is a stream and why would you want one" and grow
-from there.
-
-## How to read it
-
-Each page introduces at most two new concepts. Pages build on the
-previous one: you'll use the same `ORDERS` stream throughout, and you
-can keep one terminal open through the whole chapter without
-resetting state.
-
-Where a feature has a long list of options, knobs, or error codes,
-the page covers only what you need to understand the concept and
-links to [Reference](/reference/) for the rest.
+You've read the [Core Concepts → JetStream](/concepts/jetstream) primer, or
+you're otherwise comfortable with NATS basics: publishing, subscribing,
+subjects, and queue groups.
 
 ## Map
 
@@ -74,8 +50,6 @@ You'll need:
 
 - A working `nats-server` with JetStream enabled. The simplest way is
   `nats-server -js` (see [Getting Started](/concepts/getting-started/)).
-- The `nats` CLI installed and pointed at your server. The first few
-  pages use only the CLI. Later pages add JavaScript, Go, Python,
-  Java, Rust, and C# client examples for the same operations.
+- The `nats` CLI installed and pointed at your server.
 
 Open a terminal, run `nats-server -js`, and turn the page.
