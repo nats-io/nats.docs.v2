@@ -30,8 +30,8 @@ don't protect each other. Hold this picture for the whole chapter:
   the point you can return to after a delete or a corruption. It answers
   "how much data can I afford to lose," your **recovery point**.
 - **A mirror** is a live, read-only copy of a stream running at a second
-  site, kept current by replication. It's the site you can fail over to
-  when the first one dies. It answers "how long can recovery take," your
+  site, kept current by replication. It's the failover destination when
+  the first one dies. It answers "how long can recovery take," your
   **recovery time**.
 - **Identity** is the set of files that *are* your security layer: the
   operator and account JWTs, the nkeys that sign them, the user creds,

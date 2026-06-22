@@ -1,13 +1,13 @@
 ---
 id: shaping-the-stream
-title: "13. Shaping the stream"
+title: "12. Shaping the stream"
 sidebar_position: 14
 description: Control stream size and age with limits, and decide what happens when a limit is reached
 ---
 
-# 13. Shaping the stream
+# 12. Shaping the stream
 
-The `ORDERS` stream you created back on page 2 has no limits. It keeps
+The `ORDERS` stream you created back on page 1 has no limits. It keeps
 every message forever, on however much disk the server has. That was
 fine for learning. It's not fine for production.
 
@@ -24,7 +24,7 @@ a limit is reached. Set the ceiling, then decide who wins under pressure.
 
 A stream under the default **Limits** retention policy keeps messages
 until a limit forces it to drop them. You saw that policy in the config
-printout on page 2. A limit is one idea, a ceiling on the stream, and
+printout on page 1. A limit is one idea, a ceiling on the stream, and
 you express it through any of three knobs, depending on what you
 measure the stream by:
 

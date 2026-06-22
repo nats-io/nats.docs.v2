@@ -1,11 +1,11 @@
 ---
 id: acknowledgment
-title: "7. Acknowledgment"
+title: "6. Acknowledgment"
 sidebar_position: 8
 description: The four ways a client answers a message, and the server controls that drive redelivery
 ---
 
-# 7. Acknowledgment
+# 6. Acknowledgment
 
 The `shipping` consumer was created with `AckPolicy=explicit`. That
 choice means every message it delivers must be answered. Nothing is

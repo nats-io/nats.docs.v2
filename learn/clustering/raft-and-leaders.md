@@ -83,10 +83,11 @@ whether it's `current` (caught up), and how recently the leader heard from it.
 This is the `ORDERS` RAFT group, viewed from the outside.
 
 For a live view of a group's RAFT state (current term, who the leader is, each
-peer's status), check the `/raftz` monitoring endpoint. The exact internals it
-exposes are documented in [Reference → /raftz](/reference/system/monitor/raftz):
-log compaction, the `$NRG.*` subjects peers vote over, snapshot timing. We only
-need the group, the leader, and the followers here.
+peer's status), check the `/raftz` monitoring endpoint. The full set of RAFT
+internals it exposes is documented in
+[Reference → /raftz](/reference/system/monitor/raftz): log compaction, the
+`$NRG.*` subjects peers vote over, snapshot timing. We only need the group, the
+leader, and the followers here.
 
 ## Leader election
 

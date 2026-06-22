@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "18. Where to go next"
+title: "17. Where to go next"
 sidebar_position: 19
 description: Recap the JetStream mental model and point to what comes after this chapter
 ---
 
-# 18. Where to go next
+# 17. Where to go next
 
 You started this chapter with a publisher shouting into the void and no
 one guaranteed to be listening. You end it with an `ORDERS` stream, a
@@ -96,13 +96,9 @@ the action items from all of them in one place: a last pass before you
 trust a stream with real orders. Each group links back to the page that
 explains the why.
 
-### Why a stream — see [Pitfalls](/learn/jetstream/why-a-stream#pitfalls)
-
-- [ ] Run a service that subscribes and responds where you need a reply; a stream stores, it never answers requests.
-- [ ] Stay on plain pub-sub when the next message supersedes the last; reach for a stream only when a missed message has consequences.
-
 ### Your first stream — see [Pitfalls](/learn/jetstream/your-first-stream#pitfalls)
 
+- [ ] Stay on plain pub-sub when the next message supersedes the last; reach for a stream only when a missed message has consequences.
 - [ ] Set at least one limit (`MaxAge`, `MaxBytes`, or `MaxMsgs`) so an unbounded stream never fills the disk.
 - [ ] Pick the stream name deliberately the first time; there's no rename, only delete-and-recreate.
 - [ ] Choose the retention policy before messages flow; switching to or from WorkQueue on a live stream is rejected.

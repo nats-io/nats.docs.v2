@@ -2,7 +2,7 @@
 id: monitoring-endpoints
 title: "2. Monitoring endpoints"
 sidebar_position: 2
-description: The HTTP monitoring port :8222 and its on-demand JSON — /varz, /connz, /routez, and the /jsz JetStream lens
+description: "The HTTP monitoring port :8222 and its on-demand JSON — /varz, /connz, /routez, and the /jsz JetStream lens"
 ---
 
 # 2. Monitoring endpoints

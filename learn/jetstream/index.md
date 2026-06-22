@@ -25,24 +25,23 @@ subjects, and queue groups.
 
 | # | Page | What you learn |
 |---|---|---|
-| 1 | [Why a stream](./why-a-stream) | What core NATS doesn't give you, and why a stream is the answer |
-| 2 | [Your first stream](./your-first-stream) | Create the `ORDERS` stream and read its anatomy |
-| 3 | [Publishing](./publishing) | Publish into a stream and understand the `PubAck` contract |
-| 4 | [Reading back the stream](./reading-back) | Replay stored messages with an ephemeral consumer |
-| 5 | [Your first consumer](./your-first-consumer) | Create the `shipping` pull consumer and the acknowledgment loop |
-| 6 | [Filtering what you consume](./filtering) | Narrow a consumer to subjects like `orders.shipped` |
-| 7 | [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
-| 8 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
-| 9 | [A pool of workers](./worker-pool) | Share one consumer across many workers |
-| 10 | [Priority groups](./priority-groups) | Steer which client gets served: overflow and pinned_client |
-| 11 | [Pausing a consumer](./pausing) | Stop delivery for a window, then resume |
-| 12 | [Push vs pull](./push-vs-pull) | Why pull is the default, and when push still fits |
-| 13 | [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
-| 14 | [Delivery semantics](./delivery-semantics) | Limits, Interest, and WorkQueue retention |
-| 15 | [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
-| 16 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
-| 17 | [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
-| 18 | [Where to go next](./where-next) | A map of what's beyond this chapter |
+| 1 | [Your first stream](./your-first-stream) | Why a stream, then create the `ORDERS` stream and read its anatomy |
+| 2 | [Publishing](./publishing) | Publish into a stream and understand the `PubAck` contract |
+| 3 | [Reading back the stream](./reading-back) | Replay stored messages with an ephemeral consumer |
+| 4 | [Your first consumer](./your-first-consumer) | Create the `shipping` pull consumer and the acknowledgment loop |
+| 5 | [Filtering what you consume](./filtering) | Narrow a consumer to subjects like `orders.shipped` |
+| 6 | [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
+| 7 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
+| 8 | [A pool of workers](./worker-pool) | Share one consumer across many workers |
+| 9 | [Priority groups](./priority-groups) | Steer which client gets served: overflow and pinned_client |
+| 10 | [Pausing a consumer](./pausing) | Stop delivery for a window, then resume |
+| 11 | [Push vs pull](./push-vs-pull) | Why pull is the default, and when push still fits |
+| 12 | [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
+| 13 | [Delivery semantics](./delivery-semantics) | Limits, Interest, and WorkQueue retention |
+| 14 | [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
+| 15 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
+| 16 | [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
+| 17 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 

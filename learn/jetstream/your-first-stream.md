@@ -1,14 +1,29 @@
 ---
 id: your-first-stream
-title: 2. Your first stream
-sidebar_position: 3
-description: Create the ORDERS stream and read its anatomy
+title: 1. Your first stream
+sidebar_position: 2
+description: Why a stream, then create the ORDERS stream and read its anatomy
 ---
 
-# 2. Your first stream
+# 1. Your first stream
 
-Time to make the `ORDERS` stream real. This page uses one CLI command
-to create it and one to inspect it. Nothing more.
+This page creates the `ORDERS` stream with one CLI command and inspects it
+with another. First, though: why reach for a stream at all?
+
+## Why a stream
+
+The running example for this chapter is a small e-commerce backend, the
+Acme `ORDERS` platform. Three things happen to an order: it's created,
+shipped, or cancelled. Each shows up as a message on a
+[subject](/concepts/subjects): `orders.created`, `orders.shipped`, and
+`orders.cancelled`. A warehouse service packs the box on `orders.created`,
+a notification service emails the customer on `orders.shipped`, and an
+analytics pipeline counts everything.
+
+Plain core NATS drops any of these the moment no service is subscribed. A
+**stream** is what lets them wait: a server-side store that captures
+messages on the subjects you choose, so you can replay history,
+resume after a restart, or read them a month later.
 
 ## Prerequisites
 
@@ -32,11 +47,12 @@ nats stream add ORDERS --subjects "orders.>" --defaults
 Two things matter here.
 
 The first is the **stream name**: `ORDERS`. Stream names are
-case-sensitive identifiers. They show up in every command and every
-error message in this chapter.
+case-sensitive and can't contain dots, `*`, `>`, spaces, or slashes, so a
+subject like `orders.created` won't work as a name. They show up in every
+command and every error message in this chapter.
 
 The second is the **subjects** the stream captures: `orders.>`. That's
-a wildcard. Any subject that starts with `orders.` lands in this
+a [wildcard](/concepts/subjects#wildcards). Any subject that starts with `orders.` lands in this
 stream. `orders.created`, `orders.shipped`, `orders.cancelled`
 — all three match. So would `orders.refunded` next month, with no
 configuration change.
@@ -44,7 +60,7 @@ configuration change.
 The `--defaults` flag tells `nats` not to ask for any of the other
 config values, and to fill them in with sensible starting values
 instead. We'll look at what those defaults actually are in a
-moment. For now: defaults are fine.
+moment. For now: defaults are fine and its actually quite normal to rely on defaults.
 
 You should see output ending with something like:
 
@@ -152,10 +168,12 @@ JetStream knows exactly which stream it goes into. There's no
 ambiguity to debug later.
 
 To capture overlapping subjects, you reach for **mirrors** and
-**sources**: a stream that copies from another stream. They aren't
-needed for the running scenario; the [Reference → Create
-Stream](/reference/jetstream/api/stream/create) covers them in the
-`mirror` and `sources` fields of the stream configuration.
+**sources**: a mirror keeps a copy of one other stream, and sources
+aggregate messages from several streams into one. They aren't needed for
+the running scenario, so we don't set one up here. The [Mirrors and
+sources](/learn/jetstream/mirrors-and-sources) page builds both end to end,
+and [Reference → Create Stream](/reference/jetstream/api/stream/create)
+lists the `mirror` and `sources` configuration fields.
 
 ## Pitfalls
 
@@ -186,11 +204,13 @@ deliberately the first time:
 
 <div class="nats-example" data-type="learn-jetstream-your-first-stream-renameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**Retention is hard to switch after data exists.** The default
-`Retention Policy: Limits` can later move to `Interest`, but the server
-refuses to switch an existing stream to or from `WorkQueue`. Choose the
-retention policy when there are no messages to migrate, not after orders
-are flowing. The three policies and when to reach for each live on the
+**Switching to or from `WorkQueue` retention is rejected.** On an existing
+stream you can move between `Limits` and `Interest`, but the server refuses
+any change to or from `WorkQueue` at all, even on an empty stream
+(`stream configuration update can not change retention policy to/from
+workqueue`). The only way across that line is to delete and recreate the
+stream, which drops every stored message, so decide on `WorkQueue` up front.
+The three policies and when to reach for each live on the
 [Delivery semantics](/learn/jetstream/delivery-semantics) page.
 
 ## Where you are

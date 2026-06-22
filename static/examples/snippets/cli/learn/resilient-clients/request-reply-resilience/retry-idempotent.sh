@@ -24,7 +24,7 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
   # Grow the wait, with a little jitter, so a fleet of requesters does not
   # retry in lockstep and stampede the responder the instant it returns.
   wait=$(( attempt * attempt ))
-  jitter=$(( RANDOM % 1 + 1 ))
+  jitter=$(( RANDOM % 2 ))
   echo "attempt $attempt failed; backing off ${wait}s before retry" >&2
   sleep "$(( wait + jitter ))"
   attempt=$(( attempt + 1 ))
