@@ -40,9 +40,7 @@ refuses to run.
 
 In another terminal:
 
-```bash
-nats stream add ORDERS --subjects "orders.>" --defaults
-```
+<div class="nats-example" data-type="learn-jetstream-your-first-stream-create" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Two things matter here.
 
@@ -72,13 +70,11 @@ If you instead see `JetStream system temporarily unavailable`, your
 server was started without `-js`. Restart it with the flag and try
 again.
 
-## Look at what you made
+## Checking the created stream
 
 Ask the server what it just stored:
 
-```bash
-nats stream info ORDERS
-```
+<div class="nats-example" data-type="learn-jetstream-your-first-stream-info" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The output has two halves.
 
