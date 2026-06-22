@@ -1,11 +1,11 @@
 ---
 id: filtering
-title: "6. Filtering what you consume"
+title: "5. Filtering what you consume"
 sidebar_position: 7
 description: Add a second consumer that reads only orders.shipped, and see consumers as independent views
 ---
 
-# 6. Filtering what you consume
+# 5. Filtering what you consume
 
 The `shipping` consumer reads every message in the `ORDERS` stream.
 That's the right shape for a worker that handles each order end to end.
@@ -150,7 +150,7 @@ consumer's view; it never removes messages. After `analytics` reads
 `orders.shipped`, every `orders.created` and `orders.cancelled` message is
 still stored and still readable by `shipping`. Don't reach for a filter
 to prune a stream. What stays and what ages out is up to the stream's
-limits, covered in [13. Shaping the stream](/learn/jetstream/shaping-the-stream),
+limits, covered in [12. Shaping the stream](/learn/jetstream/shaping-the-stream),
 not to any consumer.
 
 **Overlapping filters within one consumer.** Overlap _between_ consumers
@@ -164,7 +164,7 @@ the create call fails. The filters on one consumer must be disjoint, and
 the rule holds whether the stream uses limits, interest, or work-queue
 retention. For how work-queue retention shapes delivery once filters are
 in place, see
-[14. Delivery semantics](/learn/jetstream/delivery-semantics).
+[13. Delivery semantics](/learn/jetstream/delivery-semantics).
 
 ## Where you are
 
@@ -189,5 +189,5 @@ NATS queue groups.
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer) —
   every consumer config field, including multiple filter subjects and
   subject transforms.
-- [5. Your first consumer](/learn/jetstream/your-first-consumer) — where
+- [4. Your first consumer](/learn/jetstream/your-first-consumer) — where
   you met the cursor and ack model this page builds on.

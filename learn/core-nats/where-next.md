@@ -64,7 +64,7 @@ exactly the gap the next chapter fills.
 
 The [JetStream deep dive](/learn/jetstream) adds a server-side store on
 top of the same subjects you already use. Start with
-[Why a stream](/learn/jetstream/why-a-stream): it picks up the identical
+[Why a stream](/learn/jetstream/your-first-stream#why-a-stream): it picks up the identical
 Acme ORDERS world at the exact point this chapter leaves it, and shows
 what changes when a message can wait.
 

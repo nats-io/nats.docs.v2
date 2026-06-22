@@ -65,7 +65,7 @@ backup store. The two knobs that govern this, chunk size and window
 size, have sensible defaults, and you only reach for them when the
 defaults time out. We meet them in the [Pitfalls](#pitfalls).
 
-The full set of snapshot request options lives in
+The full set of snapshot request options is documented in
 [Reference → Snapshot Stream](/reference/jetstream/api/stream/snapshot).
 We only need the behavior here.
 
@@ -98,7 +98,7 @@ is: confirm the broken stream is gone (or remove it), then restore.
 A restore you didn't check is a guess. The last step is always to read
 the rebuilt stream's state back and confirm it matches the source.
 
-<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verifyCounts" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verify-counts" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Look at the `State` block. `Messages` and `Last Sequence` must match the
 stream you snapshotted, and `Active Consumers` shows `shipping` and

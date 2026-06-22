@@ -1,11 +1,11 @@
 ---
 id: delivery-semantics
-title: "14. Delivery semantics"
+title: "13. Delivery semantics"
 sidebar_position: 15
 description: The three retention policies, and how to pick one per stream archetype
 ---
 
-# 14. Delivery semantics
+# 13. Delivery semantics
 
 The previous page shaped `ORDERS` with limits: how many messages it
 keeps, for how long, in how many bytes. Those limits decide *when* a
@@ -209,7 +209,7 @@ its own schedule, independent of the stream's `MaxAge`.
 - [Reference → Stream Configuration](/reference/jetstream/api/stream/create)
   — the `retention` field, its three values, and how each interacts with
   limits, republish, and mirrors.
-- [13. Shaping the stream](/learn/jetstream/shaping-the-stream) — the
+- [12. Shaping the stream](/learn/jetstream/shaping-the-stream) — the
   limits that govern a Limits stream.
-- [9. A pool of workers](/learn/jetstream/worker-pool) — the worker pool
+- [8. A pool of workers](/learn/jetstream/worker-pool) — the worker pool
   that shares one consumer, the pattern that fits WorkQueue.

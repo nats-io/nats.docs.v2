@@ -1,11 +1,11 @@
 ---
 id: pausing
-title: "11. Pausing a consumer"
+title: "10. Pausing a consumer"
 sidebar_position: 12
 description: Stop delivery to a consumer until a deadline, then resume where it left off
 ---
 
-# 11. Pausing a consumer
+# 10. Pausing a consumer
 
 The `shipping` consumer has been running fine. Sometimes you want it to
 stop for a while (not forever, just for a window) and then pick up
@@ -193,5 +193,5 @@ this chapter chose pull.
 
 - [Reference → Consumer API](/reference/jetstream/api/consumer) — the
   `PauseUntil` field, the pause response, and the pause advisory.
-- [8. Pull consumers in depth](/learn/jetstream/pull-consumers) — the
+- [7. Pull consumers in depth](/learn/jetstream/pull-consumers) — the
   consumer state that pausing preserves.

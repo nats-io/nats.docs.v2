@@ -102,12 +102,12 @@ and restoring it if a migration goes wrong.
 ## Where you are
 
 This is the end of the chapter. The arc is complete, and this page adds
-no new scenario state. The `east` cluster, its elected
-leaders, and the `ORDERS` stream at `R=3` are still running in your
-session exactly as you left them on the previous page. You can keep
-experimenting (kill a server and watch a re-election, add a fifth peer,
-move placement) or tear it all down with `nats stream rm ORDERS` and
-stop the three servers when you're done.
+no new scenario state. The `east` cluster, its elected leaders, and the
+`ORDERS` stream at `R=3` are still running in your session exactly as you
+left them on the previous page. You can keep experimenting (kill a server
+and watch a re-election, add a fifth peer, move placement) or tear it all
+down with `nats stream rm ORDERS` and stop the three servers when you're
+done.
 
 You hold the core model: routes form the mesh, RAFT groups agree, a quorum
 commits each write, placement decides where the replicas live, and peer
@@ -123,33 +123,33 @@ explains the why.
 
 ### Forming a cluster — see [Pitfalls](/learn/clustering/forming-a-cluster#pitfalls)
 
-- [ ] Give every server the same `cluster.name`; a mismatch silently forms two clusters that never merge.
-- [ ] Point `routes` at the route port (6222), not the client port (4222); aiming at the client port fails to form the mesh.
+- [ ] Give every server the same `cluster.name`; a mismatch silently forms two clusters that look like one until a message fails to cross.
+- [ ] Point `routes` at the route port (6222), not the client port (4222); aiming at the client listener never establishes the route.
 - [ ] List two or three seed routes so the cluster still forms if one seed server is down at boot; gossip needs only one to reach, but only if that one is up.
 
 ### Raft and leaders — see [Pitfalls](/learn/clustering/raft-and-leaders#pitfalls)
 
-- [ ] Treat a brief "no leader" window during failover as normal; an election takes seconds (the timer is 4–9s), not milliseconds.
-- [ ] Use `nats stream cluster step-down` to move leadership, not to choose a successor; the next election is still quorum-based and the winner isn't yours to pick.
-- [ ] Track the meta leader and a stream leader as different groups; losing one is not losing the other.
+- [ ] Treat a brief "no leader" window during failover as normal; the election timer is 4–9s, so let the client retry instead of failing the write.
+- [ ] Use `nats stream cluster step-down` to move leadership off a server, not to pick its successor; the next election is still quorum-based, so read `nats stream info` to learn who won.
+- [ ] Track the meta leader and a stream leader as different RAFT groups; check `nats server info` for one and `nats stream info ORDERS` for the other, because losing one is not losing the other.
 
 ### Replication and R=3 — see [Pitfalls](/learn/clustering/replication-and-r3#pitfalls)
 
-- [ ] Run at `R≥3` for anything you can't lose; `R=1` has no copy, so a write is gone with its server.
-- [ ] Read from the leader when you need read-after-write; a replica may lag, so a Direct Get from a follower can return stale data.
+- [ ] Run real orders at `R≥3`, never `R=1`; a single copy is gone with its server's disk, with no failover and no recovery.
+- [ ] Read from the leader when you need read-after-write; a follower can lag, so a Direct Get from one returns data that's correct but not the newest.
 - [ ] Read a `PubAck` as quorum held, not full replication; before deliberately taking a server down, verify each replica shows `current` in `nats stream info`.
 
 ### Placement — see [Pitfalls](/learn/clustering/placement#pitfalls)
 
-- [ ] Match tags exactly; tags are an intersection and case-sensitive: `ssd` ≠ `SSD`, and asking for a tag no server carries leaves the stream with "no suitable peers".
-- [ ] Treat `preferred` as a hint, not a lock; if the preferred server dies, the next election is random among the remaining quorum.
-- [ ] Verify server tags with `nats server info` before placing a stream on them.
+- [ ] Read a server's tags back before placing against them; tags are an intersection and a missing one fails with `no suitable peers for placement` rather than falling back to any server.
+- [ ] Spell tags exactly; matching folds case (`ssd` equals `SSD`) but `sdd` matches nothing.
+- [ ] Treat `preferred` as a hint for the initial leader, not a lock; if that server dies the next election is quorum-based and random, so move leadership explicitly with `step-down --preferred` when you need it somewhere specific now.
 
 ### Scaling and peer management — see [Pitfalls](/learn/clustering/scaling-and-peers#pitfalls)
 
-- [ ] Remove peers one at a time; pulling two from an `R=3` group at once loses quorum and the stream goes leaderless. Remove one, wait for a leader, then the next.
-- [ ] Wait for a freshly added peer's lag to reach zero before trusting it; don't kill the cluster mid-catchup.
-- [ ] Never remove the only remaining peer without understanding it destroys the replica.
+- [ ] Remove peers one at a time; pulling two from an `R=3` group at once loses quorum and the stream goes leaderless. Remove one, wait for a named leader and zero lag, then the next.
+- [ ] Wait for a freshly added peer to show `current` with zero lag before trusting it; while it catches up it's an observer, so don't kill another server mid-catchup.
+- [ ] Know the replica count from `nats stream info` before removing anything; `peer-remove` doesn't warn you that dropping the last peer destroys the replica.
 
 ## See also
 

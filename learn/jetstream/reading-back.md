@@ -1,11 +1,11 @@
 ---
 id: reading-back
-title: "4. Reading back the stream"
+title: "3. Reading back the stream"
 sidebar_position: 5
 description: Replay everything stored in the stream from the beginning with an ephemeral consumer
 ---
 
-# 4. Reading back the stream
+# 3. Reading back the stream
 
 Three messages sit in the `ORDERS` stream. So far you've only looked
 at them through `nats stream info`, which counts them but doesn't show
@@ -19,7 +19,7 @@ acknowledging anything yet.
 
 In core NATS, a subject is a moment. A message published to a subject
 exists for exactly as long as it takes to fan out to whoever is
-subscribed right now. The [Why a stream](/learn/jetstream/why-a-stream)
+subscribed right now. The [Why a stream](/learn/jetstream/your-first-stream#why-a-stream)
 page covers why that moment is too short for orders.
 
 A stream is the opposite. The three messages are durable records with

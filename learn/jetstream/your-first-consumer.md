@@ -1,20 +1,19 @@
 ---
 id: your-first-consumer
-title: "5. Your first consumer"
+title: "4. Your first consumer"
 sidebar_position: 6
 description: Create a durable pull consumer with explicit ack and learn the ack/redeliver loop
 ---
 
-# 5. Your first consumer
+# 4. Your first consumer
 
 The previous page read messages back with an ephemeral consumer. It
 replayed the stream, but it tracked nothing. Close it, reopen it, and
 it starts over from the beginning.
 
-That's fine for a quick look, but it's not how a real service reads a
-stream. A warehouse process that ships orders needs to remember which
-orders it already handled, and it needs the server to redeliver an
-order if the process dies mid-ship.
+That's fine for a quick look, but a real service needs more: it has to
+remember which orders it already handled, and have the server redeliver one
+if the process dies mid-ship.
 
 This page builds that consumer. It introduces two ideas: the **durable
 cursor** that remembers your position, and the **ack/redeliver loop**
@@ -136,7 +135,7 @@ Pull a single message from `shipping` and acknowledge it:
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 This delivers stream sequence `1` (the first `orders.created` message
-you published on page 3) and acks it. Watch the cursor move:
+you published on page 2) and acks it. Watch the cursor move:
 
 ```bash
 nats consumer info ORDERS shipping

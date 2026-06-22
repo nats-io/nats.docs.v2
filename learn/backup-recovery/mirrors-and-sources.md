@@ -16,7 +16,7 @@ as it takes to stream the archive back in.
 This page adds the second leg of the triad: a **mirror**. A mirror is a
 read-only live copy of `ORDERS` running at a second site, kept current by
 replication. Where a snapshot answers "what point can I return to", a
-mirror answers "what site can I fail over to". You'll stand one up,
+mirror answers "what site can I promote to take over". You'll stand one up,
 watch how far it trails the original, and learn the one sentence that
 keeps a mirror from becoming a false sense of safety.
 
@@ -154,8 +154,8 @@ That frozen-ness is exactly why you can rewind to it.
 
 So the two tools cover two different failures, and you need both:
 
-- **Mirror** → the site failed. Fail over to the copy. Short RTO, no data
-  loss if lag was zero.
+- **Mirror** → the site failed. Promote the copy and redirect traffic to it.
+  Short RTO, no data loss if lag was zero.
 - **Snapshot** → the data is wrong (deleted, purged, corrupted). Restore
   the point in time before it went wrong. Bounded RPO, restore-length
   RTO.

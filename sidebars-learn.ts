@@ -70,7 +70,6 @@ const sidebars: SidebarsConfig = {
           label: "JetStream",
           link: { type: "doc", id: "jetstream/index" },
           items: [
-            "jetstream/why-a-stream",
             "jetstream/your-first-stream",
             "jetstream/publishing",
             "jetstream/reading-back",

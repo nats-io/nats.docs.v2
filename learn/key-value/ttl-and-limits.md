@@ -21,7 +21,7 @@ the warehouse dashboard learns the value is gone, the same way it learned
 about every other change.
 
 You still have the `INVENTORY` bucket from the previous pages, with
-`widget-blue` decremented to 41 and the warehouse dashboard watching.
+`widget-blue` decremented to 40 and the warehouse dashboard watching.
 You'll add a key with a TTL to it.
 
 ## A per-key TTL expires a single value
@@ -65,7 +65,7 @@ most:
   key and every kept revision. The bucket won't grow past it.
 - **Max value size**: the largest a single value may be. A put of
   something bigger is rejected. Key-value values are meant to be small;
-  large blobs belong in the [Object Store](/learn/object-store).
+  large values belong in the [Object Store](/learn/object-store).
 - **History depth**: how many prior revisions each key keeps, which you
   already met on the previous page. It caps at 64, and it doubles as a
   per-key cap: it's the most messages any single key may hold.
@@ -82,7 +82,7 @@ expiry mechanism applied to a whole bucket, and its details live with
 [message TTL](/learn/jetstream/message-ttl) in JetStream. This chapter
 teaches the per-key form, which is the one unique to key-value.
 
-The full set of bucket configuration options lives in
+The full set of bucket configuration options is documented in
 [Reference → Create Stream](/reference/jetstream/api/stream/create),
 because a bucket is created as a stream and these limits map onto stream
 fields. Here you only need the three above.
@@ -127,17 +127,16 @@ The handling is in the create snippet above: after the timed create, it
 deletes `flash-sale` and creates it again with a shorter TTL, which is the
 only way to change one.
 
-<div class="nats-example" data-type="learn-key-value-ttl-and-limits-perKeyTTL" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-**Limits reject, they do not make room.** A bucket at its max size doesn't
-remove an old value to fit a new one. It rejects the next put with an error
-and leaves every existing value in place. A `CACHE` bucket sized for the
-average load will start refusing writes the moment a burst pushes it to the
-cap, and the inventory service sees the error on the put, not later on a
-get. Size the bucket for the working set you actually need to hold, not the
-average, so a busy minute doesn't bounce writes you needed to land. The
-same goes for max value size: a put over the cap is rejected outright, so
-cap it above the largest value you legitimately store.
+**Limits reject, they do not make room for an oversized value.** A put of
+a value larger than the bucket's max value size is rejected outright, and
+so is a put that would push the bucket past its max size; the server
+returns an error and leaves every existing value in place. The inventory
+service sees that error on the put, not later on a get, so a `CACHE`
+bucket sized for the average load starts refusing writes the moment a
+burst pushes it to the cap. Size the bucket for the working set you
+actually need to hold, not the average, so a busy minute doesn't bounce
+writes you needed to land, and cap max value size above the largest value
+you legitimately store.
 
 ## Where you are
 

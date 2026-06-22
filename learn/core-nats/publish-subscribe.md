@@ -131,7 +131,7 @@ That gap matters for orders. If the warehouse is restarting when an
 `orders.created` message is published, that message is gone, and no
 restart brings it back. Remembering messages for absent subscribers is
 exactly what core NATS does not do. The [JetStream deep
-dive](/learn/jetstream/why-a-stream) is the layer that adds it.
+dive](/learn/jetstream/your-first-stream#why-a-stream) is the layer that adds it.
 
 ## At-most-once delivery
 
@@ -256,7 +256,7 @@ match many subjects at once, including regional orders like
 
 - [Core Concepts → Publish-subscribe](/concepts/pub-sub-basics) — the
   five-minute overview of this pattern.
-- [Learn → JetStream → Why a stream](/learn/jetstream/why-a-stream) —
+- [Learn → JetStream → Why a stream](/learn/jetstream/your-first-stream#why-a-stream) —
   the layer that remembers messages core NATS discards.
 - [Reference → Client protocol](/reference/protocols/client) — the
   wire-level `PUB`/`SUB`/`MSG` details.
