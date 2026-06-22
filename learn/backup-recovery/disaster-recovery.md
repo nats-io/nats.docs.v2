@@ -175,7 +175,7 @@ or a lost consumer position) means restore the snapshot, because the mirror
 copied the mistake. R3 is on neither path; it's availability, not recovery.
 
 The data plane is now fully covered: a point you can return to, and a site
-you can fail over to.
+where you can promote the mirror.
 
 ## What's next
 

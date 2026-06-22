@@ -125,6 +125,7 @@ the why.
 - [ ] Verify a link's target still exists before relying on get-via-link; a link is a snapshot at creation, and deleting the target makes the link fail with `ErrObjectNotFound`.
 - [ ] Prefer a bucket link when you want loose coupling that survives the target being replaced.
 - [ ] Delete and re-put to change an object's chunk size, and delete and re-add to change a link target; `UpdateMeta` silently keeps the old chunk size and link.
+- [ ] Don't rename an object onto a name already in use; renaming onto an existing, non-deleted name fails with `ErrObjectAlreadyExists`.
 
 ### Watching and listing — see [Pitfalls](/learn/object-store/watching-and-listing#pitfalls)
 

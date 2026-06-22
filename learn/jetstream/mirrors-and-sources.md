@@ -1,11 +1,11 @@
 ---
 id: mirrors-and-sources
-title: "17. Mirrors and sources"
+title: "16. Mirrors and sources"
 sidebar_position: 18
 description: Copy one stream into another, or aggregate many streams into one
 ---
 
-# 17. Mirrors and sources
+# 16. Mirrors and sources
 
 So far the `ORDERS` stream has stood alone. Every page has read from it,
 written to it, or shaped it — but always the one stream.

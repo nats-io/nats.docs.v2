@@ -1,11 +1,11 @@
 ---
 id: publishing
-title: 3. Publishing
+title: 2. Publishing
 sidebar_position: 4
 description: Publish into a stream and understand the PubAck contract
 ---
 
-# 3. Publishing
+# 2. Publishing
 
 The `ORDERS` stream is empty. Time to put something in it.
 

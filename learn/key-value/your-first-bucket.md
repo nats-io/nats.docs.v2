@@ -84,6 +84,12 @@ decrement the value safely. The entry carries both in one
 read, so you never have to make a second call to learn which revision you
 just saw.
 
+The timestamp on the entry earns its place too. It records when the value
+was written, not when you read it, so the inventory service can tell a
+count taken seconds ago from one that has sat untouched for a week. You
+get all three facts — value, revision, and write time — from the single
+get you already made.
+
 ## Read the bucket's status
 
 One command summarizes the bucket as a whole:

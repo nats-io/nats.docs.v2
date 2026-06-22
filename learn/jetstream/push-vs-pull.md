@@ -1,15 +1,15 @@
 ---
 id: push-vs-pull
-title: "12. Push vs pull"
+title: "11. Push vs pull"
 sidebar_position: 13
 description: Why pull is the modern default, what a push consumer is, and when push still fits
 ---
 
-# 12. Push vs pull
+# 11. Push vs pull
 
 Every consumer in this chapter has been a pull consumer. The `shipping`
 consumer asks the server for messages when it's ready for them, in
-batches it controls. That's the model we've leaned on since page 5,
+batches it controls. That's the model we've leaned on since page 4,
 and it's the one to reach for first.
 
 There's a second model: the **push consumer**. The server delivers
@@ -58,7 +58,7 @@ and the subscriber copes.
 server splits the stream across them. A push consumer needs a separate
 queue construct to share load across subscribers.
 
-**The newer features are pull-only.** Priority groups from page 10 don't
+**The newer features are pull-only.** Priority groups from page 9 don't
 exist for push consumers; the server rejects them with `priority
 groups can not be used with push consumers`. As JetStream grows, the new
 capabilities land on pull first, and some only on pull.
@@ -102,7 +102,7 @@ Because the two models aren't interchangeable on the server, you can't
 flip a consumer from one to the other. The server refuses with `can not
 update push consumer to pull based`. Migration means deleting the push
 consumer and creating a pull consumer in its place, with the same
-`nats consumer add ... --pull` you already know from page 5.
+`nats consumer add ... --pull` you already know from page 4.
 
 ## What push delivery needs to stay alive
 
@@ -120,11 +120,11 @@ of this — asking for a batch _is_ the pacing.
 from "the connection died." On a quiet stream the server sends an empty
 heartbeat at a set interval; miss several and the subscriber knows
 delivery has stalled. Pull consumers get the same signal from the
-heartbeat on a pull request, which page 8 already covered.
+heartbeat on a pull request, which page 7 already covered.
 
 A push consumer may also name a **deliver group** so several subscribers
 to one deliver subject share the load, the way a core NATS queue group
-does. It's the push answer to the worker pool from page 9.
+does. It's the push answer to the worker pool from page 8.
 
 The full set of push delivery options (flow control, idle heartbeats,
 and deliver group) is documented in
@@ -169,7 +169,7 @@ Migration means delete the push consumer and recreate it as pull.
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **Trusting push to pace itself.** A pull consumer can't outrun a slow
-worker; the batch size is the brake, as page 8 covered. A push consumer
+worker; the batch size is the brake, as page 7 covered. A push consumer
 has no such brake. The server pushes the moment a message is stored, and a
 subscriber that falls behind trips the server's **slow consumer** guard:
 the connection is closed and counted in the `slow_consumers` monitoring
@@ -184,7 +184,7 @@ messages among subscribers that join the group, but a plain subscriber to
 the same deliver subject ignores the group and receives the full firehose,
 so two unwitting subscribers each get every message instead of sharing.
 Subscribe with the matching group, not bare; or, for new code, use a shared
-pull consumer from [page 9](/learn/jetstream/worker-pool), where one
+pull consumer from [page 8](/learn/jetstream/worker-pool), where one
 consumer name already splits the stream across workers with no group to get
 wrong.
 
@@ -210,6 +210,6 @@ limit policies that decide what the stream keeps and what it lets go.
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
   — every consumer option, including the push-only deliver subject, flow
   control, idle heartbeat, and deliver group fields.
-- [8. Pull consumers in depth](/learn/jetstream/pull-consumers) — the
+- [7. Pull consumers in depth](/learn/jetstream/pull-consumers) — the
   pull model this page recommends, with fetch, consume, and the bounding
   knobs.

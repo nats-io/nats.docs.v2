@@ -3,9 +3,9 @@
 #
 # The nats CLI honors SIGINT (Ctrl-C) cleanly. When you press Ctrl-C,
 # `nats sub` unsubscribes, lets the messages already in its buffer finish
-# printing, and then closes the connection — the CLI's equivalent of a
+# printing, and then closes the connection -- the CLI's equivalent of a
 # client calling Drain(). It does not abandon in-flight messages the way
-# an abrupt kill would.
+# an abrupt kill (SIGKILL) would.
 #
 # Run this, publish a few orders.created events from another terminal,
 # then press Ctrl-C. The last delivered messages are handled before exit.
