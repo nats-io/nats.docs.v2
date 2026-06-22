@@ -15,7 +15,7 @@ const https = require("https");
 // Rust: async-nats/examples/docs_[page]_[snippet].rs
 // Others: TBD when they adopt the pattern
 const EXAMPLES_CONFIG = {
-    "go": {
+    "go": [{
         repo: "nats-io/nats.go",
         branch: "doc-examples",
         directory: "examples/docs/",
@@ -39,8 +39,16 @@ const EXAMPLES_CONFIG = {
             "request-reply-calculator": "request-reply-calculator/main.go",
             "jetstream-basic": "jetstream-basic/main.go"
         },
-    },
-    "rust": {
+    }, {
+        repo: "nats-io/nats.go",
+        branch: "jetstream-docs",
+        directory: "examples/docs/",
+        examples: {
+            "learn-jetstream-your-first-stream-create": "learn-jetstream-your-first-stream-create/main.go",
+            "learn-jetstream-your-first-stream-info": "learn-jetstream-your-first-stream-info/main.go",
+        },
+    }],
+    "rust": [{
         repo: "nats-io/nats.rs",
         branch: "main",
         directory: "async-nats/examples/",
@@ -64,8 +72,16 @@ const EXAMPLES_CONFIG = {
             "request-reply-calculator": "docs_request_reply_calculator.rs",
             "jetstream-basic": "docs_jetstream_basic.rs"
         },
-    },
-    "javascript": {
+    }, {
+        repo: "nats-io/nats.rs",
+        branch: "jetstream-docs",
+        directory: "async-nats/examples/",
+        examples: {
+            "learn-jetstream-your-first-stream-create": "docs_learn_jetstream_your_first_stream_create.rs",
+            "learn-jetstream-your-first-stream-info": "docs_learn_jetstream_your_first_stream_info.rs",
+        },
+    }],
+    "javascript": [{
         repo: "nats-io/nats.js",
         branch: "docs-io-nats-examples",
         directory: "docs-io-nats-examples/",
@@ -89,8 +105,16 @@ const EXAMPLES_CONFIG = {
             "request-reply-calculator": "request-reply-calculator.ts",
             "jetstream-basic": "jetstream-basic.ts"
         },
-    },
-    "python": {
+    }, {
+        repo: "nats-io/nats.js",
+        branch: "jetstream-docs",
+        directory: "docs-io-nats-examples/",
+        examples: {
+            "learn-jetstream-your-first-stream-create": "learn-jetstream-your-first-stream-create.ts",
+            "learn-jetstream-your-first-stream-info": "learn-jetstream-your-first-stream-info.ts",
+        },
+    }],
+    "python": [{
         repo: "nats-io/nats.py",
         branch: "doc-examples",
         directory: "examples/docs/",
@@ -114,8 +138,16 @@ const EXAMPLES_CONFIG = {
             "request-reply-calculator": "request_reply_calculator.py",
             "jetstream-basic": "jetstream_basic.py"
         },
-    },
-    "java": {
+    }, {
+        repo: "nats-io/nats.py",
+        branch: "jetstream-docs",
+        directory: "examples/docs/",
+        examples: {
+            "learn-jetstream-your-first-stream-create": "learn_jetstream_your_first_stream_create.py",
+            "learn-jetstream-your-first-stream-info": "learn_jetstream_your_first_stream_info.py",
+        },
+    }],
+    "java": [{
         repo: "nats-io/nats.java",
         branch: "main",
         directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
@@ -139,8 +171,16 @@ const EXAMPLES_CONFIG = {
             "request-reply-calculator": "RequestReplyCalculator.java",
             "jetstream-basic": "JetStreamBasic.java"
         },
-    },
-    "csharp": {
+    }, {
+        repo: "nats-io/nats.java",
+        branch: "jetstream-docs",
+        directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
+        examples: {
+            "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.java",
+            "learn-jetstream-your-first-stream-info": "LearnJetStreamYourFirstStreamInfo.java",
+        },
+    }],
+    "csharp": [{
         repo: "nats-io/nats.net",
         branch: "main",
         directory: "examples/Example.NatsIODocs/",
@@ -164,7 +204,15 @@ const EXAMPLES_CONFIG = {
             "request-reply-calculator": "RequestReplyCalculator.cs",
             "jetstream-basic": "JetStreamBasic.cs"
         },
-    },
+    }, {
+        repo: "nats-io/nats.net",
+        branch: "jetstream-docs",
+        directory: "examples/Example.NatsIODocs/",
+        examples: {
+            "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.cs",
+            "learn-jetstream-your-first-stream-info": "LearnJetStreamYourFirstStreamInfo.cs",
+        },
+    }],
 };
 
 // Output directory for fetched examples

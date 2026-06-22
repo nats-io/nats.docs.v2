@@ -68,7 +68,7 @@ straight into the chapters around it.
 The [JetStream deep dive](/learn/jetstream) is the chapter underneath this
 one. Every time this chapter said "that is a stream limit" or "a watch is
 a consumer," that's where the mechanism is taught in full:
-[why a stream](/learn/jetstream/why-a-stream),
+[why a stream](/learn/jetstream/your-first-stream#why-a-stream),
 [delivery semantics](/learn/jetstream/delivery-semantics), and the
 [per-message TTL](/learn/jetstream/message-ttl) that per-key TTL rides on.
 
