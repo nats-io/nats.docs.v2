@@ -54,7 +54,7 @@ stream, replaying the last value per key and then following new writes.
 You don't configure or manage it: opening the watch creates it, and
 closing the watch removes it. How consumers track position and deliver messages
 is the JetStream chapter's job; see
-[Why a stream](/learn/jetstream/why-a-stream) if you want the layer
+[Why a stream](/learn/jetstream/your-first-stream#why-a-stream) if you want the layer
 below. Here, all you need is the behavior: snapshot, then live.
 
 ## The end-of-initial-data signal
@@ -158,7 +158,7 @@ make safe, concurrent updates:
 
 ## See also
 
-- [Why a stream](/learn/jetstream/why-a-stream) — the consumer model a
+- [Why a stream](/learn/jetstream/your-first-stream#why-a-stream) — the consumer model a
   watch is built on.
 - [Reference → Create Stream](/reference/jetstream/api/stream/create) —
   the configuration behind a watch's consumer.
