@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "17. Where to go next"
-sidebar_position: 19
+title: "18. Where to go next"
+sidebar_position: 20
 description: Recap the JetStream mental model and point to what comes after this chapter
 ---
 
-# 17. Where to go next
+# 18. Where to go next
 
 You started this chapter with a publisher shouting into the void and no
 one guaranteed to be listening. You end it with an `ORDERS` stream, a
@@ -184,6 +184,12 @@ explains the why.
 - [ ] Confirm `Allows Per-Message TTL` is on before relying on `Nats-TTL`; a header on an opted-out stream fails the publish.
 - [ ] Size a TTL to outlast the slowest healthy consumer's lag; the clock deletes the stored copy whether or not it was read.
 - [ ] Set `SubjectDeleteMarkerTTL` only when consumers must learn a value expired, and keep it at or below your shortest TTL.
+
+### Altering stream state — see [Pitfalls](/learn/jetstream/altering-stream-state#pitfalls)
+
+- [ ] Use `nats stream purge` to clear messages and `nats stream rm` to delete the stream; don't swap the two.
+- [ ] Treat a sequence as a stable address that may hold no message; never assume messages run `1..N` without gaps.
+- [ ] Set `DenyPurge` on a stream that matters, and keep a mirror; a purge can't be undone.
 
 ### Surviving node loss — see [Pitfalls](/learn/jetstream/surviving-node-loss#pitfalls)
 

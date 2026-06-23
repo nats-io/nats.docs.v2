@@ -182,8 +182,8 @@ from the previous page. Nothing else changed.
 
 ## What's next
 
-The next page steps up from a single server to a cluster, and what it
-means for the stream to survive losing a node.
+The next page stays on your single server and hands you control of what
+the stream holds: deleting a message by hand, and purging the stream.
 
 ## See also
 

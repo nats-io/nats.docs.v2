@@ -84,6 +84,7 @@ const sidebars: SidebarsConfig = {
             "jetstream/shaping-the-stream",
             "jetstream/delivery-semantics",
             "jetstream/message-ttl",
+            "jetstream/altering-stream-state",
             "jetstream/surviving-node-loss",
             "jetstream/mirrors-and-sources",
             "jetstream/where-next",
