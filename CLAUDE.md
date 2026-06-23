@@ -105,12 +105,27 @@ General feature? → All available languages
 ```
 
 ### Writing Style
-- Active voice: "NATS delivers messages"
-- Present tense: "NATS provides"
-- Welcoming and conversational (not dry/robotic)
-- Explain concepts clearly
-- Progressive complexity (simple → advanced)
-- Link to reference docs for exhaustive details
+
+Flat and plain. Explain the complex thing in everyday words and stop. The
+authority is `style-guide.pdf` (Synadia Content Style Guide); its "Sage" voice
+means making complex things simple (Orwell's rules, p19), not performing wit.
+
+- Active voice, present tense, second person, contractions.
+- State each fact once, directly. No setup, no payoff, no persona.
+- Everyday word over jargon; one technical idea per sentence; define a term
+  before using it.
+- Headings are plain and descriptive; doc page-title H1s use an action verb (p20).
+- Progressive complexity (simple → advanced); link to Reference for exhaustive details.
+
+**Hard bans (the AI-style tics):**
+- "X is not Y. It's Z." / "It does not mean…" as a device — allowed only when the
+  contrast is the genuine technical point, then one plain sentence.
+- Metaphor, simile, or personification you'd commonly see ("surgery", "shouting
+  into the void").
+- Rule-of-three / triads for rhythm; dramatic one-line fragments for effect;
+  evocative or cute headings.
+- Filler ("it's important to note", "simply", "powerful", "leverage", "seamless").
+- Over-bolding — bold a term once, at its definition.
 
 ### Interactive Animations
 
@@ -214,7 +229,7 @@ npm run fetch-examples # Fetch code examples
 - [ ] `npm run typecheck` passes
 
 **Content:**
-- [ ] Welcoming, conversational tone
+- [ ] Flat, plain tone — no AI-style tics (antithesis-as-device, triads, metaphor, dramatic fragments, evocative headings)
 - [ ] Realistic names in examples
 - [ ] Expected output shown when helpful
 - [ ] Progressive complexity

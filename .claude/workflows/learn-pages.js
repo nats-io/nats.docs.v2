@@ -41,7 +41,7 @@ log(`Pages to write: ${PAGES.length} across ${chapters.length} chapters (${chapt
 const CONVENTIONS = `
 STANDING CONVENTIONS (every Learn deep-dive page):
 - Frontmatter: id, title, sidebar_position, description. Content/where-next titles carry a leading number ("3. Filtering"); index has no number.
-- Voice: Rust-book tone, active voice, present tense, one teaching thought per paragraph, define-then-use, <=2 NEW concepts per content page. Match the gold pages exactly.
+- Voice: flat and plain per style-guide.pdf + CLAUDE.md Writing Style (no AI-style tics: no "X is not Y" inversion as a device, no rule-of-three, no metaphor, no dramatic fragments, no evocative headings), active voice, present tense, one teaching thought per paragraph, define-then-use, <=2 NEW concepts per content page. Copy the gold pages' STRUCTURE only, not their voice.
 - Teach what matters; hand the exhaustive knob list to Reference with the greppable phrase "the full set of ... is documented in [Reference](/reference/...)".
 - Examples: almost every real multi-language snippet is a nats-example div:
     <div class="nats-example" data-type="learn-<chapter>-<slug>-<snippet>" data-languages="cli,js,go,python,java,rust,csharp"></div>
