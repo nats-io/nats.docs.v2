@@ -35,9 +35,9 @@ proposes the addition as a membership-change entry, replicates it to the
 current quorum, and broadcasts the new peer set. `n4-east` is now a
 member.
 
-It isn't a useful one yet. A brand-new peer holds none of the stream's
-history. It can't vote on a write it's never seen and can't answer a
-read for data it doesn't have.
+It isn't a useful one yet, because a brand-new peer holds none of the
+stream's history. It can't vote on a write it's never seen, and it can't
+answer a read for data it doesn't have.
 
 So the new peer **catches up** first. Catchup is how a behind or new
 peer streams the entries it's missing: the leader feeds it the log from
@@ -47,7 +47,7 @@ entries behind the leader's log the peer still is. Until then, the new
 peer is an observer, present in the set and replicating, but not yet
 relied on for quorum.
 
-This observer step is the whole safety of a scale-up. Adding `n4-east`
+This observer step is what makes a scale-up safe. Adding `n4-east`
 to an `R=3` group doesn't put a half-empty replica in the voting path
 the instant it joins. The group keeps committing on the peers that
 already have the data while `n4-east` fills in behind them. Only once
@@ -95,10 +95,10 @@ lands on a peer that stays.
 
 One membership change happens at a time. While a peer add or remove is
 committing, the group refuses a second one with a
-`cluster member change is in progress` error. This is deliberate:
-two overlapping changes to who's in the voting set are exactly how a
-group talks itself out of a quorum. Let one finish, confirm a leader,
-then start the next.
+`cluster member change is in progress` error. This is deliberate,
+because two overlapping changes to who's in the voting set are a way for
+a group to lose its quorum. Let one finish and confirm a leader before
+you start the next.
 
 That confirmation is the rule that keeps a shrink safe. After a
 `peer-remove`, re-read the group and check three things before you touch
@@ -114,8 +114,8 @@ add, remove, and the verify step here.
 
 ## Pitfalls
 
-Three traps catch people the first time they resize a live group. All
-three live inside this page's two concepts: peer add with catchup, and
+Three mistakes are common the first time you resize a live group. All
+three come from this page's two concepts: peer add with catchup, and
 peer remove with migration.
 
 **Removing two peers from an `R=3` group at once loses quorum.** An
@@ -141,7 +141,7 @@ history. While it catches up it's an observer, not a full member of the
 quorum. If you kill another server mid-catchup, you can drop below the
 peers that actually hold the data and stall the group. Don't treat a
 new peer as a working replica until `nats stream info` shows it
-`current` with zero lag. That's when catchup is done.
+`current` with zero lag, which is when catchup is done.
 
 **Do not remove the only remaining peer.** `peer-remove` doesn't warn
 you when the peer you're dropping is the last copy of the stream's data.

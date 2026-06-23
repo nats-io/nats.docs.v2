@@ -10,11 +10,11 @@ description: Create the INVENTORY bucket, put a stock count, and get back an ent
 Time to make the `INVENTORY` bucket real. The inventory service keeps a
 stock count for each SKU, and a bucket is where those counts live. This
 page creates the bucket with one command, puts a count, gets it back, and
-reads the bucket's status. Nothing more.
+reads the bucket's status, and does nothing more than that.
 
 The previous chapter gave you JetStream. A bucket rides on top of it: a
 **bucket** is a JetStream stream the key-value API creates and configures
-for you. You never write the stream by hand. You ask for a bucket, and the
+for you, so you never write the stream by hand. You ask for a bucket, and the
 server stores one stream named `KV_INVENTORY` behind the friendly name
 `INVENTORY`. The stream is the topic of the [under the
 hood](/learn/key-value/under-the-hood) page; here you only need to know it
@@ -34,9 +34,7 @@ In another terminal, create the bucket:
 
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-createBucket" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Two things matter here.
-
-The first is the **bucket name**: `INVENTORY`. Bucket names are
+Two parts of this command matter. The first is the **bucket name**: `INVENTORY`. Bucket names are
 case-sensitive identifiers, and they show up in every command and every
 error message in this chapter. The name maps straight onto the backing
 stream: `INVENTORY` becomes `KV_INVENTORY`.
@@ -65,26 +63,27 @@ That's a **put**: an unconditional write. It stores the value whether or
 not the key already exists, and it hands back the key's new **revision**,
 a number the bucket bumps on every write. The first write to a fresh key
 lands at revision 1. Revisions are how the bucket tracks change over time;
-page 3 builds on them, and for now the number is just a receipt.
+page 3 builds on them, and for now the number only confirms the write
+happened.
 
 Now read it back:
 
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-getValue" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Here's the one surprise of this page. A **get** doesn't return a bare
-value. It returns an **entry**: the value together with its revision and
+A **get** returns an **entry** rather than a bare
+value: the value together with its revision and
 the time it was written. The CLI's `--raw` flag strips the entry down to
 just the value bytes (`42`), which is usually what a program wants, but the
 full object is what the server actually sends.
 
-That shape is deliberate. The inventory service rarely wants only the
+That shape is intentional, because the inventory service rarely wants only the
 count; it wants the count *and* the revision, because [history and
 revisions](/learn/key-value/history-and-revisions) uses that revision to
 decrement the value safely. The entry carries both in one
 read, so you never have to make a second call to learn which revision you
 just saw.
 
-The timestamp on the entry earns its place too. It records when the value
+The timestamp on the entry matters too. It records when the value
 was written, not when you read it, so the inventory service can tell a
 count taken seconds ago from one that has sat untouched for a week. You
 get all three facts — value, revision, and write time — from the single
@@ -99,17 +98,17 @@ One command summarizes the bucket as a whole:
 The status reports the bucket name, the history depth you set, and how many
 values it holds. It also reports the **backing stream**: the stream the
 bucket is built on, named `KV_INVENTORY`. That line is your first concrete
-proof that a bucket is a stream wearing a friendlier name. The [under the
-hood](/learn/key-value/under-the-hood) page opens that stream up and reads
+proof that a bucket is a stream with a friendlier name. The [under the
+hood](/learn/key-value/under-the-hood) page opens that stream and reads
 it directly.
 
 ## Pitfalls
 
-Two traps catch people on their very first bucket. Each is easy to avoid
+Two mistakes are common on your very first bucket, and each is easy to avoid
 once you've seen it.
 
-**A get returns an entry, not a value — and a missing key is an error,
-not an empty value.** Reaching straight for the value bytes works only
+**A get returns an entry rather than a value, and a missing key is an error
+rather than an empty value.** Reaching straight for the value bytes works only
 when the key exists. A key that was never put doesn't return an empty
 entry; it returns a key-not-found error. Those are two different
 situations: an empty value is a value, and a missing key is the absence of

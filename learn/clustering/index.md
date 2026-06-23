@@ -7,19 +7,19 @@ description: How a NATS cluster agrees and replicates — routes, RAFT, quorum c
 
 # Clustering & Replication Deep Dive
 
-A NATS cluster is more than three servers wired together. Under the
-wiring sits a mechanism: the servers find each other, elect leaders,
-agree on every write, and keep replicas in step. This chapter is that
-mechanism, taught one layer at a time the way you'd learn it by
-running a real cluster and watching it work.
+A NATS cluster involves more than three servers wired together. Beneath
+that wiring is a mechanism by which the servers find each other, elect
+leaders, agree on every write, and keep replicas in step. This chapter
+covers that mechanism, taught one layer at a time the way you'd learn it
+by running a real cluster and watching it work.
 
 The [Topologies](/learn/topologies) chapter stood up the shapes (one
 server growing into the `east` cluster, then a super-cluster, then leaf
 nodes) and deliberately left the internals for here. The
 [JetStream](/learn/jetstream) chapter gave you one page on
 [surviving node loss](/learn/jetstream/surviving-node-loss): set `R=3`,
-lose a server, keep serving. This chapter is where both promises come
-due. We go beneath the shapes to the agreement and replication that make
+lose a server, keep serving. This chapter explains how both of those
+work. We go beneath the shapes to the agreement and replication that make
 them work.
 
 <div class="nats-flow" data-scenario="singleToClusterAnimated" data-width="600" data-height="350"></div>
@@ -81,7 +81,7 @@ clusters (gateways, geo-affinity, super-cluster traffic) stays in
 | 5 | [Scaling and peer management](/learn/clustering/scaling-and-peers) | Add a peer with catchup, remove one safely, and never lose quorum doing it |
 | 6 | [Where to go next](/learn/clustering/where-next) | A recap of the whole mechanism and a production checklist |
 
-The arc is one sentence: servers form a mesh, elect leaders, replicate
+In summary, servers form a mesh, elect leaders, replicate
 every write, place the replicas where you want them, and let you scale
 the peer set without losing agreement.
 

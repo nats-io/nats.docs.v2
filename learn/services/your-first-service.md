@@ -14,14 +14,14 @@ name, its version, or which subjects it served.
 
 This page promotes that responder into a **service**: the same answering
 behavior, now wrapped by the micro framework so it gains a name, a
-version, and a built-in identity. The bytes on the wire don't change.
-What changes is that the responder becomes a first-class thing the
-network can name and, on later pages, discover, observe, and scale.
+version, and a built-in identity. The bytes on the wire stay the same.
+The responder becomes a first-class thing the network can name and, on
+later pages, discover, observe, and scale.
 
 You need a local `nats-server` running and you should already be
 comfortable with [request-reply](/learn/core-nats/request-reply). This
-page doesn't re-teach how a reply finds its way back; it teaches the
-two things the framework adds on top.
+page covers the two things the framework adds on top of how a reply
+finds its way back, rather than re-teaching that.
 
 ## A service is a named responder
 
@@ -59,8 +59,8 @@ page builds on it.
 Second, creating the service quietly subscribes it to a set of
 **discovery** subjects under `$SRV`: the verbs that let callers find it
 and read its stats. You don't see them here; the
-[discovery](/learn/services/discovery) page is where they earn their
-keep. For now, know that they exist the moment the service starts.
+[discovery](/learn/services/discovery) page is where they are used. For
+now, know that they exist the moment the service starts.
 
 The full set of service configuration fields and their valid ranges is
 documented in [Reference](/reference/). We only need the behavior here.
@@ -69,15 +69,16 @@ documented in [Reference](/reference/). We only need the behavior here.
 
 Inside an endpoint, the **handler** is the function that processes a
 request. Its contract is the request-reply you already know, with the
-framework holding the wires. Each request hands you a request object. You
-read the incoming bytes with `Data()` and you send the answer with
-`Respond()`.
+framework managing the connection. Each request hands you a request
+object. You read the incoming bytes with `Data()` and you send the answer
+with `Respond()`.
 
-That's the whole shape: `Data()` in, `Respond()` out. The framework took
-care of subscribing on `orders.inventory.check`, joining the queue group,
-reading the reply subject off the incoming message, and publishing your
-answer to it. The handler never touches a reply subject or an inbox — the
-framework does, exactly as the raw responder did by hand.
+That covers the whole shape, `Data()` to read and `Respond()` to answer.
+The framework took care of subscribing on `orders.inventory.check`,
+joining the queue group, reading the reply subject off the incoming
+message, and publishing your answer to it. The handler doesn't touch a
+reply subject or an inbox; the framework does, the same work the raw
+responder performed manually.
 
 With the service running, a caller asks the same question as before. The
 `order-svc` client sends the canonical order payload to the `check`
@@ -94,14 +95,14 @@ trip with the framework wrapper in place:
 
 The orange arrow is the request out on `orders.inventory.check`. The
 green arrow is the answer coming back. Underneath, it's plain
-request-reply over a queue group; the framework just gave the responder
-a name and an identity on the way.
+request-reply over a queue group; the framework gave the responder a name
+and an identity.
 
 ## Pitfalls
 
-Two traps catch people building their first service. Both are about
-validation: the framework names and wires your responder, but it doesn't
-police what flows through it.
+Two mistakes are common when building your first service. Both are about
+validation: the framework names your responder and sets up its
+subscriptions, but it doesn't validate the data that flows through it.
 
 **Validate the request body; never let bad input crash the handler.** The
 framework hands your handler whatever bytes the caller sent. If your
@@ -146,8 +147,8 @@ The Acme world now has its first real service:
 - The same in-stock behavior as the Core NATS responder, now named and
   wrapped, plus discovery subscriptions running quietly under `$SRV`.
 
-Nothing about the payload or the subject changed. The responder just
-became a service.
+Nothing about the payload or the subject changed; the responder became a
+service.
 
 ## What's next
 

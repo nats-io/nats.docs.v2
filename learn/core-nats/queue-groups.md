@@ -17,7 +17,7 @@ needs to see every order. It's not what you want for `warehouse`.
 The warehouse does real work for each order: it picks a box, prints a
 label, packs the items. One process can't keep up with a busy day. You
 want a pool of packers, and you want each order packed by exactly one of
-them: never zero, never two.
+them, not zero and not two.
 
 Plain pub/sub can't do that. Run three copies of the `warehouse`
 subscriber and all three pack the same order. This page introduces the
@@ -89,10 +89,10 @@ The server keeps the live members of a group in a list. For each message,
 it picks a random index into that list and delivers to that member. The
 selection is uniform-random across the available members.
 
-Random selection has one consequence worth naming: it is not
-round-robin. The server doesn't rotate fairly through the members. The
-same packer can be chosen twice in a row, and over a handful of messages
-the split can look lopsided. Over many messages it evens out.
+Random selection has one consequence: the server doesn't rotate fairly
+through the members the way round-robin would. The same packer can be
+chosen twice in a row, and over a handful of messages the split can look
+lopsided. Over many messages it evens out.
 
 > The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
 > [Reference → Client protocol](/reference/protocols/client). We only
@@ -138,13 +138,13 @@ published order:
 - exactly one packer receives it: the group gets one copy, shared.
 
 The server runs the two distributions independently. The plain
-subscription is a one-to-one fan-out. The group subscription is a
-one-to-one-of-many pick. The same message satisfies both.
+subscription is a one-to-one fan-out, the group subscription is a
+one-to-one-of-many pick, and the same message satisfies both.
 
 This is exactly the split our scenario wants. Analytics must count every
 order, so it stays a plain subscriber. Packing must happen once per
-order, so it becomes a queue group. One subject, two behaviors, zero
-extra plumbing.
+order, so it becomes a queue group. The same subject carries both
+behaviors with no extra configuration.
 
 You can confirm it. Keep the three `packers` terminals open, and in
 another terminal subscribe plain:
@@ -191,8 +191,8 @@ it works once you span regions.
 
 ## Pitfalls
 
-Queue groups are simple to use and easy to mis-wire in ways the server
-never complains about. Watch for these.
+Queue groups are easy to mis-wire in ways the server reports no error
+for. Watch for these.
 
 **A typo in the queue group name makes a second group.** The server
 matches members by the exact name string, so `packers` and `packer` are
@@ -211,9 +211,9 @@ customer strictly in order, a queue group is the wrong tool. Keep that
 work on a single subscriber.
 
 **Make a packer's work safe to repeat.** Core NATS is at-most-once, so the
-server does not redeliver after it hands a message off. The trap is the
-near-miss: a packer that's slow or briefly cut off can still be doing
-work the publisher assumes was lost. Write each packer so handling the same
+server does not redeliver after it hands a message off. The case to watch
+for is the near-miss: a packer that's slow or briefly cut off can still be
+doing work the publisher assumes was lost. Write each packer so handling the same
 order twice is harmless (pack by `order_id`, skip an order already packed)
 rather than assuming exactly one packer ever touches it. When you need the
 server to retry a dropped message to another worker, that's a durable work

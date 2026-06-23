@@ -19,8 +19,8 @@ client's certificate *be* the `order-svc` identity.
 ## TLS is per connection type
 
 A NATS server speaks to more than one kind of peer. Clients connect to
-it. In a cluster, servers route to each other. A leaf node dials a hub.
-Gateways join superclusters.
+it, servers route to each other in a cluster, a leaf node dials a hub,
+and gateways join superclusters.
 
 Each of those is a separate connection type, and **each one carries its
 own TLS configuration**. The top-level `tls {}` block secures client
@@ -104,7 +104,7 @@ The full set of TLS options (cipher suites, curve preferences, and
 certificate pinning) is documented in [Reference](/reference/). We use
 only `cert_file`, `key_file`, `ca_file`, and `timeout` here.
 
-## Mutual TLS: the certificate becomes the identity
+## Mutual TLS: mapping the certificate to the identity
 
 So far TLS proves the *server* to the client. When the client proves
 itself to the server with its own certificate, that's
@@ -185,7 +185,7 @@ a user. You don't set both: `verify_and_map` is the superset. Reach for
 plain `verify` only when an external system already maps certificates to
 users and the server doesn't need to.
 
-## Encryption at rest, in one line
+## Encryption at rest
 
 TLS protects messages *in transit*. It does nothing for messages already
 written to disk by a JetStream stream. That's a separate control:
@@ -199,7 +199,7 @@ discussion in [Surviving node loss](/learn/jetstream/surviving-node-loss).
 
 ## Pitfalls
 
-A few traps hit teams the first time they secure a NATS link. Each one
+Teams hit a few traps the first time they secure a NATS link. Each one
 is scoped to this page's two concepts: TLS, and the certificate as
 identity.
 
@@ -210,9 +210,10 @@ the client for a certificate. Until you add `verify: true` (or
 `verify_and_map: true`), any client that trusts your CA connects without
 presenting one, and you have encryption with no client identity from the
 certificate. Don't assume "TLS is on" means "clients are
-authenticated by certificate." Set `verify` and prove it.
+authenticated by certificate." Set `verify` and confirm that it is
+working.
 
-You can prove it. Point a client that holds no certificate at the
+To confirm it, point a client that holds no certificate at the
 server. Against a `verify`-enabled server the handshake fails; if the
 publish succeeds, the server isn't checking client certificates.
 

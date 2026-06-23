@@ -7,23 +7,23 @@ description: Lock down the ORDERS cluster — TLS on every link, mounted credent
 
 # 6. Hardening
 
-The cluster is sized, deployed, configurable, and upgradable. It's also,
-right now, wide open. Routes between `n1-east`, `n2-east`, and `n3-east`
-run in plaintext, the monitor port answers anyone who asks, and the
+The cluster is sized, deployed, configurable, and upgradable. Right now
+it's also unsecured. Routes between `n1-east`, `n2-east`, and `n3-east`
+run in plaintext, the monitor port responds to any request, and the
 `nats-server` process can read and write the whole filesystem.
 
-This page closes those gaps. It does two things: it puts TLS on every
-link the cluster speaks over, and it wraps the process in a hardened
-systemd unit that strips away everything it doesn't need. Both are
-operator-side controls. The auth model that issues the credentials (the
-operator `ACME`, the accounts, the users) is taught in
-[Security](/learn/security); here you *mount* those credentials and *turn
-on* the transport security around them.
+This page closes those gaps. It puts TLS on every link the cluster
+connects over, and it wraps the process in a hardened systemd unit that
+removes everything it doesn't need. Both are operator-side controls. The
+auth model that issues the credentials (the operator `ACME`, the
+accounts, the users) is taught in [Security](/learn/security); here you
+*mount* those credentials and *turn on* the transport security around
+them.
 
 ## TLS on every link
 
-A NATS server speaks to more than one kind of peer, and each kind
-carries its own TLS block. There are three:
+A NATS server connects to more than one kind of peer, and each kind
+has its own TLS block. There are three:
 
 - **Client TLS**: the top-level `tls {}` block, securing client
   connections like `order-svc` publishing to `orders.created`.
@@ -35,10 +35,10 @@ carries its own TLS block. There are three:
 These blocks are independent. Turning on TLS for clients leaves the
 cluster routes plaintext until you configure the cluster block too.
 
-This per-link split is the single most common hardening mistake: an
-operator secures clients, sees the encrypted client connection, and ships
-a cluster whose inter-node Raft traffic, including replicated `ORDERS`
-data, still travels in the clear.
+This per-link split is a common hardening mistake. An operator secures
+clients and sees the encrypted client connection, then ships a cluster
+whose inter-node Raft traffic, including replicated `ORDERS` data, is
+still unencrypted.
 
 Here's a server config that secures both the client link and the cluster
 link. Client TLS sits at the top level; cluster TLS sits inside the
@@ -98,19 +98,19 @@ The full set of TLS keys (cipher suites, curve preferences, and
 [Reference → TLS](/reference/config/tls). We use only `cert_file`,
 `key_file`, `ca_file`, and `verify` here.
 
-## Mount the credentials, prove the link
+## Mount the credentials and verify the link
 
-TLS encrypts the link; credentials name the user on it. The `ACME`
+TLS encrypts the link, and credentials identify the user on it. The `ACME`
 operator from the [Security deep dive](/learn/security/operator-mode)
 issues a `.creds` file for the `order-svc` user. You don't create it
 here; you mount it as a file the server and client can read. On
 Kubernetes that file is a Secret; on a host it lives under a path only the
 `nats` user can read.
 
-With the CA file and the creds file both in hand, one publish proves the
-whole hardened path is live. The client trusts the CA (so the link
+With the CA file and the creds file both available, one publish confirms
+the whole hardened path works. The client trusts the CA (so the link
 encrypts), presents the `order-svc` credentials (so the server
-authenticates the user), and lands one canonical order on
+authenticates the user), and publishes one canonical order to
 `orders.created`:
 
 <div class="nats-example" data-type="learn-deployment-hardening-credsConnect" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -124,22 +124,22 @@ chapter:
 
 If the publish succeeds, encryption and authentication are both on. If it
 fails at the handshake, TLS is misconfigured; if it fails with an
-authorization error, the credentials are wrong or unmounted. One command
-distinguishes the two.
+authorization error, the credentials are wrong or unmounted, and this one
+command distinguishes the two cases.
 
 ## A hardened systemd unit
 
-TLS protects the cluster from the network. The systemd unit protects
-the host from the cluster: it runs `nats-server` as an unprivileged,
-sandboxed process that can touch only what it needs. The NATS distribution
-ships a hardened unit (`nats-server-hardened.service`); it's the second
-and last concept of the page, and you adapt it rather than write it
-from scratch.
+TLS protects the cluster from the network, while the systemd unit
+protects the host from the cluster by running `nats-server` as an
+unprivileged, sandboxed process that can access only what it needs. The
+NATS distribution ships a hardened unit (`nats-server-hardened.service`),
+which is the second and last concept of the page, and you adapt it rather
+than write it from scratch.
 
-The unit does three jobs. It raises the file descriptor limit so a
-busy cluster never runs out of sockets. It sandboxes the filesystem and
-kernel surface so a compromised process can't escape. And it drops
-every Linux capability the server doesn't need:
+The unit does three jobs: it raises the file descriptor limit so a busy
+cluster doesn't run out of sockets, it sandboxes the filesystem and
+kernel surface so a compromised process can't escape, and it drops every
+Linux capability the server doesn't need:
 
 ```ini
 # /etc/systemd/system/nats-server.service (hardened)
@@ -164,7 +164,7 @@ CapabilityBoundingSet=
 SystemCallFilter=@system-service ~@privileged ~@resources
 ```
 
-Two flags carry the most weight for an operator. `LimitNOFILE=800000`
+Two flags matter most for an operator. `LimitNOFILE=800000`
 lifts the file descriptor (FD) ceiling far above the default 1024. Each
 stream costs roughly two FDs, and inter-node gossip plus client sockets
 add many more, so a real `ORDERS` cluster needs the headroom.
@@ -184,8 +184,8 @@ server-configuration keys these flags wrap are documented in
 
 The server listens on four ports: **4222** for clients, **6222** for
 cluster routes, **7222** for gateways, and **8222** for the HTTP monitor.
-The first three carry TLS once you configure it. The monitor port is
-different: it serves `/varz`, `/healthz`, and the rest in plaintext, and
+The first three carry TLS once you configure it. The monitor port does
+not: it serves `/varz`, `/healthz`, and the rest in plaintext, and
 its `/varz` output leaks the server version, connected-client count, and
 memory usage to anyone who can reach it.
 
@@ -209,13 +209,14 @@ ufw deny 8222/tcp
 What to actually scrape from `/varz` and `/healthz`, and how to read it,
 is the monitoring discipline taught in
 [Monitoring → Monitoring endpoints](/learn/monitoring/monitoring-endpoints).
-Hardening's job is only to make sure the port isn't open to the world.
+At the hardening stage, you only need to make sure the port isn't open to
+the world.
 
 ## Pitfalls
 
-A few traps hit teams the first time they harden a NATS cluster. Each one
-comes from this page's work: the sandboxed systemd unit, and locking down
-the ports that TLS now protects.
+A few traps affect teams the first time they harden a NATS cluster. Each
+one comes from this page's work: the sandboxed systemd unit, and locking
+down the ports that TLS now protects.
 
 **`ProtectSystem=strict` blocks cert reload if certs live outside
 `ReadWritePaths`.** The sandbox mounts the filesystem read-only, so a
@@ -244,7 +245,8 @@ Environment=GOMEMLIMIT=5500MiB
 
 **The monitor port exposed to the internet leaks operational detail.**
 A reachable `:8222/varz` hands out the server version, the client count,
-and the memory footprint — a reconnaissance gift. Don't leave `http:`
+and the memory footprint, which is useful information for an attacker
+performing reconnaissance. Don't leave `http:`
 bound to `0.0.0.0`. Bind it to `127.0.0.1` and let the firewall deny 8222
 from everywhere else.
 
@@ -263,8 +265,8 @@ ufw deny 6222/tcp
 ```
 
 Once the ports are open and TLS is on every link, the same authenticated
-publish from [Mount the credentials, prove the link](#mount-the-credentials-prove-the-link)
-proves the whole hardened path end to end. A successful publish confirms
+publish from [Mount the credentials and verify the link](#mount-the-credentials-and-verify-the-link)
+confirms the whole hardened path end to end. A successful publish confirms
 the client link encrypts and the credentials authenticate. Run that check
 from a node on the cluster network to confirm the routes came up. If a
 node still shows as an orphan after you allow 6222, its route handshake is
@@ -275,10 +277,10 @@ failing on the firewall or on a missing or mismatched cluster certificate.
 The `ORDERS` cluster now runs locked down. TLS protects every link: the
 client connection for `order-svc` and the cluster routes that replicate
 the stream between `n1-east`, `n2-east`, and `n3-east`. The `ACME`
-credentials are mounted as files, and one publish proves auth and
-encryption are both live. The process runs under a hardened systemd unit
+credentials are mounted as files, and one publish confirms auth and
+encryption are both on. The process runs under a hardened systemd unit
 that raises the FD limit and sandboxes the filesystem, and the monitor
-port answers only from localhost.
+port responds only from localhost.
 
 That completes the runbook. The cluster is sized, deployed on Kubernetes,
 configurable without downtime, upgradable in place, and hardened.

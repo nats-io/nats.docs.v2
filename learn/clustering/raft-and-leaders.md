@@ -32,11 +32,11 @@ that all of them agree on. One peer is the **leader**; the rest are
 **followers**. The leader is the only peer that accepts new entries; it copies
 each entry to the followers, and the group advances together.
 
-A cluster doesn't run one RAFT group. It runs many, layered.
+A cluster runs many RAFT groups at once, layered.
 
 The first is the **meta group**: one cluster-wide RAFT group whose peers are
-the servers themselves. Its log isn't your data; it's the cluster's
-*assignments*: which streams exist, how many replicas each has, and which
+the servers themselves. Its log holds the cluster's *assignments* rather than your
+data: which streams exist, how many replicas each has, and which
 servers hold them. Its leader is the **meta leader**, the server that decides
 where new streams and consumers are placed. Every server in `east` is a peer of
 the meta group.
@@ -91,7 +91,8 @@ leader, and the followers here.
 
 ## Leader election
 
-A group has one leader at a time. When the leader is healthy, life is simple:
+A group has one leader at a time. When the leader is healthy, the steady-state
+behavior is straightforward:
 the leader sends a periodic **heartbeat** to its followers (by default about
 once a second), and as long as that heartbeat arrives, the followers stay
 followers and do nothing but accept the leader's entries.
@@ -132,9 +133,9 @@ goes leaderless until a peer returns. This is the consensus math behind the
 odd-server-count advice the [Topologies chapter](/learn/topologies/your-first-cluster)
 gives as a deployment choice: an even count buys no extra majority.
 
-## Watch an election happen
+## Observing an election
 
-You don't have to take this on faith. With `east` running and `ORDERS`
+You can observe this directly. With `east` running and `ORDERS`
 replicated, find the current stream leader, kill it, and watch the survivors
 elect a new one.
 
@@ -159,7 +160,7 @@ The `Cluster Information` block now names a different leader, `n2-east` or
 (two of three), so they elected a new leader and `ORDERS` is writable again,
 even with `n1-east` down.
 
-## Moving a leader on purpose
+## Moving a leader manually
 
 Sometimes you want to move leadership without killing anything: to drain a
 server before maintenance, or to rebalance after a restart. A **stepdown** is a
@@ -184,19 +185,20 @@ assignment duty.
 
 ## Pitfalls
 
-RAFT is sturdy, but its timing and its layering surprise people. Each trap
-below is scoped to this page's two concepts: groups and elections.
+RAFT is robust, but its timing and its layering are common sources of
+confusion. Each pitfall below is scoped to this page's two concepts: groups and
+elections.
 
 **An election takes seconds, not milliseconds.** The election timer fires
 between four and nine seconds after the last heartbeat, deliberately staggered
 so two followers don't become candidates at the exact same instant. So when you
 kill a leader, expect a short window where `nats stream info` shows no leader
 and writes are refused. That window is RAFT working as designed, not a bug.
-Don't build a client that treats a brief "no leader" as a fatal error. Let it
-retry; a leader is seconds away.
+Don't build a client that treats a brief "no leader" as a fatal error. Have it
+retry, since a new leader arrives within seconds.
 
-The right response is to retry the write, not to fail. A `nats stream info`
-during the gap confirms what's happening:
+The correct handling is to retry the write rather than fail it. A `nats stream
+info` during the gap confirms what's happening:
 
 ```bash
 # During the election window, the leader line is briefly empty:

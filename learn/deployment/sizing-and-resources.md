@@ -9,13 +9,13 @@ description: The four resources a NATS node spends, the JetStream defaults, and 
 
 Topologies decided the shape: a three-node cluster called `east`
 (`n1-east`, `n2-east`, `n3-east`) carrying the R3 `ORDERS` stream. This
-chapter runs that shape for real, and running it starts with one
-question: how much of each resource does this cluster need?
+chapter runs that shape for real, and running it starts with the question
+of how much of each resource this cluster needs.
 
-Sizing a NATS node isn't guesswork. A node spends a small, fixed set of
-resources, the JetStream defaults are knowable numbers, and the account
-limits the server enforces are readable with one command. This page turns
-those into a baseline for the ORDERS workload.
+A node spends a small, fixed set of resources, the JetStream defaults are
+knowable numbers, and the account limits the server enforces are readable
+with one command. This page turns those into a baseline for the ORDERS
+workload.
 
 You'll learn two things here: the four resources a node spends (and their
 JetStream defaults), and how account limits count R3 replication
@@ -23,13 +23,14 @@ against the storage ceiling.
 
 ## The four resources a node spends
 
-Every NATS node spends the same four resources. Size each one and you've
-sized the node.
+Every NATS node spends the same four resources. Once you size each one,
+you've sized the node.
 
-**CPU** moves messages. Core NATS routing is cheap; TLS handshakes and
-JetStream replication are where cycles go. There's no hard CPU limit to
-set, so the rule is headroom: overprovision CPU by 20–30% above steady
-state so a node has cycles spare for a rebalance when a peer leaves.
+**CPU** handles moving messages. Core NATS routing is cheap; TLS
+handshakes and JetStream replication are where cycles go. There's no hard
+CPU limit to set, so the rule is headroom: overprovision CPU by 20–30%
+above steady state so a node has cycles spare for a rebalance when a peer
+leaves.
 
 **Memory** holds connections, subscriptions, and (for memory-storage
 streams) message data. The ORDERS stream uses file storage, so its
@@ -43,8 +44,8 @@ stream actually spends, and the one most likely to run out. We'll size it
 below.
 
 **File descriptors (FDs)** are the per-process limit on open files and
-sockets. Every connection, every route, and every stream consumes FDs.
-JetStream spends roughly two FDs per stream. On a small cluster the
+sockets. Connections, routes, and streams each consume FDs. JetStream
+spends roughly two FDs per stream. On a small cluster the
 default per-process limit is plenty; on a large one it isn't, which is
 why the hardened service unit on the [hardening](/learn/deployment/hardening)
 page raises it to `LimitNOFILE=800000`.
@@ -58,10 +59,10 @@ storage to a fraction of that instead, but the file-storage default stays
 at 1 TB unless you set `max_file_store` lower.
 
 That 1 TB default is a ceiling, not a reservation: the node only writes
-what the streams actually store. But it's a *trap* in a container. The
-node will happily accept writes up to 1 TB even if the volume mounted
-under it is 10 GiB, and the publish that crosses the real disk boundary
-is the one that fails. Set `max_file_store` to match the volume:
+what the streams actually store. But it causes a problem in a container.
+The node will accept writes up to 1 TB even if the volume mounted under it
+is 10 GiB, and the publish that crosses the real disk boundary fails. Set
+`max_file_store` to match the volume:
 
 ```conf
 # n1-east.conf — pin JetStream storage to the real volume size
@@ -83,7 +84,7 @@ The full set of JetStream limit keys is documented in
 
 ## Account limits and how replication counts
 
-The server config sizes the *node*. **Account limits** size the
+The server config sizes the *node*, while **account limits** size the
 *tenant*. The ORDERS account has its own ceilings (`MaxMemory`,
 `MaxStore`, `MaxStreams`, `MaxConsumers`), and the server enforces them
 no matter how much disk the node has. Read them live before you size:
@@ -132,7 +133,7 @@ the ones a sizing baseline needs here.
 
 ## Pitfalls
 
-A few sizing mistakes only surface in production, under load, when
+A few sizing mistakes only surface in production under load, where
 they're expensive to fix. Each is scoped to this page's two concepts: the
 node's resources and the account's limits.
 
@@ -141,7 +142,7 @@ any value larger than the mounted volume) lets the node accept writes it
 can't store. The failure is a publish error mid-stream, not a startup
 warning. Set `max_file_store` to the volume size, test small with a
 `10GB` value, and watch the real disk with `df -h`. Don't trust the
-config number over the device.
+config number over what the device reports.
 
 **`max_payload` larger than `max_pending`.** If `max_payload` exceeds
 `max_pending`, the server refuses to start. Keep `max_pending` at

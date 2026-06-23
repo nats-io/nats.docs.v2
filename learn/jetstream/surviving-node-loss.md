@@ -8,18 +8,18 @@ description: Why R=1 is a single point of failure, why R=3 is the production flo
 # 16. Surviving node loss
 
 Every page so far ran against a single `nats-server` on your laptop.
-That's the right way to learn. It's the wrong way to run orders in
+That's good for learning, but it's not how you run orders in
 production.
 
 A single server is a single point of failure. If that machine loses
-its disk, crashes, or just reboots, your `ORDERS` stream is at risk.
-This page explains what protects against that, and why the protection
-is something you turn on, not something you get for free.
+its disk, crashes, or reboots, your `ORDERS` stream is at risk. This
+page explains what protects against that, and why you have to turn the
+protection on yourself.
 
 It introduces two ideas: **replicas** (how many copies of the stream
 exist) and **storage durability** (whether a copy survives a restart).
 
-## How many copies: replicas
+## Replicas
 
 `nats stream info ORDERS` reports `Replicas: 1`. You saw this on the
 [Your first stream](/learn/jetstream/your-first-stream) page and
@@ -29,24 +29,23 @@ haven't changed it since.
 one copy of the message log and nothing else. This is **R=1**.
 
 R=1 has no fault tolerance. Lose that one server and you lose the
-stream: every message, every consumer's position, all of it. On a
-laptop that's fine. In production it's a data-loss incident waiting
-for a bad day.
+stream: every message and every consumer's position. On a laptop
+that's fine. In production it risks data loss.
 
 The fix is more copies. Set the stream to keep three copies across
 three servers, and the loss of any one server costs you nothing. This
 is **R=3**, and it's the production floor.
 
-R=3 tolerates one server failure. Three copies, lose one, two remain.
-And two out of three is a **majority**. The stream keeps serving reads
-and writes through the failure, with no data loss and no manual
+R=3 tolerates one server failure. With three copies, losing one leaves
+two, and two out of three is a **majority**. The stream keeps serving
+reads and writes through the failure, with no data loss and no manual
 recovery.
 
-The majority matters because of consensus: the replicas agree on
-the order of messages by majority vote, so the group stays consistent
-as long as more than half of its members are reachable. The mechanism
-is called Raft, a consensus algorithm that keeps every server agreeing
-on the order of writes through that majority vote. The
+The majority matters because the replicas have to agree on the order of
+messages. They settle that order by majority vote, so the group keeps
+working as long as more than half of its members are reachable. The
+rule they follow is called Raft. It's the method that keeps every
+server agreeing on the order of writes through that vote. The
 [Clustering & Replication](/learn/clustering) deep dive walks through it
 on a real cluster.
 
@@ -66,40 +65,42 @@ returns the `PubAck` once a majority of replicas have the message.
 That's what makes the `PubAck` on an R=3 stream a real durability
 promise: the message survives the loss of any single server.
 
-Any replica can serve reads, so read load spreads across the group
-instead of piling onto one server.
+Any replica can serve reads, so the work of reading is spread across the
+group rather than landing on one server.
 
 If the leader's server dies, the remaining replicas elect a new leader
 from among themselves, automatically. Writes pause for the short
 window of that election, then resume. No acked message is lost, because
-every message that received its `PubAck` already lived on a majority
-before the old leader went away.
+every message that received its `PubAck` was already stored on a
+majority before the old leader failed.
 
-A publish that was in flight when the old leader crashed (sent, but
-not yet replicated to a majority, so not yet acked) is a different
-case. That write is lost, and the client never gets a `PubAck` for it.
-The fix is the client's job: treat a missing `PubAck` as a failed
-publish and retry it. The durability promise covers acked messages, not
-ones still in flight when a server dies.
+A publish that was still on its way when the old leader crashed is a
+different case. The message had been sent, but it hadn't reached a
+majority of replicas yet, so it was never acked. That write is lost, and
+the client never gets a `PubAck` for it. The fix is the client's job:
+when a `PubAck` doesn't come back, treat the publish as failed and send
+it again. The durability promise covers acked messages, not ones that
+were still on their way when a server died.
 
-There's one failure mode to name. If so many servers are down that no
-majority remains (two of three gone), the group can't elect a leader.
-Writes block until enough replicas come back. The stream chooses
-consistency over accepting writes it couldn't safely replicate.
+One more failure case is worth covering. If so many servers are down
+that no majority remains (two of three gone), the group can't elect a
+leader. Writes are blocked until enough replicas come back. The stream
+would rather stop than accept writes it couldn't safely copy to a
+majority.
 
-## Where the copies live: storage durability
+## Storage durability
 
-Replicas answer "how many copies." Storage answers a different
-question: does a copy survive a server restart?
+The replica count sets how many copies exist. Storage type sets whether
+a copy survives a server restart.
 
 `nats stream info ORDERS` reports `Storage: File`. This is the default,
 and it's the durable one. File storage writes messages to disk, so a
 server can reboot and read its copy back intact.
 
 The alternative is **Memory** storage. A memory stream keeps its
-messages in RAM only. It's faster, and it's not durable: restart that
+messages in RAM only. It's faster, but it's not durable: restart that
 server and its copy is gone. Memory storage suits data you can afford
-to lose on a restart, never an order log.
+to lose on a restart. It's not suitable for an order log.
 
 Storage type is a property of the whole stream, not of individual
 replicas. An R=3 stream is all file or all memory; you can't mix a
@@ -113,19 +114,19 @@ restarts at once.
 
 ## Consumers replicate too
 
-A consumer also has state worth protecting: its cursor position and
-which messages are awaiting ack. On an R=3 stream, the `shipping`
-consumer's state is replicated the same way, so a worker pool keeps its
-place through a server failure.
+A consumer also has state worth protecting: how far it has read and
+which messages are still waiting for an ack. On an R=3 stream, the
+`shipping` consumer's state is copied the same way, so a worker pool
+keeps its place through a server failure.
 
-By default a consumer inherits its stream's replica count. You can set
-a consumer to fewer replicas than its stream when its state is cheap to
-rebuild, but never more: a consumer can't out-replicate the stream it
-reads.
+By default a consumer takes its stream's replica count. You can give a
+consumer fewer replicas than its stream when its state is cheap to
+rebuild, but never more: a consumer can't keep more copies than the
+stream it reads.
 
 The full set of consumer replica and storage options is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
-We rely on inheritance from the stream here.
+Here the consumer just takes its count from the stream.
 
 ## Turning R=3 on
 
@@ -135,15 +136,15 @@ On a cluster you raise the replica count with one command:
      data-type="learn-jetstream-surviving-node-loss-set-replicas"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-This command needs a real cluster behind it. A single-node server
-rejects `--replicas=3`, because there aren't three servers to hold the
-three copies. Running it on your laptop returns an error, not a
-three-way stream. That's expected.
+This command needs a real cluster behind it. A single server rejects
+`--replicas=3`, because there aren't three servers to hold the three
+copies. Running it on your laptop returns an error rather than a
+three-copy stream, which is expected.
 
 Standing up the three-node cluster, watching a leader get elected, and
-killing a server to see the failover is a walkthrough of its own. It
-lives in the [Clustering & Replication](/learn/clustering) deep dive,
-which picks up exactly where this page leaves off.
+killing a server to see the failover is covered separately in the
+[Clustering & Replication](/learn/clustering) deep dive, which picks up
+where this page leaves off.
 
 The full set of placement controls (which servers a stream lands on,
 tag-based steering, and per-account replica limits) is documented in
@@ -152,8 +153,7 @@ only the replica count here.
 
 ## Pitfalls
 
-These are the failures that bite when a stream meets its first dead
-server.
+These are the failures that show up when a stream first loses a server.
 
 **Trusting R=1 in production.** An R=1 stream has exactly one copy. Lose
 that server's disk and the `ORDERS` stream is gone: every message,
@@ -174,12 +174,12 @@ only one loss, the same as R=3, while paying for a fourth copy. Use odd
 counts: R=3 for the production floor, R=5 for state you can't
 re-derive. Five is the maximum a stream supports.
 
-**Reading failover from a single-node demo.** Replicas only exist
+**Reading failover from a single-server demo.** Replicas only exist
 across servers, so a one-server laptop can't show leader election or
-survive a node loss, and `nats stream edit ORDERS --replicas=3` is
-rejected outright because there aren't three servers to hold the three
-copies. Don't conclude a stream is fault-tolerant from a green
-single-node run. Prove failover on a real cluster, which the
+survive the loss of a server, and `nats stream edit ORDERS --replicas=3`
+is rejected outright because there aren't three servers to hold the
+three copies. Don't conclude a stream is fault-tolerant from a clean run
+on one server. Prove failover on a real cluster, which the
 [Clustering & Replication](/learn/clustering) deep dive walks through
 end to end.
 
@@ -201,7 +201,7 @@ What changed is your mental model:
 
 ## What's next
 
-The next page is about copying a stream's data elsewhere on purpose:
+The next page covers deliberately copying a stream's data elsewhere:
 **mirrors and sources**, the building blocks for read-replicas,
 aggregation, and disaster recovery across regions.
 

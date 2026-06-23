@@ -11,16 +11,16 @@ The [Topologies deep dive](/learn/topologies) designed a shape: a
 three-node NATS cluster, `east`, carrying the `ORDERS` stream. This
 chapter takes that exact cluster and runs it in production.
 
-Topologies taught the *shapes*: one server, a cluster, a super-cluster,
-leaf nodes. This chapter teaches the *operations* that turn a shape into
-a running system: the resources a node needs, the manifests that stand it
-up, the SIGHUP that reloads its config without dropping a connection, the
-lame-duck dance that upgrades it without losing the stream, and the
-systemd flags that lock it down.
+Topologies covered the *shapes*: one server, a cluster, a super-cluster,
+leaf nodes. This chapter covers the *operations* that turn a shape into
+a running system. Those operations are the resources a node needs, the
+manifests that stand it up, the SIGHUP that reloads its config without
+dropping a connection, the lame-duck mode that upgrades it without losing
+the stream, and the systemd flags that restrict its access.
 
-It's the runbook, not the theory. Each page names the mechanism, gives
-the exact command or manifest you run, and links the *why* out to the
-chapter that owns it.
+This is the runbook rather than the theory. Each page names the
+mechanism, gives the exact command or manifest you run, and links the
+*why* out to the chapter that covers it.
 
 <div class="nats-flow" data-scenario="lameDuckUpgradeAnimated" data-width="600" data-height="350"></div>
 
@@ -55,8 +55,8 @@ skimmed the [JetStream](/learn/jetstream) and
 [Security](/learn/security) deep dives. This chapter reuses the `ORDERS`
 stream and the `ACME` operator rather than re-introducing them.
 
-This chapter is deliberately the runbook half. It sits at the seam
-between four siblings and hands each its own job:
+This chapter is deliberately the runbook half. It divides the work with
+four sibling chapters, and each owns part of it:
 
 - **Which shape to deploy** is [Topologies](/learn/topologies). This
   chapter assumes the three-node ORDERS cluster shape is already decided.

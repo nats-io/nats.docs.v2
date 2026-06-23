@@ -26,7 +26,7 @@ instead of running CLI commands.
 
 ## The NATS Helm chart deploys a StatefulSet
 
-A NATS cluster isn't a stateless web app. Each node owns a slice of the
+A NATS cluster is stateful, unlike a stateless web app. Each node owns a slice of the
 R3 stream on its own disk, and node identity has to survive a restart:
 `nats-1` must come back as `nats-1`, with its volume, not as a fresh
 replica. That requirement rules out a Deployment and calls for a
@@ -80,7 +80,7 @@ them. Every server configuration option is documented in
 [Reference → Configuration](/reference/config); here we cover only the
 values this deployment needs.
 
-## Three probes, one monitor port
+## The three probes on the monitor port
 
 Kubernetes decides a pod's lifecycle from its probes, and a JetStream
 node has three distinct states worth probing. The chart wires all three
@@ -108,7 +108,8 @@ the last resort that restarts a truly wedged process.
 
 What each `/healthz` query parameter reports, and which advisories to
 alert on, belongs to [Monitoring](/learn/monitoring/jetstream-health).
-Here the probes are just plumbing that keeps the StatefulSet honest.
+Here the probes are just the configuration that reports each pod's state
+to the StatefulSet.
 
 ## Declare streams as CRDs with the NACK controller
 
@@ -178,10 +179,10 @@ in version control, not in someone's terminal history.
 
 <div class="nats-flow" data-scenario="crdReconcileAnimated" data-width="600" data-height="350"></div>
 
-The reconcile is a closed loop, and that's the payoff. If someone
+The reconcile is a closed loop. If someone
 deletes the stream by hand, the controller detects the drift and recreates
-it from the CRD. The declared state is the source of truth; the
-controller keeps steering the cluster back to it.
+it from the CRD. The declared state is the source of truth, and the
+controller keeps changing the cluster back to match it.
 
 The `Stream` resource has many more fields: `maxBytes`, `maxAge`,
 `placement`, `mirror`, `sources`, and the rest of the stream

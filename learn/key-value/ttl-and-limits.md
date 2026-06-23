@@ -9,11 +9,11 @@ description: Expire a single key with a per-key TTL, bound the bucket with limit
 
 Every key in `INVENTORY` so far lives until you overwrite or delete it.
 That's the right default for a stock count, but it's not the only thing
-a bucket holds. A flash-sale price, a short-lived session token, a "this
-SKU is locked for the next 30 minutes" flag: those should clean
-themselves up.
+a bucket holds. Some values should clean themselves up, such as a
+flash-sale price, a short-lived session token, or a "this SKU is locked
+for the next 30 minutes" flag.
 
-This page adds two ways to put a clock on the bucket. The first is the
+This page adds two ways to bound the bucket by time. The first is the
 per-key TTL, a single key that expires on its own. The second is the
 set of bucket limits that bound the whole thing: total size, value
 size, history depth. When a key expires, the server leaves a marker so
@@ -46,20 +46,19 @@ once, then create the timed key:
 <div class="nats-example" data-type="learn-key-value-ttl-and-limits-perKeyTTL" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The `flash-sale` key now holds `99` and will remove itself 30 minutes
-later. No cron job, no cleanup service, no sweep. The clock lives with the
-value.
+later. Because the TTL is stored with the value, this happens without a
+cron job, a separate cleanup service, or a sweep.
 
 Per-key TTL needs **nats-server 2.11 or newer**; that's the release that
 added limit markers. On an older server, enabling markers on the bucket is
-rejected, and the timed create fails with it. Know the floor, then move
-on: if you're on 2.11, the feature is just there.
+rejected, and the timed create fails with it. If you're on 2.11, the
+feature is available.
 
 ## Bucket limits bound the whole bucket
 
-A per-key TTL bounds one value. **Bucket limits** bound the whole bucket.
-They're the guardrails that keep a key-value store from growing without
-end, and you set them when you create the bucket. Three of them matter
-most:
+Where a per-key TTL bounds one value, **bucket limits** bound the whole
+bucket. They keep a key-value store from growing without end, and you set
+them when you create the bucket. Three of them matter most:
 
 - **Max bucket size**: the total bytes the bucket may hold across every
   key and every kept revision. The bucket won't grow past it.
@@ -87,10 +86,10 @@ The full set of bucket configuration options is documented in
 because a bucket is created as a stream and these limits map onto stream
 fields. Here you only need the three above.
 
-## A watcher learns the value is gone
+## Expiry leaves a marker for watchers
 
-When a per-key TTL fires, the server doesn't silently drop the value. It
-leaves a **marker**: a small message that records the key is gone and why.
+When a per-key TTL fires, the server leaves a **marker** instead of
+silently dropping the value: a small message that records the key is gone and why.
 You may have heard the marker called a *tombstone* elsewhere; the term in
 key-value is marker, and a TTL expiry leaves one with the reason
 `MaxAge`: the value aged out.
@@ -108,20 +107,22 @@ The animation walks the timeline: the inventory service creates
 `flash-sale` with a 30-minute TTL; the clock advances past it; the server
 places a marker on the key with reason `MaxAge`; and the warehouse
 dashboard receives that marker as a delete. The value expired without
-anyone touching it, and the watcher found out anyway.
+any service modifying it, and the watcher was still notified through the
+marker.
 
 ## Pitfalls
 
-Two traps catch people the first time they put a clock on a bucket. Both
-come from expecting a TTL or a limit to behave like something it's not.
+Two mistakes are common the first time you add a TTL or a limit to a
+bucket. Both come from expecting a TTL or a limit to behave in a way it
+does not.
 
 **A per-key TTL is set at create, and only at create.** There's no
 `--ttl` on put or on update; passing one does nothing, and the key keeps
 whatever TTL it had. The instinct to "extend the TTL" by writing the
 key again doesn't work: a put leaves the original clock running, and an
 update resets it to no TTL at all. To give a key a different TTL, you
-delete it and create it again with the new TTL. Don't reach for put or
-update to change a TTL; reach for delete-then-create.
+delete it and create it again with the new TTL. Use delete-then-create
+to change a TTL, not put or update.
 
 The handling is in the create snippet above: after the timed create, it
 deletes `flash-sale` and creates it again with a shorter TTL, which is the
@@ -150,13 +151,14 @@ You now have:
   leaves a marker with reason `MaxAge`, and the warehouse dashboard
   receives it as a delete.
 
-The bucket is now complete: keys with values, history, safe concurrent
-writes, and values that clean themselves up.
+The bucket is now complete. It holds keys with values, keeps history,
+supports safe concurrent writes, and has values that remove themselves
+on a TTL.
 
 ## What's next
 
-The next page lifts the lid. It shows the `KV_INVENTORY` stream that's
-been under the bucket the whole time, the direct read path, and the
+The next page shows the internals. It covers the `KV_INVENTORY` stream
+that's been under the bucket the whole time, the direct read path, and the
 difference between delete and purge.
 
 Continue to [5. Under the hood](/learn/key-value/under-the-hood).

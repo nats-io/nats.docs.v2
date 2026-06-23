@@ -7,9 +7,9 @@ description: Fire-and-forget publish, the in-memory interest graph, and core NAT
 
 # 1. Publish-subscribe
 
-Everything in core NATS is one move: a client publishes a message to a
+Core NATS has one fundamental operation: a client publishes a message to a
 subject, and every client subscribed to that subject right now gets a
-copy. This page takes that one move apart.
+copy. This page examines that operation in detail.
 
 The concept primer already says *what* publish-subscribe is. This page
 shows *how* it behaves on the wire: where the copies come from, what
@@ -49,8 +49,8 @@ You need one local `nats-server` running for the rest of this chapter:
 nats-server
 ```
 
-That's the whole deployment. No flags, no persistence, no cluster.
-Leave it running and add services to it as the chapter grows.
+That's the whole deployment, with no flags, no persistence, and no
+cluster. Leave it running and add services to it as the chapter grows.
 
 ## Publishing a message
 
@@ -118,14 +118,14 @@ coordinates, and the publisher never changes.
 ## When nobody is listening
 
 Publish to `orders.created` while no service is subscribed. The
-publish still succeeds, and the message is discarded. The server
+publish still succeeds, and the message is dropped. The server
 finds no matching entry in the interest graph, so there's nothing to
-deliver to, and the message is dropped on the floor.
+deliver to, and the message is discarded.
 
 This is the behavior to internalize: a publish with no interest isn't
-an error and isn't a stored backlog. It's a silent no-op. The publisher
+an error and isn't a stored backlog. It is a silent no-op. The publisher
 can't tell the difference between "delivered to three subscribers" and
-"delivered to nobody": both look like a successful publish.
+"delivered to nobody", because both look like a successful publish.
 
 That gap matters for orders. If the warehouse is restarting when an
 `orders.created` message is published, that message is gone, and no
@@ -165,9 +165,10 @@ connection. The Acme order payload is a few hundred bytes, so this
 never bites here, but a service that tries to ship a large blob inside
 a message will hit it.
 
-The fix isn't a bigger payload. For large data, publish a reference
-(an object-store key or a URL) and let the receiver fetch the bytes out
-of band. Subjects are cheap; large messages are not.
+The fix is not to use a bigger payload. For large data, publish a
+reference (an object-store key or a URL) and let the receiver fetch the
+bytes out of band. Subjects have low overhead, while large messages do
+not.
 
 The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
 [Reference → Client protocol](/reference/protocols/client). We only
@@ -175,7 +176,7 @@ need the behavior here.
 
 ## Try it in two terminals
 
-Watch fire-and-forget and at-most-once with your own eyes. Open two
+Observe fire-and-forget and at-most-once directly. Open two
 terminals against the running server.
 
 ```bash
@@ -193,12 +194,12 @@ nats pub orders.created '{"order_id":"ord_5kq1","customer":"initech","total_cent
 Terminal 1 prints each message the instant it's published. Now stop
 the subscriber in Terminal 1 with Ctrl-C, publish a fourth message,
 and restart the subscriber. The fourth message never appears. It was
-published into an empty interest graph and discarded. That's
-at-most-once, demonstrated.
+published into an empty interest graph and discarded, which is
+at-most-once delivery in action.
 
 ## Pitfalls
 
-A few sharp edges show up the first time you build on publish-subscribe.
+A few problems show up the first time you build on publish-subscribe.
 None of them is a bug; each is a direct consequence of the model this
 page just described.
 

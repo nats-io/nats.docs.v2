@@ -12,17 +12,17 @@ defaults: a single URL, no name, no plan for a server going away. You end
 it with an `order-svc` that opens against a server pool, reconnects with
 backoff and jitter, drains in-flight work on shutdown, bounds its
 subscribers' memory, retries requests safely, and presents credentials
-over a CA-validated link. That's the whole arc.
+over a CA-validated link. That covers the whole arc of the chapter.
 
 This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
-## The whole game in one sentence
+## The core model in one sentence
 
 Every page in this chapter moved the same object, the **connection**,
-through one more state safely. If you remember nothing else, remember
-that.
+through one more state safely. That is the one point to take away from
+this chapter.
 
 The connection is a **state machine**. It lives in a small set of
 states: DISCONNECTED, CONNECTING, CONNECTED, RECONNECTING, DRAINING,
@@ -42,10 +42,11 @@ buffer grow without bound. Request-Reply Resilience made a single
 the edge into CONNECTED so the link is encrypted and the client is who it
 claims to be.
 
-Six mechanisms, one machine. Everything else is a refinement of those
-edges: the exact flags, the defaults, the per-language spelling.
+Those six mechanisms all act on one machine. Everything else is a
+refinement of those edges: the exact flags, the defaults, the
+per-language spelling.
 
-## Where the details live now
+## Where the details live
 
 The chapter is unversioned and concept-first. The exact option names,
 defaults, and ranges live in **Reference**, which is versioned and
@@ -68,7 +69,7 @@ The [Topologies deep dive](/learn/topologies) explains the server pool
 this chapter only connects to: why a server goes away, how the
 `n1`/`n2`/`n3` cluster forms, and what a client's disconnect looks like
 from the server side. Resilient Clients treats "the server is gone" as a
-fact; Topologies tells you why.
+given fact, while Topologies explains why it happens.
 
 The [JetStream deep dive](/learn/jetstream) owns what happens to a
 consumer's *position* across a reconnect. This chapter re-subscribes the

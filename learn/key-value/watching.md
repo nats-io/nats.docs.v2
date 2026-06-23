@@ -8,15 +8,15 @@ description: Watch a bucket for live stock changes — the initial snapshot, the
 # 2. Watching
 
 You have the `INVENTORY` bucket from the last page, with `widget-blue`
-sitting at `42`. Reading it with get tells you the count *now*. But the
-warehouse dashboard doesn't want to poll get in a loop; it wants to be
-told the moment a count changes.
+at `42`. Reading it with get tells you the count *now*. The warehouse
+dashboard needs the count the moment it changes, without polling get in
+a loop.
 
-That's what a watch does. This page runs the warehouse dashboard
+A watch does that. This page runs the warehouse dashboard
 watching `INVENTORY`, shows you the two things a watch always delivers in
 order, and ends with a wildcard watch over a subset of keys.
 
-## A watch is snapshot, then live
+## What a watch delivers
 
 A **watch** delivers the current value of every matching key as an
 initial snapshot, and then streams every later change as it happens. One
@@ -38,14 +38,15 @@ Now, from another terminal, change a count:
 nats kv put INVENTORY widget-blue 41
 ```
 
-The line appears in the watching terminal the instant the put lands. No
-poll, no delay. The dashboard learned about the sale as soon as the
-inventory service recorded it.
+The line appears in the watching terminal the instant the put lands,
+without polling and without delay. The dashboard receives the change as
+soon as the inventory service records it.
 
-That snapshot-then-live shape is the whole point. A new dashboard that
-connects mid-day doesn't start blind: it gets the full current picture
-first, then keeps up with every change after. You never have to choose
-between "read the state" and "watch for changes"; a watch is both.
+The snapshot-then-live shape matters here. A new dashboard that
+connects mid-day doesn't start without data: it gets the full current
+picture first, then keeps up with every change after. A watch covers
+both reading the state and watching for changes, so you don't have to
+choose between them.
 
 <div class="nats-flow" data-scenario="kvWatchAnimated" data-width="600" data-height="350"></div>
 
@@ -55,15 +56,15 @@ You don't configure or manage it: opening the watch creates it, and
 closing the watch removes it. How consumers track position and deliver messages
 is the JetStream chapter's job; see
 [Why a stream](/learn/jetstream/your-first-stream#why-a-stream) if you want the layer
-below. Here, all you need is the behavior: snapshot, then live.
+below. Here, the behavior is what matters: snapshot, then live.
 
 ## The end-of-initial-data signal
 
 There's a boundary between the snapshot and the live stream, and the
 watch marks it for you. After the last snapshot entry and before the
 first live change, the watch delivers one **end-of-initial-data signal**:
-a single nil entry. It carries no key and no value. Its only job is to
-say "the snapshot is complete; everything after this is a live change."
+a single nil entry. It carries no key and no value. It indicates only
+that the snapshot is complete and everything after it is a live change.
 
 The CLI consumes that signal silently and keeps printing, so you never
 see it on the command line. In client code you do see it, and you must
@@ -72,14 +73,14 @@ one of them. Read it, recognize it as the boundary, and keep reading:
 
 <div class="nats-example" data-type="learn-key-value-watching-eoiHandling" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The signal is useful, not just bookkeeping. A dashboard can
+The signal is useful beyond bookkeeping. A dashboard can
 hold its "loading" state until the nil entry arrives, then flip to "live"
 knowing it has the complete current picture. A cache-warming job can
 populate from the snapshot, treat the nil entry as "warm," and switch to
-incremental updates. The boundary is information.
+incremental updates. The boundary carries information you can act on.
 
-It's also the most common watch bug, which the Pitfalls section below
-makes runnable.
+It's also the most common watch bug, and the Pitfalls section below
+includes a runnable version.
 
 ## Watching a subset with a wildcard
 
@@ -98,7 +99,7 @@ The snapshot now lists only the matching keys, and the live stream only
 carries changes to them. A put to `gadget-pro` never reaches this
 watcher; a put to `widget-red` does. The filter applies to both halves,
 snapshot and live, so a filtered watch is a smaller, cheaper view of the
-bucket rather than a firehose you sift afterward.
+bucket rather than every change for you to filter afterward.
 
 A watch supports a few more options, each tuning the same two halves you
 just saw: `IncludeHistory` replays the full history of every key instead
@@ -112,14 +113,14 @@ which is the configuration the watch's consumer is built from.
 
 ## Pitfalls
 
-Two traps catch people the first time they watch a bucket. Both come
-straight from the two concepts above: the snapshot/live boundary, and
+Two mistakes are common the first time you watch a bucket. Both come
+from the two concepts above: the snapshot/live boundary, and
 what a watch actually is.
 
 **Don't stop reading at the nil entry.** The end-of-initial-data signal
 is a nil entry in the same stream as your real entries. A loop that
-treats nil as "the stream ended" and breaks will read the snapshot, see
-the boundary marker, quit — and miss every live change that was the whole
+treats nil as "the stream ended" and breaks will read the snapshot and
+see the boundary marker, then quit before every live change that was the
 reason to watch. The fix is one line: when an entry is nil, skip it and
 keep looping. Do not break.
 

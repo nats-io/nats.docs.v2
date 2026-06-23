@@ -11,7 +11,7 @@ By now you know the trust chain in concept: an operator signs
 accounts, an account signs users, and the server trusts only the
 operator's public key. Now we make it real with tools.
 
-Two things stand between the idea and a working setup. Something has to
+Two things are needed to turn the idea into a working setup. Something has to
 generate every nkey and JWT in the chain and sign them in the right
 order. And the server, which no longer holds a user list, needs a way
 to find an account's JWT when a user from that account connects. The
@@ -23,7 +23,7 @@ accounts you built in config mode (`ORDERS` and `ANALYTICS`), a user
 `order-svc`, and the credentials it connects with. The setup mirrors
 the centralized one, but no user lives in the server config.
 
-## Why you reach for nsc
+## Why you use nsc
 
 What happens if you try to build the chain by hand? You generate an
 operator nkey, then an account nkey, then sign the account JWT with the
@@ -34,8 +34,8 @@ seed produces a JWT the server silently rejects at connect time.
 
 `nsc` is the tool that does all of this for you. It generates the
 nkeys, builds the JWTs, signs each one with the correct key in the
-chain, and stores everything in a local directory tree. Think of it as
-the keyring for the trust chain. The server never runs it. You run it
+chain, and stores everything in a local directory tree. It holds every
+key for the trust chain in one place. The server never runs it. You run it
 on a trusted machine, and it produces two kinds of output: account
 JWTs the server fetches, and credentials clients connect with.
 
@@ -179,7 +179,7 @@ credentials file.
 ## Connecting with the credentials
 
 Everything's in place. The server trusts `ACME`, holds the account
-JWTs, and `order-svc` has its credentials. Time to publish an order.
+JWTs, and `order-svc` has its credentials, so it can now publish an order.
 
 <div class="nats-example" data-type="learn-security-operator-mode-connect-creds" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -203,8 +203,8 @@ drifting apart, or from a `.creds` file ending up where it shouldn't.
 local JWT in your `nsc` store. The running server keeps the old account
 JWT until you push again, so a fresh `order-svc` connection fails with
 `Authorization Violation`. The server logs `account jwt not found`
-because the chain it holds no longer matches. Treat every `nsc edit` as
-half a change: edit, then push.
+because the chain it holds no longer matches. An `nsc edit` isn't
+complete until you push, so always run the push after the edit.
 
 <div class="nats-example" data-type="learn-security-operator-mode-push-after-edit" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

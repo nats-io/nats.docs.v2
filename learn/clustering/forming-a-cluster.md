@@ -8,13 +8,13 @@ description: How servers find each other — explicit seed routes and the gossip
 # 1. Forming a cluster
 
 The [Topologies chapter](/learn/topologies/your-first-cluster) wired three
-servers into the cluster `east` and watched a client survive a server
-loss. It showed you the `cluster {}` block and the shape it produces. It
-deliberately left the *how* alone: how a server you pointed at one peer
+servers into the cluster `east` and showed a client surviving a server
+loss. It covered the `cluster {}` block and the shape it produces. It did
+not cover the *how*: how a server you pointed at one peer
 ends up holding a route to every peer.
 
-This page opens that box. It's the first mechanism of the chapter, the
-one every later page stands on. Before servers can elect a leader or
+This page covers that. It's the first mechanism of the chapter, the
+one every later page builds on. Before servers can elect a leader or
 replicate a write, they have to find each other. Two ideas do that work:
 a route, the connection one server opens to another, and gossip,
 the way servers tell each other who else is in the cluster.
@@ -29,8 +29,8 @@ a single seed.
 A **route** is the connection one `nats-server` opens to another so the
 two act as one cluster. It isn't a client connection. A client connects
 on the client port (4222); a route connects on a separate route port
-(6222). The two never share a port, and that distinction matters more
-than it looks: half of cluster-formation bugs are a route pointed at the
+(6222). The two never share a port, and that distinction has practical
+consequences: half of cluster-formation bugs are a route pointed at the
 client port.
 
 A route is bidirectional once open. Whichever server dialed, both ends
@@ -39,8 +39,7 @@ one direction, the messages that match it in the other. With three
 servers fully connected, every server holds a route to the other two, so
 each is exactly one hop from all the rest.
 
-Routes come in two kinds, and telling them apart is the whole point of
-this page.
+Routes come in two kinds, and this page covers how to tell them apart.
 
 An **explicit route** is one you configured. You wrote its address into
 the `routes` list in `nats.conf`, and the server dials it on startup.
@@ -58,12 +57,12 @@ come from gossip.
 You configured `n2-east` and `n3-east` with a single explicit route each,
 both pointing at `n1-east`. Yet the running cluster has every server
 connected to every other. The connections you never wrote appear on their
-own. That's **gossip**.
+own through **gossip**.
 
 Gossip is route discovery by INFO redistribution. When two servers form a
 route, each sends the other an **INFO** message, a small protocol frame
 carrying its own address. The receiver learns that peer exists and dials
-it. The trick is that a server then forwards that INFO to the other peers
+it. A server then forwards that INFO to the other peers
 it already holds routes to, so each of them learns the new peer and dials
 it too. Those self-opened connections are implicit routes.
 
@@ -72,14 +71,13 @@ explicit route to `n1-east`, and the two exchange INFO. `n3-east` boots,
 dials *its* explicit route to `n1-east`, and now `n1-east` knows about
 both newcomers. On the next INFO exchange, `n1-east` tells `n2-east` about
 `n3-east`. `n2-east` has no route to `n3-east`, so it opens one — an
-implicit route. The mesh closes itself.
+implicit route that completes the mesh.
 
 <div class="nats-flow" data-scenario="clusterGossipAnimated" data-width="600" data-height="350"></div>
 
 This is why each server only needs one seed address. You point them all at
-`n1-east`; gossip discovers the rest. The cost is small and the payoff is
-large: adding a fourth server later means giving it one route, to
-`n1-east`, and nothing else.
+`n1-east`; gossip discovers the rest. Adding a fourth server later means
+giving it one route, to `n1-east`, and nothing else.
 
 The wire-level detail of the INFO frame and the route handshake (every
 field a server advertises, the protocol verbs) lives in
@@ -108,7 +106,7 @@ cluster {
 }
 ```
 
-Three things in the `cluster {}` block carry the formation.
+Three things in the `cluster {}` block control formation.
 
 `name` is the cluster identifier, `east`. Every server that should join
 must set the exact same name. A route to a server whose name differs is
@@ -140,7 +138,7 @@ cluster {
 ```
 
 `n3-east` repeats it, one port higher, pointing at the same seed. It
-does **not** list `n2-east`, and it doesn't need to: gossip will hand it
+does **not** list `n2-east`, and it doesn't need to: gossip will supply
 that route.
 
 ```conf title="n3-east.conf"
@@ -175,7 +173,7 @@ The full set of `cluster {}` fields (`pool_size`, `compression`,
 
 ## Confirm the mesh formed
 
-Ask the cluster what it became from the outside:
+Check the cluster's state from the outside:
 
 ```bash
 nats server report
@@ -199,9 +197,9 @@ count:
 The `Routes` column reads `2` for every server: each holds a route to the
 other two. You configured one explicit route per joiner; gossip supplied
 the rest. The `Cluster` column reads `east` on all three rows, so they
-joined the same cluster and not three lonely ones.
+joined the same cluster and not three separate ones.
 
-For one server's own view of its routes, ask it directly:
+For one server's own view of its routes, query it directly:
 
 ```bash
 nats server info n1-east
@@ -213,8 +211,9 @@ explicit seed plus every implicit route gossip added.
 
 ## Pitfalls
 
-A cluster is easy to form and unforgiving about three details. Each one
-fails quietly: you get a running server, just not the cluster you meant.
+A cluster is straightforward to form, but three details have to be correct.
+Each one fails quietly: you get a running server, just not the cluster you
+meant.
 
 **A mismatched `cluster.name` silently forms two clusters.** The name is
 what binds servers together. Set `name: east` on two servers and
@@ -227,9 +226,9 @@ every server, then confirm they joined as one before trusting the cluster:
 nats server report
 ```
 
-If every row shows `east`, the mesh is whole. A stray name, or a server
-missing from the report, means it went its own way. Fix the `name` and
-restart it.
+If every row shows `east`, the mesh is complete. A stray name, or a server
+missing from the report, means it formed a separate cluster. Fix the `name`
+and restart it.
 
 **Pointing `routes` at the client port (4222) never forms the mesh.** The
 route port (6222) and the client port (4222) are different listeners. A
@@ -269,14 +268,14 @@ The `east` cluster is running and has discovered itself from one seed:
 
 The servers can now reach each other. What they can't yet do is *agree*:
 decide together which server owns a stream, and keep that decision when one
-of them dies. That's RAFT, and it's the next page.
+of them fails. RAFT handles that, and it's the subject of the next page.
 
 ## What's next
 
-A cluster that can talk is not yet a cluster that can agree. The next page
-introduces **RAFT groups** and **leader election**: how the servers in
-`east` pick a leader for the cluster and for each stream, and how they pick
-a new one when a leader is lost.
+A cluster whose servers can reach each other still can't reach agreement.
+The next page introduces **RAFT groups** and **leader election**: how the
+servers in `east` pick a leader for the cluster and for each stream, and how
+they pick a new one when a leader is lost.
 
 Continue to [2. Raft and leaders](/learn/clustering/raft-and-leaders).
 
@@ -285,6 +284,6 @@ Continue to [2. Raft and leaders](/learn/clustering/raft-and-leaders).
 - [Reference → Cluster config](/reference/config/cluster) — every field of
   the `cluster {}` block.
 - [Reference → Route protocol](/reference/protocols/route) — the wire-level
-  route handshake and the INFO frame gossip rides on.
+  route handshake and the INFO frame gossip uses.
 - [Topologies → Your first cluster](/learn/topologies/your-first-cluster) —
   the same `east` cluster as a deployment shape.

@@ -7,7 +7,7 @@ description: One nats-server process clients connect to directly — when it's e
 
 # 1. Single server
 
-Every topology in this chapter grows out of one shape: a single
+Every topology in this chapter is built on top of a single
 server. So that's where Acme starts, and where you start too.
 
 A **server** is one `nats-server` process. It accepts client
@@ -16,12 +16,12 @@ stores them in streams. One process is all you need to run the entire
 ORDERS workload while you build it.
 
 This page stands up Acme's development server, `n1`, on your laptop.
-Then it draws the line: what one server is great at, and the single
-limit that eventually forces you to grow.
+Then it covers what one server is great at, and the single
+limit that eventually requires you to grow.
 
 ## The simplest deployment
 
-There's no wiring to draw yet. One server sits in the middle. Every
+There's no wiring to draw yet. There is one server in the middle, and every
 client (the order publisher, the warehouse consumer, the analytics
 pipeline) opens a connection straight to it.
 
@@ -29,16 +29,16 @@ pipeline) opens a connection straight to it.
 
 The clients don't know about each other. They know one address. A
 publisher sends `orders.created` to the server; the server hands it to
-whoever subscribed to a matching subject. That's the whole topology.
+whoever subscribed to a matching subject, and that is the whole topology.
 
 This is the deployment you've been using throughout the JetStream and
-Security chapters without naming it. Naming it is the point: it's the
+Security chapters without naming it. It's the
 single-server topology, and it's a real, valid way to run NATS.
 
 ## Start Acme's dev server
 
 Give the server a config file. A single server needs almost nothing in
-it, but two fields earn their place from day one.
+it, but two fields are worth setting from day one.
 
 ```conf
 # n1.conf — Acme's development server
@@ -89,8 +89,8 @@ payload used everywhere in this chapter.
 There's nothing topology-specific in that snippet, and that's the
 lesson. The client names one server URL and publishes. The exact same
 client code will run unchanged against the cluster, the super-cluster,
-and the leaf node in the pages ahead. Only the connect URL grows. You
-change the deployment, not the application.
+and the leaf node in the pages ahead. Only the connect URL changes. The
+deployment changes while the application stays the same.
 
 For the wire-level detail of how a client connects and authenticates,
 see [Reference → Client protocol](/reference/protocols/client).
@@ -98,7 +98,7 @@ We only need the connect URL here.
 
 ## When one server is enough
 
-A single server isn't a toy. It's the right tool for a real set of
+A single server is the right tool for a real set of
 jobs.
 
 Reach for one server in **development**: a laptop, a CI run, a quick
@@ -112,12 +112,12 @@ Reach for one server for a **small service** where the blast radius of
 that service going down is already "the feature is offline." Adding a
 second server buys nothing the service itself doesn't also need.
 
-In all of these, one server is the correct amount of infrastructure,
-not a compromise.
+In all of these, one server is the correct amount of infrastructure
+rather than a compromise.
 
-## The ceiling: a single point of failure
+## The limit: a single point of failure
 
-Here's the one limit that eventually grows Acme past `n1`.
+Here's the one limit that eventually leads Acme to add servers beyond `n1`.
 
 A single server is a **single point of failure**. If that process dies,
 or the machine it runs on reboots, every client loses its connection at
@@ -136,13 +136,13 @@ crash, never against the loss of the server itself.
 The fix for both is more servers. Two or three `nats-server` processes,
 joined together, let a client whose server died reconnect to a survivor
 and keep working. They also let a stream keep copies on more than one
-machine. That joining-together is a **cluster**, and it's the whole
+machine. That joining-together is a **cluster**, and it's the subject of the
 next page.
 
 ## Pitfalls
 
-The single-server shape has three traps. Each one is easy to walk into
-and easy to avoid once named.
+The single-server shape has three common pitfalls. Each one is easy to hit
+and easy to avoid once you know about it.
 
 **Running a single server in production.** One server is a single point
 of failure, so a reboot or crash takes the whole system down with it.
@@ -154,8 +154,8 @@ replicas need three servers to live on:
 <div class="nats-example" data-type="learn-topologies-single-server-r3-on-one-server" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The server answers `replicas > 1 not supported in non-clustered mode`.
-Don't treat that error as a config typo to override. It's the shape
-telling you the truth: redundancy is a cluster's job. On one server, ask
+Don't treat that error as a config typo to override. It reflects how the
+topology works: redundancy is a cluster's job. On one server, ask
 for `--replicas 1` and accept that R1 survives a process restart but
 never the loss of `n1`. When orders must survive that, grow to [2. Your
 first cluster](/learn/topologies/your-first-cluster). The quorum and
@@ -164,7 +164,7 @@ replication mechanics behind R3 live in
 
 **Forgetting the monitoring port.** The monitoring endpoint is off by
 default: leave `http_port` out and there's no `/varz` to curl when
-something looks wrong, so you're blind exactly when you need to see.
+something looks wrong, so you have no visibility exactly when you need it.
 Set `http_port: 8222` from day one, as `n1.conf` does above, and confirm
 the server stays reachable rather than guessing:
 
@@ -175,9 +175,9 @@ nats server check connection --server nats://localhost:4222
 **Assuming one server scales forever.** A single server scales only
 vertically: bigger CPU, more RAM, faster disk. That works until one
 machine can't hold the load, and there's no larger machine to buy. The
-trap is planning capacity as if vertical growth has no ceiling. It does.
-When you hit it, the answer is more servers sharing the work, not a
-bigger one. That's horizontal scaling, which begins on the next page.
+trap is planning capacity as if vertical growth has no ceiling, when in fact
+it does. When you hit it, the answer is more servers sharing the work rather
+than a bigger one. That's horizontal scaling, which begins on the next page.
 
 ## Where you are
 

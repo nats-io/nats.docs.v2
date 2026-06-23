@@ -21,7 +21,7 @@ tell them apart. The subject is where that distinction lives.
 A **subject** is a string the server uses to match publishers to
 subscribers. You already used one: `orders.created`.
 
-The `.` (dot) isn't decoration. It splits the subject into **tokens**.
+The `.` (dot) splits the subject into **tokens**.
 `orders.created` is two tokens, `orders` then `created`. The server
 treats each token as a separate unit when it matches.
 
@@ -50,7 +50,7 @@ Tokens are split by single dots only. Spaces, tabs, and line breaks
 aren't allowed anywhere in a subject. Stick to letters, digits, `-`, and
 `_` inside a token and you'll never be surprised.
 
-## Subjects are essentially free
+## Subjects cost almost nothing to create
 
 Acme just invented four new subjects without telling the server first.
 That's allowed, and it costs almost nothing.
@@ -68,7 +68,7 @@ every subscription.
 
 This is why subject design is cheap to get right. Put the region in the
 subject, put the order ID in the subject if you want; the server
-doesn't charge you per name.
+has no per-name cost.
 
 ## Wildcards: subscribe to many subjects at once
 
@@ -79,7 +79,7 @@ Wildcards are a **subscriber-only** tool.
 
 A **wildcard** is a token in a subscription that matches more than one
 literal subject. NATS has exactly two of them, and they differ in how
-many tokens they swallow.
+many tokens they match.
 
 <div class="nats-flow" data-scenario="subjectsWildcardAnimated" data-width="700" data-height="450"></div>
 
@@ -140,7 +140,7 @@ stops.
 This is the difference to keep: `*` is a placeholder for one token in a
 known shape; `>` is "everything from here down."
 
-## A wildcard subscriber is a real subscriber
+## A wildcard subscriber behaves like any subscriber
 
 A wildcard doesn't change the delivery model from the last page. It
 changes which subjects count as a match, nothing else.
@@ -154,12 +154,12 @@ of them. Delivery is still at-most-once: a subscriber that's offline
 when the message is published does not receive it, and nothing replays
 it later.
 
-That "nothing replays it later" is the ceiling of core NATS. A wildcard
+That "nothing replays it later" is the limit of core NATS. A wildcard
 lets a service that joins now see everything published *from now on*,
 not what it missed before joining. Capturing the backlog so a late
 subscriber can catch up is what [JetStream](/learn/jetstream) adds.
 
-## Reserved prefixes to stay clear of
+## Reserved prefixes to avoid
 
 Acme can name subjects almost anything. Two prefixes are spoken for.
 
@@ -203,7 +203,7 @@ the behavior here.
 
 ## Pitfalls
 
-A few subject mistakes bite quietly. Here are the ones to watch on this
+A few subject mistakes are easy to miss. Here are the ones to watch on this
 page.
 
 **`>` only works as the last token.** The multi-token wildcard means
@@ -215,8 +215,8 @@ job of `*`: subscribe to `orders.*.created`, not `orders.>.created`.
 
 **Publishers can't publish "to a wildcard."** Wildcards are a
 subscriber-only tool. A publisher always names one fully-qualified
-subject. The trap is that publishing to `orders.*.created` doesn't fail
-loudly: the `*` is taken as a literal character, so the message lands on
+subject. The trap is that publishing to `orders.*.created` doesn't produce
+an error: the `*` is taken as a literal character, so the message lands on
 the odd subject `orders.*.created` and every regional subscriber misses
 it. Publish the real subject (`orders.us.created`); reserve `*` and `>`
 for `nats sub` and the subscribe call in your client.
@@ -227,7 +227,7 @@ receives *every* order message at every depth: shipped, cancelled,
 every region, forever. Subscribe to the narrowest pattern that covers
 your need: `orders.*.created` for regional new-order analytics, the exact
 subject for a single concern. Narrow interest keeps unwanted traffic off
-the wire instead of off your CPU.
+the wire entirely, rather than having your code discard it after delivery.
 
 **Whitespace is never allowed in a subject.** A token may not contain a
 space, tab, or line break. The client validates this before sending, so a
@@ -237,7 +237,7 @@ invalid-subject error rather than publishing somewhere surprising:
 <div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-invalid-subject-whitespace" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 (Reserved `$` and `_INBOX` prefixes are the other thing to avoid; see
-[Reserved prefixes to stay clear of](#reserved-prefixes-to-stay-clear-of)
+[Reserved prefixes to avoid](#reserved-prefixes-to-avoid)
 above.)
 
 ## Where you are
@@ -245,7 +245,7 @@ above.)
 Acme's order traffic now has a shape:
 
 - Orders publish to structured subjects: `orders.created`,
-  `orders.us.created`, `orders.eu.created`, and friends.
+  `orders.us.created`, `orders.eu.created`, and so on.
 - Regional analytics subscribes to `orders.*.created` to catch every
   region's new orders with one subscription.
 - An audit service subscribes to `orders.>` to catch the whole
@@ -256,8 +256,8 @@ of them. That's the addressing layer everything else in core NATS uses.
 
 ## What's next
 
-So far every message flows one way: a publisher speaks, subscribers
-listen, nobody answers. The next page,
+So far every message flows one way: a publisher sends, subscribers
+receive, and nobody sends a reply back. The next page,
 [Request-reply](/learn/core-nats/request-reply), adds a reply path:
 Acme builds an inventory service that *answers* a question on
 `orders.inventory.check`, using a reserved `_INBOX` subject you just met.

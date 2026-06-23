@@ -9,13 +9,13 @@ description: Take a point-in-time snapshot of the ORDERS stream, restore it byte
 
 The `ORDERS` stream holds every order Acme has ever taken. Replication
 keeps it available when a node dies, but it doesn't protect you from a
-mistake: a fat-fingered `nats stream purge`, a bad migration, a logic bug
+mistake: an accidental `nats stream purge`, a bad migration, or a logic bug
 that deletes the wrong messages. To recover from those you need a copy
 the cluster can't touch — a point in time you can return to.
 
 This page makes that copy and proves it works. It introduces two
-operations: taking a snapshot of `ORDERS`, and restoring the
-stream from one. Nothing else.
+operations and nothing else: taking a snapshot of `ORDERS`, and restoring the
+stream from one.
 
 ## A snapshot is a point-in-time copy
 
@@ -36,7 +36,7 @@ Take a snapshot of `ORDERS` into a dated, off-site directory:
 
 The directory name carries the date on purpose. A snapshot is a point in
 time, and naming it `2026-06-04` makes that explicit. Tomorrow's snapshot
-goes in `2026-06-05`, and you keep a ladder of them under
+goes in `2026-06-05`, and you keep the dated snapshots under
 `./backups/orders/`. We make that automatic later; here it's one
 command.
 
@@ -50,7 +50,7 @@ use `--consumers`.
 
 ## How the snapshot streams off the server
 
-A snapshot isn't one big download. The server cuts the tarball into
+A snapshot doesn't arrive as one big download. The server cuts the tarball into
 chunks and pushes them to an inbox subject one at a time, waiting for the
 client to acknowledge each chunk before sending the next. That
 backpressure keeps a large stream from overwhelming a slow disk or a
@@ -61,9 +61,9 @@ high-latency link.
 The request lands on the snapshot API, the server answers with the
 config and state, and then the message chunks flow to the inbox with an
 ack per chunk until the tarball and `backup.json` are written to the
-backup store. The two knobs that govern this, chunk size and window
-size, have sensible defaults, and you only reach for them when the
-defaults time out. We meet them in the [Pitfalls](#pitfalls).
+backup store. The two settings that govern this, chunk size and window
+size, have sensible defaults, and you only change them when the
+defaults time out. We cover them in the [Pitfalls](#pitfalls).
 
 The full set of snapshot request options is documented in
 [Reference → Snapshot Stream](/reference/jetstream/api/stream/snapshot).
@@ -71,7 +71,7 @@ We only need the behavior here.
 
 ## Restore rebuilds the stream
 
-A snapshot earns its keep when you turn it back into a stream.
+A snapshot becomes useful when you turn it back into a stream.
 **Restore** reads a snapshot directory and recreates the stream from it:
 same messages, same sequence numbers, same configuration. If the snapshot
 included consumer state, restore brings the consumers back too.
@@ -84,7 +84,8 @@ One rule shapes how you use restore: **the stream name cannot change on
 restore.** The name lives in `backup.json`, and the server rejects a
 restore that would land under a different name. A snapshot of `ORDERS`
 restores as `ORDERS`, never as `ORDERS_COPY`. That keeps a restore
-unambiguous: it's a rebuild of one stream, not a way to fork it. If you
+unambiguous: it rebuilds one stream under its own name rather than forking it
+into a new one. If you
 do need a second copy under a new name, restore to `ORDERS` first and
 then mirror or source it, which
 [Mirrors and sources](/learn/backup-recovery/mirrors-and-sources) covers.
@@ -95,16 +96,16 @@ is: confirm the broken stream is gone (or remove it), then restore.
 
 ## Verify the counts
 
-A restore you didn't check is a guess. The last step is always to read
+A restore you didn't check is unverified. The last step is always to read
 the rebuilt stream's state back and confirm it matches the source.
 
 <div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verify-counts" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Look at the `State` block. `Messages` and `Last Sequence` must match the
 stream you snapshotted, and `Active Consumers` shows `shipping` and
-`analytics` back if you used `--consumers`. Matching counts are your proof
-that the archive is real — not the fact that the backup command exited
-zero.
+`analytics` back if you used `--consumers`. Matching counts are what prove
+the archive is real; the backup command exiting zero does not prove it on
+its own.
 
 ## Pitfalls
 
@@ -113,10 +114,10 @@ and restore.
 
 **Memory streams cannot be snapshotted.** A snapshot reads a stream's
 on-disk files, so a stream with `Storage: Memory` has nothing to read.
-The backup fails with `memory streams do not support snapshots`. If a stream is worth
-backing up, it's worth file storage: set `Storage: File` when you
-create it. Don't discover this during an incident; check the storage
-type before you rely on a snapshot:
+The backup fails with `memory streams do not support snapshots`. Any stream
+you want to back up needs file storage: set `Storage: File` when you
+create it. Check the storage type before you rely on a snapshot, rather than
+finding out during an incident:
 
 <div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-backup" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -168,7 +169,7 @@ else.
 
 The next page stands up that live copy. A **mirror** of `ORDERS` at a
 second site keeps a continuously updated copy you can fail over to, and
-it draws the sharp line between a snapshot (your recovery point) and a
+it distinguishes a snapshot (your recovery point) from a
 mirror (your recovery time).
 
 Continue to

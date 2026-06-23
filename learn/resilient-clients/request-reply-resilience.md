@@ -11,19 +11,19 @@ So far this chapter has hardened the connection underneath one-way
 traffic: `order-svc` publishes orders, and the subscribers receive them.
 But `order-svc` also asks questions. Before it confirms an order it sends
 a request on `orders.inventory.check` and waits for the `inventory`
-responder to answer. That call is where a fault hurts most, because the
+responder to answer. A fault on that call has the biggest impact, because the
 application is blocked on the reply.
 
 Core NATS already taught you the mechanics of request-reply: the client
 sends a request, the responder answers on a private `_INBOX` subject, and
-the reply finds its way back. This page assumes that machinery and asks
-the harder question: *what happens when the reply doesn't come?* The
-answer is that a request can fail in two different ways, and the two mean
-different things, so the client must tell them apart before it retries.
+the reply finds its way back. This page assumes that machinery and covers
+what happens when the reply doesn't come. A request can fail in two
+different ways, and the two mean different things, so the client must tell
+them apart before it retries.
 
-Two new ideas carry the page: the request timeout and the no-responders
-signal, and retry with backoff plus idempotency. We'll define each
-before we use it.
+This page introduces two new ideas: the request timeout and the
+no-responders signal, and retry with backoff plus idempotency. We'll
+define each before we use it.
 
 ## A request has three outcomes
 
@@ -36,10 +36,10 @@ reply comes back inside the deadline. The application reads it and moves
 on.
 
 The second is a timeout. The deadline passes with no reply. A timeout
-doesn't say the responder is gone; it says no answer arrived *in time*.
-The `inventory` responder may be up but slow: a long database query, a
-GC pause, a burst of load. The request was delivered to a live listener;
-the reply just didn't come back fast enough.
+doesn't mean the responder is gone, only that no answer arrived *in time*.
+The `inventory` responder may be up but slow, for example because of a
+long database query, a GC pause, or a burst of load. The request was
+delivered to a live listener; the reply just didn't come back fast enough.
 
 The third is **no responders**. The moment the client sends the request,
 the server already knows whether any subscription is listening on
@@ -47,8 +47,8 @@ the server already knows whether any subscription is listening on
 no-responders signal (a 503 status with no body) and the request call
 returns at once instead of waiting out the timeout. No responder means
 the `inventory` service isn't running, isn't registered, or its account
-can't see the subject. This isn't a slow answer; it's the absence of
-anyone to answer.
+can't see the subject. Rather than a slow answer, this means there is no
+one to answer.
 
 Here's `order-svc` asking the inventory question with a timeout set. The
 CLI prints the reply on success, a timeout message if the deadline
@@ -67,24 +67,25 @@ The full set of request options is documented in
 [Reference](/reference/). Here we cover only the ones that change how a
 request behaves under fault.
 
-## Why no-responders is a gift
+## Why no-responders is useful
 
-It's tempting to treat a missing answer as a missing answer and stop
+You might treat a missing answer as just a missing answer and stop
 there. But the no-responders signal is the most useful failure NATS
-gives you, because it's *fast and certain*. Without it, a request to a
+gives you, because it's fast and certain. Without it, a request to a
 subject nobody listens on would sit until the timeout expired: two
-seconds of the application blocked, learning nothing it didn't already
-know.
+seconds of the application blocked, without learning anything it didn't
+already know.
 
 With it, the client finds out in a single round trip that there's no
 `inventory` responder at all. That lets the two failures drive different
-behavior. A timeout says "someone is there, try again soon." No
-responders says "nobody is there yet, give them a moment to start." The
-retry strategy in the next section turns that distinction into code.
+behavior. A timeout means someone is there, so the client should try
+again soon. No responders means nobody is there yet, so the client should
+give them a moment to start. The retry strategy in the next section turns
+that distinction into code.
 
-Watch the difference play out. One request times out, waits, retries,
-and finally gets a reply; the no-responders path returns the instant
-it's sent:
+The animation below shows the difference. One request times out, waits,
+retries, and finally gets a reply; the no-responders path returns the
+instant it's sent:
 
 <div class="nats-flow" data-scenario="requestRetryAnimated" data-width="600" data-height="350"></div>
 
@@ -95,14 +96,14 @@ setup. You can see it yourself by requesting a subject nobody answers:
 
 <div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-no-responders" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-## Retry, but retry differently per failure
+## Retry differently per failure
 
-Knowing the two failures apart is only useful if the client *acts*
+Knowing the two failures apart is only useful if the client acts
 differently on each. That's **retry with backoff**: re-sending a failed
-request, with a growing wait between attempts so a struggling responder
-gets room to recover instead of being hammered.
+request, with a growing wait between attempts so an overloaded responder
+gets time to recover instead of receiving more requests.
 
-The two failures want different timing. A timeout means the responder
+The two failures call for different timing. A timeout means the responder
 is up but slow, so a fast retry is reasonable; it may answer on the
 second try. No responders means nothing is listening, so an immediate
 retry is wasted; the responder is likely starting up, and the client
@@ -112,9 +113,9 @@ responders.
 
 Either way the retry loop must be **bounded**. An unbounded retry against
 a responder that never comes back is a busy loop that never ends. Cap
-the attempts (five is a sane default) and add jitter to the wait so a
-fleet of requesters doesn't retry in lockstep and stampede the responder
-the instant it returns.
+the attempts (five is a reasonable default) and add jitter to the wait so
+a fleet of requesters doesn't retry in lockstep and overwhelm the
+responder the instant it returns.
 
 There's one more thing a retry needs to be safe, and it's the second
 concept of this page: **idempotency**. A retried request is a *duplicate*
@@ -143,9 +144,10 @@ state. Each is scoped to this page's two ideas: the two failures, and
 safe retry.
 
 **Treating a timeout and no-responders as the same failure.** They are
-not. A blind "retry on any error" backs off the same way for both, which
-is wrong in both directions: it wastes a fast-retry opportunity on a slow
-responder and it hammers a subject that has no responder at all. Branch
+not the same. A blind "retry on any error" backs off the same way for
+both, which is wrong in both directions: it wastes a fast-retry
+opportunity on a slow responder and it floods a subject that has no
+responder at all with repeated requests. Branch
 on the error (fast-retry a timeout, exponential-backoff a no-responders)
 so the client matches its behavior to what actually went wrong.
 
@@ -157,9 +159,10 @@ timeout to two or three times its p99, so a slow-but-healthy answer
 isn't mistaken for a fault.
 
 **An unbounded retry loop.** Retrying forever against a responder that
-never returns is a busy loop that pins a CPU and never surfaces the
-problem. Always cap the attempts, add jitter, and give up loudly (log
-the failure and let the caller decide) rather than spinning in silence.
+never returns is a busy loop that pins a CPU and never reports the
+problem. Always cap the attempts, add jitter, and stop with a clear
+signal (log the failure and let the caller decide) rather than retrying
+silently.
 
 **A non-idempotent retry that double-acts.** If the first attempt reached
 the `inventory` responder and only the reply was lost, a naive retry
@@ -180,12 +183,12 @@ side:
 - A request call that tells its three outcomes apart: a reply, a timeout,
   or an immediate no-responders signal.
 - A retry that fast-retries a timeout, backs off on no-responders, and is
-  bounded with jitter so it never busy-loops or stampedes.
+  bounded with jitter so it never busy-loops or overwhelms the responder.
 - Idempotent requests keyed by `order_id`, so a retry after a lost reply
   or a reconnect never double-acts.
 
-The connection now rides through faults in every direction it sends and
-receives traffic. But it still does *everything* in the clear: the bytes
+The connection now survives faults in every direction it sends and
+receives traffic. But it still does everything in the clear: the bytes
 on the wire are readable, and the server takes whatever name the client
 offers.
 

@@ -27,12 +27,14 @@ Discovery is **learning what services exist and what they answer** through
 a fixed set of subjects under the `$SRV` prefix. Every service answers
 three verbs there:
 
-- **PING**: is anyone there? The reply carries the service name, instance
-  id, and version. Use it to find services and measure round-trip time.
-- **INFO**: what does it answer? The reply adds the description and the
-  list of endpoints, each with its subject and queue group.
-- **STATS**: how's it doing? The reply adds per-endpoint counters. We
-  read those on the next page; for now, it's enough to know the verb exists.
+- **PING**: checks whether a service is present. The reply carries the
+  service name, instance id, and version. Use it to find services and
+  measure round-trip time.
+- **INFO**: reports what a service answers. The reply adds the description
+  and the list of endpoints, each with its subject and queue group.
+- **STATS**: reports how a service is doing. The reply adds per-endpoint
+  counters. We read those on the next page; for now, it's enough to know
+  the verb exists.
 
 The verbs are uppercase, and so are their subjects. A service doesn't
 publish to `$SRV` itself; it subscribes there and replies to your
@@ -69,14 +71,15 @@ documented in [Reference](/reference/). We only need the behavior here.
 
 ## Discovery is broadcast, not load-balanced
 
-Here's the one surprise on this page. The endpoints you built answer in a
-**queue group**, so each request goes to exactly one instance. The
-discovery verbs do **not**. A `$SRV.INFO.OrderInventory` request reaches
-*every* instance named `OrderInventory`, and every one of them replies.
+One detail on this page works differently than you might expect. The
+endpoints you built answer in a **queue group**, so each request goes to
+exactly one instance. The discovery verbs do **not**. A
+`$SRV.INFO.OrderInventory` request reaches *every* instance named
+`OrderInventory`, and every one of them replies.
 
-That's deliberate. The point of discovery is to see the whole picture:
-all three instances, not whichever one happened to answer first. So a
-caller doesn't wait for a single reply; it waits a short deadline and
+That's deliberate. The point of discovery is to get a response from every
+instance, all three of them, not whichever one happened to answer first.
+So a caller doesn't wait for a single reply; it waits a short deadline and
 collects however many responses arrive in that window.
 
 <div class="nats-flow" data-scenario="serviceDiscoveryAnimated" data-width="600" data-height="350"></div>
@@ -97,7 +100,7 @@ reply and don't need a deadline loop:
 
 <div class="nats-example" data-type="learn-services-discovery-targetInstance" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-## The CLI does the collecting for you
+## Collecting replies with the CLI
 
 For interactive use, the `nats` CLI wraps the broadcast loop. `nats
 service list` enumerates every service and instance it can find; `nats
@@ -110,21 +113,21 @@ nats service info OrderInventory
 nats service ping
 ```
 
-These run the same `$SRV` requests under the hood and gather the replies
+These run the same `$SRV` requests internally and gather the replies
 by deadline. They're the fastest way to see what's running while you
 develop; the programmatic verbs above are what your own tooling uses.
 
 ## Pitfalls
 
-Two traps catch people the first time they query discovery. Both come from
+Two mistakes are common the first time you query discovery. Both come from
 the broadcast behavior above.
 
 **Discovery is broadcast: a single reply is not the whole answer.** A
 plain request returns the first response and stops. Against
 `$SRV.INFO.OrderInventory` that gives you one instance and silently hides
-the rest, so a fleet of five looks like a fleet of one. Don't treat a
-discovery request like a normal request-reply call. Wait a deadline and
-collect every reply, exactly as the CLI does:
+the rest, so five running instances appear as one. Don't treat a discovery
+request like a normal request-reply call. Wait a deadline and collect
+every reply, exactly as the CLI does:
 
 <div class="nats-example" data-type="learn-services-discovery-discoverInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

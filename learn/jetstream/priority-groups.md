@@ -8,59 +8,58 @@ description: Steer which client on a pull consumer gets messages, and when
 # 9. Priority groups
 
 The worker pool on the previous page shared work evenly. Every worker on
-the `shipping` consumer pulled, and the server handed out messages to
-whoever asked. Fair, simple, and exactly what you want most of the time.
+the `shipping` consumer pulled, and the server delivered messages to
+whichever worker asked.
 
-Some workloads aren't most of the time. Sometimes you want one client to
-do all the work until it falls over. Sometimes you want a far-away client
-to stay idle unless the near ones are drowning. Plain work sharing can't
-express either preference.
+Some workloads need a different split. You might want one client to
+handle all the work until it fails, or a far-away client to stay idle
+unless the near ones fall behind. Even work sharing can't do either of
+those.
 
-**Priority groups** are how a pull consumer expresses those preferences.
-They're designed in [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md), and this page works
-through the two you'll reach for first.
+**Priority groups** let a pull consumer ask for those behaviors. They're
+designed in [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md). This page covers the two
+policies you'll use first.
 
 ## What a priority group is
 
-A priority group is a named label on a pull consumer, plus a policy that
-decides how the server serves pulls for that label.
+A priority group is a name on a pull consumer, plus a policy that
+decides how the server hands out messages for that name.
 
 You set two fields when you create the consumer:
 
 - **`PriorityGroups`**: the list of group names the consumer supports.
-  Today a consumer acts on exactly one group; naming more than one is
+  Today a consumer uses exactly one group; naming more than one is
   accepted but only the first takes effect (see Pitfalls).
 - **`PriorityPolicy`**: the rule the server applies, one of `overflow`,
   `pinned_client`, or `prioritized`.
 
-Both policies in this page use an explicit ack policy, and the examples
-create the consumers with `--ack explicit`. That's no accident: each
-policy steers on what the server tracks per client (overflow on pending
-and unacked counts, pinned_client on which client is still pulling), and
-that tracking only exists when the consumer acknowledges its messages.
+Both policies on this page need the consumer to acknowledge its messages,
+so the examples create the consumers with `--ack explicit`. Each policy
+decides what to do based on counts the server keeps per client: overflow
+looks at how many messages are waiting and unacknowledged, pinned_client
+looks at which client is still pulling. The server only keeps those counts
+when the consumer acknowledges its messages.
 
-Once a consumer has a policy, every pull must name its group. A pull
-that omits the group is rejected with `Bad Request - Priority Group
-missing`. The group on the pull and the group on the consumer have to
-match.
+Once a consumer has a policy, every pull must name its group. A pull that
+leaves the group out is rejected with `Bad Request - Priority Group missing`.
+The group on the pull and the group on the consumer must match.
 
-That's the whole shape: a named group on the consumer, a policy that
-governs it, and pulls that opt into the group by name. The rest of this
-page is the two policies and the problem each one solves.
+So a priority group is a name on the consumer, a policy that governs it,
+and pulls that join the group by name. The rest of this page covers the
+two policies and the problem each one solves.
 
 ## The overflow policy
 
-Picture two regions both able to process orders. `us-east` is close to
-the stream and cheap to serve. `us-west` works too, but every message it
-pulls crosses the country, costs more, and arrives slower. You want
-`us-west` to sit quiet — unless `us-east` falls behind.
+Two regions can both process orders. `us-east` is close to the stream and
+cheap to serve. `us-west` works too, but every message it pulls crosses
+the country, costs more, and arrives slower. You want `us-west` to stay
+idle unless `us-east` falls behind.
 
-The **overflow** policy expresses exactly that. Workers in `us-east`
-pull with no threshold, so they always get messages. Workers in
-`us-west` pull with a `min_pending` threshold: the server serves their
-pull only when the consumer has at least that many messages waiting.
-Below the threshold their pull sits idle, the same as if the stream were
-empty.
+The **overflow** policy does this. Workers in `us-east` pull with no
+threshold, so they always get messages. Workers in `us-west` pull with a
+`min_pending` threshold: the server answers their pull only when the
+consumer has at least that many messages waiting. Below the threshold
+their pull gets nothing, the same as if the stream were empty.
 
 Create an overflow consumer on the `ORDERS` stream:
 
@@ -86,22 +85,22 @@ Configuration:
         Priority Groups: [regions]
 ```
 
-The threshold lives on the pull request, not on the consumer. A
-near-region worker pulls plainly. A far-region worker adds `min_pending`:
-deliver only when the consumer has backed up past that many waiting
-messages. (`min_ack_pending` is the sibling threshold, measured against
-unacknowledged messages instead; either one being met triggers
-delivery.)
+The threshold goes on the pull request, not on the consumer. A
+near-region worker pulls with no threshold. A far-region worker adds
+`min_pending`: deliver only when the consumer has backed up past that many
+waiting messages. `min_ack_pending` is a related threshold, counted
+against unacknowledged messages instead; meeting either one triggers
+delivery.
 
 The `nats consumer next` command issues a plain pull and has no flag for
 these thresholds, so the overflow pull below comes from a client library:
 
 <div class="nats-example" data-type="learn-jetstream-priority-groups-overflowPull" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The near-region worker, pulling without a threshold, drains the stream
-as fast as it processes. The far-region worker wakes only when the
-backlog crosses its `min_pending` line, takes the overflow, and goes
-quiet again once the near worker catches up.
+The near-region worker, pulling without a threshold, empties the backlog
+as fast as it processes. The far-region worker gets messages only when the
+backlog crosses its `min_pending` threshold, takes the overflow, and goes
+idle again once the near worker catches up.
 
 :::note Standby failover is designed but not yet shipped
 ADR-42 describes a `failover` field on the overflow policy: a timer
@@ -113,20 +112,18 @@ not build on it until a later server release.
 
 ## The pinned_client policy
 
-The overflow policy spreads work under load. The **pinned_client**
-policy does the opposite: it funnels all work to one client and keeps a
-standby ready to take over.
+The overflow policy spreads work under load. The **pinned_client** policy
+sends all work to one client and keeps a standby ready to take over.
 
-Picture an order pipeline that must process strictly in arrival order.
-Two clients run for resilience, but only one may work at a time, or the
-ordering breaks. You want one active client and one waiting in the
-wings.
+Consider an order pipeline that must process messages strictly in arrival
+order. Two clients run so that one can take over if the other fails, but
+only one may work at a time, or the ordering breaks. You want one active
+client and one standby.
 
-The server picks one waiting pull and **pins** it. That client becomes
-the active recipient. Every other client's pull stays parked as a
-standby. If the pinned client stops pulling (it crashed, or went
-quiet longer than the pin timeout allows), the server pins a standby
-instead.
+The server picks one waiting pull and **pins** it. That client becomes the
+one that receives messages. Every other client's pull waits as a standby.
+If the pinned client stops pulling, because it crashed or went quiet
+longer than the pin timeout allows, the server pins a standby instead.
 
 Create a pinned consumer:
 
@@ -139,27 +136,28 @@ Two flags do the work. `--pinned-groups ordered` sets the policy to
 how long the server waits for a pull from the pinned client before it
 gives up and pins someone else.
 
-The pin timeout has to sit comfortably above the pull's `expires` value.
-The pinned client needs time to pull, get its batch or time out, process,
-then pull again, all before the timeout fires and costs it the pin. The
-server's default timeout is two minutes; keep `expires` under a minute
-and the cycle fits.
+The pin timeout must sit comfortably above the pull's `expires` value. The
+pinned client needs time to pull, get its batch or time out, process, then
+pull again, all before the timeout fires and costs it the pin. The
+server's default timeout is two minutes; keep `expires` under a minute and
+the whole cycle fits.
 
-Here's how a client earns and keeps the pin:
+The pinned client earns and keeps the pin like this:
 
 <div class="nats-example" data-type="learn-jetstream-priority-groups-pinnedClient" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The handshake is header-driven. When the server pins a client, the first
-message it delivers carries a `Nats-Pin-Id` header. The client reads that
-ID and echoes it on every later pull. The server keeps serving the client
-that presents the matching ID, and parks everyone else.
+The client and server agree on the pin through a header. When the server
+pins a client, the first message it delivers carries a `Nats-Pin-Id`
+header. The client reads that ID and sends it back on every later pull.
+The server keeps serving the client that presents the matching ID and
+parks the others.
 
 The client gives up the pin in one of two ways. If it falls silent past
-the timeout, the server pins a standby, and the old client's next pull
-(still carrying the now-stale ID) comes back with a `423` status. The
-client clears its stored ID and pulls plain again, rejoining the standby
-pool. The exact `423` rules and the pinned/unpinned advisories are in the
-[Consumer API reference](/reference/jetstream/api/consumer/info).
+the timeout, the server pins a standby, and the old client's next pull,
+still carrying the now-stale ID, comes back with a `423` status. The
+client clears its stored ID and pulls without it, joining the standby
+pool again. The `423` rules and the pinned and unpinned advisories are in
+the [Consumer API reference](/reference/jetstream/api/consumer/info).
 
 The other way is an operator forcing a switch. `nats consumer unpin`
 clears the current pin and makes the server choose again:
@@ -186,62 +184,57 @@ State:
 ```
 
 A group with no active client reads `No client`. To list every fully
-pinned consumer in one shot, `nats consumer find ORDERS --pinned`.
+pinned consumer at once, run `nats consumer find ORDERS --pinned`.
 
 :::note Client support varies
-The pinned-client handshake (storing `Nats-Pin-Id`, echoing it, handling
-the `423`) is implemented in the Go and Java clients today. Other clients
-expose the configuration fields but may not yet drive the client-side
-pinning loop. Check your client's reference before relying on it.
+The pinned-client steps (storing `Nats-Pin-Id`, sending it back, handling
+the `423`) work in the Go and Java clients today. Other clients let you set
+the configuration fields but may not yet run the client-side pinning loop.
+Check your client's reference before relying on it.
 :::
 
-A third policy, `prioritized`, also exists (pulls carry a `0`–`9`
-priority and the server serves lower numbers first), but `overflow` and
-`pinned_client` cover the common cases, so this page stops there. The
-full set of priority-group options (every field including
-`prioritized`, the `423` protocol, the `PriorityGroupState` shape, and
-the advisories) is documented in
+A third policy, `prioritized`, also exists: pulls carry a `0`–`9` priority
+and the server serves lower numbers first. This page covers `overflow` and
+`pinned_client`, which handle the common cases. The full set of
+priority-group options, including every field of `prioritized`, the `423`
+protocol, the `PriorityGroupState` fields, and the advisories, lives in
 [Reference → Consumer API](/reference/jetstream/api/consumer/info) and in
 [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md).
 
 ## Pitfalls
 
-Priority groups have a small surface, but a few traps catch people who
-read the happy path and stop there.
+Priority groups have a small surface, but a few details are easy to miss.
 
-**One group per consumer.** A consumer acts on exactly one priority
-group today. The `--overflow-groups` and `--pinned-groups` flags take a
-comma list, so passing two looks legal (and the server accepts it), but
-it silently uses only the first group and ignores the rest. Multiple
-groups per consumer is reserved for a future server release. To split
-work by region or tier now, run separate consumers on the same stream,
-each with its own group, rather than reaching for multiple groups on
-one.
+**One group per consumer.** A consumer uses exactly one priority group
+today. The `--overflow-groups` and `--pinned-groups` flags take a comma
+list, so passing two looks legal, and the server accepts it, but it uses
+only the first group and ignores the rest. Multiple groups per consumer is
+planned for a future server release. To split work by region or tier now,
+run separate consumers on the same stream, each with its own group.
 
 <div class="nats-example" data-type="learn-jetstream-priority-groups-oneGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **`failover` is designed, not shipped.** As the overflow section noted,
-NATS Server 2.14 silently ignores the `failover` timer from ADR-42: no
-field parses it, and no error tells you. The trap: a pull that relies
-on `failover` to step in below the threshold never fires. Use only
-`min_pending` and `min_ack_pending` for now, and treat `failover` as
-planned.
+NATS Server 2.14 ignores the `failover` timer from ADR-42: no field parses
+it, and no error tells you. A pull that relies on `failover` to step in
+below the threshold never fires. Use only `min_pending` and
+`min_ack_pending` for now, and treat `failover` as planned.
 
-**The pin is not a lock.** The server can switch the pinned client while
-that client still believes it holds the pin: a long-running handler can
-finish work the server already reassigned. Don't treat the pin as
-exclusive ownership. A pull that carries a now-stale `Nats-Pin-Id` comes
-back with a `423`; clear the stored ID and pull plain to rejoin the
-standby pool. If processing must never double up, lean on explicit acks
-and idempotent handlers, not on the pin alone.
+**The pin does not give one client sole ownership.** The server can switch
+the pinned client while that client still believes it holds the pin, so a
+long-running handler can finish work the server already gave to someone
+else. A pull that carries a now-stale `Nats-Pin-Id` comes back with a
+`423`; clear the stored ID and pull without it to join the standby pool
+again. If the same message must never be processed twice, use explicit
+acks and handlers that are safe to run more than once, not the pin alone.
 
 **A quiet pinned client keeps the pin.** The pin only resets when the
 pinned client pulls again within `--pinned-ttl`. A client that holds the
-pin but stops pulling (blocked on a slow handler, say) keeps every
-other client parked until the timeout fires. Keep each pull's `expires`
-comfortably under the pin timeout so the client always pulls again in
-time to renew. The cluster mechanics behind which node serves these
-pulls are covered in [clustering](/learn/clustering).
+pin but stops pulling, for example because it's stuck on a slow handler,
+keeps every other client parked until the timeout fires. Keep each pull's
+`expires` comfortably under the pin timeout so the client always pulls
+again in time to renew. Which node in a cluster serves these pulls is
+covered in [clustering](/learn/clustering).
 
 ## Where you are
 
@@ -249,18 +242,18 @@ You now have:
 
 - The `shipping` consumer and its worker pool from the last page.
 - An understanding that priority groups steer which client on a pull
-  consumer gets served, governed by a named group plus a policy.
-- The `overflow` policy demonstrated: a standby region that pulls only
+  consumer gets served, set by a group name plus a policy.
+- The `overflow` policy shown in action: a standby region that pulls only
   above a `min_pending` threshold.
-- The `pinned_client` policy demonstrated: one active client, the
-  `Nats-Pin-Id` handshake, and failover to a standby on timeout or
+- The `pinned_client` policy shown in action: one active client, the
+  `Nats-Pin-Id` exchange, and a standby taking over on timeout or
   `nats consumer unpin`.
 
 ## What's next
 
 A consumer doesn't have to be running at all. The next page pauses a
-consumer (stops it delivering for a set window) and shows when that's
-the right tool.
+consumer, stopping it from delivering for a set window, and shows when
+that's the right tool.
 
 ## See also
 

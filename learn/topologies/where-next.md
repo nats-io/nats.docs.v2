@@ -10,27 +10,27 @@ description: Recap the four composable shapes and point to the mechanics, operat
 You started this chapter with one `nats-server` on `localhost` serving
 Acme's ORDERS workload. You end it with that same workload running on a
 two-cluster super-cluster that fans out to a leaf at the factory floor.
-The deployment grew the whole time; the application never changed.
+The deployment grew throughout, while the application stayed the same.
 
-This page doesn't teach anything new. It collects the model you built
-into one place and points you at the chapters and Reference that take it
-further.
+This page collects the model you built into one place and points you at
+the chapters and Reference that take it further, rather than teaching
+anything new.
 
-## The whole chapter in one idea
+## The chapter summarized
 
-NATS scales by **composing servers**. You didn't swap binaries or
-rewrite Acme's publisher to grow the deployment; you wired more
-`nats-server` processes together into bigger shapes.
+NATS scales by **composing servers**. To grow the deployment you wired
+more `nats-server` processes together into bigger shapes, instead of
+swapping binaries or rewriting Acme's publisher.
 
-There are four shapes, and they stack.
+There are four shapes, and they stack on top of each other.
 
 A **single server** is one `nats-server` process. Clients connect to it
-directly. It's the right tool for development and small workloads, and a
-single point of failure everywhere else.
+directly. It's the right tool for development and small workloads, and
+elsewhere it's a single point of failure.
 
 A **cluster** is servers joined by **routes** into a full mesh. Clients
 connect to any server and reconnect to another when one dies. This is the
-production floor.
+shape you run in production.
 
 A **super-cluster** joins clusters with **gateways**. A gateway carries
 only the traffic that has interest on the other side, and geo-affinity
@@ -39,16 +39,17 @@ regions.
 
 A **leaf node** is a server that opens an **outbound** connection to a
 remote NATS system and bridges subject interest. It runs anywhere with
-outbound access — a factory, an edge device, a laptop — and hides its
-local clients behind it. This is how NATS reaches the edge.
+outbound access, such as a factory, an edge device, or a laptop, and
+hides its local clients behind it. This is how NATS reaches the edge.
 
-Single, cluster, super-cluster, leaf. Everything in the
+The four shapes are single server, cluster, super-cluster, and leaf.
+Everything in the
 [Putting it together](/learn/topologies/putting-it-together) page was one
 of those four shapes, or a composition of them.
 
 ## The same client code, everywhere
 
-The point worth carrying out of this chapter is that Acme's ORDERS
+The point to carry out of this chapter is that Acme's ORDERS
 publisher and consumer are identical on all four shapes.
 
 A client that publishes `orders.created` and consumes the `ORDERS`
@@ -61,9 +62,9 @@ That's the payoff of separating the application from the topology. You
 size and shape the deployment for the operational need in front of you,
 and the code you already wrote keeps working.
 
-## What this chapter deliberately left out
+## What this chapter left out
 
-This chapter taught the shapes and wiring: routes, gateways, and
+This chapter taught the shapes and wiring, namely routes, gateways, and
 leaf remotes. It didn't teach the mechanics that run inside a
 cluster once JetStream is replicated across it.
 
@@ -81,8 +82,8 @@ how to build.
 
 ## Operating a topology
 
-Wiring a topology is the start. Running one in production is the
-[Deployment](/learn/deployment) deep dive.
+Wiring a topology is the start; running one in production is covered by
+the [Deployment](/learn/deployment) deep dive.
 
 It covers the things a topology walkthrough on plain `nats-server`
 processes skips: running NATS on Kubernetes, rolling upgrades across a
@@ -107,7 +108,7 @@ can publish and subscribe is not optional in production. The
 [Security](/learn/security) deep dive covers leaf authentication,
 accounts, and the credentials a leaf remote presents to its hub.
 
-## When you need the wire-level detail
+## Wire-level detail
 
 This chapter is unversioned and concept-first. The exact fields,
 defaults, and message formats of each connection live in **Reference**,

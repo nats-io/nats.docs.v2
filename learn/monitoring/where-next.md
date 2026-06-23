@@ -11,13 +11,13 @@ You started this chapter with a deployment you knew how to build but not
 how to watch. You end it able to read the `shipping` consumer falling
 behind four different ways: as a number on an endpoint, as lag computed
 from consumer state, as an advisory you subscribed to, and as a line
-climbing on a Grafana panel. That's the whole arc.
+climbing on a Grafana panel. That covers the full chapter.
 
 This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
-## The whole game in four lenses
+## The four monitoring lenses
 
 Every page in this chapter watched the same Acme ORDERS deployment from
 one more angle. If you remember nothing else, remember where each number
@@ -25,8 +25,9 @@ comes from.
 
 The **numbers come from endpoints.** The monitoring port `:8222` serves
 on-demand JSON: `/varz` for the server, `/connz` for clients, `/routez`
-for cluster routes, and `/jsz` for JetStream. You ask, the node answers
-right now: no history, no subscription, just the live state.
+for cluster routes, and `/jsz` for JetStream. When you request an
+endpoint, the node returns its current state with no history and no
+subscription.
 
 **Lag comes from consumer state.** The stream's `LastSeq` and the
 consumer's `delivered.stream_seq` give you lag as a single number, and
@@ -36,16 +37,16 @@ redelivered) is consumer health expressed as three numbers.
 
 **Surprises come from advisories.** Events you never polled for arrive as
 transient JSON on `$JS.EVENT.ADVISORY.>` and `$SYS.*`. A poison order
-exhausting its deliveries publishes one `max_deliver` advisory. If you're
-subscribed you learn it; if you're not, it's gone.
+exhausting its deliveries publishes one `max_deliver` advisory. You learn
+it only if you're subscribed when it fires; otherwise it's gone.
 
 **History comes from the exporter.** prometheus-nats-exporter scrapes
 `:8222` and re-exposes the numbers as time series on `:7777`. Prometheus
 stores them, Grafana charts them, and `nats server check` raises an alert
 when lag crosses a threshold you set.
 
-Endpoints, consumer state, advisories, the exporter. Everything else in
-this chapter is a refinement of those four lenses.
+Everything else in this chapter is a refinement of those four lenses:
+endpoints, consumer state, advisories, and the exporter.
 
 ## Where the details live now
 
@@ -65,8 +66,8 @@ reach for most.
 ## Sibling deep dives
 
 This chapter sits in the Operate half alongside its siblings. The others
-pick up exactly where a metric stops: this chapter names the symptom, the
-Operate siblings own the fix.
+pick up exactly where a metric stops: this chapter names the symptom,
+and the Operate siblings cover the fix.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) is what you
 reach for when the lag you measured here won't drain on its own. It

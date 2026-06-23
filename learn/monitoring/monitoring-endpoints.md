@@ -7,15 +7,15 @@ description: "The HTTP monitoring port :8222 and its on-demand JSON — /varz, /
 
 # 2. Monitoring endpoints
 
-Every number this chapter reads starts in the same place: a read-only
+Every number this chapter reads comes from a read-only
 HTTP port on each NATS server. Before you reach for Prometheus or
 Grafana, you can ask a running node what it sees, right now, with a
-plain `curl`. This page is where the numbers come from on the wire.
+plain `curl`. This page covers where the numbers come from on the wire.
 
 We observe the `east` cluster you already have running (`n1-east`,
 `n2-east`, `n3-east`) and nothing more. You'll query one node's
 monitoring port, read who's connected and how the cluster is wired,
-and meet `/jsz`, the JetStream lens the next page leans on.
+and meet `/jsz`, which reports JetStream state and which the next page builds on.
 
 ## The monitoring port serves JSON on demand
 
@@ -23,7 +23,7 @@ Each NATS server exposes a **monitoring port**. By default it listens
 on `:8222`, separate from the `:4222` clients use. It speaks plain HTTP,
 and it answers only when you ask; nothing is pushed. You send a `GET`,
 the server returns a JSON snapshot of its state at that instant, and the
-connection closes. That's the whole model: a synchronous request, an
+connection closes. The model is a synchronous request answered by an
 on-demand response.
 
 A **monitoring endpoint** is one HTTP path on that port. Each path
@@ -55,12 +55,12 @@ curl -s http://localhost:8222/varz | jq
 }
 ```
 
-Three counters earn a second look. `connections` is how many clients
+Three counters are worth a second look. `connections` is how many clients
 are connected *right now*: here, the four Acme services. The
 `total_connections` next to it is the count since the server started, so
 it only ever goes up. And `slow_consumers` is the number of clients the
 server has disconnected for not keeping up; on a healthy node it stays
-at `0`. The difference between those first two is its own trap, and the
+at `0`. The difference between those first two is easy to get wrong, and the
 Pitfalls section returns to it.
 
 The full set of `/varz` fields is documented in
@@ -111,7 +111,7 @@ bytes are queued for it (`pending_bytes`). This is where you confirm
 that the `ORDERS` account's services, connecting as `order-svc`, are
 actually connected, and which subjects each one holds interest in.
 
-The two counts at the top frame the page. `num_connections` is how many
+The two counts at the top describe the response. `num_connections` is how many
 connections this response actually returned; `total` is how many matched
 the query in all. They're equal here because four connections fit in
 one response, but once you add `?limit` and `?offset` to page a long
@@ -157,7 +157,7 @@ has dropped off the mesh. *Why* a route breaks, and how leadership
 moves when it does, belongs to [Clustering](/learn/clustering); the
 endpoint only tells you *that* it broke.
 
-## /jsz is the JetStream lens
+## /jsz reports JetStream state
 
 The last endpoint is `/jsz`. It reports the JetStream state on a node:
 how many streams and consumers it holds, which node is the JetStream
@@ -185,8 +185,8 @@ curl -s 'http://localhost:8222/jsz?acc=ORDERS&streams=true' | jq
 
 That `last_seq: 1000` and the consumer numbers under it are the raw
 material for **lag**: how far behind the `shipping` consumer is. This
-page only points `/jsz` out as the JetStream lens. Reading lag,
-in-flight, and redelivery out of it is the whole job of the next page,
+page only points out that `/jsz` reports JetStream state. Reading lag,
+in-flight, and redelivery out of it is the work of the next page,
 [JetStream health](/learn/monitoring/jetstream-health). The full set of
 `/jsz` fields and parameters is documented in
 [Reference → jsz](/reference/system/monitor/jsz).
@@ -254,9 +254,10 @@ not fetch the whole tree on a schedule. Scope to one account with
 
 **The monitoring port is unauthenticated by default.** Anyone who can
 reach `:8222` can read `/connz` and see your users, subjects, and
-traffic. That's fine on a laptop and a leak in production. Locking the
+traffic. That's acceptable on a laptop, but in production it exposes that
+data to anyone who can reach the port. Locking the
 port down (TLS, an allow-list, system-account access) is a security
-concern, not a monitoring one, and it lives in
+concern, not a monitoring one, and it's covered in
 [Security](/learn/security). Name it now so you don't expose `:8222`
 to the open internet by accident.
 

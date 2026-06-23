@@ -7,10 +7,10 @@ description: Long-form deep dives into NATS subsystems
 
 # Learn
 
-This section is the long-form half of the NATS documentation. Each deep
-dive walks through one subsystem from first encounter to working
-confidence, building up a single running scenario, the Acme `ORDERS`
-platform, step by step.
+This section holds the long-form deep dives in the NATS documentation.
+Each deep dive walks through one subsystem from first encounter to
+working confidence, building up a single running scenario, the Acme
+`ORDERS` platform, step by step.
 
 Deep dives sit between two other layers of the docs:
 
@@ -18,12 +18,13 @@ Deep dives sit between two other layers of the docs:
   Started. Read those first if you're new to NATS.
 - **[Reference](/reference/)** Exhaustive, versioned catalog of
   every configuration option, header, and wire-protocol detail. Deep
-  dives link out to Reference for the full surface area — Reference
-  doesn't teach.
+  dives link out to Reference for the full surface area, since Reference
+  is a catalog rather than a teaching resource.
 
-Every deep dive follows the same pattern: one running scenario, at most
-two new concepts per page, runnable examples in CLI and the client
-libraries, and Reference linked out for the long tail.
+Every deep dive follows the same pattern: it uses one running scenario,
+introduces at most two new concepts per page, provides runnable examples
+in CLI and the client libraries, and links out to Reference for the
+remaining detail.
 
 ## Develop
 
@@ -71,7 +72,8 @@ Run, scale, and secure NATS.
 
 ## Where to start
 
-New to NATS? Start with the [Core NATS deep dive](/learn/core-nats/);
-it's the foundation every other chapter builds on. Already comfortable
-with the basics and here for persistence? Go straight to the
+If you're new to NATS, start with the
+[Core NATS deep dive](/learn/core-nats/); it's the foundation every
+other chapter builds on. If you're already comfortable with the basics
+and here for persistence, go straight to the
 [JetStream deep dive](/learn/jetstream/).
