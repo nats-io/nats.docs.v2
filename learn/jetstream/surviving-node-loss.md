@@ -1,11 +1,11 @@
 ---
 id: surviving-node-loss
-title: "15. Surviving node loss"
-sidebar_position: 17
+title: "16. Surviving node loss"
+sidebar_position: 18
 description: Why R=1 is a single point of failure, why R=3 is the production floor, and what storage durability means
 ---
 
-# 15. Surviving node loss
+# 16. Surviving node loss
 
 Every page so far ran against a single `nats-server` on your laptop.
 That's the right way to learn. It's the wrong way to run orders in

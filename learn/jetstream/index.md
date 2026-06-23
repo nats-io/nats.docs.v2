@@ -39,9 +39,10 @@ subjects, and queue groups.
 | 12 | [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
 | 13 | [Delivery semantics](./delivery-semantics) | Limits, Interest, and WorkQueue retention |
 | 14 | [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
-| 15 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
-| 16 | [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
-| 17 | [Where to go next](./where-next) | A map of what's beyond this chapter |
+| 15 | [Altering stream state](./altering-stream-state) | Delete a message or purge the stream, by hand |
+| 16 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
+| 17 | [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
+| 18 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 
