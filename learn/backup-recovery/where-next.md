@@ -7,50 +7,50 @@ description: Recap the backup-and-recovery triad and point to what comes after t
 
 # 5. Where to go next
 
-You started this chapter with a built platform and a quiet worry: an
+You started this chapter with a built but unprotected platform: an
 `ORDERS` stream full of real orders, the `ACME` operator and its
 accounts deciding who may touch them, all spread across the `east`
-cluster, and nothing standing between any of it and a bad day. You end
+cluster, with no backup or recovery in place. You end
 it with a dated snapshot under `./backups/orders/`, an `ORDERS_DR` mirror
 running at a second site, and an encrypted off-site copy of every key
-that proves who you are. That's the whole arc.
+that proves who you are. That covers the full progression.
 
 This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
-## The whole game in three copies
+## The three copies
 
-Every page in this chapter circled the same three ideas. They protect
-against different failures, and they don't protect each other. If you
-remember nothing else, remember these.
+Every page in this chapter covered the same three ideas. They protect
+against different failures, and they don't protect each other. These are
+the key points to retain.
 
 A **snapshot** is the point you can return to. It's a point-in-time
 copy of a stream (its messages, its config, and optionally its consumer
-state) written off-site. When a delete or a corruption lands, the
+state) written off-site. When a delete or a corruption occurs, the
 snapshot is the only thing that lets you go *back* to before the
 mistake. It answers how much data you can afford to lose: your
 **recovery point**.
 
 A **mirror** is the site you can fail over to. It's a live, read-only
 copy of `ORDERS` running at a second site, kept current by replication
-and watched by its `Lag`. It doesn't give you a point in the past; it
-gives you a place to keep running when the first site dies. It answers
+and tracked by its `Lag`. It doesn't give you a point in the past; it
+gives you a place to keep running when the first site fails. It answers
 how long recovery may take: your **recovery time**.
 
 **Identity** is the proof of who you are. It's the set of files that
 *are* your security layer: the operator and account JWTs, the nkeys
 that sign them, the user creds, and the server config. A restored stream
-nobody is allowed to read is not a recovery. Without these files the
-data plane comes back and the platform stays dark.
+that nobody is allowed to read is not a recovery. Without these files the
+data plane comes back but the platform stays unusable.
 
-Snapshot, mirror, identity. And the thing that's *not* on the list:
-**R3 is availability, not a backup.** Three replicas keep a stream alive
-through a node loss, but a bad write replicates to all three as eagerly
-as a good one. R3 keeps the stream up; only a snapshot lets you undo a
-mistake.
+The three are snapshot, mirror, and identity. The item that is *not* on
+the list: **R3 is availability, not a backup.** Three replicas keep a
+stream alive through a node loss, but a bad write replicates to all three
+just as a good one does. R3 keeps the stream up; only a snapshot lets you
+undo a mistake.
 
-## Where the details live now
+## Where the details live
 
 The chapter is unversioned and concept-first. The exact flags, defaults,
 and ranges live in **Reference**, which is versioned and exhaustive. When
@@ -110,7 +110,7 @@ identity bundle are all exactly as you left them on the previous page.
 You can rehearse a failover against them, schedule a test restore, or
 tear the practice copies down when you're done.
 
-You hold the operational model: a snapshot for the point you can return
+You have the operational model: a snapshot for the point you can return
 to, a mirror for the site you can fail over to, identity backup for the
 keys that prove who you are — and R3 as availability, never as any of
 those three.

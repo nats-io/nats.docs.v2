@@ -10,8 +10,8 @@ description: Publish-subscribe, subjects, request-reply, queue groups, and scatt
 Core NATS is the foundation everything else is built on. It's a
 publish-subscribe system: a publisher publishes a message to a
 subject, and every subscriber interested in that subject receives a
-copy. There's no broker queue, no storage, no acknowledgment. The
-message goes to whoever is listening right now, and to nobody
+copy. There's no broker queue, no storage, and no acknowledgment. The
+message goes to whoever is listening right now, and it goes to nobody
 else.
 
 That single idea, subjects plus interest, is enough to build five
@@ -31,9 +31,9 @@ once. If a subscriber is offline, restarting, or not
 subscribed yet, it never sees that message. The server does not store
 it for later.
 
-That's a feature, not a gap. It keeps core NATS small and fast, and
-it's exactly right when each message is superseded by the next one:
-a live price, a current temperature, a cache invalidation.
+That behavior is intentional. It keeps core NATS small and fast, and
+it's exactly right when each message is superseded by the next one,
+such as a live price, a current temperature, or a cache invalidation.
 
 When you need messages to wait for a subscriber, survive a restart,
 or be replayed later, you add a stream. That's
@@ -87,8 +87,8 @@ subscribers and services as you go. No page resets the world.
 - Regional `orders.us.*` and `orders.eu.*` subjects matched with
   single-token and multi-token wildcards.
 - An `inventory` service answering on `orders.inventory.check` over
-  request-reply, and the `_INBOX` mechanism that makes a reply find
-  its way home.
+  request-reply, and the `_INBOX` mechanism that routes a reply back
+  to the requester.
 - A `packers` pool sharing a queue group name on `orders.created`, so
   each order is handled by exactly one packer.
 - A scatter-gather query to three `shipping.quote` providers, gathered
@@ -98,9 +98,9 @@ subscribers and services as you go. No page resets the world.
 
 You've read the [Core Concepts → Publish & Subscribe](/concepts/pub-sub-basics)
 primer, or you're otherwise comfortable with the idea of subjects and
-subscribers. This chapter doesn't re-teach the *what*. It shows the
-*how*: the mechanism on the wire, the trade-off behind each pattern,
-and a runnable session you build up command by command.
+subscribers. Rather than re-teaching the *what*, this chapter shows
+the *how*: the mechanism on the wire, the trade-off behind each
+pattern, and a runnable session you build up command by command.
 
 You don't need to know anything beyond core NATS. This is usually the
 first deep dive a reader does.
@@ -137,7 +137,7 @@ You'll need:
   use only the CLI; later pages add JavaScript, Go, Python, Java,
   Rust, and C# client examples for the same operations.
 
-Open a terminal, run `nats-server`, and turn the page.
+Open a terminal, run `nats-server`, and continue to the next page.
 
 ## What's next
 

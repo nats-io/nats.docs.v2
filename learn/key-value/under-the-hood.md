@@ -9,13 +9,13 @@ description: The KV_INVENTORY stream behind the bucket, the direct read path, an
 
 You've built a whole `INVENTORY` bucket: keys with values, a watcher, safe
 decrements with compare-and-swap, and a TTL'd key that expires on its own. Every
-one of those used the friendly key-value API and never mentioned a stream. This
-page lifts the lid. The bucket was a JetStream stream the whole time, and once
-you can see it, nothing about KV is magic anymore.
+one of those used the key-value API and never mentioned a stream. This
+page shows the underlying mechanism. The bucket was a JetStream stream the whole
+time, and seeing it lets you understand how KV works internally.
 
-We do two things. First, we prove the bucket is a stream and trace one key down
-to the message that holds it. Then we look at the one place the abstraction has a
-real choice to make: delete versus purge.
+This page first proves the bucket is a stream and traces one
+key down to the message that holds it. It then covers the one operation where
+the abstraction behaves differently depending on what you ask for: delete versus purge.
 
 ## A bucket is a stream
 
@@ -25,30 +25,31 @@ of that subject, and a value is a message on it. For `INVENTORY` the backing
 stream is `KV_INVENTORY`, its subjects are `$KV.INVENTORY.>`, and the key
 `widget-blue` is the message on `$KV.INVENTORY.widget-blue`.
 
-The KV commands hide the stream name, but the stream commands see straight
-through to it. Ask the server for the stream behind the bucket:
+The KV commands don't show the stream name, but the stream commands report it
+directly. Ask the server for the stream behind the bucket:
 
 <div class="nats-example" data-type="learn-key-value-under-the-hood-streamInfoOfBucket" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The configuration the server prints back is every KV claim from this chapter,
 written in stream terms:
 
-- **Subjects: `$KV.INVENTORY.>`**. One subject branch, one key per token under it.
+- **Subjects: `$KV.INVENTORY.>`**. There is one subject branch, with one key per token under it.
 - **Max Msgs Per Subject: `1`**. This *is* the history depth. You raised it to
   keep prior revisions; the bucket's history is the stream keeping more than one
   message per subject.
 - **Discard Policy: `New`**. Once the bucket hits a limit, it rejects the
   newest write rather than silently dropping older messages to make room. This is
-  why limits matter: the bucket protects what it already holds.
+  why limits matter: the bucket keeps the messages it already holds rather than
+  evicting them.
 - **Allow Direct: `true`**. Get doesn't open a consumer. More on that next.
 - **Allow Rollup: `true`**. Purge replaces a key's whole subject with one
   message. More on that below.
 - **Deny Delete: `true`**. The stream refuses raw message deletion, so the KV
-  API stays the only door in and out.
+  API stays the only way to write and remove data.
 
 This is the same stream-storage model the JetStream chapter drew. The animation
 below is the one from that chapter, reused on purpose: the layer under your
-bucket is exactly the stream you already met.
+bucket is exactly the stream described there.
 
 <div class="nats-flow" data-scenario="jetStreamContrastAnimated" data-width="600" data-height="350"></div>
 
@@ -58,29 +59,29 @@ set any of these by hand; the client mapped your bucket settings onto them.
 
 ## Get reads the last message, with no consumer
 
-Reading a value doesn't replay the stream. It doesn't open a consumer either.
-It uses **direct get**: the server returns the last message on a subject straight
-from storage. The request goes to `$JS.API.DIRECT.GET.<stream>.<subject>` (for our
+Reading a value doesn't replay the stream and doesn't open a consumer. It uses
+**direct get**: the server returns the last message on a subject straight from
+storage. The request goes to `$JS.API.DIRECT.GET.<stream>.<subject>` (for our
 key, `$JS.API.DIRECT.GET.KV_INVENTORY.$KV.INVENTORY.widget-blue`), and the
 server answers with the latest message there. That last message is the current
 value, its sequence is the revision, and its store time is the entry timestamp.
 
-This is why `nats kv get INVENTORY widget-blue` is fast and stateless. There's
-no position to track, nothing to acknowledge, no consumer to clean up. Get is one
-request and one reply. It's the reason a bucket reads like a key-value store even
-though it's built from an append-only log: the bucket interface hides the stream,
-so you see key-value pairs, not messages. Each get is just "the last message per
-subject," served directly.
+This is why `nats kv get INVENTORY widget-blue` is fast and stateless. There's no
+position to track, no message to acknowledge, and no consumer to clean up, so a get
+is one request and one reply. It's the reason a bucket behaves as a key-value
+store even though it's built from an append-only log: the bucket interface hides
+the stream, so you see key-value pairs rather than messages. Each get returns the last
+message per subject, served directly.
 
 `Allow Direct: true` in the stream config is what enables this path. It's set
 for you when the bucket is created. The exhaustive direct-read API lives in
 [Reference → Get Stream Message](/reference/jetstream/api/stream/msg-get); here
-you only need the shape: last message, by subject, no consumer.
+you only need its shape, which is the last message for a subject, with no consumer.
 
 ## Delete versus purge
 
-Removing a key is the one operation where the abstraction makes a real decision,
-because "gone" can mean two different things underneath.
+Removing a key is the one operation where the abstraction behaves differently
+depending on what you ask for, because "gone" can mean two different things underneath.
 
 A **delete** leaves a non-destructive **marker**: a message with a
 `KV-Operation: DEL` header. The key now reads empty, but every prior revision is
@@ -99,7 +100,8 @@ sensitive), not just hide them.
 <div class="nats-example" data-type="learn-key-value-under-the-hood-deleteVsPurge" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Both make a `get` report the key as gone. The difference is entirely in what
-history can still show you afterward: delete keeps the trail, purge erases it.
+history can still show you afterward: delete keeps the prior revisions, while
+purge erases them.
 
 A bucket's `Replicas` field (how many servers hold a copy) is named here for
 completeness, because it shows up in the stream config too. Replication, leader
@@ -108,8 +110,8 @@ taught in this chapter.
 
 ## Pitfalls
 
-Seeing the stream invites a few tempting mistakes. Most come from treating the
-backing stream as something you operate directly.
+Once you can see the stream, a few mistakes become tempting. Most come from
+treating the backing stream as something you operate directly.
 
 **Delete does not remove history; only purge does.** It's easy to read "I
 deleted the key" as "the old values are gone." They are not. A deleted key still
@@ -121,7 +123,7 @@ drop prior values, purge.
 The example above is the proof: delete `widget-blue`, then read its
 history and see the old revisions still there; purge `widget-red`, then read its
 history and see it collapsed to a single marker. Choose the operation by what you
-need to survive: the trail, or the space.
+need to keep, the prior revisions or the disk space they occupy.
 
 **Do not operate the backing stream directly.** The bucket is a managed stream.
 Don't hand-edit `KV_INVENTORY`'s configuration, and don't publish to
@@ -157,12 +159,12 @@ You now have:
   marker, history dropped), and the rule never to operate the backing stream
   directly.
 
-The abstraction is no longer magic. It's a stream with a friendly face, and you
-can see both halves.
+The abstraction is no longer opaque. It's a stream presented through the KV API,
+and you can now see both the KV interface and the stream beneath it.
 
 ## What's next
 
-The last page steps back: it recaps the whole game, points you at where the
+The last page steps back: it recaps the whole chapter, points you at where the
 exhaustive details live, and collects every page's pitfalls into one
 pre-production checklist.
 

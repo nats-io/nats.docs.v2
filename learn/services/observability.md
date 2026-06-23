@@ -9,7 +9,7 @@ description: Read the per-endpoint stats the framework keeps for you, and signal
 
 Your `OrderInventory` service answers on `orders.inventory.check`, and the
 [discovery page](/learn/services/discovery) lets you enumerate it and target a
-single instance by ID. So far you can find the service. This page shows you
+single instance by ID. So far you can find the service, and this page shows you
 how it's doing.
 
 The framework keeps a running tally for every endpoint (how many requests it's
@@ -17,15 +17,15 @@ handled, how many failed, how long each took) without a single line of metrics
 code on your part. This page reads that tally, then shows the one way a handler
 influences it: by returning a service error.
 
-Two new ideas only: **per-endpoint stats** and the **service error** that the
-stats record.
+There are two new ideas here: **per-endpoint stats** and the **service error**
+that the stats record.
 
-## Per-endpoint stats come for free
+## Per-endpoint stats the framework keeps for you
 
 Every endpoint you add carries a counter set that the framework updates on each
 request, under the service lock, before your handler ever sees the next one. You
-don't register it, increment it, or flush it. It's part of what `AddEndpoint`
-gives you.
+don't register the counter set, increment it, or flush it yourself. It's part of
+what `AddEndpoint` gives you.
 
 Five fields matter for day-to-day work:
 
@@ -69,7 +69,8 @@ nats service stats OrderInventory
 
 The counters tracked here are per endpoint, not per service: a service with
 `check` and a second endpoint keeps a separate row for each. That's the level
-where you reason about load: which handler is busy, which one is slow.
+where you reason about load, telling you which handler is busy and which one is
+slow.
 
 [Reference](/reference/) documents the full set of fields in the STATS
 response, including the per-endpoint `queue_group` and an optional custom
@@ -105,17 +106,17 @@ came back over the same reply subject as any success. This is different from
 request-reply itself and is covered in
 [request-reply](/learn/core-nats/request-reply).
 
-When to return a service error is your call. Bad input, a downstream
-dependency that's unavailable, a business rule that rejects the order: each is
-a reason to call `req.Error` so the failure is both reported to the caller and
-counted in the stats. A handler that swallows the failure and responds normally
-leaves `num_errors` at zero and hides the problem.
+When to return a service error is your call. Bad input is one reason to call
+`req.Error`, a downstream dependency that's unavailable is another, and a
+business rule that rejects the order is a third; calling `req.Error` means the
+failure is both reported to the caller and counted in the stats. A handler that
+responds normally instead of reporting the failure leaves `num_errors` at zero
+and hides the problem.
 
 ## Pitfalls
 
-Two traps catch people the first time they lean on service stats. Both come
-from the same root: a service error looks like a normal reply unless you check
-for it.
+Two traps catch people the first time they rely on service stats. Both have the
+same cause: a service error looks like a normal reply unless you check for it.
 
 **A service error arrives as headers, not as a failed call.** The framework
 sends the error response over the reply subject like any success, so the

@@ -7,17 +7,17 @@ description: Back up and restore the operator, accounts, creds, nkeys, and serve
 
 # 5. Config and JWT backup
 
-The last three pages protected the data: a snapshot to return to, a
-mirror to fail over to, a runbook to choose between them. But a restored
+The last three pages protected the data with a snapshot to return to, a
+mirror to fail over to, and a runbook to choose between them. But a restored
 `ORDERS` stream is useless if nobody is allowed to read it. The accounts
-that gate it, the operator that signs those accounts, the creds
-`order-svc` connects with — none of that lives in the stream. It lives in
+that gate it, the operator that signs those accounts, and the creds
+`order-svc` connects with don't live in the stream. They live in
 a different set of files, and those files need their own backup.
 
 This page protects the **identity plane**. It does two things: it copies
 the files that *are* your security layer off-site, encrypted; then it
-puts them back in a clean-room rebuild and proves the platform comes back
-to life.
+puts them back in a clean-room rebuild and verifies that the platform runs
+again.
 
 This page doesn't teach what an operator, account, or user *is*; that
 model lives in
@@ -25,7 +25,7 @@ model lives in
 learn which files carry that identity, how to get them off-site, and
 how to restore them.
 
-## Identity is a handful of files
+## The files that carry identity
 
 Everything that proves who may touch the `ORDERS` platform reduces to
 files on disk. There are three groups, and losing any one of them breaks
@@ -48,8 +48,9 @@ that produced that signature. The layout for the Acme world:
 
 The JWTs are public; they only assert identity, they sign nothing. The
 nkeys are secret. An nkey is the private key that produced a JWT's
-signature, so an nkey leaked is identity forged, and an nkey lost is
-identity lost. Treat the `nkeys` subtree like a password vault.
+signature, so a leaked nkey lets identity be forged, and a lost nkey means
+identity is lost. Protect the `nkeys` subtree with the same controls you
+apply to stored passwords.
 
 The second group is the **creds files**. A `.creds` file is a user's JWT
 and nkey concatenated into one file: the thing a client points at to
@@ -91,11 +92,11 @@ The full set of resolver options lives in
 [Reference → Resolver](/reference/config/resolver). For now you only need
 to know the cache exists.
 
-## Back it up: tar, encrypt, ship off-site
+## Backing up the files
 
-The backup is one idea repeated for all three groups: collect the files,
-encrypt them, send them away from the cluster. A backup that sits on the
-same disk as the live keys dies with that disk; **off-site** means a copy
+The backup repeats one idea for all three groups: collect the files,
+encrypt them, and send them away from the cluster. A backup that sits on the
+same disk as the live keys is lost when that disk is lost; **off-site** means a copy
 that survives the event that takes the primary down.
 
 Collect the nsc tree, the server config, and the resolver cache into one
@@ -115,8 +116,8 @@ aws s3 cp acme-identity-2026-06-04.tar.gz.enc \
   s3://acme-dr/identity/acme-identity-2026-06-04.tar.gz.enc
 ```
 
-The archive is dated, like the snapshot directory on page 2. That date
-isn't decoration. If you rotate the operator key (re-sign the chain under
+The archive is dated, like the snapshot directory on page 2. The date
+serves a purpose. If you rotate the operator key (re-sign the chain under
 a new operator nkey), an older archive points at the *previous* operator,
 and a server restored from it trusts a chain nobody signs anymore. Tag
 each backup with the day the identity was current so you can match an
@@ -131,13 +132,14 @@ cron line keeps the identity copy as fresh as the data copy:
 ```
 
 The passphrase that `openssl` prompts for is itself a secret. Store it
-somewhere other than the bucket holding the archive. An archive and its
-key in the same place is a single point of failure, not a backup.
+somewhere other than the bucket holding the archive. Keeping an archive and
+its key in the same place is a single point of failure that defeats the
+backup.
 
-## Restore it: extract, clear the cache, verify
+## Restoring the files
 
 A clean-room restore is the backup run in reverse, plus one step that
-catches people. You decrypt and extract the bundle, then you must clear
+teams often miss. You decrypt and extract the bundle, then you must clear
 the account resolver's cache before the restored identity takes effect.
 
 Start by pulling the bundle back and unpacking it:
@@ -160,7 +162,7 @@ nsc list accounts --operator ACME
 print `ORDERS` and `ANALYTICS`. If they do, the keys and JWTs are back
 where the tools expect them.
 
-Now the step that the naive restore skips. The account resolver keeps a
+Next comes the step that a naive restore skips. The account resolver keeps a
 local cache of account JWTs in its `dir` (the `/etc/nats/jwt` from the
 config above). If that cache still holds the *old* account JWTs from
 before the failure (say, an `ORDERS` account with stale
@@ -191,7 +193,7 @@ identity that gates it.
 
 ## Pitfalls
 
-Three traps hit teams the first time they back up identity rather than
+Three traps come up the first time teams back up identity rather than
 data. Each one stays inside this page's two jobs: backing the files
 up, and restoring them.
 
@@ -225,7 +227,7 @@ openssl enc -d -aes-256-cbc -pbkdf2 \
 **A stale account-resolver cache serves old permissions after a
 restore.** Restoring the nsc tree puts the new account JWTs on disk, but
 the resolver keeps serving whatever's in its `dir` cache until you clear
-it. The symptom is maddening: the files are correct, `nsc list accounts`
+it. The symptom is confusing: the files are correct, `nsc list accounts`
 looks right, yet connections behave as if the old permissions are still
 in force. Clear the cache (`rm -rf /etc/nats/jwt/*`) and restart before
 you trust a restored identity.
@@ -249,16 +251,16 @@ clears the stale resolver cache, restarts, and verifies a real client
 connects.
 
 Combined with the snapshot from page 2 and the `ORDERS_DR` mirror from
-page 3, the whole platform now survives a clean-room rebuild: the data
+page 3, the whole platform now survives a clean-room rebuild. The data
 comes back from a snapshot, the site comes back from the mirror, and the
 identity that gates both comes back from this archive.
 
 ## What's next
 
 Every protective copy is now in place: snapshot, mirror, runbook, and
-identity. The last page recaps the whole game and collects every page's
+identity. The last page recaps the whole chapter and collects every page's
 pitfalls into one production checklist you run before you trust the
-platform with someone else's orders.
+platform with production traffic.
 
 Continue to [Where to go next](/learn/backup-recovery/where-next).
 

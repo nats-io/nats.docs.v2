@@ -21,26 +21,26 @@ In **centralized authentication**, the server holds the full list of
 users in its configuration. Every username, password, and account
 assignment sits in one place: `nats.conf` on the server.
 
-It's all config. When a connection presents credentials, the server
+The whole model is config. When a connection presents credentials, the server
 walks its config list, finds the matching user, and admits the
 connection into that user's account. It never consults an external
 service.
 
 <div class="nats-flow" data-scenario="centralizedAuthAnimated" data-width="600" data-height="380"></div>
 
-The flow is direct. The client connects and offers credentials. The
+The flow is direct: the client connects and offers credentials, and the
 server compares them against its config user list. A match is admitted
-into the user's account; a mismatch is rejected.
+into the user's account, and a mismatch is rejected.
 
 Centralized authentication is the right tool when one team owns the
 server config and the user list is small and slow to change. It lives
 entirely in one file, so it's the easiest model to read and reason
 about.
 
-It doesn't scale to many independent tenants editing their own users.
-Every change is a server-config change. The [next
+It doesn't scale to many independent tenants editing their own users,
+because every change is a server-config change. The [next
 page](/learn/security/decentralized-auth) covers the model that solves
-that. For now, one team and one config file.
+that. For now, this page assumes one team and one config file.
 
 ## Giving order-svc a credential
 
@@ -118,7 +118,7 @@ meet nkeys properly on the [decentralized
 authentication](/learn/security/decentralized-auth) page; here they're
 just one more way to authenticate a config user.
 
-**token** is the odd one out: a single shared secret with no username,
+**token** is the exception: a single shared secret with no username,
 set on the server's top-level `authorization` block rather than on a
 per-account `users` entry:
 `authorization { token: "shared-secret-rotate-me" }`. Any client
@@ -126,12 +126,12 @@ presenting the right token is admitted, which makes it a server-wide
 secret rather than a per-user one. Handy for quick internal setups.
 (When this chapter says "token" it always means this, never a JWT.)
 
-## A word on passwords
+## Storing passwords
 
 The config above stored `order-svc`'s password in plaintext. That's
-fine for a laptop and wrong for a server anyone can read.
+fine for a laptop, but not for a server anyone can read.
 
-The server agrees. On startup it scans the user list, and if any
+The server enforces this. On startup it scans the user list, and if any
 password is plaintext it logs a warning:
 
 ```
@@ -196,9 +196,9 @@ makes a handful of mistakes easy to make and easy to avoid.
 
 **Running with no authentication in production.** A server with no
 `authorization` and no per-account `users` admits every connection into
-the default account. That's convenient on a laptop and dangerous on a
-shared network: anyone who can reach the port can publish and subscribe.
-Do not ship it. Give every server at least one user list, so an
+the default account. That's convenient on a laptop, but on a shared
+network anyone who can reach the port can publish and subscribe, so do
+not ship it. Give every server at least one user list, so an
 unauthenticated connect fails with an `authorization violation` error
 instead of silently succeeding.
 
@@ -238,8 +238,8 @@ You have:
 - `order-svc` publishing the canonical order message to
   `orders.created`.
 
-The credential list lives entirely in the server config: one team,
-one file.
+The credential list lives entirely in the server config, owned by one
+team in one file.
 
 ## What's next
 

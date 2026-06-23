@@ -7,26 +7,26 @@ description: Recap the deployment runbook and collect every page's production ch
 
 # 7. Where to go next
 
-You started this chapter with a cluster shape on paper: the three-node
+You started this chapter with a cluster design: the three-node
 `east` cluster the Topologies chapter designed, carrying the R3 `ORDERS`
 stream. You end it with that same cluster sized, running on Kubernetes,
 reconfigurable without downtime, upgradable without losing the stream,
-and locked down with TLS on every link. That's the whole arc: a shape
-turned into a running system.
+and locked down with TLS on every link. Those steps take a cluster
+design and produce a running system.
 
-This page doesn't teach anything new. It collects the runbook you built
+This page introduces no new material. It collects the runbook you built
 into one place and points you at the chapters and Reference that take it
 further.
 
-## The whole game in five steps
+## The five operational steps
 
 Every page in this chapter advanced the same cluster through one
-operational step. If you remember nothing else, remember the order.
+operational step, and the order they run in matters.
 
-You **size** it first. A node spends four resources (CPU, memory, disk,
+You **size** it first. A node uses four resources (CPU, memory, disk,
 and file descriptors), and an R3 stream counts three times against the
-`ORDERS` account limits. Sizing is reading those limits before you commit
-to a PVC, not guessing at them after the disk fills.
+`ORDERS` account limits. Sizing means reading those limits before you
+commit to a PVC, rather than estimating them after the disk fills.
 
 You **deploy** it second. The NATS Helm chart stands the cluster up as a
 StatefulSet whose three pods, `nats-0`/`nats-1`/`nats-2`, are the same
@@ -35,8 +35,8 @@ turns the `ORDERS` stream and its consumers into declarative CRDs.
 
 You **configure** it third. An include splits the config into
 per-account and per-region files, and a SIGHUP reloads the reloadable
-keys in place: no restart, no client reconnect. The reloader sidecar
-turns a ConfigMap edit into that SIGHUP.
+keys in place without a restart or a client reconnect. The reloader
+sidecar turns a ConfigMap edit into that SIGHUP.
 
 You **upgrade** it fourth. Lame-duck mode lets a node drain its clients
 and transfer Raft leadership before it stops, and the upgrade order
@@ -48,10 +48,10 @@ mount as files, a locked-down systemd unit strips the process of every
 capability it doesn't need, and the monitor port closes to everything
 but localhost.
 
-Size, deploy, configure, upgrade, harden. Everything else in this
-chapter is a detail of one of those five.
+The five steps are size, deploy, configure, upgrade, and harden, and
+everything else in this chapter is a detail of one of those five.
 
-## Where the details live now
+## Where the exhaustive details are documented
 
 The chapter is unversioned and concept-first. The exact keys, defaults,
 and ranges live in **Reference**, which is versioned and exhaustive. When
@@ -65,34 +65,34 @@ all point into it.
 
 ## Sibling deep dives
 
-This chapter is the runbook. It deliberately stops at the seam of five
-other chapters and hands each its own job, so the cluster you built here
-carries straight into them.
+This chapter is the runbook, and five other chapters continue from where
+it ends. Each of those chapters covers a separate job, so the cluster you
+built here carries straight into them.
 
-The [Topologies deep dive](/learn/topologies) owns the **shape**. It's
+The [Topologies deep dive](/learn/topologies) covers the **shape**. It's
 where the three-node `east` cluster came from, and where you go to choose
 a different shape (a super-cluster across regions, or leaf nodes at the
 edge) before you size and deploy it.
 
-The [Clustering & Replication deep dive](/learn/clustering) owns the
+The [Clustering & Replication deep dive](/learn/clustering) covers the
 **Raft mechanics** this chapter only triggers. When a rolling upgrade
 transfers leadership, [raft-and-leaders](/learn/clustering/raft-and-leaders)
 explains how the meta-leader is elected and how R3 stays consistent
 through the change.
 
-The [Security deep dive](/learn/security) owns the **auth model** behind
+The [Security deep dive](/learn/security) covers the **auth model** behind
 the credentials this chapter mounts. This chapter turns TLS on and points
 the server at a creds file;
 [operator-mode](/learn/security/operator-mode) is where you design the
 operator `ACME`, the accounts, and the JWTs that the creds file carries.
 
-The [Monitoring deep dive](/learn/monitoring) owns **what to watch** once
+The [Monitoring deep dive](/learn/monitoring) covers **what to watch** once
 the cluster is live. This chapter exposes `/healthz` and runs
 `nats server report` as one-off operational checks;
 [monitoring-endpoints](/learn/monitoring/monitoring-endpoints) is where
-those signals become an alerting discipline.
+you turn those signals into ongoing alerting.
 
-The [Backup & Recovery deep dive](/learn/backup-recovery) owns
+The [Backup & Recovery deep dive](/learn/backup-recovery) covers
 **disaster recovery** (snapshotting the ORDERS stream and restoring it),
 the one production concern this chapter's hardening doesn't cover.
 
@@ -104,16 +104,16 @@ upgradable through lame-duck mode, and hardened with TLS and a
 locked-down systemd unit. This page introduces no new scenario state; the
 cluster is running exactly as you left it on the hardening page.
 
-You hold the whole runbook: take a topology shape, size its resources,
+You now have the whole runbook: take a topology shape, size its resources,
 stand it up declaratively, change it without downtime, roll it forward
-safely, and lock it down. That runbook is the floor for operating any
-NATS cluster in production, not just this one.
+safely, and lock it down. That runbook is the minimum baseline for
+operating any NATS cluster in production, not only this one.
 
 ## Production checklist
 
 Every page in this chapter closed with a Pitfalls section. This collects
-the action items from all of them in one place: a last pass before you
-trust the cluster with real orders. Each group links back to the page
+the action items from all of them in one place as a last pass before you
+run real orders through the cluster. Each group links back to the page
 that explains the why.
 
 ### Sizing & resources — see [Pitfalls](/learn/deployment/sizing-and-resources#pitfalls)

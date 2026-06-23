@@ -11,7 +11,7 @@ You've secured the ORDERS world end to end. This page puts the whole
 model back together in one picture, then points you at the chapters and
 references that go past where this one stops.
 
-## The whole game in one picture
+## The whole model in one picture
 
 Every page in this chapter added one piece. Here they are, one sentence
 each.
@@ -87,9 +87,9 @@ messages a stream keeps on disk. The resilience side (how a stream
 survives losing the server it lives on) is its own subject in
 [Surviving node loss](/learn/jetstream/surviving-node-loss).
 
-The two chapters meet here. Security decides _who_ may touch a stream.
-JetStream's replication decides _whether the stream is still there_ to be
-touched.
+The two chapters connect here. Security decides _who_ may access a
+stream. JetStream's replication decides _whether the stream is still
+there_ to be accessed.
 
 ## Reading the reference
 

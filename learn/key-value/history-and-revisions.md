@@ -7,9 +7,9 @@ description: Track a key's revisions, read its history, and decrement safely wit
 
 # 3. History and revisions
 
-So far every write to a key has been a `put`: the new value lands, the old
-one is gone, and you never had to think about who wrote last. That works
-right up until two writers touch the same key at the same time.
+So far every write to a key has been a `put`: the new value replaces the old
+one, and you never had to think about who wrote last. That works
+until two writers touch the same key at the same time.
 
 This page adds the two ideas that make concurrent writes safe. The first
 is the revision: every key carries a revision that counts its writes,
@@ -21,7 +21,7 @@ without ever losing a sale.
 You still have the `INVENTORY` bucket from the first page. After the live
 update on the watching page, `widget-blue` sits at 41 (its second
 revision), and the warehouse dashboard from that page is still attached.
-We build on both.
+This page builds on both of those.
 
 ## Every put bumps the revision
 
@@ -40,7 +40,7 @@ The bucket also keeps the **history**: the prior revisions of a key, up to
 the bucket's history depth. You set that depth when you created the bucket
 with `--history`. A bucket created with `--history 1` keeps only the
 latest value, so there's no prior revision to look at. A bucket with a
-deeper history keeps a trail you can read back.
+deeper history keeps prior revisions you can read back.
 
 Read the history of `widget-blue`:
 
@@ -53,20 +53,20 @@ operation. The history depth caps at 64 revisions per key; the full set of
 bucket configuration options is documented in
 [Reference → Create Stream](/reference/jetstream/api/stream/create).
 
-History is the kept past of a single key. It isn't an audit log of the
+History holds the prior revisions of a single key. It isn't an audit log of the
 whole bucket, and it doesn't grow without bound: once a key has more
-revisions than the depth allows, the oldest one falls off. Think of it as
-a short, fixed-length trail behind each key.
+revisions than the depth allows, the oldest one is removed. Each key keeps
+a fixed-length set of its recent revisions.
 
 ## Compare-and-swap: writing without locks
 
-Here's the problem `put` can't solve. Two copies of the inventory
-service both sell a `widget-blue`. Both read the count as 41. Both compute
-40. Both put 40. Two sales happened, but the count only dropped by one.
-One write clobbered the other, and a unit of stock vanished from the
-books.
+Consider a problem `put` can't solve. Two copies of the inventory
+service both sell a `widget-blue`. Each reads the count as 41, computes
+40, and puts 40. Two sales happened, but the count only dropped by one.
+One write overwrote the other, and a unit of stock was lost from the
+count.
 
-The fix is **optimistic concurrency**: no locks, no waiting. Instead, each
+The fix is **optimistic concurrency**, which uses no locks and no waiting. Instead, each
 writer reads the current revision, then writes *on the condition* that the
 revision hasn't changed since. If another writer got there first, the
 condition fails and the write is rejected; nothing is overwritten. The
@@ -89,32 +89,32 @@ not, the write is rejected and nothing is lost.
 
 <div class="nats-example" data-type="learn-key-value-history-and-revisions-casUpdate" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-This is the read-modify-write you reach for whenever the new value depends
-on the old one: a decrement, an increment, a status transition. The
-revision is the guard that makes it safe.
+This is the read-modify-write you use whenever the new value depends
+on the old one, such as a decrement, an increment, or a status transition. The
+revision is what makes the write safe.
 
 <div class="nats-flow" data-scenario="kvCasRetryAnimated" data-width="600" data-height="350"></div>
 
-The animation walks the conflict: the service gets `widget-blue` at
+The animation shows the conflict: the service gets `widget-blue` at
 revision 7 and calls update expecting 7, but a concurrent writer has
 already bumped the key to revision 8. The server rejects the update on the
 revision mismatch. The service re-gets (now revision 8) and retries with
-the fresh revision, which the server accepts. No write was lost, and no
-lock was ever held.
+the fresh revision, which the server accepts. No write was lost, and the
+service never held a lock.
 
 ## Pitfalls
 
-Two traps catch people the first time they rely on revisions. Both come
+Two mistakes are common the first time you rely on revisions. Both come
 from treating a CAS write like an unconditional one.
 
-**A rejected update is not queued: it's dropped, and you must retry.**
-Optimistic concurrency doesn't wait its turn. When update finds the key
+**A rejected update is dropped rather than queued, and you must retry.**
+Optimistic concurrency doesn't wait. When update finds the key
 at a different revision than you named, the server returns an error and
-your value is gone. If you fire-and-forget an update, a conflict silently
+your value is not written. If you fire-and-forget an update, a conflict silently
 loses the write. Don't assume an update succeeded; check the result, and
 on a revision mismatch, re-get the key and try again with the fresh
-revision. That re-get-and-retry loop is the whole point of CAS. Without
-it you have the same lost-write bug `put` had.
+revision. That re-get-and-retry loop is what CAS exists to support. Without
+that loop you have the same lost-write bug `put` had.
 
 Here's the handling: get the current revision, attempt the update, and on
 a mismatch re-get and retry once with the new revision.
@@ -122,13 +122,13 @@ a mismatch re-get and retry once with the new revision.
 <div class="nats-example" data-type="learn-key-value-history-and-revisions-casConflictRetry" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **Do not use put for a read-modify-write.** Put is unconditional: it
-writes no matter what the key holds now, so it'll happily overwrite a
+writes no matter what the key holds now, so it will overwrite a
 value a concurrent writer just stored. Put is correct when the new value
-doesn't depend on the old one: setting a SKU's count to a known
-absolute number from an inventory recount, say. The moment the new value
-is computed *from* the current value, like a decrement on a sale, reach
-for update with the revision instead. Put for "set it to this"; update for
-"change it from what it was."
+doesn't depend on the old one, such as setting a SKU's count to a known
+absolute number from an inventory recount. When the new value
+is computed *from* the current value, like a decrement on a sale, use
+update with the revision instead. Use put to set a key to a given value, and
+update to change it from the value it currently holds.
 
 ## Where you are
 
@@ -145,7 +145,7 @@ live, the same as any other change.
 
 ## What's next
 
-The next page gives a key a lifetime of its own with a per-key **TTL**,
+The next page gives a key its own lifetime with a per-key **TTL**,
 and bounds the whole bucket with limits.
 
 Continue to [4. TTL and limits](/learn/key-value/ttl-and-limits).

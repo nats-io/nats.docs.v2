@@ -12,8 +12,8 @@ The previous page left Acme with a three-server cluster called `east`:
 Clients connect to any of them and fail over to another when one dies.
 
 Core publish and subscribe already work across that mesh. A message
-published on `n1-east` reaches a subscriber on `n3-east` over a route.
-Nothing on this page changes that.
+published on `n1-east` reaches a subscriber on `n3-east` over a route,
+and nothing on this page changes that.
 
 What this page changes is JetStream. The `ORDERS` stream has lived on a
 single server through the whole JetStream chapter. Putting it on the
@@ -27,8 +27,8 @@ the servers of that cluster.
 ## Enable JetStream on every server
 
 A cluster doesn't run JetStream until you turn it on. Each server needs
-the `jetstream` block, and each needs a `store_dir` of its own so its
-copy of the data has somewhere to live.
+the `jetstream` block, and each needs a `store_dir` of its own to hold its
+copy of the data.
 
 Here's `n1-east`, carrying the exact `cluster {}` block from the previous
 page (the seed server with no `routes` of its own) and gaining a
@@ -54,7 +54,7 @@ the servers that hold each copy of a stream, and it must be unique within
 the cluster. Acme already gave each server a distinct name, so there's
 nothing to change.
 
-`n2-east` and `n3-east` get the same treatment: a `jetstream {}` block
+`n2-east` and `n3-east` are configured the same way: a `jetstream {}` block
 with their own `store_dir`, and their existing cluster block. Start all
 three exactly as before:
 
@@ -64,8 +64,8 @@ nats-server -c n2-east.conf
 nats-server -c n3-east.conf
 ```
 
-Three servers, JetStream on each, routes already wiring them into a mesh.
-That's everything the topology needs.
+You now have three servers, JetStream on each, and routes already wiring
+them into a mesh, which is everything the topology needs.
 
 ## The meta layer
 
@@ -81,7 +81,7 @@ holds each copy, and what happens when a server disappears.
 
 The set of servers participating in that coordination is the **meta
 group**. Every JetStream-enabled server in the cluster belongs to it.
-One of them is the meta leader; the rest follow.
+One of them is the meta leader, and the rest are followers.
 
 Ask the cluster who that is:
 
@@ -111,11 +111,11 @@ RAFT Meta Cluster Information
 ```
 
 `n2-east` is the meta leader here. Which server wins the election doesn't
-matter and isn't something you choose. The point is that exactly
-one server coordinates, and the others stand ready to take over.
+matter and isn't something you choose. What matters is that exactly
+one server coordinates, and the others can take over if it fails.
 
-The meta leader is a topology fact, not a per-stream one. It decides
-where streams land; it doesn't handle their writes. That's a detail of
+The meta leader is a topology fact rather than a per-stream one. It decides
+where streams land, but it doesn't handle their writes. Writes are a detail of
 replication, which the rest of the page turns to.
 
 ## A replicated stream needs an odd number of servers
@@ -128,16 +128,16 @@ Three servers form a clean majority of two. Lose one server and two
 remain, still a majority, so the meta group keeps coordinating and your
 streams keep serving. This is exactly why Acme runs three, not two.
 
-An even count buys you nothing here. Two servers have no majority once
-one is gone; four tolerate the same single failure that three do, while
+An even count gives you no extra protection here. Two servers have no majority once
+one is gone, and four tolerate the same single failure that three do while
 costing an extra server. That's why production clusters run an odd
 count, typically three or five; a stream replicates across at most five
 servers, so five is the practical ceiling.
 
 The wire-level detail of how that majority vote works (the Raft
 protocol, election timing, and log replication) lives in the
-[Clustering & Replication](/learn/clustering) deep dive. We only need the
-shape here: odd server count, majority rules, one coordinator.
+[Clustering & Replication](/learn/clustering) deep dive. The shape we need
+here is an odd server count, a majority rule, and one coordinator.
 
 ## Make ORDERS survive a server loss
 
@@ -166,9 +166,7 @@ Cluster Information:
               Replica: n2-east, current, seen 0.00s ago
 ```
 
-Read this top to bottom.
-
-`Name: east` is the cluster the stream lives in. Replication stays inside
+Read this section top to bottom. `Name: east` is the cluster the stream lives in. Replication stays inside
 one cluster; it's the unit a stream is replicated across.
 
 `Cluster Group` is the internal name for this stream's own coordination
@@ -180,16 +178,16 @@ copies takes every write to `ORDERS` first, then sends it to the other
 replicas; the `PubAck` comes back once a majority hold the message. The two
 `Replica` lines are the copies that follow. `current` means a copy has
 recently checked in and holds the same data; `seen` reports how long
-since it last reported. All three copies are in step.
+since it last reported. All three copies hold the same data.
 
 Notice this write-handling copy is `n1-east` while the meta leader was
-`n2-east`. That's normal. The meta leader only places the stream; once
+`n2-east`, which is normal. The meta leader only places the stream; once
 placed, the stream handles its own writes wherever it landed. You don't
 configure or pick this; it falls out of the same majority rule, and the
 [Clustering & Replication](/learn/clustering) deep dive covers how it's
 chosen and how it moves when a server dies.
 
-## What the application doesn't notice
+## What the application sees
 
 Acme's order service didn't change. It still connects to a server in
 `east` and publishes the same payload to the same subject:
@@ -205,15 +203,15 @@ Acme's order service didn't change. It still connects to a server in
 
 The publish lands wherever the client is connected, and the cluster
 routes it to whichever copy handles writes behind the scenes. The client
-never names `n1-east` or knows it holds the stream. It publishes; it gets
-a `PubAck`; the topology does the rest.
+never names `n1-east` or knows it holds the stream. It publishes and gets
+a `PubAck`, and the topology handles the routing and replication.
 
 That `PubAck` now means more than it did on one server. On `R3` it
 returns only after a majority of replicas hold the message, so the
-acknowledgment is a real durability promise: the order survives the
+acknowledgment is a durability promise: the order survives the
 loss of any single server in `east`.
 
-## What doesn't belong on this page
+## What this page leaves out
 
 Replication doesn't cross a cluster boundary. When Acme adds the `west`
 cluster on the next page, an `R3` stream in `east` is still replicated
@@ -226,13 +224,13 @@ The mechanics underneath `R3` all belong to the
 [Clustering & Replication](/learn/clustering) deep dive: how Raft elects
 a leader, how a majority keeps the log consistent, how a new leader is
 chosen when one dies, and how you steer which servers a stream lands on.
-This page stops at the topology view: a meta layer, an odd server count,
-and a stream replicated across servers.
+This page stops at the topology view, which covers a meta layer, an odd server
+count, and a stream replicated across servers.
 
 ## Pitfalls
 
 A cluster does not make JetStream highly available on its own. Four habits
-trip people up at the topology level.
+cause problems at the topology level.
 
 **An R1 stream on a cluster still has no HA.** A stream created on a cluster
 defaults to a single replica unless you ask for more. R1 puts one copy on one
@@ -247,7 +245,7 @@ This audit has a runnable form. List every stream with one replica, then assert
      data-type="learn-topologies-jetstream-in-a-cluster-audit-replicas"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**An even server count buys nothing.** A majority needs more than half the
+**An even server count gives you no extra protection.** A majority needs more than half the
 group reachable, so four servers tolerate the same single loss that three do at
 the cost of an extra server, and two have no majority left once one is gone.
 Run an odd count of three or five (a stream replicates across at most five

@@ -2,99 +2,95 @@
 id: where-next
 title: "18. Where to go next"
 sidebar_position: 20
-description: Recap the JetStream mental model and point to what comes after this chapter
+description: Recap the JetStream model and point to what comes after this chapter
 ---
 
 # 18. Where to go next
 
-You started this chapter with a publisher shouting into the void and no
-one guaranteed to be listening. You end it with an `ORDERS` stream, a
-handful of consumers reading it at their own pace, and a mirror keeping a
-permanent copy. That's the whole arc.
+This chapter started with a publisher and no one guaranteed to be
+listening. It ends with an `ORDERS` stream, a handful of consumers
+reading it at their own pace, and a mirror keeping a permanent copy.
 
-This page doesn't teach anything new. It collects the model you built
-into one place and points you at the chapters and Reference that take it
-further.
+This page gathers the model you built into one place. It then points you
+at the chapters and Reference that take it further.
 
-## The whole game in three words
+## The core model
 
-Every page in this chapter circled the same three ideas. If you remember
-nothing else, remember these.
+Every page in this chapter built on the same three ideas.
 
-A **stream** is a server-side log of messages. You publish to a subject,
-the server appends the message to any stream that captures that subject,
-and it stays there — replayable — until a limit removes it. The stream
-is what core NATS lacked: a place for a message to wait.
+A **stream** is a log of messages kept on the server. You publish to a
+subject. The server adds the message to any stream that captures that
+subject. The message stays there, ready to be read again, until a limit
+removes it.
 
-A **consumer** is a cursor over a stream. It tracks which messages a
-reader has seen, independent of every other consumer. Two consumers on
-the same stream read the same messages at different positions, and
-neither one disturbs the other.
+A consumer is a position marker over a stream. It tracks which messages a
+reader has seen, separately from every other consumer. Two consumers on
+the same stream can read the same messages at different positions without
+affecting each other.
 
-An **ack** is the reader's promise that a message is handled. Until the
-consumer acks, the message stays in flight, and the server redelivers it
-after a timeout. The ack is what turns "the message was stored" into
-"the work is done."
+An ack is the reader's way of saying a message is handled. Until the
+consumer acks, the message stays open, and the server sends it again
+after a timeout. A stored message has not yet been processed.
 
-Stream, consumer, ack. Everything else in this chapter (filtering,
-worker pools, retention, mirrors) is a refinement of those three.
+Everything else in this chapter builds on stream, consumer, and ack. That
+includes filtering, worker pools, retention, and mirrors.
 
-## Where the details live now
+## Where the details live
 
-The chapter is unversioned and concept-first. The exact flags, defaults,
-and ranges live in **Reference**, which is versioned and exhaustive. When
-you need the precise type of a config field or the full list of consumer
-options, that's where to look.
+This chapter teaches the ideas and is not tied to a server version. The
+exact flags, defaults, and ranges live in **Reference**, which is tied to
+a version and covers every option. When you need the precise type of a
+config field, or the full list of consumer options, look there.
 
-The [Reference root](/reference/) is the entry point. The handoff
-phrases throughout this chapter ("the full set of options is documented
-in Reference") all point into it.
+The [Reference root](/reference/) is the way in. The pointers to
+Reference throughout this chapter all lead into it.
 
 ## Sibling deep dives
 
 This was the first deep dive. The others build on the same foundation, so
-the stream-consumer-ack model carries straight into them.
+the stream, consumer, and ack model carries into them.
 
 The [Key-Value deep dive](/learn/key-value) shows how a key-value bucket
-is a stream underneath. The keys map to subjects, the history maps to
-sequence numbers, and a watch is a consumer. Everything you learned about
+is a stream underneath. The keys become subjects. The history becomes
+sequence numbers. A watch is a consumer. Everything you learned about
 retention and limits applies directly.
 
 The [Object Store deep dive](/learn/object-store) does the same for large
-blobs. An object is chunked across many messages in a stream, then
-reassembled on read. The stream is still the storage layer.
+files. An object is split across many messages in a stream, then put back
+together when you read it. The stream is still where the data lives.
 
 The [Clustering & Replication deep dive](/learn/clustering) goes deeper
 than this chapter's single page on surviving node loss. It covers how
-`R=3` actually elects a leader, how placement works, and what happens
-during a node failure.
+`R=3` picks a leader, how the server decides where to place the stream,
+and what happens when a node fails.
 
 The [Monitoring deep dive](/learn/monitoring) covers how to watch a
-stream and its consumers in production: advisories, health endpoints,
-and the metrics that tell you a consumer is falling behind.
+stream and its consumers in production. It walks through advisories,
+health endpoints, and the numbers that tell you a consumer is falling
+behind.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) covers the
-operational side: snapshotting a stream, restoring it, and using the
-mirrors you met on the previous page for disaster recovery.
+day-to-day operations: saving a stream to a snapshot, restoring it, and
+using the mirrors you met on the previous page to recover from a
+disaster.
 
 ## Where you are
 
-This is the end of the chapter. The arc is complete, and this page
-introduces no new scenario state. The `ORDERS` stream, its consumers,
-and its mirror are still running in your session exactly as you left them
-on the previous page. You can keep experimenting with them, or tear them
-down with `nats stream rm ORDERS` when you're done.
+This is the end of the chapter. This page adds nothing new to the running
+example. The `ORDERS` stream, its consumers, and its mirror are still
+running in your session as you left them on the previous page. You can
+keep experimenting with them, or remove them with `nats stream rm
+ORDERS` when you're done.
 
-You hold the core model: a stream stores messages, a consumer reads them
-at its own pace, and an ack closes the loop. That model is the floor for
-every other JetStream feature you'll meet.
+You now have the core model. A stream stores messages. A consumer reads
+them at its own pace. An ack confirms a message was handled. That model
+sits under every other JetStream feature.
 
 ## Production checklist
 
-Every page in this chapter closed with a Pitfalls section. This collects
-the action items from all of them in one place: a last pass before you
-trust a stream with real orders. Each group links back to the page that
-explains the why.
+Every page in this chapter closed with a Pitfalls section. This gathers
+the action items from all of them in one place. Each group links back to
+the page that explains it.
 
 ### Your first stream — see [Pitfalls](/learn/jetstream/your-first-stream#pitfalls)
 
@@ -210,5 +206,5 @@ explains the why.
   error code, versioned and exhaustive.
 - [Key-Value deep dive](/learn/key-value) — the next chapter built on the
   same stream foundation.
-- [Clustering & Replication deep dive](/learn/clustering) — the deeper
-  story behind "surviving node loss."
+- [Clustering & Replication deep dive](/learn/clustering) — the detail
+  behind "surviving node loss."

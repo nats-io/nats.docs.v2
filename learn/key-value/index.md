@@ -7,23 +7,22 @@ description: Buckets, keys, watching, revisions, and TTL, built on the stream yo
 
 # Key-Value Store
 
-NATS gives you a key-value store, and it's not a separate database. A
+NATS gives you a key-value store. It is not a separate database: a
 bucket is a JetStream stream named `KV_<bucket>` whose subjects are
 `$KV.<bucket>.>`; a key is the last token of that subject, and a value is
-a message on it. Everything in this chapter is that one stream wearing a
-friendlier face.
+a message on it. Everything in this chapter is that one stream presented
+through a key-value API.
 
-That framing is the whole game, so hold onto it from the start. When you
-`put` a value you're appending a message. When you `get` a value you're
-reading the last message for a subject. When you `watch` a bucket you're
-opening a consumer. The friendly API (`put`, `get`, `watch`, `create`,
-`update`, TTL) is what you use day to day, and the stream underneath is
-what makes it work.
+Keep that framing in mind from the start. A `put` of a value appends a
+message, a `get` of a value reads the last message for a subject, and a
+`watch` of a bucket opens a consumer. The API (`put`, `get`, `watch`,
+`create`, `update`, TTL) is what you use day to day, and the stream
+underneath is what makes it work.
 
-This chapter teaches the abstraction first and reveals the stream last.
+This chapter teaches the abstraction first and describes the stream last.
 Pages 1 through 4 teach you the key-value API on its own terms, so you
-can be productive without memorizing JetStream internals. Page 5 lifts
-the lid and shows you the stream that was there all along.
+can be productive without memorizing JetStream internals. Page 5 shows
+you the stream that the API has been using all along.
 
 ## By the end you will have
 
@@ -61,9 +60,9 @@ You create the bucket on page 1, add a watcher on page 2, decrement a key
 safely on page 3, give a key a TTL on page 4, and inspect the stream
 underneath on page 5.
 
-Key-value has many knobs: every bucket limit, every watch option, every
-header on the wire. Where a feature has a long list, the page covers only
-what you need to understand the concept. Because a bucket is created as a
+Key-value has many configuration options, covering bucket limits, watch
+options, and headers on the wire. Where a feature has a long list, the
+page covers only what you need to understand the concept. Because a bucket is created as a
 stream, the full set of bucket configuration options lives in
 [Reference → Create Stream](/reference/jetstream/api/stream/create).
 
@@ -89,4 +88,4 @@ You'll need:
   uses only the CLI. Later pages add JavaScript, Go, Python, Java, Rust,
   and C# examples for the same operations.
 
-Open a terminal, run `nats-server -js`, and turn the page.
+Open a terminal, run `nats-server -js`, and continue to the first page.

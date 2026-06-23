@@ -14,8 +14,8 @@ have different owners, and they shouldn't be able to read each other's
 private traffic.
 
 A single flat subject space can't express that. Every connection on a
-plain server sees every subject. This page introduces the wall that
-separates them.
+plain server sees every subject. This page introduces the account
+boundary that separates them.
 
 ## What an account is
 
@@ -39,7 +39,7 @@ The order platform needs two of these tenants:
 
 We build both in a minimal config file now. Sharing one subject across
 the boundary comes later, on the [Cross-Account](/learn/security/cross-account)
-page; until then the two accounts are fully sealed off.
+page; until then the two accounts are fully isolated.
 
 ## The two accounts you already have
 
@@ -48,8 +48,8 @@ They have reserved names that begin with `$`.
 
 The first is **`$G`**, the global account. Every connection on a server
 with no `accounts` block lands in `$G`. The single flat subject space
-you started with isn't the absence of accounts: it's one account
-named `$G` holding everything.
+you started with is one account named `$G` that holds everything,
+rather than an absence of accounts.
 
 The second is **`$SYS`**, the system account. The server publishes its
 own monitoring and management events here, on subjects like
@@ -117,7 +117,7 @@ an `accounts` block, the server no longer puts connections in `$G` by
 default. Every client must now name a user that exists in one of the two
 accounts.
 
-## Watching the wall hold
+## Verifying the account boundary
 
 Now prove the boundary. The order service connects as `order-svc` and
 publishes a shipment. The analytics reader connects as `analytics-reader`
@@ -126,18 +126,19 @@ different accounts, the message never arrives.
 
 <div class="nats-example" data-type="learn-security-accounts-and-multitenancy-isolation" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The subscriber in `ANALYTICS` sits on `orders.shipped` and hears
+The subscriber in `ANALYTICS` sits on `orders.shipped` and receives
 nothing. The publish from `ORDERS` lands only on `orders.shipped`
-inside `ORDERS`. Same subject name, two separate subject spaces, no
-delivery across them.
+inside `ORDERS`. The subject name is the same, but the two subject
+spaces are separate, so nothing is delivered across them.
 
 To see the message actually flow, subscribe inside the publisher's own
 account. A second `order-svc` subscription on `orders.shipped` receives
 the message immediately, because both sides are now in `ORDERS`. The
-boundary is the account, not the subject.
+account is what forms the boundary, and the subject does not.
 
-This is the isolation guarantee in one experiment: identical subject,
-different accounts, no crossing. Letting exactly one subject through,
+This experiment demonstrates the isolation guarantee: the subject is
+identical, the accounts differ, and nothing crosses between them.
+Letting exactly one subject through,
 deliberately, is what the [Cross-Account](/learn/security/cross-account)
 page is for.
 
@@ -150,10 +151,11 @@ out.
 An account can set **limits**: how many connections it allows, how much
 JetStream storage it may use. Those limits, and the server events that
 report on them, belong with operations; we point to
-[Reference](/reference/) for the field list rather than tour them here.
+[Reference](/reference/) for the field list rather than enumerate them here.
 
 An account can also **export** a subject for another account to
-**import**. That's the one deliberate hole in the wall, and the
+**import**. That's the one deliberate way to let a subject cross the
+boundary, and the
 [Cross-Account](/learn/security/cross-account) page covers it.
 
 The full set of account configuration options is documented in
@@ -164,10 +166,10 @@ The full set of account configuration options is documented in
 A few account mistakes only surface in production. Each one is easy to
 avoid once you know it's there.
 
-**`no_auth_user` quietly reopens the door.** Setting `no_auth_user`
+**`no_auth_user` can reopen access you intended to close.** Setting `no_auth_user`
 admits unauthenticated clients as the named user, placing them in that
 user's account. Point it at a user in `$G` and every anonymous client
-lands in the global account again, undoing the wall you just built. Do
+lands in the global account again, undoing the isolation you just built. Do
 name a deliberately narrow user, and don't point it at a wide-open
 account. The server also rejects `no_auth_user` together with a trusted
 operator, so it never applies in operator mode.
@@ -176,7 +178,7 @@ operator, so it never applies in operator mode.
 block and the server still creates `$SYS`, but with no user inside it you
 can't connect there. The server's monitoring and management events on
 `$SYS.SERVER.>` become unreachable, so `nats server account info` and
-event tooling go dark. Do declare a `SYS` account with a user and set
+event tooling stop working. Do declare a `SYS` account with a user and set
 `system_account: SYS`. The example below proves a tenant user sees only
 its own account while the system-account user reaches the server events:
 
@@ -217,4 +219,4 @@ token, or nkey, all from the same config file.
 - [Core Concepts → Security](/concepts/security) — the five-minute
   overview of accounts, users, and the trust model.
 - [Cross-Account](/learn/security/cross-account) — how to let exactly
-  one subject through the wall on purpose.
+  one subject cross the account boundary on purpose.

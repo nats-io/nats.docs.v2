@@ -11,7 +11,7 @@ By now the `ORDERS` stream runs `R=3` on the `east` cluster, and the meta
 leader chose which three servers hold it. So far you haven't had a say in
 that choice: the meta leader picked any three servers with room.
 
-This page gives you the say. It constrains *where* a stream's replicas
+This page lets you control that choice. It constrains *where* a stream's replicas
 land: onto a named cluster, or onto servers carrying labels you assign.
 Two concepts do all the work, and nothing here changes the payload
 `order-svc` publishes or the subjects it uses.
@@ -25,11 +25,11 @@ the meta leader must honor your constraint or refuse to create the stream.
 
 Placement has two levers. The first is the **cluster**: name a cluster and
 every replica must live there. In a single cluster like `east` this is a
-no-op, since there's only one cluster to choose. It earns its keep across
-clusters, where a stream is pinned to one region; that cross-cluster story
-lives in [Super-clusters](/learn/topologies/super-clusters), not here.
+no-op, since there's only one cluster to choose. It's useful across
+clusters, where a stream is pinned to one region; that cross-cluster case
+is covered in [Super-clusters](/learn/topologies/super-clusters), not here.
 
-The second lever is the one that matters inside `east`: **tags**.
+The second lever is the one that matters inside `east`, namely **tags**.
 
 ## Tags label servers; placement matches them
 
@@ -94,8 +94,8 @@ carries *every* tag in the list. The match is an intersection, not a union:
 `region:us-east` **and** `disk:ssd`, never either-or.
 
 The match folds case: `disk:ssd`, `disk:SSD`, and `disk:Ssd` are the same
-tag. Spelling, though, is exact, so `disk:sdd` matches nothing. The trap
-isn't case but typos. Ask for a tag that no server carries (a misspelling,
+tag. Spelling, though, is exact, so `disk:sdd` matches nothing. The problem to
+watch for is typos rather than case. Ask for a tag that no server carries (a misspelling,
 or a tag you meant to add but didn't) and the intersection is empty. No
 server qualifies, and the meta leader refuses the stream with:
 
@@ -111,7 +111,7 @@ The full set of placement and server-tag options is documented in
 [Reference](/reference/config/server_tags). We only need the cluster
 constraint and the tag intersection here.
 
-## Preferred leader is a hint, not a lock
+## Preferred leader is a hint for the initial leader
 
 Placement decides which servers hold the replicas. A separate field decides
 which of them starts as leader: the **preferred leader**.
@@ -130,7 +130,7 @@ server after the fact with `nats stream cluster step-down --preferred
 [Reference](/reference/jetstream/api/stream). We only need to know it's a
 hint here.
 
-The word *hint* is load-bearing. The preferred leader applies to the
+The word *hint* matters here. The preferred leader applies to the
 initial placement only. Once the group is running, RAFT elections decide
 leadership, as you saw on [Raft and leaders](/learn/clustering/raft-and-leaders).
 If the preferred server later dies, the next election picks a leader from
@@ -140,7 +140,7 @@ leadership for the life of the stream.
 
 ## Pitfalls
 
-Two traps catch people the first time they place a stream. Both come from
+Two mistakes are common the first time you place a stream. Both come from
 treating placement as more forgiving than it is.
 
 **Tags are an intersection; a missing tag fails the placement.** Asking for
@@ -156,7 +156,7 @@ either succeed or name the missing tag:
 
 <div class="nats-example" data-type="learn-clustering-placement-verifyTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**Preferred leader is a hint, not a lock.** Use it to shape the *initial*
+**Preferred leader is a hint that applies only to the initial leader.** Use it to shape the *initial*
 leader of a fresh group. Don't build an operational assumption ("the
 leader is always `n1-east`") on it; the moment that server dies, the next
 election is quorum-based and random among the survivors. If you need
@@ -167,8 +167,8 @@ failover.
 
 ## Where you are
 
-The `ORDERS` stream is no longer placed wherever the meta leader felt like
-putting it. You tagged `n1-east`, `n2-east`, and `n3-east`, and constrained
+The `ORDERS` stream is no longer placed on whichever servers the meta leader
+chose freely. You tagged `n1-east`, `n2-east`, and `n3-east`, and constrained
 the stream to servers carrying both `region:us-east` and `disk:ssd`. You
 know the tag match is an intersection that folds case, that a missing or
 misspelled tag yields `no suitable peers for placement`, and that the

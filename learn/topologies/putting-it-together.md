@@ -7,20 +7,20 @@ description: Compose clusters, gateways, and leaf nodes into the full Acme topol
 
 # 6. Putting it together
 
-Five pages, four shapes. A single server, a cluster joined by routes, a
-super-cluster joined by gateways, a leaf node bridging in from the
-edge. Each page either added a shape or deepened one, and carried the
-last one forward.
+Across five pages you've seen four shapes: a single server, a cluster
+joined by routes, a super-cluster joined by gateways, and a leaf node
+bridging in from the edge. Each page either added a shape or deepened
+one, and carried the last one forward.
 
 This page doesn't add a new shape. It shows how the shapes you already
 know stack into one deployment, and names the one property that stack
-gives you for free.
+provides without extra work.
 
 It introduces two ideas: composition (the shapes are layers you
 combine, not options you choose between) and address-space isolation
 (what a leaf hides from the system it connects to).
 
-## Where Acme ended up
+## The Acme deployment so far
 
 By the end of the leaf-nodes page, the Acme deployment looked like this.
 
@@ -40,13 +40,14 @@ that ran against `n1` on a laptop runs against this.
 
 <div class="nats-flow" data-scenario="massiveScaleAnimated" data-width="640" data-height="400"></div>
 
-## Shapes are layers, not choices
+## Shapes are layers you combine
 
 Look at that deployment again and notice that no shape replaced
-another. The cluster didn't replace the single server: it's three
-servers, each one a server like `n1`. The super-cluster didn't
-replace the cluster: it's two clusters with a gateway between them.
-And the leaf didn't replace anything; it's one more server that dials in.
+another. The cluster is three servers, each one a server like `n1`,
+added without removing the single server. The super-cluster is two
+clusters with a gateway between them, added without removing the
+cluster. The leaf is one more server that dials in, added without
+removing anything.
 
 This is **composition**. Each shape is a layer. You add the next layer
 when the current one runs out of room, and the layer below keeps
@@ -91,11 +92,12 @@ leafnodes {
 jetstream {}
 ```
 
-Three blocks, three layers, one server. The `cluster` block is the
-same one from page 2. The `gateway` block is page 4. The `leafnodes`
-block is page 5. Putting them in one file is all "composition" means.
+That's three blocks for three layers on one server. The `cluster` block
+is the same one from page 2, the `gateway` block is from page 4, and the
+`leafnodes` block is from page 5. Putting them in one file is all
+"composition" means.
 
-## What a leaf hides: address-space isolation
+## Address-space isolation behind a leaf
 
 The clients on the `factory-1` leaf aren't visible to the rest of the
 deployment the way a cluster server's clients are. That difference has
@@ -117,10 +119,10 @@ reachable from `n1-east` because routes carry the account's full
 interest across the mesh. Servers in a cluster are peers in the same
 address space.
 
-A leaf is the opposite stance on purpose. It's a boundary. That's
-exactly why you reach for a leaf at a factory or a branch office: local
-traffic stays local, and only the agreed-upon subjects (`orders.*`
-flowing up to the `ORDERS` stream) cross the link.
+A leaf is a boundary by design, the opposite of a route. That's why you
+use a leaf at a factory or a branch office: local traffic stays local,
+and only the agreed-upon subjects (`orders.*` flowing up to the `ORDERS`
+stream) cross the link.
 
 The wire-level detail of how a leaf binds an account and filters
 subjects lives in
@@ -142,8 +144,8 @@ specific limit forces it. The limits map cleanly onto the shapes.
   factory, a ship, or a laptop needs NATS locally with only outbound
   network access, attach a leaf.
 
-Each step is reversible in your head: the layer below never changed, so
-removing the layer above leaves a working deployment behind.
+Each step is reversible: the layer below never changed, so removing the
+layer above leaves a working deployment behind.
 
 ## Seeing the whole topology at once
 
@@ -170,8 +172,7 @@ nats server list
 ╰──────────┴─────────┴──────┴─────────┴─────┴───────┴──────┴────────┴─────────╯
 ```
 
-Each layer also has its own focused report. Three commands, three
-layers:
+Each layer also has its own focused report, one command per layer:
 
 ```bash
 nats server report routes      # the mesh inside each cluster
@@ -203,10 +204,10 @@ Run these three reports together and you've surveyed every layer of
 the deployment in one pass: routes, gateways, and leaves, each shown by
 the command named after it.
 
-## The application never moved
+## The application stays unchanged
 
-The whole point of this chapter sits in one fact: nothing about the
-ORDERS application changed across any of these layers.
+The main point of this chapter is that nothing about the ORDERS
+application changed across any of these layers.
 
 The producer still publishes `orders.created` with the same payload:
 
@@ -226,7 +227,8 @@ concern, not an application one.
 
 That separation is why you can start on a laptop and grow to a
 multi-region edge deployment without rewriting a line of business
-logic. You change the deployment, not the app.
+logic. Growing the system means changing the deployment while the app
+stays the same.
 
 ## Pitfalls
 
@@ -239,7 +241,7 @@ hub. Attach a second leaf the same way and both sit in the same address
 space: a subject one factory publishes is reachable from the other,
 because they share one account, not because you meant them to.
 
-Don't lean on "it's a leaf" for isolation. Bind each leaf to its own
+Don't rely on "it's a leaf" for isolation. Bind each leaf to its own
 dedicated account on the hub (`factory-1` to the `ORDERS` account, a
 second site to its own) so only the subjects that account imports and
 exports cross the link. The boundary is the account, not the leaf
@@ -256,22 +258,22 @@ silently crossing the leaf:
 carries the full interest of an account across the whole mesh, and a
 gateway forwards any subject that has interest on the far side. Adding a
 gateway to `east` widens reach; it doesn't partition anything. If you
-want a wall between two parts of the deployment, that wall is a leaf with
-its own account, not another route or gateway.
+want a boundary between two parts of the deployment, that boundary is a
+leaf with its own account, not another route or gateway.
 
-Don't reach for a super-cluster expecting it to hide one cluster's
+Don't use a super-cluster expecting it to hide one cluster's
 subjects from another. Use accounts for that separation, and a leaf
 where the separation also needs to follow a network edge.
 
-**Building the whole stack before a limit forces it.** Each layer is
-operational weight: more servers to run, more connections to watch. A
+**Building the whole stack before a limit forces it.** Each layer adds
+operational cost: more servers to run, more connections to watch. A
 super-cluster you stood up "to be safe" is two regions to keep healthy
 before you have a second region's traffic.
 
 Add the next layer only when the current one runs out of room, as
 [Picking the next layer](#picking-the-next-layer) describes. The
 application code is identical at every stage, so growing later costs you
-nothing in the app. There's no reward for buying the topology early.
+nothing in the app. Adding a layer early gives you no benefit.
 
 ## Where you are
 

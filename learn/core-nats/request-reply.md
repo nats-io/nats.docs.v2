@@ -21,12 +21,12 @@ two things that make request-reply work: the private reply subject the
 client sets up for itself, and what happens when nobody is there to
 answer.
 
-## A reply is just pub/sub, pointed back
+## How request-reply uses pub/sub
 
-Request-reply isn't a new protocol. It's the pub/sub you already
-know, used twice.
+Request-reply isn't a new protocol; it's the pub/sub you already know,
+used twice.
 
-Here's the whole dance. The client invents a fresh, unique subject
+Here are all the steps. The client invents a fresh, unique subject
 to receive the answer on. It subscribes to that subject. It then
 publishes the request, and includes that reply subject as a field on
 the message. The responder reads the request, sees the reply subject,
@@ -53,7 +53,7 @@ The inbox is per-request. Each call to `request()` creates a fresh
 inbox subject, subscribes to it, sends the request, waits for one
 message, then unsubscribes. The next call gets a new inbox. Nothing
 about the reply subject is shared or reused across requests, which is
-why two in-flight requests never cross wires.
+why two in-flight requests never get each other's replies.
 
 The `_INBOX.` prefix is reserved precisely so it doesn't collide with
 your own subjects. You publish to `orders.created`; you never publish
@@ -71,7 +71,7 @@ need the behavior here.
 
 ## The inventory service
 
-Time to make the responder real. The inventory service subscribes to
+Now make the responder real. The inventory service subscribes to
 `orders.inventory.check` and replies to each request with an
 in-stock answer.
 
@@ -85,8 +85,8 @@ subject and publishes a reply to whatever inbox each request carries.
 Leave that running. It's now the one service in the Acme world that
 answers questions instead of just receiving messages. The warehouse,
 notifications, and analytics subscribers from the earlier pages keep
-running unchanged. Request-reply doesn't replace them; it adds a new
-shape of conversation alongside them.
+running unchanged. Request-reply doesn't replace them; it runs
+alongside them.
 
 ## Sending a request
 
@@ -100,9 +100,9 @@ service to answer.
 
 You should see the reply printed back. Behind that one line, the
 client created an inbox, subscribed, published your payload with the
-inbox attached, received the answer, and tore the inbox down.
+inbox attached, received the answer, and unsubscribed the inbox.
 
-## Timeouts are required, not optional
+## Every request needs a timeout
 
 A request can fail to come back. The responder might be slow, or busy,
 or the reply might be lost in flight. Core NATS does not retry a reply
@@ -115,17 +115,17 @@ wait for the answer before giving up. The CLI sets `--timeout` for you
 (five seconds by default), and the request snippet above makes it
 explicit with `--timeout 2s`. Pick a value that covers the responder's
 work plus the network round-trip. In a client library you pass the
-timeout on every `request()` call, so there's no infinite wait to fall
-into by accident.
+timeout on every `request()` call, so a request can't wait
+indefinitely.
 
 When the timeout expires with no reply, the call returns a timeout
 error. Your code decides what to do next: retry, fall back, or fail
 the caller. Core NATS won't make that decision for you, and it won't
 deliver the answer late.
 
-A timeout tells you the answer didn't arrive in time. It doesn't
+A timeout tells you the answer didn't arrive in time, but it doesn't
 tell you _why_. The responder might be slow, or it might not exist at
-all. The next section is about telling those two apart instantly.
+all. The next section covers how to tell those two cases apart.
 
 ## No responders
 
@@ -160,17 +160,17 @@ nats: error: no responders available for request
 The error comes back instantly, not after two seconds. Start the
 service again and the same request succeeds.
 
-One detail to know rather than memorize: the no-responders signal
-rides on the message header mechanism. The server delivers it as a
+One more detail about how this works: the no-responders signal
+uses the message header mechanism. The server delivers it as a
 reply whose header line is `NATS/1.0 503`, and it includes a
 `Nats-Subject` header naming the request subject. A client must have
 header support enabled to receive it (every current client does). If a
 client somehow asks for no-responders detection without header support,
 the server refuses the connection rather than half-enable the feature.
 
-## One line on headers
+## Headers
 
-That `503` mechanism hints at a wider capability: NATS messages can
+That `503` mechanism points to a wider capability: NATS messages can
 carry **headers**, key/value metadata that travels alongside the
 payload in a format that looks like HTTP. A request can attach
 headers, and so can a reply.
@@ -203,7 +203,7 @@ stays on the primitives.
 ## Pitfalls
 
 Request-reply is pub/sub pointed back, so it inherits pub/sub's failure
-modes plus a few of its own. These are the ones that bite in the Acme
+modes plus a few of its own. These are the ones that show up in the Acme
 order services.
 
 **A request without a timeout can wait forever.** The CLI always sets
@@ -222,8 +222,8 @@ deployment bug behind a latency retry.
 
 **Assuming exactly one reply.** A plain `request()` returns the first
 reply and discards the rest. If two inventory instances both answer on
-`orders.inventory.check`, the second answer is lost silently. You
-never see it and never know it existed. When more than one service
+`orders.inventory.check`, the second answer is lost silently, with no
+indication that it ever arrived. When more than one service
 may answer, ask for it explicitly and gather by count or deadline:
 
 <div class="nats-example"
