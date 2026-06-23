@@ -8,10 +8,10 @@ description: The micro framework that turns a request-reply responder into a nam
 # Services
 
 In the Core NATS chapter you wrote a responder by hand. It subscribed to
-a subject, read each request, and replied. That works, but it's just a
-function on a wire. It has no name you can look up, no version, no way to
-tell how many copies are running, and no built-in count of how many
-requests it has served.
+a subject, read each request, and replied. That works, but the responder
+is only a function on a wire. It has no name you can look up and no
+version. There's no way to tell how many copies are running, and no
+built-in count of how many requests it has served.
 
 The **Services framework**, imported as **micro** in every client
 library, closes that gap. It takes the same request-reply responder you
@@ -19,12 +19,12 @@ already know and formalizes it into a **service**: a named, versioned
 handler that the server can discover, that reports its own stats, and
 that load-balances across as many copies as you start. You add no new
 infrastructure. A service is still request-reply underneath; the
-framework just wires the pieces together for you.
+framework connects those pieces for you.
 
 This chapter promotes the Core NATS `inventory` responder into a real
-`OrderInventory` service and grows it page by page. Same order payload,
-same subjects, same single local server, only now with a framework
-around the responder.
+`OrderInventory` service and grows it page by page. The order payload,
+the subjects, and the single local server stay the same, only now with
+a framework around the responder.
 
 ## By the end you'll have
 
@@ -34,13 +34,14 @@ around the responder.
 - a second `ShippingQuote` service, to show how one process can host
   multiple endpoints and group them under a subject prefix
 - the ability to discover both services over the `$SRV` subjects:
-  ask who's there, what endpoints they expose, and how they're doing
+  query which services are present, what endpoints they expose, and
+  their current stats
 - per-endpoint stats you can read back at any time: how many
   requests each endpoint served, how many failed, and how long they
   took
 - two or more instances of `OrderInventory` sharing the load, with the
-  queue group spreading requests across them and no coordinator in
-  sight
+  queue group spreading requests across them and no coordinator
+  involved
 
 ## Who this is for
 
@@ -57,8 +58,8 @@ You don't need to know anything about the micro framework itself. We
 start from "what does the framework add to a plain responder" and grow
 from there.
 
-A service stores nothing. It answers a request and forgets it. That's
-the at-most-once nature of request-reply. When you need the work to
+A service stores nothing; it answers a request and retains no record of
+it. That's the at-most-once nature of request-reply. When you need the work to
 survive a restart or be retried, that's a job for the persistence layer,
 covered in the [JetStream deep dive](/learn/jetstream). We name that
 boundary as it comes up.
@@ -92,7 +93,7 @@ long list, the page covers only the behavior you need and links to
 You'll need:
 
 - A single local `nats-server`. The Services framework needs nothing
-  special enabled. It rides on ordinary request-reply, so a plain
+  special enabled. It runs on ordinary request-reply, so a plain
   `nats-server` is enough. Topology is a separate concern, covered in the
   [Topologies deep dive](/learn/topologies).
 - The `nats` CLI installed and pointed at your server. The CLI can serve,
@@ -103,7 +104,7 @@ You'll need:
   [queue groups](/learn/core-nats/queue-groups). The framework assumes
   both.
 
-Open a terminal, start a `nats-server`, and turn the page.
+Open a terminal, start a `nats-server`, and continue to the next page.
 
 ## See also
 

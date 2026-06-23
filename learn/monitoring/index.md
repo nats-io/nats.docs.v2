@@ -13,14 +13,14 @@ the Topologies and Security deep dives gave you a NATS deployment that
 runs. This chapter teaches the next thing you need: how to *watch* that
 deployment while it runs.
 
-Monitoring is strictly about observation. This chapter shows you where
-the numbers live, which ones tell you something's wrong, and how to put
-them in front of a person before a customer notices. It never tells you
-how to *change* the deployment in response. When a number says "scale
-this" or "back this up," the page names the symptom and links the
-Operate chapter that owns the fix.
+Monitoring is about observation. This chapter shows you where the
+numbers live, which ones tell you something's wrong, and how to put them
+in front of a person before a customer notices, without telling you how
+to *change* the deployment in response. When a number says "scale this"
+or "back this up," the page names the symptom and links the Operate
+chapter that owns the fix.
 
-We don't build anything new. We take the fully grown Acme ORDERS
+We don't build anything new; we take the fully grown Acme ORDERS
 deployment you stood up in the earlier chapters (the three-node `east`
 cluster, the `ORDERS` stream, and the `shipping` and `analytics`
 consumers) and observe it. The whole chapter follows one story: the
@@ -51,9 +51,8 @@ consumer, an ack, and a cluster are. This chapter reads their *state*;
 it doesn't re-explain them. If "consumer lag" or "the `east` cluster"
 needs a refresher, those chapters own the definitions.
 
-You don't need to know anything about running NATS in production.
-That's exactly what this chapter starts from: you can build, and now
-you need to watch.
+You don't need to know anything about running NATS in production. This
+chapter starts from the point where you can build and now need to watch.
 
 ## How to read it
 

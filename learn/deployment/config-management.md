@@ -10,9 +10,9 @@ description: Split the cluster config into includes and reload it live with a SI
 The `ORDERS` cluster is running on Kubernetes as the three pods
 `nats-0`, `nats-1`, `nats-2`. Now the inevitable happens: you need to
 change something. Raise an account limit, rotate a TLS certificate, add a
-user for a new service. The naive answer is to restart the process. The
-production answer is to **reload** it: apply the new config to the
-running server without dropping a single connection.
+user for a new service. One option is to restart the process. The better
+option is to **reload** it: apply the new config to the
+running server without dropping a connection.
 
 Two mechanisms make live config change safe. First, an **include**
 splits one giant config file into small files you can own per account
@@ -77,9 +77,9 @@ server from `/root` or from `/`, and they still resolve the same way. The
 
 ## Reloadable versus non-reloadable keys
 
-Not every key can change on a running server. The split is sharp, and
-knowing it is the difference between a zero-downtime reload and a
-surprise restart.
+Not every key can change on a running server. Knowing which keys are
+reloadable determines whether a change is a zero-downtime reload or
+requires a restart.
 
 **Reloadable** keys take effect on a reload, in place, with no
 reconnect:
@@ -93,18 +93,18 @@ reconnect:
   next handshake.
 - Cluster and gateway routes, and logging settings.
 
-**Non-reloadable** keys need a process restart, because they define what
-the server fundamentally *is*:
+**Non-reloadable** keys need a process restart, because they define the
+server's identity:
 
 - `port` / `listen`: the address the server binds.
 - The `jetstream` enable flag, which turns JetStream on or off.
 - The cluster `name`.
 
-The rule of thumb: a reload can change *policy* (who connects, what they
-may do, how much they may store). It can't change *identity* (the ports
-the server listens on, the cluster it belongs to). Change one of those
-and you're doing a [rolling upgrade](/learn/deployment/rolling-upgrades),
-not a reload.
+A reload can change *policy* (who connects, what they
+may do, how much they may store), but it can't change *identity* (the ports
+the server listens on, the cluster it belongs to). Changing one of those
+requires a [rolling upgrade](/learn/deployment/rolling-upgrades) rather
+than a reload.
 
 The full set of reloadable keys is in
 [Reference → Configuration](/reference/config); here we cover only the
@@ -112,13 +112,13 @@ ones this deployment reloads.
 
 ## Validate, then reload
 
-A reload that fails is dangerous only if it leaves the server in a broken
-state. NATS avoids that: it validates the new config first, and on a
+A reload that fails is a problem only if it leaves the server in a broken
+state. NATS validates the new config first, and on a
 parse or validation failure the old config stays active. The reload
 is atomic: either the new config applies cleanly, or nothing changes.
 
 You still validate before you signal, because catching a typo at your
-terminal beats catching it in the server log. The dry-run parses a config
+terminal is preferable to catching it in the server log. The dry-run parses a config
 file and exits without starting a server:
 
 ```bash
@@ -140,10 +140,10 @@ nats-server -c /etc/nats/nats.conf -t && systemctl reload nats-server
 
 The server re-reads its config, applies the reloadable changes in place,
 and logs `Reloaded server configuration`. Open connections, including
-`order-svc`'s, stay up the whole time. No client reconnects. That's the
-payoff of reload over restart.
+`order-svc`'s, stay up the whole time, and no client reconnects. That is
+the advantage of reload over restart.
 
-## The reloader sidecar turns a ConfigMap edit into a SIGHUP
+## The reloader sidecar on Kubernetes
 
 On Kubernetes there's no shell to run `systemctl reload` in. The config
 arrives as a ConfigMap mounted into the pod, and editing the ConfigMap
@@ -175,7 +175,7 @@ The reloader retries if the server is briefly unreachable (30 retries by
 default, four seconds apart), so a reload issued during a momentary
 blip still lands.
 
-## Secrets are files, not config keys
+## Secrets as mounted files
 
 Credentials and TLS material never belong inline in the config. They're
 mounted as **files**: a Kubernetes Secret projected into the pod, or a
@@ -200,7 +200,7 @@ credentials (operators, accounts, JWTs) is taught in
 
 ## Pitfalls
 
-A few traps turn a routine reload into an outage. Each is scoped to this
+A few mistakes can turn a routine reload into an outage. Each is scoped to this
 page's two ideas: includes and live reload.
 
 **Include paths are relative to the config file, not your shell.** The
@@ -234,7 +234,7 @@ they negotiated with. If you let the old certificate expire before those
 clients reconnect, they hang on a cert the server no longer presents.
 
 Do: rotate well before expiry, and track the certificate's expiry date so
-the swap is never a fire drill. Don't: wait for the alert that the cert
+the swap is never an emergency. Don't: wait for the alert that the cert
 already expired. The auth model behind these certificates lives in
 [Security](/learn/security); here the rule is operational: replace the
 file, reload, and rotate with margin to spare.
@@ -256,7 +256,8 @@ fi
 
 Because the server also validates internally and keeps the old config on
 failure, even a reload that slips through the dry-run can't leave the
-cluster broken. The worst case is no change, never a half-applied one.
+cluster broken. The worst case is that no change applies, rather than a
+half-applied one.
 
 ## Where you are
 

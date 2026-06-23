@@ -8,11 +8,11 @@ description: Exit a connection without dropping in-flight work by draining inste
 # 3. Drain & Shutdown
 
 The last page made `order-svc`'s connection survive a server going away.
-This page handles the opposite event: your own process going away. A
-deploy rolls out, a pod is rescheduled, an operator sends SIGTERM — and
-your client has a few seconds to get off the wire cleanly.
+This page handles the opposite event: your own process going away. When a
+deploy rolls out, a pod is rescheduled, or an operator sends SIGTERM, your
+client has a few seconds to disconnect cleanly.
 
-The naive shutdown drops work on the floor. The `warehouse` subscriber
+The naive shutdown discards in-flight work. The `warehouse` subscriber
 has messages sitting in its buffer that its handler hasn't run yet.
 `order-svc` has a publish that hasn't reached the server. If the process
 just exits, all of that is gone. This page replaces the naive shutdown
@@ -41,8 +41,8 @@ bytes are still in the client's write buffer, not yet on the wire. Close
 discards them too. The server never receives that order.
 
 Close is the right call only when you're tearing down a connection you no
-longer care about: a failed health check, a test, an error path where the
-work is already lost. For a planned shutdown, it's the wrong tool.
+longer care about, such as a failed health check, a test, or an error path
+where the work is already lost. For a planned shutdown, use drain instead.
 
 ## Drain finishes in-flight work, then closes
 
@@ -58,11 +58,11 @@ handlers finish every in-flight message already in the buffers. Once the
 subscriptions are quiet, it enters **DRAINING_PUBS**: it flushes every
 pending publish to the server. Only then does it close.
 
-The order matters. Drain stops *new* work from arriving, lets *existing*
-work complete, pushes out anything queued, and closes last. A close skips
-straight to the end.
+The order matters. Drain stops new work from arriving, lets existing work
+complete, then pushes out anything queued before it closes last, whereas a
+close goes straight to the close without those steps.
 
-This is the side-by-side the animation shows. Close cuts the wire while
+The animation shows these side by side. Close shuts the connection while
 messages are still buffered; drain delivers those last messages to the
 handlers, flushes the pending publish, and only then closes.
 
@@ -92,10 +92,10 @@ other page:
 
 After `Drain()` is called the connection is in a draining state and
 refuses new work. A publish attempted at that point doesn't queue and
-doesn't silently vanish; it returns a draining error
+doesn't silently vanish. It returns a draining error
 (`ErrConnectionDraining` in nats.go, the equivalent in each library) so
-you can tell the connection is on its way out. Drain is the *last*
-thing your shutdown does, after the application has stopped producing.
+you can tell the connection is shutting down. Drain is the last thing your
+shutdown does, after the application has stopped producing.
 
 ## The drain timeout bounds how long drain waits
 
@@ -110,8 +110,8 @@ short rather than completed.
 The default is generous (30 seconds in nats.go), but the right value
 depends on your slowest handler. If a `warehouse` handler can take five
 seconds to write an order to a database, a one-second drain timeout will
-guillotine it mid-write every deploy. Size the timeout to your handler
-latency, not to a number that looks tidy.
+cut it off mid-write every deploy. Size the timeout to your handler
+latency rather than to a round number.
 
 <div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-timeout" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -136,10 +136,11 @@ hint the client may act on.
 
 ## Pitfalls
 
-Three traps turn a clean shutdown back into a lossy one. Each comes back
-to this page's two concepts: drain versus close, and the drain timeout.
+Three mistakes turn a clean shutdown back into a lossy one. Each comes
+back to this page's two concepts: drain versus close, and the drain
+timeout.
 
-**Publishing after you call drain.** Drain is a one-way door: once the
+**Publishing after you call drain.** Drain can't be reversed: once the
 connection is draining it refuses new publishes. Code that calls `Drain()`
 and *then* tries to emit a final "shutting down" event gets a draining
 error and the event is lost. Drain last, after the application has stopped
@@ -149,12 +150,12 @@ Handle the draining error instead of letting it look like success:
 
 <div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-publish-after-drain" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**A drain timeout shorter than your slowest handler.** The timeout is a
-guillotine: when it fires, in-flight work is discarded, not finished. Set
-it below the time a handler actually needs and every deploy silently drops
-the orders that were mid-handle. Measure your slowest handler and set the
-drain timeout above it, with margin. Don't pick a tidy number; pick one
-that covers the work.
+**A drain timeout shorter than your slowest handler.** When the timeout
+fires, in-flight work is discarded rather than finished. Set it below the
+time a handler actually needs and every deploy silently drops the orders
+that were mid-handle. Measure your slowest handler and set the drain
+timeout above it, with margin. Pick a number that covers the work rather
+than a round one.
 
 **Assuming a core drain acks your JetStream messages.** Drain winds down
 the *connection*: it unsubscribes, finishes in-flight messages, and

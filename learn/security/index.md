@@ -7,17 +7,18 @@ description: Authentication, authorization, and encryption, scoped per account a
 
 # Security Deep Dive
 
-Security in NATS comes down to three questions about every connection.
-Who are you? What are you allowed to do? Is the wire safe? This chapter
-answers each one in turn, then ties them together by securing a real
-workload.
+Security in NATS comes down to three questions about every connection:
+who are you, what are you allowed to do, and is the wire safe. This
+chapter answers each one in turn, then ties them together by securing a
+real workload.
 
-The workload is the order platform from the JetStream chapter. The same
-`ORDERS` world, the same message shape — but now with locked doors.
+The workload is the order platform from the JetStream chapter. It uses
+the same `ORDERS` world and the same message shape, now with access
+controls in place.
 
-## The three pillars
+## The three parts of security
 
-Every page in this chapter belongs to one of three pillars. Naming them
+Every page in this chapter belongs to one of three parts. Naming them
 up front gives you a place to file each new mechanism as it arrives.
 
 **Authentication** answers _who are you_. A connecting application
@@ -33,10 +34,10 @@ Everything else is denied. Page 5 is about authorization.
 from eavesdropping and tampering, and a client certificate can even
 serve as the identity itself. Page 7 is about encryption.
 
-## Accounts are the frame around all three
+## Accounts scope all three
 
-The three pillars don't float free. They're scoped by a fourth idea
-that comes first: the **account**.
+The three parts are scoped by a fourth idea that comes first: the
+**account**.
 
 An account is an isolated tenant. Each account has its own users, its
 own subject space, and its own view of the world. Two accounts never see
@@ -44,7 +45,7 @@ each other's messages unless you deliberately connect them. Page 1
 builds the two accounts this chapter uses, and page 6 connects them on
 purpose.
 
-So the full sentence is this. A **user** authenticates into an
+Put together, the full picture is that a **user** authenticates into an
 **account**, where **permissions** decide what it may do, over a
 connection that **TLS** keeps safe.
 
@@ -116,7 +117,8 @@ You'll need:
   and check access. Later pages add JavaScript, Go, Python, Java, Rust,
   and C# client examples for connecting with credentials.
 
-Open a terminal, keep a config file handy, and turn the page.
+Open a terminal and keep a config file handy, then continue to the next
+page.
 
 ## See also
 

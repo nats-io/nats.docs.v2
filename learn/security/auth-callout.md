@@ -12,20 +12,20 @@ mode checked a user list in the config. Decentralized mode verified a
 signature chain back to the operator. Either way, the server held
 everything it needed to say yes or no.
 
-Sometimes the server can't hold it. The real source of truth for "who
-is this?" lives in an OIDC provider, an LDAP directory, or a custom
+Sometimes the server can't have that information. The real source of truth
+for "who is this?" lives in an OIDC provider, an LDAP directory, or a custom
 service that mints short-lived credentials. You don't want to copy that
-directory into NATS config, and you can't teach the server to speak
-LDAP.
+directory into NATS config, and you can't make the server query
+LDAP directly.
 
-Auth callout is the answer. The server stops deciding and starts asking.
+Auth callout handles this case: the server stops deciding and asks an external service instead.
 
 ## What auth callout is
 
 **Auth callout** delegates the authentication decision to an external
 NATS service. When a client connects, the server doesn't check the
-client itself. It packages up what the client presented, sends that to a
-service you run, and waits for a verdict.
+client itself. It packages up what the client presented and sends that to
+a service you run, then waits for a verdict.
 
 That service is the **auth service**: in our scenario, `auth-svc`. It
 receives each connection attempt, applies whatever logic it likes
@@ -33,14 +33,14 @@ receives each connection attempt, applies whatever logic it likes
 replies with either a user identity or a rejection.
 
 The hand-off happens over one well-known subject:
-`$SYS.REQ.USER.AUTH`. The server publishes the connection request there.
-`auth-svc` subscribes there. Authentication becomes a request/reply
+`$SYS.REQ.USER.AUTH`. The server publishes the connection request there,
+and `auth-svc` subscribes there, so authentication becomes a request/reply
 exchange over NATS itself.
 
-This is the move that lets NATS authenticate against anything. The
+This is what lets NATS authenticate against anything. The
 server speaks NATS; `auth-svc` speaks NATS and OIDC, or NATS and LDAP,
 or NATS and your bespoke token format. The protocol between them is
-fixed; what `auth-svc` does in the middle is yours.
+fixed, while what `auth-svc` does in the middle is yours.
 
 This whole mechanism is defined in **ADR-26**, which specifies the
 request and response shape, the signing rules, and the optional
@@ -64,9 +64,9 @@ token maps to the `order-svc` user in `ORDERS`.
 reads the reply, admits the client as `order-svc`, and the publish
 succeeds, exactly as if `order-svc` had logged in directly.
 
-The client never knew a callout happened. It connected with a token and
-got a working connection. The directory lookup, the mapping, the
-verdict — all of that lived in `auth-svc`, off to the side.
+The client has no indication that a callout happened. It connected with a
+token and got a working connection. The directory lookup, the mapping, and
+the verdict all happened in `auth-svc`, separate from the client.
 
 ## Configure it
 
@@ -89,7 +89,7 @@ authorization {
 }
 ```
 
-Three fields carry the meaning.
+Three fields do the work here.
 
 `issuer` is the public account nkey allowed to sign the response. The
 server admits a client only if the reply was signed by this key. It
@@ -127,20 +127,20 @@ auth callout runs, only the users in `auth_users` may receive on
 other clients' credentials.
 
 ADR-26 recommends one step further: run `auth-svc` in its own dedicated
-account. Why? The auth service can bind a client to *any* authorized
-account. A service with that much power should be isolated, so a compromise of
+account. The reason is that the auth service can bind a client to *any*
+authorized account. A service with that much capability should be isolated, so a compromise of
 some other tenant can't reach it, and a bug in `auth-svc` can't leak
 into a tenant's subject space.
 
 This is the `account` field from the config above. Point it at a small
-account that holds nothing but `auth-svc`, and the callout machinery
-stays sealed off from `ORDERS`, `ANALYTICS`, and everything else.
+account that holds nothing but `auth-svc`, and the callout setup
+stays isolated from `ORDERS`, `ANALYTICS`, and everything else.
 
 ## The signed request and response
 
 The request/reply over `$SYS.REQ.USER.AUTH` is the obvious attack
 surface. If anything could publish a fake reply, it could forge any
-user. Two signatures close that gap.
+user. Two signatures protect against that.
 
 The server signs the request. Every request the server sends to
 `$SYS.REQ.USER.AUTH` is a JWT signed by the server's own nkey. When
@@ -171,10 +171,10 @@ The response can also carry an error instead of a user JWT. When
 message, and the server rejects the connection. A rejection is an
 explicit verdict, not a timeout.
 
-## When to reach for it
+## When to use it
 
-Auth callout is the heavier tool. Reach for it when the identity lives
-somewhere NATS can't see.
+Auth callout is the more involved option. Use it when the identity is held
+somewhere NATS can't access directly.
 
 - **OIDC / SSO.** A client carries a bearer token from your identity
   provider; `auth-svc` validates it and maps the claims to a NATS user.

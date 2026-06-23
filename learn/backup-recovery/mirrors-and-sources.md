@@ -8,17 +8,16 @@ description: Stand up a cross-site mirror of ORDERS for disaster recovery, read 
 # 3. Mirrors as a DR tool
 
 The last page gave you a **snapshot**, a point-in-time copy of `ORDERS`
-you can restore from. A snapshot is excellent at one thing: getting back
-the data as it stood at the moment you took it. It's poor at another:
-the data written *since* that moment is gone, and a restore takes as long
-as it takes to stream the archive back in.
+you can restore from. A snapshot gets back the data as it stood at the
+moment you took it. The data written *since* that moment is gone, and a
+restore takes as long as it takes to stream the archive back in.
 
-This page adds the second leg of the triad: a **mirror**. A mirror is a
-read-only live copy of `ORDERS` running at a second site, kept current by
-replication. Where a snapshot answers "what point can I return to", a
+This page adds the second tool of the triad: a **mirror**. A mirror
+is a read-only live copy of `ORDERS` running at a second site, kept current
+by replication. A snapshot answers "what point can I return to", and a
 mirror answers "what site can I promote to take over". You'll stand one up,
-watch how far it trails the original, and learn the one sentence that
-keeps a mirror from becoming a false sense of safety.
+watch how far it trails the original, and learn the one statement that
+keeps a mirror from being treated as more than it is.
 
 This page applies a mirror to disaster recovery. It doesn't teach how
 a mirror replicates internally (the start position, the subject
@@ -30,8 +29,8 @@ links to it rather than repeating it.
 
 So far the `ORDERS` stream lives on the `east` cluster
 (`n1-east`/`n2-east`/`n3-east`). That cluster is one site. If the whole
-site goes dark (a power loss, a network partition that strands the
-region, a data-center failure), every replica of `ORDERS` goes dark with
+site fails (a power loss, a network partition that strands the
+region, a data-center failure), every replica of `ORDERS` fails with
 it. The R3 replication that protects you from losing *one node* does
 nothing when you lose the *whole cluster*.
 
@@ -76,14 +75,14 @@ recovery you only need the plain 1:1 copy above.
 The animation shows the steady state: `order-svc` writes the canonical
 order to `ORDERS` on the `east` cluster, and each message replicates across to
 `ORDERS_DR` on `site2`. Watch the `Lag` counter: it's the next concept,
-and it's the number you'll live or die by during a failover.
+and it's the number that determines the outcome of a failover.
 
 ## Lag is how far the mirror trails
 
-Replication isn't instant, and it isn't synchronous. The upstream stores
+Replication isn't instant or synchronous. The upstream stores
 a message and acknowledges the publisher *before* the mirror has it. The
-mirror catches up a moment later. That gap has a name and a number:
-**lag**, how many messages the mirror trails behind its upstream.
+mirror catches up a moment later. That gap is called
+**lag**: how many messages the mirror trails behind its upstream.
 
 You read lag from the mirror's own stream info:
 
@@ -101,7 +100,7 @@ Mirror Information:
                 Active: 1.20s
 ```
 
-Three fields matter here.
+Three fields are relevant here: `Stream Name`, `Lag`, and `Active`.
 
 `Stream Name` confirms the upstream this mirror copies: `ORDERS`. If it
 says anything else, the mirror points at the wrong source.
@@ -132,25 +131,26 @@ chapter's job.
 
 ## A mirror is not a backup
 
-Here's the one sentence that keeps a mirror honest:
+One statement captures the limit of a mirror:
 
 > A mirror copies whatever the upstream does — including the mistakes.
 
 A mirror gives you **availability**. Lose the whole `east` site and
 `ORDERS_DR` on `site2` still holds your orders, ready to take over. That's
-a recovery *time* story: your **RTO**, how long recovery takes. A
+a matter of recovery *time*: your **RTO**, how long recovery takes. A
 mirror's RTO is short, because the data is already there.
 
 A mirror does not give you a **recovery point** you can rewind to.
-Replication is faithful, and that faithfulness is the problem. Delete the
-upstream `ORDERS` and the deletion propagates: `ORDERS_DR` follows its
-upstream into nothing. Purge a range of messages by accident and the
-purge replicates. Write a corrupt batch and the corruption replicates.
-There's no "yesterday" in a mirror, only "right now, faithfully copied".
+Replication reproduces the upstream exactly, and that's the problem.
+Delete the upstream `ORDERS` and the deletion propagates: `ORDERS_DR` is
+deleted along with its upstream. Purge a range of messages by accident
+and the purge replicates. Write a corrupt batch and the corruption
+replicates. A mirror holds only the upstream's current state, not any
+earlier state.
 
-A snapshot is the opposite. It's frozen at the moment you took it, so a
-delete or a corruption that happens *after* the snapshot can't touch it.
-That frozen-ness is exactly why you can rewind to it.
+A snapshot differs here. It's fixed at the moment you took it, so a
+delete or a corruption that happens *after* the snapshot can't affect it.
+Because it's fixed, you can rewind to it.
 
 So the two tools cover two different failures, and you need both:
 
@@ -160,34 +160,34 @@ So the two tools cover two different failures, and you need both:
   the point in time before it went wrong. Bounded RPO, restore-length
   RTO.
 
-Don't let a healthy mirror talk you out of taking snapshots. The mirror
-won't save you from the failure snapshots exist for.
+Don't let a healthy mirror be your reason to stop taking snapshots. A
+mirror doesn't protect against the failure snapshots exist for.
 
-And don't reach for R3 replication here either. R3 keeps `ORDERS` alive
+And don't reach for R3 replication here either. R3 keeps `ORDERS` available
 across the loss of one node in the `east` cluster: availability inside
 one site, not a backup and not a second site. An accidental delete
-replicates across all three R3 replicas just as faithfully as it would to
+replicates across all three R3 replicas just as exactly as it would to
 a mirror. Why R3 is availability and never a backup is taken up on the
 [disaster-recovery](/learn/backup-recovery/disaster-recovery) page, and
-the leader-election story lives at [Clustering](/learn/clustering).
+leader election is covered at [Clustering](/learn/clustering).
 
 ## Pitfalls
 
-A mirror is simple to create and easy to over-trust. Each trap below is
-scoped to this page's two ideas: the mirror as a DR copy, and the line
-between a mirror and a backup.
+A mirror is easy to create and easy to over-trust. Each trap below is
+scoped to this page's two ideas: the mirror as a DR copy, and the
+distinction between a mirror and a backup.
 
-**A mirror is not a backup.** It's the headline of this page and the
-most common mistake. Delete or corrupt the upstream and the mirror
-follows it down, because replication copies the bad write as faithfully
-as the good ones. Don't run a mirror *instead of* snapshots. Pair them:
-the mirror for site failure, the snapshot for bad data.
+**A mirror is not a backup.** It's the main point of this page and the
+most common mistake. Delete or corrupt the upstream and the mirror is
+deleted or corrupted too, because replication copies the bad write as
+exactly as the good ones. Don't run a mirror *instead of* snapshots. Pair
+them: the mirror for site failure, the snapshot for bad data.
 
 **Read `Lag` before you trust the copy.** Replication is eventually
 consistent, not synchronous, so a mirror can trail its upstream by an
-unknown amount at any moment. A mirror you've never checked is a guess.
-Read `Lag` and `Active` from the mirror's stream info and confirm the
-link is current before you depend on it:
+unknown amount at any moment. If you've never checked a mirror, you don't
+know how far it trails. Read `Lag` and `Active` from the mirror's stream
+info and confirm the link is current before you depend on it:
 
 ```bash
 # Confirm ORDERS_DR is caught up. Lag should read 0, and Active
@@ -223,15 +223,15 @@ You now have:
 - An `ORDERS_DR` mirror running at `site2`, copying `ORDERS` from the
   `east` cluster one message at a time.
 - A way to read its `Lag` and `Active` fields, and the knowledge that
-  `Lag: 0` is the green light for any failover.
-- The sharp line between the two DR tools: a mirror buys you a short RTO
-  for a site failure; a snapshot buys you a recovery point for bad data.
+  `Lag: 0` is the condition that makes a failover safe.
+- The distinction between the two DR tools: a mirror gives you a short RTO
+  for a site failure; a snapshot gives you a recovery point for bad data.
   Neither replaces the other, and R3 replaces neither.
 
 What you *don't* have yet is the procedure for actually using the mirror
 when the primary fails: verifying lag, promoting the copy to a writable
-primary, and redirecting your publishers and consumers to `site2`. That's
-the runbook.
+primary, and redirecting your publishers and consumers to `site2`. That
+procedure is the runbook.
 
 ## What's next
 

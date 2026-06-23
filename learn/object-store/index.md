@@ -14,7 +14,7 @@ slip, anything too large or too binary to ride on a plain message. A
 single JetStream stream named `OBJ_<bucket>`, the same persistence layer the
 [JetStream Deep Dive](/learn/jetstream) already taught you.
 
-That framing is the whole game, so hold onto it from the start. When you
+Keep that framing in mind from the start. When you
 `put` an object the store splits its bytes into chunks, writes each chunk as
 a message, and follows them with one metadata message describing the whole
 object. When you `get` an object the store reads that metadata, replays the
@@ -26,16 +26,16 @@ to day, and the stream underneath is what makes it work.
 
 This chapter teaches the object abstraction first and reveals the stream
 last. Pages 1 through 4 teach you the object store API on its own terms, so
-you can be productive without re-deriving JetStream internals. Page 5 lifts
-the lid and shows you the `OBJ_INVOICES` stream that was there all along.
+you can be productive without re-deriving JetStream internals. Page 5 shows
+you the `OBJ_INVOICES` stream that was present the whole time.
 
-There's a sibling store you should place this next to. The
+Place this alongside its sibling store. The
 [Key-Value Store](/learn/key-value) keeps small structured values and a full
-revision history per key: it remembers every change. The Object Store keeps
-large chunked files and only the latest metadata per object, so it remembers
-the current version, not the history. Reach for key-value when you want
-many small values you read and overwrite and audit; reach for the object
-store when you want whole files you put and fetch. That contrast holds for
+revision history per key, so it retains every change. The Object Store keeps
+large chunked files and only the latest metadata per object, so it retains
+the current version rather than the history. Use key-value when you want
+many small values that you read, overwrite, and audit; use the object
+store when you want whole files that you put and fetch. That contrast holds for
 the rest of the chapter, so we state it once here and move on.
 
 ## By the end you will have

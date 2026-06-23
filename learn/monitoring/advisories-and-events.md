@@ -14,17 +14,17 @@ ask. It does nothing for events that happen between two polls.
 
 The `shipping` consumer falling behind is a number you can poll for: its
 lag climbs and you see it on the next scrape. But a poison order that
-exhausts its deliveries isn't a level you read; it's a moment that
-passes. By the time your next scrape runs, the order is gone and the
-counter that ticked is buried in an aggregate. You need NATS to tell you
-the instant it happens.
+exhausts its deliveries is a one-time event rather than a level you read.
+By the time your next scrape runs, the order is gone and the counter that
+ticked is now part of an aggregate. You need NATS to tell you the instant
+it happens.
 
 This page covers the two streams of events NATS publishes for exactly
 that: advisories on the `$JS.EVENT.ADVISORY.*` subjects, and system
 events on the `$SYS.*` subjects. Both arrive as ordinary messages you
-subscribe to. Neither is something you ask for; they push to you.
+subscribe to. You don't request either one; the server pushes them to you.
 
-## Advisories: JetStream tells you what happened
+## Advisories
 
 An **advisory** is a transient JSON message that JetStream publishes once,
 the moment something noteworthy happens to a stream or a consumer. It's a
@@ -51,7 +51,8 @@ subscriber can choose a wildcard that matches exactly the events it
 cares about: all advisories for `ORDERS`, or only max-delivery events
 for `shipping`.
 
-Subscribe to the whole advisory tree and watch the deployment talk back:
+Subscribe to the whole advisory tree and receive these events from the
+deployment:
 
 <div class="nats-example" data-type="learn-monitoring-advisories-and-events-subscribeAdvisories" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -69,10 +70,10 @@ failed, and how many times delivery was attempted:
 }
 ```
 
-That's the whole event. Stream sequence `987` was delivered five times,
-never acked, and JetStream gave up on it. The `max_deliver` advisory is
+That is the whole event: stream sequence `987` was delivered five times,
+never acked, and JetStream stopped attempting delivery. The `max_deliver` advisory is
 the only built-in signal that this happened. There's no dead-letter
-queue waiting to catch the order. If no one is subscribed when the
+queue that retains the order. If no one is subscribed when the
 advisory fires, the fact that order `987` was dropped is lost.
 
 The `max_deliver` advisory is one type among several. JetStream also
@@ -86,21 +87,21 @@ schemas is documented in
 `max_deliver` advisory here, because it's the one that tells you an order
 slipped through.
 
-### The leader-elected advisory you only observe
+### The leader-elected advisory
 
-One advisory deserves a special note. When the leader of a replicated
+One advisory is worth calling out separately. When the leader of a replicated
 stream or consumer changes, JetStream publishes a leader-elected advisory
 naming the new leader. You'll see it in the same `$JS.EVENT.ADVISORY.>`
 subscription, and a flapping leader showing up here is worth watching.
 
-But this page stops at *observing* that it happened. *Why* a leader
+This page covers *observing* that it happened. *Why* a leader
 changed (how the election ran, what quorum is, which peer won) is
-clustering mechanics, not monitoring. When you want to understand the
+clustering mechanics rather than monitoring. When you want to understand the
 election behind the advisory, that lives in
 [Clustering → RAFT and leaders](/learn/clustering/raft-and-leaders). Here,
-the advisory is a fact you receive, not a process you explain.
+the advisory is a fact you receive, and this page does not explain the process.
 
-## System events: the server tells you who connected
+## System events
 
 The second stream of events is broader than JetStream. A **system event**
 is a message the server publishes on the `$SYS.*` subjects to report
@@ -143,20 +144,20 @@ published once and is already gone.
 
 ## Pitfalls
 
-These traps are scoped to this page's two concepts: advisories and system
+These pitfalls are scoped to this page's two concepts: advisories and system
 events. Each one comes down to the same property: these are messages that
-pass, not levels you read.
+pass by, whereas the monitoring endpoints expose levels you read.
 
 **Advisories are transient.** An advisory is published exactly once, the
 moment its event fires, and it is not stored in any stream. If you're not
 subscribed at that instant, you never learn the event happened. A live
 `nats subscribe '$JS.EVENT.ADVISORY.>'` in a terminal is fine for a demo,
-but it dies when the terminal closes, and every advisory after that is
-gone. Don't rely on a watching human or an ad-hoc subscription; give
-advisories a durable home that's always listening.
+but it stops when the terminal closes, and every advisory after that is
+gone. Don't rely on a watching human or an ad-hoc subscription; capture
+advisories in a durable destination that is always subscribed.
 
 The fix is to point a stream at the advisory subjects. A stream is always
-subscribed, stores what it captures, and lets you read events back long
+subscribed and stores what it captures, so you can read events back long
 after they fired:
 
 <div class="nats-example" data-type="learn-monitoring-advisories-and-events-persistAdvisories" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -197,7 +198,7 @@ doesn't depend on polling. You can:
 
 You've read state on demand from the monitoring port, computed lag from
 consumer state, and now received events you never asked for. The last
-lens turns all of it into stored history, charts, and threshold checks.
+page turns all of it into stored history, charts, and threshold checks.
 
 ## What's next
 

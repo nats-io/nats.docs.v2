@@ -27,7 +27,7 @@ binds to an account) is part of understanding that one shape.
 A **leaf node** is a NATS server that opens an *outbound* connection to
 a remote NATS system and bridges subject interest across it.
 
-That outbound direction is the whole point. The factory's server dials
+The outbound direction is what makes this work. The factory's server dials
 the `east` cluster; `east` never dials the factory. As long as the
 factory can make one connection out to the hub, the bridge works: no
 inbound firewall rule, no public address on the factory side.
@@ -63,8 +63,9 @@ The hub opens a port for leaf nodes to dial. On every `east` server,
 add a `leafnodes {}` block with a `listen` address.
 
 The default leaf node port is **7422**. Keep it distinct from the client
-port (4222), the route port (6222), and the gateway port (7222): four
-different listeners for four different kinds of connection.
+port (4222), the route port (6222), and the gateway port (7222), since
+each of these four ports is a separate listener for a separate kind of
+connection.
 
 Here's `n1-east` from the previous page, now also accepting leaf
 connections. The `cluster {}` and `gateway {}` blocks from earlier stay
@@ -159,8 +160,8 @@ field above selects the account on the *leaf*; the `credentials` the
 remote presents decide which account the leaf attaches to on the *hub*.
 Acme names both `ORDERS`, so the leaf's local `ORDERS` account and the
 hub's `ORDERS` account become one shared subject space across the link.
-That symmetry is a choice, not a requirement, but it's the simple,
-common setup, and the one to reach for first.
+That symmetry is optional rather than required, but it's the simple,
+common setup to start with.
 
 With that binding in place, every subject a factory machine publishes
 into `factory-1`'s `ORDERS` account reaches every `orders.>` subscriber
@@ -193,7 +194,7 @@ The bridge is by *interest*, not by exposing clients. A hub subscriber
 to `orders.>` receives factory orders without ever knowing how many
 machines produced them, or that they came from a leaf at all.
 
-## See it bridge
+## Send a message across the leaf link
 
 Stand up the hub and the leaf, subscribe on the factory floor, and
 publish from the hub. The message crosses the leaf link in the
@@ -237,7 +238,7 @@ up from the factory, and hub traffic going down. If both stay at zero,
 the link is up but no interest crosses it yet. Subscribe on one side
 and publish on the other to see them move.
 
-## One line on JetStream over a leaf
+## JetStream over a leaf
 
 If `factory-1` runs its own JetStream (a local `ORDERS` store on the
 plant floor), it needs a JetStream **domain**.
@@ -254,18 +255,18 @@ We only name the domain concept here.
 
 ## Pitfalls
 
-Three traps catch people the first time they attach a leaf. Each comes
-from a config field doing exactly what it says, just not what you
-meant.
+Three problems commonly come up the first time you attach a leaf. In
+each case a config field does exactly what it says, which differs from
+what you meant.
 
 **The leaf binds to the wrong account.** The `account` field on a remote
 decides which local account on the leaf the bridged link joins. Name the
 wrong account, or omit it and let the leaf fall back to its own default
 account (`$G`), and the link still comes up green, but a factory
 subject never matches a hub subscriber, because they sit in different
-accounts. Don't assume the binding; read it. The `Account` column in
-`nats server report leafnodes` shows the account the leaf actually
-landed in. The symptom downstream is a request that returns *no
+accounts. Rather than assume the binding, check it: the `Account`
+column in `nats server report leafnodes` shows the account the leaf
+actually landed in. The symptom downstream is a request that returns *no
 responders are available* even though both servers are up: the link is
 healthy, the interest just never crossed.
 

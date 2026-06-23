@@ -10,15 +10,15 @@ description: Connect order-svc securely by consuming a credentials file and trus
 Every connection so far has been plaintext and anonymous. `order-svc` opens
 a connection, reconnects when a server moves, drains on shutdown, and retries
 its requests. But the bytes on the wire are readable by anyone who can see
-the link, and the server takes the connection without asking who it is. In
-production, neither is acceptable.
+the link, and the server accepts the connection without verifying the
+client's identity. In production, neither is acceptable.
 
 This page closes the gap from the client's side. It does two things: it points
 the client at a credentials file so the server can authenticate
 `order-svc`, and it gives the client the CA certificate so it can validate
-the server over a TLS link before it sends a single byte. The deliberate word
-in both is *consume*. This chapter loads credentials and a CA; it never makes
-them. How either one is created (issuing a user JWT, writing a CA) is the
+the server over a TLS link before it sends any data. The key word in both is
+*consume*. This chapter loads credentials and a CA; it does not create them.
+How either one is created (issuing a user JWT, writing a CA) is the
 job of [Security](/learn/security).
 
 ## Consuming a credentials file
@@ -26,8 +26,8 @@ job of [Security](/learn/security).
 A **credentials file** is the `.creds` file the client presents to prove its
 identity. It holds two things: a user JWT that names the `order-svc` user, and
 an nkey seed, a private key the client uses to sign a challenge. You don't
-parse it or pull values out of it. You hand the client a path, and the client
-does the rest.
+parse it or extract values from it; you hand the client a path, and the client
+reads the JWT and seed itself.
 
 The mechanics happen inside the handshake from the [Connecting](/learn/resilient-clients/connecting)
 page. When the server's `INFO` says `auth_required`, it also sends a one-time
@@ -35,7 +35,7 @@ page. When the server's `INFO` says `auth_required`, it also sends a one-time
 from the creds file and sends the signature, with the user JWT, in its
 `CONNECT`. The server checks the signature against the JWT's public key. A
 valid signature proves the client holds the seed, and the connection reaches
-CONNECTED. No password ever crosses the wire.
+CONNECTED, with no password ever sent over the wire.
 
 `order-svc` connects exactly as it did before, with one addition: it points at
 its creds file. The CLI flag is `--creds`; the client libraries take a path to
@@ -68,10 +68,11 @@ handshake. The client checks that the certificate chains to the CA it was
 given. If it does, the link is encrypted and the server is authenticated; if
 it doesn't, the client aborts before sending any credentials.
 
-The order matters. The TLS handshake and CA validation run *first*, on top of
-the TCP dial. Only after the link is secure does the client send its `CONNECT`
-with the creds. So a secure connection layers cleanly: TLS proves the server,
-then the creds prove the client, over the now-encrypted link.
+The order matters here. The TLS handshake and CA validation run *first*, on top
+of the TCP dial. Only after the link is secure does the client send its
+`CONNECT` with the creds. So a secure connection is built in two layers: TLS
+proves the server, then the creds prove the client, over the now-encrypted
+link.
 
 `order-svc` connects securely by adding the CA to the same connect call. The
 CLI flag is `--tlsca`; the client libraries take a path to the same PEM file
@@ -79,13 +80,13 @@ through their TLS options. The server URL uses the `tls://` scheme:
 
 <div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-connect-tls" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Picture the secure handshake: the TLS step and CA validation, then the
-credentials, then `+OK`, plus the auth-failure branch.
+The secure handshake runs in this order: the TLS step and CA validation, then
+the credentials, then `+OK`, plus the auth-failure branch.
 
 <div class="nats-flow" data-scenario="tlsAuthHandshakeAnimated" data-width="600" data-height="350"></div>
 
-There's a mirror-image option in one line. So far the CA lets the client
-validate the *server*. **mTLS** (mutual TLS) adds the reverse: the client
+There's a related option that takes one more line. So far the CA lets the
+client validate the *server*. **mTLS** (mutual TLS) adds the reverse: the client
 also presents its own certificate and key, and the server validates it the
 same way. The client side is symmetric, a certificate path and a key path
 alongside the CA. Whether the server demands it, and how the certificate maps
@@ -103,15 +104,16 @@ Each one is scoped to this page's two inputs: the creds file and the CA.
 **Do not hardcode credentials in source.** A user JWT or a password pasted
 into the application gets committed, shared, and leaked, and it can't be
 rotated without a code change and a redeploy. Load the creds file from a path
-or an environment variable, and never commit a `.creds` file. The file is the
-identity; treat it like the secret it is.
+or an environment variable, and never commit a `.creds` file. The file holds
+the identity, so handle it as a secret.
 
 **Do not skip server verification in production.** Most clients offer a
 "skip-verify" or "insecure" TLS mode that accepts any server certificate
 without checking it against a CA. It makes a demo connect on the first try,
 and it also accepts an impostor server that hands the client a self-signed
-certificate. Always supply the CA so the client validates the server. The
-encrypted link is worthless if you can't trust who's on the other end.
+certificate. Always supply the CA so the client validates the server. An
+encrypted link provides no protection if the server on the other end can't be
+trusted.
 
 **An unmonitored credential expiry breaks the next reconnect.** A user JWT
 has a validity window. While the connection stays up, an expired JWT goes
@@ -150,9 +152,9 @@ the connect boundary rather than collapsing both into one network error:
 - It knows the one-line shape of **mTLS** (presenting its own certificate)
   and where the server side of that lives.
 
-The connection is named, pooled, reconnecting, drainable, backpressure-aware,
-request-resilient, and now authenticated over TLS. That's the full client
-state machine, hardened.
+The connection is now named, pooled, reconnecting, drainable,
+backpressure-aware, request-resilient, and authenticated over TLS, which
+covers the full client state machine.
 
 ## What's next
 

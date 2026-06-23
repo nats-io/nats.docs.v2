@@ -8,8 +8,8 @@ description: Give a service more than one endpoint, and organize endpoints under
 # 3. Endpoints and groups
 
 The previous page gave you a running `OrderInventory` service with exactly
-one endpoint, `check`, answering on `orders.inventory.check`. One service,
-one handler, one subject. That's the smallest useful shape.
+one endpoint, `check`, answering on `orders.inventory.check`. That's the
+smallest useful shape: one service, one handler, one subject.
 
 Real services rarely stay that small. A service usually answers more than
 one kind of request, and once it does you want those subjects organized
@@ -38,9 +38,9 @@ explicitly:
 
 Two services now run against the same `nats-server`. `OrderInventory`
 answers on `orders.inventory.check`; `ShippingQuote` answers on
-`shipping.quote`. Each is independent: its own name, its own version, its
-own discovery. The framework gave each a unique service ID without you
-asking.
+`shipping.quote`. Each is independent, with its own name, its own version,
+and its own discovery. The framework gave each a unique service ID without
+you asking.
 
 When the subject should match the endpoint name, you can omit it. An
 endpoint named `quote` with no subject set answers on `quote`. You set the
@@ -48,8 +48,9 @@ subject explicitly only when the wire subject and the endpoint name differ,
 which is the common case once subjects carry structure like
 `orders.inventory.check`.
 
-The handler contract is unchanged from the last page: `req.Data()` in,
-`req.Respond()` out. Adding endpoints doesn't change how a single request
+The handler contract is unchanged from the last page: you read the request
+with `req.Data()` and reply with `req.Respond()`. Adding endpoints doesn't
+change how a single request
 is served; it only adds more named handlers to the same running service.
 
 ## A group is a subject prefix
@@ -107,13 +108,13 @@ documented in [Reference](/reference/). We only need the behavior here.
 
 The animation shows one service with two endpoints. A request to
 `orders.inventory.check` lights the `check` endpoint; a request to
-`shipping.quote` lights the grouped endpoint. The same service, the same
-connection, two named handlers chosen by subject.
+`shipping.quote` lights the grouped endpoint. It's the same service on the
+same connection, with two named handlers chosen by subject.
 
 ## Pitfalls
 
-Two traps come with endpoints and groups: one about the queue group, one
-about what can't be undone.
+Endpoints and groups have two common pitfalls: one about the queue group,
+and one about what can't be undone.
 
 **Disabling the queue group turns an endpoint into broadcast.** Overriding
 the queue group changes *who* load-balances with whom. Disabling it
@@ -138,8 +139,8 @@ detach an endpoint, rename it, or change its subject on a running service.
 The same holds for the metadata you attach to a service or endpoint: it's
 fixed at creation. If a service's shape needs to change, you stop it and
 start a new one with the new layout. Decide the endpoint names and subjects
-before the service goes live, the same way you pick a stream name in
-JetStream: deliberately, the first time.
+before the service goes live, deliberately and the first time, the same
+way you pick a stream name in JetStream.
 
 You handle this by inspecting the shape, not editing it. Read back the
 running service to see exactly which endpoints, subjects, and queue groups

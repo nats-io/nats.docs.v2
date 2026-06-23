@@ -2,88 +2,88 @@
 id: acknowledgment
 title: "6. Acknowledgment"
 sidebar_position: 8
-description: The four ways a client answers a message, and the server controls that drive redelivery
+description: The four ways a client answers a message, and the server controls that drive redelivery.
 ---
 
 # 6. Acknowledgment
 
 The `shipping` consumer was created with `AckPolicy=explicit`. That
-choice means every message it delivers must be answered. Nothing is
-considered done until the client says so.
+choice means every message it delivers must be answered. A message is
+not done until the client says so.
 
-This page is about that answer, in two halves. The first half covers
-the four responses a client can give: not just ack and nak, but also
-term ("give up on this one") and in-progress ("still working"). The
-second covers the server-side controls that decide what happens when an
-answer is late or never comes.
+This page covers the four responses a client can give — ack, nak,
+term ("give up on this one"), and in-progress ("still working") — and
+the server-side controls that decide what happens when an answer is
+late or never comes.
 
 ## Why the server waits for an answer
 
-A message stays in flight from the moment the server delivers it until
-the moment the consumer answers. The server keeps a copy on the pending
-list and starts a timer.
+A message is open from the moment the server delivers it until the
+consumer answers. The server keeps a copy on the pending list and
+starts a timer.
 
-If the answer never comes, the server assumes the worker died and
-delivers the message again. This is the redelivery loop you met on the
-first consumer page. Now we name its parts.
+If the answer never comes, the server assumes the worker stopped and
+delivers the message again. This is the redelivery loop from the first
+consumer page. It has two parts.
 
 The first part is the timer. Its length is AckWait, and it defaults
 to 30 seconds.
 
-The second part is the answer itself. There are four of them.
+The second part is the answer itself. The answer takes one of four
+forms.
 
 ## The four responses
 
 A client answers a delivered message in exactly one of four ways.
 
-**ack**: the acknowledgment. Processing succeeded. The server removes
+**ack**: the acknowledgment. The work succeeded. The server removes
 the message from the pending list and never delivers it again. This is
-the answer your happy path gives.
+the answer you send when a message is handled.
 
-**nak**: a negative acknowledgment. Processing failed, redeliver this
+**nak**: a negative acknowledgment. The work failed, redeliver this
 message. The server puts it back for another attempt. A plain nak asks
 for redelivery right away.
 
-**term**: stop trying. This message can never be processed, so don't
+**term**: stop trying. This message can never be handled, so don't
 deliver it again to anyone. The server drops it from the pending list
-like an ack, but the work was never done.
+as it does for an ack, but the work was never done.
 
-**in-progress**: still working. This isn't a final answer. It resets
-the AckWait timer so a long job doesn't trip redelivery, then the
-client keeps going and answers for real later.
+**in-progress**: still working. This is not a final answer. It resets
+the AckWait timer so a long job doesn't trip redelivery. The client
+then keeps going and answers for real later.
 
-Three of these are final: ack, nak, and term each close out a delivery.
-in-progress is the one that buys more time.
+ack, nak, and term are final. Each one closes out a delivery.
+in-progress extends the timer instead.
 
 ## Negative ack with a delay
 
 A plain nak redelivers immediately. That's rarely what you want.
 
-A failure is often transient: a downstream service is briefly down, a
-row is locked, a rate limit is hit. Redelivering in the same
-millisecond just fails again, in a tight loop, as fast as the network
-allows.
+A failure is often temporary. A service it calls is briefly down, a row
+is locked, or a rate limit is hit. Redelivering in the same instant
+fails again right away, and the message retries over and over with no
+pause.
 
-The fix is to nak with a delay. The client tells the server "redeliver
-this, but wait this long first." The server holds the message for that
-delay, then puts it back.
+To avoid that, nak with a delay. The client tells the server to
+redeliver the message but wait a given time first. The server holds
+the message for that delay, then puts it back.
 
 <div class="nats-example" data-type="learn-jetstream-acknowledgment-nakWithDelay" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-A nak hands the message back to the consumer, not to the worker that
+A nak returns the message to the consumer, not to the worker that
 nak'd it. If several workers share one consumer, the redelivery can land
 on a different worker (see [worker pool](/learn/jetstream/worker-pool)).
 
-A delayed nak backs off one redelivery at a time, under the client's
-control. If you'd rather the server apply a delay schedule on its own,
+A delayed nak sets the wait one redelivery at a time, and the client
+chooses it. To have the server apply a delay schedule on its own,
 growing the wait with each attempt, set a **backoff** on the consumer.
-We come to that below.
+Backoff is covered below.
 
 ## Term: the poison message path
 
-Some failures aren't transient. A message with a malformed payload, or
-one that fails a validation that will never pass, is a poison message.
-Redelivering it wastes attempts and blocks the worker behind it.
+Some failures aren't temporary. A message with a broken payload, or one
+that fails a check that will never pass, is a poison message.
+Redelivering it wastes attempts and holds up the messages behind it.
 
 For these, the client answers term. The message leaves the pending list
 and the server never delivers it again, no matter how many attempts
@@ -91,31 +91,31 @@ remain.
 
 <div class="nats-example" data-type="learn-jetstream-acknowledgment-termPoison" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-term is a decision, not a failure signal. Reach for it only when the
-code can tell that no future attempt will succeed. When in doubt, nak
-with a delay and let the delivery limit below decide.
+Use term only when the code can tell that no future attempt will
+succeed. When in doubt, nak with a delay and let the delivery limit
+below decide.
 
 ## The server controls
 
 The four responses are the client's side. The server has two settings
-that frame them, both on the consumer.
+that work with them, both on the consumer.
 
-**AckWait** is the timer. If a delivery is neither ack'd, nak'd, nor
-kept alive with in-progress before AckWait elapses, the server treats
-it as a silent failure and redelivers. The default is 30 seconds;
-shorten it for fast work, lengthen it for slow work.
+**AckWait** is the timer. If a delivery is not ack'd, nak'd, or kept
+alive with in-progress before AckWait runs out, the server treats it as
+a silent failure and redelivers. The default is 30 seconds. Shorten it
+for fast work, lengthen it for slow work.
 
-**MaxDeliver** is the ceiling on attempts. It caps how many times the
+**MaxDeliver** is the limit on attempts. It caps how many times the
 server will deliver one message before giving up. The default is `-1`,
-which means unlimited: a message can be redelivered forever.
+which means no limit. A message can be redelivered forever.
 
-These two cover the two ways a delivery can fail. AckWait catches the
-silent failure, where no answer arrives. MaxDeliver caps the loud
-failure, where a worker keeps sending a nak on the same message.
+These two cover the two ways a delivery can fail. AckWait handles the
+case where no answer arrives. MaxDeliver caps the case where a worker
+keeps sending a nak on the same message.
 
-A timeout and a nak reach the same redelivery loop. Whichever triggers
-it, the backoff schedule below governs how long the server waits before
-the next attempt. Backoff isn't limited to naks.
+A timeout and a nak reach the same redelivery loop. Whichever one starts
+it, the backoff schedule below sets how long the server waits before the
+next attempt. Backoff applies to timeouts as well as naks.
 
 Set both on the consumer with `nats consumer edit`:
 
@@ -140,13 +140,13 @@ message itself, before the limit is reached.
 
 ## Backoff: a growing delay between attempts
 
-A flat AckWait redelivers on the same interval every time. A backoff
-makes the interval grow.
+A flat AckWait waits the same amount of time before every redelivery. A
+backoff makes that wait grow.
 
 The server holds a list of delays, one per attempt: wait one second
 before the second delivery, five seconds before the third, 30 before
-the fourth. A worker that keeps failing gets more breathing room
-each round instead of a steady drumbeat of retries.
+the fourth. The wait between attempts grows each round instead of
+staying the same.
 
 The CLI builds the list for you from a range:
 
@@ -161,20 +161,20 @@ The full set of backoff options is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 We use only a linear range here.
 
-## Two more policies, named only
+## Two more policies
 
-The consumer config carries two policies this chapter mentions but
-doesn't unpack here.
+The consumer config carries two more policies this chapter mentions but
+doesn't cover in full here.
 
 **AckPolicy** has three values you'd reach for in practice:
 `none` (no answer required), `all` (one ack answers every earlier
 message too), and `explicit` (each message answered on its own). A
-fourth value, `flow_control`, exists for push-delivery rate control
-and isn't used here. `shipping` uses `explicit`, and that's the
-right default for work that must not be lost.
+fourth value, `flow_control`, controls the rate of push delivery and
+isn't used here. `shipping` uses `explicit`, and that's the right
+default for work that must not be lost.
 
-**ReplayPolicy** controls the pace of redelivery and replay: `instant`
-delivers as fast as the client reads, while `original` paces delivery
+**ReplayPolicy** sets the pace of redelivery and replay. `instant`
+delivers as fast as the client reads. `original` spaces out delivery
 to match the original timestamps. `instant` is the default and the only
 one this chapter needs.
 
@@ -184,37 +184,37 @@ We use only `explicit` and `instant` here.
 
 ## Pitfalls
 
-The four responses and two controls are simple on their own. The traps
-live where they meet.
+Each response and control is simple on its own. Most traps come from
+how they combine.
 
-**A plain nak loops as fast as the network.** A nak with no delay asks
-for redelivery in the same instant, so a transient failure retries
-immediately, fails again, and pins one worker on one message. Don't
-nak a transient failure bare; nak with a delay, or set a backoff on the
-consumer so the wait grows each round (covered above).
+**A plain nak retries with no delay.** A nak with no delay asks
+for redelivery in the same instant. A temporary failure then retries
+right away, fails again, and ties up one worker on one message. Don't
+send a bare nak for a temporary failure. Nak with a delay, or set a
+backoff on the consumer so the wait grows each round (covered above).
 
-**A poison message with no term path burns every attempt.** Without
-term, a malformed payload is nak'd over and over until MaxDeliver
-gives up, wasting the full delivery budget and blocking the worker
+**A poison message with no term path uses every attempt.** Without
+term, a broken payload is nak'd over and over until MaxDeliver
+gives up, using the full set of attempts and holding up the messages
 behind it. When the code can tell no future attempt will succeed,
-answer term so the message exits the pending list at once instead of
-grinding through the limit.
+answer term so the message leaves the pending list at once instead of
+working through the limit.
 
 **MaxDeliver drops a message with no dead-letter.** When a message hits
 the delivery limit, the server removes it from the consumer's pending
 list and never delivers it again. The message stays in the stream, but
 the `shipping` consumer's normal output says nothing, so the drop is
-easy to miss. JetStream has no built-in dead-letter queue. The drop is
-observable, though: the server publishes an advisory the moment a
-message exceeds its limit. Subscribe to it so a poison
-`order_id` doesn't vanish unnoticed:
+easy to miss. JetStream has no built-in dead-letter queue. You can still
+catch the drop: the server publishes an advisory the moment a message
+goes past its limit. Subscribe to it so a poison `order_id` isn't
+dropped without notice:
 
 <div class="nats-example" data-type="learn-jetstream-acknowledgment-watchMaxDeliveries" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **AckWait shorter than real processing time causes double work.** If a
-job routinely takes longer than AckWait and the worker never sends
-in-progress, the server decides the worker died and redelivers a
-message that's still being processed, so two workers run the same
+job often takes longer than AckWait and the worker never sends
+in-progress, the server decides the worker stopped and redelivers a
+message that's still being handled, so two workers run the same
 order. Either raise AckWait to cover the slow case, or send in-progress
 to reset the timer while a long job runs (both covered above).
 

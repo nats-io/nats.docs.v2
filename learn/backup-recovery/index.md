@@ -20,10 +20,10 @@ left in a taxi. Each of those is a different kind of loss, and each one
 needs a different kind of copy made ahead of time. This chapter is about
 making those copies and putting them back.
 
-## The triad
+## The three things to protect
 
-Protecting a NATS platform means protecting three things, and they
-don't protect each other. Hold this picture for the whole chapter:
+Protecting a NATS platform means protecting three things, and none of
+them protects the others. Keep this in mind for the whole chapter:
 
 - **A snapshot** is a point-in-time copy of a stream (its messages, its
   config, and optionally its consumer state) written off-site. It's
@@ -38,20 +38,20 @@ don't protect each other. Hold this picture for the whole chapter:
   and the server config. Without these, a restored stream is data nobody
   is allowed to read. They're the keys that prove who you are.
 
-A snapshot won't bring a dead site back quickly. A mirror won't
-save you from a delete: delete the upstream stream and the mirror
-faithfully deletes too. And neither one matters if you've lost the
-keys. You need all three, and this chapter takes them one at a time.
+A snapshot won't bring a dead site back quickly, a mirror won't save you
+from a delete (delete the upstream stream and the mirror deletes too),
+and neither one matters if you've lost the keys. You need all three, and
+this chapter takes them one at a time.
 
 ### Why R3 is not on the list
 
 You might expect replication to be the fourth item. A stream with three
 replicas (R3) survives a node dying without losing a message, so it's
-tempting to call it a backup. It is not. R3 is high availability:
+tempting to call it a backup, but it isn't. R3 is high availability:
 several copies of the same live stream, kept identical at all times.
-That last word is the problem. When a bad write lands (an accidental
-delete, a logic error that corrupts a message), every replica applies it
-faithfully. The mistake is replicated as eagerly as the good data.
+Being kept identical is the problem. When a bad write lands (an
+accidental delete, a logic error that corrupts a message), every replica
+applies it. The mistake is replicated the same way the good data is.
 
 R3 keeps the stream *available*; only a snapshot lets you go *back* to
 before the mistake. We treat R3 as availability throughout this chapter
@@ -83,7 +83,7 @@ account, and a user are. Ideally you have the
 cluster and a second site are familiar shapes.
 
 This chapter assumes you now run NATS for someone else. You're past
-"does it work" and into "what happens at 3 a.m. when it stops." It
+whether it works and into what happens when it stops in production. It
 doesn't re-teach how a stream stores messages, how a mirror replicates
 them, or how an account trust chain validates. Instead, it links to the
 chapter that owns each of those and builds the operational layer on top.

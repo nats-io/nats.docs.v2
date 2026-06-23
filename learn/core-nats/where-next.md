@@ -19,7 +19,7 @@ This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
-## The whole game in four words
+## The four core ideas
 
 Every page in this chapter circled the same four ideas. If you remember
 nothing else, remember these.
@@ -32,7 +32,7 @@ hierarchy of subjects at once.
 **Interest** is what makes a message move. The server keeps an in-memory
 graph of which subscribers want which subjects, and a published message
 goes to every interested subscriber, or to nobody, in which case it's
-discarded. No interest, no copy, no trace.
+discarded. With no interest, no copy is made and nothing is recorded.
 
 A **reply subject** turns one-way publish into a two-way exchange. The
 client subscribes to a unique `_INBOX` subject, sends it alongside the
@@ -44,23 +44,24 @@ A **queue group** is how many subscribers share one subject's load. Each
 message goes to exactly one member of the group, chosen by the server,
 with no broker or coordinator deciding for you.
 
-Subject, interest, reply subject, queue group. Scatter-gather isn't a
-fifth idea: it's a reply subject with the first-answer-wins step
-removed, gathering every responder instead of one. Everything in core
-NATS is those four mechanics arranged differently.
+The four ideas are subject, interest, reply subject, and queue group.
+Scatter-gather is not a fifth idea. It is a reply subject with the
+first-answer-wins step removed, gathering every responder instead of
+one. Everything in core NATS is those four mechanics arranged
+differently.
 
-## The one thing core does not do
+## What core NATS does not store
 
-Core NATS does not remember. A message exists only while it's in flight
-to a live subscriber. The moment it's delivered, or discarded for lack
-of interest, it's gone. That property has a name you met on the first
-page: **at-most-once** delivery.
+Core NATS does not store messages. A message exists only while it's in
+flight to a live subscriber. Once it's delivered, or discarded for lack
+of interest, it no longer exists anywhere. That property has a name you
+met on the first page: **at-most-once** delivery.
 
-This is a deliberate floor, not a missing feature. It's what makes core
-NATS fast and what keeps a publisher from blocking on subscribers that
-are slow or offline. For the Acme ORDERS world, though, an order that
-arrives while the warehouse is restarting is an order lost. That's
-exactly the gap the next chapter fills.
+This is a deliberate design choice rather than a missing feature. It's
+what makes core NATS fast and what keeps a publisher from blocking on
+subscribers that are slow or offline. For the Acme ORDERS world, though,
+an order that arrives while the warehouse is restarting is an order lost.
+That's exactly the gap the next chapter fills.
 
 The [JetStream deep dive](/learn/jetstream) adds a server-side store on
 top of the same subjects you already use. Start with
@@ -127,10 +128,10 @@ on.
 
 ## What's next
 
-If you only follow one link, follow this one: the
-[JetStream deep dive](/learn/jetstream) is what core NATS becomes when a
-message needs to survive. It resumes the same Acme ORDERS story right
-where you are now.
+The most important link to follow is the
+[JetStream deep dive](/learn/jetstream), which is what core NATS becomes
+when a message needs to survive. It resumes the same Acme ORDERS story
+right where you are now.
 
 ## Production checklist
 

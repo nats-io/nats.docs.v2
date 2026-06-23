@@ -7,21 +7,21 @@ description: Recap the key-value mental model and point to what comes after this
 
 # 6. Where to go next
 
-You started this chapter with a JetStream stream and the claim that NATS
-gives you a key-value store on top of it. You end it with an `INVENTORY`
+This chapter began with a JetStream stream and the claim that NATS
+gives you a key-value store on top of it. By the end you have an `INVENTORY`
 bucket: keys that are SKUs, values that are stock counts, a warehouse
 dashboard watching for changes, safe decrements through compare-and-swap,
 a key that expires on its own, and a clear view of the stream underneath.
-That's the whole arc.
+That covers the chapter.
 
-This page doesn't teach anything new. It collects the model you built
+This page collects the model you built
 into one place and points you at the chapters and Reference that take it
 further.
 
-## The whole game in five words
+## The key-value to JetStream mapping
 
-Every page in this chapter circled the same idea: a bucket is a stream
-wearing a friendlier face. If you remember nothing else, remember how the
+Every page in this chapter came back to the same idea: a bucket is a stream
+with a key-value interface over it. The point to remember is how the
 key-value words map onto the JetStream words.
 
 A **bucket** is a stream. When you create `INVENTORY` you create a stream
@@ -43,8 +43,9 @@ A **watch** is a consumer. It's an ephemeral, ordered consumer that
 replays the current value of every matching key, then streams live
 changes.
 
-Bucket, key, put, revision, watch — stream, subject, message, sequence,
-consumer. Everything else in this chapter is a refinement of that mapping.
+In short: a bucket is a stream, a key is a subject, a put is a message, a
+revision is a sequence, and a watch is a consumer. Everything else in this
+chapter is a refinement of that mapping.
 
 ## Where the details live now
 
@@ -80,11 +81,11 @@ something multi-megabyte, start with
 [your first object](/learn/object-store/your-first-object).
 
 The [Clustering & Replication deep dive](/learn/clustering) is where the
-`Replicas` field you saw named under the hood becomes real. It covers how
+`Replicas` field you saw named under the hood takes effect. It covers how
 a bucket survives node loss and explains the replication mechanics behind
 that field in full.
 
-There's one more direction worth a teaser. A bucket can be sourced from
+There's one more direction worth mentioning. A bucket can be sourced from
 or mirrored into another bucket: a regional `EU_INVENTORY` bucket could
 source from `INVENTORY` so both hold the same keys, kept in sync by a
 subject transform from `$KV.SRC.>` to `$KV.DST.>`. The chapter doesn't
@@ -99,15 +100,15 @@ its history, and the `flash-sale` key are still in your session exactly as
 you left them under the hood. You can keep experimenting with them, or
 tear the bucket down with `nats kv rm INVENTORY` when you're done.
 
-You hold the core model: a bucket is a stream, a key is a subject token, a
+You have the core model: a bucket is a stream, a key is a subject token, a
 put is a message, a revision is a sequence, and a watch is a consumer.
-That mapping is the floor for every key-value feature you'll meet.
+That mapping is the basis for every key-value feature you'll meet.
 
 ## Production checklist
 
 Every page in this chapter closed with a Pitfalls section. This collects
-the action items from all of them in one place: a last pass before you
-trust a bucket with real inventory. Each group links back to the page that
+the action items from all of them in one place, as a last pass before you
+use a bucket for real inventory. Each group links back to the page that
 explains the why.
 
 ### Your first bucket — see [Pitfalls](/learn/key-value/your-first-bucket#pitfalls)

@@ -12,11 +12,11 @@ on your laptop. This chapter takes those same publishers and subscribers
 and asks the harder question: what happens when the server goes away, the
 network stalls, or the handler can't keep up?
 
-The answer isn't new application code. It's the **connection**, the live
+The answer isn't new application code but the **connection**, the live
 link from your client to a server, configured to survive faults. A
 resilient client detects when its connection breaks, buffers work while
 it's broken, recovers without losing the application's place, and shuts
-down without dropping work on the floor.
+down without losing in-flight work.
 
 One idea holds the whole chapter together: the connection is a **state
 machine**. It moves through a small set of states (DISCONNECTED,

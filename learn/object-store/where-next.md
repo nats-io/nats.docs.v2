@@ -8,22 +8,22 @@ description: Recap the object store mental model and point to what comes after t
 # 6. Where to go next
 
 You started this chapter with files that were too large or too binary to
-ride on a plain message and nowhere to put them. You end it with an
+send as a plain message and had nowhere to store them. You end it with an
 `INVOICES` bucket holding chunked invoices, each one carrying metadata and a
 link, with `analytics` watching for new arrivals and the `OBJ_INVOICES`
-stream visible underneath. That's the whole arc.
+stream visible underneath. That covers the full chapter.
 
 This page doesn't teach anything new. It collects the model you built into
 one place and points you at the chapters and Reference that take it further.
 
-## The whole game in three words
+## The three core ideas
 
-Every page in this chapter circled the same three ideas. If you remember
-nothing else, remember these.
+Every page in this chapter came back to the same three ideas. These are the
+ones to remember.
 
 A **bucket** is a named object store. You `put` a file into it by name and
 `get` it back by name, and you never touch the messages underneath. The
-bucket is the friendly surface (`put`, `get`, `list`, `watch`, `link`) over
+bucket is the API (`put`, `get`, `list`, `watch`, `link`) over
 a single JetStream stream named `OBJ_<bucket>`.
 
 A **chunk** is one slice of an object. A put splits the bytes at the chunk
@@ -35,11 +35,11 @@ handing you the bytes.
 A **rollup** is what keeps the bucket current rather than historical. Each
 metadata write carries a rollup header, so the stream keeps only the latest
 metadata per object name. Re-put an object and you get one current
-description, not a revision history. That's the line between the object
-store and key-value.
+description, not a revision history. That's what distinguishes the object
+store from key-value.
 
-Bucket, chunk, rollup. Everything else in this chapter (metadata, links,
-watch, list, soft delete) is a refinement of those three.
+Those three are bucket, chunk, and rollup. Everything else in this chapter
+(metadata, links, watch, list, soft delete) is a refinement of them.
 
 ## Where the details live now
 
@@ -97,9 +97,9 @@ your session exactly as you left them on the previous page. You can keep
 experimenting with them, or tear them down with `nats object rm INVOICES`
 when you're done.
 
-You hold the core model: a bucket stores files as chunks, a digest proves
-the bytes survived the round trip, and a rollup keeps the metadata current.
-That model is the floor for every other object store feature you'll meet.
+You hold the core model: a bucket stores files as chunks, a digest verifies
+the bytes are unchanged after the round trip, and a rollup keeps the metadata
+current. That model is the foundation for every other object store feature.
 
 ## Production checklist
 

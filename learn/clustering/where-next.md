@@ -7,21 +7,19 @@ description: Recap the clustering mechanism and point to siblings, Reference, an
 
 # 6. Where to go next
 
-You started this chapter with nothing running. You end it with three
+You started this chapter with nothing running, and by the end you have three
 servers (`n1-east`, `n2-east`, `n3-east`) that found each other from a
 single seed route, elected leaders for every RAFT group, and hold the
 `ORDERS` stream at `R=3`. A write from `order-svc` now lands on the
 leader, commits once a quorum has it, and survives one server dying.
-That's the whole arc.
+That covers the full arc of the chapter.
 
-This page doesn't teach anything new. It collects the mechanism you
-built into one place and points you at the chapters and Reference that
-take it further.
+This page collects the mechanism you built into one place and points you at
+the chapters and Reference that take it further.
 
-## The whole game in five words
+## The five core ideas
 
-Every page in this chapter turned on the same five ideas. If you remember
-nothing else, remember these.
+Every page in this chapter turned on the same five ideas.
 
 **Routes** are the server-to-server connections that form the cluster. You
 configure one explicit seed route, and gossip does the rest: each server
@@ -46,9 +44,9 @@ the peers from the servers that qualify.
 its catchup to bring lag to zero before it counts toward quorum; you
 remove a peer one at a time so the group never drops below a majority.
 
-Routes, RAFT, quorum, placement, peers. Everything else in this chapter
-(terms, elections, append entries, apply, preferred leader, migration) is
-a refinement of those five.
+Those five ideas are routes, RAFT, quorum, placement, and peers. Everything
+else in this chapter (terms, elections, append entries, apply, preferred
+leader, migration) is a refinement of those five.
 
 ## Where the details live now
 
@@ -73,10 +71,10 @@ Reference") all point into it. The pages you'll reach for most:
 
 ## Sibling deep dives
 
-This chapter is the mechanism beneath two others, so it leans on them and
-they lean on it.
+This chapter is the mechanism beneath two others, so it depends on them and
+they depend on it.
 
-The [Topologies deep dive](/learn/topologies) is where the shapes live:
+The [Topologies deep dive](/learn/topologies) covers the shapes:
 when to run a single server, when to grow into a cluster, when to reach
 for a super-cluster or leaf nodes. This chapter ran beneath its `east`
 cluster; Topologies decides *what shape* to build, and this chapter
@@ -96,7 +94,7 @@ infrastructure: Kubernetes, rolling upgrades, and sizing the servers you
 formed a cluster from here.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) covers the
-operational safety net: snapshotting a stream before a risky peer change,
+operational protection: snapshotting a stream before a risky peer change,
 and restoring it if a migration goes wrong.
 
 ## Where you are
@@ -111,8 +109,8 @@ done.
 
 You hold the core model: routes form the mesh, RAFT groups agree, a quorum
 commits each write, placement decides where the replicas live, and peer
-management grows the set without losing agreement. That model is the floor
-for operating any NATS cluster in production.
+management grows the set without losing agreement. That model is the minimum
+you need for operating any NATS cluster in production.
 
 ## Production checklist
 

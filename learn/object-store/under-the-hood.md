@@ -12,10 +12,9 @@ invoice, metadata, a label link, and an `analytics` service watching it.
 You've driven all of that through the friendly object API (`put`, `get`,
 `list`, `watch`, `link`) without ever seeing a stream.
 
-There's been a stream the whole time. This page lifts the lid: the one
-stream your bucket really is, the two subject spaces objects map onto, and
-the single header that keeps the bucket from growing a history it never
-promised you.
+There's been a stream the whole time. This page explains the one stream your
+bucket really is, the two subject spaces objects map onto, and the single
+header that keeps the bucket from accumulating a history.
 
 ## The bucket is a stream named OBJ_INVOICES
 
@@ -24,7 +23,7 @@ INVOICES`, the server created a JetStream stream and named it by convention:
 `OBJ_<bucket>`. Your `INVOICES` bucket is the stream `OBJ_INVOICES`. Every
 `put` was a publish to that stream; every `get` was a read from it.
 
-Ask the server about that stream directly and the machinery is right there:
+Ask the server about that stream directly and you can see its configuration:
 
 <div class="nats-example" data-type="learn-object-store-under-the-hood-streamInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -50,8 +49,8 @@ collides with old chunks. The metadata subject ends in the object name,
 base64url-encoded as `$O.INVOICES.M.<base64url(name)>`, so any object name,
 spaces and slashes included, becomes a safe NATS subject.
 
-That base64url metadata subject is the hinge of the next section, so hold
-onto it: each object name maps to exactly one metadata subject.
+That base64url metadata subject matters for the next section: each object
+name maps to exactly one metadata subject.
 
 ## Rollup keeps the latest metadata, not a history
 
@@ -73,7 +72,7 @@ This is why the store is rollup-latest, not multi-revision. A re-put gives you
 a new current object; it doesn't give you the object's past. When you do want
 the past (many small values with a full revision history per key), that's
 the [Key-Value Store](/learn/key-value), not this one. The contrast the index
-drew holds all the way down to the header.
+described applies down to the header level.
 
 The backing stream is configured to make rollup possible. `AllowRollup` is
 true so the header is honored; the discard policy is set to `new` so the stream
@@ -102,8 +101,8 @@ The full set of stream configuration equivalents, including how to raise
 
 ## Soft delete is a rollup that marks the object gone
 
-Deleting an object is the same rollup mechanism wearing a different hat. The
-store doesn't silently drop the name. It writes one more metadata message,
+Deleting an object uses the same rollup mechanism for a different purpose. The
+store doesn't drop the name. It writes one more metadata message,
 a **soft delete**, that marks the object `Deleted=true`, sets `Size` and
 `Chunks` to zero, and clears the digest. Because that message carries the
 rollup header, it replaces the object's current `ObjectInfo`, and the object's
@@ -123,8 +122,8 @@ security concern, not an object-store one. It's covered in
 
 ## Pitfalls
 
-Two traps catch people the first time they look under the lid. Both come from
-expecting the backing stream to behave like something it isn't.
+Two mistakes are common the first time you examine the backing stream. Both
+come from expecting the backing stream to behave differently than it does.
 
 **A soft delete does not reclaim disk the instant you call it.** A delete
 writes the soft-delete metadata message and then purges the object's chunks.
@@ -159,15 +158,14 @@ You now have:
 - Soft delete explained: a rollup metadata write that marks the object gone
   and purges its chunks.
 
-The friendly API and the stream underneath are now one picture in your head.
-Nothing the object store does is magic; it's chunks plus rollup metadata on a
-JetStream stream.
+The friendly API and the stream underneath now fit together. The object store
+is chunks plus rollup metadata on a JetStream stream.
 
 ## What's next
 
-That's the whole mechanism. The last page is navigation: a recap of the whole
-game, a checklist that collects every pitfall in this chapter, and pointers to
-where the deeper details (replicas, security, backup, monitoring) actually
+That's the whole mechanism. The last page is navigation: a recap of the
+chapter, a checklist that collects every pitfall in this chapter, and pointers
+to where the deeper details (replicas, security, backup, monitoring) actually
 live.
 
 Continue to [6. Where to go next](/learn/object-store/where-next).

@@ -7,8 +7,8 @@ description: Fan one request to many responders and gather every reply by count 
 
 # 5. Scatter-gather
 
-The inventory service answered one request with one reply. That's the
-common case: one question, one answer.
+The inventory service answered one request with one reply, which is the
+common case of a single question producing a single answer.
 
 Some questions have several answers. "What would it cost to ship this
 order?" is one of them. Acme works with three carriers, and each one
@@ -113,11 +113,11 @@ With one provider down, the client still returns after two seconds with
 the two quotes it received. A slow or missing carrier delays a decision by
 at most the deadline; it never blocks it forever.
 
-A deadline turns "wait for everyone" into "wait for whoever answers in
-time," which is the only safe assumption when the responder set isn't
-fixed.
+A deadline changes the rule from waiting for every responder to waiting
+only for whoever answers in time, which is the only safe assumption when
+the responder set isn't fixed.
 
-## What you give up
+## Delivery guarantees
 
 Scatter-gather inherits the at-most-once delivery of core NATS. A reply
 dropped in transit is just absent from the gathered set; nothing
@@ -140,7 +140,7 @@ The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
 ## Pitfalls
 
 Scatter-gather looks like one more request, so it inherits the habits of
-single-reply request-reply. These are the ones that bite.
+single-reply request-reply. These are the common mistakes.
 
 **Taking only the first reply.** A plain `nats request` stops after one
 reply, because its `--replies` flag defaults to `1`. Point it at three
@@ -186,7 +186,7 @@ The Acme ORDERS world now talks in four shapes over one local
   gathers every reply within a deadline and picks the cheapest.
 
 That's the whole of core NATS: subjects, interest, reply inboxes, and
-queue groups. Everything is ephemeral and at-most-once. Nothing is
+queue groups. Everything is ephemeral and at-most-once, and nothing is
 remembered after it's delivered.
 
 ## What's next

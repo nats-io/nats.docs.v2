@@ -9,16 +9,17 @@ description: Open order-svc with a name, a server pool, and a connect timeout, a
 
 Every resilient connection starts the same way: a client opens it. So far
 `order-svc` has connected with nothing but a server URL, a bare default
-connection. That works on a laptop. It's the wrong starting point for
-production, because the very first thing a connection does is the part most
-likely to fail: finding a server, agreeing on terms, and proving who it is.
+connection. That works on a laptop, but it's the wrong starting point for
+production. The very first thing a connection does is also the part most
+likely to fail, since it has to find a server, agree on terms, and prove who
+it is.
 
 This page opens `order-svc`'s connection deliberately. It adds two things to
 the bare default: a small set of connection options that name the
 connection and point it at more than one server, and an understanding of the
 connect handshake, the short conversation the client and server have
-before the first message moves. Get these right and every later mechanism in
-this chapter has a solid connection to build on.
+before the first message moves. Once these are correct, every later mechanism
+in this chapter has a working connection to build on.
 
 ## Connection options
 
@@ -55,13 +56,13 @@ Once `order-svc` runs against more than one server, the pool's *order*
 matters. By default the client **randomizes** the pool before it dials. Give
 it `n1`, `n2`, and `n3`, and one client may try `n2` first while another
 tries `n1`. That randomization spreads connections evenly across the servers
-instead of stacking every client on whichever URL happens to be first in the
-list.
+instead of concentrating every client on whichever URL happens to be first in
+the list.
 
 You can turn randomization off with a single option (every client calls it
 some variant of `NoRandomize`) when you deliberately want a
 preferred-server order. Most applications should leave it on so that a
-restart of every `order-svc` instance doesn't hammer one server.
+restart of every `order-svc` instance doesn't overload one server.
 
 `order-svc` opens against the `n1`/`n2`/`n3` cluster, used here only as a
 pool of three URLs the client can reach, not as a thing this chapter
@@ -87,10 +88,10 @@ default is short (two seconds in most clients), which is enough for a
 healthy network and quick to move past a dead server. Set it deliberately
 when your network is slower than that, or leave the default when it isn't.
 
-The timeout and a server pool work together. A pool gives the client
-somewhere else to go; the timeout decides how long it waits before going
-there. One unreachable server in the pool costs you one timeout, then the
-client moves on.
+The timeout and a server pool complement each other. A pool gives the client
+other URLs to try, and the timeout decides how long it waits on one URL before
+trying the next. One unreachable server in the pool costs you one timeout, then
+the client moves on to the next URL.
 
 The full set of connection options is documented in
 [Reference](/reference/); here we cover only the ones that change how a
@@ -98,9 +99,10 @@ connection behaves under fault.
 
 ## The connect handshake
 
-Naming a connection and pointing it at a pool decides *where* the client
-goes. The **connect handshake** is *what happens* when it gets there: the
-short conversation that turns a TCP socket into a working NATS connection.
+Naming a connection and pointing it at a pool decides which server the client
+goes to. The **connect handshake** is the exchange that happens once it gets
+there: the short conversation that turns a TCP socket into a working NATS
+connection.
 
 It runs in four steps, in order:
 

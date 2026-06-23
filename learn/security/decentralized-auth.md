@@ -11,13 +11,13 @@ The previous page logged `order-svc` in with centralized authentication.
 The server held the list of users in its own config, checked the
 credentials against that list, and accepted or rejected the connection.
 
-That model has a ceiling. Every new user is a server config edit and a
+That model has a scaling limit. Every new user is a server config edit and a
 reload. Every account Acme adds means the operations team touches the
 server again. The team that runs the server becomes a bottleneck for the
 teams that just want to add a user.
 
 Decentralized authentication removes that bottleneck. The server stops
-keeping a user list. Instead it learns to verify proof that someone else
+keeping a user list. Instead it verifies proof that someone else
 already vouched for the user. This page builds that mental model. It runs
 no commands; the hands-on tool comes on the next page.
 
@@ -33,9 +33,9 @@ You want each team to manage its own users without touching the server.
 The server shouldn't need to know every user in advance, only a way to
 tell a real user from a forged one.
 
-That's exactly what a signature gives you.
+A signature gives you exactly that.
 
-## Three identities, each signing the next
+## The three identities in the trust chain
 
 Decentralized authentication arranges identities into a chain. There are
 three links.
@@ -71,11 +71,12 @@ signatures, never anyone's seed.
 An nkey is easy to recognize because its first letter names its role: an
 operator nkey starts with `O`, an account nkey with `A`, a user nkey with
 `U`, and any seed with `S`. So `OD2A...` is an operator's public nkey and
-`SUAH...` is a user's seed. That one-letter prefix is what makes the chain
-tangible: three identities, three letters, each signing the next.
+`SUAH...` is a user's seed. The one-letter prefix lets you read the role
+of each identity directly: three identities, each with its own prefix
+letter, signing the next.
 
-That the server only ever sees public nkeys is the whole reason this model
-scales. The server never holds anyone's seed. It can't leak what it
+That the server only ever sees public nkeys is the reason this model
+scales: the server never holds anyone's seed, so it can't leak a seed it
 doesn't have.
 
 ## JWTs: the signed claim a user presents
@@ -84,7 +85,7 @@ A user proves who it is by presenting a **JSON Web Token (JWT)**. A JWT is
 a small, signed document that states a set of claims and carries the
 signature proving those claims haven't been altered.
 
-Reserve one word here. A JWT isn't a "token" in this chapter; "token"
+One word needs reserving here. A JWT isn't a "token" in this chapter; "token"
 is the password-style credential from the centralized page. A JWT is the
 signed document. The credentials file a client loads to present it is the
 subject of the next page.
@@ -92,13 +93,13 @@ subject of the next page.
 A user JWT names the user and the account that signed it. When
 `order-svc` connects, it presents its user JWT. The server reads which
 account signed it, finds that account's own JWT, and checks that the
-account JWT was signed by the operator. One JWT points at the next, all
-the way up.
+account JWT was signed by the operator. Each JWT references the next one up
+the chain.
 
 ## What the server actually checks
 
-Here's the move that replaces the user list. The server is configured
-with exactly one piece of trust: the **operator's public key**.
+The step that replaces the user list is this: the server is configured
+with exactly one piece of trust, the **operator's public key**.
 
 Given a connecting user, the server walks the chain:
 
@@ -106,9 +107,9 @@ Given a connecting user, the server walks the chain:
    the account's public key.
 2. The account JWT was signed by the operator. Verify that signature
    against the one operator key the server trusts.
-3. If both signatures hold, the user is genuine. Admit it.
+3. If both signatures hold, the user is genuine, so admit it.
 
-The server never needed a list of users. It needed one trusted operator
+The server never needed a list of users; it needed one trusted operator
 key and the math to verify two signatures. Add a thousand users to
 `ORDERS` and the server config doesn't change by a single line.
 
@@ -117,14 +118,14 @@ signed by an account key the operator vouched for — and the attacker holds
 no account's private key. The signature fails at step 2, and the
 connection is rejected.
 
-## Why "no user list" is the point
+## Why removing the user list matters
 
 Centralized authentication answers "is this user in my list?"
 Decentralized authentication answers "does this user's JWT trace back to my
 operator?" The second question scales because the answer is a signature
 check, not a lookup that grows with every user.
 
-This is what lets each team run its own account and stamp out its own
+This is what lets each team run its own account and create its own
 users. The `ORDERS` team signs `order-svc` with the `ORDERS` account key.
 The `ANALYTICS` team signs `analytics-reader` with the `ANALYTICS` account
 key. Neither team touches the server, and the server trusts both because
@@ -132,8 +133,8 @@ the operator vouched for both accounts.
 
 ## Pitfalls
 
-The trust chain is only as sound as the keys behind it. Four gotchas bite
-teams new to decentralized authentication. The commands below come from
+The trust chain is only as sound as the keys behind it. Four gotchas
+commonly catch teams new to decentralized authentication. The commands below come from
 **nsc**, the tool that generates and manages this chain; it gets a full
 walkthrough on the [next page](/learn/security/operator-mode).
 
@@ -154,11 +155,11 @@ secret that must stay private. Only the seed can sign; the public nkey can
 only verify, so treat the seed like a password and the public nkey like a
 username.
 
-**Signing users with the account seed instead of a scoped signing key.** It
-works, so it's tempting. But every user is then signed by the account's
-root key, and a single leaked seed can mint a user with *any* permissions.
+**Signing users with the account seed instead of a scoped signing key.** This
+works, which is why it's tempting, but every user is then signed by the account's
+root key, and a single leaked seed can sign a user with *any* permissions.
 A scoped signing key pins the permissions up front, so a leaked signing key
-can only stamp out the users you already scoped. Add a signing key to
+can only sign the users you already scoped. Add a signing key to
 `ORDERS`, scope it to `orders.>`, and sign `order-svc` with that key rather
 than the account seed (see [ADR-14](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-14.md)).
 

@@ -12,20 +12,20 @@ subscriber on `orders.inventory.check` that read a request and published a
 reply. You end it with `OrderInventory`, a named, versioned service that
 answers the same subject, announces itself on `$SRV`, counts every request,
 and load-balances across as many instances as you start. The behavior on the
-wire never changed. The framework added everything around it.
+wire never changed; the framework added everything around it.
 
 This page doesn't teach anything new. It collects the model you built into
 one place and points you at the chapters and Reference that take it further.
 
-## The whole game in one breath
+## The core idea
 
-Every page in this chapter circled the same idea. If you remember nothing
-else, remember this.
+Every page in this chapter circled the same idea, which is worth restating on
+its own.
 
 A **service** is a request-reply responder the framework formalizes. You
 hand it a name and a version, and it auto-generates a unique service ID,
 subscribes the discovery verbs, and tracks stats for you. The responder you
-already knew how to write gains an identity.
+already knew how to write now has an identity.
 
 An **endpoint** is a named handler on a subject, and a **group** is a
 subject-prefix namespace that organizes endpoints. One service can expose
@@ -39,12 +39,13 @@ tells you its counters.
 
 The default **queue group** `"q"` scales the service. Run more instances with
 the same name and version, and the server delivers each request to exactly
-one of them. There's no coordinator and no config — scaling is "run more."
+one of them. There's no coordinator and no config; you scale by running more
+instances.
 
-Service, endpoint and group, discovery, queue group. Everything else in this
-chapter is a refinement of those four.
+Those four pieces are the service, the endpoint and group, discovery, and the
+queue group. Everything else in this chapter is a refinement of them.
 
-## Where the details live now
+## Where the reference details live
 
 This chapter is unversioned and concept-first. The exact config fields, their
 valid ranges, and the wire format of the discovery verbs live in
@@ -63,11 +64,11 @@ A service is built on top of pieces other chapters teach in full, and it
 leaves gaps that other chapters fill. Follow whichever one matches the
 question you're asking now.
 
-The [Core NATS deep dive](/learn/core-nats) is the floor under this one.
-[Request-reply](/learn/core-nats/request-reply) is the mechanism every
-endpoint rides on, and [queue groups](/learn/core-nats/queue-groups) are
+The [Core NATS deep dive](/learn/core-nats) covers the lower layer this one
+builds on. [Request-reply](/learn/core-nats/request-reply) is the mechanism
+every endpoint uses, and [queue groups](/learn/core-nats/queue-groups) are
 exactly the load balancing that the default group `"q"` gives you. If anything
-in this chapter felt like it skipped a step, the step is there.
+in this chapter seemed to skip a step, that step is covered there.
 
 The [JetStream deep dive](/learn/jetstream) is where you go when a service
 needs to remember something. A service is at-most-once request-reply: it
@@ -105,7 +106,7 @@ and unsubscribes the discovery verbs.
 You hold the core model: a service is a named, versioned, discoverable
 request-reply responder; endpoints and groups organize it; the `$SRV` verbs
 make it discoverable and observable; and the queue group scales it. That model
-is the floor for everything else you'll build on the framework.
+is the foundation for everything else you'll build on the framework.
 
 ## Production checklist
 

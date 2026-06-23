@@ -2,28 +2,29 @@
 id: your-first-stream
 title: 1. Your first stream
 sidebar_position: 2
-description: Why a stream, then create the ORDERS stream and read its anatomy
+description: Why you want a stream, then create the ORDERS stream and look at its configuration
 ---
 
 # 1. Your first stream
 
-This page creates the `ORDERS` stream with one CLI command and inspects it
-with another. First, though: why reach for a stream at all?
+This page creates the `ORDERS` stream with one CLI command, then looks at
+it with another.
 
 ## Why a stream
 
-The running example for this chapter is a small e-commerce backend, the
+The running example for this chapter is a small online store, the
 Acme `ORDERS` platform. Three things happen to an order: it's created,
-shipped, or cancelled. Each shows up as a message on a
+shipped, or cancelled. Each one shows up as a message on a
 [subject](/concepts/subjects): `orders.created`, `orders.shipped`, and
-`orders.cancelled`. A warehouse service packs the box on `orders.created`,
-a notification service emails the customer on `orders.shipped`, and an
-analytics pipeline counts everything.
+`orders.cancelled`. A warehouse service packs the box on `orders.created`.
+A notification service emails the customer on `orders.shipped`. An
+analytics service counts everything.
 
-Plain core NATS drops any of these the moment no service is subscribed. A
-**stream** is what lets them wait: a server-side store that captures
-messages on the subjects you choose, so you can replay history,
-resume after a restart, or read them a month later.
+Plain core NATS drops any of these messages the moment no service is
+listening. A **stream** saves them instead. A stream is a store that
+runs on the server and keeps every message on the subjects you choose.
+You can read the saved messages again, read them after a server restart,
+or read them a month later.
 
 ## Prerequisites
 
@@ -34,7 +35,7 @@ nats-server -js
 ```
 
 The `-js` flag turns on JetStream. Without it, the next command
-refuses to run.
+won't run.
 
 ## Create the stream
 
@@ -45,20 +46,20 @@ In another terminal:
 Two things matter here.
 
 The first is the **stream name**: `ORDERS`. Stream names are
-case-sensitive and can't contain dots, `*`, `>`, spaces, or slashes, so a
-subject like `orders.created` won't work as a name. They show up in every
-command and every error message in this chapter.
+case-sensitive. They can't contain dots, `*`, `>`, spaces, or slashes, so
+a subject like `orders.created` won't work as a name. The name shows up in
+every command and every error message in this chapter.
 
-The second is the **subjects** the stream captures: `orders.>`. That's
-a [wildcard](/concepts/subjects#wildcards). Any subject that starts with `orders.` lands in this
-stream. `orders.created`, `orders.shipped`, `orders.cancelled`
-— all three match. So would `orders.refunded` next month, with no
-configuration change.
+The second is the **subjects** the stream keeps: `orders.>`. That's
+a [wildcard](/concepts/subjects#wildcards). Any subject that starts with
+`orders.` goes into this stream. `orders.created`, `orders.shipped`, and
+`orders.cancelled` all match. So would `orders.refunded` next month, with
+no change to the stream.
 
 The `--defaults` flag tells `nats` not to ask for any of the other
-config values, and to fill them in with sensible starting values
-instead. We'll look at what those defaults actually are in a
-moment. For now: defaults are fine and its actually quite normal to rely on defaults.
+settings. Instead, it fills them in with sensible starting values.
+We'll look at what those values are in a moment. For now, the defaults
+are fine.
 
 You should see output ending with something like:
 
@@ -67,18 +68,18 @@ Stream ORDERS was created
 ```
 
 If you instead see `JetStream system temporarily unavailable`, your
-server was started without `-js`. Restart it with the flag and try
+server started without `-js`. Restart it with the flag and try
 again.
 
 ## Checking the created stream
 
-Ask the server what it just stored:
+Look at what the server just created:
 
 <div class="nats-example" data-type="learn-jetstream-your-first-stream-info" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The output has two halves.
 
-The **configuration** half describes what you asked for and what the
+The **configuration** half shows what you asked for and what the
 defaults filled in:
 
 ```
@@ -99,7 +100,7 @@ Configuration:
        Duplicate Tracking Window: 2m0s
 ```
 
-The **state** half describes what's actually in the stream right
+The **state** half shows what's in the stream right
 now:
 
 ```
@@ -115,41 +116,42 @@ State:
 A new stream is empty: zero messages, zero bytes, no consumers. The
 first message you publish gets sequence `1`.
 
-## A few words on the defaults
+## The defaults
 
 You didn't ask for any of the configuration values above. The CLI
-filled them in. They're worth a short tour so they stop being
-mystery values.
+filled them in. Here is what each one means.
 
-- **Replicas: 1**. The stream lives on one server. Lose that
-  server, lose the stream. Fine on a laptop, dangerous in production.
-  We come back to this on the "Surviving node loss" page.
-- **Storage: File**. Messages are written to disk. The alternative
-  is memory, faster but lost on restart.
-- **Retention Policy: Limits**. The stream keeps messages until a
-  limit is hit (size, age, count). The alternatives are `Interest`
-  and `WorkQueue`, which delete messages once consumed. We cover the
-  three policies on the "Delivery semantics" page.
-- **Discard Policy: Old**. When a limit is finally hit, the
-  oldest messages are deleted to make room. The alternative is
-  `New`, which rejects writes when the stream is full.
+- **Replicas: 1**. The stream lives on one server. If that server goes
+  down, the stream goes down with it. That's fine on a laptop, but
+  risky in production. We come back to this on the "Surviving node loss"
+  page.
+- **Storage: File**. Messages are written to disk. The other option is
+  memory, which is faster but lost on restart.
+- **Retention Policy: Limits**. The stream keeps messages until it
+  hits a limit (size, age, or count). The other options are `Interest`
+  and `WorkQueue`, which delete messages once a consumer has read them.
+  We cover the three policies on the "Delivery semantics" page.
+- **Discard Policy: Old**. When the stream finally hits a limit, the
+  oldest messages are deleted to make room. The other option is
+  `New`, which turns away new messages when the stream is full.
 - **Maximum Messages / Bytes / Age / Message Size: unlimited**. No
   upper bound today. On a real cluster you'd always set at least
   one of these. We do that on the "Shaping the stream" page.
 - **Duplicate Tracking Window: 2m0s**. For two minutes after a
-  message is stored, the server refuses a second message with
-  the same `Nats-Msg-Id` header. This is what makes publish
-  idempotent. The [Publishing](/learn/jetstream/publishing) page uses it.
+  message is stored, the server turns away a second message that
+  carries the same `Nats-Msg-Id` header. This is what lets you publish
+  the same message twice without storing it twice. The
+  [Publishing](/learn/jetstream/publishing) page uses it.
 
-The full set of stream configuration options is documented in
+The full set of stream configuration options is listed in
 [Reference → Create Stream](/reference/jetstream/api/stream/create).
 We use only the defaults here.
 
 ## Subjects bind to exactly one stream
 
-Only one stream can capture a given subject. If you try to
-create a second stream that also captures `orders.>`, the server
-rejects it:
+Only one stream can keep a given subject. If you try to
+create a second stream that also keeps `orders.>`, the server
+turns it down:
 
 ```bash
 nats stream add ARCHIVE --subjects "orders.>" --defaults
@@ -159,54 +161,53 @@ nats stream add ARCHIVE --subjects "orders.>" --defaults
 nats: error: nats: subjects overlap with an existing stream
 ```
 
-This is a deliberate guarantee. When a message lands on a subject,
-JetStream knows exactly which stream it goes into. There's no
-ambiguity to debug later.
+This is on purpose. When a message lands on a subject, JetStream always
+knows which stream it goes into.
 
-To capture overlapping subjects, you reach for **mirrors** and
-**sources**: a mirror keeps a copy of one other stream, and sources
-aggregate messages from several streams into one. They aren't needed for
-the running scenario, so we don't set one up here. The [Mirrors and
-sources](/learn/jetstream/mirrors-and-sources) page builds both end to end,
-and [Reference → Create Stream](/reference/jetstream/api/stream/create)
-lists the `mirror` and `sources` configuration fields.
+To keep overlapping subjects, you use **mirrors** and **sources**. A
+mirror keeps a copy of one other stream. Sources pull messages from
+several streams into one. The running scenario doesn't need either, so we
+don't set one up here. The [Mirrors and
+sources](/learn/jetstream/mirrors-and-sources) page builds both from start
+to finish, and [Reference → Create
+Stream](/reference/jetstream/api/stream/create) lists the `mirror` and
+`sources` configuration fields.
 
 ## Pitfalls
 
-Three traps catch people on their very first stream. Each one is easy
-to avoid once you've seen it.
+Three things catch people on a first stream.
 
 **Unlimited defaults grow forever.** With `--defaults`, `Maximum
 Messages`, `Maximum Bytes`, and `Maximum Age` are all `unlimited`. The
 `ORDERS` stream then keeps every order it ever stored until the disk
-fills, and a full disk takes the server down with it. Don't leave a
-production stream unbounded: set at least one limit so old orders age
-out on their own.
+fills up, and a full disk takes the server down with it. Don't leave a
+production stream without a limit. Set at least one, so old orders are
+removed on their own.
 
-Check the limits, then cap the stream:
+Check the limits, then set a cap on the stream:
 
 <div class="nats-example" data-type="learn-jetstream-your-first-stream-checkLimits" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The full set of storage limits is documented on the [Shaping the
+The full set of storage limits is covered on the [Shaping the
 stream](/learn/jetstream/shaping-the-stream) page. Here you only need
 to know that the defaults set none.
 
 **A stream name is permanent.** There's no rename. `nats stream edit`
-has no `--name` flag, and the server rejects any update that changes an
+has no `--name` flag, and the server turns down any update that changes an
 existing stream's name with `stream configuration name must match
 original`. The only way to "rename" `ORDERS` is to delete it and create
-a new stream, which loses every order already stored. Pick the name
-deliberately the first time:
+a new stream, which loses every order already stored. So pick the name
+carefully the first time:
 
 <div class="nats-example" data-type="learn-jetstream-your-first-stream-renameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **Switching to or from `WorkQueue` retention is rejected.** On an existing
-stream you can move between `Limits` and `Interest`, but the server refuses
-any change to or from `WorkQueue` at all, even on an empty stream
+stream you can move between `Limits` and `Interest`. But the server won't
+allow any change to or from `WorkQueue` at all, even on an empty stream
 (`stream configuration update can not change retention policy to/from
-workqueue`). The only way across that line is to delete and recreate the
-stream, which drops every stored message, so decide on `WorkQueue` up front.
-The three policies and when to reach for each live on the
+workqueue`). The only way to make that change is to delete and recreate the
+stream, which drops every stored message. So decide on `WorkQueue` up front.
+The three policies, and when to use each one, are covered on the
 [Delivery semantics](/learn/jetstream/delivery-semantics) page.
 
 ## Where you are
@@ -215,10 +216,10 @@ You now have:
 
 - an `ORDERS` stream bound to `orders.>`
 - zero messages in it
-- a configuration full of defaults you can name
+- a configuration of default values
 
-The next page publishes the first few messages and looks at what the
-server tells you back.
+The next page publishes the first few messages and shows what the
+server returns.
 
 ## See also
 

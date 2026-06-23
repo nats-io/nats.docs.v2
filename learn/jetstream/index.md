@@ -2,18 +2,18 @@
 id: index
 title: JetStream Deep Dive
 sidebar_position: 1
-description: Streams, consumers, and the acknowledgment loop, built up step by step
+description: Streams, consumers, and the acknowledgment loop, taught step by step
 ---
 
 # JetStream Deep Dive
 
-JetStream is the persistence layer of NATS: it stores messages so they can
-be replayed later, survive a restart, and be redelivered until a consumer
-acknowledges them.
+JetStream is the part of NATS that stores messages. Once a message is stored,
+you can read it again later. It stays on disk through a server restart. And it
+keeps getting redelivered until a consumer acknowledges it.
 
-This chapter builds that up a page at a time around one running example,
-the Acme `ORDERS` platform, with a single server running from the first
-page to the last. Nothing resets between pages.
+This chapter builds that up one page at a time, using a single running example:
+the Acme `ORDERS` platform. The same server runs across the whole chapter, and
+its data carries over from one page to the next.
 
 ## Who this is for
 
@@ -48,8 +48,8 @@ subjects, and queue groups.
 
 You'll need:
 
-- A working `nats-server` with JetStream enabled. The simplest way is
-  `nats-server -js` (see [Getting Started](/concepts/getting-started/)).
+- A running `nats-server` with JetStream turned on. The simplest way to get one
+  is `nats-server -js` (see [Getting Started](/concepts/getting-started/)).
 - The `nats` CLI installed and pointed at your server.
 
-Open a terminal, run `nats-server -js`, and turn the page.
+Open a terminal and run `nats-server -js`.

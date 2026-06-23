@@ -9,13 +9,13 @@ description: Put a file into the INVOICES bucket and get it back
 
 Acme's `order-svc` already publishes order messages into the `ORDERS`
 stream. But an order produces more than a message. Once payment clears it
-produces an invoice PDF: a file too large and too binary to ride along as
-a message payload. That file needs a home, and the `warehouse` service
+produces an invoice PDF, a file too large and too binary to send as
+a message payload. That file needs to be stored somewhere, and the `warehouse` service
 needs to fetch it back before it ships the box.
 
-That home is an **object store**. This page creates Acme's first bucket,
-stores one invoice in it, and gets that invoice back. Two operations,
-`put` and `get`, carry the whole page.
+That somewhere is an **object store**. This page creates Acme's first bucket,
+stores one invoice in it, and gets that invoice back. This page covers two operations,
+`put` and `get`.
 
 ## A bucket holds objects
 
@@ -37,21 +37,19 @@ The description is stored on the bucket and shows up whenever you inspect
 it. The bucket name follows the same rule as a stream name: letters,
 digits, underscores, and dashes only. `INVOICES` is fine.
 
-## Put: hand the store a name and bytes
+## Put: store a name and bytes
 
-**Put** is the store verb. You hand the store an object name and its
+**Put** is the store verb. You give the store an object name and its
 bytes, and the store keeps them. The bytes can come from a file on disk,
 from memory, or from a stream you read as you go. Every client offers
-the convenient forms.
+convenient forms for these.
 
 Here `order-svc` puts the invoice for order `ord_8w2k`:
 
 <div class="nats-example" data-type="learn-object-store-your-first-object-put" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Three things happen inside that one call.
-
-First, the store splits the bytes into pieces. Each piece is one message.
-You'll meet that splitting properly on the [next page](/learn/object-store/chunking);
+Three things happen inside that one call. First, the store splits the bytes into pieces. Each piece is one message.
+You'll see that splitting in detail on the [next page](/learn/object-store/chunking);
 for now it's enough to know a large file doesn't become one giant
 message.
 
@@ -73,7 +71,7 @@ to ship `ord_8w2k`:
 
 <div class="nats-example" data-type="learn-object-store-your-first-object-get" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Get isn't a blind read. The store reads the object's metadata record,
+Get verifies the bytes before returning them. The store reads the object's metadata record,
 streams the pieces back in order, reassembles them, and recomputes the
 SHA-256 digest of what it reassembled. Only if that digest matches the
 one recorded on put does get return the bytes. If the two differ (a
@@ -81,8 +79,8 @@ piece went missing, a transfer was cut short), get returns an error
 instead of a corrupt file.
 
 That's the contract of an object store: what you get is byte-for-byte
-what you put, or you get an error. There's no quiet truncation to debug
-in production three weeks later.
+what you put, or you get an error. The store does not return a quietly
+truncated file.
 
 ## Watch put and get flow
 
@@ -94,13 +92,13 @@ over.
 
 <div class="nats-flow" data-scenario="objectPutGetAnimated" data-width="600" data-height="350"></div>
 
-Put is pieces-then-metadata. Get is metadata-then-pieces-then-verify.
-That ordering is what lets get know how many pieces to expect and what
+Put writes the pieces and then the metadata, while get reads the metadata
+and then the pieces and then verifies. That ordering is what lets get know how many pieces to expect and what
 digest to check them against.
 
 ## Pitfalls
 
-Two traps catch people on their first object. Both come from treating put
+Two mistakes are common on a first object. Both come from treating put
 and get as if they couldn't fail.
 
 **A digest mismatch means do not use the bytes.** The pieces of an object
@@ -108,7 +106,7 @@ are written as separate messages. If a put is interrupted partway (the
 process dies, the connection drops), the object can be left incomplete.
 The store guards against this on get: it verifies the reassembled bytes
 against the stored digest and returns `ErrDigestMismatch` on a mismatch.
-The trap is to ignore that error and use the bytes anyway. Do check the
+The mistake is to ignore that error and use the bytes anyway. Do check the
 get result before you act on it; an `ErrDigestMismatch` means retry the
 get, and a repeated mismatch means the object is damaged and should be
 put again. Don't assume a put "worked" without a get confirming it

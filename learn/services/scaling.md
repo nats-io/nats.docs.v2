@@ -20,8 +20,9 @@ created the service (you saw this happen on the
 scaling story. You start more copies of the service, and the server spreads
 requests across them.
 
-This page teaches two things: how running N instances load-balances for free,
-and how to stop an instance without dropping the work it's holding.
+This page teaches two things: how running N instances load-balances with no
+extra configuration, and how to stop an instance without dropping the work it's
+holding.
 
 ## Run more instances
 
@@ -38,38 +39,39 @@ and the new instance joins the work.
 What makes the requests spread is the **default queue group `"q"`**. Every
 endpoint joins it unless you override it. When several instances subscribe to
 `orders.inventory.check` under the same queue group, the server delivers each
-request to exactly one member of that group. Two instances, one request in:
-one instance handles it. This is the queue-group behavior from Core NATS, now
-applied automatically across instances; the mechanics live on
+request to exactly one member of that group. With two instances, one incoming
+request is handled by one of them. This is the queue-group behavior from Core
+NATS, now applied automatically across instances; the mechanics live on
 [Queue groups](/learn/core-nats/queue-groups).
 
 Start a second instance, send a burst of orders, and watch them spread:
 
 <div class="nats-example" data-type="learn-services-scaling-runInstances" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Six requests across two instances land roughly three and three. The split
-isn't round-robin you control; it's the server handing each message to whichever
+Six requests across two instances land roughly three and three. The split isn't
+a round-robin you control: the server delivers each message to whichever
 queue-group member is ready. Add a third instance and the same six spread three
-ways. There's no coordinator deciding this; the queue group does it on the
-server, per request.
+ways. No coordinator decides this; the queue group does it on the server, per
+request.
 
 <div class="nats-flow" data-scenario="serviceScalingAnimated" data-width="600" data-height="350"></div>
 
 The animation shows five `OrderInventory` instances sharing queue group `"q"`.
 Each request lights exactly one instance, and the next request can light a
-different one. That's the whole scaling model: more members, the same group,
-one delivery per request.
+different one. That's the whole scaling model: more members in the same group,
+with one delivery per request.
 
 Disabling the queue group breaks this. You met `WithEndpointQueueGroupDisabled`
 on [endpoints and groups](/learn/services/endpoints-and-groups): with it, an
 endpoint subscribes plainly instead of joining a group, so every instance
-receives every request. That's broadcast, not scaling: useful for fan-out
-work, wrong for load balancing. Keep the queue group on when you want to scale.
+receives every request. That's broadcast rather than scaling: it's useful for
+fan-out work, but wrong for load balancing. Keep the queue group on when you
+want to scale.
 
 ## Stop an instance cleanly
 
-Scaling up is half the job. Scaling down (or rolling out a new version, or
-shutting an instance for maintenance) means stopping an instance. Stopping it
+Scaling up is only part of the job. Scaling down (or rolling out a new version,
+or shutting an instance for maintenance) means stopping an instance. Stopping it
 abruptly drops any request it was mid-handle.
 
 The framework gives you a graceful stop. Calling `Stop()` on a service
@@ -102,32 +104,33 @@ You'll find the full set of service lifecycle and queue-group fields in
 
 ## Pitfalls
 
-Scaling out turns one quiet assumption into a bug: that there's only one of
-you. Each instance runs the same handler on its own connection, and they don't
-share memory. Two traps follow from that.
+Scaling out turns one easy-to-miss assumption into a bug: that only one instance
+is running. Each instance runs the same handler on its own connection, and they
+don't share memory. Two problems follow from that.
 
 **Instances don't share memory — protect external state.** If a handler
 increments a counter, caches a value, or reserves stock in a local variable,
-each instance keeps its own copy. Run three instances and you have three
-independent counters, three caches, three views of "remaining stock," and they
-drift apart. Don't assume one instance owns the truth. Keep handlers
-stateless, and when work genuinely needs shared state, push it into an external
-store: a database, or a [JetStream](/learn/jetstream) stream or key-value
-bucket that all instances read and write through. The instances stay
-interchangeable; the state lives in one place they all agree on.
+each instance keeps its own copy. Run three instances and each one has its own
+independent counter, its own cache, and its own view of "remaining stock," and
+they drift apart. Don't assume one instance holds the correct value. Keep
+handlers stateless, and when work genuinely needs shared state, push it into an
+external store: a database, or a [JetStream](/learn/jetstream) stream or
+key-value bucket that all instances read and write through. The instances stay
+interchangeable; the state lives in one place that all of them use.
 
-**A blocking handler starves its instance.** Handlers run synchronously on the
-service's connection. While one handler blocks (a slow database call, a sleep,
-a lock it can't get), that instance answers no other request. The queue group
-hides this for a while, routing around the busy instance to its peers, but if
-every instance blocks, the whole service stalls. Don't do slow work inline in a
-handler. Keep handlers fast, move long work off the request path, and add more
-instances so the rest absorb a momentary stall on one.
+**A blocking handler stops its instance from serving other requests.** Handlers
+run synchronously on the service's connection. While one handler blocks (a slow
+database call, a sleep, a lock it can't get), that instance answers no other
+request. The queue group masks this for a while by sending requests to the busy
+instance's peers instead, but if every instance blocks, the whole service
+stalls. Don't do slow work inline in a handler. Keep handlers fast, move long
+work off the request path, and add more instances so the rest absorb a momentary
+stall on one.
 
-The fix for both is the same discipline: instances are disposable, so make
-stopping one safe. A graceful stop drains in-flight work and hands new requests
-to the survivors, which is exactly what you want when an instance is slow,
-overloaded, or being replaced. Stop one and watch the rest carry on:
+The fix for both is the same: instances are disposable, so make stopping one
+safe. A graceful stop drains in-flight work and hands new requests to the
+survivors, which is what you want when an instance is slow, overloaded, or being
+replaced. Stop one and the rest carry on:
 
 <div class="nats-example" data-type="learn-services-scaling-stopService" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -145,14 +148,15 @@ You now have:
 - A graceful `Stop()` that drains in-flight work and leaves the queue group, so
   the survivors absorb the load with nothing dropped.
 
-Scaling is "run more, the queue group balances." Scaling down is "stop
-one cleanly, the rest pick it up."
+Scaling up means running more instances and letting the queue group balance the
+load. Scaling down means stopping one instance cleanly so the rest pick up its
+work.
 
 ## What's next
 
 That's the framework end to end: a named, versioned service with endpoints and
 groups, made discoverable and observable through `$SRV`, and scaled by running
-more instances. The last page recaps the whole game and points to where the
+more instances. The last page recaps all of this and points to where the
 remaining details live.
 
 Continue to [7. Where to go next](/learn/services/where-next).

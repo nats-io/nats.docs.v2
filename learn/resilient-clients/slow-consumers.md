@@ -45,10 +45,10 @@ Those caps stop the buffer from growing without end, but they're sized
 for a typical workload, not yours. A high-rate subject or large messages
 can fill 64 MB in seconds, and a `warehouse` that stays behind hits that
 default and starts dropping messages, often well before you'd have set a
-limit yourself. The defaults are a backstop, not a tuning.
+limit yourself. The defaults serve as a backstop rather than a workload-specific tuning.
 
 A **slow consumer** is a subscriber whose pending buffer fills faster
-than the handler drains it. The name is the fault. On the default limits a
+than the handler drains it, which is what the name describes. On the default limits a
 slow consumer drops messages on a busy enough day; the fix is to set
 limits sized to your own workload, and to make the drops visible.
 
@@ -73,9 +73,9 @@ everywhere in this chapter:
 {"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
 ```
 
-Choosing the numbers is a sizing exercise, not a guess. A limit sized to
+Choose the numbers by sizing rather than by guessing. A limit sized to
 roughly the handler's latency times the subject's peak rate gives the
-buffer enough room to ride out a normal burst without letting a stuck
+buffer enough room to absorb a normal burst without letting a stuck
 handler hold an open-ended backlog. Too tight and you drop messages during
 traffic that the handler could have caught up on; too loose and you waste
 memory holding a backlog the handler will never catch up on.
@@ -87,9 +87,9 @@ connection behaves under fault.
 ## The slow-consumer signal
 
 A bounded buffer raises a new question: what happens to the message that
-arrives when the buffer is already full? It doesn't block the connection,
-and it doesn't silently corrupt the buffer. Instead the client does two
-things: it drops the message, and it fires the **async error callback**
+arrives when the buffer is already full? The client doesn't block the connection
+or silently corrupt the buffer. Instead the client drops the message
+and fires the **async error callback**
 with a slow-consumer error.
 
 This is the **slow-consumer signal**: the overflow that would have grown
@@ -110,12 +110,12 @@ That signal is only useful if something is listening for it. The async
 error callback is set on the connection. It's the single place the
 client reports asynchronous problems that aren't tied to one API call: a
 slow consumer, a permission violation, a protocol error. A connection
-with no async error callback throws these on the floor, and dropped
+with no async error callback discards these reports, and dropped
 messages become invisible.
 
 <div class="nats-flow" data-scenario="slowConsumerAnimated" data-width="600" data-height="350"></div>
 
-The animation shows the shape of it: `order-svc` publishes fast, the
+The animation shows the sequence: `order-svc` publishes fast, the
 server delivers to `warehouse`, the pending buffer fills, and the message
 that overflows is dropped while the async error callback fires. The
 handler is still working through the backlog the whole time.
@@ -124,14 +124,14 @@ handler is still working through the backlog the whole time.
 
 The signal above is the *client's* view: your handler is slow, your
 buffer overflows, your callback fires, and the connection lives on.
-There's a second, distinct failure that wears the same name from the
+There's a second, distinct failure that has the same name from the
 *server's* side, and the two are worth keeping apart because they need
 different fixes.
 
 If a client reads off its socket so slowly that the server can't finish
 writing to it within the server's per-client write deadline, the server
 gives up on that client and closes the *whole connection*. From the
-client's seat this doesn't look like a dropped message and an async
+client's perspective this doesn't look like a dropped message and an async
 error. It looks like a disconnect with a read error, which then drives
 the reconnect logic from the previous page.
 
@@ -152,10 +152,10 @@ protect each individual member of that pool.
 
 ## Pitfalls
 
-A few traps turn a slow handler into a silent outage. Each is scoped to
+A few mistakes turn a slow handler into a silent outage. Each is scoped to
 this page's two ideas: pending limits and the slow-consumer signal.
 
-**The default limits are a backstop, not a tuning.** The pending buffer
+**The default limits are a backstop rather than a workload-specific tuning.** The pending buffer
 ships with roomy defaults (500,000 messages and 64 MB in the Go client)
 that a high-rate or large-message subject can fill in seconds. A
 subscriber that falls behind during a busy hour hits those defaults and
@@ -165,15 +165,15 @@ work, and size them to the handler's latency and the subject's peak rate
 rather than relying on caps sized for someone else's workload.
 
 **A nil async error callback hides every dropped message.** Pending
-limits without a callback are half a fix: the buffer is bounded, but the
+limits without a callback are an incomplete fix: the buffer is bounded, but the
 overflow is dropped silently and you never learn the application lost
 data. The slow-consumer signal only reaches you if the connection has an
 async error callback set. Always set one, and log the slow-consumer error
-loudly — a quiet drop is worse than a crash because you don't even know
+visibly — a quiet drop is worse than a crash because you don't even know
 it happened.
 
-Wire up bounded limits *and* a callback that records every slow-consumer
-drop, so a backlog is loud, not lethal:
+Set up bounded limits *and* a callback that records every slow-consumer
+drop, so a backlog is reported instead of causing silent data loss:
 
 <div class="nats-example" data-type="learn-resilient-clients-slow-consumers-handle-slow-consumer" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -182,7 +182,7 @@ of slow-consumer errors on the async callback means your handler is too
 slow and individual messages are being dropped; the connection is fine.
 A disconnect with a read error means the *server* gave up writing to a
 client that drained its socket too slowly: a different failure with a
-different fix. Treating one as the other sends you tuning the wrong knob.
+different fix. Treating one as the other leads you to change the wrong setting.
 Watch the async-error rate and the disconnect rate separately.
 
 ## Where you are

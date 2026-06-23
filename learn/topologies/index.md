@@ -9,12 +9,13 @@ description: How NATS servers compose into bigger shapes, grown one deployment a
 
 NATS scales by composing servers. This chapter walks through the shapes
 those servers form (one server, a cluster, a super-cluster, leaf nodes
-at the edge), the way a real deployment grows: start small, add servers
-when you need them, stretch across regions, push to the edge.
+at the edge), following the way a real deployment grows: you start
+small, add servers when you need them, stretch across regions, and then
+push to the edge.
 
-The point that holds the whole chapter together is this: the
-application never changes. The same server binary and the same client
-code run on every shape. You change the deployment, not the code.
+The idea that ties the whole chapter together is that the application
+never changes. The same server binary and the same client code run on
+every shape, so you change the deployment rather than the code.
 
 <div class="nats-flow" data-scenario="singleToClusterAnimated" data-width="640" data-height="400"></div>
 
@@ -38,8 +39,8 @@ What grows across the chapter is the deployment under that workload, in
 four stages:
 
 - **One server.** Acme starts with a single `nats-server`, `n1`, on a
-  developer laptop. Clients connect to it directly. It's the simplest
-  thing that works.
+  developer laptop. Clients connect to it directly, which is the
+  simplest setup that works.
 - **A cluster.** Production needs to survive a server dying. Acme stands
   up the `east` cluster (three servers: `n1-east`, `n2-east`, and
   `n3-east`) joined into a full mesh by **routes**. Clients connect to
@@ -52,21 +53,21 @@ four stages:
   network access. Acme runs `factory-1` as a **leaf node** that connects
   outward to the `east` cluster and serves its own local edge clients.
 
-Each shape adds exactly one new way for servers to connect. That's the
-whole vocabulary of NATS topology: routes join servers into a cluster,
-gateways join clusters into a super-cluster, and leaf remotes attach a
-leaf to a hub.
+Each shape adds exactly one new way for servers to connect. These are
+the connection types NATS topology uses: routes join servers into a
+cluster, gateways join clusters into a super-cluster, and leaf remotes
+attach a leaf to a hub.
 
-## What this chapter is, and is not
+## Scope of this chapter
 
 This is the Operate-half companion to the
 [Core Concepts → Topologies](/concepts/topologies) primer. The concept
 page is the five-minute overview. This chapter wires each shape up for
-real, with config you can copy-paste, `nats-server` processes you can
-run locally, and the "when and why" behind each step.
+real, providing config you can copy-paste, `nats-server` processes you
+can run locally, and the "when and why" behind each step.
 
-This chapter teaches the **shapes and the wiring**. It doesn't teach
-the **mechanics** of replication: Raft, quorum, leader election, stream
+This chapter teaches the **shapes and the wiring**, rather than the
+**mechanics** of replication: Raft, quorum, leader election, stream
 placement. Those live in the
 [Clustering & Replication](/learn/clustering) deep dive. When a topology
 page reaches that boundary, it says so in one sentence and links out

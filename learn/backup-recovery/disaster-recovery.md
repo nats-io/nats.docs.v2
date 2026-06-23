@@ -7,21 +7,21 @@ description: A runbook that picks restore-from-snapshot or promote-the-mirror pe
 
 # 4. Disaster recovery
 
-You now hold two tools. A **snapshot** of `ORDERS` sits off-site under
+You now have two tools. A **snapshot** of `ORDERS` sits off-site under
 `./backups/orders/`, and a live **mirror**, `ORDERS_DR`, runs at `site2`.
-Each protects against a different kind of bad day, and reaching for the
+Each protects against a different failure, and reaching for the
 wrong one during an outage costs you either data or hours.
 
 This page is the **runbook**: an ordered procedure that names the failure,
-picks the right tool, and walks the recovery against the real `ORDERS`
-world. It also teaches the one operation the earlier pages set up but never
+picks the right tool, and carries out the recovery against the real `ORDERS`
+deployment. It also covers the one operation the earlier pages set up but never
 performed: **promotion**, turning the read-only `ORDERS_DR` into a
 writable primary.
 
 ## Match the failure to the tool
 
-A runbook starts before the outage. The decision you don't want to make at
-three in the morning is *which tool*. Make it now, once, per failure class.
+A runbook starts before the outage. The decision you don't want to make
+under pressure during an outage is *which tool*. Decide it ahead of time, per failure class.
 
 | What happened | Reach for | Why |
 |---|---|---|
@@ -30,9 +30,9 @@ three in the morning is *which tool*. Make it now, once, per failure class.
 | Messages on `ORDERS` are corrupt or wrong (a bad publisher) | restore a known-good snapshot, or purge the bad range | The bad data replicated to the mirror as well. The snapshot predates the corruption. |
 | A consumer lost its position (`shipping` redelivering from zero) | restore a `--consumers` snapshot | Only the snapshot captured the consumer's saved delivery position. |
 
-One line runs through the whole table: **a mirror recovers a site, a
-snapshot recovers a mistake.** A mirror is a faithful live copy, so it
-faithfully copies your errors too. That's why the chapter built both, and
+One principle runs through the whole table: **a mirror recovers a site, a
+snapshot recovers a mistake.** A mirror is an exact live copy, so it
+also copies your errors. That's why the chapter built both, and
 why [R3 replication](/learn/clustering) is on neither row: replicating a
 bad write three times doesn't undo it.
 
@@ -41,7 +41,7 @@ bad write three times doesn't undo it.
 When the `east` cluster is gone, the goal is to make `ORDERS_DR` start accepting
 writes so `order-svc` and the consumers can carry on at `site2`. That's
 promotion, and it's a short, ordered sequence. The animation below
-walks it end to end.
+shows it end to end.
 
 <div class="nats-flow" data-scenario="mirrorFailoverAnimated" data-width="600" data-height="350"></div>
 
@@ -54,8 +54,8 @@ always the same: read the lag.
 
 <div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-checkLag" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-If the `east` site is fully dark, the mirror can't reach its upstream and the lag
-freezes at whatever it was when contact dropped. That frozen number is your
+If the `east` site is fully unreachable, the mirror can't reach its upstream and the lag
+stops at whatever it was when contact dropped. That stalled number is your
 real recovery point: the messages written to `ORDERS` after the last
 successful copy are lost. Note it, then proceed. Waiting for a lag that will
 never move to zero only extends the outage.
@@ -88,12 +88,12 @@ nats --server nats://site2:4222 stream edit ORDERS_DR --subjects "orders.>"
 ```
 
 `ORDERS_DR` now captures `orders.created`, `orders.shipped`,
-`orders.cancelled` — the same subjects the lost primary held. It's a full
-primary in everything but name.
+`orders.cancelled` — the same subjects the lost primary held. It now functions
+as a full primary.
 
 ### Step 4 — redirect publishers and consumers
 
-The last step is traffic. Point `order-svc` and the consumers at `site2` and
+The last step redirects traffic. Point `order-svc` and the consumers at `site2` and
 they resume against the promoted stream:
 
 ```bash
@@ -104,18 +104,18 @@ nats --server nats://site2:4222 pub orders.created \
 
 The order JSON is byte-for-byte what `order-svc` always sent; only the server
 address changed. Failover is complete: the platform writes and reads at
-`site2`, and the data loss is exactly the frozen lag you noted in step 1.
+`site2`, and the data loss is exactly the stalled lag you noted in step 1.
 
 How the mirror replicated those messages in the first place (the config,
 the filters, the start position) is the JetStream chapter's job, covered in
 [Mirrors and sources](/learn/jetstream/mirrors-and-sources). The runbook only
-reads the lag and flips the relationship.
+reads the lag and changes the relationship.
 
 ## Recovery from a mistake: restore the snapshot
 
-The other rows of the table don't fail over — they roll back. When `ORDERS`
-was deleted, purged, or filled with corrupt messages, the mirror is no help:
-it copied the damage. The snapshot is the intact copy, taken before the bad
+The other rows of the table roll back rather than fail over. When `ORDERS`
+was deleted, purged, or filled with corrupt messages, the mirror is no help,
+because it copied the bad data. The snapshot is the intact copy, taken before the bad
 event.
 
 <div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-restoreStream" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -136,15 +136,15 @@ Here it's one step in a larger procedure.
 
 ## Pitfalls
 
-The runbook fails most often not on the commands but on the order and the
-assumptions around them. Four traps catch people mid-outage.
+The runbook fails most often on the order of the steps and the
+assumptions around them rather than on the commands themselves. Four common mistakes happen mid-outage.
 
 **Never promote a mirror before lag reaches zero.** Promotion makes the
 mirror writable. If you do it while messages are still in flight from the
 upstream, those tail messages are lost and new writes land on top of the
 gap. Always run the lag check first, and only proceed at `Lag: 0` or with a
-frozen lag you've consciously accepted as your recovery point. The
-do-and-don't fits on one line: read the lag; don't skip step 1.
+stalled lag you've consciously accepted as your recovery point. Read the lag
+and don't skip step 1.
 
 You can make that check a gate. Run the lag check from
 [step 1 above](#step-1--verify-the-lag-is-zero), decide on the number, then
@@ -156,25 +156,25 @@ all three copies at once. R3 is availability, not a backup. Don't put it on
 the mistake rows of the table; that's what snapshots are for.
 
 **Stop publishers before purging corrupted messages.** Purging a bad
-sequence range while `order-svc` is still writing races new corrupt data in
-behind you, and you purge forever chasing a moving tail. Stop the
+sequence range while `order-svc` is still writing lets new corrupt data arrive
+behind you, so you keep purging against a tail that keeps growing. Stop the
 publishers, purge or restore, then resume.
 
-**An untested snapshot is a guess.** A green `nats stream info` on the live
+**An untested snapshot is unverified.** A healthy `nats stream info` on the live
 stream tells you the live stream is healthy; it proves nothing about the
 archive in `./backups/orders/`. Rehearse the restore on a schedule
-(quarterly is a sane floor) into a throwaway stream or server, so the first
+(quarterly is a reasonable minimum) into a throwaway stream or server, so the first
 time you run it isn't during the outage.
 
 ## Where you are
 
-You can now name a NATS failure and reach for the right tool without
-thinking. A lost site means promote `ORDERS_DR`: verify lag, drop the mirror
+You can now name a NATS failure and reach for the right tool quickly.
+A lost site means promote `ORDERS_DR`: verify lag, drop the mirror
 config, add the subjects, redirect traffic. A mistake (delete, corruption,
 or a lost consumer position) means restore the snapshot, because the mirror
 copied the mistake. R3 is on neither path; it's availability, not recovery.
 
-The data plane is now fully covered: a point you can return to, and a site
+The data plane is now fully covered: a snapshot you can restore to, and a site
 where you can promote the mirror.
 
 ## What's next

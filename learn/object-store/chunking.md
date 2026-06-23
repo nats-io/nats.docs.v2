@@ -12,7 +12,7 @@ The bytes were small enough to feel atomic: one put, one get, done. But
 NATS messages have a size limit, and an invoice PDF can be far larger than
 any single message. So how did a file land in a message store at all?
 
-It did not land in one message. The store split it. This page is about
+It did not land in one message; the store split it. This page is about
 that split: how an object becomes **chunks**, how get puts them back
 together, and what happens when a put fails partway through.
 
@@ -92,19 +92,18 @@ generated for that put alone, separate from the object's name. The chunks
 of one put are tagged with this fresh identity. When you put the same
 object name twice (a corrected invoice over a draft), the second put's
 chunks never overlap the first's.
-The store writes the new chunks under the new identity, swings the object's
-metadata to point at them, and the old chunks fall away. A re-put is a
-clean replacement, never a merge.
+The store writes the new chunks under the new identity, points the object's
+metadata at them, and the old chunks fall away. A re-put replaces the
+object cleanly rather than merging new bytes into the old ones.
 
-So two failure modes you might fear don't happen. A put that dies partway
-doesn't leave a broken object behind, and a re-put doesn't splice new
-bytes into old ones. Either you get the whole object you put, or the get
-tells you that you can't.
+So two failure modes don't happen. A put that fails partway doesn't leave a
+broken object behind, and a re-put doesn't splice new bytes into old ones.
+Either you get the whole object you put, or the get returns an error.
 
 ## Choosing a chunk size
 
-The chunk size is a knob. You can set it per put, and it changes how many
-messages the object becomes:
+The chunk size is configurable. You can set it per put, and it changes how
+many messages the object becomes:
 
 <div class="nats-example" data-type="learn-object-store-chunking-chunkSize" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -120,7 +119,7 @@ The full set of chunk-size options is documented in
 Two traps show up once objects get large. Each is scoped to this page:
 the chunk size, and the integrity check on get.
 
-**A chunk size at the extremes hurts.** Set it too small and a single file
+**A chunk size at the extremes causes problems.** Set it too small and a single file
 becomes thousands of tiny messages. Each chunk is a NATS message that
 carries its own protocol framing (headers and subject routing on top of
 the slice of bytes), so very small chunks waste storage on per-message
@@ -160,7 +159,7 @@ You now have:
   chunks, and a re-put under a fresh identity never overlaps old bytes.
 
 The chunks carry the data. The metadata message that closes each put
-carries everything *about* the object — and that's the next page.
+carries everything *about* the object, which the next page covers.
 
 ## What's next
 

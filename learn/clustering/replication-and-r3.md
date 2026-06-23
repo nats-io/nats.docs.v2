@@ -7,16 +7,16 @@ description: How a replicated stream commits a write by quorum, and the consiste
 
 # 4. Replication and R=3
 
-The last page elected leaders. The cluster now has a meta leader and,
+The last page elected leaders, so the cluster now has a meta leader and,
 once you create a stream, a leader for that stream's RAFT group. This
-page puts those leaders to work: it follows a single order from
+page uses those leaders: it follows a single order from
 `order-svc` into the `ORDERS` stream and shows exactly when that write
 becomes safe to lose a server over.
 
 The [surviving node loss](/learn/jetstream/surviving-node-loss) page in
 the JetStream chapter gave you the one-line version: `R=3` keeps three
-copies, so the loss of one server costs nothing. This page is the
-mechanism under that promise. It introduces two ideas: **quorum
+copies, so the loss of one server costs nothing. This page explains the
+mechanism behind that guarantee. It introduces two ideas: **quorum
 commit**, how the leader turns one write into a committed entry across
 the group, and the **consistency** you get back from it.
 
@@ -46,7 +46,7 @@ the three peers, here `n1-east`) and two **followers**, `n2-east` and
 `n3-east`. Every write goes through the leader. The followers never
 take writes directly; they receive them from the leader.
 
-Three is the production floor, and five is the ceiling: a stream
+Three is the minimum for production, and a stream
 supports at most `R=5`. The reasoning for *which* odd count to choose
 belongs to [surviving node loss](/learn/jetstream/surviving-node-loss).
 Here we follow what one write does once the count is three.
@@ -54,8 +54,8 @@ Here we follow what one write does once the count is three.
 ## A write commits by quorum
 
 When `order-svc` publishes `orders.created`, the message reaches the
-stream leader, `n1-east`. The leader doesn't store it and immediately
-say "done." It runs a short sequence first.
+stream leader, `n1-east`. The leader does not return success on storing
+it locally; it runs a short sequence first.
 
 The leader **appends** the write to its own log: an ordered,
 append-only record of every operation the group has agreed on. Appending
@@ -73,16 +73,17 @@ of three. The leader is itself one of the two, so it needs just one
 follower's ack to reach quorum. The instant the first follower acks,
 the entry is committed.
 
-Commit is the durability line. A committed entry survives the loss of
-any single server, because it already lives on a majority. This is what
-makes the `PubAck` that `order-svc` receives a real promise: the leader
-returns it only after the write commits, so a `PubAck` means the order
-outlived the chance of a single-node failure before you ever heard back.
+Commit is the point at which durability is reached. A committed entry
+survives the loss of any single server, because it already lives on a
+majority. This is what makes the `PubAck` that `order-svc` receives a
+real guarantee: the leader returns it only after the write commits, so
+a `PubAck` means the order already survived the chance of a single-node
+failure before you heard back.
 
 The third peer isn't on the critical path. `n3-east` may ack a moment
 later, or be briefly behind; the write committed without waiting for it.
 That's the point of a quorum: the group makes progress as long as a
-majority is reachable, not all of it.
+majority is reachable, even if not all peers are.
 
 ## Followers apply what the leader commits
 
@@ -92,15 +93,15 @@ the order into each peer's copy of the stream. That last step is
 where consumers can read it.
 
 The leader tracks a **commit index**, the position up to which entries
-are committed. It rides along on the next append entry or heartbeat, so
+are committed. It is included on the next append entry or heartbeat, so
 followers learn "everything up to here is committed; apply it." Each
 follower then applies those entries to its own stream store in the same
 order the leader did.
 
-Order is the guarantee. Every peer applies the same entries in the same
-sequence, so all three copies of `ORDERS` converge on the identical
-message log. A follower can lag the leader by a few entries, but it
-never reorders them and never skips one.
+Order is what the group guarantees here. Every peer applies the same
+entries in the same sequence, so all three copies of `ORDERS` converge
+on the identical message log. A follower can lag the leader by a few
+entries, but it never reorders them and never skips one.
 
 Here's one write from `order-svc` moving through that whole sequence
 (publish, append entry, ack, commit at quorum, apply):
@@ -114,8 +115,8 @@ append → quorum → commit → apply shape.
 
 ## The consistency you get
 
-Quorum commit gives a specific, nameable consistency, and it pays to
-know its edges before you build on it.
+Quorum commit gives a specific, nameable consistency, and you should
+know its boundaries before you build on it.
 
 Reads from the leader are read-after-write. The leader holds every
 committed entry and assigns every sequence number, so once a `PubAck`
@@ -125,11 +126,11 @@ where your own just-acked write is missing.
 Reads from a follower can lag. A follower applies committed entries
 slightly after the leader does, so a direct read from `n2-east` or
 `n3-east` might not yet show the most recent order, even though that
-order is already committed and safe. The data is correct, just a beat
+order is already committed and safe. The data is correct but slightly
 behind. For read-after-write, read from the leader.
 
-This is the trade `R=3` makes on purpose. It doesn't promise that every
-copy is identical at every instant; it promises that every copy
+This is the trade `R=3` makes on purpose. Rather than promising that
+every copy is identical at every instant, it promises that every copy
 *converges*, in order, and that a committed write survives one server
 loss. When you need to confirm where the copies actually stand, the
 `Cluster` block of `nats stream info` reports each replica's status and
@@ -137,19 +138,20 @@ how far behind it is, which is exactly the next section's first trap.
 
 ## Pitfalls
 
-Three traps catch people the first time they trust a replicated stream.
-Each is scoped to this page's two ideas: how a write commits, and the
-consistency it gives back.
+These are three common mistakes the first time you trust a replicated
+stream. Each is scoped to this page's two ideas: how a write commits,
+and the consistency it gives back.
 
 **`R=1` has no copy.** A stream at `R=1` lives on exactly one server.
 There's no second peer, so there's no quorum and nothing to commit
-*to* beyond the one log. Lose that server's disk and the order is gone
-with it — no failover, no recovery. Only `R≥3` survives a node loss.
-Don't run real orders at `R=1`; the why-three reasoning lives on
+*to* beyond the one log. If that server's disk is lost, the order is
+lost too, with no failover and no recovery. Only `R≥3` survives a node
+loss.
+Don't run real orders at `R=1`; the why-three reasoning is covered on
 [surviving node loss](/learn/jetstream/surviving-node-loss).
 
 **A follower may lag, so a follower read can be stale.** A committed
-write is safe, but it reaches each follower's stream store a beat after
+write is safe, but it reaches each follower's stream store slightly after
 the leader applies it. A direct read aimed at a follower can therefore
 return data that's correct but not the newest. Don't assume any peer
 is current just because the write was acked. For read-after-write, read

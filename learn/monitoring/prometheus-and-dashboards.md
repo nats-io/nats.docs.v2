@@ -7,10 +7,10 @@ description: Scrape the monitoring port into Prometheus time series, chart them 
 
 # 5. Prometheus & dashboards
 
-Every number so far is a snapshot. You `curl` the monitoring port and you
-see "now." You read the `shipping` consumer's state and you learn it's
-20 orders behind *at this instant*. None of it is stored. Refresh the
-query a minute later and the old value is gone, with no record of whether
+Every number so far is a snapshot. When you `curl` the monitoring port you
+see "now," and when you read the `shipping` consumer's state you learn it's
+20 orders behind *at this instant*. None of it is stored. If you refresh the
+query a minute later the old value is gone, with no record of whether
 the lag is climbing or shrinking.
 
 This page closes that gap. It takes the same numbers you already know how
@@ -24,12 +24,12 @@ We add no new entities. The `east` cluster, the `ORDERS` stream, and the
 piece of plumbing, the exporter, outside NATS, and watch the orders
 deployment from one more angle.
 
-## The exporter turns one-shot JSON into time series
+## The exporter converts JSON to time series
 
 The monitoring port serves JSON when you ask for it. Prometheus doesn't
 read NATS JSON; it reads its own metrics format, and it pulls that
-format on a schedule. Bridging the two is one job, and one program does
-it: **prometheus-nats-exporter**, which scrapes the
+format on a schedule. **prometheus-nats-exporter** is the program that
+connects the two: it scrapes the
 monitoring port and re-exposes the numbers as Prometheus metrics.
 
 A **time series** is a single named number recorded repeatedly over
@@ -79,10 +79,10 @@ redelivered survive the round trip exactly, now as labeled series.
 The full set of exporter metrics and labels is documented in
 [Reference](/reference/). We only need the consumer-lag series here.
 
-## Store, chart, and alert
+## Prometheus, Grafana, and the check
 
-The exporter exposes "now." Three pieces sit behind it and turn "now"
-into something you can act on.
+The exporter exposes "now." Prometheus, Grafana, and the check sit behind
+it and turn "now" into something you can act on.
 
 **Prometheus** scrapes the exporter's `:7777` on its own interval and
 appends each value to its time series store. This is where the time
@@ -103,7 +103,7 @@ scrape_configs:
 **Grafana** reads Prometheus and draws it. A **dashboard** is a Grafana
 view; one chart on it is a panel. A dashboard for the orders deployment
 puts the `shipping` consumer's `nats_consumer_num_pending` on a panel,
-and the moment the consumer falls behind, the line climbs on screen.
+so when the consumer falls behind, the line climbs on screen.
 Grafana publishes community dashboards for NATS that read a Prometheus
 data source out of the box; you import one and point it at your
 Prometheus.
@@ -114,8 +114,8 @@ series crosses its threshold.
 
 <div class="nats-flow" data-scenario="metricsScrapeAnimated" data-width="600" data-height="350"></div>
 
-**`nats server check`** is the alerting side. A dashboard needs a person
-watching it; a check fires on its own. The CLI runs a check against a
+**`nats server check`** is the alerting side. Where a dashboard needs a person
+watching it, a check fires on its own. The CLI runs a check against a
 consumer, compares a metric to a threshold you set, and returns an
 OK / WARNING / CRITICAL verdict in a format Prometheus, Nagios, or a
 plain script can read. Pointed at the `shipping` consumer with a lag
@@ -136,7 +136,7 @@ let you chart request/reply timing belong with services, in
 
 ## Pitfalls
 
-Three traps catch teams the first time they wire NATS into Prometheus and
+Teams hit three common problems the first time they wire NATS into Prometheus and
 Grafana. Each stays within this page's two concepts: the exporter, and
 the alert-and-chart layer behind it.
 
@@ -170,16 +170,17 @@ has defaults, but the defaults don't know your SLA. A check run without
 climbs past anything you'd care about, because nothing told it where
 the line is. Always set explicit thresholds that match what the orders
 deployment can tolerate; the `checkConsumer` example above pins
-`--unprocessed-critical 100` for exactly this reason. A silent check is worse
-than no check, because it looks like coverage.
+`--unprocessed-critical 100` for this reason. A silent check looks like
+coverage while providing none, which makes it worse than having no check.
 
 **The exporter keeps no time series.** The exporter is stateless: every
 scrape is a fresh read of `:8222`, and the moment you stop scraping, the
 past is gone. Without Prometheus behind it, `nats_consumer_num_pending`
 is the same one-shot "now" you started this page trying to escape: you
 gain a metrics format, not a record. Do not treat the exporter alone as
-monitoring. It's the bridge; Prometheus is the memory. Run both, or
-you're back to refreshing a query by hand.
+monitoring. The exporter only converts the format, and Prometheus is what
+stores the history, so run both. Without Prometheus you're back to refreshing
+a query by hand.
 
 ## Where you are
 
@@ -195,12 +196,12 @@ threshold you set.
 You've watched the `shipping` consumer fall behind four ways now: as
 `num_pending` on `/jsz`, as lag computed from the consumer's state, as a
 `max_deliver` advisory, and as a rising time series on a Grafana panel.
-That's the chapter's whole game: the same symptom, observed from every
+That's the focus of this chapter: the same symptom, observed from every
 angle a running deployment offers.
 
 ## What's next
 
-The next page recaps the four lenses, points to where the *fixes* for
+The next page recaps the four ways of observing, points to where the *fixes* for
 what you observe live, and collects every page's Pitfalls into one
 production checklist.
 

@@ -8,7 +8,7 @@ description: Read stream and consumer state, then compute lag, in-flight, and re
 # 3. JetStream health
 
 The previous page showed you the monitoring port and named `/jsz` as the
-JetStream lens. That endpoint counts streams and consumers, but a count
+JetStream endpoint. That endpoint counts streams and consumers, but a count
 doesn't tell you whether the `shipping` consumer is keeping up. To answer
 that you read *state*, the live numbers JetStream keeps for the stream
 and for each consumer, and you turn a few of them into one number: lag.
@@ -52,7 +52,7 @@ State:
         Active Consumers: 2
 ```
 
-Three fields carry the weight here.
+Three of these fields matter most here.
 
 **Messages** (`messages`) is how many orders the stream holds. **Last
 Sequence** (`last_seq`) is the sequence number assigned to the newest
@@ -67,7 +67,7 @@ The full set of stream state fields is documented in
 [Reference → stream API](/reference/jetstream/api/stream). We only need
 `last_seq` here.
 
-## Consumer state: the cursor and the gap
+## Consumer state: position and gap
 
 A consumer keeps its own state. Where the stream state describes what's
 *stored*, the consumer state describes how far one reader has *gotten*.
@@ -89,13 +89,13 @@ State:
                   Waiting Pulls: 0 of maximum 512
 ```
 
-Four fields describe the consumer's progress, and each one means
-something precise.
+Four fields describe the consumer's progress, and each one has a precise
+meaning.
 
 **Last Delivered Message** carries `delivered.stream_seq`: the stream
 sequence of the last order the server handed to a `shipping` worker. In
 the snapshot it's `980`. The stream's `last_seq` is `1000`. The gap
-between them is the heart of this page.
+between them is what this page is about.
 
 **Acknowledgment Floor** (`ack_floor.stream_seq`) is the sequence below
 which every order has been acked. Orders `981` through `1000` haven't
@@ -105,7 +105,7 @@ all acked. That second group is the next field.
 **Outstanding Acks** counts orders delivered but not yet acked, also
 called **in-flight** (`num_ack_pending`). Five `shipping` workers are
 holding five orders, working on them, and haven't confirmed them back.
-In-flight is not lag; it's work in progress.
+In-flight measures work in progress, which is a different thing from lag.
 
 **Redelivered Messages** (`num_redelivered`) counts how many orders the
 server has had to deliver more than once since the consumer was created:
@@ -140,7 +140,7 @@ rather than subtracting by hand. You compute it yourself when you want to
 cross-check that the reported number is fresh, a point the Pitfalls
 return to.
 
-Three numbers now tell the whole story of the `shipping` consumer:
+Three numbers now describe the full state of the `shipping` consumer:
 
 - **lag = 20**: orders waiting, never delivered (`num_pending`)
 - **in-flight = 5**: orders delivered, not yet acked (`num_ack_pending`)
@@ -150,7 +150,7 @@ Three numbers now tell the whole story of the `shipping` consumer:
 A healthy consumer keeps lag near zero and redelivery flat. Lag climbing
 while `last_seq` climbs means orders arrive faster than `shipping`
 processes them. Redelivery climbing means workers are taking orders and
-failing to ack them. Each symptom points at a different cause, and naming
+failing to ack them. Each symptom has a different cause, and naming
 which number moved is the first step every time.
 
 This animation shows the three numbers as positions on the stream log:
@@ -160,16 +160,16 @@ pulses back as a redelivery.
 
 <div class="nats-flow" data-scenario="consumerLagAnimated" data-width="600" data-height="350"></div>
 
-Watching lag is the job. Deciding what to do about a lag that won't come
-down (adding `shipping` workers, or sizing the deployment) belongs to the
-[worker pool](/learn/jetstream/worker-pool) page and the
-[deployment](/learn/deployment) chapter. This page names the symptom; the
-fix lives there.
+Watching lag is the task here. Deciding what to do about a lag that won't
+come down (adding `shipping` workers, or sizing the deployment) belongs to
+the [worker pool](/learn/jetstream/worker-pool) page and the
+[deployment](/learn/deployment) chapter. This page names the symptom, and
+the fix is covered there.
 
 ## Pitfalls
 
 These traps are scoped to this page's two concepts: reading consumer
-state, and reading lag from it. Each one is a number that lies if you
+state, and reading lag from it. Each one is a number that misleads if you
 read it without context.
 
 **Pull-consumer lag is only fresh when a client is fetching.** A pull
@@ -224,7 +224,7 @@ poll. When a poison order exhausts its deliveries, the server announces
 it once, on a subject, and if you're not listening you never learn it
 happened.
 
-The next page subscribes to those announcements.
+The next page covers subscribing to those announcements.
 
 Continue to [4. Advisories & events](/learn/monitoring/advisories-and-events).
 
