@@ -13,12 +13,18 @@ it with another.
 ## Why a stream
 
 The running example for this chapter is a small online store, the
-Acme `ORDERS` platform. Three things happen to an order: it's created,
-shipped, or cancelled. Each one shows up as a message on a
-[subject](/concepts/subjects): `orders.created`, `orders.shipped`, and
-`orders.cancelled`. A warehouse service packs the box on `orders.created`.
-A notification service emails the customer on `orders.shipped`. An
-analytics service counts everything.
+Acme `ORDERS` platform. Each thing that happens to an order shows up as a
+message on a [subject](/concepts/subjects):
+
+- `orders.created` — a new order comes in
+- `orders.shipped` — the order leaves the warehouse
+- `orders.cancelled` — the order is called off
+
+Services react to those messages:
+
+- a warehouse service packs the box on `orders.created`
+- a notification service emails the customer on `orders.shipped`
+- an analytics service counts everything
 
 Plain core NATS drops any of these messages the moment no service is
 listening. A **stream** saves them instead. A stream is a store that
@@ -43,7 +49,7 @@ In another terminal:
 
 <div class="nats-example" data-type="learn-jetstream-your-first-stream-create" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Two things matter here.
+Two parts of that command matter.
 
 The first is the **stream name**: `ORDERS`. Stream names are
 case-sensitive. They can't contain dots, `*`, `>`, spaces, or slashes, so
@@ -56,10 +62,9 @@ a [wildcard](/concepts/subjects#wildcards). Any subject that starts with
 `orders.cancelled` all match. So would `orders.refunded` next month, with
 no change to the stream.
 
-The `--defaults` flag tells `nats` not to ask for any of the other
-settings. Instead, it fills them in with sensible starting values.
-We'll look at what those values are in a moment. For now, the defaults
-are fine.
+The `--defaults` flag tells `nats` not to prompt you for the other
+settings. The server fills them in with its standard defaults. We'll look
+at what those values are in a moment. For now, the defaults are fine.
 
 You should see output ending with something like:
 
@@ -67,9 +72,9 @@ You should see output ending with something like:
 Stream ORDERS was created
 ```
 
-If you instead see `JetStream system temporarily unavailable`, your
-server started without `-js`. Restart it with the flag and try
-again.
+If the command fails instead with `no responders available for request`,
+your server started without `-js`: JetStream isn't running, so nothing
+answers the request. Restart it with the flag and try again.
 
 ## Checking the created stream
 
@@ -118,8 +123,9 @@ first message you publish gets sequence `1`.
 
 ## The defaults
 
-You didn't ask for any of the configuration values above. The CLI
-filled them in. Here is what each one means.
+You didn't set any of the configuration values above. The server filled
+them in with its standard defaults, the values a stream gets whenever a
+field is left unset. Here is what each one means.
 
 - **Replicas: 1**. The stream lives on one server. If that server goes
   down, the stream goes down with it. That's fine on a laptop, but
@@ -175,7 +181,7 @@ Stream](/reference/jetstream/api/stream/create) lists the `mirror` and
 
 ## Pitfalls
 
-Three things catch people on a first stream.
+A few things catch people on a first stream.
 
 **Unlimited defaults grow forever.** With `--defaults`, `Maximum
 Messages`, `Maximum Bytes`, and `Maximum Age` are all `unlimited`. The

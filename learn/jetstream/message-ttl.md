@@ -19,8 +19,8 @@ service that reads from the stream has 60 minutes to react to a
 cancellation. After that the message is no longer useful, and you don't
 want it in the stream for the full seven days.
 
-`MaxAge` can't do that. It's a single number that applies to every
-message the same way.
+`MaxAge` applies one deadline to every message in the stream, so it
+can't expire this one ahead of the rest.
 
 A **per-message TTL** handles this case. TTL is short for time-to-live.
 It's a lifespan attached to one message, telling the server to delete
@@ -55,7 +55,7 @@ The settings block gains one line:
 Allows Per-Message TTL: true
 ```
 
-Two things to know about this switch.
+This switch comes with two catches.
 
 It can't be reversed. You can turn `AllowMsgTTL` on for an existing
 stream, but you can't turn it off again. The server refuses to take it
