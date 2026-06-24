@@ -11,6 +11,7 @@ export { PublishSubscribeAnimated } from './publishSubscribeAnimated';
 export { SubjectsWildcardAnimated } from './subjectsWildcardAnimated';
 export { WildcardComparison } from './wildcardComparison';
 export { JetStreamContrastAnimated } from './jetStreamContrastAnimated';
+export { PublishAckAnimated } from './publishAckAnimated';
 export { JetStreamConsumersAnimated } from './jetStreamConsumersAnimated';
 export { singleServerScenario } from './singleServer';
 export { clusterScenario } from './cluster';

@@ -46,6 +46,10 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "learn-jetstream-your-first-stream-create/main.go",
             "learn-jetstream-your-first-stream-info": "learn-jetstream-your-first-stream-info/main.go",
+            "learn-jetstream-publishing-sync": "learn-jetstream-publishing-sync/main.go",
+            "learn-jetstream-publishing-pubAck": "learn-jetstream-publishing-pubAck/main.go",
+            "learn-jetstream-publishing-dedup": "learn-jetstream-publishing-dedup/main.go",
+            "learn-jetstream-publishing-confirmStored": "learn-jetstream-publishing-confirmStored/main.go",
         },
     }],
     "rust": [{
@@ -79,6 +83,10 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "docs_learn_jetstream_your_first_stream_create.rs",
             "learn-jetstream-your-first-stream-info": "docs_learn_jetstream_your_first_stream_info.rs",
+            "learn-jetstream-publishing-sync": "docs_learn_jetstream_publishing_sync.rs",
+            "learn-jetstream-publishing-pubAck": "docs_learn_jetstream_publishing_pub_ack.rs",
+            "learn-jetstream-publishing-dedup": "docs_learn_jetstream_publishing_dedup.rs",
+            "learn-jetstream-publishing-confirmStored": "docs_learn_jetstream_publishing_confirm_stored.rs",
         },
     }],
     "javascript": [{
@@ -112,6 +120,10 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "learn-jetstream-your-first-stream-create.ts",
             "learn-jetstream-your-first-stream-info": "learn-jetstream-your-first-stream-info.ts",
+            "learn-jetstream-publishing-sync": "learn-jetstream-publishing-sync.ts",
+            "learn-jetstream-publishing-pubAck": "learn-jetstream-publishing-pubAck.ts",
+            "learn-jetstream-publishing-dedup": "learn-jetstream-publishing-dedup.ts",
+            "learn-jetstream-publishing-confirmStored": "learn-jetstream-publishing-confirmStored.ts",
         },
     }],
     "python": [{
@@ -145,6 +157,10 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "learn_jetstream_your_first_stream_create.py",
             "learn-jetstream-your-first-stream-info": "learn_jetstream_your_first_stream_info.py",
+            "learn-jetstream-publishing-sync": "learn_jetstream_publishing_sync.py",
+            "learn-jetstream-publishing-pubAck": "learn_jetstream_publishing_pub_ack.py",
+            "learn-jetstream-publishing-dedup": "learn_jetstream_publishing_dedup.py",
+            "learn-jetstream-publishing-confirmStored": "learn_jetstream_publishing_confirm_stored.py",
         },
     }],
     "java": [{
@@ -178,6 +194,10 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.java",
             "learn-jetstream-your-first-stream-info": "LearnJetStreamYourFirstStreamInfo.java",
+            "learn-jetstream-publishing-sync": "LearnJetStreamPublishingSync.java",
+            "learn-jetstream-publishing-pubAck": "LearnJetStreamPublishingPubAck.java",
+            "learn-jetstream-publishing-dedup": "LearnJetStreamPublishingDedup.java",
+            "learn-jetstream-publishing-confirmStored": "LearnJetStreamPublishingConfirmStored.java",
         },
     }],
     "csharp": [{
@@ -211,6 +231,10 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.cs",
             "learn-jetstream-your-first-stream-info": "LearnJetStreamYourFirstStreamInfo.cs",
+            "learn-jetstream-publishing-sync": "LearnJetStreamPublishingSync.cs",
+            "learn-jetstream-publishing-pubAck": "LearnJetStreamPublishingPubAck.cs",
+            "learn-jetstream-publishing-dedup": "LearnJetStreamPublishingDedup.cs",
+            "learn-jetstream-publishing-confirmStored": "LearnJetStreamPublishingConfirmStored.cs",
         },
     }],
 };

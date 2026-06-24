@@ -169,9 +169,11 @@ doesn't cover in full here.
 **AckPolicy** has three values you'd reach for in practice:
 `none` (no answer required), `all` (one ack answers every earlier
 message too), and `explicit` (each message answered on its own). A
-fourth value, `flow_control`, controls the rate of push delivery and
-isn't used here. `shipping` uses `explicit`, and that's the right
-default for work that must not be lost.
+fourth value, `flow_control`, belongs to push consumers and paces how
+fast the server delivers; pull consumers like `shipping` don't need it,
+and [Push vs pull](/learn/jetstream/push-vs-pull) covers it. `shipping`
+uses `explicit`, and that's the right default for work that must not be
+lost.
 
 **ReplayPolicy** sets the pace of redelivery and replay. `instant`
 delivers as fast as the client reads. `original` spaces out delivery

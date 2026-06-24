@@ -7,19 +7,20 @@ description: Why pull is the modern default, what a push consumer is, and when p
 
 # 11. Push vs pull
 
-Every consumer in this chapter has been a pull consumer. The `shipping`
-consumer asks the server for messages when it's ready for them, in
-batches it controls. That's the model we've used since page 4, and it's
-the one to reach for first.
+You've run pull consumers across the last seven pages: the `shipping`
+consumer (page 4), a filter on it (page 5), the ack loop (page 6),
+batches and bounds (page 7), a worker pool (page 8), priority groups
+(page 9), and a pause (page 10). Every one asked the server for messages
+in batches it controlled. That's the pull model, and it's the one to
+reach for first.
 
 There's a second model: the **push consumer**. The server delivers
-messages to it on its own, the moment they're stored in the stream. This
-page explains what a push consumer is, why pull is the default, and the
-cases where push still applies.
+messages to it on its own, the moment they're stored in the stream. Now
+that you know pull well, this page explains what push is, why pull became
+the default, and the cases where push still applies.
 
-Nothing about the `shipping` consumer changes here. This page is a
-decision rather than new scenario state. You'll leave knowing how to
-choose pull or push on purpose.
+No scenario state changes here; `shipping` stays exactly as you left it.
+You'll leave knowing how to choose pull or push on purpose.
 
 ## What a push consumer is
 

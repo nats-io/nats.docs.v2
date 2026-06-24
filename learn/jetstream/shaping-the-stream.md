@@ -11,10 +11,10 @@ The `ORDERS` stream you created back on page 1 has no limits. It keeps
 every message forever, on however much disk the server has. That was
 fine for learning, but not for production.
 
-Without a limit, orders keep arriving, the stream keeps growing, and one
-day the disk fills with no warning in advance.
+Without a limit, the stream keeps growing until it fills the disk and
+takes the server down with it.
 
-This page covers two things. The **limit** is the ceiling that decides
+This page covers two settings. The **limit** is the cap that decides
 when the stream must start dropping messages. The **Discard policy** is
 what the server does when a limit is reached.
 
