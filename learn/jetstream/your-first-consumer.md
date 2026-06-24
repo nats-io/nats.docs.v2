@@ -15,9 +15,9 @@ A real service needs more than that. It has to remember which orders it
 already handled, and the server has to redeliver an order if the process
 dies before finishing it.
 
-This page builds that consumer. It introduces two things: the **durable
-cursor** that records your position, and the **ack/redeliver loop** that
-makes delivery reliable.
+This page builds that consumer. It introduces the **durable cursor**
+that records your position and the **ack/redeliver loop** that makes
+delivery reliable.
 
 **Entering:** three orders stored in the `ORDERS` stream, no consumer yet.
 

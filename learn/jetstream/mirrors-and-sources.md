@@ -226,9 +226,11 @@ You now have:
 
 ## What's next
 
-This is the last mechanics page of the chapter. The next page points you
-to where JetStream continues (KV, object store, operations) and back to
-the Reference for everything we deferred.
+The stream-and-consumer mechanics are now covered. The [next
+page](/learn/jetstream/advanced-publishing) maps the advanced publishing
+modes — async and batch — for when one-at-a-time publishing isn't enough.
+After that, [Where to go next](/learn/jetstream/where-next) recaps the
+chapter and points to where JetStream continues.
 
 ## See also
 

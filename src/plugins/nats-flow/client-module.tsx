@@ -27,6 +27,7 @@ if (ExecutionEnvironment.canUseDOM) {
       PublishSubscribeAnimated: module.PublishSubscribeAnimated,
       SubjectsWildcardAnimated: module.SubjectsWildcardAnimated,
       JetStreamContrastAnimated: module.JetStreamContrastAnimated,
+      PublishAckAnimated: module.PublishAckAnimated,
       JetStreamConsumersAnimated: module.JetStreamConsumersAnimated,
       CentralizedAuthAnimated: module.CentralizedAuthAnimated,
       DecentralizedAuthAnimated: module.DecentralizedAuthAnimated,

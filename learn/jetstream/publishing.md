@@ -13,6 +13,8 @@ server sends back a confirmation that it stored the message. This page
 covers that confirmation, called a `PubAck`, and how to make a publish
 safe to retry.
 
+<div class="nats-flow" data-scenario="publishAckAnimated" data-width="640" data-height="360"></div>
+
 ## Publish from the CLI
 
 Start in the terminal. A plain `nats pub` is a core NATS publish: the
@@ -71,9 +73,9 @@ Here are the same three publishes from a client library:
 
 <div class="nats-example"
      data-type="learn-jetstream-publishing-sync"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp"></div>
 
-Two things to notice in any of these snippets:
+Two details show up in every one of these snippets:
 
 1. You publish to a subject, not to a stream. The server finds the stream
    that captures the subject and stores the message there. Your code
@@ -103,7 +105,7 @@ Here is the same publish, now reading the `PubAck` back:
 
 <div class="nats-example"
      data-type="learn-jetstream-publishing-pubAck"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp"></div>
 
 The rule is simple: if a publish doesn't return a `PubAck`, the message
 was not stored. A network timeout, a server error, or a subject that no
@@ -154,7 +156,7 @@ is stored. The same header from a client library:
 
 <div class="nats-example"
      data-type="learn-jetstream-publishing-dedup"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp"></div>
 
 Give every publish you might retry a stable `Nats-Msg-Id` that the
 producer can recompute, such as an order ID, a request ID, or a hash of
@@ -165,19 +167,20 @@ page uses only `Nats-Msg-Id`.
 
 ## What we've skipped
 
-A few things this page left out, kept for later or for Reference:
+A few things this page leaves out. The other publishing modes get their
+own page later in the chapter; the rest is in Reference:
 
-- **Async publish.** Most client libraries can send many publishes and
-  collect the `PubAcks` together for higher throughput. The mechanics
-  vary by language, but the contract is the same: one `PubAck` per
-  message, arriving later. See your client's reference.
-- **Expected-stream and expected-sequence headers.** A publish can be set
-  to fail unless the stream is in a specific state, which is useful for
-  optimistic concurrency. See
+- **Async publish** — fire many publishes and collect the `PubAcks` later,
+  for higher throughput. See [Advanced
+  publishing](/learn/jetstream/advanced-publishing).
+- **Atomic batch publish** — store a group of messages all-or-nothing
+  (server 2.12+). See [Advanced publishing](/learn/jetstream/advanced-publishing).
+- **Fast-ingest batch publish** — flow-controlled, high-throughput ingest
+  without atomicity (server 2.14+). See [Advanced
+  publishing](/learn/jetstream/advanced-publishing).
+- **Expected-stream and expected-sequence headers** — fail a publish unless
+  the stream is in a specific state, for optimistic concurrency. See
   [Reference → JetStream Headers](/reference/jetstream/api/headers).
-- **Batch publish.** A way to store several messages together. It needs a
-  newer server, and the `PubAck` gains `batch` and `count` fields. See
-  [Reference → Publish Acknowledgement](/reference/jetstream/api/stream/pub-ack).
 
 ## Pitfalls
 

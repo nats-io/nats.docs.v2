@@ -42,7 +42,8 @@ subjects, and queue groups.
 | 15 | [Altering stream state](./altering-stream-state) | Delete a message or purge the stream, by hand |
 | 16 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
 | 17 | [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
-| 18 | [Where to go next](./where-next) | A map of what's beyond this chapter |
+| 18 | [Advanced publishing](./advanced-publishing) | Async, atomic-batch, and fast-ingest publishing |
+| 19 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 

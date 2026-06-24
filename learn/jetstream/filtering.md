@@ -124,8 +124,7 @@ use only a single `Filter Subject` here.
 
 ## Pitfalls
 
-A filter is a small piece of config, but a wrong one fails quietly. Watch
-for these three.
+A filter is a small piece of config, but a wrong one fails quietly.
 
 **A filter that matches nothing.** The server accepts any filter subject,
 even one that matches no message in the stream. A typo like

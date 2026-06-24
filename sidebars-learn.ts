@@ -87,6 +87,7 @@ const sidebars: SidebarsConfig = {
             "jetstream/altering-stream-state",
             "jetstream/surviving-node-loss",
             "jetstream/mirrors-and-sources",
+            "jetstream/advanced-publishing",
             "jetstream/where-next",
           ],
         },

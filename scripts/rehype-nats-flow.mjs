@@ -13,6 +13,8 @@ const FALLBACKS = {
     'Animated publish/subscribe: a publisher emits messages; NATS delivers a copy to every matching subscriber.',
   subjectsWildcardAnimated:
     'Animated subject wildcards: messages on different subjects (orders.us.created, orders.eu.created, …) are routed by matching wildcard subscriptions.',
+  publishAckAnimated:
+    'Animated PubAck flow: a publisher sends a message to the server; the server’s listener matches the subject, the stream stores the message and assigns a sequence number, and the server returns a PubAck with the stream name and sequence.',
   wildcardComparison:
     'Side-by-side comparison of single-token (*) and multi-token (>) wildcard subject matching.',
 };
@@ -29,6 +31,7 @@ const TITLES = {
   queueGroupAnimated: 'Queue group (animated)',
   publishSubscribeAnimated: 'Publish / Subscribe (animated)',
   subjectsWildcardAnimated: 'Subject wildcards (animated)',
+  publishAckAnimated: 'Publish and PubAck (animated)',
   wildcardComparison: 'Wildcard comparison',
 };
 
