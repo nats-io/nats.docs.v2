@@ -2,186 +2,268 @@
 id: reading-back
 title: "3. Reading back the stream"
 sidebar_position: 5
-description: Replay everything stored in the stream from the beginning with an ephemeral consumer
+description: Meet the producer, stream, and consumer; create a durable consumer and read everything the stream holds
 ---
 
 # 3. Reading back the stream
 
-The `ORDERS` stream holds three messages. So far you've only looked
-at them through `nats stream info`, which counts them but doesn't show
-their contents.
+The `ORDERS` stream holds the orders you published on the previous page.
+So far you've only seen them through `nats stream info`, which counts the
+messages but doesn't show their contents.
 
-This page reads them back. It pulls every stored message, in order,
-from the first one, without changing the stream and without
-acknowledging anything yet.
+This page reads them back. First it introduces the three pieces that move
+a message from a publisher to a reader, then it creates a reader and pulls
+every stored message, in order, from the first one.
 
-## Streams keep messages, subjects don't
+You might have run the publish commands once, or a few times while
+experimenting, so the stream could hold three messages or thirty. None of
+the steps below assume a number: they read back whatever is there.
 
-In core NATS, a message published to a subject exists only as long as
-it takes to reach whoever is subscribed right now. The
-[Why a stream](/learn/jetstream/your-first-stream#why-a-stream) page
-covers why that's too short for orders.
+## How a producer, a stream, and a consumer fit together
 
-A stream keeps its messages. The three messages are durable records
-with fixed sequence numbers. They don't disappear when you read them,
-and they don't move. Reading message 1 leaves message 1 where it was,
-available to the next reader.
+Three pieces move a message through JetStream:
 
-The rest of the chapter relies on this property: you can re-read a
-stream whenever you want, as many times as you want. A service started
-a month from now reads the same sequence 1 you're about to read today.
+- A **producer** publishes messages to a subject,
+  reads the `PubAck` and retries on failure.
+- A **stream** stores the messages, in order. As it stores each one it
+  assigns a **stream sequence**, the message's position in the store.
+- A **consumer** is a server-side cursor on a stream. A **client** connects
+  to it to receive messages; the consumer tracks how far that client has
+  progressed and hands out the next one. Each consumer keeps its own
+  **consumer sequence**, a counter the server bumps on every delivery —
+  redeliveries included — so it counts deliveries, not distinct messages.
 
-## Reading with an ephemeral consumer
+<div class="nats-flow" data-scenario="jetStreamPipelineAnimated" data-width="640" data-height="260"></div>
 
-To read messages out of a stream you need a **consumer**. A consumer is
-the server-side cursor that tracks which messages a reader has seen and
-delivers the next ones.
+A stream can feed many consumers at once, each reading at its own pace and
+each with its own position. This page uses one consumer; later pages add
+more.
 
-You'll build a long-lived consumer on the [next page](/learn/jetstream/your-first-consumer).
-For now you want the lightest reader: one that exists only for this
-replay and is removed when your session ends. That's an
-**ephemeral consumer**, a consumer with no name you chose and no
-server-side state that outlives your session.
+## Streams keep messages
 
-The CLI creates one for you automatically. The command below delivers
-every message the stream holds:
+In core NATS, a message published to a subject exists only as long as it
+takes to reach whoever is subscribed right now. The
+[Why a stream](/learn/jetstream/your-first-stream#why-a-stream) page covers
+why that's too short for orders.
+
+A stream keeps its messages. They're durable records with fixed stream
+sequences. They don't disappear when you read them, and they don't move.
+Reading message 1 leaves message 1 where it was, available to the next
+reader. You can re-read a stream whenever you want: a new consumer created
+a month from now starts at the same sequence 1 you're about to read today.
+
+## A consumer is a server-side object
+
+To read a stream you create a consumer. A consumer isn't part of your
+application; it's an object on the server, sitting next to the stream. Your
+application is the **client**: it connects to the consumer to receive
+messages. The stored messages and the read position both stay on the server,
+so the client can disconnect and reconnect without losing its place or
+tracking any sequence numbers itself.
+
+<div class="nats-flow" data-scenario="consumerServerSideAnimated" data-width="640" data-height="220"></div>
+
+Create a consumer named `orders-reader`:
 
 <div class="nats-example"
-     data-type="learn-jetstream-reading-back-replay"
+     data-type="learn-jetstream-reading-back-create"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The `--all` flag tells the ephemeral consumer to start at the
-beginning of the stream, sequence 1, rather than at whatever arrives
-next. The `--terminate-at-end` flag stops the reader once it's read
-everything currently stored, so the command returns instead of waiting
-for more.
+Three settings define how it reads:
 
-You see all three messages, oldest first:
+- **Deliver all** starts the consumer at the first message in the stream,
+  sequence 1, so it reads the whole log.
+- **Pull** means the client asks the server for messages when it's ready,
+  rather than having the server push them on its own. This chapter uses
+  pull consumers throughout and explains why on a
+  [later page](/learn/jetstream/push-vs-pull).
+- **Ack explicit** means the client acknowledges each message it handles,
+  and the consumer's position advances only as acks arrive. It's the default
+  for a pull consumer. On this page you read and ack on the happy path; a
+  [later page](/learn/jetstream/your-first-consumer) digs into what
+  acknowledgment buys you — the redelivery loop that makes delivery reliable.
 
-```
-[#1] Received JetStream message: stream: ORDERS seq 1
-{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
-
-[#2] Received JetStream message: stream: ORDERS seq 2
-{"order_id":"ord_2zr9","customer":"globex","total_cents":7800,"ts":"2026-05-22T10:14:25Z"}
-
-[#3] Received JetStream message: stream: ORDERS seq 3
-{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:31Z"}
-```
-
-The sequence numbers match what `nats stream info` reported on the
-previous page. You're reading the same append-only log, in order.
-
-## No messages were processed
-
-You read all three messages, but you did nothing with them. This
-ephemeral replay consumer delivers everything the stream holds so you
-can see what's stored. There's a separate mechanism for a reader to
-confirm it's finished with a message, but you don't need it to read,
-and the [next page](/learn/jetstream/your-first-consumer) is where it
-matters.
-
-## The stream is unchanged
-
-Run `nats stream info ORDERS` again:
+Look at the consumer before it has read anything:
 
 ```bash
-nats stream info ORDERS
+nats consumer info ORDERS orders-reader
 ```
-
-The `State` block is identical to before the replay:
 
 ```
 State:
 
-             Messages: 3
-                Bytes: 459 B
-        First Sequence: 1 @ 2026-05-22T10:14:22Z
-         Last Sequence: 3 @ 2026-05-22T10:14:31Z
-        Active Consumers: 0
+  Last Delivered Message: Consumer sequence: 0 Stream sequence: 0
+    Acknowledgment Floor: Consumer sequence: 0 Stream sequence: 0
+        Outstanding Acks: 0 out of maximum 1,000
+    Redelivered Messages: 0
+    Unprocessed Messages: 3
+           Waiting Pulls: 0 of maximum 512
 ```
 
-Three messages, same sequences, zero active consumers: the ephemeral
-consumer was removed when the command exited. Reading a stream doesn't
-remove its data. Unlike popping from a queue, the messages stay in
-place.
+`Unprocessed Messages` is how many stored messages the consumer hasn't
+delivered yet: the whole stream, since it hasn't started. Yours shows
+however many you published. The acknowledgment fields below it stay at zero
+until the consumer starts delivering and acking; the next page works through
+them.
 
-## Starting somewhere other than the beginning
+## Read the stored messages
 
-You passed `--all`, which means start from the beginning. A consumer
-doesn't have to start there; you'll see the other starting points
-later. Replaying from the beginning shows that the whole log is still
-there.
+Now read. Binding to the consumer reuses its position, delivers
+everything it hasn't seen, and acknowledges each message as it goes:
+
+<div class="nats-example"
+     data-type="learn-jetstream-reading-back-read"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The messages arrive oldest first, each with its stream sequence:
+
+```
+[#1] Received JetStream message: stream: ORDERS seq: 1 / pending: 2 / subject: orders.created
+{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
+
+[#2] Received JetStream message: stream: ORDERS seq: 2 / pending: 1 / subject: orders.created
+{"order_id":"ord_2zr9","customer":"globex","total_cents":7800,"ts":"2026-05-22T10:14:25Z"}
+
+[#3] Received JetStream message: stream: ORDERS seq: 3 / pending: 0 / subject: orders.shipped
+{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:31Z"}
+```
+
+The `pending` count is how many stored messages are still waiting. It
+falls by one with each message and the read stops when it reaches `0`,
+whether the stream held three messages or three hundred. The stream
+sequences (`seq: 1`, `2`, `3`) match what `nats stream info` reported on
+the previous page. You're reading the same append-only log, in order.
+
+## Stream sequence versus consumer sequence
+
+Read the consumer again, now that it has caught up:
+
+```bash
+nats consumer info ORDERS orders-reader
+```
+
+```
+State:
+
+  Last Delivered Message: Consumer sequence: 3 Stream sequence: 3
+    Acknowledgment Floor: Consumer sequence: 3 Stream sequence: 3
+    Unprocessed Messages: 0
+```
+
+`Last Delivered Message` carries the two sequence numbers side by side, and
+they're worth telling apart:
+
+- **Stream sequence** is the message's fixed position in the log. The
+  server assigned it when the message was published, and it never changes.
+  It's the same number you saw in the `PubAck` and in `nats stream info`.
+- **Consumer sequence** is this consumer's own counter. The server adds one
+  every time the consumer delivers a message, redeliveries included, so it
+  tracks how many deliveries this consumer has made, not how many distinct
+  messages it has seen.
+
+Here both read `3` because `orders-reader` started at the beginning and
+read straight through, so its third delivery was stream message 3. They
+drift apart whenever a consumer delivers a different set of messages than
+the stream stores in order: one that starts partway through, one that
+[filters](/learn/jetstream/filtering) to a subset of subjects, or one that
+has a message [redelivered](/learn/jetstream/your-first-consumer). The
+consumer sequence counts deliveries; the stream sequence stays pinned to
+the message.
+
+You read these numbers with `nats consumer info`, but in code you rarely need
+that call. Every message a consumer delivers carries the same state in its
+**metadata** — its stream and consumer sequence, how many messages are still
+pending, how many times it's been delivered. That metadata rides along with
+the delivery for free, while `nats consumer info` is a separate request to the
+server: fine for a one-off check, too costly to call for every message. In a
+handler, read the state off the message.
+
+## The consumer remembers where it stopped
+
+The position you just saw is on disk. To see it work, publish one more
+order:
+
+```bash
+nats pub --jetstream orders.created \
+  '{"order_id":"ord_5xk1","customer":"initech","total_cents":1500,"ts":"2026-05-22T11:02:00Z"}'
+```
+
+Then read again with the same command. The consumer delivers only the new
+message, not the whole log:
+
+```
+[#1] Received JetStream message: stream: ORDERS seq: 4 / pending: 0 / subject: orders.created
+{"order_id":"ord_5xk1","customer":"initech","total_cents":1500,"ts":"2026-05-22T11:02:00Z"}
+```
+
+It resumed from where it left off. A disconnect or a server restart
+wouldn't change that: the position is durable, tied to the name
+`orders-reader`. An unnamed reader wouldn't have it, which the next section
+gets to.
+
+## Reading once without a named consumer
+
+Creating a durable consumer is the right move when a reader comes back. For
+a throwaway look at a stream you don't need one. Subscribe straight to the
+stream's subjects and the CLI builds an **ephemeral** consumer for you,
+reads the backlog, and discards the consumer when the command exits:
+
+<div class="nats-example"
+     data-type="learn-jetstream-reading-back-replay"
+     data-languages="cli"></div>
+
+An ephemeral consumer keeps no position you can return to. It's fine for a
+one-off read, but for anything you need to resume after an interruption, use
+the durable consumer from this page: an ephemeral one is removed once it goes
+idle, and a reconnect then starts over from the beginning.
+
+## The stream is unchanged
+
+Run `nats stream info ORDERS` again. The `State` block holds the same
+message count and sequences as before the read (plus the one order you just
+published). Reading a stream doesn't remove its data. Unlike taking an item
+off a queue, the messages stay in place for the next reader.
 
 ## Pitfalls
 
-Reading a stream back is read-only and safe, but a few habits cause
-trouble the first time you point a replay at real data.
+Reading a stream back is safe, but a few habits cause trouble the first
+time you point a reader at real data.
 
-**Replaying a huge stream from sequence 1.** `--all` starts the
-ephemeral consumer at sequence 1 and reads the entire log. On a
-three-message `ORDERS` stream that's instant. On a stream holding
-millions of orders it takes minutes and produces a lot of output and
-network traffic. Use `--all` only when you want the whole history. To
-read just the most recent messages instead, start near the end with `--last`, from a
-point in time with `--since`, or from a known sequence with
-`--start-sequence`.
+**Re-running a caught-up reader waits.** The read command stops once it has
+delivered everything stored, but if there's nothing new, there's nothing to
+stop after, so it waits for the next message instead of returning. That's
+correct for a live subscription and surprising for a one-shot read. To read
+the current backlog and exit, run it when there's something to read; to
+watch for new messages, leave it running and let them arrive.
 
-**An ephemeral consumer disappearing mid-read.** The replay above uses
-an ephemeral consumer, one with no name you chose and no state that
-outlives your session. The server removes an idle ephemeral consumer
-once it's been inactive for a configurable period (the
-`inactive_threshold`), so if your reader stalls or its connection
-drops while reading through a long stream, the cursor is gone and a
-reconnect restarts from sequence 1. For a one-shot read that's fine.
-For a read you need to resume after an interruption, create a named,
-durable consumer instead; it keeps its cursor on the server across
-disconnects:
-
-<div class="nats-example"
-     data-type="learn-jetstream-reading-back-durable-replay"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-The durable, ack-based reader is the subject of the
-[next page](/learn/jetstream/your-first-consumer); here it's the fix
-for a replay that's interrupted partway through.
-
-**`--all` vs `--new` confusion.** `--all` (the server's default
-`DeliverAll` start) delivers everything stored from sequence 1 first,
-then keeps the subscription open for live messages. `--new`
-(`DeliverNew`) skips the backlog and delivers only messages published
-after the consumer is created. Picking `--new` when you meant to audit
-history delivers nothing of what's already stored; picking `--all`
-when you only wanted live traffic delivers the entire backlog first.
-Decide which one matches the question you're asking before you run the
-command.
-
-**Expecting `--all` to replay and then exit.** On its own, `--all`
-reads the stored messages and then waits for the next message to
-arrive. It's a long-lived subscription, not a one-shot read. The replay
-command at the top of this page pairs it with `--terminate-at-end` so
-it returns once the stored messages are read. Drop that flag and the
-command waits after the last stored message until you interrupt it.
+**Replaying a huge stream from the beginning.** `Deliver all` starts at
+sequence 1 and reads the entire log. On a three-message `ORDERS` stream
+that's instant. On a stream holding millions of orders it takes time and
+moves a lot of data. Read the whole history only when you want it. To start
+elsewhere, create the consumer with a different delivery policy: the most
+recent messages (`--deliver last`), messages since a point in time
+(`--deliver since`), or a known sequence (`--deliver 1000`). The full set
+is in [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 
 ## Where you are
 
-Nothing about the stream changed on this page. You still have:
+The `ORDERS` stream is unchanged by reading. You now have:
 
-- the `ORDERS` stream bound to `orders.>`
-- three messages stored at sequences 1, 2, and 3
-- zero durable consumers (the replay used a throwaway ephemeral one)
-
-What changed is your understanding: a stream is a log you can replay
-on demand, and reading it doesn't empty it.
+- the `ORDERS` stream bound to `orders.>`, holding the messages you
+  published
+- a durable consumer, `orders-reader`, with a position saved on the server
+- a clear split between the **stream sequence** (the message's fixed slot)
+  and the **consumer sequence** (how far a reader has progressed)
 
 ## What's next
 
-The next page creates your first real consumer: a named, durable one
-that remembers where it left off.
+You've read the log with one consumer and acked each message. The next page
+adds a second consumer with a filter and shows how several consumers read the
+same stream as independent views, each at its own position.
 
 ## See also
 
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
-  — every consumer option, including ordered consumers.
-- [Your first consumer](/learn/jetstream/your-first-consumer) — the
-  durable, ack-based reader that picks up where this replay leaves off.
+  — every consumer option, including delivery policies and ordered consumers.
+- [Filtering what you consume](/learn/jetstream/filtering) — add a second
+  consumer that reads only the subjects it needs.

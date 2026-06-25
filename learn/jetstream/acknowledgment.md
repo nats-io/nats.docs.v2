@@ -23,8 +23,8 @@ consumer answers. The server keeps a copy on the pending list and
 starts a timer.
 
 If the answer never comes, the server assumes the worker stopped and
-delivers the message again. This is the redelivery loop from the first
-consumer page. It has two parts.
+delivers the message again. This is the redelivery loop from the previous
+page. It has two parts.
 
 The first part is the timer. Its length is AckWait, and it defaults
 to 30 seconds.
