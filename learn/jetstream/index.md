@@ -27,9 +27,9 @@ subjects, and queue groups.
 |---|---|---|
 | 1 | [Your first stream](./your-first-stream) | Why a stream, then create the `ORDERS` stream and read its anatomy |
 | 2 | [Publishing](./publishing) | Publish into a stream and understand the `PubAck` contract |
-| 3 | [Reading back the stream](./reading-back) | Replay stored messages with an ephemeral consumer |
-| 4 | [Your first consumer](./your-first-consumer) | Create the `shipping` pull consumer and the acknowledgment loop |
-| 5 | [Filtering what you consume](./filtering) | Narrow a consumer to subjects like `orders.shipped` |
+| 3 | [Reading back the stream](./reading-back) | Read stored messages back with a durable consumer |
+| 4 | [Filtering what you consume](./filtering) | Add a second consumer that reads only `orders.shipped` |
+| 5 | [Delivery and acknowledgment](./your-first-consumer) | In-flight, ack, double ack, and redelivery |
 | 6 | [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
 | 7 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
 | 8 | [A pool of workers](./worker-pool) | Share one consumer across many workers |

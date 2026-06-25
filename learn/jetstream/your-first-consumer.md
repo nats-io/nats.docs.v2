@@ -1,158 +1,121 @@
 ---
 id: your-first-consumer
-title: "4. Your first consumer"
-sidebar_position: 6
-description: Create a durable pull consumer with explicit ack and learn the ack/redeliver loop
+title: "5. Delivery and acknowledgment"
+sidebar_position: 7
+description: How a message is delivered and held in flight, what an ack and a double ack do, and how an unacked message comes back
 ---
 
-# 4. Your first consumer
+# 5. Delivery and acknowledgment
 
-The previous page read messages back with an ephemeral consumer. It
-replayed the stream but tracked no position, so reopening it starts over
-from the beginning.
+Pages 3 and 4 created consumers — `orders-reader` to read the stream back,
+then `analytics` to filter it — and acked each message on the happy path,
+where every message succeeded. This page is the part those pages took for
+granted: what an acknowledgment actually does, and what happens to a message
+that's delivered but never acked.
 
-A real service needs more than that. It has to remember which orders it
-already handled, and the server has to redeliver an order if the process
-dies before finishing it.
+That's the **ack/redeliver loop**, and it's one of the pieces that give
+JetStream its **at-least-once** delivery: a message stays available and is
+redelivered until a reader confirms it, so it's handled at least once even
+when things fail. A reader can crash mid-message, a handler can throw, a
+process can be killed — and the message it was working on comes back instead
+of vanishing. (At-least-once also leans on the durable stream from the earlier
+pages; the ack loop is the consumer half.)
 
-This page builds that consumer. It introduces the **durable cursor**
-that records your position and the **ack/redeliver loop** that makes
-delivery reliable.
+**Entering:** the orders in `ORDERS`, and the `orders-reader` and `analytics`
+consumers from the previous pages.
 
-**Entering:** three orders stored in the `ORDERS` stream, no consumer yet.
+The examples on this page are CLI-only for now; the per-language versions come
+once the page settles.
 
-## Durable consumers
+## A consumer to experiment with
 
-A **consumer** is the server-side object a reader connects to. So far the
-consumers in this chapter have been ephemeral: created when a reader asks
-for one and discarded when the reader disconnects.
-
-A **durable** consumer has a name, and the server keeps its state on disk
-under that name. That state is a **cursor**: the position of the last
-message the reader has acknowledged. When the reader reconnects, the
-consumer resumes from where the cursor points.
-
-This is what lets a service restart without re-processing everything it
-already did.
-
-## Create the shipping consumer
-
-Create a durable consumer named `shipping` on the `ORDERS` stream:
+The demos below deliberately skip an ack to watch a message come back, so
+they're easier to follow on a consumer of their own. Create one named
+`shipping` — a pull consumer with explicit ack, the same kind you made on the
+previous pages:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-create"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli"></div>
 
-Three parts of this command matter.
+It starts at the beginning of `ORDERS`, so it has the stored orders to work
+through.
 
-`--pull` makes this a **pull consumer**. The reader asks the server for
-messages when it's ready for them, rather than having the server send
-them on its own. We use pull consumers throughout this chapter and
-explain why on a later page.
+## The delivery lifecycle
 
-`--ack explicit` sets the **acknowledgment policy**: the server won't
-consider a message handled until an **acknowledgment**, or **ack**
-for short, arrives. Every message this consumer delivers must be
-individually acked by the reader.
+A message moves through a few states on a consumer:
 
-The consumer name `shipping` (a positional argument, not a flag) makes
-the consumer durable. A named consumer survives restarts; an unnamed one
-doesn't.
-
-Look at what you created:
-
-```bash
-nats consumer info ORDERS shipping
-```
-
-The output names the policy and the cursor position:
-
-```
-Information for Consumer ORDERS > shipping
-
-Configuration:
-
-                    Name: shipping
-               Pull Mode: true
-          Filter Subject:
-          Deliver Policy: All
-              Ack Policy: Explicit
-                Ack Wait: 30.00s
-           Replay Policy: Instant
-         Max Ack Pending: 1,000
-
-State:
-
-   Last Delivered Message: Consumer sequence: 0 Stream sequence: 0
-     Acknowledgment Floor: Consumer sequence: 0 Stream sequence: 0
-         Outstanding Acks: 0 out of maximum 1,000
-     Redelivered Messages: 0
-```
-
-Two fields in the `State` block are the cursor. **Last Delivered
-Message** is how far the server has handed messages out.
-**Acknowledgment Floor** is how far the reader has acked. Right now both
-are zero: nothing delivered, nothing acked.
-
-The **Ack Wait** field in the `Configuration` block (`30.00s` here) is
-the redelivery deadline. The next section explains how it drives the
-ack/redeliver loop.
-
-## The ack/redeliver loop
-
-The animation below shows the in-flight state and the redelivery loop: a
-message delivered to a reader, held until it's acked, and delivered again
-if the ack never arrives.
+1. **Delivered, in flight.** The consumer hands the message to a reader. The
+   message stays in the stream, and the consumer's **acknowledgment floor** —
+   how far it has confirmed handling — hasn't moved past it. The message is in
+   flight: out with a reader, not yet confirmed.
+2. **Acked.** The reader processes the message and sends an **ack**. The floor
+   advances past it; the message is done as far as this consumer is concerned.
+3. **Redelivered.** If no ack arrives within the **Ack Wait** deadline, the
+   server assumes the reader failed and delivers the message again — to the
+   same reader or another one on the same consumer.
 
 <div class="nats-flow" data-scenario="jetStreamConsumersAnimated" data-width="600" data-height="380"></div>
 
-When the consumer delivers a message, that message enters an
-**in-flight** state. It stays in the stream and is not yet considered
-handled; the reader has it, but the consumer's cursor has not advanced
-past it.
+The gap between what's been delivered and what's been acked is the set of
+in-flight messages. The rest of this page opens and closes that gap on
+purpose.
 
-The reader processes the message, then acks it. The ack tells the server
-to advance the cursor past that message. Only then does the message leave
-the in-flight state.
+## Acknowledge a message
 
-If the ack never comes, the server waits. The length of the wait is set
-by Ack Wait, which the output above shows as 30 seconds. When Ack Wait elapses
-with no ack, the server assumes the reader failed and **redelivers** the
-message, either to the same reader or to another one reading the same
-consumer.
-
-This is what makes delivery reliable. A message stays in flight until
-it's acked, so a reader that crashes mid-process never acks and the
-message is delivered again.
-
-## Pull one message and ack it
-
-Pull a single message from `shipping` and acknowledge it:
+Pull one message from `shipping` and ack it:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-pullAndAck"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli"></div>
 
-This delivers stream sequence `1` (the first `orders.created` message
-you published on page 2) and acks it. Watch the cursor move:
+You get the first stored order, and the ack confirms it:
 
-```bash
-nats consumer info ORDERS shipping
 ```
+subj: orders.created / tries: 1 / cons seq: 1 / str seq: 1 / pending: 2
+{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
+```
+
+`tries: 1` is the delivery count — this is the first time the message has gone
+out. Check the consumer:
 
 ```
 State:
 
-   Last Delivered Message: Consumer sequence: 1 Stream sequence: 1
-     Acknowledgment Floor: Consumer sequence: 1 Stream sequence: 1
-         Outstanding Acks: 0 out of maximum 1,000
-     Redelivered Messages: 0
+  Last Delivered Message: Consumer sequence: 1 Stream sequence: 1
+    Acknowledgment Floor: Consumer sequence: 1 Stream sequence: 1
+        Outstanding Acks: 0 out of maximum 1,000
+    Redelivered Messages: 0
 ```
 
-Both cursor fields advanced to stream sequence `1`. The next pull will
-deliver sequence `2`, then `3`, because the cursor records the position.
+Both cursors advanced to sequence 1: delivered, then acked, with nothing left
+in flight. You read the `tries`, sequences, and pending count off the
+delivered message itself — no `nats consumer info` call needed, as the
+previous pages noted. The full `State` block is here only to show the floor
+moving.
 
-## Skipping the ack
+## Double ack: make sure the ack landed
+
+A plain ack is fire-and-forget. The client sends it and moves on without
+waiting to hear that the server recorded it. Almost always that's fine. But if
+the ack is lost on the way to the server — a connection drops at the wrong
+moment — the server never advances the floor, Ack Wait elapses, and the
+message is redelivered. The reader handled it once and will see it again.
+
+A **double ack** closes that window. The client sends the ack and waits for
+the server to confirm it before treating the message as done. Reach for it
+when reprocessing a message would be harmful and you can't make the handler
+idempotent — a payment capture, say. It costs a round-trip per message, so
+it's a deliberate choice, not the default.
+
+<div class="nats-flow" data-scenario="doubleAckAnimated" data-width="560" data-height="240"></div>
+
+There's no CLI flag for it: a double ack is a client-library call (`AckSync`
+in Go and .NET, `ackAck` in JavaScript, `double_ack` in Rust). It lands with
+this page's per-language examples; for now, know the call exists and when to
+reach for it.
+
+## Redelivery: when a message isn't acked
 
 To see redelivery, pull a message but skip the ack:
 
@@ -160,100 +123,91 @@ To see redelivery, pull a message but skip the ack:
      data-type="learn-jetstream-your-first-consumer-next"
      data-languages="cli"></div>
 
-This delivers sequence `2` and leaves it in flight. Check the state and
-you'll see one outstanding ack:
+This delivers the next order, sequence 2, and leaves it in flight. The state
+now shows the gap:
 
 ```
 State:
 
-   Last Delivered Message: Consumer sequence: 2 Stream sequence: 2
-     Acknowledgment Floor: Consumer sequence: 1 Stream sequence: 1
-         Outstanding Acks: 1 out of maximum 1,000
-     Redelivered Messages: 0
+  Last Delivered Message: Consumer sequence: 2 Stream sequence: 2
+    Acknowledgment Floor: Consumer sequence: 1 Stream sequence: 1
+        Outstanding Acks: 1 out of maximum 1,000
+    Redelivered Messages: 0
 ```
 
-The Last Delivered cursor moved to `2`, but the Acknowledgment Floor
-stayed at `1`. The gap is the in-flight message. Wait 30 seconds for Ack
-Wait to elapse, pull again, and the server hands you sequence `2` a
-second time — now with `Redelivered Messages` counted. The message came
-back because you never acked it.
+Last Delivered moved to 2, but the Acknowledgment Floor stayed at 1. That one
+message is in flight: `Outstanding Acks: 1`. Wait out the Ack Wait deadline —
+30 seconds by default — pull again, and the server hands you sequence 2 a
+second time, now with `tries: 2`. It came back because you never acked it.
 
-## What we are not covering yet
+A redelivery doesn't slot back into stream order. A consumer usually has
+several messages in flight at once — the `out of maximum 1,000` in the state
+above is **MaxAckPending**, the cap on how many it delivers before they're
+acked. While one message waits to be redelivered, the consumer keeps handing
+out later ones, so the repeat can arrive *after* messages with higher sequence
+numbers.
 
-Explicit ack is one policy of four, and `+ACK` is one reader response of
-several. A reader can also negatively acknowledge a message to ask for
-immediate redelivery, signal that it's still working, or terminate a
-message so it never comes back.
+<div class="nats-flow" data-scenario="redeliveryOrderAnimated" data-width="660" data-height="220"></div>
 
-Those responses, the other ack policies, and push consumers all belong
-to the next layers. The full set of consumer options is documented in
-[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
-We use only explicit ack on a pull consumer here.
+If a consumer must process strictly in order, set MaxAckPending to 1. It then
+delivers one message at a time and won't move past it until it's acked, so a
+redelivery always comes back before anything new:
+
+```bash
+nats consumer edit ORDERS shipping --max-pending 1
+```
+
+That ordering guarantee costs throughput — one message in flight means no
+overlap between handlers — so use it only when order actually matters.
+
+A reader doesn't have to wait out the deadline, and a stuck message doesn't
+have to retry forever. A reader can answer a message in other ways — ask for
+an immediate retry, give up on a message that can never be handled, or signal
+that it's still working — and the server has controls that decide how long it
+waits between retries and when it stops. Those responses and controls are the
+[next page](/learn/jetstream/acknowledgment).
 
 ## Pitfalls
 
-The ack/redeliver loop is reliable, but a few mistakes break it. Each one
-below is scoped to this consumer.
+**Forgetting to ack.** A handler that processes a message but never acks looks
+identical to a crashed reader: the message stays in flight, Ack Wait elapses,
+and it's redelivered — and with the default unlimited delivery limit, that
+repeats forever. Always ack on the success path. The
+[next page](/learn/jetstream/acknowledgment) covers how to retire a message
+that genuinely can't be processed, so it stops coming back.
 
-**Ack Wait set too low.** Ack Wait is the deadline for an ack; its
-default is 30 seconds. Set it shorter than your slowest handler and the
-server redelivers a message that's still being processed, then
-redelivers again, producing a redelivery storm where every message is
-worked twice.
+**Acking the same message twice.** Once you ack a message, the floor moves
+past it. A second ack does nothing useful, and most clients reject it locally
+with *"message was already acknowledged"*. Ack each delivery exactly once, in
+one place in your handler.
 
-Don't guess Ack Wait. Set it comfortably longer than your slowest message
-handler, with room to spare:
-
-<div class="nats-example"
-     data-type="learn-jetstream-your-first-consumer-ackWait"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-**Forgetting to ack.** A handler that processes a message but never
-acks looks identical to a crashed reader: the message stays in flight,
-Ack Wait elapses, and the server redelivers it — forever, since the
-default delivery limit is unlimited. The `shipping` consumer will hand
-you the same `ord_8w2k` order again and again.
-
-Always ack on the success path. If a message can't be processed,
-terminate it so it stops coming back (covered with
-the other reader responses in [Reference → Consumer
-Configuration](/reference/jetstream/api/consumer)).
-
-**Acking the same message twice.** Once you ack a message, the server
-advances the cursor past it. A second ack on the same message does
-nothing useful, and most clients reject it with an error like
-*"message was already acknowledged"* instead of sending it to the server.
-Ack each delivery exactly once, in one place in your handler.
-
-**Reusing a durable name with a different config.** A durable consumer
-is identified by its name. Run `nats consumer add ORDERS shipping` again with
-different flags and the server returns *consumer already exists*; it
-won't silently reconfigure `shipping` out from under a running
-reader. To change a durable, edit it (`nats consumer edit`) instead of
-recreating it, or pick a new name.
+**Reusing a durable name with a different config.** A durable consumer is
+identified by its name. Run `nats consumer add ORDERS shipping` again with
+different flags and the server returns *consumer already exists*; it won't
+silently reconfigure a consumer a reader is using. Edit it
+(`nats consumer edit`) instead, or pick a new name.
 
 ## Where you are
 
-You now have:
+`shipping` is a durable pull consumer with explicit ack, and you've seen the
+core of the loop:
 
-- A durable pull consumer named `shipping` on `ORDERS`, with
-  `AckPolicy=explicit`.
-- A cursor that remembers which messages you've acked, surviving
-  restarts.
-- The ack/redeliver loop: a message stays in flight until it's acked,
-  and is redelivered after Ack Wait if it isn't.
+- a message is **delivered** and held **in flight** until it's confirmed
+- an **ack** (or a **double ack**, when a lost ack would hurt) advances the
+  acknowledgment floor past it
+- an unacked message is **redelivered** after the Ack Wait deadline
 
-The `ORDERS` stream still holds all three messages; a consumer reading
-them doesn't delete them.
+The delivery count (`tries`) rides along on each message, so a reader always
+knows how many times it's seen one.
 
 ## What's next
 
-One stream can feed many consumers, each at its own position. The next
-page adds a second consumer that reads only `orders.shipped`, and shows
-how a **filter** turns one stream into independent views.
+You've seen the happy path and that an unacked message comes back. The next
+page goes deep on the four ways a client answers a message — ack, nak, term,
+and in-progress — and the server controls (Ack Wait, MaxDeliver, backoff) that
+decide when a message comes back and when it stops.
 
 ## See also
 
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
-  — every consumer option, including all four ack policies, push
-  consumers, and the full set of reader responses beyond `+ACK`.
+  — every consumer option, the four ack policies, and push consumers.

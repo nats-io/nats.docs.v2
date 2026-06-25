@@ -15,15 +15,15 @@ import { AnimatedEdge } from "../edges";
 
 // Brand palette.
 const PUBLISH_COLOR = "#27AAE1"; // NATS primary blue — message on the way in
-const ACK_COLOR = "#34A574"; // NATS green — the PubAck coming back, and the store
+const ACK_COLOR = "#34A574"; // NATS green — stored, and the PubAck coming back
 const NAVY = "#375C93";
 
-// A small database-cylinder glyph for the stream's store.
+// A small database-cylinder glyph for the stream's storage.
 function DbCylinder({ color }: { color: string }) {
     return (
         <svg
-            width="22"
-            height="26"
+            width="20"
+            height="24"
             viewBox="0 0 24 28"
             fill="none"
             stroke={color}
@@ -37,103 +37,80 @@ function DbCylinder({ color }: { color: string }) {
     );
 }
 
-// The server boundary. Just a labelled box; the listener and store nodes sit
-// inside it as children, so the message dot can flow between them.
-function ServerBoxNode() {
+// One stream. It accepts messages on its subjects, stores them, and returns a
+// PubAck. Not a listener plus a separate store — a single thing that does all
+// three. (The internal leader/follower mechanics only appear once a stream is
+// replicated; that belongs on the durability pages, not here.)
+function StreamNode({ data }: NodeProps) {
+    const d = data as { accepting?: boolean; storing?: boolean; seq?: number };
+    const accepting = !!d.accepting;
+    const storing = !!d.storing;
+    const borderColor = storing
+        ? ACK_COLOR
+        : accepting
+        ? PUBLISH_COLOR
+        : "#d1d5db";
     return (
         <div
             style={{
-                width: 206,
-                height: 200,
-                border: `2px solid ${NAVY}`,
+                width: 196,
+                border: `2px solid ${borderColor}`,
                 borderRadius: 10,
-                background: "#ffffff",
+                background: storing ? "#ecfdf5" : "#ffffff",
+                padding: "10px 12px",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                transition: "background 0.3s ease, border-color 0.3s ease",
             }}
         >
+            {/* Header: it's a stream, running on the server. */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <NatsIcon width={16} height={16} />
+                <span style={{ fontWeight: 600, fontSize: 13, color: "#374151" }}>
+                    Stream ORDERS
+                </span>
+            </div>
+
+            {/* What it accepts. */}
+            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 7 }}>
+                accepts <code style={{ fontSize: 12, color: NAVY }}>orders.&gt;</code>
+            </div>
+
+            {/* What it holds. */}
             <div
                 style={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                    paddingTop: 8,
+                    gap: 8,
+                    marginTop: 6,
                 }}
             >
-                <NatsIcon width={16} height={16} />
-                <span style={{ fontWeight: 600, fontSize: 13, color: "#374151" }}>
-                    nats-server
+                <DbCylinder color={storing ? ACK_COLOR : NAVY} />
+                <span style={{ fontSize: 12, color: "#374151" }}>
+                    stored · last seq{" "}
+                    <strong>{d.seq ?? 0}</strong>
                 </span>
             </div>
-        </div>
-    );
-}
 
-// The subject listener that matches the published subject.
-function ListenerNode({ data }: NodeProps) {
-    const matching = !!(data as { matching?: boolean }).matching;
-    return (
-        <div
-            style={{
-                width: 168,
-                display: "flex",
-                flexDirection: "column",
-                gap: 2,
-                border: `1px solid ${matching ? PUBLISH_COLOR : "#e5e7eb"}`,
-                background: matching ? "#eff8fd" : "#f9fafb",
-                borderRadius: 6,
-                padding: "6px 8px",
-                transition: "background 0.3s ease, border-color 0.3s ease",
-            }}
-        >
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>
-                Stream listener
-            </span>
-            <code style={{ fontSize: 12, color: NAVY }}>orders.&gt;</code>
-            <Handle type="target" id="in" position={Position.Left} style={{ opacity: 0 }} />
-            <Handle type="source" id="down" position={Position.Bottom} style={{ opacity: 0 }} />
-        </div>
-    );
-}
-
-// The stream's store. Turns green as it keeps the message.
-function StoreNode({ data }: NodeProps) {
-    const d = data as { storing?: boolean; seq?: number };
-    const storing = !!d.storing;
-    return (
-        <div
-            style={{
-                width: 168,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                border: `1px solid ${storing ? ACK_COLOR : "#e5e7eb"}`,
-                background: storing ? "#ecfdf5" : "#f9fafb",
-                borderRadius: 6,
-                padding: "6px 8px",
-                transition: "background 0.3s ease, border-color 0.3s ease",
-            }}
-        >
-            <DbCylinder color={storing ? ACK_COLOR : NAVY} />
-            <div style={{ lineHeight: 1.25 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>
-                    Stream storage
-                </div>
-                <div style={{ fontSize: 11, color: "#6b7280" }}>
-                    ORDERS · seq: {d.seq ?? 0}
-                </div>
-            </div>
-            <Handle type="target" id="up" position={Position.Top} style={{ opacity: 0 }} />
-            <Handle type="source" id="out" position={Position.Left} style={{ opacity: 0 }} />
+            {/* Messages arrive on the left; the PubAck leaves on the left too. */}
+            <Handle
+                type="target"
+                id="in"
+                position={Position.Left}
+                style={{ top: "38%", opacity: 0 }}
+            />
+            <Handle
+                type="source"
+                id="out"
+                position={Position.Left}
+                style={{ top: "62%", opacity: 0 }}
+            />
         </div>
     );
 }
 
 const nodeTypes = {
     publisher: PublisherNode,
-    serverBox: ServerBoxNode,
-    listener: ListenerNode,
-    store: StoreNode,
+    stream: StreamNode,
 };
 
 const edgeTypes = {
@@ -146,22 +123,22 @@ const STAGE_ORDER: Stage[] = ["publish", "store", "ack"];
 
 const STAGE_DURATION_MS: Record<Stage, number> = {
     publish: 3000,
-    store: 2600,
+    store: 2400,
     ack: 3400,
 };
 
 const CAPTION: Record<Stage, string> = {
     publish:
-        "The publisher sends a message to a subject — orders.created. The server's listener for orders.> matches it.",
+        "The publisher sends a message to a subject — orders.created. The ORDERS stream accepts it, because it listens on orders.>.",
     store:
-        "The listener hands the message to the matching stream, which stores it on disk and assigns the next sequence number.",
+        "The stream stores the message on disk and assigns it the next sequence number.",
     ack:
-        "The server replies with a PubAck — the stream name and the sequence it gave the message — so the publisher knows the write landed.",
+        "The stream returns a PubAck — its name and the sequence it gave the message — so the publisher knows the write landed.",
 };
 
 function PublishAckAnimatedInner({
-    width = 640,
-    height = 360,
+    width = 600,
+    height = 320,
 }: {
     width?: number;
     height?: number;
@@ -178,60 +155,38 @@ function PublishAckAnimatedInner({
         return () => clearTimeout(timer);
     }, [stage]);
 
-    // The store assigns the next sequence number as the message lands.
+    // The stream assigns the next sequence number as the message lands.
     useEffect(() => {
         if (stage === "store") setSeq((s) => s + 1);
     }, [stage]);
-
-    const matching = stage === "publish" || stage === "store";
-    const storing = stage === "store" || stage === "ack";
 
     const nodes: any[] = [
         {
             id: "client",
             type: "publisher",
-            position: { x: 30, y: 130 },
+            position: { x: 30, y: 120 },
             data: { label: "Publisher" },
         },
         {
-            id: "server",
-            type: "serverBox",
-            position: { x: 300, y: 80 },
-            data: {},
-            draggable: false,
-            selectable: false,
-            style: { width: 206, height: 200 },
-        },
-        {
-            id: "listener",
-            type: "listener",
-            parentId: "server",
-            extent: "parent",
-            position: { x: 19, y: 44 },
-            data: { matching },
-            draggable: false,
-            selectable: false,
-        },
-        {
-            id: "store",
-            type: "store",
-            parentId: "server",
-            extent: "parent",
-            position: { x: 19, y: 128 },
-            data: { storing, seq },
-            draggable: false,
-            selectable: false,
+            id: "stream",
+            type: "stream",
+            position: { x: 340, y: 110 },
+            data: {
+                accepting: stage === "publish",
+                storing: stage === "store" || stage === "ack",
+                seq,
+            },
         },
     ];
 
     const edges: any[] = [];
 
-    // Hop 1: publisher -> listener (the message arriving and matching).
+    // Publisher -> stream (the message arriving on its subject).
     if (stage === "publish") {
         edges.push({
-            id: "pub-listener",
+            id: "pub",
             source: "client",
-            target: "listener",
+            target: "stream",
             targetHandle: "in",
             type: "animated",
             animated: true,
@@ -246,30 +201,11 @@ function PublishAckAnimatedInner({
         });
     }
 
-    // Hop 2: listener -> store (the matched message handed to the stream).
-    if (stage === "store") {
-        edges.push({
-            id: "listener-store",
-            source: "listener",
-            sourceHandle: "down",
-            target: "store",
-            targetHandle: "up",
-            type: "animated",
-            animated: true,
-            markerEnd: { type: MarkerType.ArrowClosed },
-            data: {
-                color: PUBLISH_COLOR,
-                animated: true,
-                interval: 1100,
-            },
-        });
-    }
-
-    // Hop 3: store -> publisher (the PubAck returning).
+    // Stream -> publisher (the PubAck returning).
     if (stage === "ack") {
         edges.push({
-            id: "store-ack",
-            source: "store",
+            id: "ack",
+            source: "stream",
             sourceHandle: "out",
             target: "client",
             type: "animated",

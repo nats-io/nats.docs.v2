@@ -14,7 +14,15 @@ const FALLBACKS = {
   subjectsWildcardAnimated:
     'Animated subject wildcards: messages on different subjects (orders.us.created, orders.eu.created, …) are routed by matching wildcard subscriptions.',
   publishAckAnimated:
-    'Animated PubAck flow: a publisher sends a message to the server; the server’s listener matches the subject, the stream stores the message and assigns a sequence number, and the server returns a PubAck with the stream name and sequence.',
+    'Animated PubAck flow: a publisher sends a message to a subject; the ORDERS stream accepts it (it listens on orders.>), stores it and assigns a sequence number, then returns a PubAck with the stream name and sequence.',
+  jetStreamPipelineAnimated:
+    'Animated JetStream pipeline: a producer publishes into the ORDERS stream, where each message gets a fixed stream sequence; one consumer then reads the stored messages in order, advancing its own consumer sequence, and hands each to a client. The stream sequence is the message\'s position in the log; the consumer sequence is how many messages this consumer has read.',
+  consumerServerSideAnimated:
+    'Architecture diagram: the NATS server contains two entities, the ORDERS stream (the stored messages) and the orders-reader consumer (a server-side cursor over the stream). A separate client application connects from outside the server: it pulls messages from the consumer and receives them. The stored messages and the read position both live on the server, not in the client.',
+  doubleAckAnimated:
+    'Plain ack versus double ack. In both, the server (the consumer) delivers a message to the client and the client sends an ack back. With a plain ack the client moves on the instant it sends the ack (fire-and-forget). With a double ack the ack is a request: the client waits for the server to confirm the ack landed before treating the message as done.',
+  redeliveryOrderAnimated:
+    'Redelivery is in delivery order, not stream order. A consumer delivers messages 1 through 5; the client acks 1, 2, 4, and 5 but skips 3. While 3 sits unacked an Ack Wait timer fills; when it completes the server redelivers message 3, so it arrives after 4 and 5 — out of stream order — and the client acks it that second time, before the consumer continues with message 6.',
   wildcardComparison:
     'Side-by-side comparison of single-token (*) and multi-token (>) wildcard subject matching.',
 };
@@ -32,6 +40,10 @@ const TITLES = {
   publishSubscribeAnimated: 'Publish / Subscribe (animated)',
   subjectsWildcardAnimated: 'Subject wildcards (animated)',
   publishAckAnimated: 'Publish and PubAck (animated)',
+  jetStreamPipelineAnimated: 'Producer, stream, and consumer (animated)',
+  consumerServerSideAnimated: 'A consumer is server-side (animated)',
+  doubleAckAnimated: 'Plain ack vs double ack (animated)',
+  redeliveryOrderAnimated: 'Out-of-order redelivery (animated)',
   wildcardComparison: 'Wildcard comparison',
 };
 

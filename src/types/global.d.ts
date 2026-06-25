@@ -18,7 +18,12 @@ import type {
   PublishSubscribeAnimated as PublishSubscribeAnimatedComponent,
   SubjectsWildcardAnimated as SubjectsWildcardAnimatedComponent,
   JetStreamContrastAnimated as JetStreamContrastAnimatedComponent,
+  PublishAckAnimated as PublishAckAnimatedComponent,
   JetStreamConsumersAnimated as JetStreamConsumersAnimatedComponent,
+  JetStreamPipelineAnimated as JetStreamPipelineAnimatedComponent,
+  ConsumerServerSideAnimated as ConsumerServerSideAnimatedComponent,
+  DoubleAckAnimated as DoubleAckAnimatedComponent,
+  RedeliveryOrderAnimated as RedeliveryOrderAnimatedComponent,
   CentralizedAuthAnimated as CentralizedAuthAnimatedComponent,
   DecentralizedAuthAnimated as DecentralizedAuthAnimatedComponent,
   AuthCalloutAnimated as AuthCalloutAnimatedComponent,
@@ -73,7 +78,12 @@ declare global {
       PublishSubscribeAnimated: typeof PublishSubscribeAnimatedComponent;
       SubjectsWildcardAnimated: typeof SubjectsWildcardAnimatedComponent;
       JetStreamContrastAnimated: typeof JetStreamContrastAnimatedComponent;
+      PublishAckAnimated: typeof PublishAckAnimatedComponent;
       JetStreamConsumersAnimated: typeof JetStreamConsumersAnimatedComponent;
+      JetStreamPipelineAnimated: typeof JetStreamPipelineAnimatedComponent;
+      ConsumerServerSideAnimated: typeof ConsumerServerSideAnimatedComponent;
+      DoubleAckAnimated: typeof DoubleAckAnimatedComponent;
+      RedeliveryOrderAnimated: typeof RedeliveryOrderAnimatedComponent;
       CentralizedAuthAnimated: typeof CentralizedAuthAnimatedComponent;
       DecentralizedAuthAnimated: typeof DecentralizedAuthAnimatedComponent;
       AuthCalloutAnimated: typeof AuthCalloutAnimatedComponent;
