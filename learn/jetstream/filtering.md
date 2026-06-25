@@ -1,21 +1,21 @@
 ---
 id: filtering
-title: "5. Filtering what you consume"
-sidebar_position: 7
+title: "4. Filtering what you consume"
+sidebar_position: 6
 description: Add a second consumer that reads only orders.shipped, and see consumers as independent views
 ---
 
-# 5. Filtering what you consume
+# 4. Filtering what you consume
 
-The `shipping` consumer reads every message in the `ORDERS` stream,
-which fits a worker that handles each order end to end.
+The `orders-reader` consumer from the previous page reads every message in
+the `ORDERS` stream — no filter, the whole log.
 
-The analytics team needs only one thing: when an order ships. They have
-no use for `orders.created` or `orders.cancelled`, so delivering those
-messages to them would be wasted work on both sides.
+A reporting job needs only one thing: when an order ships. It has no use for
+`orders.created` or `orders.cancelled`, so delivering those messages to it
+would be wasted work on both sides.
 
-This page adds a consumer that reads only `orders.shipped`, and shows
-why a second consumer doesn't interfere with the first.
+This page adds a second consumer that reads only `orders.shipped`, and shows
+why one consumer doesn't interfere with another.
 
 ## What a filter does
 
@@ -43,7 +43,7 @@ Ask the server to describe the consumer:
 nats consumer info ORDERS analytics
 ```
 
-The configuration block now carries a line the `shipping` consumer
+The configuration block now carries a line the `orders-reader` consumer
 didn't have:
 
 ```
@@ -58,12 +58,12 @@ Configuration:
 ```
 
 `Filter Subject: orders.shipped` is the line that matters. The
-`shipping` consumer has no filter, so its info output omits this line.
+`orders-reader` consumer has no filter, so its info output omits this line.
 No filter line means every subject in the stream.
 
 ## Two consumers with separate positions
 
-The `analytics` consumer and the `shipping` consumer read the same
+The `analytics` consumer and the `orders-reader` consumer read the same
 stream, but each tracks its own position in it.
 
 From the previous page, a consumer keeps a cursor: the sequence number
@@ -73,7 +73,7 @@ have two separate cursors.
 
 The server stores the cursor alongside the consumer's config and ack
 state, separate from the stream's messages. When `analytics` advances
-its cursor past sequence `3`, `shipping`'s position does not change.
+its cursor past sequence `3`, `orders-reader`'s position does not change.
 Both consumers read the same stored messages from their own cursor.
 
 Pull from `analytics` and see what comes back:
@@ -84,12 +84,11 @@ nats consumer next ORDERS analytics --count 5
 
 `analytics` sees only the `orders.shipped` message stored on the
 publishing page, sequence `3`. The `orders.created` messages at
-sequences `1` and `2` do not appear for this consumer. They are still in
-the stream, and `shipping` can still read them. The filter hides them
-from `analytics`.
+sequences `1` and `2` don't appear for this consumer. They're still in the
+stream; the filter just hides them from `analytics`.
 
-`shipping` stays wherever you left it. Reading from `analytics` did not
-move `shipping`'s cursor, and it did not consume or delete any message
+`orders-reader` stays wherever you left it. Reading from `analytics` did not
+move `orders-reader`'s cursor, and it did not consume or delete any message
 from the stream.
 
 ## A consumer is a view
@@ -100,7 +99,7 @@ of every message, and each consumer reads it from its own position.
 
 Because consumers are independent, a filter is a cheap way to send the
 same messages to more than one reader. Adding `analytics` cost one
-command. It did not copy any data, it did not slow down `shipping`, and
+command. It did not copy any data, it did not slow down `orders-reader`, and
 it can start, stop, or fall behind without affecting any other consumer.
 The server keeps one copy of each message and serves every consumer from
 it.
@@ -108,8 +107,8 @@ it.
 This differs from the core NATS queue group you met in Core Concepts. A
 queue group splits one subject's live traffic across workers that share
 the load. Here, each consumer gets its own full view of the stored
-stream, filtered to what it asked for. Sharing load within one consumer
-is what the next page covers.
+stream, filtered to what it asked for. Sharing load within one consumer —
+the worker-pool pattern — comes later in the chapter.
 
 ## Other filtering options
 
@@ -144,7 +143,7 @@ When a pull comes back empty, run `nats consumer info` and check the
 **Expecting a filter to delete from the stream.** A filter narrows one
 consumer's view; it never removes messages. After `analytics` reads
 `orders.shipped`, every `orders.created` and `orders.cancelled` message is
-still stored and still readable by `shipping`. Don't use a filter to
+still stored and still readable by `orders-reader`. Don't use a filter to
 prune a stream. What stays and what ages out is controlled by the
 stream's limits, covered in [12. Shaping the stream](/learn/jetstream/shaping-the-stream),
 not by any consumer.
@@ -166,7 +165,7 @@ retention shapes delivery once filters are in place, see
 
 The `ORDERS` stream now has two consumers reading it:
 
-- `shipping`: no filter, reads every order; the worker from the previous
+- `orders-reader`: no filter, reads every order; the reader from the previous
   page
 - `analytics`: filtered to `orders.shipped`, sees only ships
 
@@ -175,15 +174,15 @@ the other, and the stream itself is untouched by either read.
 
 ## What's next
 
-So far a single client at a time has read each consumer. The next page
-puts several workers behind the one `shipping` consumer and distributes
-the load across them, the stream-based equivalent of core NATS queue
-groups.
+Both `orders-reader` and `analytics` read on the happy path: pull a message,
+ack it, move on. The next page is about what that acknowledgment actually
+does — how a message is held in flight until it's confirmed, what a double
+ack adds, and how an unacked message is redelivered.
 
 ## See also
 
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer) —
   every consumer config field, including multiple filter subjects and
   subject transforms.
-- [4. Your first consumer](/learn/jetstream/your-first-consumer) — where
-  you met the cursor and ack model this page builds on.
+- [3. Reading back the stream](/learn/jetstream/reading-back) — where you met
+  the consumer cursor this page builds on.

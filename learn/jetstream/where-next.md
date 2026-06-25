@@ -112,7 +112,7 @@ the page that explains it.
 - [ ] Confirm `--all` versus `--new` matches the question (backlog or live traffic) before you run the command.
 - [ ] Pair `--all` with `--terminate-at-end` for a one-shot replay; on its own it drains the backlog then blocks waiting for more.
 
-### Your first consumer — see [Pitfalls](/learn/jetstream/your-first-consumer#pitfalls)
+### Delivery and acknowledgment — see [Pitfalls](/learn/jetstream/your-first-consumer#pitfalls)
 
 - [ ] Set Ack Wait longer than your slowest handler, with headroom, to avoid a redelivery storm.
 - [ ] Ack on every success path, and term a genuinely unprocessable message so it stops coming back.

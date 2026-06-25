@@ -13,7 +13,7 @@ server sends back a confirmation that it stored the message. This page
 covers that confirmation, called a `PubAck`, and how to make a publish
 safe to retry.
 
-<div class="nats-flow" data-scenario="publishAckAnimated" data-width="640" data-height="360"></div>
+<div class="nats-flow" data-scenario="publishAckAnimated" data-width="600" data-height="320"></div>
 
 ## Publish from the CLI
 
@@ -217,7 +217,7 @@ order shipped as soon as the `PubAck` returns is acting on a write that no
 shipping logic has seen. Keep business outcomes separate from the publish.
 The delivery-and-ack half of the story is on the
 [next page](/learn/jetstream/reading-back) and in
-[your first consumer](/learn/jetstream/your-first-consumer).
+[delivery and acknowledgment](/learn/jetstream/your-first-consumer).
 
 ## Where you are
 

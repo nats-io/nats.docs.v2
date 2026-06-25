@@ -50,6 +50,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-publishing-pubAck": "learn-jetstream-publishing-pubAck/main.go",
             "learn-jetstream-publishing-dedup": "learn-jetstream-publishing-dedup/main.go",
             "learn-jetstream-publishing-confirmStored": "learn-jetstream-publishing-confirmStored/main.go",
+            "learn-jetstream-reading-back-create": "learn-jetstream-reading-back-create/main.go",
+            "learn-jetstream-reading-back-read": "learn-jetstream-reading-back-read/main.go",
         },
     }],
     "rust": [{
@@ -87,6 +89,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-publishing-pubAck": "docs_learn_jetstream_publishing_pub_ack.rs",
             "learn-jetstream-publishing-dedup": "docs_learn_jetstream_publishing_dedup.rs",
             "learn-jetstream-publishing-confirmStored": "docs_learn_jetstream_publishing_confirm_stored.rs",
+            "learn-jetstream-reading-back-create": "docs_learn_jetstream_reading_back_create.rs",
+            "learn-jetstream-reading-back-read": "docs_learn_jetstream_reading_back_read.rs",
         },
     }],
     "javascript": [{
@@ -124,6 +128,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-publishing-pubAck": "learn-jetstream-publishing-pubAck.ts",
             "learn-jetstream-publishing-dedup": "learn-jetstream-publishing-dedup.ts",
             "learn-jetstream-publishing-confirmStored": "learn-jetstream-publishing-confirmStored.ts",
+            "learn-jetstream-reading-back-create": "learn-jetstream-reading-back-create.ts",
+            "learn-jetstream-reading-back-read": "learn-jetstream-reading-back-read.ts",
         },
     }],
     "python": [{
@@ -161,6 +167,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-publishing-pubAck": "learn_jetstream_publishing_pub_ack.py",
             "learn-jetstream-publishing-dedup": "learn_jetstream_publishing_dedup.py",
             "learn-jetstream-publishing-confirmStored": "learn_jetstream_publishing_confirm_stored.py",
+            "learn-jetstream-reading-back-create": "learn_jetstream_reading_back_create.py",
+            "learn-jetstream-reading-back-read": "learn_jetstream_reading_back_read.py",
         },
     }],
     "java": [{
@@ -198,6 +206,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-publishing-pubAck": "LearnJetStreamPublishingPubAck.java",
             "learn-jetstream-publishing-dedup": "LearnJetStreamPublishingDedup.java",
             "learn-jetstream-publishing-confirmStored": "LearnJetStreamPublishingConfirmStored.java",
+            "learn-jetstream-reading-back-create": "LearnJetStreamReadingBackCreate.java",
+            "learn-jetstream-reading-back-read": "LearnJetStreamReadingBackRead.java",
         },
     }],
     "csharp": [{
@@ -235,6 +245,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-publishing-pubAck": "LearnJetStreamPublishingPubAck.cs",
             "learn-jetstream-publishing-dedup": "LearnJetStreamPublishingDedup.cs",
             "learn-jetstream-publishing-confirmStored": "LearnJetStreamPublishingConfirmStored.cs",
+            "learn-jetstream-reading-back-create": "LearnJetStreamReadingBackCreate.cs",
+            "learn-jetstream-reading-back-read": "LearnJetStreamReadingBackRead.cs",
         },
     }],
 };

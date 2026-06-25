@@ -120,60 +120,96 @@ NatsFlow/
 
 ## Adding New Scenarios
 
-To create a custom scenario:
+There are two kinds of scenario. Most new work uses the **animated** kind.
 
-1. Create a new file in `scenarios/`, e.g., `myScenario.ts`:
+| Kind | File | When |
+|------|------|------|
+| **Animated component** (`.tsx`) | `scenarios/<name>Animated.tsx` exporting a React component `XxxAnimated` | Anything with motion, steps, state, or toggles — the default for new charts |
+| **Static scenario** (`.ts`) | `scenarios/<name>.ts` exporting a `{ description, nodes, edges }` object | A fixed diagram with no animation logic |
 
-```typescript
-import { MarkerType } from '@xyflow/react';
-import type { NatsFlowScenario } from '../types';
+> Don't write a scenario from scratch — copy the closest existing one. For a
+> round-trip (request → reply, publish → ack) start from
+> `requestRetryAnimated.tsx`; for a multi-node topology start from
+> `clusterMeshAnimated.tsx`. Both show the standard shape below.
 
-export const myScenario: NatsFlowScenario = {
-  description: 'My custom pattern',
-  nodes: [
-    {
-      id: 'node1',
-      type: 'publisher',
-      position: { x: 50, y: 150 },
-      data: { label: 'My Publisher' },
-    },
-    // Add more nodes...
-  ],
-  edges: [
-    {
-      id: 'e1',
-      source: 'node1',
-      target: 'node2',
-      type: 'animated',
-      animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
-      data: { color: '#3b82f6', animated: true },
-    },
-    // Add more edges...
-  ],
-};
+### Animated component (the common case)
+
+The runtime loader auto-resolves any `data-scenario` ending in `Animated` to
+the **PascalCase** component on `window.NatsFlow` — so `data-scenario="myFlowAnimated"`
+looks up `MyFlowAnimated`. Wire it up in **four** places (the component file
+shows none of these, which is why they're easy to miss):
+
+1. **Create** `scenarios/myFlowAnimated.tsx`. The shape:
+
+```tsx
+import { ReactFlow, ReactFlowProvider, Background, MarkerType } from '@xyflow/react';
+import { PublisherNode, ServerNode } from '../nodes';   // reuse shared nodes
+import { AnimatedEdge } from '../edges';
+
+const nodeTypes = { publisher: PublisherNode, server: ServerNode /* + custom inline nodes */ };
+const edgeTypes = { animated: AnimatedEdge };
+
+function MyFlowAnimatedInner({ width = 600, height = 320 }) {
+  const [stage, setStage] = useState('a');          // a stage state machine,
+  useEffect(() => { /* setTimeout to advance stage, loop */ }, [stage]);
+  const nodes = [ /* rebuilt from `stage` each render */ ];
+  const edges = [ /* only the active stage's edges; AnimatedEdge data:
+                     { color, label, labelColor, animated, interval } */ ];
+  return (<div>{/* stepper buttons */}<ReactFlow nodes={nodes} edges={edges}
+            nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView .../>{/* caption */}</div>);
+}
+
+// Always wrap in ReactFlowProvider.
+export function MyFlowAnimated(props) {
+  return <ReactFlowProvider><MyFlowAnimatedInner {...props} /></ReactFlowProvider>;
+}
 ```
 
-2. Export from `scenarios/index.ts`:
+2. **Export** from `scenarios/index.ts`:
 
 ```typescript
-export { myScenario } from './myScenario';
+export { MyFlowAnimated } from './myFlowAnimated';
 ```
 
-3. Update the loader (`/static/js/nats-flow-loader.js`) to include the new scenario:
+3. **Register** on `window.NatsFlow` in `src/plugins/nats-flow/client-module.tsx`
+   (the top-level object, *not* the nested `scenarios` map):
+
+```typescript
+MyFlowAnimated: module.MyFlowAnimated,
+```
+
+4. **Add fallback text** in `scripts/rehype-nats-flow.mjs` — a `FALLBACKS` entry
+   (the prose shown in non-JS / markdown / LLM output) and a `TITLES` entry.
+   Skipping this is non-fatal but prints a build warning and yields generic
+   markdown output:
 
 ```javascript
-scenarios = {
-  // ... existing scenarios
-  myScenario: module.myScenario,
-};
+// FALLBACKS
+myFlowAnimated: 'One or two sentences describing what the animation shows.',
+// TITLES
+myFlowAnimated: 'My flow (animated)',
 ```
 
-4. Use in Markdown:
+Then embed it (note camelCase in the attribute):
 
 ```html
-<div class="nats-flow" data-scenario="myScenario"></div>
+<div class="nats-flow" data-scenario="myFlowAnimated" data-width="600" data-height="320"></div>
 ```
+
+### Static scenario
+
+1. Create `scenarios/myScenario.ts` exporting a `NatsFlowScenario` object
+   (`{ description, nodes, edges }`) — same node/edge shape as above.
+2. Export it from `scenarios/index.ts`.
+3. Add it to the `scenarios: { ... }` map inside `window.NatsFlow` in
+   `src/plugins/nats-flow/client-module.tsx` (this is the lookup for any
+   `data-scenario` that does **not** end in `Animated`).
+4. Embed: `<div class="nats-flow" data-scenario="myScenario"></div>`.
+
+> Custom node components register in the scenario's local `nodeTypes` map; for
+> a node made of sub-parts, draw them inside one node component, or use
+> `parentId` children. Keep internal mechanics (e.g. replication leader →
+> followers) for the pages where they're real, not on intro flows.
 
 ## Node Types
 
