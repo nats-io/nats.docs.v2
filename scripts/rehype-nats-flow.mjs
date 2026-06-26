@@ -18,7 +18,7 @@ const FALLBACKS = {
   jetStreamPipelineAnimated:
     'Animated JetStream pipeline: a producer publishes into the ORDERS stream, where each message gets a fixed stream sequence; one consumer then reads the stored messages in order, advancing its own consumer sequence, and hands each to a client. The stream sequence is the message\'s position in the log; the consumer sequence is how many messages this consumer has read.',
   consumerServerSideAnimated:
-    'Architecture diagram: the NATS server contains two entities, the ORDERS stream (the stored messages) and the orders-reader consumer (a server-side cursor over the stream). A separate client application connects from outside the server: it pulls messages from the consumer and receives them. The stored messages and the read position both live on the server, not in the client.',
+    'Architecture diagram: the NATS server contains two entities, the ORDERS stream (the stored messages) and the billing consumer (a server-side cursor over the stream). A separate client application connects from outside the server: it pulls messages from the consumer and receives them. The stored messages and the read position both live on the server, not in the client.',
   doubleAckAnimated:
     'Plain ack versus double ack. In both, the server (the consumer) delivers a message to the client and the client sends an ack back. With a plain ack the client moves on the instant it sends the ack (fire-and-forget). With a double ack the ack is a request: the client waits for the server to confirm the ack landed before treating the message as done.',
   redeliveryOrderAnimated:
