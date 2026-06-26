@@ -1,11 +1,11 @@
 ---
 id: prometheus-and-dashboards
-title: "5. Prometheus & dashboards"
+title: "Prometheus & dashboards"
 sidebar_position: 5
 description: Scrape the monitoring port into Prometheus time series, chart them in Grafana, and alert with nats server check thresholds
 ---
 
-# 5. Prometheus & dashboards
+# Prometheus & dashboards
 
 Every number so far is a snapshot. When you `curl` the monitoring port you
 see "now," and when you read the `shipping` consumer's state you learn it's

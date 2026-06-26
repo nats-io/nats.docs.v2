@@ -1,11 +1,11 @@
 ---
 id: disaster-recovery
-title: 4. Disaster recovery
+title: Disaster recovery
 sidebar_position: 4
 description: A runbook that picks restore-from-snapshot or promote-the-mirror per failure class, then promotes ORDERS_DR cleanly
 ---
 
-# 4. Disaster recovery
+# Disaster recovery
 
 You now have two tools. A **snapshot** of `ORDERS` sits off-site under
 `./backups/orders/`, and a live **mirror**, `ORDERS_DR`, runs at `site2`.
@@ -185,7 +185,7 @@ they are: the operator JWT, the account JWTs, the nkeys, and the creds are
 gone. The next page backs up the **identity** plane.
 
 Continue to
-[5. Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup).
+[Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup).
 
 ## See also
 

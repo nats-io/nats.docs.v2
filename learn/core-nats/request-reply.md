@@ -1,11 +1,11 @@
 ---
 id: request-reply
-title: "3. Request-reply"
+title: "Request-reply"
 sidebar_position: 4
 description: Build a reply on top of pub/sub with a private inbox, a timeout, and the no-responders signal
 ---
 
-# 3. Request-reply
+# Request-reply
 
 Pub/sub is one-way. A publisher publishes to `orders.created`, and a
 copy goes to every interested subscriber. The publisher never hears
@@ -264,7 +264,7 @@ The inventory service is a single process. To scale it, you run
 several copies and let NATS hand each request to exactly one of them.
 That's a queue group: built-in load balancing with no broker in the
 middle. Build one on the next page:
-[4. Queue groups](/learn/core-nats/queue-groups).
+[Queue groups](/learn/core-nats/queue-groups).
 
 ## See also
 

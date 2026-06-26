@@ -23,16 +23,20 @@ up front gives you a place to file each new mechanism as it arrives.
 
 **Authentication** answers _who are you_. A connecting application
 presents some proof of identity (a password, a token, an nkey, or a
-JWT), and the server decides whether to admit it. Pages 2 through 4 and
-page 8 are about authentication.
+JWT), and the server decides whether to admit it. The authentication
+pages cover this, from [Authentication basics](./authentication-basics)
+through [Decentralized authentication](./decentralized-auth) and
+[Operator mode](./operator-mode), plus [Auth callout](./auth-callout).
 
 **Authorization** answers _what may you do_. Once admitted, a user can
 publish and subscribe only to the subjects you grant it.
-Everything else is denied. Page 5 is about authorization.
+Everything else is denied. The [Authorization](./authorization) page
+covers this.
 
 **Encryption** answers _is the wire safe_. TLS protects each connection
 from eavesdropping and tampering, and a client certificate can even
-serve as the identity itself. Page 7 is about encryption.
+serve as the identity itself. The [Encryption & TLS](./encryption) page
+covers this.
 
 ## Accounts scope all three
 
@@ -41,9 +45,10 @@ The three parts are scoped by a fourth idea that comes first: the
 
 An account is an isolated tenant. Each account has its own users, its
 own subject space, and its own view of the world. Two accounts never see
-each other's messages unless you deliberately connect them. Page 1
-builds the two accounts this chapter uses, and page 6 connects them on
-purpose.
+each other's messages unless you deliberately connect them.
+[Accounts & multitenancy](./accounts-and-multitenancy) builds the two
+accounts this chapter uses, and [Cross-account](./cross-account)
+connects them on purpose.
 
 Put together, the full picture is that a **user** authenticates into an
 **account**, where **permissions** decide what it may do, over a
@@ -94,17 +99,17 @@ what you need to understand the concept and links to
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | [Accounts & multitenancy](./accounts-and-multitenancy) | An account is an isolated tenant; the `$G` and `$SYS` accounts |
-| 2 | [Authentication basics](./authentication-basics) | Centralized, config-based auth and the credential types |
-| 3 | [Decentralized authentication](./decentralized-auth) | The operator, account, and user trust chain, with nkeys and JWTs |
-| 4 | [Operator mode](./operator-mode) | The `nsc` workflow and the account resolver |
-| 5 | [Authorization](./authorization) | Subject permissions: publish and subscribe allow and deny lists |
-| 6 | [Cross-account](./cross-account) | Exports and imports that share one subject across tenants |
-| 7 | [Encryption & TLS](./encryption) | TLS per connection type and mutual TLS identity mapping |
-| 8 | [Auth callout](./auth-callout) | Delegating the authentication decision to an external service |
-| 9 | [Where to go next](./where-next) | A map of what's beyond this chapter |
+| Page | What you learn |
+|---|---|
+| [Accounts & multitenancy](./accounts-and-multitenancy) | An account is an isolated tenant; the `$G` and `$SYS` accounts |
+| [Authentication basics](./authentication-basics) | Centralized, config-based auth and the credential types |
+| [Decentralized authentication](./decentralized-auth) | The operator, account, and user trust chain, with nkeys and JWTs |
+| [Operator mode](./operator-mode) | The `nsc` workflow and the account resolver |
+| [Authorization](./authorization) | Subject permissions: publish and subscribe allow and deny lists |
+| [Cross-account](./cross-account) | Exports and imports that share one subject across tenants |
+| [Encryption & TLS](./encryption) | TLS per connection type and mutual TLS identity mapping |
+| [Auth callout](./auth-callout) | Delegating the authentication decision to an external service |
+| [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 

@@ -1,11 +1,11 @@
 ---
 id: your-first-stream
-title: 1. Your first stream
+title: Your first stream
 sidebar_position: 2
 description: Why you want a stream, then create the ORDERS stream and look at its configuration
 ---
 
-# 1. Your first stream
+# Your first stream
 
 This page creates the `ORDERS` stream with one CLI command, then looks at
 it with another.

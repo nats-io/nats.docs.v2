@@ -1,11 +1,11 @@
 ---
 id: advanced-publishing
-title: "18. Advanced publishing"
+title: "Advanced publishing"
 sidebar_position: 20
 description: Async, atomic-batch, and fast-ingest publishing for higher throughput or grouped writes
 ---
 
-# 18. Advanced publishing
+# Advanced publishing
 
 [Publishing](/learn/jetstream/publishing) sent one message at a time and
 waited for each `PubAck`. That's the right default, and most services

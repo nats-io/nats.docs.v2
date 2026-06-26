@@ -1,11 +1,11 @@
 ---
 id: your-first-bucket
-title: 1. Your first bucket
+title: Your first bucket
 sidebar_position: 2
 description: Create the INVENTORY bucket, put a stock count, and get back an entry
 ---
 
-# 1. Your first bucket
+# Your first bucket
 
 Time to make the `INVENTORY` bucket real. The inventory service keeps a
 stock count for each SKU, and a bucket is where those counts live. This
@@ -43,8 +43,8 @@ The second is `--history 1`. **History** is how many prior values the
 bucket keeps for each key. One means the bucket holds only the current
 value of a key and forgets the rest. That's the default and all the
 inventory service needs to start. The depth can go as high as 64, but no
-higher; page 3 raises it so a key remembers where it's been, and for now,
-one is enough.
+higher; [History and revisions](./history-and-revisions) raises it so a key
+remembers where it's been, and for now, one is enough.
 
 You didn't set any other configuration. A bucket has the same long list
 of stream knobs underneath, all filled with sensible defaults. The full
@@ -63,8 +63,8 @@ That's a **put**: an unconditional write. It stores the value whether or
 not the key already exists, and it hands back the key's new **revision**,
 a number the bucket bumps on every write. The first write to a fresh key
 lands at revision 1. Revisions are how the bucket tracks change over time;
-page 3 builds on them, and for now the number only confirms the write
-happened.
+[History and revisions](./history-and-revisions) builds on them, and for now
+the number only confirms the write happened.
 
 Now read it back:
 
@@ -144,7 +144,7 @@ The next page puts the **warehouse dashboard** on the bucket: a watch that
 streams every stock change live, starting with a snapshot of what's
 already there.
 
-Continue to [2. Watching](/learn/key-value/watching).
+Continue to [Watching](/learn/key-value/watching).
 
 ## See also
 

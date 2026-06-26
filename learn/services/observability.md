@@ -1,11 +1,11 @@
 ---
 id: observability
-title: "5. Observability"
+title: "Observability"
 sidebar_position: 5
 description: Read the per-endpoint stats the framework keeps for you, and signal service errors that those stats record
 ---
 
-# 5. Observability
+# Observability
 
 Your `OrderInventory` service answers on `orders.inventory.check`, and the
 [discovery page](/learn/services/discovery) lets you enumerate it and target a
@@ -164,7 +164,7 @@ The last mechanism is **scaling**: run more instances of `OrderInventory` and
 let the default queue group `"q"` spread requests across them, with no
 coordinator and no config change.
 
-Continue to [6. Scaling](/learn/services/scaling).
+Continue to [Scaling](/learn/services/scaling).
 
 ## See also
 

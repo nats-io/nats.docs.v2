@@ -1,11 +1,11 @@
 ---
 id: raft-and-leaders
-title: "2. Raft and leaders"
+title: "Raft and leaders"
 sidebar_position: 3
 description: How a NATS cluster reaches agreement — RAFT groups, leaders and followers, and the election that picks a leader on a quorum of votes
 ---
 
-# 2. Raft and leaders
+# Raft and leaders
 
 The [previous page](/learn/clustering/forming-a-cluster) left you with a live
 three-server cluster `east` (`n1-east`, `n2-east`, and `n3-east`) that
@@ -245,7 +245,7 @@ leader gets an order onto all three peers and decides it's safe.
 The next page traces exactly that. It follows one `orders.created` write from
 the leader's log to a quorum of peers, shows where the write **commits**, and
 explains the consistency you get from `R=3`:
-[3. Replication and R=3](/learn/clustering/replication-and-r3).
+[Replication and R=3](/learn/clustering/replication-and-r3).
 
 ## See also
 

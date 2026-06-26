@@ -1,11 +1,11 @@
 ---
 id: history-and-revisions
-title: "3. History and revisions"
+title: "History and revisions"
 sidebar_position: 4
 description: Track a key's revisions, read its history, and decrement safely with compare-and-swap
 ---
 
-# 3. History and revisions
+# History and revisions
 
 So far every write to a key has been a `put`: the new value replaces the old
 one, and you never had to think about who wrote last. That works
@@ -148,7 +148,7 @@ live, the same as any other change.
 The next page gives a key its own lifetime with a per-key **TTL**,
 and bounds the whole bucket with limits.
 
-Continue to [4. TTL and limits](/learn/key-value/ttl-and-limits).
+Continue to [TTL and limits](/learn/key-value/ttl-and-limits).
 
 ## See also
 

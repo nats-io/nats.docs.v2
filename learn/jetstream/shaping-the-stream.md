@@ -1,13 +1,15 @@
 ---
 id: shaping-the-stream
-title: "12. Shaping the stream"
+title: "Shaping the stream"
 sidebar_position: 14
 description: Control stream size and age with limits, and decide what happens when a limit is reached
 ---
 
-# 12. Shaping the stream
+# Shaping the stream
 
-The `ORDERS` stream you created back on page 1 has no limits. It keeps
+The `ORDERS` stream you created back on the
+[Your first stream](/learn/jetstream/your-first-stream) page has no
+limits. It keeps
 every message forever, on however much disk the server has. That was
 fine for learning, but not for production.
 
@@ -22,7 +24,8 @@ what the server does when a limit is reached.
 
 A stream under the default **Limits** retention policy keeps messages
 until a limit forces it to drop them. You saw that policy in the config
-printout on page 1. A limit is a ceiling on the stream. You set it with
+printout on the [Your first stream](/learn/jetstream/your-first-stream)
+page. A limit is a ceiling on the stream. You set it with
 one of three options, depending on how you want to measure the stream:
 
 - **MaxAge** caps how old a message may get. Set it to seven days and a

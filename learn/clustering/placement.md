@@ -1,11 +1,11 @@
 ---
 id: placement
-title: "4. Placement"
+title: "Placement"
 sidebar_position: 5
 description: Constrain where a stream's replicas live using cluster and server tags, and understand preferred leader as a hint
 ---
 
-# 4. Placement
+# Placement
 
 By now the `ORDERS` stream runs `R=3` on the `east` cluster, and the meta
 leader chose which three servers hold it. So far you haven't had a say in
@@ -184,7 +184,7 @@ grows the group by adding a fourth server, watches a new peer catch up
 before it counts toward quorum, and removes a peer without ever losing the
 majority that keeps `ORDERS` writable.
 
-Continue to [5. Scaling and peer management](/learn/clustering/scaling-and-peers).
+Continue to [Scaling and peer management](/learn/clustering/scaling-and-peers).
 
 ## See also
 

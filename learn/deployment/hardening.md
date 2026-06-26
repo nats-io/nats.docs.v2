@@ -1,11 +1,11 @@
 ---
 id: hardening
-title: "6. Hardening"
+title: "Hardening"
 sidebar_position: 6
 description: Lock down the ORDERS cluster — TLS on every link, mounted credentials, and a sandboxed systemd unit
 ---
 
-# 6. Hardening
+# Hardening
 
 The cluster is sized, deployed, configurable, and upgradable. Right now
 it's also unsecured. Routes between `n1-east`, `n2-east`, and `n3-east`

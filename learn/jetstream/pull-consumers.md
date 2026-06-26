@@ -1,11 +1,11 @@
 ---
 id: pull-consumers
-title: "7. Pull consumers in depth"
+title: "Pull consumers in depth"
 sidebar_position: 9
 description: Fetch a batch versus consume a continuous flow, and the fields that bound each pull
 ---
 
-# 7. Pull consumers in depth
+# Pull consumers in depth
 
 The `shipping` consumer delivers the next message to a worker when the
 worker asks. That ask is a **pull**. The page that created the consumer

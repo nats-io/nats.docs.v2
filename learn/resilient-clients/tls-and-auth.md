@@ -1,11 +1,11 @@
 ---
 id: tls-and-auth
-title: "6. TLS & Auth"
+title: "TLS & Auth"
 sidebar_position: 7
 description: Connect order-svc securely by consuming a credentials file and trusting the cluster CA over a TLS handshake
 ---
 
-# 6. TLS & Auth
+# TLS & Auth
 
 Every connection so far has been plaintext and anonymous. `order-svc` opens
 a connection, reconnects when a server moves, drains on shutdown, and retries
@@ -164,7 +164,7 @@ every page's production checklist, and points to where the surrounding topics
 live (why servers move, what happens to a consumer's position, and how the
 creds and CA you just loaded are made).
 
-Continue to [7. Where Next](/learn/resilient-clients/where-next).
+Continue to [Where Next](/learn/resilient-clients/where-next).
 
 ## See also
 

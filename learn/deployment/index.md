@@ -76,8 +76,11 @@ belongs there, and this chapter links to it instead.
 ## How to read it
 
 Each page introduces at most two new concepts and carries the same
-cluster forward. You size it (page 2), deploy it (page 3), edit its
-config live (page 4), upgrade it (page 5), and harden it (page 6). The
+cluster forward. You [size it](/learn/deployment/sizing-and-resources),
+[deploy it](/learn/deployment/kubernetes), [edit its config
+live](/learn/deployment/config-management), [upgrade
+it](/learn/deployment/rolling-upgrades), and
+[harden it](/learn/deployment/hardening). The
 node names (`n1-east`/`n2-east`/`n3-east`), the `ORDERS` stream, the
 `order-svc` publisher, and the `ACME` operator stay fixed throughout, so
 you keep a
@@ -91,15 +94,15 @@ for the exhaustive knob list.
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | [Deployment & Upgrades](/learn/deployment) | What this chapter operates and the order of the runbook |
-| 2 | [Sizing & resources](/learn/deployment/sizing-and-resources) | The four resources a node spends, and how an R3 stream counts against account limits |
-| 3 | [Kubernetes](/learn/deployment/kubernetes) | Stand the cluster up as a StatefulSet with the NATS Helm chart, and declare streams as CRDs |
-| 4 | [Config management](/learn/deployment/config-management) | Split config into includes and reload it live with a SIGHUP: no downtime, no reconnect |
-| 5 | [Rolling upgrades](/learn/deployment/rolling-upgrades) | Use lame-duck mode and the right upgrade order to roll a new version through the cluster |
-| 6 | [Hardening](/learn/deployment/hardening) | TLS on every link, mounted credentials, and a locked-down systemd unit |
-| 7 | [Where to go next](/learn/deployment/where-next) | The production checklist and a map of what's beyond running the cluster |
+| Page | What you learn |
+|---|---|
+| [Deployment & Upgrades](/learn/deployment) | What this chapter operates and the order of the runbook |
+| [Sizing & resources](/learn/deployment/sizing-and-resources) | The four resources a node spends, and how an R3 stream counts against account limits |
+| [Kubernetes](/learn/deployment/kubernetes) | Stand the cluster up as a StatefulSet with the NATS Helm chart, and declare streams as CRDs |
+| [Config management](/learn/deployment/config-management) | Split config into includes and reload it live with a SIGHUP: no downtime, no reconnect |
+| [Rolling upgrades](/learn/deployment/rolling-upgrades) | Use lame-duck mode and the right upgrade order to roll a new version through the cluster |
+| [Hardening](/learn/deployment/hardening) | TLS on every link, mounted credentials, and a locked-down systemd unit |
+| [Where to go next](/learn/deployment/where-next) | The production checklist and a map of what's beyond running the cluster |
 
 ## Prerequisites
 

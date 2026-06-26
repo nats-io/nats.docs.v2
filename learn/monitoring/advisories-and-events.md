@@ -1,11 +1,11 @@
 ---
 id: advisories-and-events
-title: "4. Advisories & events"
+title: "Advisories & events"
 sidebar_position: 4
 description: Subscribe to JetStream advisories and system events to learn about things you never polled for
 ---
 
-# 4. Advisories & events
+# Advisories & events
 
 The two pages before this one read state on demand. You `curl` the
 monitoring port `:8222` and it answers with the numbers as they are right
@@ -208,7 +208,7 @@ that charts them, and `nats server check` that fires when lag crosses a
 threshold.
 
 Continue to
-[5. Prometheus & dashboards](/learn/monitoring/prometheus-and-dashboards).
+[Prometheus & dashboards](/learn/monitoring/prometheus-and-dashboards).
 
 ## See also
 

@@ -1,11 +1,11 @@
 ---
 id: super-clusters
-title: "4. Super-clusters"
+title: "Super-clusters"
 sidebar_position: 5
 description: Join the east and west clusters with gateways, and keep order traffic local by default
 ---
 
-# 4. Super-clusters
+# Super-clusters
 
 Acme's `east` cluster is healthy: three servers form a full mesh of
 routes, with the `ORDERS` stream replicated across them. Then a second

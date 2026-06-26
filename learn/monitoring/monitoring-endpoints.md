@@ -1,11 +1,11 @@
 ---
 id: monitoring-endpoints
-title: "2. Monitoring endpoints"
+title: "Monitoring endpoints"
 sidebar_position: 2
 description: "The HTTP monitoring port :8222 and its on-demand JSON — /varz, /connz, /routez, and the /jsz JetStream lens"
 ---
 
-# 2. Monitoring endpoints
+# Monitoring endpoints
 
 Every number this chapter reads comes from a read-only
 HTTP port on each NATS server. Before you reach for Prometheus or
@@ -284,7 +284,7 @@ left them unexplained. The next page reads the `shipping` consumer's
 state in full and turns those raw fields into the one number that says
 "the shipping consumer is behind": lag.
 
-Continue to [3. JetStream health](/learn/monitoring/jetstream-health).
+Continue to [JetStream health](/learn/monitoring/jetstream-health).
 
 ## See also
 

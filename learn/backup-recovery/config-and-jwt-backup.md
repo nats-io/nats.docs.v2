@@ -1,11 +1,11 @@
 ---
 id: config-and-jwt-backup
-title: 5. Config and JWT backup
+title: Config and JWT backup
 sidebar_position: 5
 description: Back up and restore the operator, accounts, creds, nkeys, and server config off-site so the identity plane survives a clean-room rebuild
 ---
 
-# 5. Config and JWT backup
+# Config and JWT backup
 
 The last three pages protected the data with a snapshot to return to, a
 mirror to fail over to, and a runbook to choose between them. But a restored
@@ -116,7 +116,7 @@ aws s3 cp acme-identity-2026-06-04.tar.gz.enc \
   s3://acme-dr/identity/acme-identity-2026-06-04.tar.gz.enc
 ```
 
-The archive is dated, like the snapshot directory on page 2. The date
+The archive is dated, like the snapshot directory from [Stream backup and restore](/learn/backup-recovery/stream-backup-restore). The date
 serves a purpose. If you rotate the operator key (re-sign the chain under
 a new operator nkey), an older archive points at the *previous* operator,
 and a server restored from it trusts a chain nobody signs anymore. Tag
@@ -188,8 +188,8 @@ nats stream info ORDERS \
 ```
 
 If `order-svc` authenticates and `nats stream info ORDERS` returns the
-stream, the full platform is back: the data from pages 2–4, and now the
-identity that gates it.
+stream, the full platform is back: the data the earlier pages protected,
+and now the identity that gates it.
 
 ## Pitfalls
 
@@ -250,8 +250,9 @@ version it belongs to. And you have a restore procedure that extracts it,
 clears the stale resolver cache, restarts, and verifies a real client
 connects.
 
-Combined with the snapshot from page 2 and the `ORDERS_DR` mirror from
-page 3, the whole platform now survives a clean-room rebuild. The data
+Combined with the snapshot from [Stream backup and restore](/learn/backup-recovery/stream-backup-restore)
+and the `ORDERS_DR` mirror from [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources),
+the whole platform now survives a clean-room rebuild. The data
 comes back from a snapshot, the site comes back from the mirror, and the
 identity that gates both comes back from this archive.
 

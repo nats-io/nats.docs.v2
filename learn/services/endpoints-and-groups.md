@@ -1,11 +1,11 @@
 ---
 id: endpoints-and-groups
-title: "3. Endpoints and groups"
+title: "Endpoints and groups"
 sidebar_position: 3
 description: Give a service more than one endpoint, and organize endpoints under a group subject prefix
 ---
 
-# 3. Endpoints and groups
+# Endpoints and groups
 
 The previous page gave you a running `OrderInventory` service with exactly
 one endpoint, `check`, answering on `orders.inventory.check`. That's the
@@ -172,7 +172,7 @@ page asks the server what's out there: the `$SRV` discovery verbs let any
 client learn which services exist, what endpoints they expose, and which
 instances are answering.
 
-Continue to [4. Discovery](/learn/services/discovery).
+Continue to [Discovery](/learn/services/discovery).
 
 ## See also
 

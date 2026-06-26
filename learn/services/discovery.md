@@ -1,11 +1,11 @@
 ---
 id: discovery
-title: "4. Discovery"
+title: "Discovery"
 sidebar_position: 4
 description: Learn what services exist and what they answer using the $SRV discovery verbs
 ---
 
-# 4. Discovery
+# Discovery
 
 Your `OrderInventory` service answers on `orders.inventory.check`, and
 `ShippingQuote` answers on `shipping.quote`. To call them, you had to know
@@ -162,7 +162,7 @@ it's doing*: request counts, error counts, and processing time per
 endpoint. The next page reads those counters and shows how a handler
 records an error.
 
-Continue to [5. Observability](/learn/services/observability).
+Continue to [Observability](/learn/services/observability).
 
 ## See also
 

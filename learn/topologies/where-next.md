@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "7. Where to go next"
+title: "Where to go next"
 sidebar_position: 8
 description: Recap the four composable shapes and point to the mechanics, operations, and protocol references beyond this chapter
 ---
 
-# 7. Where to go next
+# Where to go next
 
 You started this chapter with one `nats-server` on `localhost` serving
 Acme's ORDERS workload. You end it with that same workload running on a

@@ -1,11 +1,11 @@
 ---
 id: watching-and-listing
-title: 4. Watching and listing
+title: Watching and listing
 sidebar_position: 5
 description: List the INVOICES bucket and watch it for new objects with the analytics service
 ---
 
-# 4. Watching and listing
+# Watching and listing
 
 The `INVOICES` bucket now holds a few objects: `invoice-ord_8w2k.pdf` with
 its description and `content-type` header, and `label-ord_8w2k.png` linked
@@ -163,7 +163,7 @@ bucket *is* a JetStream stream named `OBJ_INVOICES`, and the next page reads its
 stream config to show you the chunk and metadata subjects, the rollup that
 keeps one current record per object, and how a soft delete really works.
 
-Continue to [5. Under the hood](/learn/object-store/under-the-hood).
+Continue to [Under the hood](/learn/object-store/under-the-hood).
 
 ## See also
 

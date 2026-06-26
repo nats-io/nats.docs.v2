@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "7. Where Next"
+title: "Where Next"
 sidebar_position: 8
 description: Recap the connection lifecycle, point to the sibling deep dives, and collect every page's pitfalls into one production checklist
 ---
 
-# 7. Where Next
+# Where Next
 
 You started this chapter with the Acme clients connecting on bare
 defaults: a single URL, no name, no plan for a server going away. You end

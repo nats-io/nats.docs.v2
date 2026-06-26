@@ -1,11 +1,11 @@
 ---
 id: cross-account
-title: "6. Cross-Account"
+title: "Cross-Account"
 sidebar_position: 7
 description: How two isolated accounts share exactly one subject, deliberately
 ---
 
-# 6. Cross-Account
+# Cross-Account
 
 Two accounts can't see each other's traffic. That's the whole point
 of an account: it's an isolated subject space, and `ORDERS` and
@@ -232,7 +232,7 @@ credential and every message has crossed the network in the clear.
 Encryption & TLS puts a TLS layer under each connection, and shows how
 a client certificate can serve as the user's identity.
 
-Continue to [7. Encryption & TLS](/learn/security/encryption).
+Continue to [Encryption & TLS](/learn/security/encryption).
 
 ## See also
 

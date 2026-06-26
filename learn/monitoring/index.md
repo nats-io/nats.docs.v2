@@ -68,13 +68,13 @@ concept needs and links to [Reference](/reference/) for the rest.
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 2 | [Monitoring endpoints](/learn/monitoring/monitoring-endpoints) | The HTTP monitoring port `:8222` and its on-demand JSON: `/varz`, `/connz`, `/routez`, and the `/jsz` JetStream lens |
-| 3 | [JetStream health](/learn/monitoring/jetstream-health) | Stream and consumer state, and how to read lag, in-flight, and redelivery as numbers |
-| 4 | [Advisories and events](/learn/monitoring/advisories-and-events) | Transient messages on `$JS.EVENT.ADVISORY.>` and `$SYS.*` that report events you never actively queried for |
-| 5 | [Prometheus and dashboards](/learn/monitoring/prometheus-and-dashboards) | The exporter, time series, Grafana dashboards, and `nats server check` alert thresholds |
-| 6 | [Where to go next](/learn/monitoring/where-next) | A recap of the four lenses and a map of the Operate siblings beyond this chapter |
+| Page | What you learn |
+|---|---|
+| [Monitoring endpoints](/learn/monitoring/monitoring-endpoints) | The HTTP monitoring port `:8222` and its on-demand JSON: `/varz`, `/connz`, `/routez`, and the `/jsz` JetStream lens |
+| [JetStream health](/learn/monitoring/jetstream-health) | Stream and consumer state, and how to read lag, in-flight, and redelivery as numbers |
+| [Advisories and events](/learn/monitoring/advisories-and-events) | Transient messages on `$JS.EVENT.ADVISORY.>` and `$SYS.*` that report events you never actively queried for |
+| [Prometheus and dashboards](/learn/monitoring/prometheus-and-dashboards) | The exporter, time series, Grafana dashboards, and `nats server check` alert thresholds |
+| [Where to go next](/learn/monitoring/where-next) | A recap of the four lenses and a map of the Operate siblings beyond this chapter |
 
 The four lenses map to four pages: numbers come from the
 [endpoints](/learn/monitoring/monitoring-endpoints), lag comes from

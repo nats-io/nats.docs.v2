@@ -1,6 +1,6 @@
 ---
 id: queue-groups
-title: "4. Queue groups"
+title: "Queue groups"
 sidebar_position: 5
 description: Share one subject across a pool of subscribers, so each message is handled by exactly one of them
 ---
@@ -8,7 +8,7 @@ description: Share one subject across a pool of subscribers, so each message is 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# 4. Queue groups
+# Queue groups
 
 So far every subscriber on a subject gets a copy of every message.
 That's what you want for `notifications` and `analytics`: each of them

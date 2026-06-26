@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "5. Where to go next"
+title: "Where to go next"
 sidebar_position: 6
 description: Recap the backup-and-recovery triad and point to what comes after this chapter
 ---
 
-# 5. Where to go next
+# Where to go next
 
 You started this chapter with a built but unprotected platform: an
 `ORDERS` stream full of real orders, the `ACME` operator and its

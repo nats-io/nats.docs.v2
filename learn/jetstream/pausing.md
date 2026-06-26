@@ -1,11 +1,11 @@
 ---
 id: pausing
-title: "10. Pausing a consumer"
+title: "Pausing a consumer"
 sidebar_position: 12
 description: Stop delivery to a consumer until a deadline, then resume where it left off
 ---
 
-# 10. Pausing a consumer
+# Pausing a consumer
 
 Sometimes you want a consumer to stop delivering for a while and then
 pick up exactly where it was.
@@ -160,7 +160,7 @@ doesn't change the stream. New messages keep arriving while the
 `shipping` consumer is paused, and they count toward the stream's storage
 limits. A long pause on a stream with a tight `MaxMsgs` or `MaxBytes` can
 drop the oldest orders before the consumer reads them. Size the stream
-for the longest pause you expect, or keep pauses short. See [13. Shaping
+for the longest pause you expect, or keep pauses short. See [Shaping
 the stream](/learn/jetstream/shaping-the-stream) for how the limits
 apply.
 
@@ -183,5 +183,5 @@ sense instead, and why this chapter uses pull.
 
 - [Reference → Consumer API](/reference/jetstream/api/consumer) — the
   `PauseUntil` field, the pause response, and the pause advisory.
-- [7. Pull consumers in depth](/learn/jetstream/pull-consumers) — the
+- [Pull consumers in depth](/learn/jetstream/pull-consumers) — the
   consumer state that pausing preserves.

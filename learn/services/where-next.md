@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "7. Where to go next"
+title: "Where to go next"
 sidebar_position: 7
 description: Recap the Services mental model and point to the chapters and Reference that take it further
 ---
 
-# 7. Where to go next
+# Where to go next
 
 You started this chapter with a hand-rolled request-reply responder: a
 subscriber on `orders.inventory.check` that read a request and published a

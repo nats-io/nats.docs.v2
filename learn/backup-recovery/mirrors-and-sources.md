@@ -1,11 +1,11 @@
 ---
 id: mirrors-and-sources
-title: 3. Mirrors as a DR tool
+title: Mirrors as a DR tool
 sidebar_position: 3
 description: Stand up a cross-site mirror of ORDERS for disaster recovery, read its lag, and learn why a mirror is not a backup
 ---
 
-# 3. Mirrors as a DR tool
+# Mirrors as a DR tool
 
 The last page gave you a **snapshot**, a point-in-time copy of `ORDERS`
 you can restore from. A snapshot gets back the data as it stood at the
@@ -240,7 +240,7 @@ for per failure class, and the exact steps to **promote** `ORDERS_DR`
 into a writable `ORDERS` when the `east` site is gone.
 
 Continue to
-[4. Disaster recovery](/learn/backup-recovery/disaster-recovery).
+[Disaster recovery](/learn/backup-recovery/disaster-recovery).
 
 ## See also
 

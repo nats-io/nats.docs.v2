@@ -1,11 +1,11 @@
 ---
 id: slow-consumers
-title: 4. Slow Consumers
+title: Slow Consumers
 sidebar_position: 5
 description: Bound a subscription's in-memory buffer so a slow handler surfaces backlog instead of silently exhausting memory
 ---
 
-# 4. Slow Consumers
+# Slow Consumers
 
 So far the connection survives a server going away and exits cleanly on a
 signal. Those faults come from the *outside* (the network, the server, a
@@ -208,7 +208,7 @@ The next mechanism is **request-reply resilience**: telling "the
 responder is slow" apart from "no responder exists at all", and retrying
 each case correctly without sending the same order twice.
 
-Continue to [5. Request-Reply Resilience](/learn/resilient-clients/request-reply-resilience).
+Continue to [Request-Reply Resilience](/learn/resilient-clients/request-reply-resilience).
 
 ## See also
 

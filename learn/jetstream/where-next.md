@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "19. Where to go next"
+title: "Where to go next"
 sidebar_position: 21
 description: Recap the JetStream model and point to what comes after this chapter
 ---
 
-# 19. Where to go next
+# Where to go next
 
 This chapter started with a publisher and no one guaranteed to be
 listening. It ends with an `ORDERS` stream, a handful of consumers

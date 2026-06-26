@@ -1,11 +1,11 @@
 ---
 id: scaling-and-peers
-title: "5. Scaling and peer management"
+title: "Scaling and peer management"
 sidebar_position: 6
 description: Add a peer with catchup, remove one safely, and keep quorum while you grow or shrink the ORDERS group
 ---
 
-# 5. Scaling and peer management
+# Scaling and peer management
 
 The `ORDERS` stream runs at `R=3` on `n1-east`, `n2-east`, and
 `n3-east`, placed where the [Placement](/learn/clustering/placement)

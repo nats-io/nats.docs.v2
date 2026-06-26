@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "6. Where to go next"
+title: "Where to go next"
 sidebar_position: 6
 description: Recap the four monitoring lenses and point to the Operate siblings and Reference that take watching NATS further
 ---
 
-# 6. Where to go next
+# Where to go next
 
 You started this chapter with a deployment you knew how to build but not
 how to watch. You end it able to read the `shipping` consumer falling

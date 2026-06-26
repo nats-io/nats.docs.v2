@@ -1,11 +1,11 @@
 ---
 id: authorization
-title: "5. Authorization"
+title: "Authorization"
 sidebar_position: 6
 description: Subject permissions, allow and deny lists, and the rule that an allow-list closes everything else
 ---
 
-# 5. Authorization
+# Authorization
 
 By the end of the last page, `order-svc` can prove who it is. The
 server admits the connection and lets it onto the `ORDERS` account.
@@ -263,7 +263,7 @@ isolation means it can't see `ORDERS` traffic at all. The next page
 opens exactly one subject across that boundary, on purpose, with
 exports and imports.
 
-Continue to [6. Cross-Account](/learn/security/cross-account).
+Continue to [Cross-Account](/learn/security/cross-account).
 
 ## See also
 

@@ -1,11 +1,11 @@
 ---
 id: delivery-semantics
-title: "13. Delivery semantics"
+title: "Delivery semantics"
 sidebar_position: 15
 description: The three retention policies, and how to pick one for the kind of work a stream does
 ---
 
-# 13. Delivery semantics
+# Delivery semantics
 
 The previous page shaped `ORDERS` with limits: how many messages it
 keeps, for how long, in how many bytes. Those limits decide when a
@@ -172,7 +172,7 @@ unique on workqueue stream` for overlapping filters.
 
 Give each consumer a filter that splits the subjects between them, so no
 message belongs to two consumers. A worker *pool* sharing one consumer
-is the other valid setup; see [9. A pool of workers](/learn/jetstream/worker-pool).
+is the other valid setup; see [A pool of workers](/learn/jetstream/worker-pool).
 
 <div class="nats-example" data-type="learn-jetstream-delivery-semantics-workqueueOverlap" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -204,7 +204,7 @@ own schedule, independent of the stream's `MaxAge`.
 - [Reference → Stream Configuration](/reference/jetstream/api/stream/create)
   — the `retention` field, its three values, and how each interacts with
   limits, republish, and mirrors.
-- [12. Shaping the stream](/learn/jetstream/shaping-the-stream) — the
+- [Shaping the stream](/learn/jetstream/shaping-the-stream) — the
   limits that govern a Limits stream.
-- [8. A pool of workers](/learn/jetstream/worker-pool) — the worker pool
+- [A pool of workers](/learn/jetstream/worker-pool) — the worker pool
   that shares one consumer, the pattern that fits WorkQueue.
