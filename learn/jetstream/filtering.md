@@ -1,11 +1,11 @@
 ---
 id: filtering
-title: "4. Filtering what you consume"
+title: "Filtering what you consume"
 sidebar_position: 6
 description: Add a second consumer that reads only orders.shipped, and see consumers as independent views
 ---
 
-# 4. Filtering what you consume
+# Filtering what you consume
 
 The `billing` consumer from the previous page reads every message in
 the `ORDERS` stream — no filter, the whole log.
@@ -76,6 +76,12 @@ state, separate from the stream's messages. When `analytics` advances
 its cursor past sequence `3`, `billing`'s position does not change.
 Both consumers read the same stored messages from their own cursor.
 
+<div class="nats-flow" data-scenario="twoConsumersAnimated" data-width="640" data-height="300"></div>
+
+`billing` reads every order and advances through all of them; `analytics`
+delivers only the `orders.shipped` messages and skips the rest, so the two
+cursors come to rest at different positions. Neither one moves the other.
+
 Pull from `analytics` and see what comes back:
 
 ```bash
@@ -145,7 +151,7 @@ consumer's view; it never removes messages. After `analytics` reads
 `orders.shipped`, every `orders.created` and `orders.cancelled` message is
 still stored and still readable by `billing`. Don't use a filter to
 prune a stream. What stays and what ages out is controlled by the
-stream's limits, covered in [12. Shaping the stream](/learn/jetstream/shaping-the-stream),
+stream's limits, covered in [Shaping the stream](/learn/jetstream/shaping-the-stream),
 not by any consumer.
 
 **Overlapping filters within one consumer.** Overlap _between_ consumers
@@ -159,7 +165,7 @@ already covers another, the create call fails. The filters on one
 consumer must not overlap each other. This rule holds whether the stream
 uses limits, interest, or work-queue retention. For how work-queue
 retention shapes delivery once filters are in place, see
-[13. Delivery semantics](/learn/jetstream/delivery-semantics).
+[Delivery semantics](/learn/jetstream/delivery-semantics).
 
 ## Where you are
 
@@ -184,5 +190,5 @@ ack adds, and how an unacked message is redelivered.
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer) —
   every consumer config field, including multiple filter subjects and
   subject transforms.
-- [3. Reading back the stream](/learn/jetstream/reading-back) — where you met
+- [Reading back the stream](/learn/jetstream/reading-back) — where you met
   the consumer cursor this page builds on.
