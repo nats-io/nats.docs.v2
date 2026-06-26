@@ -8,7 +8,7 @@
 #   --pull          the reader asks for messages when it's ready
 #   --ack explicit  acknowledge each message; the position advances only once
 #                   a message is acked (the default for a pull consumer)
-nats consumer add ORDERS orders-reader \
+nats consumer add ORDERS billing \
   --deliver all \
   --pull \
   --ack explicit \

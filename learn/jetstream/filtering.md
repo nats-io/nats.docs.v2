@@ -7,7 +7,7 @@ description: Add a second consumer that reads only orders.shipped, and see consu
 
 # 4. Filtering what you consume
 
-The `orders-reader` consumer from the previous page reads every message in
+The `billing` consumer from the previous page reads every message in
 the `ORDERS` stream — no filter, the whole log.
 
 A reporting job needs only one thing: when an order ships. It has no use for
@@ -43,7 +43,7 @@ Ask the server to describe the consumer:
 nats consumer info ORDERS analytics
 ```
 
-The configuration block now carries a line the `orders-reader` consumer
+The configuration block now carries a line the `billing` consumer
 didn't have:
 
 ```
@@ -58,12 +58,12 @@ Configuration:
 ```
 
 `Filter Subject: orders.shipped` is the line that matters. The
-`orders-reader` consumer has no filter, so its info output omits this line.
+`billing` consumer has no filter, so its info output omits this line.
 No filter line means every subject in the stream.
 
 ## Two consumers with separate positions
 
-The `analytics` consumer and the `orders-reader` consumer read the same
+The `analytics` consumer and the `billing` consumer read the same
 stream, but each tracks its own position in it.
 
 From the previous page, a consumer keeps a cursor: the sequence number
@@ -73,7 +73,7 @@ have two separate cursors.
 
 The server stores the cursor alongside the consumer's config and ack
 state, separate from the stream's messages. When `analytics` advances
-its cursor past sequence `3`, `orders-reader`'s position does not change.
+its cursor past sequence `3`, `billing`'s position does not change.
 Both consumers read the same stored messages from their own cursor.
 
 Pull from `analytics` and see what comes back:
@@ -87,8 +87,8 @@ publishing page, sequence `3`. The `orders.created` messages at
 sequences `1` and `2` don't appear for this consumer. They're still in the
 stream; the filter just hides them from `analytics`.
 
-`orders-reader` stays wherever you left it. Reading from `analytics` did not
-move `orders-reader`'s cursor, and it did not consume or delete any message
+`billing` stays wherever you left it. Reading from `analytics` did not
+move `billing`'s cursor, and it did not consume or delete any message
 from the stream.
 
 ## A consumer is a view
@@ -99,7 +99,7 @@ of every message, and each consumer reads it from its own position.
 
 Because consumers are independent, a filter is a cheap way to send the
 same messages to more than one reader. Adding `analytics` cost one
-command. It did not copy any data, it did not slow down `orders-reader`, and
+command. It did not copy any data, it did not slow down `billing`, and
 it can start, stop, or fall behind without affecting any other consumer.
 The server keeps one copy of each message and serves every consumer from
 it.
@@ -143,7 +143,7 @@ When a pull comes back empty, run `nats consumer info` and check the
 **Expecting a filter to delete from the stream.** A filter narrows one
 consumer's view; it never removes messages. After `analytics` reads
 `orders.shipped`, every `orders.created` and `orders.cancelled` message is
-still stored and still readable by `orders-reader`. Don't use a filter to
+still stored and still readable by `billing`. Don't use a filter to
 prune a stream. What stays and what ages out is controlled by the
 stream's limits, covered in [12. Shaping the stream](/learn/jetstream/shaping-the-stream),
 not by any consumer.
@@ -165,7 +165,7 @@ retention shapes delivery once filters are in place, see
 
 The `ORDERS` stream now has two consumers reading it:
 
-- `orders-reader`: no filter, reads every order; the reader from the previous
+- `billing`: no filter, reads every order; the reader from the previous
   page
 - `analytics`: filtered to `orders.shipped`, sees only ships
 
@@ -174,7 +174,7 @@ the other, and the stream itself is untouched by either read.
 
 ## What's next
 
-Both `orders-reader` and `analytics` read on the happy path: pull a message,
+Both `billing` and `analytics` read on the happy path: pull a message,
 ack it, move on. The next page is about what that acknowledgment actually
 does — how a message is held in flight until it's confirmed, what a double
 ack adds, and how an unacked message is redelivered.

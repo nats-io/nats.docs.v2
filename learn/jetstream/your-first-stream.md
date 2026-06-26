@@ -186,17 +186,11 @@ A few things catch people on a first stream.
 **Unlimited defaults grow forever.** With `--defaults`, `Maximum
 Messages`, `Maximum Bytes`, and `Maximum Age` are all `unlimited`. The
 `ORDERS` stream then keeps every order it ever stored until the disk
-fills up, and a full disk takes the server down with it. Don't leave a
-production stream without a limit. Set at least one, so old orders are
-removed on their own.
-
-Check the limits, then set a cap on the stream:
-
-<div class="nats-example" data-type="learn-jetstream-your-first-stream-checkLimits" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-The full set of storage limits is covered on the [Shaping the
-stream](/learn/jetstream/shaping-the-stream) page. Here you only need
-to know that the defaults set none.
+fills up, and a full disk takes the server down with it. That's fine
+while you're learning on a laptop, but a production stream needs at least
+one limit so old orders age out before the disk does. Setting limits is
+the [Shaping the stream](/learn/jetstream/shaping-the-stream) page; here
+the defaults are deliberately left unbounded.
 
 **A stream name is permanent.** There's no rename. `nats stream edit`
 has no `--name` flag, and the server turns down any update that changes an

@@ -11,9 +11,13 @@ The `ORDERS` stream holds the orders you published on the previous page.
 So far you've only seen them through `nats stream info`, which counts the
 messages but doesn't show their contents.
 
-This page reads them back. First it introduces the three pieces that move
-a message from a publisher to a reader, then it creates a reader and pulls
-every stored message, in order, from the first one.
+This page reads them back through Acme's **billing** service. Billing acts on
+every order — it charges the customer when one is created, captures the payment
+when it ships, refunds a cancellation — so when it first comes up, or restarts
+after downtime, it has to work through the whole stream from the first order and
+miss none. That's a durable consumer reading the log from sequence 1, which is
+what this page builds. First, the three pieces that move a message from a
+publisher to a reader.
 
 You might have run the publish commands once, or a few times while
 experimenting, so the stream could hold three messages or thirty. None of
@@ -63,7 +67,7 @@ tracking any sequence numbers itself.
 
 <div class="nats-flow" data-scenario="consumerServerSideAnimated" data-width="640" data-height="220"></div>
 
-Create a consumer named `orders-reader`:
+Create a consumer named `billing`:
 
 <div class="nats-example"
      data-type="learn-jetstream-reading-back-create"
@@ -86,7 +90,7 @@ Three settings define how it reads:
 Look at the consumer before it has read anything:
 
 ```bash
-nats consumer info ORDERS orders-reader
+nats consumer info ORDERS billing
 ```
 
 ```
@@ -139,7 +143,7 @@ the previous page. You're reading the same append-only log, in order.
 Read the consumer again, now that it has caught up:
 
 ```bash
-nats consumer info ORDERS orders-reader
+nats consumer info ORDERS billing
 ```
 
 ```
@@ -161,7 +165,7 @@ they're worth telling apart:
   tracks how many deliveries this consumer has made, not how many distinct
   messages it has seen.
 
-Here both read `3` because `orders-reader` started at the beginning and
+Here both read `3` because `billing` started at the beginning and
 read straight through, so its third delivery was stream message 3. They
 drift apart whenever a consumer delivers a different set of messages than
 the stream stores in order: one that starts partway through, one that
@@ -198,7 +202,7 @@ message, not the whole log:
 
 It resumed from where it left off. A disconnect or a server restart
 wouldn't change that: the position is durable, tied to the name
-`orders-reader`. An unnamed reader wouldn't have it, which the next section
+`billing`. An unnamed reader wouldn't have it, which the next section
 gets to.
 
 ## Reading once without a named consumer
@@ -251,7 +255,7 @@ The `ORDERS` stream is unchanged by reading. You now have:
 
 - the `ORDERS` stream bound to `orders.>`, holding the messages you
   published
-- a durable consumer, `orders-reader`, with a position saved on the server
+- a durable consumer, `billing`, with a position saved on the server
 - a clear split between the **stream sequence** (the message's fixed slot)
   and the **consumer sequence** (how far a reader has progressed)
 

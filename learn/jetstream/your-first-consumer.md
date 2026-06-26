@@ -7,7 +7,7 @@ description: How a message is delivered and held in flight, what an ack and a do
 
 # 5. Delivery and acknowledgment
 
-Pages 3 and 4 created consumers — `orders-reader` to read the stream back,
+Pages 3 and 4 created consumers — `billing` to read the stream back,
 then `analytics` to filter it — and acked each message on the happy path,
 where every message succeeded. This page is the part those pages took for
 granted: what an acknowledgment actually does, and what happens to a message
@@ -21,7 +21,7 @@ process can be killed — and the message it was working on comes back instead
 of vanishing. (At-least-once also leans on the durable stream from the earlier
 pages; the ack loop is the consumer half.)
 
-**Entering:** the orders in `ORDERS`, and the `orders-reader` and `analytics`
+**Entering:** the orders in `ORDERS`, and the `billing` and `analytics`
 consumers from the previous pages.
 
 The examples on this page are CLI-only for now; the per-language versions come
