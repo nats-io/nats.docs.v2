@@ -1,7 +1,7 @@
 ---
 id: your-first-consumer
 title: "Delivery and acknowledgment"
-sidebar_position: 7
+sidebar_position: 6
 description: How a message is delivered and held in flight, what an ack and a double ack do, and how an unacked message comes back
 ---
 
@@ -26,9 +26,6 @@ pages; the ack loop is the consumer half.)
 **Entering:** the orders in `ORDERS`, and the `billing` and `analytics`
 consumers from the previous pages.
 
-The examples on this page are CLI-only for now; the per-language versions come
-once the page settles.
-
 ## A consumer to experiment with
 
 The demos below deliberately skip an ack to watch a message come back, so
@@ -38,7 +35,7 @@ previous pages:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-create"
-     data-languages="cli"></div>
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 It starts at the beginning of `ORDERS`, so it has the stored orders to work
 through.
@@ -69,7 +66,7 @@ Pull one message from `shipping` and ack it:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-pullAndAck"
-     data-languages="cli"></div>
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 You get the first stored order, and the ack confirms it:
 
@@ -112,10 +109,17 @@ it's a deliberate choice, not the default.
 
 <div class="nats-flow" data-scenario="doubleAckAnimated" data-width="560" data-height="240"></div>
 
-There's no CLI flag for it: a double ack is a client-library call (`AckSync`
-in Go and .NET, `ackAck` in JavaScript, `double_ack` in Rust). It lands with
-this page's per-language examples; for now, know the call exists and when to
-reach for it.
+There's no CLI flag for it — a double ack is a client-library call. Pull a
+message and double-ack it:
+
+<div class="nats-example"
+     data-type="learn-jetstream-your-first-consumer-doubleAck"
+     data-languages="js,go,python,java,rust,csharp"></div>
+
+The call is named differently across clients — `DoubleAck` in Go, `ackAck` in
+JavaScript, `ack_sync` in Python, `ackSync` in Java, `AckAsync` (with the
+double-ack option) in .NET, `double_ack` in Rust — but each waits for the
+server to confirm the ack before returning.
 
 ## Redelivery: when a message isn't acked
 
@@ -123,7 +127,7 @@ To see redelivery, pull a message but skip the ack:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-next"
-     data-languages="cli"></div>
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 This delivers the next order, sequence 2, and leaves it in flight. The state
 now shows the gap:
