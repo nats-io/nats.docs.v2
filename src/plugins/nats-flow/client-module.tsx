@@ -33,6 +33,8 @@ if (ExecutionEnvironment.canUseDOM) {
       ConsumerServerSideAnimated: module.ConsumerServerSideAnimated,
       DoubleAckAnimated: module.DoubleAckAnimated,
       RedeliveryOrderAnimated: module.RedeliveryOrderAnimated,
+      TwoConsumersAnimated: module.TwoConsumersAnimated,
+      AckResponsesAnimated: module.AckResponsesAnimated,
       CentralizedAuthAnimated: module.CentralizedAuthAnimated,
       DecentralizedAuthAnimated: module.DecentralizedAuthAnimated,
       AuthCalloutAnimated: module.AuthCalloutAnimated,

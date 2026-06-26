@@ -76,6 +76,8 @@ const sidebars: SidebarsConfig = {
             "jetstream/filtering",
             "jetstream/your-first-consumer",
             "jetstream/acknowledgment",
+            "jetstream/subject-mapping",
+            "jetstream/consumer-kinds",
             "jetstream/pull-consumers",
             "jetstream/worker-pool",
             "jetstream/priority-groups",

@@ -1,11 +1,11 @@
 ---
 id: acknowledgment
-title: "6. Acknowledgment"
+title: "Acknowledgment"
 sidebar_position: 8
 description: The four ways a client answers a message, and the server controls that drive redelivery.
 ---
 
-# 6. Acknowledgment
+# Acknowledgment
 
 The `shipping` consumer was created with `AckPolicy=explicit`. That
 choice means every message it delivers must be answered. A message is
@@ -55,6 +55,12 @@ then keeps going and answers for real later.
 ack, nak, and term are final. Each one closes out a delivery.
 in-progress extends the timer instead.
 
+<div class="nats-flow" data-scenario="ackResponsesAnimated" data-width="660" data-height="240"></div>
+
+The rest of this page takes the three non-trivial answers — nak, term, and the
+controls behind them — one at a time. The wire format of each answer is in
+[Reference → Consumer API](/reference/jetstream/api/consumer).
+
 ## Negative ack with a delay
 
 A plain nak redelivers immediately. That's rarely what you want.
@@ -73,6 +79,9 @@ the message for that delay, then puts it back.
 A nak returns the message to the consumer, not to the worker that
 nak'd it. If several workers share one consumer, the redelivery can land
 on a different worker (see [worker pool](/learn/jetstream/worker-pool)).
+Each nak also raises a nak advisory on
+`$JS.EVENT.ADVISORY.CONSUMER.MSG_NAKED.ORDERS.shipping`; its fields are in
+[Reference → Nak advisory](/reference/jetstream/advisory/nak).
 
 A delayed nak sets the wait one redelivery at a time, and the client
 chooses it. To have the server apply a delay schedule on its own,
@@ -90,6 +99,24 @@ and the server never delivers it again, no matter how many attempts
 remain.
 
 <div class="nats-example" data-type="learn-jetstream-acknowledgment-termPoison" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**After a term**, the message is gone from this consumer but not from the
+stream. Term runs through the same path as an ack: the pending entry clears and
+the acknowledgment floor moves past the message, so it's never redelivered to
+this consumer. The message itself stays in the stream under the default `Limits`
+retention — other consumers still see it, and it ages out with the stream's
+limits like any other message. On a `WorkQueue` or `Interest` stream, where a
+handled message is removed, a term removes it just as an ack would; see
+[Delivery semantics](/learn/jetstream/delivery-semantics).
+
+The difference from an ack is that the work never happened, so the server
+records the give-up. It publishes a **terminated advisory** on
+`$JS.EVENT.ADVISORY.CONSUMER.MSG_TERMINATED.ORDERS.shipping`, carrying the
+stream and consumer sequence, the delivery count, and an optional reason you can
+attach to the term. Watch it the way the pitfall below watches the
+max-deliveries advisory, so a terminated `order_id` doesn't disappear without a
+trace. The advisory's fields are in
+[Reference → Terminated advisory](/reference/jetstream/advisory/terminated).
 
 Use term only when the code can tell that no future attempt will
 succeed. When in doubt, nak with a delay and let the delivery limit
@@ -161,28 +188,26 @@ The full set of backoff options is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 We use only a linear range here.
 
-## Two more policies
+## Ack policy: the other values
 
-The consumer config carries two more policies this chapter mentions but
-doesn't cover in full here.
+This page assumed `explicit`, the policy `shipping` was created with.
+AckPolicy has three more values.
 
-**AckPolicy** has three values you'd reach for in practice:
-`none` (no answer required), `all` (one ack answers every earlier
-message too), and `explicit` (each message answered on its own). A
-fourth value, `flow_control`, belongs to push consumers and paces how
-fast the server delivers; pull consumers like `shipping` don't need it,
-and [Push vs pull](/learn/jetstream/push-vs-pull) covers it. `shipping`
-uses `explicit`, and that's the right default for work that must not be
-lost.
+`explicit` answers each message on its own. It's what `shipping` uses and
+the right default for work that must not be lost — everything on this page
+depends on it. `none` requires no answer at all: the server treats a
+message as done the moment it's delivered, so there's no pending list, no
+Ack Wait, and no redelivery, and nothing on this page applies. `all` lets
+one ack answer every earlier message too — cheaper, but it only fits a
+consumer that processes strictly in order, since acking message 10 also
+retires 1 through 9. A fourth value, `flow_control`, belongs to push
+consumers and paces how fast the server delivers; pull consumers like
+`shipping` don't need it, and [Push vs pull](/learn/jetstream/push-vs-pull)
+covers it.
 
-**ReplayPolicy** sets the pace of redelivery and replay. `instant`
-delivers as fast as the client reads. `original` spaces out delivery
-to match the original timestamps. `instant` is the default and the only
-one this chapter needs.
-
-The full set of ack and replay policies is documented in
-[Reference → Consumer API](/reference/jetstream/api/consumer).
-We use only `explicit` and `instant` here.
+The full set of ack policies is in
+[Reference → Consumer API](/reference/jetstream/api/consumer). This page
+uses `explicit`.
 
 ## Pitfalls
 
@@ -207,9 +232,11 @@ the delivery limit, the server removes it from the consumer's pending
 list and never delivers it again. The message stays in the stream, but
 the `shipping` consumer's normal output says nothing, so the drop is
 easy to miss. JetStream has no built-in dead-letter queue. You can still
-catch the drop: the server publishes an advisory the moment a message
-goes past its limit. Subscribe to it so a poison `order_id` isn't
-dropped without notice:
+catch the drop: the server publishes a max-deliveries advisory on
+`$JS.EVENT.ADVISORY.CONSUMER.MAX_DELIVERIES.ORDERS.shipping` the moment a
+message goes past its limit
+([Reference → Max-deliveries advisory](/reference/jetstream/advisory/max-deliver)).
+Subscribe to it so a poison `order_id` isn't dropped without notice:
 
 <div class="nats-example" data-type="learn-jetstream-acknowledgment-watchMaxDeliveries" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -240,3 +267,7 @@ outstanding, and how a client controls the flow of messages it pulls.
   — the exact ack reply protocol and every response type.
 - [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
   — AckWait, MaxDeliver, backoff arrays, and every other field.
+- [Reference → Terminated advisory](/reference/jetstream/advisory/terminated),
+  [Nak advisory](/reference/jetstream/advisory/nak), and
+  [Max-deliveries advisory](/reference/jetstream/advisory/max-deliver)
+  — the events the server raises on term, nak, and a delivery-limit drop.
