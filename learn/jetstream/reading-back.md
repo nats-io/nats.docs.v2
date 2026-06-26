@@ -1,11 +1,11 @@
 ---
 id: reading-back
-title: "3. Reading back the stream"
+title: "Reading back the stream"
 sidebar_position: 5
 description: Meet the producer, stream, and consumer; create a durable consumer and read everything the stream holds
 ---
 
-# 3. Reading back the stream
+# Reading back the stream
 
 The `ORDERS` stream holds the orders you published on the previous page.
 So far you've only seen them through `nats stream info`, which counts the
@@ -248,6 +248,14 @@ elsewhere, create the consumer with a different delivery policy: the most
 recent messages (`--deliver last`), messages since a point in time
 (`--deliver since`), or a known sequence (`--deliver 1000`). The full set
 is in [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
+
+Delivery policy sets *where* a consumer starts; a separate **replay policy**
+sets the *pace* once it's reading. The default, `instant`, hands messages
+over as fast as the client reads them. The other value, `original`, spaces
+deliveries out to match the gaps between the messages' original timestamps,
+replaying recorded traffic at something like its real speed. This chapter
+uses `instant` throughout; both are listed in
+[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 
 ## Where you are
 

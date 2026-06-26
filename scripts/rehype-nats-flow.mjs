@@ -23,6 +23,10 @@ const FALLBACKS = {
     'Plain ack versus double ack. In both, the server (the consumer) delivers a message to the client and the client sends an ack back. With a plain ack the client moves on the instant it sends the ack (fire-and-forget). With a double ack the ack is a request: the client waits for the server to confirm the ack landed before treating the message as done.',
   redeliveryOrderAnimated:
     'Redelivery is in delivery order, not stream order. A consumer delivers messages 1 through 5; the client acks 1, 2, 4, and 5 but skips 3. While 3 sits unacked an Ack Wait timer fills; when it completes the server redelivers message 3, so it arrives after 4 and 5 — out of stream order — and the client acks it that second time, before the consumer continues with message 6.',
+  twoConsumersAnimated:
+    'Two consumers read one ORDERS stream from independent positions. The billing consumer has no filter and delivers every order; the analytics consumer filters to orders.shipped and delivers only the shipped messages, skipping orders.created. Each keeps its own cursor, so reading from one never moves the other: billing advances through all six messages and reaches #6, while analytics has delivered only the two shipped orders and sits at #5. The stream keeps one shared copy of every message and serves each consumer from its own position.',
+  ackResponsesAnimated:
+    'The four responses shown as consequences on a real stream of deliveries. The consumer delivers message #1 and the client acks it, so the consumer hands over the next message, #2. The client naks #2 and the same message is redelivered immediately; the retry is then acked and delivery moves on to #3. The client terms #3: it is dropped and turns red, and the next message, #4, is delivered at once. For #4 the client sends in-progress, which is not a final answer — it refills the Ack Wait window to keep the slow message in flight — then finally acks it and moves on to #5. In short: ack advances to the next message, nak redelivers the same message immediately, term drops the message and advances to the next, and in-progress extends the Ack Wait window.',
   wildcardComparison:
     'Side-by-side comparison of single-token (*) and multi-token (>) wildcard subject matching.',
 };
@@ -44,6 +48,8 @@ const TITLES = {
   consumerServerSideAnimated: 'A consumer is server-side (animated)',
   doubleAckAnimated: 'Plain ack vs double ack (animated)',
   redeliveryOrderAnimated: 'Out-of-order redelivery (animated)',
+  twoConsumersAnimated: 'Two consumers, separate positions (animated)',
+  ackResponsesAnimated: 'The four ack responses (animated)',
   wildcardComparison: 'Wildcard comparison',
 };
 
