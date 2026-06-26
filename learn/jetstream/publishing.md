@@ -1,7 +1,7 @@
 ---
 id: publishing
 title: Publishing
-sidebar_position: 4
+sidebar_position: 3
 description: Publish into a stream and understand the PubAck contract
 ---
 

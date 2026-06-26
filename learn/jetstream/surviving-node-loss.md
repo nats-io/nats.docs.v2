@@ -1,7 +1,7 @@
 ---
 id: surviving-node-loss
 title: "Surviving node loss"
-sidebar_position: 18
+sidebar_position: 17
 description: Why R=1 is a single point of failure, why R=3 is the production floor, and what storage durability means
 ---
 
@@ -201,9 +201,9 @@ What changed is your mental model:
 
 ## What's next
 
-The next page covers deliberately copying a stream's data elsewhere:
-**mirrors and sources**, the building blocks for read-replicas,
-aggregation, and disaster recovery across regions.
+The next page returns to the publisher: **advanced publishing** — the
+async, atomic-batch, and fast-ingest modes for when one-at-a-time
+publishing isn't enough.
 
 ## See also
 

@@ -1,7 +1,7 @@
 ---
 id: where-next
 title: "Where to go next"
-sidebar_position: 21
+sidebar_position: 22
 description: Recap the JetStream model and point to what comes after this chapter
 ---
 
@@ -71,8 +71,9 @@ behind.
 
 The [Backup & Recovery deep dive](/learn/backup-recovery) covers the
 day-to-day operations: saving a stream to a snapshot, restoring it, and
-using the mirrors you met on the previous page to recover from a
-disaster.
+using the mirrors you met on the
+[Mirrors and sources](/learn/jetstream/mirrors-and-sources) page to recover
+from a disaster.
 
 ## Where you are
 
