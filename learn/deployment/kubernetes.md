@@ -1,11 +1,11 @@
 ---
 id: kubernetes
-title: "3. Kubernetes"
+title: "Kubernetes"
 sidebar_position: 3
 description: Stand the ORDERS cluster up as a StatefulSet with the NATS Helm chart, then declare its streams and consumers as CRDs
 ---
 
-# 3. Kubernetes
+# Kubernetes
 
 The [previous page](/learn/deployment/sizing-and-resources) gave the
 ORDERS workload a sizing baseline: an R3 file stream that fits a 10 Gi
@@ -267,7 +267,7 @@ config into includes and reloads it live (limits, TLS paths, accounts)
 with a SIGHUP and zero downtime.
 
 Continue to
-[4. Config management](/learn/deployment/config-management).
+[Config management](/learn/deployment/config-management).
 
 ## See also
 

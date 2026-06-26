@@ -1,11 +1,11 @@
 ---
 id: auth-callout
-title: "8. Auth Callout"
+title: "Auth Callout"
 sidebar_position: 9
 description: Delegating the authentication decision to an external service over $SYS.REQ.USER.AUTH, and the signed request and response that protect it
 ---
 
-# 8. Auth Callout
+# Auth Callout
 
 Every page so far decided authentication inside the server. Centralized
 mode checked a user list in the config. Decentralized mode verified a
@@ -273,13 +273,13 @@ The next page steps back and maps where to go from here: the operations
 chapters that put these pieces into a real deployment, and the reference
 material for the fields this chapter only touched.
 
-Continue to [9. Where to go next](/learn/security/where-next).
+Continue to [Where to go next](/learn/security/where-next).
 
 ## See also
 
 - [Core Concepts → Security](/concepts/security) — the five-minute
   overview of NATS authentication and authorization.
-- [3. Decentralized Authentication](/learn/security/decentralized-auth) —
+- [Decentralized Authentication](/learn/security/decentralized-auth) —
   the user JWTs and account nkeys that the callout response reuses.
 - [Reference](/reference/) — the full auth callout request claim, xkey
   encryption, and operator-mode binding.

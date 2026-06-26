@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "6. Where to go next"
+title: "Where to go next"
 sidebar_position: 7
 description: Recap the object store mental model and point to what comes after this chapter
 ---
 
-# 6. Where to go next
+# Where to go next
 
 You started this chapter with files that were too large or too binary to
 send as a plain message and had nowhere to store them. You end it with an

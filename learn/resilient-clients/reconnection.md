@@ -1,11 +1,11 @@
 ---
 id: reconnection
-title: 2. Reconnection
+title: Reconnection
 sidebar_position: 3
 description: Survive a server going away — reconnect with backoff and jitter across the pool, and buffer publishes through the gap
 ---
 
-# 2. Reconnection
+# Reconnection
 
 On the last page `order-svc` opened a connection with a name, a server
 pool, and a sane connect timeout. That connection works right up until
@@ -218,7 +218,7 @@ unsubscribe, deliver the last in-flight messages to your handlers, flush
 pending publishes, and only then close, so a deploy or a SIGTERM never
 loses work.
 
-Continue to [3. Drain & Shutdown](/learn/resilient-clients/drain-and-shutdown).
+Continue to [Drain & Shutdown](/learn/resilient-clients/drain-and-shutdown).
 
 ## See also
 

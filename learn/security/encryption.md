@@ -1,11 +1,11 @@
 ---
 id: encryption
-title: "7. Encryption & TLS"
+title: "Encryption & TLS"
 sidebar_position: 8
 description: Secure each connection type with TLS, and let a client certificate be the user identity with mTLS
 ---
 
-# 7. Encryption & TLS
+# Encryption & TLS
 
 Everything so far runs over a plaintext link. `order-svc` authenticates,
 its permissions scope it to `orders.>`, and `ANALYTICS` imports
@@ -268,7 +268,7 @@ The last mechanism in this chapter is **auth callout**: handing the
 authentication decision to an external NATS service so you can plug NATS
 into OIDC, LDAP, or a custom identity service.
 
-Continue to [8. Auth Callout](/learn/security/auth-callout).
+Continue to [Auth Callout](/learn/security/auth-callout).
 
 ## See also
 

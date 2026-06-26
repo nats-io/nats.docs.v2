@@ -99,15 +99,15 @@ only what you need to wire it up and links to
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | [Single server](/learn/topologies/single-server) | The simplest deployment, when one server is enough, and its single-point-of-failure ceiling |
-| 2 | [Your first cluster](/learn/topologies/your-first-cluster) | Join servers with routes into a full mesh, and what client reconnect and failover buy you |
-| 3 | [JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster) | What changes for streams once there's a cluster: the meta layer and replicated streams |
-| 4 | [Super-clusters](/learn/topologies/super-clusters) | Join clusters with gateways across regions, and how geo-affinity keeps traffic local |
-| 5 | [Leaf nodes](/learn/topologies/leaf-nodes) | Attach a leaf node with an outbound leaf connection and how subject interest flows across it |
-| 6 | [Putting it together](/learn/topologies/putting-it-together) | Compose clusters, gateways, and leaf nodes into the full Acme picture |
-| 7 | [Where to go next](/learn/topologies/where-next) | A map of what's beyond this chapter |
+| Page | What you learn |
+|---|---|
+| [Single server](/learn/topologies/single-server) | The simplest deployment, when one server is enough, and its single-point-of-failure ceiling |
+| [Your first cluster](/learn/topologies/your-first-cluster) | Join servers with routes into a full mesh, and what client reconnect and failover buy you |
+| [JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster) | What changes for streams once there's a cluster: the meta layer and replicated streams |
+| [Super-clusters](/learn/topologies/super-clusters) | Join clusters with gateways across regions, and how geo-affinity keeps traffic local |
+| [Leaf nodes](/learn/topologies/leaf-nodes) | Attach a leaf node with an outbound leaf connection and how subject interest flows across it |
+| [Putting it together](/learn/topologies/putting-it-together) | Compose clusters, gateways, and leaf nodes into the full Acme picture |
+| [Where to go next](/learn/topologies/where-next) | A map of what's beyond this chapter |
 
 ## What you build
 

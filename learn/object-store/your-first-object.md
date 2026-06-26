@@ -1,11 +1,11 @@
 ---
 id: your-first-object
-title: 1. Your first object
+title: Your first object
 sidebar_position: 2
 description: Put a file into the INVOICES bucket and get it back
 ---
 
-# 1. Your first object
+# Your first object
 
 Acme's `order-svc` already publishes order messages into the `ORDERS`
 stream. But an order produces more than a message. Once payment clears it
@@ -147,7 +147,7 @@ Put split the invoice into pieces and get reassembled them. The next page
 names that mechanism, **chunking**, and stores an invoice large enough
 to span many chunks, so you can read the chunk count for yourself.
 
-Continue to [2. Chunking](/learn/object-store/chunking).
+Continue to [Chunking](/learn/object-store/chunking).
 
 ## See also
 

@@ -1,11 +1,11 @@
 ---
 id: message-ttl
-title: "14. Per-message TTL"
+title: "Per-message TTL"
 sidebar_position: 16
 description: Make a single message expire ahead of the stream's MaxAge
 ---
 
-# 14. Per-message TTL
+# Per-message TTL
 
 The previous page capped `ORDERS` at a 7-day `MaxAge`. Every message in
 the stream now lives the same seven days, then is removed. That's one

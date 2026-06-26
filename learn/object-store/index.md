@@ -25,9 +25,10 @@ to day, and the stream underneath is what makes it work.
 <div class="nats-flow" data-scenario="jetStreamContrastAnimated" data-width="600" data-height="350"></div>
 
 This chapter teaches the object abstraction first and reveals the stream
-last. Pages 1 through 4 teach you the object store API on its own terms, so
-you can be productive without re-deriving JetStream internals. Page 5 shows
-you the `OBJ_INVOICES` stream that was present the whole time.
+last. The first four pages teach you the object store API on its own terms, so
+you can be productive without re-deriving JetStream internals.
+[Under the hood](./under-the-hood) shows you the `OBJ_INVOICES` stream that
+was present the whole time.
 
 Place this alongside its sibling store. The
 [Key-Value Store](/learn/key-value) keeps small structured values and a full
@@ -74,9 +75,12 @@ start from "what is a bucket and why would you want one" and grow from there.
 Each page introduces at most two new concepts, and each builds on the last:
 you use the same `INVOICES` bucket throughout, and you can keep one
 terminal open through the whole chapter without resetting state. You create
-the bucket and store your first invoice on page 1, store a large multi-chunk
-invoice on page 2, attach metadata and a link on page 3, list and watch the
-bucket on page 4, and inspect the stream underneath on page 5.
+the bucket and store your first invoice in
+[Your first object](./your-first-object), store a large multi-chunk invoice
+in [Chunking](./chunking), attach metadata and a link in
+[Metadata and links](./metadata-and-links), list and watch the bucket in
+[Watching and listing](./watching-and-listing), and inspect the stream
+underneath in [Under the hood](./under-the-hood).
 
 The object store has many knobs: chunk size, replicas, compression, every
 field on the wire. Where a feature has a long list, the page covers only
@@ -85,14 +89,14 @@ options lives in [Reference](/reference/); here we only need the behavior.
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | [Your first object](./your-first-object) | Create `INVOICES`, put `invoice-ord_8w2k.pdf`, and get it back with its digest verified |
-| 2 | [Chunking](./chunking) | Store a 3 MB invoice across many chunks and read the chunk count |
-| 3 | [Metadata and links](./metadata-and-links) | Attach a description, headers, and a metadata map, then link one object to another |
-| 4 | [Watching and listing](./watching-and-listing) | List the bucket as a snapshot, then watch it for new objects live |
-| 5 | [Under the hood](./under-the-hood) | See the `OBJ_INVOICES` stream, the chunk and metadata subjects, and rollup versus soft delete |
-| 6 | [Where to go next](./where-next) | A map of what's beyond objects, and one pre-production checklist |
+| Page | What you learn |
+|---|---|
+| [Your first object](./your-first-object) | Create `INVOICES`, put `invoice-ord_8w2k.pdf`, and get it back with its digest verified |
+| [Chunking](./chunking) | Store a 3 MB invoice across many chunks and read the chunk count |
+| [Metadata and links](./metadata-and-links) | Attach a description, headers, and a metadata map, then link one object to another |
+| [Watching and listing](./watching-and-listing) | List the bucket as a snapshot, then watch it for new objects live |
+| [Under the hood](./under-the-hood) | See the `OBJ_INVOICES` stream, the chunk and metadata subjects, and rollup versus soft delete |
+| [Where to go next](./where-next) | A map of what's beyond objects, and one pre-production checklist |
 
 ## Prerequisites
 

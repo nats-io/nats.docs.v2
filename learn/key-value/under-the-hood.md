@@ -1,11 +1,11 @@
 ---
 id: under-the-hood
-title: 5. Under the hood
+title: Under the hood
 sidebar_position: 6
 description: The KV_INVENTORY stream behind the bucket, the direct read path, and delete versus purge
 ---
 
-# 5. Under the hood
+# Under the hood
 
 You've built a whole `INVENTORY` bucket: keys with values, a watcher, safe
 decrements with compare-and-swap, and a TTL'd key that expires on its own. Every
@@ -150,8 +150,10 @@ stream is why it exists.
 
 You now have:
 
-- The same `INVENTORY` bucket from pages 1–4, plus the ability to inspect it as
-  the `KV_INVENTORY` stream it's always been.
+- The same `INVENTORY` bucket you built across the first four pages, from
+  [Your first bucket](./your-first-bucket) through
+  [TTL and limits](./ttl-and-limits), plus the ability to inspect it as the
+  `KV_INVENTORY` stream it's always been.
 - A map from every KV operation to its stream mechanism: put is a message, get is
   a direct read of the last message per subject, history is messages kept per
   subject, a revision is a sequence number, a watch is a consumer.
@@ -168,7 +170,7 @@ The last page steps back: it recaps the whole chapter, points you at where the
 exhaustive details live, and collects every page's pitfalls into one
 pre-production checklist.
 
-Continue to [6. Where to go next](/learn/key-value/where-next).
+Continue to [Where to go next](/learn/key-value/where-next).
 
 ## See also
 

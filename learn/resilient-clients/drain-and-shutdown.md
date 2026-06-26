@@ -1,11 +1,11 @@
 ---
 id: drain-and-shutdown
-title: "3. Drain & Shutdown"
+title: "Drain & Shutdown"
 sidebar_position: 4
 description: Exit a connection without dropping in-flight work by draining instead of closing
 ---
 
-# 3. Drain & Shutdown
+# Drain & Shutdown
 
 The last page made `order-svc`'s connection survive a server going away.
 This page handles the opposite event: your own process going away. When a
@@ -184,7 +184,7 @@ quieter: a subscriber whose handler can't keep up, so its buffer
 fills faster than it drains. That's the **slow consumer**, and left
 unbounded it grows until the process is killed.
 
-Continue to [4. Slow Consumers](/learn/resilient-clients/slow-consumers).
+Continue to [Slow Consumers](/learn/resilient-clients/slow-consumers).
 
 ## See also
 

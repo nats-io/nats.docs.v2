@@ -1,11 +1,11 @@
 ---
 id: scaling
-title: "6. Scaling"
+title: "Scaling"
 sidebar_position: 6
 description: Run N instances of a service and let the default queue group balance the load, then stop one cleanly
 ---
 
-# 6. Scaling
+# Scaling
 
 `OrderInventory` answers every request, reports its endpoints through
 discovery, and keeps per-endpoint stats. So far one instance does all of
@@ -159,7 +159,7 @@ groups, made discoverable and observable through `$SRV`, and scaled by running
 more instances. The last page recaps all of this and points to where the
 remaining details live.
 
-Continue to [7. Where to go next](/learn/services/where-next).
+Continue to [Where to go next](/learn/services/where-next).
 
 ## See also
 

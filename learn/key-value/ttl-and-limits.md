@@ -1,11 +1,11 @@
 ---
 id: ttl-and-limits
-title: "4. TTL and limits"
+title: "TTL and limits"
 sidebar_position: 5
 description: Expire a single key with a per-key TTL, bound the bucket with limits, and watch a value disappear on its own
 ---
 
-# 4. TTL and limits
+# TTL and limits
 
 Every key in `INVENTORY` so far lives until you overwrite or delete it.
 That's the right default for a stock count, but it's not the only thing
@@ -161,7 +161,7 @@ The next page shows the internals. It covers the `KV_INVENTORY` stream
 that's been under the bucket the whole time, the direct read path, and the
 difference between delete and purge.
 
-Continue to [5. Under the hood](/learn/key-value/under-the-hood).
+Continue to [Under the hood](/learn/key-value/under-the-hood).
 
 ## See also
 

@@ -1,14 +1,16 @@
 ---
 id: your-first-consumer
-title: "5. Delivery and acknowledgment"
+title: "Delivery and acknowledgment"
 sidebar_position: 7
 description: How a message is delivered and held in flight, what an ack and a double ack do, and how an unacked message comes back
 ---
 
-# 5. Delivery and acknowledgment
+# Delivery and acknowledgment
 
-Pages 3 and 4 created consumers — `billing` to read the stream back,
-then `analytics` to filter it — and acked each message on the happy path,
+The [reading-back](/learn/jetstream/reading-back) and
+[filtering](/learn/jetstream/filtering) pages created consumers —
+`billing` to read the stream back, then `analytics` to filter it — and
+acked each message on the happy path,
 where every message succeeded. This page is the part those pages took for
 granted: what an acknowledgment actually does, and what happens to a message
 that's delivered but never acked.

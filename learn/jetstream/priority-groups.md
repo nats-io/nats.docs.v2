@@ -1,11 +1,11 @@
 ---
 id: priority-groups
-title: "9. Priority groups"
+title: "Priority groups"
 sidebar_position: 11
 description: Steer which client on a pull consumer gets messages, and when
 ---
 
-# 9. Priority groups
+# Priority groups
 
 The worker pool on the previous page shared work evenly. Every worker on
 the `shipping` consumer pulled, and the server delivered messages to
@@ -263,5 +263,5 @@ that's the right tool.
   advisories.
 - [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md) — the design of pull consumer priority
   groups.
-- [8. A pool of workers](/learn/jetstream/worker-pool) — the even
+- [A pool of workers](/learn/jetstream/worker-pool) — the even
   work-sharing this page steers away from.

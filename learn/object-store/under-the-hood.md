@@ -1,11 +1,11 @@
 ---
 id: under-the-hood
-title: 5. Under the hood
+title: Under the hood
 sidebar_position: 6
 description: See the OBJ_INVOICES stream, the chunk and metadata subjects, and rollup versus soft delete
 ---
 
-# 5. Under the hood
+# Under the hood
 
 Four pages in, the `INVOICES` bucket has invoices, a 3 MB multi-chunk
 invoice, metadata, a label link, and an `analytics` service watching it.
@@ -168,7 +168,7 @@ chapter, a checklist that collects every pitfall in this chapter, and pointers
 to where the deeper details (replicas, security, backup, monitoring) actually
 live.
 
-Continue to [6. Where to go next](/learn/object-store/where-next).
+Continue to [Where to go next](/learn/object-store/where-next).
 
 ## See also
 

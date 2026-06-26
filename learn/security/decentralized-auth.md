@@ -1,11 +1,11 @@
 ---
 id: decentralized-auth
-title: "3. Decentralized Authentication"
+title: "Decentralized Authentication"
 sidebar_position: 4
 description: The trust chain operator to account to user, and what a signed user JWT actually proves
 ---
 
-# 3. Decentralized Authentication
+# Decentralized Authentication
 
 The previous page logged `order-svc` in with centralized authentication.
 The server held the list of users in its own config, checked the
@@ -171,7 +171,7 @@ and the JWT never expires, so a leaked credentials file is valid forever;
 set one without a renewal plan and the client fails the moment it lapses.
 Decide the lifetime deliberately and pair a short expiry with a way to
 re-issue creds. The detailed `nsc` flags for this live on
-[4. Operator Mode](/learn/security/operator-mode).
+[Operator Mode](/learn/security/operator-mode).
 
 ## Where you are
 
@@ -195,11 +195,11 @@ The next page makes this real with `nsc`. You'll create the operator
 the credentials file the client connects with. You'll also configure the
 account resolver that tells the server where to fetch account JWTs.
 
-Continue to [4. Operator Mode](/learn/security/operator-mode).
+Continue to [Operator Mode](/learn/security/operator-mode).
 
 ## See also
 
 - [Core Concepts → Security](/concepts/security) — the five-minute
   overview of the same trust model.
-- [4. Operator Mode](/learn/security/operator-mode) — the `nsc` walkthrough
+- [Operator Mode](/learn/security/operator-mode) — the `nsc` walkthrough
   that builds this chain for real.

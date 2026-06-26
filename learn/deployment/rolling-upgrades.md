@@ -1,11 +1,11 @@
 ---
 id: rolling-upgrades
-title: "5. Rolling upgrades"
+title: "Rolling upgrades"
 sidebar_position: 5
 description: Roll a new server version through the ORDERS cluster with lame-duck mode and the right upgrade order, keeping the R3 stream available and clients connected
 ---
 
-# 5. Rolling upgrades
+# Rolling upgrades
 
 The previous page changed the cluster's config without dropping a
 connection. A new server *version* is a harder problem, because the
@@ -253,7 +253,7 @@ operational step is **hardening** it: TLS on every link, the `ACME`
 credentials mounted, a locked-down systemd unit, and the monitor port
 closed to the internet.
 
-Continue to [6. Hardening](/learn/deployment/hardening).
+Continue to [Hardening](/learn/deployment/hardening).
 
 ## See also
 

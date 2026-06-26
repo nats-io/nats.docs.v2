@@ -1,11 +1,11 @@
 ---
 id: putting-it-together
-title: "6. Putting it together"
+title: "Putting it together"
 sidebar_position: 7
 description: Compose clusters, gateways, and leaf nodes into the full Acme topology, with isolation behind leaves and the same client code everywhere
 ---
 
-# 6. Putting it together
+# Putting it together
 
 Across five pages you've seen four shapes: a single server, a cluster
 joined by routes, a super-cluster joined by gateways, and a leaf node
@@ -93,9 +93,11 @@ jetstream {}
 ```
 
 That's three blocks for three layers on one server. The `cluster` block
-is the same one from page 2, the `gateway` block is from page 4, and the
-`leafnodes` block is from page 5. Putting them in one file is all
-"composition" means.
+is the same one from [Your first cluster](/learn/topologies/your-first-cluster),
+the `gateway` block is from [Super-clusters](/learn/topologies/super-clusters),
+and the `leafnodes` block is from
+[Leaf nodes](/learn/topologies/leaf-nodes). Putting them in one file is
+all "composition" means.
 
 ## Address-space isolation behind a leaf
 
@@ -108,7 +110,8 @@ leaf stay private to that leaf unless the leaf is explicitly told to
 share them. A client on `factory-1` can publish to a local subject and
 have it stay on the factory floor, never reaching `east` or `west`.
 
-This falls out of how a leaf binds to an account. Page 5 attached
+This falls out of how a leaf binds to an account.
+[Leaf nodes](/learn/topologies/leaf-nodes) attached
 `factory-1` to one account on the hub. Only the subjects that account
 imports and exports cross the leaf connection. Everything else the
 factory clients do is theirs alone.
@@ -197,7 +200,8 @@ made visible:
 
 The `Spoke` column says `yes`: from the hub's point of view,
 `factory-1` is on the far end of an outbound connection it accepted,
-not a peer it dialed. That's the leaf direction from page 5, confirmed
+not a peer it dialed. That's the leaf direction from
+[Leaf nodes](/learn/topologies/leaf-nodes), confirmed
 by the report.
 
 Run these three reports together and you've surveyed every layer of

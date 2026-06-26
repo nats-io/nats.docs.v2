@@ -1,11 +1,11 @@
 ---
 id: your-first-cluster
-title: "2. Your first cluster"
+title: "Your first cluster"
 sidebar_position: 3
 description: Join three servers into a cluster with routes, then watch a client survive a server loss
 ---
 
-# 2. Your first cluster
+# Your first cluster
 
 The [previous page](/learn/topologies/single-server) left Acme running on
 one server, `n1`, on a laptop. That server publishes `orders.*` and holds

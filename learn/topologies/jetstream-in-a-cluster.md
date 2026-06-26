@@ -1,11 +1,11 @@
 ---
 id: jetstream-in-a-cluster
-title: "3. JetStream in a cluster"
+title: "JetStream in a cluster"
 sidebar_position: 4
 description: What changes for JetStream once it runs on a cluster — the meta layer, R3 streams, and where a stream's writes land
 ---
 
-# 3. JetStream in a cluster
+# JetStream in a cluster
 
 The previous page left Acme with a three-server cluster called `east`:
 `n1-east`, `n2-east`, and `n3-east`, joined by routes into a full mesh.

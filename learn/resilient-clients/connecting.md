@@ -1,11 +1,11 @@
 ---
 id: connecting
-title: "1. Connecting"
+title: "Connecting"
 sidebar_position: 2
 description: Open order-svc with a name, a server pool, and a connect timeout, and read the connect handshake
 ---
 
-# 1. Connecting
+# Connecting
 
 Every resilient connection starts the same way: a client opens it. So far
 `order-svc` has connected with nothing but a server URL, a bare default
@@ -192,7 +192,7 @@ makes `order-svc` cycle the same pool with backoff and jitter, and buffer its
 publishes until it rejoins.
 
 Continue to
-[2. Reconnection](/learn/resilient-clients/reconnection).
+[Reconnection](/learn/resilient-clients/reconnection).
 
 ## See also
 

@@ -1,11 +1,11 @@
 ---
 id: scatter-gather
-title: "5. Scatter-gather"
+title: "Scatter-gather"
 sidebar_position: 6
 description: Fan one request to many responders and gather every reply by count or deadline
 ---
 
-# 5. Scatter-gather
+# Scatter-gather
 
 The inventory service answered one request with one reply, which is the
 common case of a single question producing a single answer.

@@ -1,11 +1,11 @@
 ---
 id: forming-a-cluster
-title: "1. Forming a cluster"
+title: "Forming a cluster"
 sidebar_position: 2
 description: How servers find each other — explicit seed routes and the gossip that grows one seed into a full mesh
 ---
 
-# 1. Forming a cluster
+# Forming a cluster
 
 The [Topologies chapter](/learn/topologies/your-first-cluster) wired three
 servers into the cluster `east` and showed a client surviving a server
@@ -277,7 +277,7 @@ The next page introduces **RAFT groups** and **leader election**: how the
 servers in `east` pick a leader for the cluster and for each stream, and how
 they pick a new one when a leader is lost.
 
-Continue to [2. Raft and leaders](/learn/clustering/raft-and-leaders).
+Continue to [Raft and leaders](/learn/clustering/raft-and-leaders).
 
 ## See also
 

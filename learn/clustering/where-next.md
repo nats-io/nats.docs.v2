@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "6. Where to go next"
+title: "Where to go next"
 sidebar_position: 7
 description: Recap the clustering mechanism and point to siblings, Reference, and a production checklist
 ---
 
-# 6. Where to go next
+# Where to go next
 
 You started this chapter with nothing running, and by the end you have three
 servers (`n1-east`, `n2-east`, `n3-east`) that found each other from a

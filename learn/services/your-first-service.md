@@ -1,11 +1,11 @@
 ---
 id: your-first-service
-title: "2. Your first service"
+title: "Your first service"
 sidebar_position: 2
 description: Promote the Core NATS inventory responder into a named, versioned OrderInventory service with one endpoint
 ---
 
-# 2. Your first service
+# Your first service
 
 In the Core NATS chapter you built an inventory responder. It subscribed
 to `orders.inventory.check`, read each request, and published an answer
@@ -156,7 +156,7 @@ One service with one endpoint is the smallest useful shape. Real services
 expose several endpoints and organize them under subject prefixes called
 groups. The next page adds a second endpoint and a second service.
 
-Continue to [3. Endpoints and groups](/learn/services/endpoints-and-groups).
+Continue to [Endpoints and groups](/learn/services/endpoints-and-groups).
 
 ## See also
 

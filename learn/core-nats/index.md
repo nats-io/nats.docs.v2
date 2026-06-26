@@ -118,14 +118,14 @@ need the behavior here, not the byte layout.
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | [Publish-subscribe](/learn/core-nats/publish-subscribe) | Fire-and-forget publish, the interest graph, at-most-once delivery, and the 1 MB max payload |
-| 2 | [Subjects & wildcards](/learn/core-nats/subjects-and-wildcards) | Dot-delimited subject hierarchies and the `*` and `>` subscriber wildcards |
-| 3 | [Request-reply](/learn/core-nats/request-reply) | The `_INBOX` reply subject, timeouts, and the no-responders signal |
-| 4 | [Queue groups](/learn/core-nats/queue-groups) | Load balancing where each message goes to exactly one group member |
-| 5 | [Scatter-gather](/learn/core-nats/scatter-gather) | Fan one request to many responders and gather the replies |
-| 6 | [Where to go next](/learn/core-nats/where-next) | A map of what's beyond the foundation |
+| Page | What you learn |
+|---|---|
+| [Publish-subscribe](/learn/core-nats/publish-subscribe) | Fire-and-forget publish, the interest graph, at-most-once delivery, and the 1 MB max payload |
+| [Subjects & wildcards](/learn/core-nats/subjects-and-wildcards) | Dot-delimited subject hierarchies and the `*` and `>` subscriber wildcards |
+| [Request-reply](/learn/core-nats/request-reply) | The `_INBOX` reply subject, timeouts, and the no-responders signal |
+| [Queue groups](/learn/core-nats/queue-groups) | Load balancing where each message goes to exactly one group member |
+| [Scatter-gather](/learn/core-nats/scatter-gather) | Fan one request to many responders and gather the replies |
+| [Where to go next](/learn/core-nats/where-next) | A map of what's beyond the foundation |
 
 ## Prerequisites
 

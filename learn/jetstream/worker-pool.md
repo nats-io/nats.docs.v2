@@ -1,11 +1,11 @@
 ---
 id: worker-pool
-title: "8. A pool of workers"
+title: "A pool of workers"
 sidebar_position: 10
 description: Run several workers off one consumer, and what happens when one crashes mid-message
 ---
 
-# 8. A pool of workers
+# A pool of workers
 
 The `shipping` consumer works. One worker pulls a message, ships the
 order, acks. But one worker is slow: it handles one message at a time,

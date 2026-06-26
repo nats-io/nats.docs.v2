@@ -1,11 +1,11 @@
 ---
 id: single-server
-title: "1. Single server"
+title: "Single server"
 sidebar_position: 2
 description: One nats-server process clients connect to directly — when it's enough and where its ceiling is
 ---
 
-# 1. Single server
+# Single server
 
 Every topology in this chapter is built on top of a single
 server. So that's where Acme starts, and where you start too.
@@ -157,7 +157,7 @@ The server answers `replicas > 1 not supported in non-clustered mode`.
 Don't treat that error as a config typo to override. It reflects how the
 topology works: redundancy is a cluster's job. On one server, ask
 for `--replicas 1` and accept that R1 survives a process restart but
-never the loss of `n1`. When orders must survive that, grow to [2. Your
+never the loss of `n1`. When orders must survive that, grow to [Your
 first cluster](/learn/topologies/your-first-cluster). The quorum and
 replication mechanics behind R3 live in
 [Clustering & Replication](/learn/clustering).
@@ -195,7 +195,7 @@ Acme's deployment right now:
 
 The next page joins three servers (`n1-east`, `n2-east`, `n3-east`)
 into Acme's first cluster, so a client whose server dies reconnects
-to another and keeps working: [2. Your first
+to another and keeps working: [Your first
 cluster](/learn/topologies/your-first-cluster).
 
 ## See also

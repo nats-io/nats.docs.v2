@@ -1,11 +1,11 @@
 ---
 id: chunking
-title: 2. Chunking
+title: Chunking
 sidebar_position: 3
 description: How a large invoice is split into chunks, reassembled, and verified by its digest
 ---
 
-# 2. Chunking
+# Chunking
 
 On the last page you put a small invoice into `INVOICES` and got it back.
 The bytes were small enough to feel atomic: one put, one get, done. But
@@ -167,7 +167,7 @@ The metadata message named the object, its size, and its digest. It can
 carry more: a human-readable **description**, HTTP-style **headers**, a
 free-form key/value map, and **links** from one object to another.
 
-Continue to [3. Metadata and links](/learn/object-store/metadata-and-links).
+Continue to [Metadata and links](/learn/object-store/metadata-and-links).
 
 ## See also
 

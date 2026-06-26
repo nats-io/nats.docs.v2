@@ -1,11 +1,11 @@
 ---
 id: metadata-and-links
-title: 3. Metadata and links
+title: Metadata and links
 sidebar_position: 4
 description: Attach a description, headers, and a metadata map to an object, then link one object to another
 ---
 
-# 3. Metadata and links
+# Metadata and links
 
 An object carries more than its bytes. So far `invoice-ord_8w2k.pdf` is only a
 name and a payload: `warehouse` has to fetch the whole thing to learn
@@ -146,7 +146,7 @@ The next page teaches list and watch: a snapshot of every object in
 the bucket, and a live stream of metadata updates as `analytics` watches the
 bucket fill.
 
-Continue to [4. Watching and listing](/learn/object-store/watching-and-listing).
+Continue to [Watching and listing](/learn/object-store/watching-and-listing).
 
 ## See also
 

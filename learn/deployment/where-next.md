@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "7. Where to go next"
+title: "Where to go next"
 sidebar_position: 7
 description: Recap the deployment runbook and collect every page's production checklist in one place
 ---
 
-# 7. Where to go next
+# Where to go next
 
 You started this chapter with a cluster design: the three-node
 `east` cluster the Topologies chapter designed, carrying the R3 `ORDERS`
