@@ -226,11 +226,11 @@ You now have:
 
 ## What's next
 
-The stream-and-consumer mechanics are now covered. The [next
-page](/learn/jetstream/advanced-publishing) maps the advanced publishing
-modes — async and batch — for when one-at-a-time publishing isn't enough.
-After that, [Where to go next](/learn/jetstream/where-next) recaps the
-chapter and points to where JetStream continues.
+The next page covers [subject mapping](/learn/jetstream/subject-mapping):
+rewriting subjects as a stream stores them, and republishing stored
+messages onto live subjects. After that,
+[per-message TTL](/learn/jetstream/message-ttl), then
+[Where to go next](/learn/jetstream/where-next) recaps the chapter.
 
 ## See also
 

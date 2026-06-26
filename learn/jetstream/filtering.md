@@ -1,7 +1,7 @@
 ---
 id: filtering
 title: "Filtering what you consume"
-sidebar_position: 6
+sidebar_position: 5
 description: Add a second consumer that reads only orders.shipped, and see consumers as independent views
 ---
 

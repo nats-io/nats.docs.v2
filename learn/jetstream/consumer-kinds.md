@@ -1,7 +1,7 @@
 ---
 id: consumer-kinds
 title: Kinds of consumers
-sidebar_position: 6.8
+sidebar_position: 8
 description: The dimensions a consumer varies along — delivery, lifetime, and the stream's retention
 ---
 
