@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 // consumerServerSideAnimated
 // Shows that a consumer is a SERVER-SIDE construct. The NATS server box holds
-// two entities — the ORDERS stream and the orders-reader consumer (a cursor
+// two entities — the ORDERS stream and the billing consumer (a cursor
 // over the stream). The client is a separate application outside the server:
 // it asks the consumer for messages (pull) and receives them (deliver). The
 // stored messages and the read position both live on the server; the client
@@ -157,7 +157,7 @@ function ConsumerServerSideAnimatedInner() {
                                 fontWeight: 600,
                             }}
                         >
-                            Consumer · orders-reader
+                            Consumer · billing
                         </div>
                         <div
                             style={{
