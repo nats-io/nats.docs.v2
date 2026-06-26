@@ -110,13 +110,13 @@ copy those files off-site and put them back.
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | [Stream backup and restore](/learn/backup-recovery/stream-backup-restore) | Take a point-in-time snapshot of `ORDERS`, restore it, and verify the counts match |
-| 2 | [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources) | Stand up `ORDERS_DR` at a second site, read its lag, and see why a mirror is not a backup |
-| 3 | [Disaster recovery](/learn/backup-recovery/disaster-recovery) | A runbook that picks restore or promotion per failure class, and how to promote a mirror |
-| 4 | [Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup) | Back up and restore the operator, accounts, creds, and server config off-site |
-| 5 | [Where to go next](/learn/backup-recovery/where-next) | The whole game recapped, plus a single production checklist |
+| Page | What you learn |
+|---|---|
+| [Stream backup and restore](/learn/backup-recovery/stream-backup-restore) | Take a point-in-time snapshot of `ORDERS`, restore it, and verify the counts match |
+| [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources) | Stand up `ORDERS_DR` at a second site, read its lag, and see why a mirror is not a backup |
+| [Disaster recovery](/learn/backup-recovery/disaster-recovery) | A runbook that picks restore or promotion per failure class, and how to promote a mirror |
+| [Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup) | Back up and restore the operator, accounts, creds, and server config off-site |
+| [Where to go next](/learn/backup-recovery/where-next) | The whole game recapped, plus a single production checklist |
 
 ## Prerequisites
 

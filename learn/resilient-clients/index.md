@@ -72,9 +72,10 @@ drain, slow consumer, no responders, and the rest.
 ## How to read it
 
 Each page introduces at most two new concepts and carries the same
-`order-svc` connection forward. You open the connection on page 2, make it
-reconnect on page 3, drain it on page 4, and so on: one resilience
-option per page, never a fresh example.
+`order-svc` connection forward. You [open the connection](/learn/resilient-clients/connecting),
+[make it reconnect](/learn/resilient-clients/reconnection),
+[drain it](/learn/resilient-clients/drain-and-shutdown), and so on: one
+resilience option per page, never a fresh example.
 
 This chapter only ever talks about what the **client** does. When a page
 reaches the edge of the client (*why* a server went away, *how* a
@@ -91,16 +92,16 @@ set of connection options in [Reference](/reference/).
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | Resilient Clients Deep Dive | The connection as a state machine, and the seven faults this chapter survives |
-| 2 | [Connecting](/learn/resilient-clients/connecting) | Open `order-svc` with a name, a server pool, and a connect timeout, and read the connect handshake |
-| 3 | [Reconnection](/learn/resilient-clients/reconnection) | Reconnect with backoff and jitter, cycle the server pool, and buffer publishes while disconnected |
-| 4 | [Drain & Shutdown](/learn/resilient-clients/drain-and-shutdown) | Drain in-flight work on shutdown instead of dropping it with a bare close |
-| 5 | [Slow Consumers](/learn/resilient-clients/slow-consumers) | Bound a subscription's pending buffer and detect overflow before it OOMs |
-| 6 | [Request-Reply Resilience](/learn/resilient-clients/request-reply-resilience) | Tell no-responders apart from a timeout, and retry each one safely |
-| 7 | [TLS & Auth](/learn/resilient-clients/tls-and-auth) | Consume a credentials file and trust a CA so the connection is authenticated and encrypted |
-| 8 | [Where Next](/learn/resilient-clients/where-next) | A production checklist and a map of what's beyond the client |
+| Page | What you learn |
+|---|---|
+| Resilient Clients Deep Dive | The connection as a state machine, and the seven faults this chapter survives |
+| [Connecting](/learn/resilient-clients/connecting) | Open `order-svc` with a name, a server pool, and a connect timeout, and read the connect handshake |
+| [Reconnection](/learn/resilient-clients/reconnection) | Reconnect with backoff and jitter, cycle the server pool, and buffer publishes while disconnected |
+| [Drain & Shutdown](/learn/resilient-clients/drain-and-shutdown) | Drain in-flight work on shutdown instead of dropping it with a bare close |
+| [Slow Consumers](/learn/resilient-clients/slow-consumers) | Bound a subscription's pending buffer and detect overflow before it OOMs |
+| [Request-Reply Resilience](/learn/resilient-clients/request-reply-resilience) | Tell no-responders apart from a timeout, and retry each one safely |
+| [TLS & Auth](/learn/resilient-clients/tls-and-auth) | Consume a credentials file and trust a CA so the connection is authenticated and encrypted |
+| [Where Next](/learn/resilient-clients/where-next) | A production checklist and a map of what's beyond the client |
 
 ## Prerequisites
 

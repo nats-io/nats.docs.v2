@@ -1,11 +1,11 @@
 ---
 id: operator-mode
-title: "4. Operator Mode"
+title: "Operator Mode"
 sidebar_position: 5
 description: Build the ACME trust chain with nsc, point the server at a resolver, and connect with a creds file
 ---
 
-# 4. Operator Mode
+# Operator Mode
 
 By now you know the trust chain in concept: an operator signs
 accounts, an account signs users, and the server trusts only the
@@ -250,7 +250,7 @@ anywhere in its account. The next page adds **authorization**: subject
 permissions that scope `order-svc` to exactly `orders.>`. The same
 permission model works in config mode and in the JWTs you just built.
 
-Continue to [5. Authorization](/learn/security/authorization).
+Continue to [Authorization](/learn/security/authorization).
 
 ## See also
 

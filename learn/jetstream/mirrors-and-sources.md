@@ -1,11 +1,11 @@
 ---
 id: mirrors-and-sources
-title: "17. Mirrors and sources"
+title: "Mirrors and sources"
 sidebar_position: 19
 description: Copy one stream into another, or aggregate many streams into one
 ---
 
-# 17. Mirrors and sources
+# Mirrors and sources
 
 So far this chapter has worked with a single `ORDERS` stream.
 

@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "6. Where to go next"
+title: "Where to go next"
 sidebar_position: 7
 description: Recap the key-value mental model and point to what comes after this chapter
 ---
 
-# 6. Where to go next
+# Where to go next
 
 This chapter began with a JetStream stream and the claim that NATS
 gives you a key-value store on top of it. By the end you have an `INVENTORY`

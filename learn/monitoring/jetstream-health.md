@@ -1,11 +1,11 @@
 ---
 id: jetstream-health
-title: "3. JetStream health"
+title: "JetStream health"
 sidebar_position: 3
 description: Read stream and consumer state, then compute lag, in-flight, and redelivery as numbers
 ---
 
-# 3. JetStream health
+# JetStream health
 
 The previous page showed you the monitoring port and named `/jsz` as the
 JetStream endpoint. That endpoint counts streams and consumers, but a count
@@ -226,7 +226,7 @@ happened.
 
 The next page covers subscribing to those announcements.
 
-Continue to [4. Advisories & events](/learn/monitoring/advisories-and-events).
+Continue to [Advisories & events](/learn/monitoring/advisories-and-events).
 
 ## See also
 

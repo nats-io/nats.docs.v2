@@ -20,9 +20,10 @@ message, a `get` of a value reads the last message for a subject, and a
 underneath is what makes it work.
 
 This chapter teaches the abstraction first and describes the stream last.
-Pages 1 through 4 teach you the key-value API on its own terms, so you
-can be productive without memorizing JetStream internals. Page 5 shows
-you the stream that the API has been using all along.
+The first four pages teach you the key-value API on its own terms, so you
+can be productive without memorizing JetStream internals.
+[Under the hood](./under-the-hood) shows you the stream that the API has
+been using all along.
 
 ## By the end you will have
 
@@ -56,9 +57,11 @@ from "what is a bucket and why would you want one" and grow from there.
 Each page introduces at most two new concepts and builds on the one
 before it: the same `INVENTORY` bucket carries through, and you can
 keep one terminal open through the whole chapter without resetting state.
-You create the bucket on page 1, add a watcher on page 2, decrement a key
-safely on page 3, give a key a TTL on page 4, and inspect the stream
-underneath on page 5.
+You create the bucket on [Your first bucket](./your-first-bucket), add a
+watcher on [Watching](./watching), decrement a key safely on
+[History and revisions](./history-and-revisions), give a key a TTL on
+[TTL and limits](./ttl-and-limits), and inspect the stream underneath on
+[Under the hood](./under-the-hood).
 
 Key-value has many configuration options, covering bucket limits, watch
 options, and headers on the wire. Where a feature has a long list, the
@@ -68,14 +71,14 @@ stream, the full set of bucket configuration options lives in
 
 ## Map
 
-| # | Page | What you learn |
-|---|---|---|
-| 1 | [Your first bucket](./your-first-bucket) | Create `INVENTORY`, put and get `widget-blue`, and read its status |
-| 2 | [Watching](./watching) | Receive a snapshot of every key, then live changes as they happen |
-| 3 | [History and revisions](./history-and-revisions) | Track revisions, read history, and decrement safely with compare-and-swap |
-| 4 | [TTL and limits](./ttl-and-limits) | Expire a single key with a per-key TTL, and bound the bucket with limits |
-| 5 | [Under the hood](./under-the-hood) | See the `KV_INVENTORY` stream, the direct read, and delete versus purge |
-| 6 | [Where to go next](./where-next) | A map of what's beyond key-value, and one pre-production checklist |
+| Page | What you learn |
+|---|---|
+| [Your first bucket](./your-first-bucket) | Create `INVENTORY`, put and get `widget-blue`, and read its status |
+| [Watching](./watching) | Receive a snapshot of every key, then live changes as they happen |
+| [History and revisions](./history-and-revisions) | Track revisions, read history, and decrement safely with compare-and-swap |
+| [TTL and limits](./ttl-and-limits) | Expire a single key with a per-key TTL, and bound the bucket with limits |
+| [Under the hood](./under-the-hood) | See the `KV_INVENTORY` stream, the direct read, and delete versus purge |
+| [Where to go next](./where-next) | A map of what's beyond key-value, and one pre-production checklist |
 
 ## Prerequisites
 

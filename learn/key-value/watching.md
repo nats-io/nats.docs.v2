@@ -1,11 +1,11 @@
 ---
 id: watching
-title: "2. Watching"
+title: "Watching"
 sidebar_position: 3
 description: Watch a bucket for live stock changes — the initial snapshot, the end-of-initial-data signal, and wildcard filters
 ---
 
-# 2. Watching
+# Watching
 
 You have the `INVENTORY` bucket from the last page, with `widget-blue`
 at `42`. Reading it with get tells you the count *now*. The warehouse
@@ -155,7 +155,7 @@ You now have:
 
 The next page reads the history each put creates and uses revisions to
 make safe, concurrent updates:
-[3. History and revisions](/learn/key-value/history-and-revisions).
+[History and revisions](/learn/key-value/history-and-revisions).
 
 ## See also
 

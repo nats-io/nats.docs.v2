@@ -1,11 +1,11 @@
 ---
 id: publishing
-title: 2. Publishing
+title: Publishing
 sidebar_position: 4
 description: Publish into a stream and understand the PubAck contract
 ---
 
-# 2. Publishing
+# Publishing
 
 The `ORDERS` stream is empty. This page puts messages into it. Publishing
 into a stream works like a normal NATS publish, with one difference: the

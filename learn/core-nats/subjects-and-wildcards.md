@@ -1,11 +1,11 @@
 ---
 id: subjects-and-wildcards
-title: "2. Subjects & wildcards"
+title: "Subjects & wildcards"
 sidebar_position: 3
 description: How NATS addresses messages with dot-delimited subjects, and how subscribers match many of them at once with wildcards
 ---
 
-# 2. Subjects & wildcards
+# Subjects & wildcards
 
 On the previous page Acme published `orders.created` and three services
 subscribed to it. That subject was a flat name. This page gives the

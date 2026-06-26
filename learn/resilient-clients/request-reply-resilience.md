@@ -1,11 +1,11 @@
 ---
 id: request-reply-resilience
-title: "5. Request-Reply Resilience"
+title: "Request-Reply Resilience"
 sidebar_position: 6
 description: Tell a slow responder apart from an absent one, then retry the request safely with backoff and idempotent IDs
 ---
 
-# 5. Request-Reply Resilience
+# Request-Reply Resilience
 
 So far this chapter has hardened the connection underneath one-way
 traffic: `order-svc` publishes orders, and the subscribers receive them.
@@ -198,7 +198,7 @@ The last mechanism in this chapter is **TLS and auth**: pointing the
 client at the `order-svc` credentials file so it authenticates, and at
 the cluster CA so it validates the server over an encrypted link.
 
-Continue to [6. TLS & Auth](/learn/resilient-clients/tls-and-auth).
+Continue to [TLS & Auth](/learn/resilient-clients/tls-and-auth).
 
 ## See also
 

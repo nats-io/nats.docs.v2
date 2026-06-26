@@ -1,11 +1,11 @@
 ---
 id: replication-and-r3
-title: 4. Replication and R=3
+title: Replication and R=3
 sidebar_position: 4
 description: How a replicated stream commits a write by quorum, and the consistency you get from it
 ---
 
-# 4. Replication and R=3
+# Replication and R=3
 
 The last page elected leaders, so the cluster now has a meta leader and,
 once you create a stream, a leader for that stream's RAFT group. This
@@ -196,7 +196,7 @@ landed. The next page makes that choice yours: placement constrains a
 stream's replicas to a cluster and to servers carrying matching tags,
 and hints which peer should lead first.
 
-Continue to [5. Placement](/learn/clustering/placement).
+Continue to [Placement](/learn/clustering/placement).
 
 ## See also
 

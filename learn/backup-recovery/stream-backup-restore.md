@@ -1,11 +1,11 @@
 ---
 id: stream-backup-restore
-title: "1. Stream backup and restore"
+title: "Stream backup and restore"
 sidebar_position: 2
 description: Take a point-in-time snapshot of the ORDERS stream, restore it byte-identical, and verify the counts match
 ---
 
-# 1. Stream backup and restore
+# Stream backup and restore
 
 The `ORDERS` stream holds every order Acme has ever taken. Replication
 keeps it available when a node dies, but it doesn't protect you from a
@@ -173,7 +173,7 @@ it distinguishes a snapshot (your recovery point) from a
 mirror (your recovery time).
 
 Continue to
-[2. Mirrors and sources](/learn/backup-recovery/mirrors-and-sources).
+[Mirrors and sources](/learn/backup-recovery/mirrors-and-sources).
 
 ## See also
 

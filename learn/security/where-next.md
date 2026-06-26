@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "9. Where to go next"
+title: "Where to go next"
 sidebar_position: 10
 description: The whole security model in one picture, and where to read further
 ---
 
-# 9. Where to go next
+# Where to go next
 
 You've secured the ORDERS world end to end. This page puts the whole
 model back together in one picture, then points you at the chapters and

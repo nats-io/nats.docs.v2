@@ -1,11 +1,11 @@
 ---
 id: altering-stream-state
-title: "15. Altering stream state"
+title: "Altering stream state"
 sidebar_position: 17
 description: Delete a single message or purge the stream by hand, and what removal does to sequence numbers
 ---
 
-# 15. Altering stream state
+# Altering stream state
 
 Retention limits and per-message TTL both remove messages for you, on a
 schedule the server runs. Sometimes you need to remove something by hand:

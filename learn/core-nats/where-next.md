@@ -1,11 +1,11 @@
 ---
 id: where-next
-title: "6. Where to go next"
+title: "Where to go next"
 sidebar_position: 7
 description: Recap the core NATS mental model and point to what comes after the foundation
 ---
 
-# 6. Where to go next
+# Where to go next
 
 You started this chapter with a single publish to `orders.created` and
 no guarantee anyone was subscribed. You end it with `warehouse`,
@@ -87,8 +87,9 @@ else: every flag and default, versioned in full.
 Core NATS is the foundation. The other chapters build directly on the
 four mechanics you just learned.
 
-The [Services deep dive](/learn/services) takes request-reply and queue
-groups (the two patterns from pages 3 and 4) and wraps them in a
+The [Services deep dive](/learn/services) takes the
+[request-reply](/learn/core-nats/request-reply) and
+[queue group](/learn/core-nats/queue-groups) patterns and wraps them in a
 framework that adds discovery, schemas, and built-in metrics. If you find
 yourself hand-rolling many request-reply responders, that's the chapter
 to read next. Start with
@@ -103,14 +104,16 @@ without losing in-flight work. Its pages on
 moment you move off a single local server.
 
 The [Topologies deep dive](/learn/topologies/super-clusters) explains how
-the interest graph you met on page 1 stretches across clustered and
-geographically separated servers, including how a queue group prefers a
-local member when the same group spans regions.
+the interest graph you met in
+[publish-subscribe](/learn/core-nats/publish-subscribe) stretches across
+clustered and geographically separated servers, including how a queue group
+prefers a local member when the same group spans regions.
 
 The [Security deep dive](/learn/security) covers who's allowed to
-publish or subscribe to which subjects. The subject hierarchy from page 2
-is also the unit of permission, so the addressing you designed is the
-same thing you secure.
+publish or subscribe to which subjects. The subject hierarchy from
+[subjects & wildcards](/learn/core-nats/subjects-and-wildcards) is also the
+unit of permission, so the addressing you designed is the same thing you
+secure.
 
 ## Where you are
 

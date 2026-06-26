@@ -1,11 +1,11 @@
 ---
 id: authentication-basics
-title: "2. Authentication Basics"
+title: "Authentication Basics"
 sidebar_position: 3
 description: Centralized config-based authentication and the three credential types
 ---
 
-# 2. Authentication Basics
+# Authentication Basics
 
 The previous page gave `ORDERS` and `ANALYTICS` their own isolated
 subject spaces. Nobody's using them yet. A connection still has to

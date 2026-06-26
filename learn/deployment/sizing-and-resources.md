@@ -1,11 +1,11 @@
 ---
 id: sizing-and-resources
-title: "2. Sizing & resources"
+title: "Sizing & resources"
 sidebar_position: 2
 description: The four resources a NATS node spends, the JetStream defaults, and how account limits count R3 replication
 ---
 
-# 2. Sizing & resources
+# Sizing & resources
 
 Topologies decided the shape: a three-node cluster called `east`
 (`n1-east`, `n2-east`, `n3-east`) carrying the R3 `ORDERS` stream. This
@@ -191,7 +191,7 @@ With the resources sized, the next page stands the cluster up: the NATS
 Helm chart, the StatefulSet that maps `nats-0..2` to `n1-east..n3-east`,
 and the NACK controller that declares the `ORDERS` stream as a CRD.
 
-Continue to [3. Kubernetes](/learn/deployment/kubernetes).
+Continue to [Kubernetes](/learn/deployment/kubernetes).
 
 ## See also
 

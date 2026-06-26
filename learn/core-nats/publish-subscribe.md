@@ -1,11 +1,11 @@
 ---
 id: publish-subscribe
-title: "1. Publish-subscribe"
+title: "Publish-subscribe"
 sidebar_position: 2
 description: Fire-and-forget publish, the in-memory interest graph, and core NATS at-most-once delivery
 ---
 
-# 1. Publish-subscribe
+# Publish-subscribe
 
 Core NATS has one fundamental operation: a client publishes a message to a
 subject, and every client subscribed to that subject right now gets a

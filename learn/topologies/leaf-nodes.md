@@ -1,11 +1,11 @@
 ---
 id: leaf-nodes
-title: "5. Leaf nodes"
+title: "Leaf nodes"
 sidebar_position: 6
 description: Bridge a factory site to the east cluster with a leaf node that dials out and binds to an account
 ---
 
-# 5. Leaf nodes
+# Leaf nodes
 
 Acme now runs a super-cluster: `east` and `west`, joined by gateways.
 Both clusters live in cloud regions Acme controls. The ORDERS workload
@@ -309,7 +309,8 @@ Acme's deployment now reaches the edge:
   behind the leaf, sharing one subject space with the cloud
 
 The application code never changed. A factory machine publishes
-`orders.created` exactly the way the dev server `n1` did on page 1.
+`orders.created` exactly the way the dev server `n1` did on
+[Single server](/learn/topologies/single-server).
 
 ## What's next
 

@@ -1,11 +1,11 @@
 ---
 id: accounts-and-multitenancy
-title: "1. Accounts & Multitenancy"
+title: "Accounts & Multitenancy"
 sidebar_position: 2
 description: How an account isolates a tenant's subject space, and the two accounts every server already has
 ---
 
-# 1. Accounts & Multitenancy
+# Accounts & Multitenancy
 
 The order platform from the JetStream chapter has more than one team
 reading from it. The order service publishes the orders. A separate

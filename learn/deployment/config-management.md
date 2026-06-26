@@ -1,11 +1,11 @@
 ---
 id: config-management
-title: "4. Config management"
+title: "Config management"
 sidebar_position: 4
 description: Split the cluster config into includes and reload it live with a SIGHUP — no downtime, no client reconnect
 ---
 
-# 4. Config management
+# Config management
 
 The `ORDERS` cluster is running on Kubernetes as the three pods
 `nats-0`, `nats-1`, `nats-2`. Now the inevitable happens: you need to
@@ -279,7 +279,7 @@ Lame-duck mode drains a node gracefully, transfers its Raft leadership,
 and lets the next version take its place, all while the R3 `ORDERS`
 stream stays available and clients stay connected.
 
-Continue to [5. Rolling upgrades](/learn/deployment/rolling-upgrades).
+Continue to [Rolling upgrades](/learn/deployment/rolling-upgrades).
 
 ## See also
 
