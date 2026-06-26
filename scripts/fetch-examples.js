@@ -59,6 +59,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-nakWithDelay": "learn-jetstream-acknowledgment-nakWithDelay/main.go",
             "learn-jetstream-acknowledgment-termPoison": "learn-jetstream-acknowledgment-termPoison/main.go",
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "learn-jetstream-acknowledgment-watchMaxDeliveries/main.go",
+            "learn-jetstream-filtering-createFiltered": "learn-jetstream-filtering-createFiltered/main.go",
+            "learn-jetstream-filtering-filterMatchesNothing": "learn-jetstream-filtering-filterMatchesNothing/main.go",
         },
     }],
     "rust": [{
@@ -105,6 +107,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-nakWithDelay": "docs_learn_jetstream_acknowledgment_nak_with_delay.rs",
             "learn-jetstream-acknowledgment-termPoison": "docs_learn_jetstream_acknowledgment_term_poison.rs",
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "docs_learn_jetstream_acknowledgment_watch_max_deliveries.rs",
+            "learn-jetstream-filtering-createFiltered": "docs_learn_jetstream_filtering_create_filtered.rs",
+            "learn-jetstream-filtering-filterMatchesNothing": "docs_learn_jetstream_filtering_filter_matches_nothing.rs",
         },
     }],
     "javascript": [{
@@ -151,6 +155,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-nakWithDelay": "learn-jetstream-acknowledgment-nakWithDelay.ts",
             "learn-jetstream-acknowledgment-termPoison": "learn-jetstream-acknowledgment-termPoison.ts",
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "learn-jetstream-acknowledgment-watchMaxDeliveries.ts",
+            "learn-jetstream-filtering-createFiltered": "learn-jetstream-filtering-createFiltered.ts",
+            "learn-jetstream-filtering-filterMatchesNothing": "learn-jetstream-filtering-filterMatchesNothing.ts",
         },
     }],
     "python": [{
@@ -197,6 +203,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-nakWithDelay": "learn_jetstream_acknowledgment_nak_with_delay.py",
             "learn-jetstream-acknowledgment-termPoison": "learn_jetstream_acknowledgment_term_poison.py",
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "learn_jetstream_acknowledgment_watch_max_deliveries.py",
+            "learn-jetstream-filtering-createFiltered": "learn_jetstream_filtering_create_filtered.py",
+            "learn-jetstream-filtering-filterMatchesNothing": "learn_jetstream_filtering_filter_matches_nothing.py",
         },
     }],
     "java": [{
@@ -243,6 +251,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-nakWithDelay": "LearnJetStreamAcknowledgmentNakWithDelay.java",
             "learn-jetstream-acknowledgment-termPoison": "LearnJetStreamAcknowledgmentTermPoison.java",
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "LearnJetStreamAcknowledgmentWatchMaxDeliveries.java",
+            "learn-jetstream-filtering-createFiltered": "LearnJetStreamFilteringCreateFiltered.java",
+            "learn-jetstream-filtering-filterMatchesNothing": "LearnJetStreamFilteringFilterMatchesNothing.java",
         },
     }],
     "csharp": [{
@@ -289,6 +299,8 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-nakWithDelay": "LearnJetStreamAcknowledgmentNakWithDelay.cs",
             "learn-jetstream-acknowledgment-termPoison": "LearnJetStreamAcknowledgmentTermPoison.cs",
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "LearnJetStreamAcknowledgmentWatchMaxDeliveries.cs",
+            "learn-jetstream-filtering-createFiltered": "LearnJetStreamFilteringCreateFiltered.cs",
+            "learn-jetstream-filtering-filterMatchesNothing": "LearnJetStreamFilteringFilterMatchesNothing.cs",
         },
     }],
 };
