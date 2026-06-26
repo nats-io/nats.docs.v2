@@ -194,10 +194,9 @@ You now have:
 
 ## What's next
 
-Limits-based retention removes messages by age across the whole stream.
-The next page adds a [per-message
-TTL](/learn/jetstream/message-ttl) that expires a single message on its
-own schedule, independent of the stream's `MaxAge`.
+Retention removes messages on a schedule the server runs. The next page
+covers removing them by hand: [deleting a single
+message](/learn/jetstream/altering-stream-state) and purging the stream.
 
 ## See also
 

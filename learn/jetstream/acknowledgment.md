@@ -1,7 +1,7 @@
 ---
 id: acknowledgment
 title: "Acknowledgment"
-sidebar_position: 8
+sidebar_position: 7
 description: The four ways a client answers a message, and the server controls that drive redelivery.
 ---
 
@@ -257,9 +257,10 @@ poison message has a clear exit through term.
 
 ## What's next
 
-The next page goes deep on the consumer you've been driving from the
-CLI: how a pull consumer fetches batches, how the server tracks what's
-outstanding, and how a client controls the flow of messages it pulls.
+The next page steps back to map the **kinds of consumers** — push versus
+pull, durable versus ephemeral, and how a stream's retention changes what
+a consumer does. The pages after it go deep on pull mechanics: how a pull
+consumer fetches batches and controls the flow of messages it pulls.
 
 ## See also
 

@@ -1,7 +1,7 @@
 ---
 id: advanced-publishing
 title: "Advanced publishing"
-sidebar_position: 20
+sidebar_position: 18
 description: Async, atomic-batch, and fast-ingest publishing for higher throughput or grouped writes
 ---
 
@@ -95,9 +95,9 @@ past a dropped message on purpose. Use it only when a hole is acceptable
 
 ## What's next
 
-That's the end of the JetStream deep dive. The [next
-page](/learn/jetstream/where-next) recaps the model you built and points to
-the chapters that take it further.
+The next page covers copying a stream's data elsewhere: **mirrors and
+sources**, the building blocks for read-replicas, aggregation, and
+disaster recovery across regions.
 
 ## See also
 

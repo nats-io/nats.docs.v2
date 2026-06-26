@@ -1,14 +1,13 @@
 ---
 id: altering-stream-state
 title: "Altering stream state"
-sidebar_position: 17
+sidebar_position: 16
 description: Delete a single message or purge the stream by hand, and what removal does to sequence numbers
 ---
 
 # Altering stream state
 
-Retention limits and per-message TTL both remove messages for you, on a
-schedule the server runs. Sometimes you need to remove something by hand:
+Retention limits remove messages for you, on a schedule the server runs. Sometimes you need to remove something by hand:
 one bad message a buggy producer wrote, or every message in a stream
 you're clearing out for a fresh test run.
 

@@ -1,7 +1,7 @@
 ---
 id: subject-mapping
 title: Subject mapping and transforms
-sidebar_position: 6.6
+sidebar_position: 20
 description: Rewrite subjects on the way into a stream, and republish stored messages onto new subjects
 ---
 
@@ -123,6 +123,11 @@ stream. That's a server-configuration topic, not a JetStream one.
      - changing a stream's subject transform doesn't rewrite already-stored
        messages
      - partition bucket count is fixed once consumers depend on it */}
+
+## What's next
+
+The next page covers [per-message TTL](/learn/jetstream/message-ttl):
+giving a single message a shorter lifespan than the rest of the stream.
 
 ## See also
 

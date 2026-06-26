@@ -1,16 +1,16 @@
 ---
 id: message-ttl
 title: "Per-message TTL"
-sidebar_position: 16
+sidebar_position: 21
 description: Make a single message expire ahead of the stream's MaxAge
 ---
 
 # Per-message TTL
 
-The previous page capped `ORDERS` at a 7-day `MaxAge`. Every message in
-the stream now lives the same seven days, then is removed. That's one
-lifespan for the whole stream. Sometimes one message needs a different
-lifespan.
+The [Shaping the stream](/learn/jetstream/shaping-the-stream) page capped
+`ORDERS` at a 7-day `MaxAge`, so every message in the stream lives the
+same seven days, then is removed. That's one lifespan for the whole
+stream. Sometimes one message needs a different lifespan.
 
 ## When one message should expire sooner
 
@@ -178,13 +178,14 @@ off. You published an `orders.cancelled` message with a 60-second
 earlier of TTL and `MaxAge` always wins.
 
 The stream still holds its earlier messages under the 7-day `MaxAge`
-from the previous page. Nothing else changed.
+set on the [Shaping the stream](/learn/jetstream/shaping-the-stream) page.
+Nothing else changed.
 
 ## What's next
 
-The next page stays on your single server and covers two ways to control
-what the stream holds: deleting a single message, and purging the
-stream.
+That's the last of the stream and consumer mechanics. [Where to go
+next](/learn/jetstream/where-next) recaps the model you built and points
+to the chapters that take it further.
 
 ## See also
 

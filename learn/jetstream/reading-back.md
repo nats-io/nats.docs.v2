@@ -1,7 +1,7 @@
 ---
 id: reading-back
 title: "Reading back the stream"
-sidebar_position: 5
+sidebar_position: 4
 description: Meet the producer, stream, and consumer; create a durable consumer and read everything the stream holds
 ---
 

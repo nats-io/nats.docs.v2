@@ -31,7 +31,6 @@ subjects, and queue groups.
 | [Filtering what you consume](./filtering) | Add a second consumer that reads only `orders.shipped` |
 | [Delivery and acknowledgment](./your-first-consumer) | In-flight, ack, double ack, and redelivery |
 | [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
-| [Subject mapping and transforms](./subject-mapping) | Rewrite subjects on the way into a stream, and republish stored messages |
 | [Kinds of consumers](./consumer-kinds) | Push vs pull, durable vs ephemeral, and how retention shapes a consumer |
 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
 | [A pool of workers](./worker-pool) | Share one consumer across many workers |
@@ -40,11 +39,12 @@ subjects, and queue groups.
 | [Push vs pull](./push-vs-pull) | Why pull is the default, and when push still fits |
 | [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
 | [Delivery semantics](./delivery-semantics) | Limits, Interest, and WorkQueue retention |
-| [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
 | [Altering stream state](./altering-stream-state) | Delete a message or purge the stream, by hand |
 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
-| [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
 | [Advanced publishing](./advanced-publishing) | Async, atomic-batch, and fast-ingest publishing |
+| [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
+| [Subject mapping and transforms](./subject-mapping) | Rewrite subjects on the way into a stream, and republish stored messages |
+| [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
