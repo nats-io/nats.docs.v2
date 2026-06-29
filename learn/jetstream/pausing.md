@@ -7,15 +7,20 @@ description: Stop delivery to a consumer until a deadline, then resume where it 
 
 # Pausing a consumer
 
-Sometimes you want a consumer to stop delivering for a while and then
-pick up exactly where it was.
+Acme's shipping carrier sends a notice: the API the `shipping` workers call
+to book each shipment goes down for maintenance this Sunday, 03:00 to 05:00.
+For those two hours no shipment can be booked. Left running, the pool keeps
+pulling orders, fails every booking, and churns through redeliveries against a
+dead API.
 
-You could delete the consumer and recreate it later, but that throws
-away everything it tracked: which messages it had acknowledged, and how
-far it had read.
+You could delete the `shipping` consumer and recreate it after the window, but
+that throws away everything it tracked: how far it has read and which orders
+it has acked.
 
-A **paused** consumer stops receiving messages until a deadline you
-set, and keeps all of its progress until then.
+Pausing fits exactly here. A **paused** consumer stops receiving messages
+until a deadline you set, and keeps all of its progress until then. You pause
+`shipping` until 05:00; orders keep landing in `ORDERS`, and the pool resumes
+on its own when the carrier is back, picking up right where it stopped.
 
 ## What pausing keeps
 
@@ -106,20 +111,15 @@ whether you or the deadline decides the timing.
 
 ## When to pause
 
-Two situations cause most pauses.
+The carrier window is the first of two common reasons. A **maintenance
+window** is any planned time when a system the consumer feeds into goes
+offline, so delivering messages no worker can handle yet only wastes
+attempts. The second is **backpressure**: a downstream system is overloaded
+and needs room to recover, so you pause to stop the flow and resume once it
+catches up.
 
-The first is a **maintenance window**: a planned time when a system the
-consumer feeds into goes offline. Say the warehouse API or a database is
-down for an upgrade. Rather than let the `shipping` consumer deliver
-messages no worker can process, you pause it until the upgrade is done.
-The messages stay in the stream, and the consumer resumes on schedule.
-
-The second is **backpressure**: a system the consumer feeds into is
-overloaded and can't keep up. Pausing the consumer stops delivery, gives
-that system room to recover, and resumes when you choose. The cursor
-doesn't move, so nothing is lost and nothing is handled twice.
-
-In both cases, you stop delivery without losing the consumer's place.
+In both cases the cursor doesn't move, so you stop delivery without losing
+the consumer's place: nothing is lost and nothing is handled twice.
 
 ## Availability
 

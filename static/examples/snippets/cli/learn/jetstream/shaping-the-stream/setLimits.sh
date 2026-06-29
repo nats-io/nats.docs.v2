@@ -9,7 +9,8 @@
 # --max-age sets MaxAge: the oldest a message may get. 7d means a
 #   message is removed roughly seven days after it was stored.
 # --max-bytes sets MaxBytes: the most disk the stream may occupy on
-#   disk. 1GB means the stream never grows past a gigabyte.
+#   disk. 1GiB caps it at one gibibyte (about a gigabyte); the stream
+#   never grows past it. nats reports the cap back as "1.0 GiB".
 #
 # MaxMsgs is left unset, so message count stays unlimited. Discard
 # policy is left at its default (Old), so when a limit is hit the
@@ -17,4 +18,4 @@
 
 nats stream edit ORDERS \
   --max-age=7d \
-  --max-bytes=1GB
+  --max-bytes=1GiB
