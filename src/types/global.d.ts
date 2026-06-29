@@ -26,6 +26,7 @@ import type {
   RedeliveryOrderAnimated as RedeliveryOrderAnimatedComponent,
   TwoConsumersAnimated as TwoConsumersAnimatedComponent,
   AckResponsesAnimated as AckResponsesAnimatedComponent,
+  WorkerPoolAnimated as WorkerPoolAnimatedComponent,
   CentralizedAuthAnimated as CentralizedAuthAnimatedComponent,
   DecentralizedAuthAnimated as DecentralizedAuthAnimatedComponent,
   AuthCalloutAnimated as AuthCalloutAnimatedComponent,
@@ -88,6 +89,7 @@ declare global {
       RedeliveryOrderAnimated: typeof RedeliveryOrderAnimatedComponent;
       TwoConsumersAnimated: typeof TwoConsumersAnimatedComponent;
       AckResponsesAnimated: typeof AckResponsesAnimatedComponent;
+      WorkerPoolAnimated: typeof WorkerPoolAnimatedComponent;
       CentralizedAuthAnimated: typeof CentralizedAuthAnimatedComponent;
       DecentralizedAuthAnimated: typeof DecentralizedAuthAnimatedComponent;
       AuthCalloutAnimated: typeof AuthCalloutAnimatedComponent;

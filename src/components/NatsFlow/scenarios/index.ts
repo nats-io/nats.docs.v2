@@ -19,6 +19,7 @@ export { DoubleAckAnimated } from './doubleAckAnimated';
 export { RedeliveryOrderAnimated } from './redeliveryOrderAnimated';
 export { TwoConsumersAnimated } from './twoConsumersAnimated';
 export { AckResponsesAnimated } from './ackResponsesAnimated';
+export { WorkerPoolAnimated } from './workerPoolAnimated';
 export { singleServerScenario } from './singleServer';
 export { clusterScenario } from './cluster';
 export { superClusterScenario } from './superCluster';
