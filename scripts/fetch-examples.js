@@ -68,6 +68,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-consumeContinuous": "learn-jetstream-pull-consumers-consumeContinuous/main.go",
             "learn-jetstream-pull-consumers-emptyFetch": "learn-jetstream-pull-consumers-emptyFetch/main.go",
             "learn-jetstream-ordered-consumer-read": "learn-jetstream-ordered-consumer-read/main.go",
+            "learn-jetstream-shaping-the-stream-setLimits": "learn-jetstream-shaping-the-stream-setLimits/main.go",
+            "learn-jetstream-shaping-the-stream-discardNew": "learn-jetstream-shaping-the-stream-discardNew/main.go",
+            "learn-jetstream-shaping-the-stream-perSubjectLimit": "learn-jetstream-shaping-the-stream-perSubjectLimit/main.go",
         },
     }],
     "rust": [{
@@ -123,6 +126,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-consumeContinuous": "docs_learn_jetstream_pull_consumers_consume_continuous.rs",
             "learn-jetstream-pull-consumers-emptyFetch": "docs_learn_jetstream_pull_consumers_empty_fetch.rs",
             "learn-jetstream-ordered-consumer-read": "docs_learn_jetstream_ordered_consumer_read.rs",
+            "learn-jetstream-shaping-the-stream-setLimits": "docs_learn_jetstream_shaping_the_stream_set_limits.rs",
+            "learn-jetstream-shaping-the-stream-discardNew": "docs_learn_jetstream_shaping_the_stream_discard_new.rs",
+            "learn-jetstream-shaping-the-stream-perSubjectLimit": "docs_learn_jetstream_shaping_the_stream_per_subject_limit.rs",
         },
     }],
     "javascript": [{
@@ -178,6 +184,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-consumeContinuous": "learn-jetstream-pull-consumers-consumeContinuous.ts",
             "learn-jetstream-pull-consumers-emptyFetch": "learn-jetstream-pull-consumers-emptyFetch.ts",
             "learn-jetstream-ordered-consumer-read": "learn-jetstream-ordered-consumer-read.ts",
+            "learn-jetstream-shaping-the-stream-setLimits": "learn-jetstream-shaping-the-stream-setLimits.ts",
+            "learn-jetstream-shaping-the-stream-discardNew": "learn-jetstream-shaping-the-stream-discardNew.ts",
+            "learn-jetstream-shaping-the-stream-perSubjectLimit": "learn-jetstream-shaping-the-stream-perSubjectLimit.ts",
         },
     }],
     "python": [{
@@ -233,6 +242,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-consumeContinuous": "learn_jetstream_pull_consumers_consume_continuous.py",
             "learn-jetstream-pull-consumers-emptyFetch": "learn_jetstream_pull_consumers_empty_fetch.py",
             "learn-jetstream-ordered-consumer-read": "learn_jetstream_ordered_consumer_read.py",
+            "learn-jetstream-shaping-the-stream-setLimits": "learn_jetstream_shaping_the_stream_set_limits.py",
+            "learn-jetstream-shaping-the-stream-discardNew": "learn_jetstream_shaping_the_stream_discard_new.py",
+            "learn-jetstream-shaping-the-stream-perSubjectLimit": "learn_jetstream_shaping_the_stream_per_subject_limit.py",
         },
     }],
     "java": [{
@@ -288,6 +300,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-consumeContinuous": "LearnJetStreamPullConsumersConsumeContinuous.java",
             "learn-jetstream-pull-consumers-emptyFetch": "LearnJetStreamPullConsumersEmptyFetch.java",
             "learn-jetstream-ordered-consumer-read": "LearnJetStreamOrderedConsumerRead.java",
+            "learn-jetstream-shaping-the-stream-setLimits": "LearnJetStreamShapingTheStreamSetLimits.java",
+            "learn-jetstream-shaping-the-stream-discardNew": "LearnJetStreamShapingTheStreamDiscardNew.java",
+            "learn-jetstream-shaping-the-stream-perSubjectLimit": "LearnJetStreamShapingTheStreamPerSubjectLimit.java",
         },
     }],
     "csharp": [{
@@ -343,6 +358,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-consumeContinuous": "LearnJetStreamPullConsumersConsumeContinuous.cs",
             "learn-jetstream-pull-consumers-emptyFetch": "LearnJetStreamPullConsumersEmptyFetch.cs",
             "learn-jetstream-ordered-consumer-read": "LearnJetStreamOrderedConsumerRead.cs",
+            "learn-jetstream-shaping-the-stream-setLimits": "LearnJetStreamShapingTheStreamSetLimits.cs",
+            "learn-jetstream-shaping-the-stream-discardNew": "LearnJetStreamShapingTheStreamDiscardNew.cs",
+            "learn-jetstream-shaping-the-stream-perSubjectLimit": "LearnJetStreamShapingTheStreamPerSubjectLimit.cs",
         },
     }],
 };
