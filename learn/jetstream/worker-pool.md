@@ -136,18 +136,20 @@ workers die together.
 Running several workers makes two consumer settings, `AckWait` and
 `MaxAckPending`, matter in practice.
 
-**A redelivered order ships twice unless the worker is safe to repeat.**
-You get at-least-once delivery: a message arrives at least
-one time, and sometimes more. When one worker crashes mid-message, the
-order comes back to another after `AckWait`. If your worker does its
-real-world action (charging a card, printing a label) before it acks,
-that action runs again on the redelivery. Tie every action to the
-`order_id` so a second delivery of `ord_8w2k` does nothing instead of
-shipping twice. Watch redelivery across the workers:
+**A redelivered order can arrive at a second worker.** When one worker
+crashes mid-order, the server gives that order to another worker after
+`AckWait`, so the work still gets done. The same order can then run twice, so
+key side effects by `order_id`. A redelivery shows up in the message's
+delivery count:
 
 <div class="nats-example"
      data-type="learn-jetstream-worker-pool-redelivery-count"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The pool shares work by demand, so you don't choose which worker gets an
+order. For that control, use [priority groups](/learn/jetstream/priority-groups):
+send everything to one worker until it fails, or keep a standby worker idle
+until the pool falls behind.
 
 **A low `MaxAckPending` starves a large set of workers.** The cap is shared
 across the whole consumer, not per worker. Set it to 3 and only three
