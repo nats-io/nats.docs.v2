@@ -257,11 +257,10 @@ poison message has a clear exit through term.
 
 ## What's next
 
-The next page steps back to map the **kinds of consumers** — how long a
-consumer lives, how its state is replicated and stored, pull versus push,
-and the ordered-consumer pattern. The pages after it go deep on pull
-mechanics: how a pull consumer fetches batches and controls the flow of
-messages it pulls.
+One worker pulls one order at a time. The next page covers the two ways a
+client drives a pull consumer — [fetching a batch versus consuming a
+continuous flow](/learn/jetstream/pull-consumers) — and when to reach for
+each.
 
 ## See also
 

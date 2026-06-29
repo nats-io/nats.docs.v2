@@ -1,16 +1,15 @@
 ---
 id: worker-pool
 title: "Scaling a consumer"
-sidebar_position: 7
+sidebar_position: 9
 description: Point several workers at one consumer to share the load, and what happens when one crashes mid-message
 ---
 
 # Scaling a consumer
 
-On the [acknowledgment page](/learn/jetstream/acknowledgment), one worker
-drove the `shipping` consumer: pull an order, ship it, ack, and let the
-redeliver loop retry anything that failed. That kept up while Acme shipped a
-few orders an hour.
+On the [previous page](/learn/jetstream/pull-consumers), one worker consumed
+the `shipping` consumer: a continuous pull loop that ships each order and
+acks. That kept up while Acme shipped a few orders an hour.
 
 Then Acme's order volume climbed. Orders arrive faster than one worker can
 ship them, and the unshipped ones pile up in `ORDERS`.

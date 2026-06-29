@@ -1,7 +1,7 @@
 ---
 id: consumer-kinds
 title: Kinds of consumers
-sidebar_position: 8
+sidebar_position: 10
 description: The dimensions a consumer varies along — naming, lifetime, replicas, storage, delivery, and the ordered pattern
 ---
 
@@ -151,9 +151,9 @@ per-message acks, use a normal named consumer.
 
 ## What's next
 
-The next page goes deep on the pull consumer this chapter has used all along:
-how a [pull consumer](/learn/jetstream/pull-consumers) fetches batches, how the
-server tracks what's outstanding, and the knobs that bound a pull.
+The next page steers which worker on the `shipping` consumer gets an order:
+[priority groups](/learn/jetstream/priority-groups) can send all the work to
+one client until it fails, or hold a standby idle until the pool falls behind.
 
 ## See also
 
