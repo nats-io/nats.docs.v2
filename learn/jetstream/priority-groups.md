@@ -104,14 +104,6 @@ as fast as it processes. The far-region worker gets messages only when the
 backlog crosses its `min_pending` threshold, takes the overflow, and goes
 idle again once the near worker catches up.
 
-:::note Standby failover is designed but not yet shipped
-ADR-42 describes a `failover` field on the overflow policy: a timer
-that lets a standby region step in after a few seconds with no nearby
-pulls, even below the threshold. As of NATS Server 2.14 the server
-silently ignores `failover`. Treat it as planned, not working, and do
-not build on it until a later server release.
-:::
-
 ## The pinned_client policy
 
 The overflow policy spreads work under load. The **pinned_client** policy
@@ -256,12 +248,6 @@ planned for a future server release. To split work by region or tier now,
 run separate consumers on the same stream, each with its own group.
 
 <div class="nats-example" data-type="learn-jetstream-priority-groups-oneGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-**`failover` is designed, not shipped.** As the overflow section noted,
-NATS Server 2.14 ignores the `failover` timer from ADR-42: no field parses
-it, and no error tells you. A pull that relies on `failover` to step in
-below the threshold never fires. Use only `min_pending` and
-`min_ack_pending` for now, and treat `failover` as planned.
 
 **The pin does not give one client sole ownership.** The server can switch
 the pinned client while that client still believes it holds the pin, so a
