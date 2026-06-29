@@ -9,13 +9,20 @@
 #
 # --discard new flips the trade: when a limit is hit, the server rejects
 # the new message and the publish fails with "maximum bytes exceeded" (or
-# "maximum messages exceeded"). The publisher now feels the limit and can
-# retry, alert, or shed load.
+# "maximum messages exceeded"). The publisher now feels the limit.
 
-nats stream edit ORDERS --discard new
+# Force the full condition so you can see the rejection. Discard New never
+# drops messages that are already stored, so switching ORDERS to it and
+# capping it at one message leaves the orders from earlier pages in place and
+# puts the stream instantly over its limit -- both in one edit.
+nats stream edit ORDERS --discard new --max-msgs 1
 
-# With Discard New in place, a publish into a full stream returns an
-# error instead of succeeding silently. Handle that error in the
-# publisher rather than assuming every publish is stored.
+# ORDERS is now full. Under Discard New this publish fails instead of
+# succeeding silently, so the publisher can retry, alert, or shed load:
 nats pub orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
+# -> nats: maximum messages exceeded
+
+# Put ORDERS back the way it was: Discard Old and no message-count cap. The
+# 7-day age and 1 GiB byte limits set earlier stay in place.
+nats stream edit ORDERS --discard old --max-msgs -1
