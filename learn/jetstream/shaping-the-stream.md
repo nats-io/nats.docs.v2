@@ -77,8 +77,10 @@ Configuration:
 ```
 
 `Maximum Messages` is still `unlimited`, because you set only age and
-bytes. The stream now has clear bounds. It can't grow past a gigabyte,
-and it can't hold anything older than a week.
+bytes. (`Maximum Message Size`, also in the block, is a different limit —
+a cap on a single message rather than the whole stream — and stays
+unlimited here.) The stream now has clear bounds: it can't grow past a
+gigabyte, and it can't hold anything older than a week.
 
 ## The Discard policy
 
@@ -166,10 +168,15 @@ add a per-subject ceiling with `MaxMsgsPerSubject`:
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Under Discard Old, a per-subject ceiling drops the oldest message *for
-that subject* once it fills. Under Discard New, it rejects the publish
-with `maximum messages per subject exceeded`. That's a third rejection
-string, alongside the whole-stream `maximum bytes exceeded` and
-`maximum messages exceeded`.
+that subject* once it fills. Discard New doesn't change that on its own:
+by default the per-subject limit still rolls, dropping the subject's
+oldest message rather than rejecting the publish. Making a full subject
+reject takes a second setting, `DiscardNewPerSubject` (the
+`discard_new_per_subject` config field), on top of Discard New. With both,
+a publish past the per-subject ceiling fails with `maximum messages per
+subject exceeded`, a third rejection string alongside the whole-stream
+`maximum bytes exceeded` and `maximum messages exceeded`. The field is in
+[Reference → Stream Configuration](/reference/jetstream/api/stream).
 
 ## Where you are
 
