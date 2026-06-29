@@ -28,6 +28,9 @@ import type {
   AckResponsesAnimated as AckResponsesAnimatedComponent,
   WorkerPoolAnimated as WorkerPoolAnimatedComponent,
   CrashRedeliveryAnimated as CrashRedeliveryAnimatedComponent,
+  PriorityOverflowAnimated as PriorityOverflowAnimatedComponent,
+  PriorityPinnedAnimated as PriorityPinnedAnimatedComponent,
+  PriorityPrioritizedAnimated as PriorityPrioritizedAnimatedComponent,
   CentralizedAuthAnimated as CentralizedAuthAnimatedComponent,
   DecentralizedAuthAnimated as DecentralizedAuthAnimatedComponent,
   AuthCalloutAnimated as AuthCalloutAnimatedComponent,
@@ -92,6 +95,9 @@ declare global {
       AckResponsesAnimated: typeof AckResponsesAnimatedComponent;
       WorkerPoolAnimated: typeof WorkerPoolAnimatedComponent;
       CrashRedeliveryAnimated: typeof CrashRedeliveryAnimatedComponent;
+      PriorityOverflowAnimated: typeof PriorityOverflowAnimatedComponent;
+      PriorityPinnedAnimated: typeof PriorityPinnedAnimatedComponent;
+      PriorityPrioritizedAnimated: typeof PriorityPrioritizedAnimatedComponent;
       CentralizedAuthAnimated: typeof CentralizedAuthAnimatedComponent;
       DecentralizedAuthAnimated: typeof DecentralizedAuthAnimatedComponent;
       AuthCalloutAnimated: typeof AuthCalloutAnimatedComponent;
