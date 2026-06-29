@@ -17,8 +17,8 @@ unless the near ones fall behind. Even work sharing can't do either of
 those.
 
 **Priority groups** let a pull consumer ask for those behaviors. They're
-designed in [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md). This page covers the two
-policies you'll use first.
+designed in [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md). This page covers all three
+policies the server offers.
 
 ## What a priority group is
 
@@ -33,12 +33,12 @@ You set two fields when you create the consumer:
 - **`PriorityPolicy`**: the rule the server applies, one of `overflow`,
   `pinned_client`, or `prioritized`.
 
-Both policies on this page need the consumer to acknowledge its messages,
-so the examples create the consumers with `--ack explicit`. Each policy
-decides what to do based on counts the server keeps per client: overflow
-looks at how many messages are waiting and unacknowledged, pinned_client
-looks at which client is still pulling. The server only keeps those counts
-when the consumer acknowledges its messages.
+Two of the three policies, overflow and pinned_client, need the consumer to
+acknowledge its messages, so those examples use `--ack explicit`. They decide
+what to do from counts the server keeps per client: overflow looks at how many
+messages are waiting and unacknowledged, pinned_client at which client is
+still pulling, and the server only keeps those counts when the consumer acks.
+Prioritized just sorts pulls by a number and needs no acks.
 
 Once a consumer has a policy, every pull must name its group. A pull that
 leaves the group out is rejected with `Bad Request - Priority Group missing`.
@@ -193,11 +193,48 @@ the configuration fields but may not yet run the client-side pinning loop.
 Check your client's reference before relying on it.
 :::
 
-A third policy, `prioritized`, also exists: pulls carry a `0`–`9` priority
-and the server serves lower numbers first. This page covers `overflow` and
-`pinned_client`, which handle the common cases. The full set of
-priority-group options, including every field of `prioritized`, the `423`
-protocol, the `PriorityGroupState` fields, and the advisories, lives in
+## The prioritized policy
+
+The overflow policy makes a standby wait for a backlog to build. Sometimes you
+want the opposite: hand work to the next region the instant the closer one
+stops asking, with no threshold and no delay.
+
+`us-east` is close and cheap but resource-constrained. Whenever it has
+capacity it should take the work; when it doesn't, `us-west` should pick up
+right away, and `eu-west` only when neither US region is pulling. That's a
+hierarchy, not a threshold.
+
+The **prioritized** policy serves pulls in priority order. Each pull carries a
+`priority` from `0` to `9`, and the server hands messages to the lowest number
+present first; pulls at the same priority share round-robin. So `us-east`
+pulls at priority `0`, `us-west` at `1`, and `eu-west` at `2`: work goes to
+`us-east` whenever it's asking, falls to `us-west` the moment `us-east` isn't,
+and reaches `eu-west` only when neither is pulling.
+
+Create a prioritized consumer:
+
+```bash
+nats consumer add ORDERS dispatch --prioritized-groups regions --pull --defaults
+```
+
+`--prioritized-groups regions` sets the policy to `prioritized` and names the
+single group `regions`. Unlike the other two policies, prioritized keeps no
+per-client counts, so it doesn't require explicit acks.
+
+The priority rides on the pull request, the same place overflow's thresholds
+go, so `nats consumer next` can't set it and the pull comes from a client
+library:
+
+<div class="nats-example" data-type="learn-jetstream-priority-groups-prioritizedPull" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+This is the immediate counterpart to overflow. Overflow waits for the backlog
+to cross a threshold before a standby gets anything, which avoids churn but
+makes far regions wait. Prioritized shifts work the moment a higher-priority
+puller goes quiet, with no delay, at the cost of some flip-flop as work moves
+between regions.
+
+The full set of priority-group options, the `423` protocol, the
+`PriorityGroupState` fields, and the advisories live in
 [Reference → Consumer API](/reference/jetstream/api/consumer/info) and in
 [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md).
 
@@ -248,6 +285,8 @@ You now have:
 - The `pinned_client` policy shown in action: one active client, the
   `Nats-Pin-Id` exchange, and a standby taking over on timeout or
   `nats consumer unpin`.
+- The `prioritized` policy shown in action: regions pulling at `0`–`9`
+  priority levels, served lowest-first with no delay.
 
 ## What's next
 
@@ -258,9 +297,8 @@ that's the right tool.
 ## See also
 
 - [Reference → Consumer API](/reference/jetstream/api/consumer/info) —
-  the priority-group config fields, the `prioritized` policy,
-  `PriorityGroupState`, the `423` protocol, and the pinned/unpinned
-  advisories.
+  the priority-group config fields, `PriorityGroupState`, the `423`
+  protocol, and the pinned/unpinned advisories.
 - [ADR-42](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-42.md) — the design of pull consumer priority
   groups.
 - [A pool of workers](/learn/jetstream/worker-pool) — the even
