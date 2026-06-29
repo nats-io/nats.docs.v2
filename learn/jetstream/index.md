@@ -36,7 +36,6 @@ subjects, and queue groups.
 | [Ordered consumers](./ordered-consumer) | A throwaway in-order read of a stream, and the config behind it |
 | [Priority groups](./priority-groups) | Steer which client gets served: overflow and pinned_client |
 | [Pausing a consumer](./pausing) | Stop delivery for a window, then resume |
-| [Push vs pull](./push-vs-pull) | Why pull is the default, and when push still fits |
 | [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
 | [Delivery semantics](./delivery-semantics) | Limits, Interest, and WorkQueue retention |
 | [Altering stream state](./altering-stream-state) | Delete a message or purge the stream, by hand |

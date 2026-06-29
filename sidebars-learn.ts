@@ -81,7 +81,6 @@ const sidebars: SidebarsConfig = {
             "jetstream/ordered-consumer",
             "jetstream/priority-groups",
             "jetstream/pausing",
-            "jetstream/push-vs-pull",
             "jetstream/shaping-the-stream",
             "jetstream/delivery-semantics",
             "jetstream/altering-stream-state",

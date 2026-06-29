@@ -202,8 +202,7 @@ one ack answer every earlier message too — cheaper, but it only fits a
 consumer that processes strictly in order, since acking message 10 also
 retires 1 through 9. A fourth value, `flow_control`, belongs to push
 consumers and paces how fast the server delivers; pull consumers like
-`shipping` don't need it, and [Push vs pull](/learn/jetstream/push-vs-pull)
-covers it.
+`shipping` don't need it.
 
 The full set of ack policies is in
 [Reference → Consumer API](/reference/jetstream/api/consumer). This page

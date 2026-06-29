@@ -175,9 +175,9 @@ place it held before the pause.
 
 ## What's next
 
-So far every consumer in this chapter has been a pull consumer. The next
-page covers when a [push consumer](/learn/jetstream/push-vs-pull) makes
-sense instead, and why this chapter uses pull.
+With consumers covered, the next page returns to the stream itself: the
+[limits and discard policy](/learn/jetstream/shaping-the-stream) that decide
+what `ORDERS` keeps and what it drops once it fills up.
 
 ## See also
 
