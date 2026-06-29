@@ -31,7 +31,7 @@ subjects, and queue groups.
 | [Filtering what you consume](./filtering) | Add a second consumer that reads only `orders.shipped` |
 | [Delivery and acknowledgment](./your-first-consumer) | In-flight, ack, double ack, and redelivery |
 | [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
-| [Kinds of consumers](./consumer-kinds) | Push vs pull, durable vs ephemeral, and how retention shapes a consumer |
+| [Kinds of consumers](./consumer-kinds) | Lifetime, replicas, storage, pull vs push, and ordered consumers |
 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
 | [A pool of workers](./worker-pool) | Share one consumer across many workers |
 | [Priority groups](./priority-groups) | Steer which client gets served: overflow and pinned_client |
