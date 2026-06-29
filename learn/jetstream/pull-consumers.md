@@ -1,7 +1,7 @@
 ---
 id: pull-consumers
 title: "Pull consumers in depth"
-sidebar_position: 9
+sidebar_position: 8
 description: Fetch a batch versus consume a continuous flow, and the fields that bound each pull
 ---
 

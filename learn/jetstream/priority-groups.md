@@ -7,9 +7,9 @@ description: Steer which client on a pull consumer gets messages, and when
 
 # Priority groups
 
-The worker pool on the previous page shared work evenly. Every worker on
-the `shipping` consumer pulled, and the server delivered messages to
-whichever worker asked.
+The [worker pool](/learn/jetstream/worker-pool) shared work evenly. Every
+worker on the `shipping` consumer pulled, and the server delivered messages
+to whichever worker asked.
 
 Some workloads need a different split. You might want one client to
 handle all the work until it fails, or a far-away client to stay idle
