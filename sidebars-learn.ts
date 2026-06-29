@@ -78,7 +78,7 @@ const sidebars: SidebarsConfig = {
             "jetstream/acknowledgment",
             "jetstream/pull-consumers",
             "jetstream/worker-pool",
-            "jetstream/consumer-kinds",
+            "jetstream/ordered-consumer",
             "jetstream/priority-groups",
             "jetstream/pausing",
             "jetstream/push-vs-pull",

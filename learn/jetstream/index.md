@@ -31,9 +31,9 @@ subjects, and queue groups.
 | [Filtering what you consume](./filtering) | Add a second consumer that reads only `orders.shipped` |
 | [Delivery and acknowledgment](./your-first-consumer) | In-flight, ack, double ack, and redelivery |
 | [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
-| [Kinds of consumers](./consumer-kinds) | Lifetime, replicas, storage, pull vs push, and ordered consumers |
 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
-| [A pool of workers](./worker-pool) | Share one consumer across many workers |
+| [Scaling a consumer](./worker-pool) | Many workers split the load of one consumer |
+| [Ordered consumers](./ordered-consumer) | A throwaway in-order read of a stream, and the config behind it |
 | [Priority groups](./priority-groups) | Steer which client gets served: overflow and pinned_client |
 | [Pausing a consumer](./pausing) | Stop delivery for a window, then resume |
 | [Push vs pull](./push-vs-pull) | Why pull is the default, and when push still fits |
