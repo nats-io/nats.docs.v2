@@ -105,6 +105,8 @@ default), the server hands the order to another worker. This is the
 redelivery loop from the [acknowledgment page](/learn/jetstream/acknowledgment),
 now spread across the pool.
 
+<div class="nats-flow" data-scenario="crashRedeliveryAnimated" data-width="640" data-height="320"></div>
+
 Watch it happen. Kill one worker mid-order, wait out `AckWait`, and the order
 reappears on a surviving worker. It ships once, because some worker
 eventually acks it.

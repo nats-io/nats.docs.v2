@@ -31,6 +31,8 @@ const FALLBACKS = {
     'Side-by-side comparison of single-token (*) and multi-token (>) wildcard subject matching.',
   workerPoolAnimated:
     'Several workers share one pull consumer. The ORDERS stream holds a backlog of stored orders and the single shipping consumer has one read position that sweeps through them. Each order is handed to exactly one worker, rotating round-robin across the workers that are asking, so three workers end up with an even share. Acked orders stay in the stream — the workers share a read position, not the messages.',
+  crashRedeliveryAnimated:
+    'One order is delivered to a worker that crashes before it acks. The order stays in progress on the shipping consumer while the AckWait timer runs; the server can\'t see the crash, only the missing ack. When AckWait elapses the server redelivers the same order to a surviving worker, which ships it and acks. The order is handled exactly once even though the first worker failed.',
 };
 
 const TITLES = {
@@ -54,6 +56,7 @@ const TITLES = {
   ackResponsesAnimated: 'The four ack responses (animated)',
   wildcardComparison: 'Wildcard comparison',
   workerPoolAnimated: 'Workers sharing one consumer (animated)',
+  crashRedeliveryAnimated: 'Crash mid-message, then redelivery (animated)',
 };
 
 const cache = new Map();
