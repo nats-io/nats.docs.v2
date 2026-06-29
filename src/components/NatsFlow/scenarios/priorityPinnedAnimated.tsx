@@ -8,11 +8,15 @@ import React, { useEffect, useState } from "react";
 // back 423 — it clears the id and rejoins the standby pool.
 
 const TICK_MS = 80;
-const PIN1_END = 2800;
-const QUIET_END = 3900;
-const REPIN_END = 4600;
-const PIN2_END = 7300;
-const CYCLE_MS = 8500;
+const PIN1_END = 4600;
+const QUIET_END = 6700;
+const REPIN_END = 8000;
+const PIN2_END = 12600;
+const CYCLE_MS = 13800;
+
+// Message-flow dots that travel along the active line to the pinned worker.
+const DOT_PERIOD = 850;
+const N_DOTS = 3;
 
 const STREAM_BLUE = "#27AAE1";
 const CONSUMER_GREEN = "#34A574";
@@ -95,7 +99,8 @@ function PriorityPinnedAnimatedInner() {
                     </div>
                 </div>
 
-                {/* fan: active line goes to the receiving (pinned) worker */}
+                {/* fan: active line goes to the receiving (pinned) worker, with
+                    message dots flowing along it while delivery is happening */}
                 <svg width={FAN_W} height={COL_H} style={{ flex: "none", overflow: "visible" }}>
                     {workers.map((_, i) => {
                         const active = i === receiving;
@@ -113,6 +118,20 @@ function PriorityPinnedAnimatedInner() {
                             />
                         );
                     })}
+                    {receiving >= 0 &&
+                        Array.from({ length: N_DOTS }, (_, d) => {
+                            const f = (((elapsed % DOT_PERIOD) / DOT_PERIOD) + d / N_DOTS) % 1;
+                            const y1 = workerCenterY(receiving);
+                            return (
+                                <circle
+                                    key={`dot-${d}`}
+                                    cx={f * FAN_W}
+                                    cy={COL_H / 2 + f * (y1 - COL_H / 2)}
+                                    r={4}
+                                    fill={CONSUMER_GREEN}
+                                />
+                            );
+                        })}
                 </svg>
 
                 {/* workers */}
