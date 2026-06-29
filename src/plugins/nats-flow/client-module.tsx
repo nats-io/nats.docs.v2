@@ -35,6 +35,7 @@ if (ExecutionEnvironment.canUseDOM) {
       RedeliveryOrderAnimated: module.RedeliveryOrderAnimated,
       TwoConsumersAnimated: module.TwoConsumersAnimated,
       AckResponsesAnimated: module.AckResponsesAnimated,
+      WorkerPoolAnimated: module.WorkerPoolAnimated,
       CentralizedAuthAnimated: module.CentralizedAuthAnimated,
       DecentralizedAuthAnimated: module.DecentralizedAuthAnimated,
       AuthCalloutAnimated: module.AuthCalloutAnimated,

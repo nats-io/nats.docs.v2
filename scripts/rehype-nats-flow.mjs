@@ -29,6 +29,8 @@ const FALLBACKS = {
     'The four responses shown as consequences on a real stream of deliveries. The consumer delivers message #1 and the client acks it, so the consumer hands over the next message, #2. The client naks #2 and the same message is redelivered immediately; the retry is then acked and delivery moves on to #3. The client terms #3: it is dropped and turns red, and the next message, #4, is delivered at once. For #4 the client sends in-progress, which is not a final answer — it refills the Ack Wait window to keep the slow message in flight — then finally acks it and moves on to #5. In short: ack advances to the next message, nak redelivers the same message immediately, term drops the message and advances to the next, and in-progress extends the Ack Wait window.',
   wildcardComparison:
     'Side-by-side comparison of single-token (*) and multi-token (>) wildcard subject matching.',
+  workerPoolAnimated:
+    'Several workers share one pull consumer. The ORDERS stream holds a backlog of stored orders and the single shipping consumer has one read position that sweeps through them. Each order is handed to exactly one worker, rotating round-robin across the workers that are asking, so three workers end up with an even share. Acked orders stay in the stream — the workers share a read position, not the messages.',
 };
 
 const TITLES = {
@@ -51,6 +53,7 @@ const TITLES = {
   twoConsumersAnimated: 'Two consumers, separate positions (animated)',
   ackResponsesAnimated: 'The four ack responses (animated)',
   wildcardComparison: 'Wildcard comparison',
+  workerPoolAnimated: 'Workers sharing one consumer (animated)',
 };
 
 const cache = new Map();

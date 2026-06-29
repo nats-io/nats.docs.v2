@@ -61,6 +61,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "learn-jetstream-acknowledgment-watchMaxDeliveries/main.go",
             "learn-jetstream-filtering-createFiltered": "learn-jetstream-filtering-createFiltered/main.go",
             "learn-jetstream-filtering-filterMatchesNothing": "learn-jetstream-filtering-filterMatchesNothing/main.go",
+            "learn-jetstream-worker-pool-worker": "learn-jetstream-worker-pool-worker/main.go",
+            "learn-jetstream-worker-pool-redelivery-count": "learn-jetstream-worker-pool-redelivery-count/main.go",
+            "learn-jetstream-worker-pool-max-pending": "learn-jetstream-worker-pool-max-pending/main.go",
         },
     }],
     "rust": [{
@@ -109,6 +112,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "docs_learn_jetstream_acknowledgment_watch_max_deliveries.rs",
             "learn-jetstream-filtering-createFiltered": "docs_learn_jetstream_filtering_create_filtered.rs",
             "learn-jetstream-filtering-filterMatchesNothing": "docs_learn_jetstream_filtering_filter_matches_nothing.rs",
+            "learn-jetstream-worker-pool-worker": "docs_learn_jetstream_worker_pool_worker.rs",
+            "learn-jetstream-worker-pool-redelivery-count": "docs_learn_jetstream_worker_pool_redelivery_count.rs",
+            "learn-jetstream-worker-pool-max-pending": "docs_learn_jetstream_worker_pool_max_pending.rs",
         },
     }],
     "javascript": [{
@@ -157,6 +163,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "learn-jetstream-acknowledgment-watchMaxDeliveries.ts",
             "learn-jetstream-filtering-createFiltered": "learn-jetstream-filtering-createFiltered.ts",
             "learn-jetstream-filtering-filterMatchesNothing": "learn-jetstream-filtering-filterMatchesNothing.ts",
+            "learn-jetstream-worker-pool-worker": "learn-jetstream-worker-pool-worker.ts",
+            "learn-jetstream-worker-pool-redelivery-count": "learn-jetstream-worker-pool-redelivery-count.ts",
+            "learn-jetstream-worker-pool-max-pending": "learn-jetstream-worker-pool-max-pending.ts",
         },
     }],
     "python": [{
@@ -205,6 +214,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "learn_jetstream_acknowledgment_watch_max_deliveries.py",
             "learn-jetstream-filtering-createFiltered": "learn_jetstream_filtering_create_filtered.py",
             "learn-jetstream-filtering-filterMatchesNothing": "learn_jetstream_filtering_filter_matches_nothing.py",
+            "learn-jetstream-worker-pool-worker": "learn_jetstream_worker_pool_worker.py",
+            "learn-jetstream-worker-pool-redelivery-count": "learn_jetstream_worker_pool_redelivery_count.py",
+            "learn-jetstream-worker-pool-max-pending": "learn_jetstream_worker_pool_max_pending.py",
         },
     }],
     "java": [{
@@ -253,6 +265,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "LearnJetStreamAcknowledgmentWatchMaxDeliveries.java",
             "learn-jetstream-filtering-createFiltered": "LearnJetStreamFilteringCreateFiltered.java",
             "learn-jetstream-filtering-filterMatchesNothing": "LearnJetStreamFilteringFilterMatchesNothing.java",
+            "learn-jetstream-worker-pool-worker": "LearnJetStreamWorkerPoolWorker.java",
+            "learn-jetstream-worker-pool-redelivery-count": "LearnJetStreamWorkerPoolRedeliveryCount.java",
+            "learn-jetstream-worker-pool-max-pending": "LearnJetStreamWorkerPoolMaxPending.java",
         },
     }],
     "csharp": [{
@@ -301,6 +316,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-acknowledgment-watchMaxDeliveries": "LearnJetStreamAcknowledgmentWatchMaxDeliveries.cs",
             "learn-jetstream-filtering-createFiltered": "LearnJetStreamFilteringCreateFiltered.cs",
             "learn-jetstream-filtering-filterMatchesNothing": "LearnJetStreamFilteringFilterMatchesNothing.cs",
+            "learn-jetstream-worker-pool-worker": "LearnJetStreamWorkerPoolWorker.cs",
+            "learn-jetstream-worker-pool-redelivery-count": "LearnJetStreamWorkerPoolRedeliveryCount.cs",
+            "learn-jetstream-worker-pool-max-pending": "LearnJetStreamWorkerPoolMaxPending.cs",
         },
     }],
 };
