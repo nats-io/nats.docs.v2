@@ -67,6 +67,7 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-fetchBatch": "learn-jetstream-pull-consumers-fetchBatch/main.go",
             "learn-jetstream-pull-consumers-consumeContinuous": "learn-jetstream-pull-consumers-consumeContinuous/main.go",
             "learn-jetstream-pull-consumers-emptyFetch": "learn-jetstream-pull-consumers-emptyFetch/main.go",
+            "learn-jetstream-ordered-consumer-read": "learn-jetstream-ordered-consumer-read/main.go",
         },
     }],
     "rust": [{
@@ -121,6 +122,7 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-fetchBatch": "docs_learn_jetstream_pull_consumers_fetch_batch.rs",
             "learn-jetstream-pull-consumers-consumeContinuous": "docs_learn_jetstream_pull_consumers_consume_continuous.rs",
             "learn-jetstream-pull-consumers-emptyFetch": "docs_learn_jetstream_pull_consumers_empty_fetch.rs",
+            "learn-jetstream-ordered-consumer-read": "docs_learn_jetstream_ordered_consumer_read.rs",
         },
     }],
     "javascript": [{
@@ -175,6 +177,7 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-fetchBatch": "learn-jetstream-pull-consumers-fetchBatch.ts",
             "learn-jetstream-pull-consumers-consumeContinuous": "learn-jetstream-pull-consumers-consumeContinuous.ts",
             "learn-jetstream-pull-consumers-emptyFetch": "learn-jetstream-pull-consumers-emptyFetch.ts",
+            "learn-jetstream-ordered-consumer-read": "learn-jetstream-ordered-consumer-read.ts",
         },
     }],
     "python": [{
@@ -229,6 +232,7 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-fetchBatch": "learn_jetstream_pull_consumers_fetch_batch.py",
             "learn-jetstream-pull-consumers-consumeContinuous": "learn_jetstream_pull_consumers_consume_continuous.py",
             "learn-jetstream-pull-consumers-emptyFetch": "learn_jetstream_pull_consumers_empty_fetch.py",
+            "learn-jetstream-ordered-consumer-read": "learn_jetstream_ordered_consumer_read.py",
         },
     }],
     "java": [{
@@ -283,6 +287,7 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-fetchBatch": "LearnJetStreamPullConsumersFetchBatch.java",
             "learn-jetstream-pull-consumers-consumeContinuous": "LearnJetStreamPullConsumersConsumeContinuous.java",
             "learn-jetstream-pull-consumers-emptyFetch": "LearnJetStreamPullConsumersEmptyFetch.java",
+            "learn-jetstream-ordered-consumer-read": "LearnJetStreamOrderedConsumerRead.java",
         },
     }],
     "csharp": [{
@@ -337,6 +342,7 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-pull-consumers-fetchBatch": "LearnJetStreamPullConsumersFetchBatch.cs",
             "learn-jetstream-pull-consumers-consumeContinuous": "LearnJetStreamPullConsumersConsumeContinuous.cs",
             "learn-jetstream-pull-consumers-emptyFetch": "LearnJetStreamPullConsumersEmptyFetch.cs",
+            "learn-jetstream-ordered-consumer-read": "LearnJetStreamOrderedConsumerRead.cs",
         },
     }],
 };

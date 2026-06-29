@@ -27,14 +27,20 @@ pick, no ack to send, and no consumer to delete when you finish. The library
 hands you every message in stream order, from your start point to the end, as
 one continuous flow.
 
+<div class="nats-example"
+     data-type="learn-jetstream-ordered-consumer-read"
+     data-languages="go,js,python,java,rust,csharp"></div>
+
 That's the whole client-side surface: ask for an ordered consumer, loop until
-the log is drained.
+the log is drained. The ordered consumer is a client-library construct, so
+there's no CLI form.
 
 ## What the library does
 
-The simplicity hides a loop. Under the cover, the library creates an ephemeral
-consumer and tracks the stream sequence of each message it delivers. As long
-as the sequences arrive in order, it passes them straight to you.
+The simplicity hides a loop. Under the cover, the library creates a consumer
+with a short inactivity threshold and tracks the stream sequence of each
+message it delivers. As long as the sequences arrive in order, it passes them
+straight to you.
 
 When a sequence goes missing, or the consumer goes quiet — its heartbeats stop
 because it was deleted, lost on a reconnect, or dropped in a node restart — the
@@ -43,8 +49,12 @@ next sequence it expected. Each new consumer gets its own name (`prefix_1`,
 `prefix_2`, and so on). You see one unbroken, in-order stream through all of
 it; the recovery is invisible.
 
-That recovery is the whole point. A plain consumer that hit a gap would hand
-you the gap. The ordered consumer heals it.
+That recovery is what lets an ordered consumer drop acks and still keep order.
+Without acks there's nothing to trigger a redelivery, so a plain no-ack
+consumer that missed a message would hand you the gap and read on out of
+order. The ordered consumer instead spots the gap and rebuilds itself from the
+missing sequence — the message is still in the stream — so the order holds with
+no acks at all.
 
 ## The config underneath
 
