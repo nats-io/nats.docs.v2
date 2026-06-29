@@ -78,9 +78,9 @@ Three settings define how it reads:
 - **Deliver all** starts the consumer at the first message in the stream,
   sequence 1, so it reads the whole log.
 - **Pull** means the client asks the server for messages when it's ready,
-  rather than having the server push them on its own. This chapter uses
-  pull consumers throughout and explains why on a
-  [later page](/learn/jetstream/push-vs-pull).
+  rather than having the server push them on its own. Pull is the default
+  for new consumers; an older push model exists, but this chapter uses pull
+  throughout.
 - **Ack explicit** means the client acknowledges each message it handles,
   and the consumer's position advances only as acks arrive. It's the default
   for a pull consumer. On this page you read and ack on the happy path; a

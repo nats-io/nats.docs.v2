@@ -140,7 +140,7 @@ the page that explains it.
 - [ ] Keep `MaxAckPending` at or above your batch size so it doesn't throttle throughput.
 - [ ] Pair `batch` with `max_bytes` so a single pull is bounded by size as well as count.
 
-### A pool of workers — see [Pitfalls](/learn/jetstream/worker-pool#pitfalls)
+### Scaling a consumer — see [Pitfalls](/learn/jetstream/worker-pool#pitfalls)
 
 - [ ] Key every side effect by `order_id` so a redelivered message is a no-op, not a double shipment.
 - [ ] Size `MaxAckPending` to at least your worker count, with headroom; the cap is shared across the whole pool.
@@ -158,12 +158,6 @@ the page that explains it.
 - [ ] Read the `Paused Until Deadline` line before debugging a "stuck" consumer; a pause looks like a stall.
 - [ ] Pause with a duration like `1h` so the deadline can never land in the past and no-op.
 - [ ] Size the stream for the longest pause you expect; publishes keep landing and count against the limits while a consumer sleeps.
-
-### Push vs pull — see [Pitfalls](/learn/jetstream/push-vs-pull#pitfalls)
-
-- [ ] Start new work on a pull consumer; push consumers are deprecated and can't be flipped to pull in place.
-- [ ] Enable flow control if you must run an inherited push consumer on a hot stream; better yet, migrate to pull.
-- [ ] Subscribe with the matching deliver group, not bare; a plain subscriber receives the full firehose.
 
 ### Shaping the stream — see [Pitfalls](/learn/jetstream/shaping-the-stream#pitfalls)
 
