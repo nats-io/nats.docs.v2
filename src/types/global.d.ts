@@ -31,6 +31,10 @@ import type {
   PriorityOverflowAnimated as PriorityOverflowAnimatedComponent,
   PriorityPinnedAnimated as PriorityPinnedAnimatedComponent,
   PriorityPrioritizedAnimated as PriorityPrioritizedAnimatedComponent,
+  MaxAgeAnimated as MaxAgeAnimatedComponent,
+  MaxMsgsAnimated as MaxMsgsAnimatedComponent,
+  DiscardOldAnimated as DiscardOldAnimatedComponent,
+  DiscardNewAnimated as DiscardNewAnimatedComponent,
   CentralizedAuthAnimated as CentralizedAuthAnimatedComponent,
   DecentralizedAuthAnimated as DecentralizedAuthAnimatedComponent,
   AuthCalloutAnimated as AuthCalloutAnimatedComponent,
@@ -98,6 +102,10 @@ declare global {
       PriorityOverflowAnimated: typeof PriorityOverflowAnimatedComponent;
       PriorityPinnedAnimated: typeof PriorityPinnedAnimatedComponent;
       PriorityPrioritizedAnimated: typeof PriorityPrioritizedAnimatedComponent;
+      MaxAgeAnimated: typeof MaxAgeAnimatedComponent;
+      MaxMsgsAnimated: typeof MaxMsgsAnimatedComponent;
+      DiscardOldAnimated: typeof DiscardOldAnimatedComponent;
+      DiscardNewAnimated: typeof DiscardNewAnimatedComponent;
       CentralizedAuthAnimated: typeof CentralizedAuthAnimatedComponent;
       DecentralizedAuthAnimated: typeof DecentralizedAuthAnimatedComponent;
       AuthCalloutAnimated: typeof AuthCalloutAnimatedComponent;
