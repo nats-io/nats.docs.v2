@@ -64,6 +64,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-worker-pool-worker": "learn-jetstream-worker-pool-worker/main.go",
             "learn-jetstream-worker-pool-redelivery-count": "learn-jetstream-worker-pool-redelivery-count/main.go",
             "learn-jetstream-worker-pool-max-pending": "learn-jetstream-worker-pool-max-pending/main.go",
+            "learn-jetstream-pull-consumers-fetchBatch": "learn-jetstream-pull-consumers-fetchBatch/main.go",
+            "learn-jetstream-pull-consumers-consumeContinuous": "learn-jetstream-pull-consumers-consumeContinuous/main.go",
+            "learn-jetstream-pull-consumers-emptyFetch": "learn-jetstream-pull-consumers-emptyFetch/main.go",
         },
     }],
     "rust": [{
@@ -115,6 +118,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-worker-pool-worker": "docs_learn_jetstream_worker_pool_worker.rs",
             "learn-jetstream-worker-pool-redelivery-count": "docs_learn_jetstream_worker_pool_redelivery_count.rs",
             "learn-jetstream-worker-pool-max-pending": "docs_learn_jetstream_worker_pool_max_pending.rs",
+            "learn-jetstream-pull-consumers-fetchBatch": "docs_learn_jetstream_pull_consumers_fetch_batch.rs",
+            "learn-jetstream-pull-consumers-consumeContinuous": "docs_learn_jetstream_pull_consumers_consume_continuous.rs",
+            "learn-jetstream-pull-consumers-emptyFetch": "docs_learn_jetstream_pull_consumers_empty_fetch.rs",
         },
     }],
     "javascript": [{
@@ -166,6 +172,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-worker-pool-worker": "learn-jetstream-worker-pool-worker.ts",
             "learn-jetstream-worker-pool-redelivery-count": "learn-jetstream-worker-pool-redelivery-count.ts",
             "learn-jetstream-worker-pool-max-pending": "learn-jetstream-worker-pool-max-pending.ts",
+            "learn-jetstream-pull-consumers-fetchBatch": "learn-jetstream-pull-consumers-fetchBatch.ts",
+            "learn-jetstream-pull-consumers-consumeContinuous": "learn-jetstream-pull-consumers-consumeContinuous.ts",
+            "learn-jetstream-pull-consumers-emptyFetch": "learn-jetstream-pull-consumers-emptyFetch.ts",
         },
     }],
     "python": [{
@@ -217,6 +226,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-worker-pool-worker": "learn_jetstream_worker_pool_worker.py",
             "learn-jetstream-worker-pool-redelivery-count": "learn_jetstream_worker_pool_redelivery_count.py",
             "learn-jetstream-worker-pool-max-pending": "learn_jetstream_worker_pool_max_pending.py",
+            "learn-jetstream-pull-consumers-fetchBatch": "learn_jetstream_pull_consumers_fetch_batch.py",
+            "learn-jetstream-pull-consumers-consumeContinuous": "learn_jetstream_pull_consumers_consume_continuous.py",
+            "learn-jetstream-pull-consumers-emptyFetch": "learn_jetstream_pull_consumers_empty_fetch.py",
         },
     }],
     "java": [{
@@ -268,6 +280,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-worker-pool-worker": "LearnJetStreamWorkerPoolWorker.java",
             "learn-jetstream-worker-pool-redelivery-count": "LearnJetStreamWorkerPoolRedeliveryCount.java",
             "learn-jetstream-worker-pool-max-pending": "LearnJetStreamWorkerPoolMaxPending.java",
+            "learn-jetstream-pull-consumers-fetchBatch": "LearnJetStreamPullConsumersFetchBatch.java",
+            "learn-jetstream-pull-consumers-consumeContinuous": "LearnJetStreamPullConsumersConsumeContinuous.java",
+            "learn-jetstream-pull-consumers-emptyFetch": "LearnJetStreamPullConsumersEmptyFetch.java",
         },
     }],
     "csharp": [{
@@ -319,6 +334,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-worker-pool-worker": "LearnJetStreamWorkerPoolWorker.cs",
             "learn-jetstream-worker-pool-redelivery-count": "LearnJetStreamWorkerPoolRedeliveryCount.cs",
             "learn-jetstream-worker-pool-max-pending": "LearnJetStreamWorkerPoolMaxPending.cs",
+            "learn-jetstream-pull-consumers-fetchBatch": "LearnJetStreamPullConsumersFetchBatch.cs",
+            "learn-jetstream-pull-consumers-consumeContinuous": "LearnJetStreamPullConsumersConsumeContinuous.cs",
+            "learn-jetstream-pull-consumers-emptyFetch": "LearnJetStreamPullConsumersEmptyFetch.cs",
         },
     }],
 };

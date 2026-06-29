@@ -63,7 +63,7 @@ is the batch size:
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-fetch"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli"></div>
 
 Run it twice and you walk the stream a batch at a time. The consumer's
 cursor advances as messages are acked, the same way it did one message
