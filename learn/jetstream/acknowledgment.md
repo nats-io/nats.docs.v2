@@ -257,10 +257,11 @@ poison message has a clear exit through term.
 
 ## What's next
 
-The next page steps back to map the **kinds of consumers** — push versus
-pull, durable versus ephemeral, and how a stream's retention changes what
-a consumer does. The pages after it go deep on pull mechanics: how a pull
-consumer fetches batches and controls the flow of messages it pulls.
+The next page steps back to map the **kinds of consumers** — how long a
+consumer lives, how its state is replicated and stored, pull versus push,
+and the ordered-consumer pattern. The pages after it go deep on pull
+mechanics: how a pull consumer fetches batches and controls the flow of
+messages it pulls.
 
 ## See also
 
