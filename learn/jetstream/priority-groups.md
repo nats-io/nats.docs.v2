@@ -267,18 +267,10 @@ covered in [clustering](/learn/clustering).
 
 ## Where you are
 
-You now have:
-
-- The `shipping` consumer and its worker pool from the last page.
-- An understanding that priority groups steer which client on a pull
-  consumer gets served, set by a group name plus a policy.
-- The `overflow` policy shown in action: a standby region that pulls only
-  above a `min_pending` threshold.
-- The `pinned_client` policy shown in action: one active client, the
-  `Nats-Pin-Id` exchange, and a standby taking over on timeout or
-  `nats consumer unpin`.
-- The `prioritized` policy shown in action: regions pulling at `0`–`9`
-  priority levels, served lowest-first with no delay.
+A priority group is always one group plus a policy that decides how the server
+hands out pulls: reach for `overflow` to spill work to a standby only under
+load, `pinned_client` for one active worker with a standby ready to take over,
+and `prioritized` for an immediate, lowest-first hierarchy across regions.
 
 ## What's next
 
