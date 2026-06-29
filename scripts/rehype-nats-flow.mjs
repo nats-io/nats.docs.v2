@@ -33,6 +33,12 @@ const FALLBACKS = {
     'Several workers share one pull consumer. The ORDERS stream holds a backlog of stored orders and the single shipping consumer has one read position that sweeps through them. Each order is handed to exactly one worker, rotating round-robin across the workers that are asking, so three workers end up with an even share. Acked orders stay in the stream — the workers share a read position, not the messages.',
   crashRedeliveryAnimated:
     'One order is delivered to a worker that crashes before it acks. The order stays in progress on the shipping consumer while the AckWait timer runs; the server can\'t see the crash, only the missing ack. When AckWait elapses the server redelivers the same order to a surviving worker, which ships it and acks. The order is handled exactly once even though the first worker failed.',
+  priorityOverflowAnimated:
+    'Overflow priority policy. A near worker (us-east) pulls with no threshold and always drains the ORDERS backlog; a far worker (us-west) pulls with a min_pending threshold and is served only while the backlog sits above it. A burst pushes the backlog over the line so us-west takes the overflow, and once the backlog falls back under, us-west goes idle again.',
+  priorityPinnedAnimated:
+    'Pinned_client priority policy. The server pins one worker and sends it every message while the others stand by. The pinned worker goes quiet; once PinnedTTL elapses the server pins a standby instead and stamps its messages with a new Nats-Pin-Id, and the old worker\'s next pull carrying the stale id comes back 423 — it clears the id and rejoins the standby pool.',
+  priorityPrioritizedAnimated:
+    'Prioritized priority policy. Three regions pull at priority 0, 1 and 2. The server serves the lowest priority that is currently pulling, with no delay: us-east (0) gets everything while it pulls; the moment it goes quiet the work falls to us-west (1), then eu-west (2); when us-east returns the work snaps straight back to priority 0.',
 };
 
 const TITLES = {
@@ -57,6 +63,9 @@ const TITLES = {
   wildcardComparison: 'Wildcard comparison',
   workerPoolAnimated: 'Workers sharing one consumer (animated)',
   crashRedeliveryAnimated: 'Crash mid-message, then redelivery (animated)',
+  priorityOverflowAnimated: 'Overflow priority policy (animated)',
+  priorityPinnedAnimated: 'Pinned-client priority policy (animated)',
+  priorityPrioritizedAnimated: 'Prioritized priority policy (animated)',
 };
 
 const cache = new Map();

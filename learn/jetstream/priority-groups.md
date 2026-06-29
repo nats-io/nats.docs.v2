@@ -61,6 +61,8 @@ threshold, so they always get messages. Workers in `us-west` pull with a
 consumer has at least that many messages waiting. Below the threshold
 their pull gets nothing, the same as if the stream were empty.
 
+<div class="nats-flow" data-scenario="priorityOverflowAnimated" data-width="640" data-height="340"></div>
+
 Create an overflow consumer on the `ORDERS` stream:
 
 ```bash
@@ -124,6 +126,8 @@ The server picks one waiting pull and **pins** it. That client becomes the
 one that receives messages. Every other client's pull waits as a standby.
 If the pinned client stops pulling, because it crashed or went quiet
 longer than the pin timeout allows, the server pins a standby instead.
+
+<div class="nats-flow" data-scenario="priorityPinnedAnimated" data-width="640" data-height="360"></div>
 
 Create a pinned consumer:
 
@@ -210,6 +214,8 @@ present first; pulls at the same priority share round-robin. So `us-east`
 pulls at priority `0`, `us-west` at `1`, and `eu-west` at `2`: work goes to
 `us-east` whenever it's asking, falls to `us-west` the moment `us-east` isn't,
 and reaches `eu-west` only when neither is pulling.
+
+<div class="nats-flow" data-scenario="priorityPrioritizedAnimated" data-width="640" data-height="360"></div>
 
 Create a prioritized consumer:
 
