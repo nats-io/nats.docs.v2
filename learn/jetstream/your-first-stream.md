@@ -136,7 +136,7 @@ field is left unset. Here is what each one means.
 - **Retention Policy: Limits**. The stream keeps messages until it
   hits a limit (size, age, or count). The other options are `Interest`
   and `WorkQueue`, which delete messages once a consumer has read them.
-  We cover the three policies on the "Delivery semantics" page.
+  We cover the three policies on the "Retention policies" page.
 - **Discard Policy: Old**. When the stream finally hits a limit, the
   oldest messages are deleted to make room. The other option is
   `New`, which turns away new messages when the stream is full.
@@ -208,7 +208,7 @@ allow any change to or from `WorkQueue` at all, even on an empty stream
 workqueue`). The only way to make that change is to delete and recreate the
 stream, which drops every stored message. So decide on `WorkQueue` up front.
 The three policies, and when to use each one, are covered on the
-[Delivery semantics](/learn/jetstream/delivery-semantics) page.
+[Retention policies](/learn/jetstream/retention-policies) page.
 
 ## Where you are
 

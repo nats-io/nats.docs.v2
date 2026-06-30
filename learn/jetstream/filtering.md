@@ -165,7 +165,7 @@ already covers another, the create call fails. The filters on one
 consumer must not overlap each other. This rule holds whether the stream
 uses limits, interest, or work-queue retention. For how work-queue
 retention shapes delivery once filters are in place, see
-[Delivery semantics](/learn/jetstream/delivery-semantics).
+[Retention policies](/learn/jetstream/retention-policies).
 
 ## Where you are
 

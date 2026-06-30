@@ -212,5 +212,5 @@ versus Interest versus WorkQueue, and which one to use when.
 
 - [Reference → Stream Configuration](/reference/jetstream/api/stream)
   — every limit option, its type, range, and default.
-- [Delivery semantics](/learn/jetstream/delivery-semantics) — the next
+- [Retention policies](/learn/jetstream/retention-policies) — the next
   page, where the retention policy changes how messages are kept.

@@ -107,7 +107,7 @@ this consumer. The message itself stays in the stream under the default `Limits`
 retention — other consumers still see it, and it ages out with the stream's
 limits like any other message. On a `WorkQueue` or `Interest` stream, where a
 handled message is removed, a term removes it just as an ack would; see
-[Delivery semantics](/learn/jetstream/delivery-semantics).
+[Retention policies](/learn/jetstream/retention-policies).
 
 The difference from an ack is that the work never happened, so the server
 records the give-up. It publishes a **terminated advisory** on
