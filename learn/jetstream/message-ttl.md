@@ -1,7 +1,7 @@
 ---
 id: message-ttl
 title: "Per-message TTL"
-sidebar_position: 21
+sidebar_position: 22
 description: Make a single message expire ahead of the stream's MaxAge
 ---
 
@@ -87,10 +87,10 @@ keeps its full 7-day life.
 
 A message lives until the *first* deadline that arrives. The per-message
 TTL and the stream `MaxAge` are both deadlines, and the earlier one
-wins.
+applies.
 
 For the cancellation above, the 60-second TTL arrives long before the
-7-day `MaxAge`. The TTL wins, and the message expires early.
+7-day `MaxAge`. The TTL applies, and the message expires early.
 
 A per-message TTL only ever makes a message expire *sooner* than
 `MaxAge` would, never later, with one exception covered next.
@@ -116,6 +116,11 @@ page, seen from the other end. A short TTL puts a deadline on the stored
 copy. If no consumer reads and acks the message before that deadline,
 the message expires unread. The server deletes it on schedule either
 way.
+
+If a consumer needs to learn that a message expired rather than just
+find it gone, the stream's `SubjectDeleteMarkerTTL` setting leaves a
+delete marker in its place; the
+[reference](/reference/jetstream/api/stream) covers it.
 
 Size the TTL to the work. A 60-second TTL on a cancellation only makes
 sense if the consumer that cares about cancellations reads within that
@@ -155,16 +160,17 @@ on a stream you haven't confirmed opted in.
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **A short TTL deletes the message whether or not a consumer read it.**
-The TTL is a clock on the *stored copy*, not a promise about delivery.
-The clock runs on its own, no matter what any consumer is doing. If the
-TTL runs out while the `shipping` consumer is down, backed up, or just
-reading slowly mid-batch, the server deletes the message and nobody
+The TTL is a deadline on the *stored copy*, not a guarantee about
+delivery. It counts down regardless of what any consumer is doing. If the
+TTL runs out while the consumer that handles cancellations is down,
+backed up, or reading slowly mid-batch, the server deletes the message
+and nobody
 processes the cancellation. A consumer that already holds a message
 doesn't pause that message's TTL. Do size the TTL to outlast the lag of
 your slowest healthy consumer. Don't set a TTL shorter than the time in
 which the message still has to be acted on.
 
-**Turning `AllowMsgTTL` on is a one-way door.** You can turn the feature
+**Turning `AllowMsgTTL` on can't be undone.** You can turn the feature
 on with `nats stream edit ORDERS --allow-msg-ttl`, but the server
 refuses to turn it back off. Do turn it on on purpose, knowing the
 stream keeps the feature for life. Don't flip it on to test something
@@ -175,7 +181,7 @@ and expect to undo it.
 `ORDERS` now has `AllowMsgTTL` turned on, a switch you can't turn back
 off. You published an `orders.cancelled` message with a 60-second
 `Nats-TTL` and saw it expire while the rest of the stream remained. The
-earlier of TTL and `MaxAge` always wins.
+earlier of TTL and `MaxAge` always applies.
 
 The stream still holds its earlier messages under the 7-day `MaxAge`
 set on the [Shaping the stream](/learn/jetstream/shaping-the-stream) page.

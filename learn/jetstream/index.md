@@ -42,6 +42,7 @@ subjects, and queue groups.
 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
 | [Advanced publishing](./advanced-publishing) | Async, atomic-batch, and fast-ingest publishing |
 | [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
+| [Reading messages directly](./get-direct) | Get one message or a batch straight from the stream, no consumer |
 | [Subject mapping and transforms](./subject-mapping) | Rewrite subjects on the way into a stream, and republish stored messages |
 | [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
 | [Where to go next](./where-next) | A map of what's beyond this chapter |

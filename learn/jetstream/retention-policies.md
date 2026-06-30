@@ -35,25 +35,25 @@ first. Consumers reading and acking messages has no effect on what the
 stream keeps. The stream is a log, and the log holds everything inside
 its limits.
 
+<div class="nats-flow" data-scenario="limitsRetentionAnimated" data-width="580" data-height="284"></div>
+
 **Interest** keeps a message only while some consumer still wants it. A
 message is removed once *every* consumer on the stream has acked it. If
 no consumer is interested in a subject, a message on that subject is
 removed right away.
 
+<div class="nats-flow" data-scenario="interestRetentionAnimated" data-width="580" data-height="300"></div>
+
 **WorkQueue** keeps a message only until *one* consumer acks it. The
 first ack removes the message for everyone. Each message is delivered
 once and then removed.
+
+<div class="nats-flow" data-scenario="workQueueRetentionAnimated" data-width="580" data-height="288"></div>
 
 The three policies differ in who decides a message is finished. Under
 Limits, the limits decide. Under Interest, every consumer must ack
 before the message is removed. Under WorkQueue, the first consumer to
 ack removes it.
-
-<div class="nats-flow" data-scenario="limitsRetentionAnimated" data-width="580" data-height="284"></div>
-
-<div class="nats-flow" data-scenario="interestRetentionAnimated" data-width="580" data-height="300"></div>
-
-<div class="nats-flow" data-scenario="workQueueRetentionAnimated" data-width="580" data-height="288"></div>
 
 ## Pick the policy from the kind of work
 
