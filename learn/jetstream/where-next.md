@@ -1,7 +1,7 @@
 ---
 id: where-next
 title: "Where to go next"
-sidebar_position: 22
+sidebar_position: 23
 description: Recap the JetStream model and point to what comes after this chapter
 ---
 

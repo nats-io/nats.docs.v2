@@ -52,7 +52,9 @@ nats stream purge ORDERS
 ```
 
 That removes every message in `ORDERS` and reports how many it dropped
-(`Purged 3 messages from ORDERS`). The stream itself stays: same config,
+(`Purged 3 messages from ORDERS`). Like `rmm`, it asks for confirmation
+first; add `--force` to skip the prompt in a script. The stream itself
+stays: same config,
 same consumers, same name. Only the messages go. (Don't confuse it with
 `nats stream rm ORDERS`, which deletes the whole stream, config and
 consumers included.)

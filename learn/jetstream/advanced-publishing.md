@@ -27,9 +27,10 @@ throughput goes up.
 
 The contract is the same as a synchronous publish — one `PubAck` per
 message, at-least-once storage — so you still have to check every ack;
-a publish you never confirm is a publish you can't trust. This is a
-client-library feature with no stream setting to turn on. The exact API
-varies by language; see your client's reference.
+an unconfirmed publish gives up the only guarantee a JetStream publish
+offers. This is a client-library feature with no stream setting to turn
+on. The exact API varies by language; see your client library's
+documentation.
 
 ## Atomic batch publish
 
@@ -92,6 +93,21 @@ batches are fine on such a stream.
 **Fast-ingest gaps lose data in `gap: ok` mode.** That mode keeps going
 past a dropped message on purpose. Use it only when a hole is acceptable
 (metrics); for anything you can't lose, use `gap: fail` or an atomic batch.
+
+## Where you are
+
+Nothing about `ORDERS` changed on this page. You now have a map of the
+three ways to publish beyond one-at-a-time:
+
+- **Async** overlaps round trips for throughput; you collect and check
+  every `PubAck` yourself.
+- **Atomic batch** commits a group of messages all-or-nothing, gated by
+  `AllowAtomicPublish`.
+- **Fast-ingest batch** trades atomicity for server-paced speed, gated by
+  `AllowBatchPublish`.
+
+The default one-at-a-time publish from the
+[publishing page](/learn/jetstream/publishing) still fits most services.
 
 ## What's next
 

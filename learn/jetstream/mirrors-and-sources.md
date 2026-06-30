@@ -7,7 +7,7 @@ description: Copy one stream into another, or aggregate many streams into one
 
 # Mirrors and sources
 
-So far this chapter has worked with a single `ORDERS` stream.
+So far the running example has been a single `ORDERS` stream.
 
 This page covers the two ways to build one stream from another.
 A **mirror** is a read-only copy of a single stream. Sources
@@ -30,7 +30,7 @@ mirror too.
 
 A mirror is read-only. You can't publish to it directly, because it
 listens on no subjects of its own. Its only job is to follow the
-upstream. The mirror rejects any `nats pub` aimed at it.
+upstream. A `nats pub` aimed at the mirror reaches no stream that accepts it.
 
 A mirror keeps its own retention. The upstream might keep messages for
 seven days while the mirror keeps them forever. The copy keeps all
@@ -76,7 +76,7 @@ Mirror Information:
 
           Stream Name: ORDERS
                   Lag: 0
-               Active: 1.20s
+            Last Seen: 1.20s
 ```
 
 Three fields describe the mirror's state.
@@ -87,7 +87,7 @@ Three fields describe the mirror's state.
 lag of `0` means fully caught up. A lag that climbs and stays high means
 the mirror can't keep pace with how fast the upstream is being written.
 
-**Active** is how long since the mirror last heard from the upstream. A
+**Last Seen** is how long since the mirror last heard from the upstream. A
 small, steady value is healthy.
 
 Publish a fourth order into `ORDERS`, then re-run `nats stream info
@@ -175,10 +175,12 @@ are easy to get wrong the first time.
 
 **Treating a mirror as writable.** A mirror listens on no subjects of its
 own, so there's nothing on the mirror's name for a publish to reach. A
-`nats pub` aimed at `ORDERS-ARCHIVE` doesn't fail with "this is a
-mirror"; it comes back with `no responders available`, because no stream
-is listening on that name. Don't publish to the mirror. Publish to the
-upstream `ORDERS` stream and let the mirror copy the message on its own.
+`nats pub --jetstream` aimed at `ORDERS-ARCHIVE` waits for a `PubAck`
+that never comes and reports `no responders available`, because no stream
+is listening on that name. (A plain `nats pub` reports that it published
+and the message silently goes nowhere.) Don't publish to the mirror.
+Publish to the upstream `ORDERS` stream and let the mirror copy the
+message on its own.
 
 <div class="nats-example"
      data-type="learn-jetstream-mirrors-and-sources-publishToMirror"
@@ -210,7 +212,7 @@ exports and imports on both sides, and each of the three subjects has a
 required type. The consumer API and flow-control subjects are *service*
 exports, because they work as request and reply. The delivery subject is
 a *stream* export, because the messages flow one way. Get a type wrong
-and replication doesn't fail with an error; the mirror just never catches
+and replication doesn't fail with an error; the mirror never catches
 up. Check each import type against
 [Reference → Stream Configuration](/reference/jetstream/api/stream/create).
 Setting up cross-account and cross-domain access is part of configuring
@@ -226,9 +228,10 @@ You now have:
 
 ## What's next
 
-The next page covers [subject mapping](/learn/jetstream/subject-mapping):
-rewriting subjects as a stream stores them, and republishing stored
-messages onto live subjects. After that,
+The next page covers [reading messages directly](/learn/jetstream/get-direct):
+getting one message or a batch straight from the stream, with no consumer,
+served by any replica or mirror. After that,
+[subject mapping](/learn/jetstream/subject-mapping),
 [per-message TTL](/learn/jetstream/message-ttl), then
 [Where to go next](/learn/jetstream/where-next) recaps the chapter.
 
