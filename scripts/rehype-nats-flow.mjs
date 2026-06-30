@@ -39,6 +39,12 @@ const FALLBACKS = {
     'Pinned_client priority policy. The server pins one worker and sends it every message while the others stand by. The pinned worker goes quiet; once PinnedTTL elapses the server pins a standby instead and stamps its messages with a new Nats-Pin-Id, and the old worker\'s next pull carrying the stale id comes back 423 — it clears the id and rejoins the standby pool.',
   priorityPrioritizedAnimated:
     'Prioritized priority policy. Three regions pull at priority 0, 1 and 2. The server serves the lowest priority that is currently pulling, with no delay: us-east (0) gets everything while it pulls; the moment it goes quiet the work falls to us-west (1), then eu-west (2); when us-east returns the work snaps straight back to priority 0.',
+  limitsRetentionAnimated:
+    'Limits retention. A consumer reads and acks every order in the ORDERS stream, and each one stays in place — acking never removes a message here. Only a limit (MaxAge, MaxBytes, or MaxMsgs) removes one. The read cursor sweeps the stored messages while all of them remain.',
+  interestRetentionAnimated:
+    'Interest retention, both behaviors. When an order is published on orders.shipped, a subject both consumers subscribe to, it is stored and removed once every consumer has acked it. When an order is published on orders.archived, a subject no consumer subscribes to, it is dropped the instant it is published — no interest, nothing stored.',
+  workQueueRetentionAnimated:
+    'WorkQueue retention. Each order is delivered to exactly one worker; the first ack removes it for everyone, so the stream drains back to empty. Workers take turns: an order is published, one worker pulls and acks it, and the message is gone.',
 };
 
 const TITLES = {
@@ -66,6 +72,9 @@ const TITLES = {
   priorityOverflowAnimated: 'Overflow priority policy (animated)',
   priorityPinnedAnimated: 'Pinned-client priority policy (animated)',
   priorityPrioritizedAnimated: 'Prioritized priority policy (animated)',
+  limitsRetentionAnimated: 'Limits retention — acks keep the message (animated)',
+  interestRetentionAnimated: 'Interest retention — all-ack and no-interest (animated)',
+  workQueueRetentionAnimated: 'WorkQueue retention — first ack drains it (animated)',
 };
 
 const cache = new Map();

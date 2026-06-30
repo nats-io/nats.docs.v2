@@ -37,7 +37,7 @@ subjects, and queue groups.
 | [Priority groups](./priority-groups) | Steer which client gets served: overflow and pinned_client |
 | [Pausing a consumer](./pausing) | Stop delivery for a window, then resume |
 | [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
-| [Delivery semantics](./delivery-semantics) | Limits, Interest, and WorkQueue retention |
+| [Retention policies](./retention-policies) | Limits, Interest, and WorkQueue retention |
 | [Altering stream state](./altering-stream-state) | Delete a message or purge the stream, by hand |
 | [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
 | [Advanced publishing](./advanced-publishing) | Async, atomic-batch, and fast-ingest publishing |

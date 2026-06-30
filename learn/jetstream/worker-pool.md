@@ -188,7 +188,7 @@ You scale by starting more processes; the consumer is unchanged. And because
 Several workers on the `ORDERS` log still leave every order in the stream
 after one of them handles it. That's right for an audit log, but wrong for a
 backlog of jobs that should disappear once they're done. The next page
-builds a [true job queue](/learn/jetstream/delivery-semantics): a
+builds a [true job queue](/learn/jetstream/retention-policies): a
 **WorkQueue** stream where each item is claimed by one worker and removed
 on ack, the natural home for workers like these.
 

@@ -1,11 +1,11 @@
 ---
-id: delivery-semantics
-title: "Delivery semantics"
+id: retention-policies
+title: "Retention policies"
 sidebar_position: 15
 description: The three retention policies, and how to pick one for the kind of work a stream does
 ---
 
-# Delivery semantics
+# Retention policies
 
 The previous page shaped `ORDERS` with limits: how many messages it
 keeps, for how long, in how many bytes. Those limits decide when a
@@ -49,6 +49,12 @@ Limits, the limits decide. Under Interest, every consumer must ack
 before the message is removed. Under WorkQueue, the first consumer to
 ack removes it.
 
+<div class="nats-flow" data-scenario="limitsRetentionAnimated" data-width="580" data-height="284"></div>
+
+<div class="nats-flow" data-scenario="interestRetentionAnimated" data-width="580" data-height="300"></div>
+
+<div class="nats-flow" data-scenario="workQueueRetentionAnimated" data-width="580" data-height="288"></div>
+
 ## Pick the policy from the kind of work
 
 Choose a retention policy from the kind of work the stream does. The
@@ -79,7 +85,7 @@ separate `JOBS` stream with WorkQueue retention. This is the only place
 in the chapter where a second stream appears, and it's here to show the
 policy difference.
 
-<div class="nats-example" data-type="learn-jetstream-delivery-semantics-workQueueCreate" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-retention-policies-workQueueCreate" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 The `--retention work` flag is the only change. `nats stream info JOBS`
 reports it in the configuration block, next to the same fields you read
@@ -105,11 +111,14 @@ drops back to zero. The ack removed the message, which no limit on
 
 Set retention when you create the stream, and leave it there.
 
-The `retention` field is set when you create the stream. The server lets
-you change it on an existing stream, but the change applies to every
-message already stored, right away. Say a stream has been collecting an
-audit history under Limits, and you switch it to WorkQueue. It starts
-deleting messages on the first ack, including history you meant to keep.
+The server allows exactly one live change: it swaps Limits and Interest,
+in either direction. Anything involving WorkQueue is locked — see the
+pitfall below. And even the allowed swap applies to messages already
+stored, right away. Say a stream has been collecting an audit history
+under Limits and you switch it to Interest. From that moment the server
+removes any message every consumer has already acked, and any message on
+a subject no consumer is interested in — including history you meant to
+keep.
 
 Treat the policy as fixed at creation. If you want a different policy
 than the stream has, create a new stream with the right policy rather
@@ -145,23 +154,23 @@ This page uses only the three `retention` values.
 
 ## Pitfalls
 
-Both of these apply to Interest and WorkQueue. The server checks both
-when you create or edit a stream, so you find out right away rather than
-in production.
+Both of these are WorkQueue constraints. The server checks them when you
+create or edit a stream, so you find out right away rather than in
+production.
 
 **Retention to or from WorkQueue is locked after creation.** The earlier
-section covered switching at all, and how that rewrites your history.
-There's a stricter rule underneath it. The server lets you swap Limits
-and Interest on a live stream, but it rejects any change that adds or
-removes WorkQueue. A stream that isn't WorkQueue at creation can't become
-one, and a WorkQueue stream can't change to another policy.
+section covered the Limits–Interest swap the server allows, and how even
+that rewrites your history. The rule underneath it is stricter: the
+server rejects any change that adds or removes WorkQueue. A stream that
+isn't WorkQueue at creation can't become one, and a WorkQueue stream
+can't change to another policy.
 
 Don't plan a migration path that edits retention into or out of
 WorkQueue. Create a new stream with the policy you want and move the
 data. The edit below is rejected with `stream configuration update can
 not change retention policy to/from workqueue`.
 
-<div class="nats-example" data-type="learn-jetstream-delivery-semantics-retentionSwitchRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-retention-policies-retentionSwitchRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **WorkQueue rejects consumers that overlap.** The first ack removes a
 message for everyone, so the server won't let two consumers claim the
@@ -174,7 +183,7 @@ Give each consumer a filter that splits the subjects between them, so no
 message belongs to two consumers. A worker *pool* sharing one consumer
 is the other valid setup; see [A pool of workers](/learn/jetstream/worker-pool).
 
-<div class="nats-example" data-type="learn-jetstream-delivery-semantics-workqueueOverlap" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-retention-policies-workqueueOverlap" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 ## Where you are
 

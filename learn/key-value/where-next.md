@@ -70,7 +70,7 @@ The [JetStream deep dive](/learn/jetstream) is the chapter underneath this
 one. Every time this chapter said "that is a stream limit" or "a watch is
 a consumer," that's where the mechanism is taught in full:
 [why a stream](/learn/jetstream/your-first-stream#why-a-stream),
-[delivery semantics](/learn/jetstream/delivery-semantics), and the
+[retention policies](/learn/jetstream/retention-policies), and the
 [per-message TTL](/learn/jetstream/message-ttl) that per-key TTL rides on.
 
 The [Object Store deep dive](/learn/object-store) is the next step when a

@@ -165,7 +165,7 @@ the page that explains it.
 - [ ] Size `MaxBytes` for your peak, not your average, when the age window matters; either limit can fire first.
 - [ ] Add `MaxMsgsPerSubject` when each subject deserves its own retention; whole-stream limits let one noisy subject starve a quiet one.
 
-### Delivery semantics — see [Pitfalls](/learn/jetstream/delivery-semantics#pitfalls)
+### Retention policies — see [Pitfalls](/learn/jetstream/retention-policies#pitfalls)
 
 - [ ] Create a new stream to move to or from WorkQueue; the server locks that change on a live stream.
 - [ ] Give each WorkQueue consumer a disjoint filter, or share one consumer as a pool; overlapping consumers are rejected.

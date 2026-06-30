@@ -35,6 +35,9 @@ import type {
   MaxMsgsAnimated as MaxMsgsAnimatedComponent,
   DiscardOldAnimated as DiscardOldAnimatedComponent,
   DiscardNewAnimated as DiscardNewAnimatedComponent,
+  LimitsRetentionAnimated as LimitsRetentionAnimatedComponent,
+  InterestRetentionAnimated as InterestRetentionAnimatedComponent,
+  WorkQueueRetentionAnimated as WorkQueueRetentionAnimatedComponent,
   CentralizedAuthAnimated as CentralizedAuthAnimatedComponent,
   DecentralizedAuthAnimated as DecentralizedAuthAnimatedComponent,
   AuthCalloutAnimated as AuthCalloutAnimatedComponent,
@@ -106,6 +109,9 @@ declare global {
       MaxMsgsAnimated: typeof MaxMsgsAnimatedComponent;
       DiscardOldAnimated: typeof DiscardOldAnimatedComponent;
       DiscardNewAnimated: typeof DiscardNewAnimatedComponent;
+      LimitsRetentionAnimated: typeof LimitsRetentionAnimatedComponent;
+      InterestRetentionAnimated: typeof InterestRetentionAnimatedComponent;
+      WorkQueueRetentionAnimated: typeof WorkQueueRetentionAnimatedComponent;
       CentralizedAuthAnimated: typeof CentralizedAuthAnimatedComponent;
       DecentralizedAuthAnimated: typeof DecentralizedAuthAnimatedComponent;
       AuthCalloutAnimated: typeof AuthCalloutAnimatedComponent;

@@ -82,7 +82,7 @@ const sidebars: SidebarsConfig = {
             "jetstream/priority-groups",
             "jetstream/pausing",
             "jetstream/shaping-the-stream",
-            "jetstream/delivery-semantics",
+            "jetstream/retention-policies",
             "jetstream/altering-stream-state",
             "jetstream/surviving-node-loss",
             "jetstream/advanced-publishing",
