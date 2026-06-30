@@ -74,38 +74,45 @@ stream stays small because it drops a message once the last interested
 consumer is done. You get fan-out delivery without an ever-growing log.
 
 **A job queue where each message is work for one worker → WorkQueue.**
-The message is a task. One worker picks it up, does it, and acks it, and
-then the message is removed so no one does it twice. This is the kind of
-stream where a message should leave once it's handled.
+This is the home for Acme's shipping workers from [Scaling a
+consumer](/learn/jetstream/worker-pool). Each message is an order to ship.
+One shipping worker claims it, ships it, and acks, and then the task is
+removed so no one ships the same order twice. The queue drains as the
+workers keep up, where a log would only grow.
 
-## A WorkQueue stream, for contrast
+## A WorkQueue stream for the shipping work
 
-`ORDERS` stays Limits; don't change it. To see the contrast, create a
-separate `JOBS` stream with WorkQueue retention. This is the only place
-in the chapter where a second stream appears, and it's here to show the
-policy difference.
+`ORDERS` stays Limits; don't change it — it's the record of what
+customers did. But Acme also has *work* to do on each order: when one is
+paid, a [shipping worker](/learn/jetstream/worker-pool) has to ship it,
+exactly once. Ship the same order twice and a second parcel goes out the
+door. That's a job queue, not a log — each task goes to one worker and is
+gone once it's done. Give it its own `FULFILLMENT` stream with WorkQueue
+retention:
 
 <div class="nats-example" data-type="learn-jetstream-retention-policies-workQueueCreate" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The `--retention work` flag is the only change. `nats stream info JOBS`
-reports it in the configuration block, next to the same fields you read
-on `ORDERS`:
+The `--retention work` flag is the only change from how you built
+`ORDERS`. `nats stream info FULFILLMENT` shows it in the `Options` block:
 
 ```bash
-nats stream info JOBS
+nats stream info FULFILLMENT
 ```
 
 ```
-Configuration:
+             Subjects: fulfill.>
 
-             Subjects: jobs.>
-   Retention Policy: WorkQueue
+Options:
+
+            Retention: WorkQueue
        Discard Policy: Old
 ```
 
-Publish a job and have a consumer ack it, and the stream's message count
-drops back to zero. The ack removed the message, which no limit on
-`ORDERS` does. This is the behavior WorkQueue provides.
+Enqueue one order to ship and have a shipping worker ack it, and the
+stream's message count drops back to zero. The ack removed the task,
+which no limit on `ORDERS` does. The worker publishes `orders.shipped`
+back to `ORDERS` as it finishes, so the record lands in the log while the
+task drains from the queue.
 
 ## Switching retention on a live stream
 
@@ -196,8 +203,8 @@ You now have:
   one question that separates them: who decides a message is finished.
 - Which policy fits which kind of work: audit log → Limits, fan-out →
   Interest, job queue → WorkQueue.
-- A throwaway `JOBS` stream that showed WorkQueue removing a message on
-  ack.
+- A `FULFILLMENT` WorkQueue stream — the shipping workers' queue — that
+  dropped a task on ack while `ORDERS` kept the record.
 - The rule that retention is fixed at creation, not switched on a live
   stream.
 
