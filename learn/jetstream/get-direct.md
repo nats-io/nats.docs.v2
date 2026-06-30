@@ -14,7 +14,7 @@ one message by its sequence, or the latest order on a subject, with no consumer
 to create and no position to track.
 
 JetStream has a lighter read for those. You ask the stream for a message and the
-server returns it straight from the store — no consumer, no ack, no cursor.
+server returns it straight from the store.
 
 ## Get one message
 
@@ -70,15 +70,16 @@ nats stream info ORDERS
                    Direct Get: true
 ```
 
-The CLI turns it on for new streams, so `ORDERS` already has it. If a stream
-shows `Direct Get: false`, switch it on:
+The CLI turns it on for new streams, so `ORDERS` already has it. The line shows
+up only when the setting is on; if a stream's info has no `Direct Get` line at
+all, it's off — switch it on:
 
 <div class="nats-example"
      data-type="learn-jetstream-get-direct-enable"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-With it on, read directly by adding `--direct` to a stream subscription. This one
-asks for three messages starting at sequence 1:
+With it on, read directly with the Direct Get API. This fetches the message at
+sequence 1 from any replica that holds it, not just the leader:
 
 <div class="nats-example"
      data-type="learn-jetstream-get-direct-direct-read"
@@ -87,15 +88,13 @@ asks for three messages starting at sequence 1:
 ```
 Subscribing to JetStream Stream (direct) holding messages with subject orders.> starting with sequence 1
 [#1] Received JetStream message (direct): stream: ORDERS seq 1 / subject: orders.created / time: 2026-05-22 10:14:22
-[#2] Received JetStream message (direct): stream: ORDERS seq 2 / subject: orders.created / time: 2026-05-22 10:14:25
-[#3] Received JetStream message (direct): stream: ORDERS seq 3 / subject: orders.shipped / time: 2026-05-22 10:14:31
 ```
 
-The `(direct)` marks the path: each message came from a server's local store over
+The `(direct)` marks the path: the message came from a server's local store over
 the Direct Get API, not from the leader through the regular read. On a replicated
-stream that spreads read load across the servers, and on a stream with
-[mirrors](/learn/jetstream/mirrors-and-sources) it lets a reader fetch from a
-nearby mirror instead of the origin.
+stream that spreads read load across the servers, and on a stream whose origin
+sets `mirror_direct`, it lets a reader fetch from a nearby
+[mirror](/learn/jetstream/mirrors-and-sources) instead of the origin.
 
 The trade-off is freshness. A replica or mirror can sit a moment behind the
 leader, so Direct Get is **not read-after-write coherent**: a message you just
@@ -107,11 +106,17 @@ load. When you must see your own most recent write, read the leader with
 
 ## Get a batch in one request
 
-The `--count 3` above didn't make three round trips. Direct Get returns more than
-one message per request: the server streams the matching messages back over a
-single request. Each one carries a `Nats-Num-Pending` header counting how many
-still match after it, so the client knows when the batch is complete — the count
-reaches `0` on the last message:
+A single request can return more than one message. Ask Direct Get for a range and
+the server streams the matching messages back over one request, instead of a round
+trip each. Raise the count to three:
+
+```bash
+nats sub --stream ORDERS --direct --start-sequence 1 --count 3
+```
+
+Each message carries a `Nats-Num-Pending` header counting how many still match
+after it, so the client knows when the batch is complete — the count reaches `0`
+on the last message:
 
 ```
 [#1] ... seq 1 ...   Nats-Num-Pending: 2
@@ -123,7 +128,8 @@ That makes Direct Get a cheap way to pull a slice of the log without standing up
 a consumer: a range from a sequence, the latest message on each of several
 subjects (`--last-per-subject`), or a point-in-time snapshot across subjects. A
 batch is bounded by a count or a byte budget; the request fields (`batch`,
-`max_bytes`, `multi_last`) are in the reference.
+`max_bytes`, `multi_last`) are in the reference, and client libraries expose the
+batch read through their JetStream or Orbit helper APIs.
 
 A batch read is still a one-shot snapshot, not a subscription. It returns what's
 stored when you ask and stops. To keep receiving new orders as they arrive, that's
@@ -140,8 +146,8 @@ Both read a stream; they answer different needs.
   log: read every message in order, keep a durable position across restarts, ack
   as you go, and pick up new messages as they're published.
 
-A direct read never moves a consumer's position and never removes a message. It's
-a look at the stored data, nothing more.
+A direct read never moves a consumer's position and never removes a message. It
+only reads what's stored.
 
 ## Pitfalls
 
