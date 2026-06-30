@@ -71,6 +71,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-shaping-the-stream-setLimits": "learn-jetstream-shaping-the-stream-setLimits/main.go",
             "learn-jetstream-shaping-the-stream-discardNew": "learn-jetstream-shaping-the-stream-discardNew/main.go",
             "learn-jetstream-shaping-the-stream-perSubjectLimit": "learn-jetstream-shaping-the-stream-perSubjectLimit/main.go",
+            "learn-jetstream-retention-policies-workQueueCreate": "learn-jetstream-retention-policies-workQueueCreate/main.go",
+            "learn-jetstream-retention-policies-workqueueOverlap": "learn-jetstream-retention-policies-workqueueOverlap/main.go",
+            "learn-jetstream-retention-policies-retentionSwitchRejected": "learn-jetstream-retention-policies-retentionSwitchRejected/main.go",
         },
     }],
     "rust": [{
@@ -129,6 +132,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-shaping-the-stream-setLimits": "docs_learn_jetstream_shaping_the_stream_set_limits.rs",
             "learn-jetstream-shaping-the-stream-discardNew": "docs_learn_jetstream_shaping_the_stream_discard_new.rs",
             "learn-jetstream-shaping-the-stream-perSubjectLimit": "docs_learn_jetstream_shaping_the_stream_per_subject_limit.rs",
+            "learn-jetstream-retention-policies-workQueueCreate": "docs_learn_jetstream_retention_policies_work_queue_create.rs",
+            "learn-jetstream-retention-policies-workqueueOverlap": "docs_learn_jetstream_retention_policies_workqueue_overlap.rs",
+            "learn-jetstream-retention-policies-retentionSwitchRejected": "docs_learn_jetstream_retention_policies_retention_switch_rejected.rs",
         },
     }],
     "javascript": [{
@@ -187,6 +193,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-shaping-the-stream-setLimits": "learn-jetstream-shaping-the-stream-setLimits.ts",
             "learn-jetstream-shaping-the-stream-discardNew": "learn-jetstream-shaping-the-stream-discardNew.ts",
             "learn-jetstream-shaping-the-stream-perSubjectLimit": "learn-jetstream-shaping-the-stream-perSubjectLimit.ts",
+            "learn-jetstream-retention-policies-workQueueCreate": "learn-jetstream-retention-policies-workQueueCreate.ts",
+            "learn-jetstream-retention-policies-workqueueOverlap": "learn-jetstream-retention-policies-workqueueOverlap.ts",
+            "learn-jetstream-retention-policies-retentionSwitchRejected": "learn-jetstream-retention-policies-retentionSwitchRejected.ts",
         },
     }],
     "python": [{
@@ -245,6 +254,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-shaping-the-stream-setLimits": "learn_jetstream_shaping_the_stream_set_limits.py",
             "learn-jetstream-shaping-the-stream-discardNew": "learn_jetstream_shaping_the_stream_discard_new.py",
             "learn-jetstream-shaping-the-stream-perSubjectLimit": "learn_jetstream_shaping_the_stream_per_subject_limit.py",
+            "learn-jetstream-retention-policies-workQueueCreate": "learn_jetstream_retention_policies_work_queue_create.py",
+            "learn-jetstream-retention-policies-workqueueOverlap": "learn_jetstream_retention_policies_workqueue_overlap.py",
+            "learn-jetstream-retention-policies-retentionSwitchRejected": "learn_jetstream_retention_policies_retention_switch_rejected.py",
         },
     }],
     "java": [{
@@ -303,6 +315,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-shaping-the-stream-setLimits": "LearnJetStreamShapingTheStreamSetLimits.java",
             "learn-jetstream-shaping-the-stream-discardNew": "LearnJetStreamShapingTheStreamDiscardNew.java",
             "learn-jetstream-shaping-the-stream-perSubjectLimit": "LearnJetStreamShapingTheStreamPerSubjectLimit.java",
+            "learn-jetstream-retention-policies-workQueueCreate": "LearnJetStreamRetentionPoliciesWorkQueueCreate.java",
+            "learn-jetstream-retention-policies-workqueueOverlap": "LearnJetStreamRetentionPoliciesWorkqueueOverlap.java",
+            "learn-jetstream-retention-policies-retentionSwitchRejected": "LearnJetStreamRetentionPoliciesRetentionSwitchRejected.java",
         },
     }],
     "csharp": [{
@@ -361,6 +376,9 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-shaping-the-stream-setLimits": "LearnJetStreamShapingTheStreamSetLimits.cs",
             "learn-jetstream-shaping-the-stream-discardNew": "LearnJetStreamShapingTheStreamDiscardNew.cs",
             "learn-jetstream-shaping-the-stream-perSubjectLimit": "LearnJetStreamShapingTheStreamPerSubjectLimit.cs",
+            "learn-jetstream-retention-policies-workQueueCreate": "LearnJetStreamRetentionPoliciesWorkQueueCreate.cs",
+            "learn-jetstream-retention-policies-workqueueOverlap": "LearnJetStreamRetentionPoliciesWorkqueueOverlap.cs",
+            "learn-jetstream-retention-policies-retentionSwitchRejected": "LearnJetStreamRetentionPoliciesRetentionSwitchRejected.cs",
         },
     }],
 };
