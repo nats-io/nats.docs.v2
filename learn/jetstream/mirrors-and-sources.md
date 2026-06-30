@@ -22,7 +22,7 @@ sourcing and mirroring.
 A mirror is a stream that continuously copies every message from one
 upstream stream.
 
-<div class="nats-flow" data-scenario="mirrorCopyAnimated" data-width="680" data-height="190"></div>
+<div class="nats-flow" data-scenario="mirrorCopyAnimated" data-width="680" data-height="250"></div>
 
 The copy is exact. A message in the mirror keeps the same sequence
 number, the same timestamp, and the same subject it had upstream. If
