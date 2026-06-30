@@ -17,11 +17,12 @@ Both behaviors are specified in
 [ADR-59](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-59.md), the authoritative document for stream
 sourcing and mirroring.
 
-## A mirror is a read-only copy
+## What a mirror is
 
 A mirror is a stream that continuously copies every message from one
-upstream stream. Behind the scenes the server reads each message from
-the upstream and adds it to the mirror.
+upstream stream.
+
+<div class="nats-flow" data-scenario="mirrorCopyAnimated" data-width="680" data-height="190"></div>
 
 The copy is exact. A message in the mirror keeps the same sequence
 number, the same timestamp, and the same subject it had upstream. If
@@ -33,11 +34,62 @@ listens on no subjects of its own. Its only job is to follow the
 upstream. A `nats pub` aimed at the mirror reaches no stream that accepts it.
 
 A mirror keeps its own retention. The upstream might keep messages for
-seven days while the mirror keeps them forever. The copy keeps all
-messages from upstream; the mirror's own retention limits decide what it
-stores locally.
+seven days while the mirror keeps them forever — the mirror's own limits
+decide what it stores, independent of the upstream's.
 
-## Build the ORDERS-ARCHIVE mirror
+Its configuration is fixed at creation. You can't point a mirror at a
+different upstream or add a filter later; to change any of that you delete
+it and create it again. That's cheap, because the upstream still holds the
+data and the new mirror catches up on its own.
+
+## What sources are
+
+A **source** is the inverse of a mirror. Where a mirror copies from one
+upstream, a stream with sources pulls from several upstreams at once and
+merges them into a single stream.
+
+Consider three regional order streams — `ORDERS-US`, `ORDERS-EU`,
+`ORDERS-APAC`. A stream that lists all three as sources becomes one
+combined `ALL-ORDERS` view, fed by every region.
+
+<div class="nats-flow" data-scenario="sourcesMergeAnimated" data-width="680" data-height="280"></div>
+
+The merge interleaves. Messages from one upstream keep their own order,
+but across upstreams there's no ordering guarantee, and the aggregate
+gives them fresh sequence numbers as they arrive — it doesn't preserve
+each upstream's the way a mirror does.
+
+A sourced stream can also listen on its own subjects. Unlike a mirror, it
+may accept direct publishes alongside the messages it pulls in, so one
+stream can hold both what it gathered and what was published straight to it.
+
+Sources can also change after creation. You add an upstream, drop one, or
+adjust a filter by updating the stream config — no need to delete and
+recreate.
+
+## Mirror or source?
+
+The two solve different problems. A mirror is one stream copied exactly; a
+source is many streams merged into one.
+
+| | Mirror | Source |
+| --- | --- | --- |
+| Upstreams | exactly one | one or many |
+| Sequence numbers | kept from the upstream | fresh, interleaved across sources |
+| Own subjects, direct publishes | no — read-only | yes, optional |
+| Change the config later | no — delete and recreate | yes — add, drop, or edit sources |
+
+Reach for a **mirror** when you want a second copy of one stream: a read
+replica close to a remote region, a stream that survives the loss of the
+upstream's cluster, or a long-retention archive of a short-retention stream.
+
+Reach for **sources** when you want to combine many streams into one:
+merging per-region or per-tenant streams for reporting, or building a
+derived view that draws from several streams.
+
+## Build them
+
+### Build the ORDERS-ARCHIVE mirror
 
 Create a second stream that mirrors `ORDERS`. Call it `ORDERS-ARCHIVE`,
 and give it no limits, so it becomes a permanent record of every order:
@@ -46,30 +98,15 @@ and give it no limits, so it becomes a permanent record of every order:
      data-type="learn-jetstream-mirrors-and-sources-createMirror"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The `--mirror ORDERS` flag tells the server this new stream is a mirror
-of `ORDERS` rather than a normal stream. You don't give it `--subjects`,
-because a mirror listens on no subjects of its own.
-
-The CLI exposes only the simplest mirror. For a mirror that filters or
-rewrites subjects you supply a JSON config instead. Here's the raw
-command for the archive:
-
-```bash
-nats stream add ORDERS-ARCHIVE --mirror ORDERS
-```
-
-By default a mirror starts from the very beginning of the upstream; the
-Reference covers how to control where replication starts.
+The `--mirror ORDERS` flag tells the server this new stream is a mirror of
+`ORDERS` rather than a normal stream. You don't give it `--subjects`,
+because a mirror listens on no subjects of its own. The CLI exposes only
+the simplest mirror; for one that filters or rewrites subjects you supply a
+JSON config, covered in the Reference.
 
 Right after creation the mirror catches up. Within moments it holds the
-same three orders that `ORDERS` does. Confirm it:
-
-```bash
-nats stream info ORDERS-ARCHIVE
-```
-
-The output carries a section that a normal stream doesn't have, the
-mirror status:
+same three orders that `ORDERS` does, reported in a section a normal stream
+doesn't have:
 
 ```
 Mirror Information:
@@ -79,71 +116,48 @@ Mirror Information:
             Last Seen: 1.20s
 ```
 
-Three fields describe the mirror's state.
-
-**Stream Name** is the upstream the mirror follows: `ORDERS`.
-
-**Lag** is how many messages the mirror is still behind the upstream. A
-lag of `0` means fully caught up. A lag that climbs and stays high means
-the mirror can't keep pace with how fast the upstream is being written.
-
-**Last Seen** is how long since the mirror last heard from the upstream. A
-small, steady value is healthy.
+**Stream Name** is the upstream the mirror follows. **Lag** is how many
+messages it's still behind — `0` means fully caught up, and a lag that
+climbs and stays high means it can't keep pace. **Last Seen** is how long
+since it last heard from the upstream; a small, steady value is healthy.
 
 Publish a fourth order into `ORDERS`, then re-run `nats stream info
-ORDERS-ARCHIVE`. The mirror picks it up on its own, with no consumer and
-no client code involved. The lag ticks to `0` again.
+ORDERS-ARCHIVE`. The mirror picks it up on its own, with no consumer and no
+client code involved, and the lag ticks back to `0`.
 
-## A mirror cannot be edited
+### Build the ALL-ORDERS source
 
-A mirror's configuration is fixed at creation. You can't point
-`ORDERS-ARCHIVE` at a different upstream, add a filter, or change
-where replication started. An update won't do it.
+A source needs streams to aggregate. Create three regional streams, each
+owning its own subjects, then create `ALL-ORDERS` to source all three at
+once:
 
-To change any of that, you delete the mirror and create it again. On the
-fresh creation the new settings take effect, and the mirror catches up
-from the upstream all over again.
+<div class="nats-example"
+     data-type="learn-jetstream-mirrors-and-sources-createSource"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-A mirror is cheap to recreate because the upstream still holds the data,
-so deleting and recreating is the supported way to change its config.
+`ALL-ORDERS` takes no `--subjects` of its own here; it just lists its
+upstreams. Its info carries a Source Information section — one block per
+upstream, because each source replicates on its own:
 
-## Sources aggregate many streams into one
+```
+Source Information:
 
-A source is the inverse of a mirror. Where a mirror copies from one
-upstream, a stream with sources pulls from several upstreams at once
-and merges them into a single stream.
+          Stream Name: ORDERS-US
+                  Lag: 0
+            Last Seen: 1.20s
 
-Consider three regional order streams: `ORDERS-US`, `ORDERS-EU`,
-`ORDERS-APAC`. A stream that lists all three as sources becomes one
-combined `ALL-ORDERS` view, fed by every region:
+          Stream Name: ORDERS-EU
+                  Lag: 0
+            Last Seen: 1.20s
 
-```bash
-nats stream add ALL-ORDERS --source ORDERS-US --source ORDERS-EU --source ORDERS-APAC
+          Stream Name: ORDERS-APAC
+                  Lag: 0
+            Last Seen: 1.20s
 ```
 
-Messages from each upstream keep their own order. Across different
-upstreams there's no ordering guarantee. The merged stream mixes their
-messages together in the order they arrive.
-
-A sourced stream can also listen on its own subjects. Unlike a mirror,
-it may accept direct publishes alongside the messages it pulls in, so
-one stream can hold both the messages it gathered and messages published
-straight to it.
-
-Sources can change after creation. You add an upstream, drop one, or
-adjust a filter by updating the stream config, with no need to delete
-and recreate the stream. That is the practical difference from a mirror.
-
-## What each one is for
-
-Use a mirror when you want a second copy of one stream. Examples are a
-read replica close to a remote region, a stream that survives the loss
-of the upstream's cluster, or a long-retention archive of a
-short-retention stream.
-
-Use sources when you want to combine many streams into one. Examples are
-merging per-region or per-tenant streams for reporting, or building a
-derived view that draws from several streams.
+Each upstream has its own Lag and Last Seen. `ALL-ORDERS` now holds every
+order from every region, interleaved in arrival order. Add or drop a region
+later by updating the stream — no recreation needed.
 
 ## Filters, transforms, and reach
 
@@ -184,7 +198,7 @@ message on its own.
 
 <div class="nats-example"
      data-type="learn-jetstream-mirrors-and-sources-publishToMirror"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli"></div>
 
 **Treating mirror contents as real-time.** A mirror is eventually consistent:
 the server copies the upstream stream continuously, so the mirror can run
@@ -223,8 +237,8 @@ accounts and authorization.
 You now have:
 
 - an `ORDERS` stream, unchanged
-- an `ORDERS-ARCHIVE` mirror that holds an exact, read-only copy of it
-- a mental model for sources as the aggregation counterpart to mirrors
+- an `ORDERS-ARCHIVE` mirror — an exact, read-only copy of it
+- an `ALL-ORDERS` aggregate that sources three regional streams into one
 
 ## What's next
 
