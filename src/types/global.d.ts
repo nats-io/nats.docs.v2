@@ -35,6 +35,14 @@ import type {
   MaxMsgsAnimated as MaxMsgsAnimatedComponent,
   DiscardOldAnimated as DiscardOldAnimatedComponent,
   DiscardNewAnimated as DiscardNewAnimatedComponent,
+  DeleteMessageAnimated as DeleteMessageAnimatedComponent,
+  PurgeStreamAnimated as PurgeStreamAnimatedComponent,
+  SequenceGapAnimated as SequenceGapAnimatedComponent,
+  NodeLossAnimated as NodeLossAnimatedComponent,
+  LeaderFailoverAnimated as LeaderFailoverAnimatedComponent,
+  AsyncOrderingAnimated as AsyncOrderingAnimatedComponent,
+  AtomicBatchAnimated as AtomicBatchAnimatedComponent,
+  FastIngestAnimated as FastIngestAnimatedComponent,
   LimitsRetentionAnimated as LimitsRetentionAnimatedComponent,
   InterestRetentionAnimated as InterestRetentionAnimatedComponent,
   WorkQueueRetentionAnimated as WorkQueueRetentionAnimatedComponent,
@@ -77,6 +85,8 @@ import type {
   CrdReconcileAnimated as CrdReconcileAnimatedComponent,
   ConfigReloadAnimated as ConfigReloadAnimatedComponent,
   LameDuckUpgradeAnimated as LameDuckUpgradeAnimatedComponent,
+  MirrorCopyAnimated as MirrorCopyAnimatedComponent,
+  SourcesMergeAnimated as SourcesMergeAnimatedComponent,
 } from '../components/NatsFlow';
 import type React from 'react';
 import type ReactDOM from 'react-dom/client';
@@ -109,6 +119,14 @@ declare global {
       MaxMsgsAnimated: typeof MaxMsgsAnimatedComponent;
       DiscardOldAnimated: typeof DiscardOldAnimatedComponent;
       DiscardNewAnimated: typeof DiscardNewAnimatedComponent;
+      DeleteMessageAnimated: typeof DeleteMessageAnimatedComponent;
+      PurgeStreamAnimated: typeof PurgeStreamAnimatedComponent;
+      SequenceGapAnimated: typeof SequenceGapAnimatedComponent;
+      NodeLossAnimated: typeof NodeLossAnimatedComponent;
+      LeaderFailoverAnimated: typeof LeaderFailoverAnimatedComponent;
+      AsyncOrderingAnimated: typeof AsyncOrderingAnimatedComponent;
+      AtomicBatchAnimated: typeof AtomicBatchAnimatedComponent;
+      FastIngestAnimated: typeof FastIngestAnimatedComponent;
       LimitsRetentionAnimated: typeof LimitsRetentionAnimatedComponent;
       InterestRetentionAnimated: typeof InterestRetentionAnimatedComponent;
       WorkQueueRetentionAnimated: typeof WorkQueueRetentionAnimatedComponent;
@@ -151,6 +169,8 @@ declare global {
       CrdReconcileAnimated: typeof CrdReconcileAnimatedComponent;
       ConfigReloadAnimated: typeof ConfigReloadAnimatedComponent;
       LameDuckUpgradeAnimated: typeof LameDuckUpgradeAnimatedComponent;
+      MirrorCopyAnimated: typeof MirrorCopyAnimatedComponent;
+      SourcesMergeAnimated: typeof SourcesMergeAnimatedComponent;
       scenarios: {
         publishSubscribe: typeof publishSubscribeScenario;
         requestReply: typeof requestReplyScenario;

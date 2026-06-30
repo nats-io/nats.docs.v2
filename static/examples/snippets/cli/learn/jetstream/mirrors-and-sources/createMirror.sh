@@ -4,5 +4,5 @@
 nats stream add ORDERS-ARCHIVE --mirror ORDERS
 
 # Confirm the mirror caught up. The Mirror Information section reports
-# the upstream stream name, the replication Lag, and time since Active.
+# the upstream stream name, the replication Lag, and the Last Seen time.
 nats stream info ORDERS-ARCHIVE

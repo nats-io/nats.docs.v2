@@ -9,4 +9,4 @@ nats stream info ORDERS-ARCHIVE
 #
 #           Stream Name: ORDERS
 #                   Lag: 0
-#                Active: 1.20s
+#             Last Seen: 1.20s

@@ -46,7 +46,11 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "learn-jetstream-your-first-stream-create/main.go",
             "learn-jetstream-your-first-stream-info": "learn-jetstream-your-first-stream-info/main.go",
+            "learn-jetstream-mirrors-and-sources-createMirror": "learn-jetstream-mirrors-and-sources-createMirror/main.go",
+            "learn-jetstream-mirrors-and-sources-mirrorLag": "learn-jetstream-mirrors-and-sources-mirrorLag/main.go",
+            "learn-jetstream-mirrors-and-sources-createSource": "learn-jetstream-mirrors-and-sources-createSource/main.go",
             "learn-jetstream-publishing-sync": "learn-jetstream-publishing-sync/main.go",
+            "learn-jetstream-advanced-publishing-async": "learn-jetstream-advanced-publishing-async/main.go",
             "learn-jetstream-publishing-pubAck": "learn-jetstream-publishing-pubAck/main.go",
             "learn-jetstream-publishing-dedup": "learn-jetstream-publishing-dedup/main.go",
             "learn-jetstream-publishing-confirmStored": "learn-jetstream-publishing-confirmStored/main.go",
@@ -74,6 +78,13 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-retention-policies-workQueueCreate": "learn-jetstream-retention-policies-workQueueCreate/main.go",
             "learn-jetstream-retention-policies-workqueueOverlap": "learn-jetstream-retention-policies-workqueueOverlap/main.go",
             "learn-jetstream-retention-policies-retentionSwitchRejected": "learn-jetstream-retention-policies-retentionSwitchRejected/main.go",
+        },
+    }, {
+        repo: "synadia-io/orbit.go",
+        branch: "jetstream-docs",
+        directory: "jetstreamext/examples/",
+        examples: {
+            "learn-jetstream-advanced-publishing-atomic": "atomicbatchdocs/main.go",
         },
     }],
     "rust": [{
@@ -107,7 +118,11 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "docs_learn_jetstream_your_first_stream_create.rs",
             "learn-jetstream-your-first-stream-info": "docs_learn_jetstream_your_first_stream_info.rs",
+            "learn-jetstream-mirrors-and-sources-createMirror": "docs_learn_jetstream_mirrors_and_sources_create_mirror.rs",
+            "learn-jetstream-mirrors-and-sources-mirrorLag": "docs_learn_jetstream_mirrors_and_sources_mirror_lag.rs",
+            "learn-jetstream-mirrors-and-sources-createSource": "docs_learn_jetstream_mirrors_and_sources_create_source.rs",
             "learn-jetstream-publishing-sync": "docs_learn_jetstream_publishing_sync.rs",
+            "learn-jetstream-advanced-publishing-async": "docs_learn_jetstream_advanced_publishing_async.rs",
             "learn-jetstream-publishing-pubAck": "docs_learn_jetstream_publishing_pub_ack.rs",
             "learn-jetstream-publishing-dedup": "docs_learn_jetstream_publishing_dedup.rs",
             "learn-jetstream-publishing-confirmStored": "docs_learn_jetstream_publishing_confirm_stored.rs",
@@ -135,6 +150,13 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-retention-policies-workQueueCreate": "docs_learn_jetstream_retention_policies_work_queue_create.rs",
             "learn-jetstream-retention-policies-workqueueOverlap": "docs_learn_jetstream_retention_policies_workqueue_overlap.rs",
             "learn-jetstream-retention-policies-retentionSwitchRejected": "docs_learn_jetstream_retention_policies_retention_switch_rejected.rs",
+        },
+    }, {
+        repo: "synadia-io/orbit.rs",
+        branch: "jetstream-docs",
+        directory: "jetstream-extra/examples/",
+        examples: {
+            "learn-jetstream-advanced-publishing-atomic": "docs_atomic_batch.rs",
         },
     }],
     "javascript": [{
@@ -168,7 +190,12 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "learn-jetstream-your-first-stream-create.ts",
             "learn-jetstream-your-first-stream-info": "learn-jetstream-your-first-stream-info.ts",
+            "learn-jetstream-mirrors-and-sources-createMirror": "learn-jetstream-mirrors-and-sources-createMirror.ts",
+            "learn-jetstream-mirrors-and-sources-mirrorLag": "learn-jetstream-mirrors-and-sources-mirrorLag.ts",
+            "learn-jetstream-mirrors-and-sources-createSource": "learn-jetstream-mirrors-and-sources-createSource.ts",
             "learn-jetstream-publishing-sync": "learn-jetstream-publishing-sync.ts",
+            "learn-jetstream-advanced-publishing-async": "learn-jetstream-advanced-publishing-async.ts",
+            "learn-jetstream-advanced-publishing-atomic": "learn-jetstream-advanced-publishing-atomic.ts",
             "learn-jetstream-publishing-pubAck": "learn-jetstream-publishing-pubAck.ts",
             "learn-jetstream-publishing-dedup": "learn-jetstream-publishing-dedup.ts",
             "learn-jetstream-publishing-confirmStored": "learn-jetstream-publishing-confirmStored.ts",
@@ -229,7 +256,12 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "learn_jetstream_your_first_stream_create.py",
             "learn-jetstream-your-first-stream-info": "learn_jetstream_your_first_stream_info.py",
+            "learn-jetstream-mirrors-and-sources-createMirror": "learn_jetstream_mirrors_and_sources_create_mirror.py",
+            "learn-jetstream-mirrors-and-sources-mirrorLag": "learn_jetstream_mirrors_and_sources_mirror_lag.py",
+            "learn-jetstream-mirrors-and-sources-createSource": "learn_jetstream_mirrors_and_sources_create_source.py",
             "learn-jetstream-publishing-sync": "learn_jetstream_publishing_sync.py",
+            "learn-jetstream-advanced-publishing-async": "learn_jetstream_advanced_publishing_async.py",
+            "learn-jetstream-advanced-publishing-atomic": "learn_jetstream_advanced_publishing_atomic.py",
             "learn-jetstream-publishing-pubAck": "learn_jetstream_publishing_pub_ack.py",
             "learn-jetstream-publishing-dedup": "learn_jetstream_publishing_dedup.py",
             "learn-jetstream-publishing-confirmStored": "learn_jetstream_publishing_confirm_stored.py",
@@ -290,7 +322,11 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.java",
             "learn-jetstream-your-first-stream-info": "LearnJetStreamYourFirstStreamInfo.java",
+            "learn-jetstream-mirrors-and-sources-createMirror": "LearnJetStreamMirrorsAndSourcesCreateMirror.java",
+            "learn-jetstream-mirrors-and-sources-mirrorLag": "LearnJetStreamMirrorsAndSourcesMirrorLag.java",
+            "learn-jetstream-mirrors-and-sources-createSource": "LearnJetStreamMirrorsAndSourcesCreateSource.java",
             "learn-jetstream-publishing-sync": "LearnJetStreamPublishingSync.java",
+            "learn-jetstream-advanced-publishing-async": "LearnJetStreamAdvancedPublishingAsync.java",
             "learn-jetstream-publishing-pubAck": "LearnJetStreamPublishingPubAck.java",
             "learn-jetstream-publishing-dedup": "LearnJetStreamPublishingDedup.java",
             "learn-jetstream-publishing-confirmStored": "LearnJetStreamPublishingConfirmStored.java",
@@ -318,6 +354,13 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-retention-policies-workQueueCreate": "LearnJetStreamRetentionPoliciesWorkQueueCreate.java",
             "learn-jetstream-retention-policies-workqueueOverlap": "LearnJetStreamRetentionPoliciesWorkqueueOverlap.java",
             "learn-jetstream-retention-policies-retentionSwitchRejected": "LearnJetStreamRetentionPoliciesRetentionSwitchRejected.java",
+        },
+    }, {
+        repo: "synadia-io/orbit.java",
+        branch: "jetstream-docs",
+        directory: "batch-publish/src/examples/java/io/synadia/examples/",
+        examples: {
+            "learn-jetstream-advanced-publishing-atomic": "AtomicBatchDocExample.java",
         },
     }],
     "csharp": [{
@@ -351,7 +394,11 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.cs",
             "learn-jetstream-your-first-stream-info": "LearnJetStreamYourFirstStreamInfo.cs",
+            "learn-jetstream-mirrors-and-sources-createMirror": "LearnJetStreamMirrorsAndSourcesCreateMirror.cs",
+            "learn-jetstream-mirrors-and-sources-mirrorLag": "LearnJetStreamMirrorsAndSourcesMirrorLag.cs",
+            "learn-jetstream-mirrors-and-sources-createSource": "LearnJetStreamMirrorsAndSourcesCreateSource.cs",
             "learn-jetstream-publishing-sync": "LearnJetStreamPublishingSync.cs",
+            "learn-jetstream-advanced-publishing-async": "LearnJetStreamAdvancedPublishingAsync.cs",
             "learn-jetstream-publishing-pubAck": "LearnJetStreamPublishingPubAck.cs",
             "learn-jetstream-publishing-dedup": "LearnJetStreamPublishingDedup.cs",
             "learn-jetstream-publishing-confirmStored": "LearnJetStreamPublishingConfirmStored.cs",
@@ -379,6 +426,13 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-retention-policies-workQueueCreate": "LearnJetStreamRetentionPoliciesWorkQueueCreate.cs",
             "learn-jetstream-retention-policies-workqueueOverlap": "LearnJetStreamRetentionPoliciesWorkqueueOverlap.cs",
             "learn-jetstream-retention-policies-retentionSwitchRejected": "LearnJetStreamRetentionPoliciesRetentionSwitchRejected.cs",
+        },
+    }, {
+        repo: "synadia-io/orbit.net",
+        branch: "jetstream-docs",
+        directory: "tools/DocsExamples/",
+        examples: {
+            "learn-jetstream-advanced-publishing-atomic": "ExampleAtomicBatchDoc.cs",
         },
     }],
 };
