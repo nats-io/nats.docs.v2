@@ -48,7 +48,7 @@ leave the rest unlimited.
 MaxAge evicts by the clock; MaxMsgs evicts by the count. Same discard,
 two different triggers:
 
-<div class="nats-flow" data-scenario="maxAgeAnimated" data-width="420" data-height="200"></div>
+<div class="nats-flow" data-scenario="maxAgeAnimated" data-width="620" data-height="200"></div>
 
 <div class="nats-flow" data-scenario="maxMsgsAnimated" data-width="520" data-height="200"></div>
 
