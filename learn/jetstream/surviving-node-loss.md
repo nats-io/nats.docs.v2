@@ -41,6 +41,8 @@ two, and two out of three is a **majority**. The stream keeps serving
 reads and writes through the failure, with no data loss and no manual
 recovery.
 
+<div class="nats-flow" data-scenario="nodeLossAnimated" data-width="780" data-height="300"></div>
+
 The majority matters because the replicas have to agree on the order of
 messages. They settle that order by majority vote, so the group keeps
 working as long as more than half of its members are reachable. The
@@ -73,6 +75,8 @@ from among themselves, automatically. Writes pause for the short
 window of that election, then resume. No acked message is lost, because
 every message that received its `PubAck` was already stored on a
 majority before the old leader failed.
+
+<div class="nats-flow" data-scenario="leaderFailoverAnimated" data-width="780" data-height="320"></div>
 
 A publish that was still on its way when the old leader crashed is a
 different case. The message had been sent, but it hadn't reached a
@@ -127,6 +131,42 @@ stream it reads.
 The full set of consumer replica and storage options is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 Here the consumer just takes its count from the stream.
+
+## What replicas buy, and what they cost
+
+Replicas are a durability control. Raising the count buys fault tolerance
+and costs load. Be exact about what it does and doesn't do, because adding
+replicas is not how you scale throughput.
+
+**Stream replicas** (R=3, R=5):
+
+- Survive node loss. More copies tolerate more failures.
+- Spread reads. Any replica can serve a read, so read work moves off the
+  leader, through Direct Get or because each consumer reads from its local
+  copy.
+- Cost load across the cluster. Every replica stores the full log, and every
+  write is copied to a majority before its `PubAck`. R=3 is roughly three
+  times the storage and write traffic of R=1.
+- Don't scale writes. Every write still goes through the one leader, so a
+  higher count lowers peak write throughput rather than raising it.
+
+**Consumer replicas:**
+
+- Survive node loss. A replicated consumer keeps its read position and
+  pending acks when its leader's server dies, and the group elects a new
+  consumer leader.
+- Don't scale delivery. One consumer leader does all the work; the followers
+  only stand by to take over. Extra replicas add replication load without
+  adding throughput.
+
+When you need more throughput, the tool isn't a replica:
+
+- To scale a consumer, add workers — [Scaling a
+  consumer](/learn/jetstream/worker-pool).
+- To scale writes past one leader, split subjects across streams — [Subject
+  mapping](/learn/jetstream/subject-mapping).
+- To spread those streams across servers, see [Clustering &
+  Replication](/learn/clustering).
 
 ## Turning R=3 on
 
@@ -198,6 +238,9 @@ What changed is your mental model:
 - **File** storage survives a restart; **Memory** storage doesn't.
 - The stream has a **leader** that all writes flow through, and a new
   one is elected automatically when a server dies.
+- Replicas are a **durability** knob, not a throughput one: they survive
+  node loss but don't scale writes or delivery. Throughput comes from
+  workers and partitioning, not from more copies.
 
 ## What's next
 
