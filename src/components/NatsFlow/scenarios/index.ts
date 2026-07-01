@@ -86,3 +86,5 @@ export { ConfigReloadAnimated } from './configReloadAnimated';
 export { LameDuckUpgradeAnimated } from './lameDuckUpgradeAnimated';
 export { MirrorCopyAnimated } from './mirrorCopyAnimated';
 export { SourcesMergeAnimated } from './sourcesMergeAnimated';
+export { DirectGetAnimated } from './directGetAnimated';
+export { BatchGetAnimated } from './batchGetAnimated';

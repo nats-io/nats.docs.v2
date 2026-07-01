@@ -87,6 +87,8 @@ import type {
   LameDuckUpgradeAnimated as LameDuckUpgradeAnimatedComponent,
   MirrorCopyAnimated as MirrorCopyAnimatedComponent,
   SourcesMergeAnimated as SourcesMergeAnimatedComponent,
+  DirectGetAnimated as DirectGetAnimatedComponent,
+  BatchGetAnimated as BatchGetAnimatedComponent,
 } from '../components/NatsFlow';
 import type React from 'react';
 import type ReactDOM from 'react-dom/client';
@@ -171,6 +173,8 @@ declare global {
       LameDuckUpgradeAnimated: typeof LameDuckUpgradeAnimatedComponent;
       MirrorCopyAnimated: typeof MirrorCopyAnimatedComponent;
       SourcesMergeAnimated: typeof SourcesMergeAnimatedComponent;
+      DirectGetAnimated: typeof DirectGetAnimatedComponent;
+      BatchGetAnimated: typeof BatchGetAnimatedComponent;
       scenarios: {
         publishSubscribe: typeof publishSubscribeScenario;
         requestReply: typeof requestReplyScenario;

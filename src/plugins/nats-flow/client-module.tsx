@@ -97,6 +97,8 @@ if (ExecutionEnvironment.canUseDOM) {
       LameDuckUpgradeAnimated: module.LameDuckUpgradeAnimated,
       MirrorCopyAnimated: module.MirrorCopyAnimated,
       SourcesMergeAnimated: module.SourcesMergeAnimated,
+      DirectGetAnimated: module.DirectGetAnimated,
+      BatchGetAnimated: module.BatchGetAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,

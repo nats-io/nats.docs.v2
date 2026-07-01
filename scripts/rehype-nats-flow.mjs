@@ -5,6 +5,10 @@ import { visit } from 'unist-util-visit';
 const SCENARIO_DIR = path.resolve('src/components/NatsFlow/scenarios');
 
 const FALLBACKS = {
+  directGetAnimated:
+    'Direct Get reads one message by sequence from any copy of a replicated stream, not only the leader. ORDERS is replicated across three servers — a leader and two replicas, each holding a full copy. A reader fires a stream of Direct Gets, each for a different sequence number; every read is answered by whichever copy serves it — sometimes the leader, sometimes a replica — and a per-server tally shows the read load spreading across all three.',
+  batchGetAnimated:
+    'Batch Direct Get returns many messages over a single request, and any copy of a replicated stream can serve it. ORDERS is replicated across three servers — a leader and two replicas. Three batches run in turn, each served by a different copy, so batch reads spread across all three. Within a batch the serving copy streams the messages back one after another, each carrying a Nats-Num-Pending header that counts down — 2, then 1, then 0 on the last message — so the reader knows the batch is complete.',
   toggleableSubscribers:
     'Interactive demo: a publisher sends messages to NATS while you toggle subscribers on and off. Inactive subscribers receive nothing.',
   queueGroupAnimated:
