@@ -100,6 +100,7 @@ if (ExecutionEnvironment.canUseDOM) {
       DirectGetAnimated: module.DirectGetAnimated,
       BatchGetAnimated: module.BatchGetAnimated,
       SubjectTransformAnimated: module.SubjectTransformAnimated,
+      MessageTtlAnimated: module.MessageTtlAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,
