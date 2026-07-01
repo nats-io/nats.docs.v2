@@ -89,6 +89,7 @@ const EXAMPLES_CONFIG = {
         directory: "jetstreamext/examples/",
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "atomicbatchdocs/main.go",
+            "learn-jetstream-get-direct-batch-get": "learn-jetstream-get-direct-batch-get/main.go",
         },
     }],
     "rust": [{
@@ -165,6 +166,7 @@ const EXAMPLES_CONFIG = {
         directory: "jetstream-extra/examples/",
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "docs_atomic_batch.rs",
+            "learn-jetstream-get-direct-batch-get": "docs_learn_jetstream_get_direct_batch_get.rs",
         },
     }],
     "javascript": [{
@@ -205,6 +207,7 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-get-direct-last-for-subject": "learn-jetstream-get-direct-last-for-subject.ts",
             "learn-jetstream-get-direct-enable": "learn-jetstream-get-direct-enable.ts",
             "learn-jetstream-get-direct-direct-read": "learn-jetstream-get-direct-direct-read.ts",
+            "learn-jetstream-get-direct-batch-get": "learn-jetstream-get-direct-batch-get.ts",
             "learn-jetstream-publishing-sync": "learn-jetstream-publishing-sync.ts",
             "learn-jetstream-advanced-publishing-async": "learn-jetstream-advanced-publishing-async.ts",
             "learn-jetstream-advanced-publishing-atomic": "learn-jetstream-advanced-publishing-atomic.ts",
@@ -382,6 +385,13 @@ const EXAMPLES_CONFIG = {
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "AtomicBatchDocExample.java",
         },
+    }, {
+        repo: "synadia-io/orbit.java",
+        branch: "jetstream-docs",
+        directory: "direct-batch/src/examples/java/io/synadia/examples/",
+        examples: {
+            "learn-jetstream-get-direct-batch-get": "LearnJetStreamGetDirectBatchGet.java",
+        },
     }],
     "csharp": [{
         repo: "nats-io/nats.net",
@@ -457,6 +467,7 @@ const EXAMPLES_CONFIG = {
         directory: "tools/DocsExamples/",
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "ExampleAtomicBatchDoc.cs",
+            "learn-jetstream-get-direct-batch-get": "ExampleLearnJetStreamGetDirectBatchGet.cs",
         },
     }],
 };

@@ -59,20 +59,12 @@ a read you run often, or from far away, JetStream offers **Direct Get**: the sam
 by-sequence and by-subject reads, answered by *any* server that holds a copy of
 the stream, not only the leader.
 
-Direct Get is a stream setting, `allow_direct`, shown by `nats stream info` as
-the `Direct Get` line:
+<div class="nats-flow" data-scenario="directGetAnimated" data-width="680" data-height="300"></div>
 
-```bash
-nats stream info ORDERS
-```
-
-```
-                   Direct Get: true
-```
-
-The CLI turns it on for new streams, so `ORDERS` already has it. The line shows
-up only when the setting is on; if a stream's info has no `Direct Get` line at
-all, it's off — switch it on:
+Direct Get is the stream's `allow_direct` setting. Check it with `nats stream info ORDERS`:
+its output carries a `Direct Get: true` line when the setting is on, and no such
+line when it's off. The CLI enables it for new streams, so `ORDERS` already has
+it — turn it on for a stream that doesn't:
 
 <div class="nats-example"
      data-type="learn-jetstream-get-direct-enable"
@@ -108,11 +100,11 @@ load. When you must see your own most recent write, read the leader with
 
 A single request can return more than one message. Ask Direct Get for a range and
 the server streams the matching messages back over one request, instead of a round
-trip each. Raise the count to three:
+trip each. This reads three messages starting at sequence 1:
 
-```bash
-nats sub --stream ORDERS --direct --start-sequence 1 --count 3
-```
+<div class="nats-example"
+     data-type="learn-jetstream-get-direct-batch-get"
+     data-languages="cli,js,go,java,rust,csharp"></div>
 
 Each message carries a `Nats-Num-Pending` header counting how many still match
 after it, so the client knows when the batch is complete — the count reaches `0`
@@ -124,12 +116,15 @@ on the last message:
 [#3] ... seq 3 ...   Nats-Num-Pending: 0
 ```
 
+<div class="nats-flow" data-scenario="batchGetAnimated" data-width="680" data-height="300"></div>
+
 That makes Direct Get a cheap way to pull a slice of the log without standing up
 a consumer: a range from a sequence, the latest message on each of several
 subjects (`--last-per-subject`), or a point-in-time snapshot across subjects. A
 batch is bounded by a count or a byte budget; the request fields (`batch`,
-`max_bytes`, `multi_last`) are in the reference, and client libraries expose the
-batch read through their JetStream or Orbit helper APIs.
+`max_bytes`, `multi_last`) are in the reference. The CLI and `nats.js` have batch
+Direct Get built in; Go, Rust, Java, and C# reach it through the
+[Synadia Orbit](https://github.com/synadia-io) helper libraries.
 
 A batch read is still a one-shot snapshot, not a subscription. It returns what's
 stored when you ask and stops. To keep receiving new orders as they arrive, that's
