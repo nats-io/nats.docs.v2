@@ -7,9 +7,9 @@ description: Rewrite subjects on the way into a stream, and republish stored mes
 
 # Subject mapping and transforms
 
-A [filter](/learn/jetstream/filtering) narrows which stored messages a consumer
-receives, but it never changes a subject. **Subject mapping** does change the
-subject. JetStream rewrites subjects in three places:
+A [filter](/learn/jetstream/filtering) picks which stored messages a consumer
+sees without ever changing a subject. **Subject mapping** rewrites the subject
+itself, in three places:
 
 - **On the way in** — a stream's *subject transform* rewrites a message's
   subject as it's stored.
@@ -26,14 +26,22 @@ A transform is a `source → destination` pair. The source is a subject filter
 with the usual `*` and `>` wildcards; the destination is a subject template that
 pulls matched tokens back in by position:
 
-- `{{wildcard(1)}}` — the first `*` token from the source (`{{wildcard(2)}}` the
-  second, and so on).
-- `{{partition(n, 1)}}` — hash the first token into one of `n` buckets,
-  `0`…`n-1`, the same way every time, for deterministic partitioning.
-- `{{split(2, ".")}}`, `{{splitfromleft(1, 3)}}` — split or slice a token.
+- `{{wildcard(1)}}` — the token the first `*` matched (`{{wildcard(2)}}` the
+  second, and so on). The older `$1` form means the same thing.
+- `{{partition(n, 1)}}` — hash the token the first `*` matched into one of `n`
+  buckets, `0`…`n-1`. The same value always lands in the same bucket, so it's a
+  stable way to shard.
+- A trailing `>` in the source carries across to a `>` in the destination
+  unchanged — that's how `orders.>` maps to `dash.orders.>`, with every token
+  after `orders` riding along.
+- `{{split(1, -)}}`, `{{splitfromleft(1, 3)}}` — reshape a single matched token:
+  split it wherever a bare delimiter appears (written without quotes, and it
+  can't be `.`, which already separates tokens), or cut it at a character
+  position.
 
-The reference lists the full set (`wildcard`, `partition`, `split`,
-`splitfromleft`/`splitfromright`, `slicefromleft`/`slicefromright`).
+The reference has the complete list. You'll mostly reach for `wildcard` and
+`partition`; `split`, `splitfromleft`/`splitfromright`, and
+`slicefromleft`/`slicefromright` chop a single token when you need it.
 
 You can try a transform without a stream. `nats server mappings` takes the
 source, the destination, and a subject, and prints what it maps to:
@@ -48,9 +56,13 @@ orders.created.archived
 
 ## Rewrite subjects on the way in
 
-A stream's **subject transform** changes the subject a message is stored under.
-The stream still listens on its configured subjects; the transform decides what
-each stored message's subject becomes.
+A stream's **subject transform** rewrites the subject a message is stored under.
+The stream keeps listening on all its configured subjects: a message whose subject
+matches the transform's source is stored under the rewritten subject, and any
+other message is stored under its original subject. A transform rewrites subjects;
+it never drops a message.
+
+<div class="nats-flow" data-scenario="subjectTransformAnimated" data-width="680" data-height="300"></div>
 
 A common use is deterministic partitioning: hash a token into a fixed set of
 buckets so consumers can split the load by bucket. Leave `ORDERS` alone — this is
@@ -72,9 +84,10 @@ nats stream subjects ORDERS-SHARDED
 ```
 
 ```
-      Subject │ Count            Subject │ Count
-orders.1.acme │ 1         orders.2.wayne │ 1
+Subject         │ Count
+orders.1.acme   │ 1
 orders.1.globex │ 1
+orders.2.wayne  │ 1
 ```
 
 Each customer hashes to the same bucket every time, so a consumer filtered to one
@@ -115,10 +128,15 @@ Nats-Last-Sequence: 4
 
 Each republished message carries five headers describing where it came from:
 `Nats-Stream`, `Nats-Subject` (the original stored subject), `Nats-Sequence`,
-`Nats-Time-Stamp`, and `Nats-Last-Sequence` (the sequence of the message before
-this one, so a subscriber can spot a gap). Add `--republish-headers` to send only
-the headers, not the bodies, when subscribers only need to know that something
-changed. Clear republish with `nats stream edit ORDERS --no-republish`.
+`Nats-Time-Stamp`, and `Nats-Last-Sequence` — the stream sequence of the previous
+message *on the same subject*, or `0` if there wasn't one, so a subscriber
+following one subject can tell it missed something. Any headers the publisher set
+are carried through too.
+
+`--republish-headers` sends the headers without the bodies, for subscribers that
+only need to know something changed; each message then also carries a
+`Nats-Msg-Size` header with the omitted body's byte count. Clear republish with
+`nats stream edit ORDERS --no-republish`.
 
 ## Transform while copying
 
@@ -150,6 +168,13 @@ fire-and-forget, no storage, no acks, no replay. A subscriber that's down misses
 whatever was republished while it was away, and nothing redelivers it. Use
 republish to watch a stream live; use a consumer when a reader has to catch up on
 what it missed.
+
+**A republish destination that loops back into the stream.** The destination
+can't overlap the stream's own subjects. Point a stream that ingests `orders.>`
+at destination `orders.dash.>` and the server rejects it as a cycle (error
+`10052`). Send republished messages to a separate subject space — `dash.orders.>`,
+not something under `orders.>` — and watch for loops that span two streams in one
+account, which the server can't always catch.
 
 **Editing a transform doesn't rewrite what's already stored.** Adding or changing
 a subject transform only affects messages stored after the change. Messages
@@ -185,6 +210,12 @@ giving a single message a shorter lifespan than the rest of the stream.
 - [Reference → Create Stream](/reference/jetstream/api/stream/create) — the
   `subject_transform`, `republish`, and per-source `subject_transforms` fields,
   and the full transform function list.
+- [ADR-36: Subject Mapping Transforms in Streams](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-36.md)
+  — where a transform attaches to a stream, a source, or a mirror.
+- [ADR-30: Subject Transform](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-30.md)
+  — the transform template functions and their exact behavior.
+- [ADR-28: RePublish](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-28.md)
+  — the republish headers and the loop-prevention rules.
 - [Filtering what you consume](/learn/jetstream/filtering) — narrowing a
   consumer's view without changing subjects.
 - [Mirrors and sources](/learn/jetstream/mirrors-and-sources) — transforms
