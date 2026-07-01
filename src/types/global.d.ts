@@ -90,6 +90,7 @@ import type {
   DirectGetAnimated as DirectGetAnimatedComponent,
   BatchGetAnimated as BatchGetAnimatedComponent,
   SubjectTransformAnimated as SubjectTransformAnimatedComponent,
+  MessageTtlAnimated as MessageTtlAnimatedComponent,
 } from '../components/NatsFlow';
 import type React from 'react';
 import type ReactDOM from 'react-dom/client';
@@ -177,6 +178,7 @@ declare global {
       DirectGetAnimated: typeof DirectGetAnimatedComponent;
       BatchGetAnimated: typeof BatchGetAnimatedComponent;
       SubjectTransformAnimated: typeof SubjectTransformAnimatedComponent;
+      MessageTtlAnimated: typeof MessageTtlAnimatedComponent;
       scenarios: {
         publishSubscribe: typeof publishSubscribeScenario;
         requestReply: typeof requestReplyScenario;

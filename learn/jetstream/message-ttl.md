@@ -89,6 +89,8 @@ A message lives until the *first* deadline that arrives. The per-message
 TTL and the stream `MaxAge` are both deadlines, and the earlier one
 applies.
 
+<div class="nats-flow" data-scenario="messageTtlAnimated" data-width="680" data-height="300"></div>
+
 For the cancellation above, the 60-second TTL arrives long before the
 7-day `MaxAge`. The TTL applies, and the message expires early.
 
@@ -149,7 +151,7 @@ A few ways per-message TTL goes wrong in practice.
 **A TTL header on a stream that never opted in fails the publish. It
 does not store the message without a TTL instead.** The server rejects
 the `Nats-TTL` header with a `per-message TTL is disabled` error
-(`err_code` 10166), and the publish returns no `PubAck`. The danger is
+(`err_code` 10166), and nothing is stored. The danger is
 assuming the message landed with its TTL when it never landed at all.
 Do check the `Allows Per-Message TTL` line in `nats stream info ORDERS`
 before you rely on the header. Don't publish a TTL message and walk away
