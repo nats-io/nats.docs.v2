@@ -99,6 +99,7 @@ if (ExecutionEnvironment.canUseDOM) {
       SourcesMergeAnimated: module.SourcesMergeAnimated,
       DirectGetAnimated: module.DirectGetAnimated,
       BatchGetAnimated: module.BatchGetAnimated,
+      SubjectTransformAnimated: module.SubjectTransformAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,

@@ -88,3 +88,4 @@ export { MirrorCopyAnimated } from './mirrorCopyAnimated';
 export { SourcesMergeAnimated } from './sourcesMergeAnimated';
 export { DirectGetAnimated } from './directGetAnimated';
 export { BatchGetAnimated } from './batchGetAnimated';
+export { SubjectTransformAnimated } from './subjectTransformAnimated';
