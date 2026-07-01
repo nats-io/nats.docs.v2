@@ -2,107 +2,201 @@
 id: advanced-publishing
 title: "Advanced publishing"
 sidebar_position: 18
-description: Async, atomic-batch, and fast-ingest publishing for higher throughput or grouped writes
+description: Async, atomic-batch, and fast-ingest publishing — what each is for, the order trap in async, and the code for every mode
 ---
 
 # Advanced publishing
 
-[Publishing](/learn/jetstream/publishing) sent one message at a time and
-waited for each `PubAck`. That's the right default, and most services
-never need more. When you do — because you publish at high volume, or you
-need a group of messages to land together — JetStream offers three other
-ways to publish.
+[Publishing](/learn/jetstream/publishing) sent one order at a time and waited
+for each `PubAck`. That's the right default, and most services never need
+anything else. Two things change that: publishing at high volume, where waiting
+for each ack in turn is too slow, and writing a group of orders that only make
+sense together. JetStream has three publish modes for those cases.
 
-This page is a map of the three, not a how-to. Each one is a larger topic
-with its own protocol and per-client API; this page says what each is for
-and when to reach for it, then links to the detail. Nothing about the
-`ORDERS` stream changes here.
+This page covers each one — what it does, when to reach for it, and what it
+costs. The `ORDERS` stream you've used all chapter doesn't change; these are
+choices the publisher makes.
 
 ## Async publish
 
-A normal publish blocks until the `PubAck` comes back. An **async publish**
-doesn't: you fire many publishes in a row and collect their `PubAcks`
-later. The round trips overlap instead of running one after another, so
-throughput goes up.
+A normal publish blocks until the `PubAck` comes back, so a service that sends a
+thousand orders pays a thousand round trips end to end. An **async publish**
+doesn't wait: you fire each publish and keep going, then collect the acks
+afterward. The round trips overlap, so the same thousand orders take a fraction
+of the wall-clock time.
 
-The contract is the same as a synchronous publish — one `PubAck` per
-message, at-least-once storage — so you still have to check every ack;
-an unconfirmed publish gives up the only guarantee a JetStream publish
-offers. This is a client-library feature with no stream setting to turn
-on. The exact API varies by language; see your client library's
-documentation.
+The contract is unchanged — one `PubAck` per message, at-least-once storage — so
+you still have to check every ack. What's new is when you check it: later, in a
+batch, instead of right after each call.
+
+### The order trap
+
+Async publish has one failure mode a synchronous publish doesn't, and it's the
+reason to understand the mode before using it.
+
+The server numbers messages in the order they arrive and get stored. When you
+fire orders 1 through 6 async, they're stored at sequences 1 through 6. Now say
+order 3's ack fails — a timeout, a dropped connection — while 4, 5, and 6
+succeeded.
+
+The reorder is an after-effect of the retry. A failed publish doesn't land, so
+order 3 is simply missing — and you send it again, automatically or by hand. By
+then 4, 5, and 6 are already stored, so the re-sent order takes a higher sequence
+and ends up *after* the orders you sent next.
+
+<div class="nats-flow" data-scenario="asyncOrderingAnimated" data-width="840" data-height="380"></div>
+
+There are two fixes, for two different problems:
+
+- **If the ack was lost but the message was actually stored**, re-publishing
+  stores a second copy. Give each publish a stable `Nats-Msg-Id` (the same header
+  from [Avoiding duplicate writes](/learn/jetstream/publishing#avoiding-duplicate-writes)),
+  and the server drops the repeat instead of storing it twice.
+- **If the order itself matters**, set `Nats-Expected-Last-Subject-Sequence` on
+  each publish. The server stores the message only when the subject's last
+  sequence is the one you expect, and rejects it otherwise. An out-of-order
+  retry then fails fast — you handle the rejection — instead of silently landing
+  in the wrong place.
+
+One rule covers the rest: **an async publish you never check is a lost write.**
+Firing publishes without reading the acks gives up the only guarantee a
+JetStream publish offers. Collect every ack and confirm it.
+
+Async publish is a client-library feature — there's no stream setting to turn it
+on — and the API differs by language. Each one below fires several orders without
+awaiting each ack, then collects and checks them all afterward:
+
+<div class="nats-example"
+     data-type="learn-jetstream-advanced-publishing-async"
+     data-languages="js,go,python,java,rust,csharp"></div>
+
+A note per language: Go, Java, .NET, and Rust have a dedicated async-publish call
+that hands back a future you collect; nats.js does it by not awaiting each
+`publish()` and gathering the promises; nats.py has no first-class async publish,
+so the example approximates it with `asyncio.gather` and you add your own limit on
+how many run at once. On the CLI, the everyday `nats pub` is synchronous; the
+async path lives in the benchmark, `nats bench js pub orders.created --batch 1000`.
 
 ## Atomic batch publish
 
-An **atomic batch** stores a group of messages all-or-nothing. Either the
-whole batch is committed, or none of it is. Use it when several messages
-only make sense together — for example, the multiple keys of one record,
-where a half-written update would leave the data inconsistent.
+An **atomic batch** stores a group of messages all-or-nothing. Either the whole
+batch commits, or none of it does. Use it when several messages only make sense
+together — the line items of one order, where a half-written order would leave
+the data inconsistent.
 
-The stream must opt in with `AllowAtomicPublish`, and the client marks
-batch membership with `Nats-Batch-Id`, `Nats-Batch-Sequence`, and a final
-`Nats-Batch-Commit` header. The server holds the messages until the commit,
-then writes them as a unit. A batch is capped (1000 messages) and is
-abandoned if it stalls or a sequence gap appears, so the commit can fail —
-read the final `PubAck`. Added in server 2.12.
+<div class="nats-flow" data-scenario="atomicBatchAnimated" data-width="780" data-height="320"></div>
 
-See [ADR-50: JetStream Batch Publishing](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-50.md)
-for the header protocol, and [Reference → Create
-Stream](/reference/jetstream/api/stream/create) for the `allow_atomic`
-field.
+The stream opts in with `AllowAtomicPublish`. The client opens a batch with a
+`Nats-Batch-Id`, tags each message with an increasing `Nats-Batch-Sequence`, and
+marks the last one with `Nats-Batch-Commit`. The server holds the messages in a
+staging buffer and writes them as a unit only on commit. The committing `PubAck`
+carries two extra fields, `batch` and `count`, so you can confirm the whole group
+landed.
+
+A batch is bounded, and it can be abandoned. It's capped at 1,000 messages, a
+stream allows at most 50 batches in flight, and a batch that hits a sequence gap
+or goes ten seconds without a message is dropped — the server raises a
+`stream_batch_abandoned` advisory rather than committing a partial group. Treat
+the final `PubAck` as the only proof the batch committed. Atomic batch was added
+in server 2.12.
+
+Opt the stream in with `AllowAtomicPublish`, then open a batch, stage messages,
+and commit them as a unit. The CLI and nats.js have this in the core client; Go,
+Java, Rust, and .NET reach it through the [Synadia
+Orbit](https://github.com/synadia-io) companion libraries; nats.py drives it with
+the `Nats-Batch-*` headers directly. Each example commits three line items of one
+order:
+
+<div class="nats-example"
+     data-type="learn-jetstream-advanced-publishing-atomic"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+The wire protocol is the same underneath — the `Nats-Batch-Id`,
+`Nats-Batch-Sequence`, and `Nats-Batch-Commit` headers — so a client without an
+Orbit helper can drive a batch with raw headers, as the Python tab shows. See
+[ADR-50](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-50.md)
+for the full header set and limits.
 
 ## Fast-ingest batch publish
 
-A **fast-ingest batch** moves data into a stream at high speed without the
-atomicity. It's built to replace async publish: instead of the client
-guessing how fast to go, the server runs flow control over an open channel
-and tells each publisher how fast it may push, so many concurrent fast
-publishers stay balanced. A batch can run unbounded, and you choose whether
-a dropped message fails the batch (`gap: fail`, for ordered data like an
-object store) or is tolerated (`gap: ok`, for metrics).
+A **fast-ingest batch** moves data into a stream at high speed with the server
+setting the pace. It's built to replace async publish: instead of the client
+guessing how fast to push and paying to track every ack, the client opens one
+channel and the server runs flow control over it. The server acks in batches and
+tells each publisher how fast it may go — ramping up while it keeps up, slowing
+down under load — so many concurrent fast publishers stay balanced.
 
-The stream opts in with `AllowBatchPublish`. These batches aren't reliable
-the way atomic ones are: in `gap: ok` mode messages can be lost without the
-batch being abandoned, so it's for throughput, not guarantees. Added in
-server 2.14.
+<div class="nats-flow" data-scenario="fastIngestAnimated" data-width="760" data-height="300"></div>
 
-See [ADR-50: JetStream Batch
-Publishing](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-50.md)
-for the flow-control protocol.
+It trades away atomicity, and that trade is the choice you make per batch. A
+batch can run unbounded, and a dropped message means one of two things:
+
+- **`gap: fail`** abandons the batch on the first gap, so what's stored is in
+  order with no holes. Use it for ordered data, like the chunks of an object.
+- **`gap: ok`** reports the gap and keeps going. Use it where a hole is
+  acceptable, like a stream of metrics.
+
+The stream opts in with `AllowBatchPublish`. Fast-ingest was added in server
+2.14, and client support is still landing:
+
+| Client | Fast-ingest publish |
+| --- | --- |
+| CLI | `nats bench js pub fast` (benchmark only) |
+| Go | Synadia Orbit — `jetstreamext.NewFastPublisher` |
+| Rust | Synadia Orbit — `jetstream_extra`'s `fast_publish` |
+| nats.js | internal API (`startFastIngest`), not yet public |
+| Python, Java, .NET | `AllowBatchPublish` stream flag only — no publisher yet |
+
+Because there's no stable public publisher in most clients, this page doesn't
+show per-language code for it. When you need fast ingest today, the practical
+paths are the Orbit libraries for Go and Rust; the rest will follow. The
+flow-control protocol is in
+[ADR-50](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-50.md).
+
+## Choosing a mode
+
+Most services should publish one at a time and check each `PubAck`. Reach past
+that only when one of these is true:
+
+| Mode | Reach for it when | All-or-nothing | Opt-in |
+| --- | --- | --- | --- |
+| One at a time | The default — simple, ordered, safe to retry | n/a | none |
+| Async | You publish at volume and one-at-a-time is too slow | no | none |
+| Atomic batch | A group of messages must land together or not at all | yes | `AllowAtomicPublish` |
+| Fast-ingest | You need maximum sustained throughput and can tolerate (or fail on) gaps | no | `AllowBatchPublish` |
 
 ## Pitfalls
 
-A few things separate these from a plain publish.
+A few things separate these modes from a plain publish.
 
-**An async publish you never check is a lost write.** Firing publishes
-without reading the `PubAcks` gives up the one guarantee a JetStream
-publish offers. Collect and check every ack, or use fast-ingest, which
-makes the server pace you instead.
+**An async publish you never check is a lost write.** Firing publishes without
+reading the `PubAcks` gives up the one guarantee a JetStream publish offers.
+Collect and check every ack — and if order matters, add
+`Nats-Expected-Last-Subject-Sequence` so a retry fails fast instead of landing
+out of order.
 
-**An atomic batch can be abandoned silently.** If the batch hits a sequence
-gap, exceeds 1000 messages, or goes 10 seconds without a message, the server
-drops the whole thing and raises an advisory. Treat the final `PubAck` as
-the only proof the batch committed, and don't assume a half-sent batch
-landed.
+**An atomic batch can be abandoned silently.** If the batch hits a sequence gap,
+exceeds 1,000 messages, or goes ten seconds without a message, the server drops
+the whole thing and raises an advisory. Treat the final `PubAck` as the only
+proof the batch committed; don't assume a half-sent batch landed.
 
-**`AllowAtomicPublish` and async persistence don't mix.** A stream set to
-persist asynchronously (`PersistMode: async`) rejects atomic publishing,
-because the atomicity depends on the synchronous write path. Fast-ingest
-batches are fine on such a stream.
+**`AllowAtomicPublish` and async persistence don't mix.** A stream set to persist
+asynchronously (`PersistMode: async`) rejects atomic publishing, because the
+atomicity depends on the synchronous write path. Fast-ingest batches are fine on
+such a stream.
 
-**Fast-ingest gaps lose data in `gap: ok` mode.** That mode keeps going
-past a dropped message on purpose. Use it only when a hole is acceptable
-(metrics); for anything you can't lose, use `gap: fail` or an atomic batch.
+**Fast-ingest gaps lose data in `gap: ok` mode.** That mode keeps going past a
+dropped message on purpose. Use it only when a hole is acceptable, like metrics;
+for anything you can't lose, use `gap: fail` or an atomic batch.
 
 ## Where you are
 
-Nothing about `ORDERS` changed on this page. You now have a map of the
-three ways to publish beyond one-at-a-time:
+Nothing about `ORDERS` changed on this page. You now have the three publish modes
+beyond one-at-a-time, and the code for the one most services actually reach for:
 
-- **Async** overlaps round trips for throughput; you collect and check
-  every `PubAck` yourself.
-- **Atomic batch** commits a group of messages all-or-nothing, gated by
-  `AllowAtomicPublish`.
+- **Async** overlaps round trips for throughput. You collect and check every
+  `PubAck` yourself, and watch the order trap on retries.
+- **Atomic batch** commits a group all-or-nothing, gated by `AllowAtomicPublish`.
 - **Fast-ingest batch** trades atomicity for server-paced speed, gated by
   `AllowBatchPublish`.
 
@@ -111,9 +205,9 @@ The default one-at-a-time publish from the
 
 ## What's next
 
-The next page covers copying a stream's data elsewhere: **mirrors and
-sources**, the building blocks for read-replicas, aggregation, and
-disaster recovery across regions.
+The next page covers copying a stream's data elsewhere: **mirrors and sources**,
+the building blocks for read-replicas, aggregation, and disaster recovery across
+regions.
 
 ## See also
 
@@ -121,5 +215,7 @@ disaster recovery across regions.
   — the full atomic and fast-ingest protocols, headers, and limits.
 - [Reference → Create Stream](/reference/jetstream/api/stream/create) —
   the `allow_atomic` and `allow_batched` stream settings.
+- [Reference → JetStream Headers](/reference/jetstream/api/headers) —
+  `Nats-Expected-Last-Subject-Sequence` and the batch headers.
 - [Reference → Publish Acknowledgement](/reference/jetstream/api/stream/pub-ack)
   — the `batch` and `count` fields a batch `PubAck` carries.

@@ -36,6 +36,8 @@ stored bytes so the old contents can't be read back. That's the right
 default for a message that held data it shouldn't have, such as a card
 number a producer logged by mistake.
 
+<div class="nats-flow" data-scenario="deleteMessageAnimated" data-width="780" data-height="270"></div>
+
 From a client library you choose that cost yourself. `DeleteMsg(seq)`
 marks the message erased but leaves its bytes in place until they're
 later overwritten, which is cheap. `SecureDeleteMsg(seq)` overwrites them
@@ -58,6 +60,8 @@ stays: same config,
 same consumers, same name. Only the messages go. (Don't confuse it with
 `nats stream rm ORDERS`, which deletes the whole stream, config and
 consumers included.)
+
+<div class="nats-flow" data-scenario="purgeStreamAnimated" data-width="780" data-height="270"></div>
 
 A bare purge removes everything. Three optional flags narrow it:
 
@@ -90,6 +94,8 @@ promised: sequence numbers only ever climb. After a full purge of
 `ORDERS`, the next message you publish doesn't start over at `1`. It gets
 the number after the last one the stream ever held, because purge sets the
 stream's first sequence to one past its last.
+
+<div class="nats-flow" data-scenario="sequenceGapAnimated" data-width="780" data-height="270"></div>
 
 Consumers handle the gaps without trouble. A consumer reading `ORDERS`
 skips the sequences that are gone; it never blocks waiting for a deleted
