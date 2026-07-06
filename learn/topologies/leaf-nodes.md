@@ -50,7 +50,7 @@ clusters use internally; the leaf just extends it across one outbound
 hop. (Routing and replication inside a cluster are covered in the
 [Clustering deep dive](/learn/clustering).)
 
-<div class="nats-flow" data-scenario="leafNodeAnimated" data-width="640" data-height="400"></div>
+<div class="nats-flow" data-scenario="leafNodeAnimated" data-width="640" data-height="500"></div>
 
 The wire-level detail of the leaf node protocol (how interest and
 messages are framed across the link) is documented in
@@ -62,72 +62,59 @@ only need the config and the bridging behavior.
 The hub opens a port for leaf nodes to dial. On every `east` server,
 add a `leafnodes {}` block with a `listen` address.
 
-The default leaf node port is **7422**. Keep it distinct from the client
-port (4222), the route port (6222), and the gateway port (7222), since
-each of these four ports is a separate listener for a separate kind of
-connection.
+The default leaf node port is **7422**. It's a fourth kind of listener,
+separate from the client port (4222), the route port (6222), and the
+gateway port (7222) — one port per kind of connection.
 
-Here's `n1-east` from the previous page, now also accepting leaf
-connections. The `cluster {}` and `gateway {}` blocks from earlier stay
-exactly as they were; only the `leafnodes` block is new:
+Here's `n1-east`, the same east cluster config from before, now also
+accepting leaf connections. Only the `leafnodes` block is new:
 
 ```conf
-# n1-east.conf — carrying forward cluster + gateway, adding leafnodes
+# n1-east.conf — the east cluster config, now accepting leaf connections
 server_name: n1-east
-listen: 0.0.0.0:4222
+listen: 127.0.0.1:4222
 
 cluster {
   name: east
-  listen: 0.0.0.0:6222
+  listen: 127.0.0.1:6222
   routes: [
     nats://127.0.0.1:6223
-    nats://127.0.0.1:6224
-  ]
-}
-
-gateway {
-  name: east
-  listen: 0.0.0.0:7222
-  gateways: [
-    { name: west, url: "nats://127.0.0.1:7333" }
   ]
 }
 
 # NEW: accept inbound leaf node connections on 7422
 leafnodes {
-  listen: 0.0.0.0:7422
+  listen: 127.0.0.1:7422
 }
 ```
 
-Add the same `leafnodes {}` block to `n2-east` and `n3-east`. A leaf can
-dial any hub server; listing several gives the leaf somewhere to
-reconnect if one hub server is down.
+Add a `leafnodes {}` block to `n2-east` and `n3-east` too. Since all three
+run on one machine, give each its own leafnode port — 7423 and 7424, the
+way their client and cluster ports are already offset. A leaf can dial
+any hub server, so listing several gives it somewhere to reconnect if one
+is down.
 
 ## The leaf side: dial out with a remote
 
 The leaf does the opposite. Instead of *listening* for leaf
 connections, `factory-1` declares a **remote**: the hub it dials.
 
-A remote lives in `leafnodes.remotes` and carries three things that
-matter for this page: the hub `urls`, the `credentials` that prove who
-the leaf is, and the `account` the leaf's bridged interest joins
-locally.
+A remote lives in `leafnodes.remotes`. The one field it can't do without
+is `urls` — where to dial the hub:
 
 ```conf
 # factory-1.conf — a leaf that dials the east cluster
 server_name: factory-1
-listen: 0.0.0.0:4222
+listen: 127.0.0.1:4300
 
 leafnodes {
   remotes: [
     {
       urls: [
-        "nats://n1-east.acme.internal:7422"
-        "nats://n2-east.acme.internal:7422"
-        "nats://n3-east.acme.internal:7422"
+        "nats://127.0.0.1:7422"
+        "nats://127.0.0.1:7423"
+        "nats://127.0.0.1:7424"
       ]
-      credentials: "/etc/nats/factory-1.creds"
-      account: "ORDERS"
     }
   ]
 }
@@ -135,49 +122,43 @@ leafnodes {
 
 `factory-1` has no `cluster {}` block and no `gateway {}` block. It's a
 standalone server that reaches the rest of Acme through one outbound
-link. That's what lets it run on the plant network with nothing but
-egress.
+link — that's what lets it run on the plant network with nothing but
+egress. Its own client port (`4300`) is separate from the hub's.
 
-The `urls` are plain NATS URLs pointing at each hub server's leafnode
-listen port (`7422` here). List every hub server you want the leaf to be
-able to dial; the leaf tries them in turn.
+The `urls` point at each hub server's leafnode listen port. Listing all
+three gives the leaf somewhere to reconnect if one hub server is down; it
+tries them in turn.
 
-## Where the leaf's traffic lands: the account field
+One leaf isn't limited to one hub. `remotes` is a list: a leaf can hold
+several, each dialing a different NATS system, and bridge them all through
+the one server. A leaf can also run its own `leafnodes { listen }` block and
+become a hub for leaves further out — leaf links compose into trees, not
+just a single hub and spoke.
 
-The `account` field finishes the picture of how the leaf bridges. It
-names which *local* account on the leaf the bridged link joins: the
-account a factory machine's traffic flows into on `factory-1` itself.
+In production a remote usually carries two more fields — `credentials` to
+prove who the leaf is, and `account` to bind its traffic to a specific
+account. We skip both here — the leaf bridges in the default account —
+and come back to them in
+[Accounts: the production layer](#accounts-the-production-layer).
 
-An account is NATS's unit of subject isolation, its own flat space of
-subjects, separate from every other account. Acme runs the ORDERS
-workload inside an account named `ORDERS`, the same one the JetStream
-and Security chapters use. The leaf doesn't introduce the account
-concept; it reuses the existing `ORDERS` account and names which one
-its bridged interest joins.
+## Accounts: the production layer
 
-Two accounts are in play, one on each end of the link. The `account`
-field above selects the account on the *leaf*; the `credentials` the
-remote presents decide which account the leaf attaches to on the *hub*.
-Acme names both `ORDERS`, so the leaf's local `ORDERS` account and the
-hub's `ORDERS` account become one shared subject space across the link.
-That symmetry is optional rather than required, but it's the simple,
-common setup to start with.
+The auth-free setup above bridges in NATS's default account, which is all
+the demo needs. A production deployment usually isn't auth-free: it puts
+each workload in its own **account** — NATS's unit of subject isolation, a
+flat space of subjects separate from every other — and a leaf remote
+carries two more fields to join one:
 
-With that binding in place, every subject a factory machine publishes
-into `factory-1`'s `ORDERS` account reaches every `orders.>` subscriber
-in the hub's `ORDERS` account, and vice versa. The factory floor and the
-cloud share one subject space because both ends of the link sit in an
-`ORDERS` account.
+- `account` selects which local account on the leaf the bridged interest
+  joins.
+- `credentials` is a `.creds` file that proves the leaf's identity to the
+  hub, which attaches it to the matching account there.
 
-The `credentials` file is how the hub knows which account to attach the
-leaf to, and that it's allowed at all. It holds the leaf's user
-identity; the hub checks it against its own authorization before
-attaching the leaf to the hub's `ORDERS` account. A factory can't reach
-a hub account it has no credentials for.
-
-How those credentials are minted, and how the hub authorizes leaf
-connections, is the job of the [Security deep dive](/learn/security). We
-only need to point a remote at an existing `.creds` file here.
+Point both ends at the same account and the factory floor and the cloud
+share one isolated subject space across the link. Setting up accounts,
+minting those credentials, and authorizing leaf connections is the job of
+the [Security deep dive](/learn/security); here we stay in the default
+account.
 
 ## Local clients stay hidden behind the leaf
 
@@ -194,49 +175,44 @@ The bridge is by *interest*, not by exposing clients. A hub subscriber
 to `orders.>` receives factory orders without ever knowing how many
 machines produced them, or that they came from a leaf at all.
 
+That covers connections. **Subjects** are separate: whether a factory
+subject stays on the floor or reaches the hub depends on the account the
+leaf binds to. Bound to its own account, only the subjects that account
+imports and exports cross the link — that's **address-space isolation**, an
+account decision (the [production layer](#accounts-the-production-layer)
+above), not something the leaf link gives you for free. In the default
+account this page uses there's no subject boundary; interest flows across
+the leaf the way it flows across a cluster's routes. Connections hide on
+their own; subjects need an account.
+
 ## Send a message across the leaf link
 
 Stand up the hub and the leaf, subscribe on the factory floor, and
-publish from the hub. The message crosses the leaf link in the
+publish from the hub. The order crosses the leaf link in the
 hub-to-leaf direction.
 
-<div class="nats-example"
-     data-type="learn-topologies-leaf-nodes-leaf-bridge"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-The subscriber runs against `factory-1` on its local port. The publisher
-runs against an `east` hub server. The order arrives on the factory
-floor because the leaf carried the hub's `orders.shipped` interest up,
-and the hub forwarded the matching message down. Neither side opened a
-connection to the other beyond the single leaf link.
-
-## Inspect the link from the hub
-
-From any `east` server, ask the hub what leaf nodes are attached:
+Subscribe to `orders.>` on `factory-1`, in its own terminal:
 
 ```bash
-nats server report leafnodes
+nats sub "orders.>" --server nats://localhost:4300
 ```
 
-```
-╭──────────────────────────────────────────────────────────────────────────────╮
-│                              Leafnode Connections                              │
-├─────────┬───────────┬─────────┬───────────────────┬──────┬─────────┬──────────┤
-│ Server  │ Name      │ Account │ Address           │ RTT  │ Msgs In │ Msgs Out │
-├─────────┼───────────┼─────────┼───────────────────┼──────┼─────────┼──────────┤
-│ n1-east │ factory-1 │ ORDERS  │ 10.4.1.20:51884   │ 12ms │ 1,204   │ 87       │
-╰─────────┴───────────┴─────────┴───────────────────┴──────┴─────────┴──────────╯
+In another terminal, publish to an `east` hub server:
+
+```bash
+nats pub orders.shipped "order ord_8w2k shipped" --server nats://localhost:4222
 ```
 
-Three columns confirm the shape. `Name` is `factory-1`, the leaf. The
-`Account` is `ORDERS`, the binding from the remote. `Address` is the
-factory's outbound source address: the leaf dialed the hub, so the hub
-sees the leaf's side of the connection.
+The order arrives on the factory floor:
 
-`Msgs In` and `Msgs Out` are from the hub's point of view: orders coming
-up from the factory, and hub traffic going down. If both stay at zero,
-the link is up but no interest crosses it yet. Subscribe on one side
-and publish on the other to see them move.
+```
+[#1] Received on "orders.shipped"
+order ord_8w2k shipped
+```
+
+The leaf carried the factory's `orders.>` interest up to the hub, and the
+hub forwarded the matching message down — neither side opened a connection
+to the other beyond the single leaf link.
 
 ## JetStream over a leaf
 
@@ -255,29 +231,7 @@ We only name the domain concept here.
 
 ## Pitfalls
 
-Three problems commonly come up the first time you attach a leaf. In
-each case a config field does exactly what it says, which differs from
-what you meant.
-
-**The leaf binds to the wrong account.** The `account` field on a remote
-decides which local account on the leaf the bridged link joins. Name the
-wrong account, or omit it and let the leaf fall back to its own default
-account (`$G`), and the link still comes up green, but a factory
-subject never matches a hub subscriber, because they sit in different
-accounts. Rather than assume the binding, check it: the `Account`
-column in `nats server report leafnodes` shows the account the leaf
-actually landed in. The symptom downstream is a request that returns *no
-responders are available* even though both servers are up: the link is
-healthy, the interest just never crossed.
-
-<div class="nats-example"
-     data-type="learn-topologies-leaf-nodes-wrong-account"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-(The `credentials` file is what lets the hub authorize that binding at
-all; a wrong or missing one fails the connection with an authorization
-error instead. Minting and authorizing those creds is the
-[Security deep dive](/learn/security).)
+Two problems commonly come up the first time you attach a leaf.
 
 **Treating the leaf like an inbound connection.** A leaf dials *out*.
 The hub `listen`s on 7422; the leaf declares a `remotes` entry pointing
@@ -303,14 +257,14 @@ Acme's deployment now reaches the edge:
 - `east` and `west` clusters, joined by gateways (a super-cluster)
 - a leaf node, `factory-1`, dialing `east` over an outbound link on
   port 7422
-- the leaf bound to the `ORDERS` account, bridging `orders.*` interest
-  both ways
+- the leaf bridging `orders.*` interest both ways over that one link, in
+  the default account (bind it to a named account in production)
 - factory machines connected to `factory-1` as plain clients, hidden
   behind the leaf, sharing one subject space with the cloud
 
-The application code never changed. A factory machine publishes
-`orders.created` exactly the way the dev server `n1` did on
-[Single server](/learn/topologies/single-server).
+Publishing and subscribing didn't change. A factory machine publishes
+`orders.created` to `factory-1` exactly the way a client did against the
+dev server `n1` on [Single server](/learn/topologies/single-server).
 
 ## What's next
 

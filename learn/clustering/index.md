@@ -22,8 +22,6 @@ lose a server, keep serving. This chapter explains how both of those
 work. We go beneath the shapes to the agreement and replication that make
 them work.
 
-<div class="nats-flow" data-scenario="singleToClusterAnimated" data-width="600" data-height="350"></div>
-
 ## By the end you'll have
 
 - A live three-server cluster (`n1-east`, `n2-east`, `n3-east`, the same

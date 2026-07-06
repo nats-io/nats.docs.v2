@@ -9,6 +9,8 @@ import type {
   fanInScenario,
   toggleableSubscribersScenario,
   singleServerScenario,
+  topologiesSingleServerScenario,
+  topologiesClusterMeshScenario,
   clusterScenario,
   superClusterScenario,
   leafNodeScenario,
@@ -141,6 +143,8 @@ declare global {
         fanIn: typeof fanInScenario;
         toggleableSubscribers: typeof toggleableSubscribersScenario;
         singleServer: typeof singleServerScenario;
+        topologiesSingleServer: typeof topologiesSingleServerScenario;
+        topologiesClusterMesh: typeof topologiesClusterMeshScenario;
         cluster: typeof clusterScenario;
         superCluster: typeof superClusterScenario;
         leafNode: typeof leafNodeScenario;
