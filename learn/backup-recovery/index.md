@@ -69,9 +69,10 @@ live in the [Clustering & Replication](/learn/clustering) deep dive.
   (restore the snapshot or promote the mirror), walked against the
   real objects.
 - An off-site, encrypted copy of the platform's identity (the
-  `ACME` operator, the `ORDERS` and `ANALYTICS` accounts, the
-  `order-svc` and `analytics-reader` creds, and the server config), and
-  a procedure that puts it all back in a clean-room rebuild.
+  `ACME` operator and the `ORDERS` and `ANALYTICS` accounts with every
+  JWT and private seed, plus the server config), and a procedure that
+  puts it all back in a clean-room rebuild and re-mints any lost creds
+  files.
 
 ## Who this is for
 
@@ -115,7 +116,7 @@ copy those files off-site and put them back.
 | [Stream backup and restore](/learn/backup-recovery/stream-backup-restore) | Take a point-in-time snapshot of `ORDERS`, restore it, and verify the counts match |
 | [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources) | Stand up `ORDERS_DR` at a second site, read its lag, and see why a mirror is not a backup |
 | [Disaster recovery](/learn/backup-recovery/disaster-recovery) | A runbook that picks restore or promotion per failure class, and how to promote a mirror |
-| [Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup) | Back up and restore the operator, accounts, creds, and server config off-site |
+| [Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup) | Back up and restore the operator, accounts, keys, and server config off-site |
 | [Where to go next](/learn/backup-recovery/where-next) | The whole game recapped, plus a single production checklist |
 
 ## Prerequisites
@@ -126,8 +127,9 @@ You'll need the world the earlier chapters built, running locally:
   the `ORDERS` stream. Memory streams can't be snapshotted, so file
   storage isn't optional here.
 - The `nats` CLI installed and pointed at that server.
-- The `nsc` CLI and the `~/.nsc` tree from the Security chapter, holding
-  the `ACME` operator and the `ORDERS` and `ANALYTICS` accounts.
+- The `nats auth` store from the Security chapter (the tree under
+  `$XDG_DATA_HOME/nats`), holding the `ACME` operator and the `ORDERS`
+  and `ANALYTICS` accounts.
 - A second place to put copies: a second site for the mirror, and any
   off-site location (another disk, a bucket) for snapshots and identity.
 

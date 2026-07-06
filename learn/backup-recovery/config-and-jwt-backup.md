@@ -2,7 +2,7 @@
 id: config-and-jwt-backup
 title: Config and JWT backup
 sidebar_position: 5
-description: Back up and restore the operator, accounts, creds, nkeys, and server config off-site so the identity plane survives a clean-room rebuild
+description: Back up and restore the operator, accounts, keys, and server config off-site so the identity plane survives a clean-room rebuild
 ---
 
 # Config and JWT backup
@@ -31,97 +31,140 @@ Everything that proves who may touch the `ORDERS` platform reduces to
 files on disk. There are three groups, and losing any one of them breaks
 the platform in a different way.
 
-The first group is the **nsc tree** under `~/.nsc`. This is where the
-`nsc` tool keeps the trust chain it built in the Security chapter. Two
-kinds of file matter here. A **JWT** is the signed identity token: one
-for the operator, one for each account. An **nkey** is the private signing key
-that produced that signature. The layout for the Acme world:
+The first group is the **`nats auth` store**, the directory tree the
+Security chapter built under `$XDG_DATA_HOME/nats` (by default
+`~/.local/share/nats`). Two kinds of file live in it. A **JWT** is the
+signed identity token: one for the operator, one per account, one per
+user. A **seed** (an `.nk` file) is the private nkey that produced that
+signature. The layout for the Acme world:
 
 ```text
-~/.nsc/nats/ACME/ACME.jwt                  # operator JWT
-~/.nsc/nats/ACME/ORDERS/ORDERS.jwt         # ORDERS account JWT
-~/.nsc/nats/ACME/ANALYTICS/ANALYTICS.jwt   # ANALYTICS account JWT
-~/.nsc/nkeys/ACME/ACME.nk                  # operator nkey (signs accounts)
-~/.nsc/nkeys/ACME/ORDERS/ORDERS.nk         # ORDERS account nkey (signs users)
-~/.nsc/nkeys/ACME/ANALYTICS/ANALYTICS.nk   # ANALYTICS account nkey
+$XDG_DATA_HOME/nats/nsc/            # store root; the on-disk layout is nsc-compatible
+├── keys/
+│   └── keys/
+│       ├── O/BJ/OBJYFWT2….nk       # operator identity seed
+│       ├── O/CY/OCYOEBDC….nk       # operator signing-key seed
+│       ├── A/CX/ACXV2TF4….nk       # ORDERS account seed (+ ANALYTICS, SYSTEM)
+│       └── U/A2/UA2YLJKK….nk       # order-svc user seed (+ analytics-reader, admin)
+└── stores/
+    └── ACME/
+        ├── ACME.jwt                # operator JWT
+        └── accounts/
+            ├── ORDERS/ORDERS.jwt
+            ├── ORDERS/users/order-svc.jwt
+            ├── ANALYTICS/…         # ANALYTICS.jwt, analytics-reader.jwt
+            └── SYSTEM/…            # SYSTEM.jwt, admin.jwt
 ```
 
-The JWTs are public; they only assert identity, they sign nothing. The
-nkeys are secret. An nkey is the private key that produced a JWT's
-signature, so a leaked nkey lets identity be forged, and a lost nkey means
-identity is lost. Protect the `nkeys` subtree with the same controls you
-apply to stored passwords.
+The `stores` half holds only JWTs, which are public; they assert
+identity, they sign nothing. The `keys` half is secret. A seed is the
+private key behind a JWT's signature, so a leaked seed lets identity be
+forged, and a lost seed means identity is lost. Protect the `keys`
+subtree with the same controls you apply to stored passwords.
 
 The second group is the **creds files**. A `.creds` file is a user's JWT
-and nkey concatenated into one file: the thing a client points at to
-connect. Each service has one:
+and seed concatenated into one file: the thing a client points at to
+connect. They aren't inside the store — each one landed wherever
+`--credential` wrote it when the user was created, and the copies your
+services run with sit on the client machines. These are the files
+`order-svc` and `analytics-reader` present at connect time.
 
-```text
-~/.nsc/.../users/order-svc.creds          # ORDERS account user
-~/.nsc/.../users/analytics-reader.creds   # ANALYTICS account user
-```
-
-The exact path under the tree depends on how `nsc` was configured, but
-`nsc list users` will print it. These are the files `order-svc` and
-`analytics-reader` present at connect time.
-
-The third group is the **server config**, the `nats-server.conf` the
-running cluster reads. It isn't identity itself, but it points at all of
-it: where the operator JWT lives, where the account resolver is, the TLS
-files, and the JetStream store directory. Restore the keys without the
-config and the server doesn't know to trust them.
+The third group is the **server config**, the `server.conf` that
+`nats server generate` wrote for the running cluster. It isn't identity
+itself, but it anchors it: the operator JWT the server trusts, the
+`SYSTEM` account preload, and the resolver directory where account JWTs
+land. Restore the keys without the config and the server doesn't know to
+trust them.
 
 ```conf
-# /etc/nats/nats-server.conf — what ties the identity together
-operator: /etc/nats/ACME.jwt
+# ./acme-server/server.conf — what ties the identity together
+operator: eyJ0eXAiOiJKV1Qi...              # the full ACME operator JWT
 
-resolver: {
-  type: full
-  dir: /etc/nats/jwt          # the account resolver's local JWT cache
+system_account: AAW27T5RB3M5GNDKLGEZ...    # the SYSTEM account public key
+
+resolver_preload {
+    # SYSTEM account JWT, baked into the config
+    AAW27T5RB3M5GNDKLGEZ...: eyJ0eXAiOiJKV1Qi...
 }
 
-jetstream {
-  store_dir: /var/lib/nats/jetstream
+resolver {
+   type: full
+   dir: /var/lib/nats/resolver             # the server's own copy of account JWTs
 }
 ```
 
 The `resolver` block is the **account resolver**, the server component
-that serves account JWTs to itself when a user connects. Note its `dir`:
-that directory is a cache of account JWTs, and it matters at restore time.
-The full set of resolver options lives in
+that verifies accounts when a user connects. Its `dir` holds the
+server's own copy of every pushed account JWT, and that copy matters at
+restore time. The full set of resolver options lives in
 [Reference → Resolver](/reference/config/resolver). For now you only need
-to know the cache exists.
+to know that the server keeps its own copy.
 
 ## Backing up the files
 
-The backup repeats one idea for all three groups: collect the files,
-encrypt them, and send them away from the cluster. A backup that sits on the
-same disk as the live keys is lost when that disk is lost; **off-site** means a copy
-that survives the event that takes the primary down.
-
-Collect the nsc tree, the server config, and the resolver cache into one
-encrypted archive:
+The store has a native backup command. One line captures the whole
+`ACME` subtree — every JWT and every private seed, operator, accounts,
+and users — in a single file:
 
 ```bash
-# Bundle the identity plane and encrypt it with a passphrase.
-# ~/.nsc carries the operator + account JWTs, the nkeys, and the creds.
-# /etc/nats carries the server config and the resolver's JWT cache.
-
-tar czf - ~/.nsc /etc/nats \
-  | openssl enc -aes-256-cbc -pbkdf2 -salt \
-      -out acme-identity-2026-06-04.tar.gz.enc
-
-# Ship the encrypted bundle off-site, away from the live cluster.
-aws s3 cp acme-identity-2026-06-04.tar.gz.enc \
-  s3://acme-dr/identity/acme-identity-2026-06-04.tar.gz.enc
+nats auth operator backup ACME acme-operator.backup
 ```
 
-The archive is dated, like the snapshot directory from [Stream backup and restore](/learn/backup-recovery/stream-backup-restore). The date
-serves a purpose. If you rotate the operator key (re-sign the chain under
-a new operator nkey), an older archive points at the *previous* operator,
-and a server restored from it trusts a chain nobody signs anymore. Tag
-each backup with the day the identity was current so you can match an
-archive to the operator version it belongs to.
+```
+Wrote backup for ACME to acme-operator.backup
+
+WARNING: The output file is unencrypted and contains secrets,
+consider encrypting it with 'nats auth nkey seal'
+```
+
+The file is a single JSON document — treat it as an opaque blob and
+don't edit it by hand. Read the warning literally: the file
+holds the operator's private seed, every signing-key seed, and every
+account and user seed. Whoever holds this one file *is* the `ACME`
+operator. Never ship it anywhere unencrypted.
+
+The `--key` flag encrypts the backup with a curve key. Generate the key
+once, then point `--key` at the seed file — it takes a file path, not
+the key string:
+
+```bash
+nats auth nkey gen curve --output backup-curve.nk
+
+nats auth operator backup ACME acme-operator.backup --key backup-curve.nk
+```
+
+```
+Wrote backup for ACME to acme-operator.backup
+```
+
+No warning this time: the output is a sealed blob that only the curve
+seed can open. That makes `backup-curve.nk` the key to every future
+restore. Store it somewhere other than the location holding the
+backups; keeping an archive and its key in the same place is a single
+point of failure that defeats the backup.
+
+Two things the backup does *not* contain. It carries no creds files —
+those are re-minted from the restored store, as you'll see below. And
+it carries nothing from the server side: back up `server.conf`
+alongside it, because the `SYSTEM` preload inside it is what lets you
+repopulate a server after a disaster. The resolver directory itself
+needs no backup; re-pushing the accounts rebuilds it.
+
+Ship both files off-site, dated:
+
+```bash
+# Ship the sealed backup and the server config away from the live cluster.
+aws s3 cp acme-operator.backup \
+  s3://acme-dr/identity/acme-operator-2026-07-04.backup
+aws s3 cp ./acme-server/server.conf \
+  s3://acme-dr/identity/server-2026-07-04.conf
+```
+
+The date serves a purpose. If you rotate the operator key (re-sign the
+chain under a new operator identity), an older backup restores the
+*previous* operator, and a server rebuilt from it trusts a chain nobody
+signs anymore. Tag each backup with the day the identity was current so
+you can match a file to the operator version it belongs to.
 
 Run this on a schedule the same way you schedule the snapshot. A daily
 cron line keeps the identity copy as fresh as the data copy:
@@ -131,65 +174,114 @@ cron line keeps the identity copy as fresh as the data copy:
 30 2 * * *  nats  /usr/local/bin/backup-identity.sh
 ```
 
-The passphrase that `openssl` prompts for is itself a secret. Store it
-somewhere other than the bucket holding the archive. Keeping an archive and
-its key in the same place is a single point of failure that defeats the
-backup.
-
 ## Restoring the files
 
-A clean-room restore is the backup run in reverse, plus one step that
-teams often miss. You decrypt and extract the bundle, then you must clear
-the account resolver's cache before the restored identity takes effect.
+A clean-room restore is one command against the backup file, then a
+verification pass, then one server-side step that teams often miss.
 
-Start by pulling the bundle back and unpacking it:
-
-```bash
-# Fetch and decrypt the off-site bundle.
-aws s3 cp \
-  s3://acme-dr/identity/acme-identity-2026-06-04.tar.gz.enc .
-
-openssl enc -d -aes-256-cbc -pbkdf2 \
-  -in acme-identity-2026-06-04.tar.gz.enc \
-  | tar xzf - -C /
-
-# Confirm nsc sees the restored chain.
-nsc list operators
-nsc list accounts --operator ACME
-```
-
-`nsc list operators` should print `ACME`, and `nsc list accounts` should
-print `ORDERS` and `ANALYTICS`. If they do, the keys and JWTs are back
-where the tools expect them.
-
-Next comes the step that a naive restore skips. The account resolver keeps a
-local cache of account JWTs in its `dir` (the `/etc/nats/jwt` from the
-config above). If that cache still holds the *old* account JWTs from
-before the failure (say, an `ORDERS` account with stale
-permissions), the server keeps serving the old identity even though the
-new JWTs are on disk. Clear the cache so the restored JWTs win:
+Pull the backup down and restore it. `--key` names the same curve seed
+file the backup was sealed with:
 
 ```bash
-# Remove the stale resolver cache, then restart the server so it
-# reloads the restored account JWTs from the nsc tree.
-rm -rf /etc/nats/jwt/*
+aws s3 cp s3://acme-dr/identity/acme-operator-2026-07-04.backup acme-operator.backup
 
-nats-server -c /etc/nats/nats-server.conf
+nats auth operator restore ACME acme-operator.backup --key backup-curve.nk
 ```
 
-With the cache empty, the server repopulates it from the restored chain
-on first connect. Finally, prove a real client can connect with a
-restored cred — identity plane and data plane together:
+```
+Operator ACME (OBJYFWT2JMTZJBNNXZWQU5UDZSQYUKK2GQ6OGTDSBDN35WW3PXWPSSP6)
+
+Configuration:
+
+            Name: ACME
+         Subject: OBJYFWT2JMTZJBNNXZWQU5UDZSQYUKK2GQ6OGTDSBDN35WW3PXWPSSP6
+        Accounts: 3
+  System Account: SYSTEM (AAW27T5RB3M5GNDKLGEZR27S2HY5XHGL2PWVKOMBU7L4ZZYEPEGHOS7J)
+    Signing Keys: OCYOEBDCJQKV3F6LWKCWVLGDOLMLZYO5LRLILZVRW376BDWBBZOO4RQX
+```
+
+The `Subject` is the same operator public key as before the loss:
+restore brings back the original keys, it doesn't mint new ones. That
+has a useful consequence — every creds file you handed out before the
+disaster keeps working, because nothing rotated. One caveat: restore
+refuses to run if the operator already exists in the store
+(`nats: error: operator ACME already exist`). It's for rebuilding a
+clean machine; to restore over a corrupted store, move the old store
+directory aside first.
+
+Confirm the chain is complete:
 
 ```bash
-# Use the restored order-svc cred to reach the restored stream.
-nats stream info ORDERS \
-  --creds ~/.nsc/.../users/order-svc.creds
+nats auth account ls
+nats auth user ls ORDERS
 ```
 
-If `order-svc` authenticates and `nats stream info ORDERS` returns the
-stream, the full platform is back: the data the earlier pages protected,
-and now the identity that gates it.
+`account ls` should list `ANALYTICS`, `ORDERS`, and `SYSTEM` with one
+user each, and `user ls ORDERS` should show `order-svc`. If a service's
+creds file was lost along with the machine it lived on, mint a fresh
+one from the restored seeds:
+
+```bash
+nats auth user credential order-svc.creds order-svc ORDERS
+```
+
+```
+Wrote credential for order-svc to order-svc.creds
+```
+
+Next comes the step that a naive restore skips. Restoring the store
+rebuilds your workstation's copy of the chain, but the server validates
+connections against its *own* copy: the account JWTs in its resolver
+directory. If that directory survived, the server never notices your
+restore. If it didn't — a fresh machine, a wiped disk — the server
+starts from the saved `server.conf`, trusts `ACME`, and still rejects
+every user:
+
+```bash
+nats pub orders.new "hello" --creds order-svc.creds
+```
+
+```
+nats: error: nats: Authorization Violation
+```
+
+The resolver directory is empty, so the server can't find the `ORDERS`
+account JWT. Fill it by pushing each account, exactly as on first
+setup:
+
+```bash
+nats auth account push ORDERS --operator ACME --creds sys.creds
+nats auth account push ANALYTICS --operator ACME --creds sys.creds
+```
+
+```
+Updating account ORDERS (ACXV2TF4CTC575UWIFY75K4ZHLS337VNP2JKAD4E5IS346TATYFTDLYR) on 1 server(s)
+
+✓ Update completed on acme-1
+
+Success 1 Failed 0 Expected 1
+```
+
+The push itself authenticates with the `SYSTEM` creds, and it can get
+in even though the resolver is empty because `server.conf` preloads the
+`SYSTEM` account JWT. That preload is the bootstrap path for the whole
+recovery — and the reason the config file belongs in the backup set.
+
+Finally, prove a real client can connect — identity plane and data
+plane together:
+
+```bash
+nats pub orders.new "back" --creds order-svc.creds
+```
+
+```
+13:48:24 Published 4 bytes to "orders.new"
+```
+
+If `order-svc` authenticates with the same creds file it had before the
+disaster, and `nats stream info ORDERS --creds order-svc.creds` returns
+the restored stream, the full platform is back: the data the earlier
+pages protected, and now the identity that gates it.
 
 ## Pitfalls
 
@@ -197,64 +289,62 @@ Three traps come up the first time teams back up identity rather than
 data. Each one stays inside this page's two jobs: backing the files
 up, and restoring them.
 
-**An nkey lost is identity lost.** There's no recovery path for a lost
-nkey: no reset link, no support ticket that regenerates it. The nkey is
-the private key that signs the chain, and without it you can't sign a
-new account or rotate a user. Don't treat the `~/.nsc/nkeys` subtree as
-ordinary config you can rebuild; back it up encrypted and off-site, and
-guard the passphrase like a password.
-
-You can prove your archive actually contains the nkeys before you ever
-need them. List the secret subtree inside the encrypted bundle without
-extracting the whole thing:
+**The backup file is the whole authority.** `operator backup` writes
+every private seed in the `ACME` subtree into one file; anyone who
+reads it can sign accounts and users as you. Treat it more carefully
+than any single key: always pass `--key` so it leaves your machine
+sealed, and keep the curve seed file away from the backups it opens.
+The flip side is that the curve seed is now load-bearing. Restore
+without it fails —
 
 ```bash
-# Verify the encrypted archive carries the nkeys, not just the JWTs.
-openssl enc -d -aes-256-cbc -pbkdf2 \
-  -in acme-identity-2026-06-04.tar.gz.enc \
-  | tar tzf - | grep '\.nk$'
-
-# Expected — three nkeys present:
-#   .nsc/nkeys/ACME/ACME.nk
-#   .nsc/nkeys/ACME/ORDERS/ORDERS.nk
-#   .nsc/nkeys/ACME/ANALYTICS/ANALYTICS.nk
-#
-# Empty output means you backed up the public JWTs but not the secret
-# keys — your archive cannot rebuild the chain. Re-run the backup over
-# all of ~/.nsc, not just the JWT paths.
+nats auth operator restore ACME acme-operator.backup
 ```
 
-**A stale account-resolver cache serves old permissions after a
-restore.** Restoring the nsc tree puts the new account JWTs on disk, but
-the resolver keeps serving whatever's in its `dir` cache until you clear
-it. The symptom is confusing: the files are correct, `nsc list accounts`
-looks right, yet connections behave as if the old permissions are still
-in force. Clear the cache (`rm -rf /etc/nats/jwt/*`) and restart before
-you trust a restored identity.
+```
+nats: error: unmarshal failed: invalid character 'e' looking for beginning of value
+```
 
-**An un-backed-up operator rotation orphans the archive.** If you rotate
-the `ACME` operator (re-sign the chain under a fresh operator nkey) and
-your last off-site backup predates the rotation, that archive restores a
-server trusting an operator nobody signs accounts under anymore. Tag
-every backup with the operator version or timestamp, and take a fresh
-backup right after any rotation, so an archive and the live
-operator never drift apart.
+— and there's no recovery path: no reset link, no support ticket that
+regenerates a seed. Losing both the store and the means to open its
+backup is losing the identity. Test-restore on a spare machine once so
+you know the file and the key actually pair up.
+
+**A restored store doesn't refill the server's resolver.** The store on
+your workstation and the resolver directory on the server are separate
+copies of the account JWTs. `operator restore` rebuilds only yours. A
+server that lost its resolver directory keeps rejecting users with
+`Authorization Violation` — the files on your side are correct,
+`account ls` looks right, yet nobody can connect. The fix is one
+`nats auth account push` per account, authenticated with the `SYSTEM`
+creds that the config's `resolver_preload` lets in. That works only
+while you still have `server.conf`; back it up with the identity, not
+as an afterthought.
+
+**An un-backed-up operator rotation orphans the archive.** If you
+rotate the `ACME` operator (re-sign the chain under a fresh operator
+key) and your last off-site backup predates the rotation, that backup
+restores an operator nobody signs accounts under anymore. Tag every
+backup with the operator version or timestamp, and take a fresh backup
+right after any rotation, so a backup and the live operator never
+drift apart.
 
 ## Where you are
 
-The identity plane is now recoverable. You have an off-site, encrypted
-archive of the `ACME` operator JWT and nkey, the `ORDERS` and
-`ANALYTICS` account JWTs and nkeys, the `order-svc` and
-`analytics-reader` creds, and the server config, dated to the operator
-version it belongs to. And you have a restore procedure that extracts it,
-clears the stale resolver cache, restarts, and verifies a real client
+The identity plane is now recoverable. You have a sealed, off-site
+backup of the whole `ACME` subtree — the operator, `ORDERS`,
+`ANALYTICS`, and `SYSTEM` with all their JWTs and private seeds — plus
+the `server.conf` that anchors it, dated to the operator version it
+belongs to, with the curve seed stored apart. And you have a restore
+procedure that rebuilds the store, re-mints any lost creds, re-pushes
+the accounts into an empty resolver, and verifies a real client
 connects.
 
 Combined with the snapshot from [Stream backup and restore](/learn/backup-recovery/stream-backup-restore)
 and the `ORDERS_DR` mirror from [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources),
 the whole platform now survives a clean-room rebuild. The data
 comes back from a snapshot, the site comes back from the mirror, and the
-identity that gates both comes back from this archive.
+identity that gates both comes back from this backup.
 
 ## What's next
 
@@ -271,6 +361,7 @@ Continue to [Where to go next](/learn/backup-recovery/where-next).
   operator, accounts, and users you backed up here actually are.
 - [Security → Cross-account](/learn/security/cross-account) — the
   `ORDERS`-to-`ANALYTICS` export/import that a cross-account mirror also
-  depends on, and must be backed up with the accounts.
+  depends on; it lives in the account JWTs, so the backup carries it.
 - [Reference → Resolver](/reference/config/resolver) — the full set of
-  account-resolver options, including the cache `dir` cleared on restore.
+  account-resolver options, including the `dir` the push refills on
+  restore.

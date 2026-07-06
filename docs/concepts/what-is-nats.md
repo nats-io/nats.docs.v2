@@ -42,7 +42,7 @@ NATS ships as a small set of pieces you compose together: the server, a client f
 - **Server** — the single [`nats-server`](https://github.com/nats-io/nats-server) binary. Clustering, JetStream, leaf nodes, MQTT, and WebSocket are all configuration on the same process.
 - **Clients** — official Tier 1 clients exist for Go, JavaScript/TypeScript, Python, Java, Rust, C#/.NET, and C. Tier 2 clients (may lag on new server features) cover Zig, Swift, Ruby, and Elixir.
 - **Orbit** — optional per-language extension libraries with higher-level utilities and experimental features built on top of the core client.
-- **Tooling** — the `nats` CLI, `nsc` for identity, NACK and Helm charts for Kubernetes, Prometheus exporter, surveyor, bridges to Kafka / JMS / Spark / Flink, and a Terraform provider.
+- **Tooling** — the `nats` CLI with built-in `nats auth` identity commands, `nsc` as the standalone identity tool, NACK and Helm charts for Kubernetes, Prometheus exporter, surveyor, bridges to Kafka / JMS / Spark / Flink, and a Terraform provider.
 
 See the [ecosystem page](ecosystem) for the full list with links.
 

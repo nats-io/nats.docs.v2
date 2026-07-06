@@ -73,7 +73,7 @@ Typical Orbit contents include extra JetStream helpers (request-many, batch publ
 
 | Name | Description |
 |---|---|
-| [natscli](https://github.com/nats-io/natscli) | The everyday `nats` CLI. Publish, subscribe, manage streams and consumers, inspect a running server. Most examples in these docs use it |
+| [natscli](https://github.com/nats-io/natscli) | The everyday `nats` CLI. Publish, subscribe, manage streams and consumers, inspect a running server, manage operators, accounts, and users with `nats auth`. Most examples in these docs use it |
 | [nats-top](https://github.com/nats-io/nats-top) | `top`-style live view of server activity |
 | [nats-box](https://github.com/nats-io/nats-box) | Container image bundling the common NATS utilities (`nats`, `nsc`, `nk`) for ad-hoc shells in Kubernetes |
 
@@ -83,7 +83,7 @@ Tools and libraries for managing operators, accounts, users, and signing keys wi
 
 | Name | Description |
 |---|---|
-| [nsc](https://github.com/nats-io/nsc) | CLI for managing operators, accounts, and users |
+| [nsc](https://github.com/nats-io/nsc) | Standalone CLI for managing operators, accounts, and users. An alternative to the `nats auth` commands built into the `nats` CLI; reads the same on-disk store and covers operations `nats auth` doesn't yet |
 | [synadia-io/jwt-auth-builder.go](https://github.com/synadia-io/jwt-auth-builder.go) | Programmatic builder for accounts and users (alternative to driving `nsc` from code) |
 | [synadia-io/callout.go](https://github.com/synadia-io/callout.go) | Go SDK for writing auth-callout services |
 | [synadia-io/callout.net](https://github.com/synadia-io/callout.net) | .NET SDK for writing auth-callout services |
