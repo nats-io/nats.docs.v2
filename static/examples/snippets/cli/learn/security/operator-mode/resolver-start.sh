@@ -1,17 +1,23 @@
 #!/bin/bash
-# Point nats-server at a nats-based account resolver, start it, then push the
-# ACME accounts so the server can validate users in ORDERS and ANALYTICS.
+# Start the server with the generated resolver config, then push the
+# ACME accounts so it can validate users in ORDERS and ANALYTICS.
 
-# Generate the server config for a full nats-based resolver.
-# It embeds the operator JWT and system account, and a resolver { type: full } block.
-nsc generate config --nats-resolver > resolver.conf
+# nats server generate is interactive: pick the template
+# "'nats auth' managed NATS Server configuration" and answer the
+# prompts. It writes ./acme-server/server.conf.
+nats server generate ./acme-server
 
-# Start the server with that config. The ./jwt directory starts empty.
-nats-server -c resolver.conf &
+# Start the server. Its resolver directory begins empty.
+# Leave it running; the commands below go in a second terminal.
+nats-server -c ./acme-server/server.conf
 
-# Tell nsc the server's NATS URL so it knows where to deliver account JWTs.
-nsc edit operator --account-jwt-server-url nats://localhost:4222
+# Create a SYSTEM user. Its creds are what authorizes a push.
+nats auth user add admin SYSTEM --defaults --credential sys.creds
 
-# Push every account JWT under ACME to the running server.
-# User JWTs are NOT pushed -- clients present their own at connect time.
-nsc push --all
+# Push each account JWT to the running server. Push is per account.
+nats auth account push ORDERS -s nats://127.0.0.1:4222 --creds sys.creds
+# Updating account ORDERS (AC6S25M37MU5PJGKYF5QPJPJ6XDQZXJPIPTMCR5MK7ZALYQGX6MH4IRU) on 1 server(s)
+# ✓ Update completed on acme-1
+# Success 1 Failed 0 Expected 1
+nats auth account push ANALYTICS -s nats://127.0.0.1:4222 --creds sys.creds
+# Success 1 Failed 0 Expected 1

@@ -13,46 +13,45 @@ chapter answers each one in turn, then ties them together by securing a
 real workload.
 
 The workload is the order platform from the JetStream chapter. It uses
-the same `ORDERS` world and the same message shape, now with access
-controls in place.
+the same `ORDERS` name (now an account, not a stream) and the same
+message shape, with access controls in place. The same server runs
+across the whole chapter, reconfigured a step at a time.
 
 ## The three parts of security
 
-Every page in this chapter belongs to one of three parts. Naming them
-up front gives you a place to file each new mechanism as it arrives.
+Every page in this chapter belongs to one of three parts.
 
-**Authentication** answers _who are you_. A connecting application
-presents some proof of identity (a password, a token, an nkey, or a
+**Authentication** answers who you are. A connecting application
+presents proof of identity (a password, a token, an nkey, or a
 JWT), and the server decides whether to admit it. The authentication
 pages cover this, from [Authentication basics](./authentication-basics)
-through [Decentralized authentication](./decentralized-auth) and
-[Operator mode](./operator-mode), plus [Auth callout](./auth-callout).
+through [Operator mode](./operator-mode) and
+[Decentralized authentication](./decentralized-auth), plus
+[Auth callout](./auth-callout).
 
-**Authorization** answers _what may you do_. Once admitted, a user can
-publish and subscribe only to the subjects you grant it.
-Everything else is denied. The [Authorization](./authorization) page
+**Authorization** answers what you're allowed to do. Once admitted, a
+user can publish and subscribe only to the subjects you grant it; the
+server denies everything else. The [Authorization](./authorization) page
 covers this.
 
-**Encryption** answers _is the wire safe_. TLS protects each connection
-from eavesdropping and tampering, and a client certificate can even
-serve as the identity itself. The [Encryption & TLS](./encryption) page
+**Encryption** answers whether the wire is safe. TLS protects each
+connection from eavesdropping and tampering, and a client certificate
+can serve as the identity itself. The [Encryption & TLS](./encryption) page
 covers this.
 
 ## Accounts scope all three
 
-The three parts are scoped by a fourth idea that comes first: the
-**account**.
+A fourth idea scopes all three: the **account**.
 
-An account is an isolated tenant. Each account has its own users, its
-own subject space, and its own view of the world. Two accounts never see
+An account is an isolated tenant. Each account has its own users and its
+own subject space. Two accounts never see
 each other's messages unless you deliberately connect them.
-[Accounts & multitenancy](./accounts-and-multitenancy) builds the two
+[Accounts and multitenancy](./accounts-and-multitenancy) builds the two
 accounts this chapter uses, and [Cross-account](./cross-account)
-connects them on purpose.
+connects them.
 
-Put together, the full picture is that a **user** authenticates into an
-**account**, where **permissions** decide what it may do, over a
-connection that **TLS** keeps safe.
+A user authenticates into an account, where permissions decide what it
+may do, over a connection that TLS keeps safe.
 
 ## What you'll have built
 
@@ -64,11 +63,11 @@ different ways, both producing the same running system.
 - A user `order-svc` in `ORDERS` that may publish `orders.>` and nothing
   else, and a user `analytics-reader` in `ANALYTICS` that may read only
   the orders it's shown.
-- A deliberate bridge: `ORDERS` **exports** the subject `orders.shipped`
-  and `ANALYTICS` **imports** it, so analytics sees shipped orders and
+- A deliberate bridge: `ORDERS` exports the subject `orders.shipped`
+  and `ANALYTICS` imports it, so analytics sees shipped orders and
   no other order events.
-- The same setup rebuilt under an **operator** named `ACME`, where the
-  server trusts a single signing key instead of a config user list.
+- The same setup rebuilt under an operator named `ACME`, where the
+  server trusts the operator's public key instead of a config user list.
 - TLS on the client connection, with mutual TLS as the next step up.
 - An external `auth-svc` that authenticates clients on the server's
   behalf through an auth callout.
@@ -77,9 +76,9 @@ different ways, both producing the same running system.
 
 You've read the [Core Concepts → Security](/concepts/security) primer
 or are otherwise comfortable with NATS basics: publishing, subscribing,
-and subjects. This chapter doesn't re-teach those.
+and [subjects](/concepts/subjects). This chapter doesn't re-teach those.
 
-It also assumes you've met JetStream, since the running scenario is the
+It also assumes you know JetStream, since the running scenario is the
 same `ORDERS` platform. If you haven't, the
 [Core Concepts → JetStream](/concepts/jetstream) primer is enough
 background, and the [JetStream deep dive](/learn/jetstream) covers it in
@@ -88,46 +87,38 @@ work.
 
 ## How to read it
 
-Each page introduces at most two new concepts. Pages build on the
-previous one: the same accounts and users carry forward, and each
-page states exactly how the configuration changes from the last.
+Each page introduces at most two new concepts. The same accounts and
+users carry forward, and each page states exactly how the configuration
+changes from the last.
 
 Security in NATS has many knobs: cipher suites, every JWT claim, every
-resolver type. Where a feature has a long list, the page covers only
-what you need to understand the concept and links to
+resolver type. Where a feature has a long list of options, the page
+covers only what you need to understand the concept and links to
 [Reference](/reference/) for the rest.
 
 ## Map
 
 | Page | What you learn |
 |---|---|
-| [Accounts & multitenancy](./accounts-and-multitenancy) | An account is an isolated tenant; the `$G` and `$SYS` accounts |
 | [Authentication basics](./authentication-basics) | Centralized, config-based auth and the credential types |
-| [Decentralized authentication](./decentralized-auth) | The operator, account, and user trust chain, with nkeys and JWTs |
-| [Operator mode](./operator-mode) | The `nsc` workflow and the account resolver |
 | [Authorization](./authorization) | Subject permissions: publish and subscribe allow and deny lists |
+| [Accounts and multitenancy](./accounts-and-multitenancy) | An account is an isolated tenant; the `$G` and `$SYS` accounts |
 | [Cross-account](./cross-account) | Exports and imports that share one subject across tenants |
-| [Encryption & TLS](./encryption) | TLS per connection type and mutual TLS identity mapping |
+| [Operator mode](./operator-mode) | The `nats auth` workflow and the account resolver |
+| [Decentralized authentication](./decentralized-auth) | The operator, account, and user trust chain, with nkeys and JWTs |
 | [Auth callout](./auth-callout) | Delegating the authentication decision to an external service |
+| [Encryption & TLS](./encryption) | TLS per connection type, mutual TLS identity mapping, TLS-first handshakes, and encryption at rest |
 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 
 You'll need:
 
-- A working `nats-server`. The early pages run it with a config file you
-  edit by hand; later pages add `nsc` for operator mode. Both ship with
-  the standard NATS tooling.
-- The `nats` CLI installed. The first pages use only the CLI to connect
-  and check access. Later pages add JavaScript, Go, Python, Java, Rust,
-  and C# client examples for connecting with credentials.
+- A working `nats-server`. The early pages start it with
+  `nats-server -c nats.conf`, editing the config file by hand.
+- The `nats` CLI installed. The chapter's examples are CLI; the operator
+  pages use the `nats auth` commands built into the same `nats` CLI.
+  Client libraries take the same credentials on their connect call.
 
-Open a terminal and keep a config file handy, then continue to the next
-page.
-
-## See also
-
-- [Core Concepts → Security](/concepts/security) — the five-minute
-  overview of the same material.
-- [Core Concepts → Subjects](/concepts/subjects) — the addressing model
-  that permissions are written against.
+Open a terminal and keep a config file handy. Continue to
+[Authentication basics](./authentication-basics).

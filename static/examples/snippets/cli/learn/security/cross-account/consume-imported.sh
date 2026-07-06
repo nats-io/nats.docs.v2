@@ -3,8 +3,8 @@
 # while order-svc (in ORDERS) publishes it. The export/import pair makes the
 # message cross the account boundary.
 #
-# Assumes a nats-server running with ORDERS exporting stream "orders.shipped"
-# and ANALYTICS importing it (see export-import.sh for the config).
+# Assumes the server config from this page: ORDERS exports the stream
+# "orders.shipped" and ANALYTICS imports it from ORDERS.
 
 # Context for analytics-reader in the ANALYTICS account.
 nats context save analytics \
@@ -30,6 +30,8 @@ nats --context orders pub orders.shipped \
 sleep 1
 kill "$SUB_PID"
 
-# analytics-reader receives the message even though it was published in a
-# different account, because ORDERS exports orders.shipped and ANALYTICS
-# imports it.
+# Expected (subscriber terminal): the message arrives even though it was
+# published in a different account, because ORDERS exports orders.shipped
+# and ANALYTICS imports it.
+#   [#1] Received on "orders.shipped"
+#   {"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}

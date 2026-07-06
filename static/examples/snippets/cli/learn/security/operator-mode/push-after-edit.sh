@@ -1,16 +1,17 @@
 #!/bin/bash
-# An edit only changes the LOCAL JWT in nsc's store. The server keeps the
-# old account JWT until you push again, so order-svc fails to connect.
-# Re-push after every account or operator change.
+# An edit only changes the local JWT in the nats auth store. The server
+# keeps validating against its stored copy, so until you push, the edit
+# silently has no effect: existing creds still connect, old limits hold.
 
 # Edit the ORDERS account locally (here: a connection-count limit).
-nsc edit account --name ORDERS --conns 50
+nats auth account edit ORDERS --connections 50
 
-# Without a push, the server still holds the previous ORDERS JWT:
-#   nats: Authorization Violation   (server logs: "account jwt not found")
+# No push yet: the server still enforces the previous, unlimited value.
+# Nothing errors -- the change just hasn't happened on the server.
 
-# Deliver the updated JWT to the running server, then reconnect.
-nsc push --account ORDERS
+# Deliver the updated JWT to the running server.
+nats auth account push ORDERS -s nats://127.0.0.1:4222 --creds sys.creds
+# Success 1 Failed 0 Expected 1
 
-# Confirm the server's copy matches your local store.
-nsc push --account ORDERS --diff
+# Confirm the server's copy matches: it now shows Connections: 50.
+nats auth account query ORDERS -s nats://127.0.0.1:4222 --creds sys.creds

@@ -1,22 +1,30 @@
 #!/bin/bash
-# A user that denies all subscribes (subscribe: { deny: [">"] }) cannot create
-# the reply inbox a request needs. The reply has nowhere to land, so the request
-# times out with no responders rather than returning an answer.
+# Broken state: order-svc's subscribe section denies everything:
+#   permissions: {
+#     publish: { allow: ["orders.>"] }
+#     subscribe: { deny: [">"] }
+#   }
+# A request subscribes to a temporary _INBOX.> subject before it publishes,
+# and the deny blocks that subscription, so no reply can ever arrive.
 
-# Connect as a request/reply client in the ORDERS account.
+# Connect as order-svc.
 export NATS_USER=order-svc
 export NATS_PASSWORD=s3cr3t
 
-# Send a request. The client subscribes to a reply subject under _INBOX. before
-# publishing, but the broad subscribe deny blocks that subscription, so the
-# server returns:
-#   nats: error: Permissions Violation for Subscription to "_INBOX.xxxx.*"
-# and the request gives up:
-#   nats: error: nats: timeout
+# The CLI is silent about the denial: it prints only
+#   Sending request on "orders.lookup"
+# then waits out the timeout and exits 0 — no error. The violation appears
+# in the SERVER log:
+#   [ERR] ... "$G/user:order-svc" - Subscription Violation - Subject "_INBOX.<random>", SID 1
+# (Client libraries raise a timeout error on the request instead.)
 nats req orders.lookup '{"order_id":"ord_8w2k"}' --timeout 2s
 
-# Fix: allow the inbox prefix so replies can be delivered. Add _INBOX.> to the
-# subscribe allow-list (in config or via nsc), then the request completes.
+# Fix: REPLACE the subscribe section in the server config — adding an allow
+# next to the deny does nothing, because deny beats allow:
 #   subscribe: { allow: ["_INBOX.>"] }
-# Or with nsc on a decentralized user:
-#   nsc edit user --name order-svc --account ORDERS --allow-sub "_INBOX.>"
+# Reload the server and run the same request again, with a responder
+# listening on orders.lookup. Expected output:
+#   Sending request on "orders.lookup"
+#   Received with rtt 652µs
+#   {"order_id":"ord_8w2k","status":"shipped"}
+nats req orders.lookup '{"order_id":"ord_8w2k"}' --timeout 2s

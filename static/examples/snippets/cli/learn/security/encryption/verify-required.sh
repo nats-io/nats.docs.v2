@@ -11,6 +11,7 @@ nats pub orders.shipped \
   --server tls://nats.acme.internal:4222 \
   --tlsca /etc/nats/certs/ca.pem
 
-# Expected against a verify-enabled server: the publish fails at the
-# handshake with a "bad certificate" / "certificate required" error,
-# because no --tlscert / --tlskey was supplied.
+# Expected against a verify-enabled server (no --tlscert / --tlskey given):
+#   nats: error: remote error: tls: certificate required
+# The server log shows:
+#   [ERR] ... TLS handshake error: tls: client didn't provide a certificate
