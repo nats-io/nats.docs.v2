@@ -145,7 +145,8 @@ field is left unset. Here is what each one means.
   one of these. We do that on the "Shaping the stream" page.
 - **Duplicate Tracking Window: 2m0s**. For two minutes after a
   message is stored, the server turns away a second message that
-  carries the same `Nats-Msg-Id` header. This is what lets you publish
+  carries the same [`Nats-Msg-Id`](/reference/jetstream/api/headers)
+  header. This is what lets you publish
   the same message twice without storing it twice. The
   [Publishing](/learn/jetstream/publishing) page uses it.
 

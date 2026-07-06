@@ -98,7 +98,8 @@ A `PubAck` has three fields you use regularly:
   the next section.
 
 A `PubAck` can also include a few situational fields, such as a `domain`
-for multi-tenant or leaf-node setups. The full list is in Reference. The
+for multi-tenant or leaf-node setups. The full list is in
+[Reference](/reference/jetstream/api/stream/pub-ack). The
 three above are the ones day-to-day publishing code reads.
 
 Here is the same publish, now reading the `PubAck` back:

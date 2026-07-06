@@ -122,7 +122,8 @@ That makes Direct Get a cheap way to pull a slice of the log without standing up
 a consumer: a range from a sequence, the latest message on each of several
 subjects (`--last-per-subject`), or a point-in-time snapshot across subjects. A
 batch is bounded by a count or a byte budget; the request fields (`batch`,
-`max_bytes`, `multi_last`) are in the reference. The CLI and `nats.js` have batch
+`max_bytes`, `multi_last`) are in the
+[reference](/reference/jetstream/api/stream/msg-get). The CLI and `nats.js` have batch
 Direct Get built in; Go, Rust, Java, and C# reach it through the
 [Synadia Orbit](https://github.com/synadia-io) helper libraries.
 
