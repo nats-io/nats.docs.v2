@@ -9,7 +9,7 @@
 #    authorization {
 #        # How long the server waits for auth-svc before rejecting. Default 2s.
 #        timeout: "1s"
-#        users: [ { user: "auth-svc", password: "s3cr3t" } ]
+#        users: [ { user: auth-svc, password: c4llout } ]
 #        auth_callout {
 #            issuer: "ABJHLOVMPA4CI6R5KLNGOB4GSLNIY7IOUPAJC4YFNDLQVIOBYQGUWVLA"
 #            auth_users: [ auth-svc ]
@@ -21,12 +21,11 @@ nats-server -c auth-callout.conf &
 
 # 3. Do NOT start auth-svc, to simulate an outage. A client connects with a
 #    token. The server signs a request, publishes it to $SYS.REQ.USER.AUTH,
-#    and no one replies. After the timeout the server rejects the client.
-#    Use --timeout above the callout timeout so the client error is the
-#    server's rejection, not the client giving up first.
+#    and no one replies. The 1s callout timeout is below the client's ~2s
+#    connect deadline, so the server's rejection arrives first and the
+#    client sees Authorization Violation.
 nats --server nats://localhost:4222 \
   --token "ord-token-123" \
-  --timeout 5s \
   pub orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
 
@@ -35,4 +34,4 @@ nats --server nats://localhost:4222 \
 #
 # The fix is operational, not config: run auth-svc with enough replicas
 # that one slow instance does not stall connections, and keep its
-# OIDC/LDAP lookups fast. The timeout is a backstop, not a substitute.
+# OIDC/LDAP lookups fast.

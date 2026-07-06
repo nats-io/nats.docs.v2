@@ -1,76 +1,70 @@
 ---
 id: authentication-basics
-title: "Authentication Basics"
-sidebar_position: 3
+title: "Authentication basics"
+sidebar_position: 2
 description: Centralized config-based authentication and the three credential types
 ---
 
-# Authentication Basics
+# Authentication basics
 
-The previous page gave `ORDERS` and `ANALYTICS` their own isolated
-subject spaces. Nobody's using them yet. A connection still has to
-prove who it is before the server will place it in an account.
+The index page left you with a bare `nats-server`: it admits every
+connection, and anyone who can reach the port can publish and
+subscribe. This page adds the first user list.
 
-That proof is **authentication**: the server deciding which user a
-connection is. This page covers the simplest way to do it, where the
-list of valid users lives in the server's own config file.
+That's **authentication**: the server deciding which user a connection
+is. This page covers the simplest way to do it, where the list of
+valid users lives in the server's own config file.
 
 ## Centralized authentication
 
 In **centralized authentication**, the server holds the full list of
-users in its configuration. Every username, password, and account
-assignment sits in one place: `nats.conf` on the server.
+users in its own config file, `nats.conf`.
 
-The whole model is config. When a connection presents credentials, the server
-walks its config list, finds the matching user, and admits the
-connection into that user's account. It never consults an external
-service.
+When a connection presents credentials, the server walks its config
+list, finds the matching user, and admits the connection. It never
+consults an external service.
 
 <div class="nats-flow" data-scenario="centralizedAuthAnimated" data-width="600" data-height="380"></div>
-
-The flow is direct: the client connects and offers credentials, and the
-server compares them against its config user list. A match is admitted
-into the user's account, and a mismatch is rejected.
 
 Centralized authentication is the right tool when one team owns the
 server config and the user list is small and slow to change. It lives
 entirely in one file, so it's the easiest model to read and reason
 about.
 
-It doesn't scale to many independent tenants editing their own users,
-because every change is a server-config change. The [next
-page](/learn/security/decentralized-auth) covers the model that solves
-that. For now, this page assumes one team and one config file.
-
 ## Giving order-svc a credential
 
-Recall the `ORDERS` account from the previous page. Its order service
-needs a user to connect as: `order-svc`.
+The chapter's order platform needs a user for its order service,
+`order-svc`, and one for its reporting side, `analytics-reader`.
 
-A centralized user lives inside an account's `users` array. Each entry
-names a user with a `user` field, carries that user's credential, and
-assigns the account by being nested inside it. Here's the
-`ORDERS` account with one user:
+A centralized user lives in the `users` array of the server's
+`authorization` block. Each entry names a user with a `user` field and
+carries that user's credential:
 
 ```conf
-accounts {
-  ORDERS {
-    users = [
-      { user: order-svc, password: "s3cr3t-rotate-me" }
-    ]
-  }
-  ANALYTICS {
-    users = [
-      { user: analytics-reader, password: "read-only-pw" }
-    ]
-  }
+authorization {
+  users: [
+    { user: order-svc, password: s3cr3t }
+    { user: analytics-reader, password: an4lytics }
+  ]
 }
 ```
 
-The `user` and `password` fields are the credential. The enclosing
-`ORDERS` block is the account. A connection that presents
-`order-svc` / `s3cr3t-rotate-me` is authenticated as `order-svc` and
-placed in `ORDERS`.
+The `user` and `password` fields are the credential. A connection that
+presents `order-svc` / `s3cr3t` is authenticated as `order-svc`. Both
+users share the global account, called `$G`; the
+[Accounts and multitenancy](/learn/security/accounts-and-multitenancy)
+page later gives each its own space.
+
+For a server with exactly one user, you can skip the array and put a
+single `user` and `password` pair directly in the `authorization`
+block.
+
+The `authorization` block also takes a `timeout` field: how long the
+server gives a client to finish authenticating, 2 seconds by default.
+Plain numbers are seconds; duration strings need quotes
+(`timeout: "500ms"` — an unquoted `1m` parses as a number, not a
+minute). The full field list is in
+[Reference](/reference/config/authorization).
 
 Start the server with that config:
 
@@ -88,51 +82,94 @@ the CLI that's two flags; in a client library it's two fields on the
 connect call. The user publishes the canonical order message to
 `orders.created`:
 
-<div class="nats-example" data-type="learn-security-authentication-basics-connect" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-security-authentication-basics-connect" data-languages="cli"></div>
 
-The server matched the credentials, placed the connection in `ORDERS`,
-and accepted the publish. Wrong credentials would have been rejected
-at connect time with an `authorization violation` error, before any
-publish.
+```
+14:18:38 Published 91 bytes to "orders.created"
+```
+
+The server matched the credentials and accepted the 91-byte order
+payload. A wrong password fails at connect time, before any publish:
+
+```bash
+nats pub orders.created "test" --user order-svc --password wrong
+```
+
+```
+nats: error: nats: Authorization Violation
+```
+
+An unauthenticated connect — no flags at all — fails with the same
+`Authorization Violation` error. The server gives the same answer for
+a wrong password and an unknown user, so a failed login doesn't reveal
+which half was wrong.
 
 A client offers credentials once, when it connects. Authentication
 decides the user for the whole life of that connection. What the user
 may then publish or subscribe to is a separate question:
-authorization, which has its own [page](/learn/security/authorization).
+authorization, covered on the
+[Authorization](/learn/security/authorization) page.
 
 ### Other ways a user entry can authenticate
 
 `order-svc` used a password, but config auth offers three credential
-styles in all: user/password, nkey, and token. The first two live on a
-per-account `users` entry; the third sits at the server level. The model
-doesn't change; only the field differs.
+styles in all: user/password, nkey, and token. The model doesn't
+change; only the field differs.
 
 **user/password** is the pair you just used: the client sends a
 username and a password, and the server compares the password against
-the stored value. It's the style this page uses for centralized
-auth. **nkey** is a
-public-key credential: the server stores only the user's public nkey,
-the client holds the matching private seed and proves ownership by
-signing a server-issued nonce, so nothing secret crosses the wire. We
-meet nkeys properly on the [decentralized
-authentication](/learn/security/decentralized-auth) page; here they're
-just one more way to authenticate a config user.
+the stored value.
 
-**token** is the exception: a single shared secret with no username,
-set on the server's top-level `authorization` block rather than on a
-per-account `users` entry:
+**nkey** is a public-key credential: the user entry holds only a
+public nkey — it replaces the whole user/password pair, and the server
+rejects an entry that mixes them. The client holds the matching
+private seed and proves ownership by signing a server-issued nonce, so
+nothing secret crosses the wire:
+
+```conf
+users: [
+  { nkey: UAPZQH4MNJCOVEJFERB3NFSIROQ5RE7CGBEPKAZSB6QB7IQHBKXHZPVP }
+]
+```
+
+Generate the keypair, add the printed public key to the user list, and
+connect with the seed file:
+
+<div class="nats-example" data-type="learn-security-authentication-basics-nkey-user" data-languages="cli"></div>
+
+```
+UAPZQH4MNJCOVEJFERB3NFSIROQ5RE7CGBEPKAZSB6QB7IQHBKXHZPVP
+18:02:29 Published 91 bytes to "orders.created"
+```
+
+`gen` writes the private seed to `user.nk` and prints nothing, `show`
+prints the public key the config entry above holds, and the publish
+authenticated with only the seed file — a seed the server doesn't know
+fails with the same `Authorization Violation` as a wrong password. We
+come back to nkeys on the
+[Decentralized authentication](/learn/security/decentralized-auth)
+page; here they're just one more way to authenticate a config user.
+
+**token** is a single shared secret with no username, set on the
+server's top-level `authorization` block:
 `authorization { token: "shared-secret-rotate-me" }`. Any client
-presenting the right token is admitted, which makes it a server-wide
-secret rather than a per-user one. Handy for quick internal setups.
-(When this chapter says "token" it always means this, never a JWT.)
+presenting the right token is admitted. It's the one style that can't
+be per-user, which makes it a server-wide secret — usable for quick
+internal setups but little else. (When this chapter says "token" it
+always means this, never a JWT.)
+
+One CLI trap to know: the `--user` flag doubles as a token field — its
+help text reads "Username or Token". A lone `--user` with no
+`--password` is sent as a token, so it can appear to work against a
+token-configured server and mask a misconfiguration.
 
 ## Storing passwords
 
 The config above stored `order-svc`'s password in plaintext. That's
-fine for a laptop, but not for a server anyone can read.
+fine for a laptop, but not for a config file others can read.
 
-The server enforces this. On startup it scans the user list, and if any
-password is plaintext it logs a warning:
+The server flags this itself: on startup it scans the user list, and
+if any password is plaintext it logs a warning:
 
 ```
 [WRN] Plaintext passwords detected, use nkeys or bcrypt
@@ -146,66 +183,79 @@ compare. The stored value reveals nothing usable if the config leaks.
 Generate a hash with the CLI:
 
 ```bash
-nats server passwd
+nats server passwd --pass "s3cr3t-rotate-me-later"
 ```
 
-It prompts for a password and prints a hash that begins with `$2a$`,
-`$2b$`, `$2x$`, or `$2y$` (the prefix the server uses to recognize a
-hash). Add `--generate` to have it invent a strong passphrase and hash
-it in one step.
+```
+$2a$11$4I9tIK1JVbttZYtn.F.Jse5iY5ves4EtYWIpjlwyvgVYHJc8yTvk.
+```
 
-Paste the hash into the config in place of the plaintext password.
-Write the bcrypt value without surrounding quotes; the server
-detects the `$2a$`-style prefix and treats the whole string as the
-stored hash:
+Without `--pass` it prompts interactively; `--generate` invents a
+strong passphrase and hashes it in one step, and `--cost` raises the
+hashing cost above the default 11. The command refuses passwords
+shorter than 10 characters (`password should be at least 10 characters
+long`), which is why this example hashes the longer
+`s3cr3t-rotate-me-later`.
+
+The printed hash starts with `$2a$11$` — Go's bcrypt prefix at cost
+11. The server recognizes any value matching `$2a$`, `$2b$`, `$2x$`,
+or `$2y$` as a bcrypt hash and compares everything else as plaintext.
+
+Paste the hash into the config in place of the plaintext password;
+quotes around it are optional:
 
 ```conf
-accounts {
-  ORDERS {
-    users = [
-      { user: order-svc, password: $2a$11$Vx8sQH0o6Q2yqgk0Rj4y3eF6jK7uYwq9k0Zr2nF1pD8sLm3aBcDe }
-    ]
-  }
+authorization {
+  users: [
+    { user: order-svc, password: "$2a$11$4I9tIK1JVbttZYtn.F.Jse5iY5ves4EtYWIpjlwyvgVYHJc8yTvk." }
+    { user: analytics-reader, password: an4lytics }
+  ]
 }
 ```
 
-The warning is now gone, and `order-svc` connects exactly as before:
-the client still sends the same plaintext password. Only the stored
-form changed.
+`order-svc` now authenticates with `s3cr3t-rotate-me-later` — the
+password the hash was generated from. The client still sends the
+plaintext; only the stored form is hashed. Once every password in the
+list is a hash, the startup warning goes away. (The rest of the
+chapter returns to the short plaintext `s3cr3t` so the listings stay
+readable.)
 
-The full set of `authorization` and account fields is documented in
-[Reference](/reference/). We use only `user`, `password`, `token`,
-`nkey`, and per-account `users` here.
+Tokens can be stored the same way — a bcrypt hash in the `token` field
+goes through the same comparison, and the client sends the clear
+token.
+
+Because the client still sends the plaintext over the wire, bcrypt
+protects only the config file at rest. Pair it with TLS, which the
+[Encryption & TLS](/learn/security/encryption) page sets up.
 
 ## What this page does not cover
 
 A client certificate can also be a credential: the server can map a
-certificate identity straight to a user with mTLS, so the cert *is* the
-credential. That ties into TLS, so it waits for the
-[encryption](/learn/security/encryption) page.
+certificate identity straight to a user with mTLS, so the cert *is*
+the credential. That ties into TLS, so the
+[Encryption & TLS](/learn/security/encryption) page covers it.
 
 The other open question is scale. Centralized auth keeps every user in
 one config file, which is exactly what breaks down when many tenants
-manage their own users. The next page introduces the model built for
-that.
+manage their own users. The [Operator mode](/learn/security/operator-mode)
+page introduces the model built for that.
 
 ## Pitfalls
 
-Centralized auth keeps every credential in one file you control, which
-makes a handful of mistakes easy to make and easy to avoid.
+A few things catch people when credentials live in a config file.
 
 **Running with no authentication in production.** A server with no
-`authorization` and no per-account `users` admits every connection into
-the default account. That's convenient on a laptop, but on a shared
-network anyone who can reach the port can publish and subscribe, so do
-not ship it. Give every server at least one user list, so an
-unauthenticated connect fails with an `authorization violation` error
-instead of silently succeeding.
+`authorization` block admits every connection. That's convenient on a
+laptop, but on a shared network anyone who can reach the port can
+publish and subscribe, so don't ship it. Give every server at least
+one user list, so an unauthenticated connect fails with
+`nats: error: nats: Authorization Violation` instead of silently
+succeeding.
 
-**Leaving plaintext passwords in a deployed config.** The page covered
-the fix above: the server logs `Plaintext passwords detected, use nkeys
-or bcrypt` on startup and you replace the raw value with a `nats server
-passwd` hash. The pitfall is treating that warning as noise. On any
+**Leaving plaintext passwords in a deployed config.** The server logs
+`Plaintext passwords detected, use nkeys or bcrypt` on startup, and
+the fix — a `nats server passwd` hash in place of the raw value — is
+covered above. The pitfall is treating that warning as noise. On any
 server someone else can read, store the bcrypt hash, not the plaintext.
 
 **Committing credentials to git.** A `nats.conf` with a password (even a
@@ -216,44 +266,50 @@ environment variable or a secret store, and add the real config to
 `.gitignore`.
 
 **Putting the password in the connection URL.** A URL like
-`nats://order-svc:s3cr3t-rotate-me@localhost:4222` puts the credential
-into shell history, process listings, and any log that records the
-connection string. Store it in a named context instead, then connect by
-context name with no credential on the command line:
+`nats://order-svc:s3cr3t@localhost:4222` puts the credential into
+shell history, process listings, and any log that records the
+connection string. Store it in a named context instead — passing the
+password as `"$NATS_PASSWORD"` so your shell history records only the
+variable name — then connect by context name with no credential on the
+command line:
 
-<div class="nats-example" data-type="learn-security-authentication-basics-context-creds" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-security-authentication-basics-context-creds" data-languages="cli"></div>
 
-The context holds `order-svc`'s password; the publish carries none. The
-credential never appears in the command, so it never reaches your history
-or the server's connection log.
+```
+14:19:37 Published 91 bytes to "orders.created"
+```
+
+The context holds `order-svc`'s password; the publish command carries
+none. While `NATS_PASSWORD` is exported the CLI prints
+`WARNING: Shell environment overrides in place using NATS_PASSWORD`,
+so unset it once the context is saved.
 
 ## Where you are
 
 You have:
 
 - A server started with `nats-server -c nats.conf`.
-- An `ORDERS` account with a centralized user, `order-svc`,
-  authenticated by a bcrypt-hashed password.
-- An `ANALYTICS` account with its own user, `analytics-reader`.
-- `order-svc` publishing the canonical order message to
-  `orders.created`.
-
-The credential list lives entirely in the server config, owned by one
-team in one file.
+- Two users in a top-level `authorization` block, both in the global
+  account `$G`: `order-svc` and `analytics-reader`,
+  password-authenticated — and you know how to swap any stored
+  password for a `nats server passwd` bcrypt hash.
+- Proof the passwords work: `order-svc` published the canonical order
+  message to `orders.created`, and a wrong password was rejected with
+  `Authorization Violation`.
 
 ## What's next
 
-The next page keeps the same two accounts and the same two users but
-moves the trust out of the config file. You'll see how an
-**operator** signs accounts, accounts sign users, and the server ends
-up trusting a single public key instead of a list of passwords.
+`order-svc` can prove who it is, but nothing yet limits what it may
+do: it can publish and subscribe anywhere on the server. The next page
+adds those limits.
 
-Continue to [Decentralized Authentication](/learn/security/decentralized-auth).
+Continue to [Authorization](/learn/security/authorization).
 
 ## See also
 
-- [Decentralized Authentication](/learn/security/decentralized-auth)
-  — the model that scales past one config file.
+- [Reference → authorization](/reference/config/authorization) — every
+  field of the `authorization` block, including `timeout` and
+  per-user options.
 - [Authorization](/learn/security/authorization) — what an
   authenticated user is then allowed to do.
 - [Core Concepts → Security](/concepts/security) — the five-minute
