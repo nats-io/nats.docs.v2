@@ -121,7 +121,8 @@ client whose certificate doesn't chain to `ca_file`. That proves the
 client holds a valid certificate, but it doesn't yet say who the
 client is.
 
-`verify_and_map: true` covers both steps. It requires and verifies the
+[`verify_and_map: true`](/reference/config/tls/verify_and_map) covers
+both steps. It requires and verifies the
 client certificate, then reads an identity out of it and uses that as
 the NATS user. The server tries the certificate's email SANs first,
 then DNS SANs, then URI SANs, and only then the **subject** — the

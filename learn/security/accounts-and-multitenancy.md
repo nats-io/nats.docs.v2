@@ -126,7 +126,8 @@ The subjects it names now resolve inside `ORDERS`: the allow list
 scopes the user within its account, and the account isolates it from
 everyone else.
 
-The one new field is `jetstream: enabled`. On a server that runs
+The one new field is
+[`jetstream: enabled`](/reference/config/accounts/jetstream). On a server that runs
 JetStream, declaring an `accounts` block makes JetStream opt-in per
 account: an account without the field gets
 `JetStream not enabled for account (10039)` on every JetStream call.
@@ -251,7 +252,8 @@ block and the server still creates `$SYS`, but with no user inside it
 you can't connect there. The server's monitoring and management events
 on `$SYS.SERVER.>` become unreachable, so `nats server account info`
 and event tooling stop working. Do declare a `SYS` account with a user
-and set `system_account: SYS`. The example below proves a tenant user
+and set [`system_account: SYS`](/reference/config/system_account). The
+example below proves a tenant user
 sees only its own account while the system-account user reaches the
 server events:
 
