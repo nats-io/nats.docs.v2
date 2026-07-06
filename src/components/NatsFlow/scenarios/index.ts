@@ -92,3 +92,7 @@ export { DirectGetAnimated } from './directGetAnimated';
 export { BatchGetAnimated } from './batchGetAnimated';
 export { SubjectTransformAnimated } from './subjectTransformAnimated';
 export { MessageTtlAnimated } from './messageTtlAnimated';
+export { AccountIsolationAnimated } from './accountIsolationAnimated';
+export { CrossAccountExportAnimated } from './crossAccountExportAnimated';
+export { ResolverPushAnimated } from './resolverPushAnimated';
+export { TlsFirstHandshakeAnimated } from './tlsFirstHandshakeAnimated';

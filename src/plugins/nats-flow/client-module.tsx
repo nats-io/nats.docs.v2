@@ -101,6 +101,10 @@ if (ExecutionEnvironment.canUseDOM) {
       BatchGetAnimated: module.BatchGetAnimated,
       SubjectTransformAnimated: module.SubjectTransformAnimated,
       MessageTtlAnimated: module.MessageTtlAnimated,
+      AccountIsolationAnimated: module.AccountIsolationAnimated,
+      CrossAccountExportAnimated: module.CrossAccountExportAnimated,
+      ResolverPushAnimated: module.ResolverPushAnimated,
+      TlsFirstHandshakeAnimated: module.TlsFirstHandshakeAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,
