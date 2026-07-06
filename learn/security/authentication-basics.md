@@ -59,7 +59,8 @@ For a server with exactly one user, you can skip the array and put a
 single `user` and `password` pair directly in the `authorization`
 block.
 
-The `authorization` block also takes a `timeout` field: how long the
+The `authorization` block also takes a
+[`timeout`](/reference/config/authorization/timeout) field: how long the
 server gives a client to finish authenticating, 2 seconds by default.
 Plain numbers are seconds; duration strings need quotes
 (`timeout: "500ms"` — an unquoted `1m` parses as a number, not a
