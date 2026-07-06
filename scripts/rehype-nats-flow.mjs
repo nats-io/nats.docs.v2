@@ -53,6 +53,14 @@ const FALLBACKS = {
     'Interest retention, both behaviors. When an order is published on orders.shipped, a subject both consumers subscribe to, it is stored and removed once every consumer has acked it. When an order is published on orders.archived, a subject no consumer subscribes to, it is dropped the instant it is published — no interest, nothing stored.',
   workQueueRetentionAnimated:
     'WorkQueue retention. Each order is delivered to exactly one worker; the first ack removes it for everyone, so the stream drains back to empty. Workers take turns: an order is published, one worker pulls and acks it, and the message is gone.',
+  accountIsolationAnimated:
+    'Two accounts on one server, ORDERS and ANALYTICS. order-svc publishes orders.shipped inside ORDERS: the subscriber in the same account receives it, while analytics-reader — subscribed to the identical subject string inside ANALYTICS — receives nothing. An account is an isolated subject space; the same subject name in two accounts is two different subjects.',
+  crossAccountExportAnimated:
+    'The two accounts from the previous page, now with one deliberate opening: ORDERS exports orders.shipped and ANALYTICS imports it. A publish on orders.shipped is delivered twice — to the subscriber inside ORDERS and, across the account boundary, to analytics-reader. A second publish on orders.created, a subject that was never exported, is delivered inside ORDERS only. One named subject crosses; everything else stays isolated.',
+  resolverPushAnimated:
+    "Operator mode in two beats. First, nats auth account push sends the ORDERS account JWT — signed by operator ACME — to the server over the SYSTEM account, and acme-1 stores it in its resolver directory next to the preloaded SYSTEM JWT. Then order-svc connects with a creds file: it presents its user JWT and signs the server's challenge, the server verifies the user JWT against the stored ORDERS JWT and ORDERS against the one trusted operator key, and the client is admitted. Account JWTs live on the server; user JWTs never do.",
+  tlsFirstHandshakeAnimated:
+    "Two connection timelines side by side. In the default handshake the server's INFO line — version and connect URLs — crosses the wire in plaintext, and only then does the link upgrade to TLS before credentials flow. With handshake_first, TLS runs before any protocol byte, so the INFO arrives already encrypted, the way an HTTPS server behaves. Credentials are encrypted in both modes; the plaintext INFO in the first lane is exactly what TLS-first removes.",
 };
 
 const TITLES = {
@@ -83,6 +91,10 @@ const TITLES = {
   limitsRetentionAnimated: 'Limits retention — acks keep the message (animated)',
   interestRetentionAnimated: 'Interest retention — all-ack and no-interest (animated)',
   workQueueRetentionAnimated: 'WorkQueue retention — first ack drains it (animated)',
+  accountIsolationAnimated: 'Account isolation (animated)',
+  crossAccountExportAnimated: 'One subject across the account boundary (animated)',
+  resolverPushAnimated: 'Push an account, then connect (animated)',
+  tlsFirstHandshakeAnimated: 'Default vs TLS-first handshake (animated)',
 };
 
 const cache = new Map();
