@@ -106,7 +106,7 @@ question this chapter assumes you've already answered.
 This is the end of the chapter: the triad is complete, and this page
 introduces no new scenario state. The `east` cluster, the `ORDERS`
 stream, the `ORDERS_DR` mirror at the second site, and the off-site
-identity bundle are all exactly as you left them on the previous page.
+identity backup are all exactly as you left them on the previous page.
 You can rehearse a failover against them, schedule a test restore, or
 tear the practice copies down when you're done.
 
@@ -145,9 +145,9 @@ group links back to the page that explains the why.
 
 ### Config and JWT backup — see [Pitfalls](/learn/backup-recovery/config-and-jwt-backup#pitfalls)
 
-- [ ] Back up nkeys encrypted and off-site and treat them like passwords; an nkey lost is identity lost, with no recovery.
-- [ ] Clear the account-resolver cache and restart after an identity restore; a stale cache serves old permissions over the restored JWTs.
-- [ ] Tag each identity backup with the operator version or timestamp; an unrecorded operator rotation leaves the archive pointing at a dead operator.
+- [ ] Seal every `nats auth operator backup` with `--key` and store the curve seed apart from the backups; the file carries every private seed, and losing store plus key together is losing the identity.
+- [ ] Re-push each account after an identity restore if the server lost its resolver directory; the restore rebuilds only your store, and the push needs the `server.conf` whose `SYSTEM` preload lets it in — so back that file up too.
+- [ ] Tag each identity backup with the operator version or timestamp; an unrecorded operator rotation leaves the backup pointing at a dead operator.
 
 ## See also
 
