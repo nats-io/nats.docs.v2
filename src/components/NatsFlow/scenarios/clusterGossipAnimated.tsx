@@ -17,6 +17,13 @@ const edgeTypes = {
     animated: AnimatedEdge,
 };
 
+// Canonical description for the rehype plugin (first description-keyed
+// string literal in this source becomes the markdown fallback text).
+export const clusterGossipAnimatedMeta = {
+    description:
+        "Three east servers form a full mesh from one seed route: n2-east and n3-east dial their explicit route to n1-east, INFO gossip carries each newcomer's address, and the missing route appears as an implicit route neither config names.",
+};
+
 // Brand palette.
 const IDLE_COLOR = "#94a3b8"; // gray — link not yet formed / dormant
 const MSG_COLOR = "#27AAE1"; // NATS primary blue — active step

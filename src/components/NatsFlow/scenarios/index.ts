@@ -75,6 +75,7 @@ export { ObjectRollupAnimated } from './objectRollupAnimated';
 export { ClusterGossipAnimated } from './clusterGossipAnimated';
 export { RaftElectionAnimated } from './raftElectionAnimated';
 export { R3ReplicationAnimated } from './r3ReplicationAnimated';
+export { R3FailoverAnimated } from './r3FailoverAnimated';
 export { PeerScalingAnimated } from './peerScalingAnimated';
 export { MonitoringEndpointsAnimated } from './monitoringEndpointsAnimated';
 export { ConsumerLagAnimated } from './consumerLagAnimated';

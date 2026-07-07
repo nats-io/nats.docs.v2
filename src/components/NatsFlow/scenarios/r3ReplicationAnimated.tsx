@@ -18,6 +18,13 @@ const edgeTypes = {
     animated: AnimatedEdge,
 };
 
+// Canonical description for the rehype plugin (first description-keyed
+// string literal in this source becomes the markdown fallback text).
+export const r3ReplicationAnimatedMeta = {
+    description:
+        "One write from order-svc moves through the R3 ORDERS group: publish to the leader n1-east, WAL append, AppendEntry to the followers, quorum ack at 2 of 3, commit, and apply on the followers.",
+};
+
 // Brand palette.
 const MSG_COLOR = "#27AAE1"; // NATS primary blue — message / RPC in flight
 const IDLE_COLOR = "#94a3b8"; // gray — quiet replication link

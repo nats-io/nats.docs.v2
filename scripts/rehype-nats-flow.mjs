@@ -95,6 +95,11 @@ const TITLES = {
   crossAccountExportAnimated: 'One subject across the account boundary (animated)',
   resolverPushAnimated: 'Push an account, then connect (animated)',
   tlsFirstHandshakeAnimated: 'Default vs TLS-first handshake (animated)',
+  clusterGossipAnimated: 'One seed route grows a full mesh (animated)',
+  raftElectionAnimated: 'RAFT leader election (animated)',
+  r3ReplicationAnimated: 'R3 quorum commit (animated)',
+  r3FailoverAnimated: 'Kill the leader mid-publish (animated)',
+  peerScalingAnimated: 'Peer add with catchup, then peer remove (animated)',
 };
 
 const cache = new Map();

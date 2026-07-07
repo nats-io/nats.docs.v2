@@ -292,6 +292,10 @@ commit doesn't promise that publishing never fails, it promises that an
 acked write is never lost, and that the failure window is one election
 long.
 
+Here's that failure end to end:
+
+<div class="nats-flow" data-scenario="r3FailoverAnimated" data-width="640" data-height="400"></div>
+
 Restart the killed server and it rejoins as a follower, behind:
 
 ```

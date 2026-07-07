@@ -84,6 +84,7 @@ if (ExecutionEnvironment.canUseDOM) {
       ClusterGossipAnimated: module.ClusterGossipAnimated,
       RaftElectionAnimated: module.RaftElectionAnimated,
       R3ReplicationAnimated: module.R3ReplicationAnimated,
+      R3FailoverAnimated: module.R3FailoverAnimated,
       PeerScalingAnimated: module.PeerScalingAnimated,
       MonitoringEndpointsAnimated: module.MonitoringEndpointsAnimated,
       ConsumerLagAnimated: module.ConsumerLagAnimated,

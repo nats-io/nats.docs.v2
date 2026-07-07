@@ -17,6 +17,13 @@ const edgeTypes = {
     animated: AnimatedEdge,
 };
 
+// Canonical description for the rehype plugin (first description-keyed
+// string literal in this source becomes the markdown fallback text).
+export const peerScalingAnimatedMeta = {
+    description:
+        "A fourth server joins the ORDERS group: the leader proposes AddPeer, n4-east streams missing entries as an observer until its lag reaches zero and it counts toward quorum; later RemovePeer drops it and the group migrates to the smaller peer set.",
+};
+
 // Brand palette.
 const IDLE_COLOR = "#94a3b8"; // idle RAFT links (gray)
 const MSG_COLOR = "#27AAE1"; // NATS primary blue — active proposal / catchup

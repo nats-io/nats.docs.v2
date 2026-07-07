@@ -17,6 +17,13 @@ const edgeTypes = {
     animated: AnimatedEdge,
 };
 
+// Canonical description for the rehype plugin (first description-keyed
+// string literal in this source becomes the markdown fallback text).
+export const raftElectionAnimatedMeta = {
+    description:
+        "A three-peer RAFT group loses its leader: heartbeats stop, n2-east's election timer fires first, it becomes a candidate, bumps the term, collects the survivors' votes, and reaches quorum as the new leader. A final beat contrasts the crash path with a clean step-down, which transfers leadership without waiting for any timer.",
+};
+
 // Brand-ish palette.
 const IDLE_COLOR = "#94a3b8"; // gray — quiet RAFT peer link
 const MSG_COLOR = "#27AAE1"; // NATS primary blue — message in flight
@@ -31,7 +38,8 @@ type Stage =
     | "candidate"
     | "request"
     | "vote"
-    | "leader";
+    | "leader"
+    | "stepdown";
 
 const STAGE_ORDER: Stage[] = [
     "steady",
@@ -40,6 +48,7 @@ const STAGE_ORDER: Stage[] = [
     "request",
     "vote",
     "leader",
+    "stepdown",
 ];
 
 // How long each stage holds before advancing to the next.
@@ -50,6 +59,7 @@ const STAGE_DURATION_MS: Record<Stage, number> = {
     request: 3500,
     vote: 3500,
     leader: 4500,
+    stepdown: 5000,
 };
 
 const CAPTION: Record<Stage, string> = {
@@ -65,6 +75,8 @@ const CAPTION: Record<Stage, string> = {
         "n3-east grants its Vote for term 5. With its own vote plus n3-east's, n2-east now holds 2 of 3 — a quorum.",
     leader:
         "Quorum reached: n2-east becomes the term-5 Leader and starts sending its own heartbeats. The cluster has a leader again.",
+    stepdown:
+        "The crash path above is the slow one. A step-down (or a clean stop) transfers leadership without waiting for any timer: n2-east hands off, n3-east leads term 6 in under a second.",
 };
 
 // Per-stage role + term shown on each server label.
@@ -76,6 +88,7 @@ function roleFor(
         stage === "vote";
 
     if (id === "n2") {
+        if (stage === "stepdown") return { role: "Follower", term: 6, color: IDLE_COLOR };
         if (stage === "leader") return { role: "Leader", term: 5, color: COMMIT_COLOR };
         if (candidatePhase) return { role: "Candidate", term: 5, color: NAVY };
         return { role: "Follower", term: 4, color: IDLE_COLOR };
@@ -84,10 +97,11 @@ function roleFor(
     if (id === "n1") {
         // Old leader in the steady term, then down/silent for the rest.
         if (stage === "steady") return { role: "Leader", term: 4, color: COMMIT_COLOR };
-        return { role: "Follower", term: stage === "leader" ? 5 : 4, color: IDLE_COLOR };
+        return { role: "Follower", term: stage === "leader" || stage === "stepdown" ? 5 : 4, color: IDLE_COLOR };
     }
 
-    // n3 — a follower throughout, advancing to term 5 once it votes.
+    // n3 — a follower until it takes the clean handoff in "stepdown".
+    if (stage === "stepdown") return { role: "Leader", term: 6, color: COMMIT_COLOR };
     const n3Term = stage === "vote" || stage === "leader" ? 5 : 4;
     return { role: "Follower", term: n3Term, color: IDLE_COLOR };
 }
@@ -241,6 +255,25 @@ function RaftElectionAnimatedInner({
                 },
             });
         }
+    }
+
+    // --- Clean handoff: n2 transfers leadership to n3, no timer involved ---
+    if (stage === "stepdown") {
+        edges.push({
+            id: "stepdown-n2-n3",
+            source: "n2",
+            target: "n3",
+            type: "animated",
+            animated: true,
+            markerEnd: { type: MarkerType.ArrowClosed },
+            data: {
+                color: NAVY,
+                label: "step-down → transfer T6",
+                labelColor: NAVY,
+                animated: true,
+                interval: 1200,
+            },
+        });
     }
 
     const stageNum = STAGE_ORDER.indexOf(stage) + 1;

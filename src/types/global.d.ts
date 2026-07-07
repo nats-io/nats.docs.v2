@@ -76,6 +76,7 @@ import type {
   ClusterGossipAnimated as ClusterGossipAnimatedComponent,
   RaftElectionAnimated as RaftElectionAnimatedComponent,
   R3ReplicationAnimated as R3ReplicationAnimatedComponent,
+  R3FailoverAnimated as R3FailoverAnimatedComponent,
   PeerScalingAnimated as PeerScalingAnimatedComponent,
   MonitoringEndpointsAnimated as MonitoringEndpointsAnimatedComponent,
   ConsumerLagAnimated as ConsumerLagAnimatedComponent,
@@ -164,6 +165,7 @@ declare global {
       ClusterGossipAnimated: typeof ClusterGossipAnimatedComponent;
       RaftElectionAnimated: typeof RaftElectionAnimatedComponent;
       R3ReplicationAnimated: typeof R3ReplicationAnimatedComponent;
+      R3FailoverAnimated: typeof R3FailoverAnimatedComponent;
       PeerScalingAnimated: typeof PeerScalingAnimatedComponent;
       MonitoringEndpointsAnimated: typeof MonitoringEndpointsAnimatedComponent;
       ConsumerLagAnimated: typeof ConsumerLagAnimatedComponent;
