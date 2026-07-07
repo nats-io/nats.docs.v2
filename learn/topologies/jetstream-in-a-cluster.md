@@ -49,14 +49,16 @@ covers.
 
 ## A replicated stream needs an odd number of servers
 
-The meta group reaches its decisions by majority vote: more than half its
-members must be reachable. That one rule sets the shape of a JetStream
-cluster, and it's why you run an **odd** number of servers.
+The meta group reaches its decisions by majority vote, and so does each
+replicated stream's own group of copies: more than half the members must
+be reachable. That one rule sets the shape of a JetStream cluster, and
+it's why you run an **odd** number of servers.
 
 Three servers keep working with one lost, because two of three are still
-a majority. Lose a second and no majority is left, so streams pause
-writes rather than store an order they can't copy safely. This is exactly
-why Acme runs three, not two.
+a majority. Lose a second and an R=3 stream has no majority of its own
+copies left, so it pauses writes rather than store an order it can't
+copy safely (the meta group loses its majority too, pausing stream and
+consumer creation). This is exactly why Acme runs three, not two.
 
 An even count gives you no extra protection here. Two servers have no majority once
 one is gone, and four tolerate the same single failure that three do while

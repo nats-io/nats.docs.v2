@@ -67,8 +67,9 @@ returns the `PubAck` once a majority of replicas have the message.
 That's what makes the `PubAck` on an R=3 stream a real durability
 promise: the message survives the loss of any single server.
 
-Any replica can serve reads, so the work of reading is spread across the
-group rather than landing on one server.
+With direct reads enabled (Direct Get), any replica can serve reads, so
+the work of reading is spread across the group rather than landing on
+one server.
 
 If the leader's server dies, the remaining replicas elect a new leader
 from among themselves, automatically. Writes pause for the short
@@ -141,9 +142,8 @@ replicas is not how you scale throughput.
 **Stream replicas** (R=3, R=5):
 
 - Survive node loss. More copies tolerate more failures.
-- Spread reads. Any replica can serve a read, so read work moves off the
-  leader, through Direct Get or because each consumer reads from its local
-  copy.
+- Spread reads. With Direct Get, any replica can serve a read, so read
+  work moves off the leader.
 - Cost load across the cluster. Every replica stores the full log, and every
   write is copied to a majority before its `PubAck`. R=3 is roughly three
   times the storage and write traffic of R=1.
@@ -186,8 +186,8 @@ killing a server to see the failover is covered separately in the
 [Clustering & Replication](/learn/clustering) deep dive, which picks up
 where this page leaves off.
 
-The full set of placement controls (which servers a stream lands on,
-tag-based steering, and per-account replica limits) is documented in
+The full set of placement controls (which servers a stream lands on
+and tag-based steering) is documented in
 the [Clustering & Replication](/learn/clustering) deep dive. We change
 only the replica count here.
 

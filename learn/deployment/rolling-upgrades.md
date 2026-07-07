@@ -105,8 +105,9 @@ One node in the cluster is the **meta-leader**: the Raft leader for the
 cluster's own metadata, the node that coordinates where streams and
 consumers live. The other two are non-leaders. Stepping the meta-leader
 down forces a metadata election, and while that election runs, stream and
-consumer *operations* (create, update, leadership moves) pause for tens
-of seconds.
+consumer *operations* (create, update, leadership moves) pause for a few
+seconds (the 4–9 second election window measured in
+[Raft and leaders](/learn/clustering/raft-and-leaders)).
 
 So the rule is: **upgrade the non-leaders first, and the meta-leader
 last.** By the time you reach the meta-leader, the other two nodes are
@@ -205,8 +206,9 @@ a real drain takes on your cluster first, then set the duration above it
 with margin, rather than defaulting to the minimum value.
 
 **Upgrading the meta-leader without draining it blocks stream ops for
-30–60s.** Restart the meta-leader directly and the cluster has no leader
-for metadata until it elects a new one, and during that window every
+several seconds.** Restart the meta-leader directly and the cluster has
+no leader for metadata until it elects a new one (4–9 seconds after a
+crash-style stop), and during that window every
 stream and consumer operation stalls. Always enter lame-duck mode so
 leadership transfers *before* the process stops, and always do the
 non-leaders first so the meta-leader's one election is short. Check which
