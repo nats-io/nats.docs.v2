@@ -16,9 +16,10 @@ This page doesn't add a new shape. It shows how the shapes you already
 know stack into one deployment, and names the one property that stack
 provides without extra work.
 
-It introduces two ideas: composition (the shapes are layers you
-combine, not options you choose between) and address-space isolation
-(what a leaf hides from the system it connects to).
+It introduces two ideas: composition — the shapes are layers you
+combine, not options you choose between — and the one thing composition
+doesn't give you: a boundary between the layers, which stays a
+leaf-and-account decision.
 
 ## The Acme deployment so far
 
@@ -38,7 +39,13 @@ The ORDERS workload runs on top of all of it, unchanged. Producers
 publish `orders.*`. Consumers read the `ORDERS` stream. The same code
 that ran against `n1` on a laptop runs against this.
 
-<div class="nats-flow" data-scenario="massiveScaleAnimated" data-width="640" data-height="400"></div>
+<div class="nats-flow" data-scenario="massiveScaleAnimated" data-width="820" data-height="470"></div>
+
+The animation shows the messaging layer: an order published in one place
+crossing routes, the gateway, and the leaf link to reach interest
+elsewhere. The `ORDERS` stream's replicas live on the same servers but
+aren't drawn here — that's the JetStream layer from
+[JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster).
 
 ## Shapes are layers you combine
 
@@ -66,30 +73,31 @@ with three blocks:
 ```conf
 # n1-east.conf — one server, three roles
 server_name: n1-east
-listen: 0.0.0.0:4222
+listen: 127.0.0.1:4222
 
 cluster {
   name: east
-  listen: 0.0.0.0:6222
+  listen: 127.0.0.1:6222
   routes: [
-    nats://127.0.0.1:6223   # n2-east
-    nats://127.0.0.1:6224   # n3-east
+    nats://127.0.0.1:6223   # n2-east; gossip fills in the rest
   ]
 }
 
 gateway {
   name: east
-  listen: 0.0.0.0:7222
+  listen: 127.0.0.1:7222
   gateways: [
-    { name: west, urls: ["nats://west.acme.internal:7222"] }
+    { name: west, urls: ["nats://127.0.0.1:7322", "nats://127.0.0.1:7323", "nats://127.0.0.1:7324"] }
   ]
 }
 
 leafnodes {
-  listen: 0.0.0.0:7422
+  listen: 127.0.0.1:7422
 }
 
-jetstream {}
+jetstream {
+  store_dir: "./js/n1-east"
+}
 ```
 
 That's three blocks for three layers on one server. The `cluster` block
@@ -99,38 +107,18 @@ and the `leafnodes` block is from
 [Leaf nodes](/learn/topologies/leaf-nodes). Putting them in one file is
 all "composition" means.
 
-## Address-space isolation behind a leaf
+## Composition adds reach, not boundaries
 
-The clients on the `factory-1` leaf aren't visible to the rest of the
-deployment the way a cluster server's clients are. That difference has
-a name.
+Stacking these shapes gives you one address space by default. Routes carry
+an account's full interest across a cluster; a gateway forwards any subject
+the far side wants. Neither partitions anything — they widen where a message
+can go.
 
-**Address-space isolation** means the subjects and clients behind a
-leaf stay private to that leaf unless the leaf is explicitly told to
-share them. A client on `factory-1` can publish to a local subject and
-have it stay on the factory floor, never reaching `east` or `west`.
-
-This falls out of how a leaf binds to an account.
-[Leaf nodes](/learn/topologies/leaf-nodes) attached
-`factory-1` to one account on the hub. Only the subjects that account
-imports and exports cross the leaf connection. Everything else the
-factory clients do is theirs alone.
-
-Contrast that with a cluster. Inside `east`, the three servers share
-one account namespace by design: a subject published on `n2-east` is
-reachable from `n1-east` because routes carry the account's full
-interest across the mesh. Servers in a cluster are peers in the same
-address space.
-
-A leaf is a boundary by design, the opposite of a route. That's why you
-use a leaf at a factory or a branch office: local traffic stays local,
-and only the agreed-upon subjects (`orders.*` flowing up to the `ORDERS`
-stream) cross the link.
-
-The wire-level detail of how a leaf binds an account and filters
-subjects lives in
-[Reference → Leafnode protocol](/reference/protocols/leafnode). We only
-need the shape here: a leaf is an isolation boundary, a route is not.
+The one layer that *can* draw a boundary is the leaf, and only when you bind
+it to its own account — the **address-space isolation** from
+[Leaf nodes](/learn/topologies/leaf-nodes). In a composed deployment, if you
+want to keep one part's subjects private, that's where the boundary lives,
+not in another route or gateway.
 
 ## Picking the next layer
 
@@ -152,9 +140,15 @@ layer above leaves a working deployment behind.
 
 ## Seeing the whole topology at once
 
-One command surveys every layer. From a client with system-account
-access, `nats server list` reports each server, which cluster it
-belongs to, and its route and gateway connection counts:
+Everything so far has run auth-free, confirmed by publishing across each
+boundary. To *survey* the whole fabric instead — every server, cluster, and
+connection in one view — you need the **system account** (`$SYS`), which
+this chapter doesn't set up. Add one (the [Security deep
+dive](/learn/security) covers it), connect with its credentials, and a few
+admin commands report the layers.
+
+`nats server list` reports each server, which cluster it belongs to, and
+its route and gateway connection counts:
 
 ```bash
 nats server list
@@ -208,21 +202,13 @@ Run these three reports together and you've surveyed every layer of
 the deployment in one pass: routes, gateways, and leaves, each shown by
 the command named after it.
 
-## The application stays unchanged
+## The client code stays the same
 
-The main point of this chapter is that nothing about the ORDERS
-application changed across any of these layers.
+The main point of this chapter is that nothing on the client side changed
+across any of these layers.
 
-The producer still publishes `orders.created` with the same payload:
-
-```json
-{
-  "order_id": "ord_8w2k",
-  "customer": "acme-co",
-  "total_cents": 4200,
-  "ts": "2026-05-22T10:14:22Z"
-}
-```
+The producer still publishes `orders.created` with the same payload it did
+on a single server — order id, customer, total, timestamp.
 
 A consumer still reads the `ORDERS` stream. The client connects to a
 NATS URL and the server fabric (routes, gateways, leaves) delivers
@@ -236,38 +222,7 @@ stays the same.
 
 ## Pitfalls
 
-Composing shapes is mostly addition, but three traps come from forgetting
-that one property, isolation, doesn't stack automatically.
-
-**Two leaves sharing one account leak into each other.** A leaf with no
-account named in its config binds to the default global account on the
-hub. Attach a second leaf the same way and both sit in the same address
-space: a subject one factory publishes is reachable from the other,
-because they share one account, not because you meant them to.
-
-Don't rely on "it's a leaf" for isolation. Bind each leaf to its own
-dedicated account on the hub (`factory-1` to the `ORDERS` account, a
-second site to its own) so only the subjects that account imports and
-exports cross the link. The boundary is the account, not the leaf
-connection.
-
-You can prove the boundary holds. A service that lives only in `east`
-is unreachable from the factory floor unless the factory account imports
-its subject. The request comes back with no responders instead of
-silently crossing the leaf:
-
-<div class="nats-example" data-type="learn-topologies-putting-it-together-isolation-boundary" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-**Stacking a shape onto a cluster does not add a boundary.** A route
-carries the full interest of an account across the whole mesh, and a
-gateway forwards any subject that has interest on the far side. Adding a
-gateway to `east` widens reach; it doesn't partition anything. If you
-want a boundary between two parts of the deployment, that boundary is a
-leaf with its own account, not another route or gateway.
-
-Don't use a super-cluster expecting it to hide one cluster's
-subjects from another. Use accounts for that separation, and a leaf
-where the separation also needs to follow a network edge.
+The one trap in composing shapes is doing it before you need to.
 
 **Building the whole stack before a limit forces it.** Each layer adds
 operational cost: more servers to run, more connections to watch. A
@@ -294,9 +249,10 @@ And two ideas to carry forward:
 
 - Composition: the shapes are layers you stack, each one leaving
   the layer below untouched.
-- Address-space isolation: a leaf is a boundary that keeps its
-  clients and subjects private until you explicitly share them; a route
-  is not.
+- The limit of composition: stacking shapes adds reach, not boundaries.
+  Only a leaf with its own account partitions the stack — address-space
+  isolation is the leaf's property, from
+  [Leaf nodes](/learn/topologies/leaf-nodes).
 
 This is the full picture the [Topologies concept
 page](/concepts/topologies) sketched, now wired up for real.

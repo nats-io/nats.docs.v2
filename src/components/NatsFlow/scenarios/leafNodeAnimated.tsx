@@ -1,15 +1,61 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
     Background,
-    MarkerType,
     ReactFlow,
     ReactFlowProvider,
+    type NodeProps,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, SubscriberNode } from "../nodes";
-import { AnimatedEdge } from "../edges";
+import { LabelNode, PublisherNode, ServerNode, SubscriberNode } from "../nodes";
+import { AnimatedEdge, FloatingEdge } from "../edges";
+
+// A hub (cluster east) stacked over a leaf (factory-1), joined by one outbound
+// leaf connection. A hub client publishes; the order rides down the single leaf
+// link to a subscriber on the factory floor. The link is drawn vertically
+// between n1-east and factory-1 so it's the one line crossing between the two
+// boxes. The leaf is one server, so its box is small and its client sits
+// outside it — just as the hub client sits outside the cluster box.
+const HUB = "#375C93"; // navy — the hub cluster
+const LEAF = "#7c3aed"; // purple — the leaf
+const MSG = "#27AAE1"; // NATS blue — a message inside a system
+const ROUTE = "#94a3b8"; // gray — idle intra-cluster route
+
+// A tinted, titled box. The title sits at the top by default, or the bottom
+// when `labelPos` is "bottom" (so a link entering the top edge doesn't cross it).
+function RegionNode({ data }: NodeProps) {
+    const d = data as any;
+    const vertical = d.labelPos === "bottom" ? { bottom: 8 } : { top: 8 };
+    return (
+        <div
+            style={{
+                width: "100%",
+                height: "100%",
+                background: d.bg,
+                border: `1.5px solid ${d.border}`,
+                borderRadius: 14,
+                boxSizing: "border-box",
+            }}
+        >
+            <div
+                style={{
+                    position: "absolute",
+                    ...vertical,
+                    left: 14,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    color: d.labelColor,
+                }}
+            >
+                {d.label}
+            </div>
+        </div>
+    );
+}
 
 const nodeTypes = {
+    region: RegionNode,
+    label: LabelNode,
     publisher: PublisherNode,
     subscriber: SubscriberNode,
     server: ServerNode,
@@ -17,264 +63,55 @@ const nodeTypes = {
 
 const edgeTypes = {
     animated: AnimatedEdge,
+    floating: FloatingEdge,
 };
 
-// Colors: leaf link is the structural connection, the two flows are tinted to
-// distinguish "hub → edge" (blue) from "edge → hub" (green).
-const LEAF_LINK_COLOR = "#9333ea"; // purple — the outbound leaf connection
-const HUB_TO_EDGE_COLOR = "#3b82f6"; // blue — interest/message bridged down
-const EDGE_TO_HUB_COLOR = "#10b981"; // green — interest/message bridged up
+// Parent region nodes first; server positions are relative to their region.
+const nodes: any[] = [
+    {
+        id: "hub-region",
+        type: "region",
+        position: { x: 110, y: 20 },
+        style: { width: 480, height: 160 },
+        data: { label: "HUB — cluster east", bg: "#eff6ff", border: HUB, labelColor: "#1e3a5f" },
+        selectable: false,
+        draggable: false,
+    },
+    {
+        id: "leaf-region",
+        type: "region",
+        position: { x: 110, y: 355 },
+        style: { width: 200, height: 150 },
+        data: { label: "LEAF — factory-1", bg: "#faf5ff", border: LEAF, labelColor: "#6b21a8", labelPos: "bottom" },
+        selectable: false,
+        draggable: false,
+    },
+    // Hub: n1-east holds the leaf link; n2-east is an idle cluster peer.
+    { id: "n1-east", type: "server", parentId: "hub-region", extent: "parent", position: { x: 40, y: 45 }, data: { label: "n1-east", circular: true, borderColor: HUB } },
+    { id: "n2-east", type: "server", parentId: "hub-region", extent: "parent", position: { x: 300, y: 45 }, data: { label: "n2-east", circular: true, borderColor: HUB } },
+    // Leaf: just factory-1, directly below n1-east.
+    { id: "factory-1", type: "server", parentId: "leaf-region", extent: "parent", position: { x: 40, y: 15 }, data: { label: "factory-1", circular: true, borderColor: LEAF } },
+    // Clients sit outside their boxes.
+    { id: "hub-pub", type: "publisher", position: { x: -30, y: 85 }, data: { label: "hub client" } },
+    { id: "edge-client", type: "subscriber", position: { x: 360, y: 380 }, data: { label: "edge client" } },
+    // The leaf link's label, placed beside the vertical line (not on it).
+    { id: "leaf-link-label", type: "label", position: { x: 250, y: 250 }, data: { label: "leaf connection (outbound)", color: LEAF, fontSize: 12 } },
+];
 
-type Phase = "connect" | "bridgeDown" | "bridgeUp";
+const INTERVAL = 2800;
 
-// Each phase holds for a beat so the eye can follow the single highlighted flow.
-const PHASE_DURATION_MS: Record<Phase, number> = {
-    connect: 4000,
-    bridgeDown: 5000,
-    bridgeUp: 5000,
-};
+const edges: any[] = [
+    // Idle intra-cluster route — gray, undirected.
+    { id: "route-e", source: "n1-east", target: "n2-east", type: "floating", data: { color: ROUTE } },
+    // The order: hub client -> n1-east -> down the leaf link -> factory-1 -> edge client.
+    { id: "m-in", source: "hub-pub", target: "n1-east", type: "animated", data: { color: MSG, animated: true, straight: true, interval: INTERVAL, delay: 0 } },
+    { id: "m-leaf", source: "n1-east", sourceHandle: "bottom-out", target: "factory-1", targetHandle: "top-in", type: "animated", data: { color: LEAF, animated: true, straight: true, interval: INTERVAL, delay: 700 } },
+    { id: "m-out", source: "factory-1", target: "edge-client", type: "animated", data: { color: MSG, animated: true, straight: true, interval: INTERVAL, delay: 1400 } },
+];
 
-const PHASE_ORDER: Phase[] = ["connect", "bridgeDown", "bridgeUp"];
-
-function LeafNodeAnimatedInner({
-    width = 640,
-    height = 400,
-}: {
-    width?: number;
-    height?: number;
-}) {
-    const [phase, setPhase] = useState<Phase>("connect");
-
-    // Auto-advance through the phases, looping back to the start.
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setPhase((prev) => {
-                const idx = PHASE_ORDER.indexOf(prev);
-                return PHASE_ORDER[(idx + 1) % PHASE_ORDER.length];
-            });
-        }, PHASE_DURATION_MS[phase]);
-        return () => clearTimeout(timer);
-    }, [phase]);
-
-    // Once the leaf has connected, the link stays up for every later phase.
-    const connected = phase !== "connect";
-
-    const nodes = [
-        // ----- Hub cluster (top) -----
-        {
-            id: "hub-pub",
-            type: "publisher",
-            position: { x: 40, y: 30 },
-            data: { label: "Hub client" },
-        },
-        {
-            id: "n1-east",
-            type: "server",
-            position: { x: 240, y: 20 },
-            data: { label: "n1-east" },
-        },
-        {
-            id: "n2-east",
-            type: "server",
-            position: { x: 460, y: 20 },
-            data: { label: "n2-east" },
-        },
-        // ----- Leaf node (bottom) -----
-        {
-            id: "factory-1",
-            type: "server",
-            position: { x: 240, y: 250 },
-            data: { label: "factory-1" },
-            style: {
-                opacity: connected ? 1 : 0.55,
-            },
-        },
-        {
-            id: "edge-sub",
-            type: "subscriber",
-            position: { x: 460, y: 210 },
-            data: { label: "Edge client" },
-            style: {
-                opacity: connected ? 1 : 0.55,
-            },
-        },
-        {
-            id: "edge-pub",
-            type: "publisher",
-            position: { x: 460, y: 300 },
-            data: { label: "Edge sensor" },
-            style: {
-                opacity: connected ? 1 : 0.55,
-            },
-        },
-    ];
-
-    const edges: any[] = [];
-
-    // Structural cluster route between the two hub servers — always present.
-    edges.push({
-        id: "e-cluster-east",
-        source: "n1-east",
-        target: "n2-east",
-        type: "animated",
-        markerEnd: { type: MarkerType.ArrowClosed },
-        data: {
-            color: "#94a3b8",
-            animated: false,
-            label: "cluster east",
-            labelColor: "#64748b",
-        },
-    });
-
-    // The outbound leaf connection: factory-1 dials UP into the hub. During the
-    // connect phase we animate dots traveling from leaf → hub to show the
-    // direction the connection is initiated. After that it stays as a steady
-    // (non-animated) structural link so the interest flows read clearly.
-    edges.push({
-        id: `e-leaf-link-${phase}`,
-        source: "factory-1",
-        target: "n1-east",
-        type: "animated",
-        markerEnd: { type: MarkerType.ArrowClosed },
-        data: {
-            color: LEAF_LINK_COLOR,
-            animated: phase === "connect",
-            label: "leaf connection (outbound) ↑",
-            labelColor: LEAF_LINK_COLOR,
-            interval: 1200,
-        },
-    });
-
-    if (connected) {
-        // Hub edge client publishers feed into the hub at all times once linked.
-        edges.push({
-            id: `e-hub-pub-n1-${phase}`,
-            source: "hub-pub",
-            target: "n1-east",
-            type: "animated",
-            markerEnd: { type: MarkerType.ArrowClosed },
-            data: {
-                color: phase === "bridgeDown"
-                    ? HUB_TO_EDGE_COLOR
-                    : "#cbd5e1",
-                animated: phase === "bridgeDown",
-                interval: 1600,
-            },
-        });
-
-        // factory-1 fans the bridged message out to its local edge client.
-        edges.push({
-            id: `e-factory-edgesub-${phase}`,
-            source: "factory-1",
-            target: "edge-sub",
-            type: "animated",
-            markerEnd: { type: MarkerType.ArrowClosed },
-            data: {
-                color: phase === "bridgeDown"
-                    ? HUB_TO_EDGE_COLOR
-                    : "#cbd5e1",
-                animated: phase === "bridgeDown",
-                // Slight delay so the message visually arrives at factory-1
-                // before continuing on to the edge client.
-                delay: phase === "bridgeDown" ? 700 : 0,
-                interval: 1600,
-            },
-        });
-
-        // Edge sensor publishes up into factory-1.
-        edges.push({
-            id: `e-edgepub-factory-${phase}`,
-            source: "edge-pub",
-            target: "factory-1",
-            type: "animated",
-            markerEnd: { type: MarkerType.ArrowClosed },
-            data: {
-                color: phase === "bridgeUp"
-                    ? EDGE_TO_HUB_COLOR
-                    : "#cbd5e1",
-                animated: phase === "bridgeUp",
-                interval: 1600,
-            },
-        });
-
-        // factory-1 bridges the edge message UP the leaf link into the hub.
-        edges.push({
-            id: `e-factory-n1-up-${phase}`,
-            source: "factory-1",
-            target: "n2-east",
-            type: "animated",
-            markerEnd: { type: MarkerType.ArrowClosed },
-            data: {
-                color: phase === "bridgeUp"
-                    ? EDGE_TO_HUB_COLOR
-                    : "#cbd5e1",
-                animated: phase === "bridgeUp",
-                delay: phase === "bridgeUp" ? 700 : 0,
-                interval: 1600,
-            },
-        });
-    }
-
-    const description = (() => {
-        switch (phase) {
-            case "connect":
-                return "factory-1 opens an outbound connection up into cluster east (n1-east). The hub never dials the leaf.";
-            case "bridgeDown":
-                return "Interest bridges down: a hub client's message crosses the leaf link and reaches an edge client on factory-1.";
-            case "bridgeUp":
-                return "Interest bridges up: an edge sensor's message crosses the leaf link the other way and reaches the hub.";
-        }
-    })();
-
-    const phaseLabel: Record<Phase, string> = {
-        connect: "1. Connect out",
-        bridgeDown: "2. Hub → edge",
-        bridgeUp: "3. Edge → hub",
-    };
-
-    const buttonStyle = (active: boolean): React.CSSProperties => ({
-        padding: "6px 14px",
-        fontSize: "13px",
-        border: "1px solid #d1d5db",
-        borderRadius: "4px",
-        backgroundColor: active ? LEAF_LINK_COLOR : "#ffffff",
-        color: active ? "#ffffff" : "#374151",
-        cursor: "pointer",
-        fontWeight: 500,
-    });
-
+function LeafNodeAnimatedInner({ width = 640, height = 500 }: { width?: number; height?: number }) {
     return (
         <div style={{ position: "relative" }}>
-            {/* Step controls */}
-            <div
-                style={{
-                    marginBottom: "10px",
-                    display: "flex",
-                    gap: "8px",
-                    alignItems: "center",
-                }}
-            >
-                <span
-                    style={{
-                        fontSize: "13px",
-                        color: "#6b7280",
-                        marginRight: "4px",
-                    }}
-                >
-                    Step:
-                </span>
-                {PHASE_ORDER.map((p) => (
-                    <button
-                        key={p}
-                        onClick={() => setPhase(p)}
-                        style={buttonStyle(phase === p)}
-                    >
-                        {phaseLabel[p]}
-                    </button>
-                ))}
-            </div>
-
-            {/* Diagram */}
             <div
                 style={{
                     width: `${width}px`,
@@ -291,72 +128,25 @@ function LeafNodeAnimatedInner({
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
                     fitView
-                    fitViewOptions={{ padding: 0.2 }}
+                    fitViewOptions={{ padding: 0.08 }}
                     nodesDraggable={false}
                     nodesConnectable={false}
                     elementsSelectable={false}
                     zoomOnScroll={false}
                     panOnDrag={false}
                     preventScrolling={true}
-                    minZoom={0.5}
+                    minZoom={0.4}
                     maxZoom={1.5}
                     proOptions={{ hideAttribution: true }}
                 >
                     <Background />
                 </ReactFlow>
-
-                {/* Cluster / leaf zone labels */}
-                <div
-                    style={{
-                        position: "absolute",
-                        left: "12px",
-                        top: "8px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        letterSpacing: "1px",
-                        textTransform: "uppercase",
-                        color: "#64748b",
-                    }}
-                >
-                    Hub — cluster east
-                </div>
-                <div
-                    style={{
-                        position: "absolute",
-                        left: "12px",
-                        bottom: "8px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        letterSpacing: "1px",
-                        textTransform: "uppercase",
-                        color: LEAF_LINK_COLOR,
-                    }}
-                >
-                    Leaf — factory-1
-                </div>
             </div>
-
-            {/* Status */}
-            <div
-                style={{
-                    marginTop: "8px",
-                    fontSize: "13px",
-                    color: "#6b7280",
-                }}
-            >
-                {description}
-            </div>
-            <div
-                style={{
-                    marginTop: "4px",
-                    fontSize: "12px",
-                    color: "#9ca3af",
-                    fontStyle: "italic",
-                }}
-            >
-                The leaf connects out, so factory-1 can live anywhere with
-                outbound access to the hub — no inbound ports, no public
-                address required.
+            <div style={{ marginTop: "8px", fontSize: "13px", color: "#6b7280" }}>
+                <code>factory-1</code> dials one outbound connection up to the{" "}
+                <strong>east</strong> hub. An order published on the hub rides that
+                single link down to a subscriber on the factory floor — no inbound
+                connection to the factory needed.
             </div>
         </div>
     );

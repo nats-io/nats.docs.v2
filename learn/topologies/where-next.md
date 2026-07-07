@@ -10,7 +10,7 @@ description: Recap the four composable shapes and point to the mechanics, operat
 You started this chapter with one `nats-server` on `localhost` serving
 Acme's ORDERS workload. You end it with that same workload running on a
 two-cluster super-cluster that fans out to a leaf at the factory floor.
-The deployment grew throughout, while the application stayed the same.
+The deployment grew throughout, while the client code stayed the same.
 
 This page collects the model you built into one place and points you at
 the chapters and Reference that take it further, rather than teaching
@@ -91,16 +91,16 @@ cluster without dropping clients, hardening servers, and sizing servers
 for a workload.
 
 Once a topology is live, you watch it with the
-[Monitoring](/learn/monitoring) deep dive. The monitoring endpoints this
-chapter used to inspect a topology (routes, gateways, and leaf
-connections) are the same ones you scrape in production to know the mesh
-is healthy and traffic is flowing where you expect.
+[Monitoring](/learn/monitoring) deep dive. The routes, gateways, and leaf
+connections you wired by hand here each show up on a monitoring endpoint —
+the same ones you scrape in production to know the mesh is healthy and
+traffic is flowing where you expect.
 
 ## Securing a leaf
 
 The [Leaf nodes](/learn/topologies/leaf-nodes) page attached `factory-1`
-to the `east` cluster and bound it to an account, but kept the
-credentials side light.
+to the `east` cluster and ran it auth-free, in the default account,
+leaving account binding and credentials for production.
 
 A leaf opens a connection across a trust boundary, often the public
 internet, so authenticating that connection and scoping what the leaf
@@ -146,19 +146,17 @@ shapes in production.
 
 ## Production checklist
 
-Each shape in this chapter ends with a **Pitfalls** section. Here are
-those traps collected into one pass over a deployment before it carries
-real traffic: the thing to do, grouped by the page that explains why.
+Each shape in this chapter flags what to watch for. Here they are
+collected into one pass over a deployment before it carries real traffic:
+the thing to do, grouped by the page that explains why.
 
-**Single server**: see [Pitfalls](/learn/topologies/single-server#pitfalls)
+**Single server**: see [The limits of one server](/learn/topologies/single-server#the-limits-of-one-server)
 
 - [ ] Move production workloads off a single server before a reboot can drop orders in flight.
-- [ ] Set `http_port: 8222` from day one so `/varz` is there when something breaks.
 - [ ] Plan for horizontal growth, not a bigger box; vertical scaling has a ceiling.
 
 **Cluster**: see [Pitfalls](/learn/topologies/your-first-cluster#pitfalls)
 
-- [ ] Give every client the full server list, never a single seed URL.
 - [ ] Set the same `name` on all servers, then confirm they joined as one cluster.
 - [ ] Bind the cluster port to a private interface and firewall it off the open internet.
 - [ ] Run an odd server count once you replicate a stream.
@@ -167,25 +165,22 @@ real traffic: the thing to do, grouped by the page that explains why.
 
 - [ ] Audit replica counts and raise the streams that matter to R3; a cluster alone is not HA.
 - [ ] Run an odd count (three or five), never an even count; a stream replicates across at most five servers.
-- [ ] Read a stream's own leader from `nats stream info`, not from the meta-group summary.
 - [ ] Spread R3 replicas across independent failure domains, not one rack or zone.
 
 **Super-cluster**: see [Pitfalls](/learn/topologies/super-clusters#pitfalls)
 
 - [ ] Join regions with a `gateway {}` block, never a `cluster {}` stretched across them.
-- [ ] Match each gateway `name` exactly, then confirm both directions show up.
+- [ ] Match each gateway `name` to its cluster's, then confirm a publish crosses to the other region.
 - [ ] Place a queue subscriber for each workload in every region that produces it.
 
 **Leaf nodes**: see [Pitfalls](/learn/topologies/leaf-nodes#pitfalls)
 
-- [ ] Set the leaf's `account` explicitly and verify it in `nats server report leafnodes`.
 - [ ] Put `remotes` on the egress-only side and `leafnodes { listen }` on the hub.
 - [ ] Give a leaf its own JetStream `domain` when it needs a distinct local store.
 
 **Composing shapes**: see [Pitfalls](/learn/topologies/putting-it-together#pitfalls)
 
-- [ ] Bind each leaf to its own dedicated account so leaves never leak into each other.
-- [ ] Use accounts, not another route or gateway, when you need a wall between deployment parts.
+- [ ] Reach for accounts — with a leaf where the boundary follows a network edge — when you need an isolation wall, not another route or gateway.
 - [ ] Add each layer only when the current one runs out of room.
 
 ## See also
