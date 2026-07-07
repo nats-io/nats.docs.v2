@@ -1,0 +1,29 @@
+new-nats.docs
+
+Copyright (c) 2026 Synadia Communications, Inc.
+
+Original code and documentation in this repository are licensed under the
+MIT License (see LICENSE).
+
+This repository contains content derived from and generated out of the
+following upstream projects, each licensed under the Apache License,
+Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0):
+
+- nats-io/nats.docs (https://github.com/nats-io/nats.docs)
+  Portions of the documentation content are derived from the official
+  NATS documentation.
+
+- nats-io/nats-server (https://github.com/nats-io/nats-server)
+  The versioned reference documentation under reference_versioned_docs/
+  and the vendored JSON schemas under src/schemas/vendor/ are generated
+  from nats-server source code.
+
+- nats-io/jsm.go (https://github.com/nats-io/jsm.go)
+  JetStream API schemas and generated reference pages derive from jsm.go.
+
+The Apache-2.0-derived portions remain subject to the Apache License,
+Version 2.0; this repository's MIT license applies to the original work
+contained here and does not relicense upstream content.
+
+NATS and the NATS logo are trademarks of the Cloud Native Computing
+Foundation and/or Synadia Communications, Inc.

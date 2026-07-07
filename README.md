@@ -1,13 +1,23 @@
-# NATS Documentation
+# NATS Documentation (rebuild)
 
-This is the official documentation site for NATS, built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+A ground-up rebuild of the [NATS](https://nats.io) documentation, built with
+[Docusaurus](https://docusaurus.io/). It reorganizes the docs around
+[Diátaxis](https://diataxis.fr/): Core Concepts, hands-on Tutorials, long-form
+Learn deep dives, and per-version generated Reference (from `nats-server` and
+`jsm.go` source), plus interactive message-flow animations and multi-language
+code examples pulled from the client repositories.
+
+> **Status:** work in progress. This is an experimental rebuild by
+> [Synadia](https://synadia.com), not (yet) the official NATS documentation —
+> the official docs live at [docs.nats.io](https://docs.nats.io) and
+> [nats-io/nats.docs](https://github.com/nats-io/nats.docs).
 
 ## Overview
 
 **What is this repository?**
-- Official NATS documentation site
-- Source for [docs.nats.io](https://docs.nats.io) (or similar)
+- A rebuilt NATS documentation site
 - Written in Markdown/MDX with React components
+- Reference docs generated per NATS version from upstream source
 - Automatically deployed on every merge to `main`
 
 **For new contributors:**
@@ -35,11 +45,9 @@ This is the official documentation site for NATS, built using [Docusaurus](https
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/nats-io/nats.docs.git new-nats.docs
+git clone https://github.com/synadia-labs/new-nats.docs.git
 cd new-nats.docs
 ```
-
-   **Note:** This repository may be cloned with different local names (`nats.docs`, `new-nats.docs`, etc.). The examples in this README use `new-nats.docs` to match the recommended multi-repository setup.
 
 2. Install dependencies:
 ```bash
@@ -166,8 +174,6 @@ This site supports multiple deployment options:
 - **Netlify**: Each PR gets a unique preview URL
 - **Vercel**: Alternative preview deployment option
 
-See [.github/workflows/README.md](.github/workflows/README.md) for setup instructions.
-
 ### Manual Deployment
 
 Using SSH:
@@ -223,8 +229,6 @@ npm run generate-docs:dry-run
 - When modifying generation templates in `scripts/templates/`
 - Before committing reference doc changes
 
-**Learn more:** See [GENERATION.md](./GENERATION.md) for complete documentation generation guide.
-
 ## Development
 
 ### Technology Stack
@@ -254,7 +258,6 @@ new-nats.docs/
 │   ├── js/                    # Client-side JavaScript
 │   │   └── nats-example-loader-v2.js  # Loads code examples dynamically
 │   └── img/                   # Images and assets
-├── nats-branding/             # Official NATS brand assets
 ├── scripts/
 │   └── fetch-examples.js      # Fetches examples from GitHub repos
 ├── docusaurus.config.ts       # Site configuration
@@ -818,3 +821,18 @@ CLI examples are stored directly in this repository at `static/examples/snippets
 - Review [CLAUDE.md](./CLAUDE.md) for style guidelines
 - Check existing documentation pages for examples
 - Look at `src/components/NatsFlow/README.md` for animation component details
+
+## License and Attribution
+
+The original code and documentation in this repository are licensed under
+the [MIT License](./LICENSE).
+
+Parts of this repository derive from Apache-2.0-licensed upstream projects,
+and those portions remain under the Apache License 2.0 — see
+[NOTICE](./NOTICE) for details:
+
+- Documentation content derived from
+  [nats-io/nats.docs](https://github.com/nats-io/nats.docs)
+- Reference documentation and JSON schemas generated from
+  [nats-io/nats-server](https://github.com/nats-io/nats-server) and
+  [nats-io/jsm.go](https://github.com/nats-io/jsm.go)

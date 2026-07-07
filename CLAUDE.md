@@ -58,7 +58,7 @@ In all other cases, use `nats-example` tags and add examples to the multi-repo s
    - Use: `git add static/examples/snippets/cli/[page]/[snippet].sh`
    - See `static/examples/snippets/cli/README.md` for details
 
-2. **Go**: Write in `~/coding/nats.go-docs` at `examples/docs/[page]-[snippet]/main.go` (doc-examples branch)
+2. **Go**: Write in your local `nats.go` clone (e.g. `../nats.go-docs`) at `examples/docs/[page]-[snippet]/main.go` (doc-examples branch)
    - Commit and push to nats-io/nats.go doc-examples branch
    - **IMPORTANT**: Add entry to `EXAMPLES_CONFIG` in `scripts/fetch-examples.js`:
      ```javascript
@@ -66,7 +66,7 @@ In all other cases, use `nats-example` tags and add examples to the multi-repo s
      ```
    - Fetched during build via `npm run fetch-examples`
 
-3. **Rust**: Write in `~/coding/nats.rs-docs` at `async-nats/examples/docs_[page]_[snippet].rs` (doc-examples branch)
+3. **Rust**: Write in your local `nats.rs` clone (e.g. `../nats.rs-docs`) at `async-nats/examples/docs_[page]_[snippet].rs` (doc-examples branch)
    - Commit and push to nats-io/nats.rs doc-examples branch
    - **IMPORTANT**: Add entry to `EXAMPLES_CONFIG` in `scripts/fetch-examples.js`:
      ```javascript
@@ -245,16 +245,3 @@ npm run fetch-examples # Fetch code examples
 
 ---
 
-## Subagent Usage
-
-A specialized subagent (`nats-docs-writer`) auto-triggers on:
-- `docs/**/*.md`
-- `docs/**/*.mdx`
-- `src/components/NatsFlow/**`
-
-Manual invocation:
-```
-/task Create documentation for [topic] following NATS standards
-```
-
-The subagent enforces MUST rules, applies SHOULD guidelines, and validates against the checklist.
