@@ -1,8 +1,8 @@
-# NatsFlow Integration - Setup Complete
+# NatsFlow Integration
 
 ## Overview
 
-NatsFlow is now fully integrated into the NATS documentation site. It provides interactive, animated React Flow diagrams that work in **regular Markdown (.md) files** - no MDX required!
+NatsFlow is the documentation site's system for interactive, animated React Flow diagrams that work in **regular Markdown (.md) files** - no MDX required!
 
 ## Architecture
 
@@ -135,13 +135,18 @@ Use data attributes to customize:
 Start the dev server:
 
 ```bash
-cd /Users/tomaszpietrek/coding/new-nats.docs
 npm start
 ```
 
 Visit: http://localhost:3000/concepts/natsflow-demo
 
 ## Adding New Scenarios
+
+> The full authoring guide, including the animated stage-machine scenarios
+> used across the Learn section, lives in
+> [`src/components/NatsFlow/README.md`](./src/components/NatsFlow/README.md).
+> New scenarios also register a type in `src/types/global.d.ts` and a title
+> in `scripts/rehype-nats-flow.mjs`.
 
 ### 1. Create the scenario file
 
@@ -265,24 +270,6 @@ Should show no errors in:
 - `src/plugins/nats-flow/**`
 - `src/types/global.d.ts`
 
-## Files Modified/Created
-
-### Created
-- `src/components/NatsFlow/` - All component files
-- `src/plugins/nats-flow/` - Plugin files
-- `src/types/global.d.ts` - Global type definitions
-- `static/js/nats-flow-loader.js` - Loader script
-- `docs/concepts/natsflow-demo.md` - Demo page
-
-### Modified
-- `docusaurus.config.ts` - Added plugin and script
-- `package.json` - Added dependencies
-
-### Dependencies Added
-- `@xyflow/react` - React Flow library
-- `clsx` - Utility classes
-- `tailwind-merge` - Tailwind class merging
-
 ## Benefits
 
 1. **No MDX Required** - Works in regular .md files
@@ -291,7 +278,3 @@ Should show no errors in:
 4. **Extensible** - Easy to add new scenarios
 5. **Performant** - Bundled at build time
 6. **Integrated** - Works with Docusaurus navigation
-
-## Credits
-
-Based on React Flow implementation from `kubecon25-flow-ui`, adapted for Docusaurus with custom plugin architecture.
