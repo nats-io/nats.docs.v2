@@ -7,8 +7,8 @@ description: One nats-server process clients connect to directly — when it's e
 
 # Single server
 
-Every topology in this chapter is built on top of a single
-server. So that's where Acme starts, and where you start too.
+Every topology in this chapter is built on a single server. That's
+where Acme starts.
 
 A **server** is one `nats-server` process. It accepts client connections, routes
 messages between subjects, and, if you turn JetStream on, can store them in
@@ -63,7 +63,7 @@ out here so the address is never a mystery. Clients will use
 observable; the [Monitoring deep dive](/learn/monitoring) covers what to
 watch on it.
 
-`jetstream` turns JetStream on and gives it a `store_dir` to
+[`jetstream`](/reference/config/jetstream) turns JetStream on and gives it a `store_dir` to
 write to. Acme enables it so `n1` can hold the same ORDERS stream it
 carried through the JetStream chapter.
 
@@ -124,9 +124,13 @@ jobs.
 Reach for one server in **development**: a laptop, a CI run, a quick
 experiment. There's nothing to coordinate and nothing to wait for.
 
-Reach for one server when **embedding** NATS inside another
-application. The `nats-server` binary can run in-process, giving that one
-app a full NATS without operating a separate fleet.
+Reach for one server when NATS runs **on the device itself**. The
+`nats-server` binary is one small, self-contained process, so it can run
+on edge hardware — a car, a factory machine, a point-of-sale terminal —
+or embedded in-process inside another application. Each gets a full local
+NATS with no fleet to operate. A device server like this often later dials
+out to a central system as a [leaf node](/learn/topologies/leaf-nodes),
+but on its own it's still a single server.
 
 Reach for one server behind a **small, single-instance service** — an
 internal dashboard or a nightly job that already runs as one process.
@@ -158,18 +162,15 @@ survive a restart of the process, but they still live on one machine.
 Lose that disk and you lose the stream. One server gives you durability against a
 crash, never against the loss of the server itself.
 
-Capacity is the second limit. A single server scales only **vertically**:
-a bigger CPU, more RAM, a faster disk. That carries Acme a long way, but
-every machine has a ceiling, and there's no larger one to buy past it.
-When one server can no longer hold the load, the answer isn't a bigger
-server — it's more of them sharing the work.
+Capacity is the second limit. A single server scales **vertically** — a
+bigger CPU, more RAM, a faster disk — which is sometimes the right fix,
+but every machine has a ceiling. Past it, the way forward is more servers,
+not a bigger one.
 
-The fix for both is a **cluster**. Three `nats-server` processes,
-joined together, let a client whose server died reconnect to another server
-and keep working, and let a stream keep copies on more than one machine.
-They also spread load that no single machine could carry alone. The next
-page stands up Acme's first cluster, `east`, and shows how it lifts both
-limits at once.
+The fix for both limits is a **cluster**: more than one server, so a
+client can fail over and a stream can keep copies on more than one machine.
+The next page stands up Acme's first cluster, `east`, and shows how it
+lifts both limits at once.
 
 ## Pitfalls
 

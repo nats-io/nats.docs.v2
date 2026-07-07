@@ -217,7 +217,7 @@ to the other beyond the single leaf link.
 ## JetStream over a leaf
 
 If `factory-1` runs its own JetStream (a local `ORDERS` store on the
-plant floor), it needs a JetStream **domain**.
+plant floor), it needs a JetStream **[domain](/reference/config/jetstream/domain)**.
 
 A domain is a name that isolates one JetStream system from another across
 a leaf link, so the factory's streams and the hub's streams stay

@@ -34,17 +34,42 @@ four stages:
   thing that works.
 - **A cluster.** Production needs to survive a server outage. Acme stands
   up the `east` cluster (three servers: `n1-east`, `n2-east`, and
-  `n3-east`) joined into a full mesh by **routes**. Clients connect to
+  `n3-east`) joined into a full mesh by **[routes](/reference/protocols/route)**. Clients connect to
   any one of them.
 - **A super-cluster.** Traffic arrives from a second region. Acme adds
-  the `west` cluster and joins it to `east` with **gateways**. The two
+  the `west` cluster and joins it to `east` with **[gateways](/reference/protocols/gateway)**. The two
   clusters now form a super-cluster that spans regions, while keeping
   most traffic local to where it starts.
 - **Leaf nodes.** A factory floor needs NATS on-site with only outbound
-  network access. Acme runs `factory-1` as a **leaf node** that connects
+  network access. Acme runs `factory-1` as a **[leaf node](/reference/protocols/leafnode)** that connects
   outward to the `east` cluster and serves its own local edge clients.
 
 All of the examples in this chapter are runnable on a single machine.
+
+## Two layers: messaging and JetStream
+
+Every shape in this chapter does two separate jobs, and it helps to keep
+them apart.
+
+The first is **core messaging**. A client publishes `orders.created`, and
+the server fabric — routes, gateways, and leaf connections — carries that
+message to whoever has a matching subscription, wherever they're
+connected. The animations on these pages show this layer: a message
+leaving one server and arriving at another.
+
+The second is **JetStream**. A stream stores messages on disk, and clients
+read them back through consumers instead of subscribing to the subject
+directly. JetStream replicates that stored copy across the servers the
+topology provides, so it survives a lost server. It's a separate layer on
+the same fabric: the topology moves messages, and JetStream persists and
+replicates them.
+
+Most of what a topology does is the first layer, and the animations
+reflect that. JetStream enters on the
+[JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster) page.
+When a page talks about a message reaching a subscriber, that's core
+messaging; when it talks about a stream surviving a lost server, that's
+JetStream on top.
 
 ## Scope of this chapter
 

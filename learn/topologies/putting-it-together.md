@@ -41,6 +41,12 @@ that ran against `n1` on a laptop runs against this.
 
 <div class="nats-flow" data-scenario="massiveScaleAnimated" data-width="820" data-height="470"></div>
 
+The animation shows the messaging layer: an order published in one place
+crossing routes, the gateway, and the leaf link to reach interest
+elsewhere. The `ORDERS` stream's replicas live on the same servers but
+aren't drawn here — that's the JetStream layer from
+[JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster).
+
 ## Shapes are layers you combine
 
 Look at that deployment again and notice that no shape replaced
