@@ -143,26 +143,21 @@ page is about the routes.
 Look again at the configs: each server lists a single route to one peer —
 `n2-east` and `n3-east` at `n1-east`, and `n1-east` back at `n2-east`.
 That's one route apiece, not the full mesh from above where every server
-holds a route to every other. The obvious move is to finish it by hand —
-give every config a route to both of its peers.
+holds a route to every other. It's enough. When a server connects to a
+route you wrote, it learns about every other server that peer already
+knows, and dials those too — the routes you didn't write appear on their
+own.
 
-You can, and it's a valid cluster: the servers simply notice the
-redundant connections and drop the extras (the log notes a `Duplicate
-Route` close). But you don't need to, because they complete the mesh on
-their own.
+You can still write the full mesh by hand; the servers drop the redundant
+connections (the log notes a `Duplicate Route` close), and no server then
+depends on a single seed being up first. The cost is that every new
+server means editing every config.
 
-When a server connects to a route you wrote, it learns about every other
-server that peer already knows, and dials those too. So `n2-east` connects
-to `n1-east`, discovers the rest of the cluster, and connects to them
-directly; when `n3-east` joins, the others learn about it and connect back.
-The routes you didn't write appear on their own.
-
-This is why each server only needs one route, not the full list:
-`n2-east`, `n3-east`, and any server you add later point at `n1-east`,
-`n1-east` points back at one of them, and gossip fills in the rest. The
-by-hand mesh is the other end of the trade-off — no server depends on a
-single seed being up first, but every new server then means editing every
-config.
+How that discovery actually works — the INFO messages that carry it, and
+which of the resulting routes are explicit versus gossip-learned — is the
+opening page of
+[Clustering & Replication](/learn/clustering/forming-a-cluster). The
+shape to remember here: one seed route per server grows a full mesh.
 
 ## Start the cluster
 
@@ -275,12 +270,12 @@ get them wrong. These three come up most often when standing up `east`.
 **Misspell a cluster name.** A typo in `name` doesn't raise an error.
 The server with the odd name forms its own cluster and never
 joins `east`, leaving you with two clusters that look like one until a
-message fails to cross. (On the wire the server rejects the route with
-`cluster name does not match`.) Set the same `name` on all three. To catch
-a stray one, look for that rejection line in its log, or rerun the
-cross-server publish from [Confirm the routes](#confirm-the-routes): if a
-message published on one server never reaches a subscriber on another, they
-never joined.
+message fails to cross. Set the same `name` on all three. To catch a
+stray one, rerun the cross-server publish from
+[Confirm the routes](#confirm-the-routes): if a message published on one
+server never reaches a subscriber on another, they never joined. What the
+rejected route looks like in the server log is shown in
+[Forming a cluster](/learn/clustering/forming-a-cluster).
 
 **Expose the cluster port to the world.** The cluster `listen` port (6222)
 accepts routes from other servers, not clients — and a route is a *trusted*

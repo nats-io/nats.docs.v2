@@ -32,18 +32,16 @@ what streams exist and where each one lives, so a `create ORDERS` sent to
 any of them makes one stream, not three. That agreement needs a single
 decision-maker.
 
-So a JetStream cluster runs a coordinator. The servers elect one
+So a JetStream cluster runs a coordinator. One server acts as the
 **meta leader**, and the meta leader owns every decision about *where*
 streams and consumers live: which servers hold a new stream, which server
 holds each copy, and what happens when a server disappears.
 
 The set of servers participating in that coordination is the **meta
-group**. Every JetStream-enabled server in the cluster belongs to it.
-One of them is the meta leader, and the rest are followers.
-
-Which server wins that election doesn't matter and isn't something you
-choose. What matters is that exactly one server coordinates where streams
-and consumers live, and the others can take over if it fails.
+group**; every JetStream-enabled server in the cluster belongs to it.
+Which server leads isn't something you choose, and another takes over if
+it fails — how that handover is decided is covered in
+[Clustering & Replication](/learn/clustering/raft-and-leaders).
 
 The meta leader decides where a stream lives, but it doesn't handle the
 writes to it. Those go through replication, which the rest of this page
@@ -51,19 +49,14 @@ covers.
 
 ## A replicated stream needs an odd number of servers
 
-The meta group reaches its decisions by majority vote. A majority of a
-group needs more than half its members reachable, which is why a
-JetStream cluster wants an **odd** number of servers.
+The meta group reaches its decisions by majority vote: more than half its
+members must be reachable. That one rule sets the shape of a JetStream
+cluster, and it's why you run an **odd** number of servers.
 
-Three servers form a clean majority of two. Lose one server and two
-remain, still a majority, so the meta group keeps coordinating and your
-streams keep serving. This is exactly why Acme runs three, not two.
-
-Lose a second server, though, and the majority is gone. With one of three
-left, no write can reach a majority, so the stream stops accepting new
-messages until a server comes back — it would rather pause than store an
-order it can't copy to a majority. Three servers is what lets any single
-one fail while writes keep flowing.
+Three servers keep working with one lost, because two of three are still
+a majority. Lose a second and no majority is left, so streams pause
+writes rather than store an order they can't copy safely. This is exactly
+why Acme runs three, not two.
 
 An even count gives you no extra protection here. Two servers have no majority once
 one is gone, and four tolerate the same single failure that three do while
@@ -71,10 +64,10 @@ costing an extra server. That's why production clusters run an odd
 count, typically three or five; a stream replicates across at most five
 servers, so five is the practical ceiling.
 
-The wire-level detail of how that majority vote works (the Raft
-protocol, election timing, and log replication) lives in the
-[Clustering & Replication](/learn/clustering) deep dive. The shape we need
-here is an odd server count, a majority rule, and one coordinator.
+How that majority vote actually works — the Raft protocol, election
+timing, and log replication — lives in
+[Clustering & Replication](/learn/clustering/raft-and-leaders). The shape
+we need here is an odd server count, a majority rule, and one coordinator.
 
 ## Make ORDERS survive a server loss
 
@@ -122,35 +115,31 @@ Cluster Information:
               Replica: n2-east, current, seen 0.00s ago
 ```
 
-Read this section top to bottom. `Name: east` is the cluster the stream lives in. Replication stays inside
-one cluster; it's the unit a stream is replicated across.
+Read it as the shape it describes. `Name: east` is the cluster the stream
+lives in — replication stays inside one cluster. `Leader: n1-east` is the
+copy that takes every write to `ORDERS`; the two `Replica` lines are the
+copies that follow it, and `current` means a copy has recently checked in
+and holds the same data.
 
-`Cluster Group` is the internal name for this stream's own coordination
-group: its own Raft group, separate from the meta group. Each stream
-gets one.
+The mechanics under this output — what a `Cluster Group` is, how the
+leader keeps the copies in step, and when a write is acknowledged — are
+the subject of
+[Clustering & Replication](/learn/clustering/replication-and-r3), which
+reads this same block field by field.
 
-`Leader: n1-east` is where the stream's writes land. One of the three
-copies takes every write to `ORDERS` first, then sends it to the other
-replicas, and the write is acknowledged only once a majority hold it. The two
-`Replica` lines are the copies that follow. `current` means a copy has
-recently checked in and holds the same data; `seen` reports how long
-since it last reported. All three copies hold the same data.
-
-This stream's leader, `n1-east`, is whichever copy the cluster picked to
-take its writes — not necessarily the server coordinating the meta group.
-The two are chosen independently: the meta leader only places the stream,
-and once placed the stream handles its own writes wherever it landed. You
-configure neither; both fall out of the same majority rule, and the
-[Clustering & Replication](/learn/clustering) deep dive covers how they're
-chosen and how they move when a server dies.
+One thing worth knowing at this altitude: the stream's leader is not
+necessarily the meta leader. The meta leader only places the stream, and
+once placed the stream handles its own writes wherever it landed. You
+configure neither, and
+[Clustering & Replication](/learn/clustering/raft-and-leaders) covers how
+each is chosen and how they move when a server dies.
 
 ## Consumers replicate too
 
 A consumer has state worth protecting as well: how far a reader has gotten
 and which messages are still waiting for an ack. The meta leader places
-consumers just as it places streams, and each consumer gets its own Raft
-group and leader — chosen independently of the stream's, so a consumer can
-lead on `n1-east` while its stream leads on `n3-east`. `nats consumer info`
+consumers just as it places streams, and a replicated consumer survives a
+server loss the same way a replicated stream does. `nats consumer info`
 shows a Cluster Information section of its own.
 
 By default a consumer takes its stream's replica count, so a consumer on
@@ -158,8 +147,9 @@ R3 `ORDERS` is replicated three ways too and keeps its place through a
 server loss. You can set it lower, but an R1 consumer on an R3 stream is
 its own single point of failure: its position lives on one server, so
 losing that server loses the reader's place even though the stream
-survives. The [Clustering & Replication](/learn/clustering) deep dive
-covers consumer placement and the replica options in full.
+survives. The
+[Clustering & Replication](/learn/clustering/replication-and-r3) deep dive
+covers consumer replication and the replica options in full.
 
 ## Pitfalls
 
@@ -192,11 +182,11 @@ nats server check stream --stream=ORDERS --peer-expect=3
 OK ORDERS OK:3 peers OK:0 sources | sources=0
 ```
 
-**An even server count gives you no extra protection.** A majority needs more than half the
-group reachable, so four servers tolerate the same single loss that three do at
-the cost of an extra server, and two have no majority left once one is gone.
-Run an odd count of three or five (a stream replicates across at most five
-servers), never four or six.
+**An even server count gives you no extra protection.** The majority rule
+above already made the case: four servers tolerate the same single loss
+that three do, and two have no majority left once one is gone. Run an odd
+count of three or five (a stream replicates across at most five servers),
+never four or six.
 
 **All three replicas in one failure domain defeat R3.** Three copies survive
 one server loss only if the three servers can fail independently. Spread across
@@ -211,7 +201,7 @@ Acme's deployment now looks like this:
 
 - The `east` cluster (`n1-east`, `n2-east`, `n3-east`) runs JetStream
   on every server, each with its own `store_dir`.
-- The cluster elects a **meta leader** that coordinates where streams and
+- The cluster runs a **meta leader** that coordinates where streams and
   consumers live.
 - `ORDERS` is an **R3** stream: three copies across the three servers,
   with one of them taking every write.
