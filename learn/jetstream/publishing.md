@@ -29,7 +29,7 @@ nats pub --jetstream orders.created '{"order_id":"ord_8w2k","customer":"acme-co"
 The server appends the message to `ORDERS` (the stream captures
 `orders.>`) and replies on the same call:
 
-```
+```text
 Stored in Stream: ORDERS Sequence: 1
 ```
 
@@ -49,14 +49,15 @@ nats pub --jetstream orders.shipped '{"order_id":"ord_8w2k","customer":"acme-co"
 You can check the whole stream with `nats stream info ORDERS`. It now
 reports three messages:
 
-```
+```text
 State:
 
-             Messages: 3
-                Bytes: 459 B
-        First Sequence: 1 @ 2026-05-22 10:14:22
-         Last Sequence: 3 @ 2026-05-22 10:14:31
-        Active Consumers: 0
+                     Messages: 3
+                        Bytes: 404 B
+               First Sequence: 1 @ 2026-05-22 10:14:22
+                Last Sequence: 3 @ 2026-05-22 10:14:31
+             Active Consumers: 0
+           Number of Subjects: 2
 ```
 
 You didn't have to run that command to know the writes succeeded. Each
@@ -95,24 +96,24 @@ A `PubAck` has three fields you use regularly:
   record, you can replay the stream from that point later.
 - **duplicate**: `false` for a new message, `true` if the server
   recognized the message as a repeat. Duplicate detection is covered in
-  the next section.
+  [Avoiding duplicate writes](#avoiding-duplicate-writes) below.
 
 A `PubAck` can also include a few situational fields, such as a `domain`
 for multi-tenant or leaf-node setups. The full list is in
 [Reference](/reference/jetstream/api/stream/pub-ack). The
 three above are the ones day-to-day publishing code reads.
 
-Here is the same publish, now reading the `PubAck` back:
+The snippets in the previous section already return this object; reading
+its fields is all there is to it.
 
-<div class="nats-example"
-     data-type="learn-jetstream-publishing-pubAck"
-     data-languages="js,go,python,java,rust,csharp"></div>
-
-The rule is simple: if a publish doesn't return a `PubAck`, the message
-was not stored. A network timeout, a server error, or a subject that no
-stream captures all produce a failed publish, not a silent loss. Handle a
-failed `PubAck` the way you handle any failed write: retry it, or report
-the failure to the caller.
+The rule: the `PubAck` is your only proof that the message was stored.
+When a publish fails, what you know depends on how it failed. A subject
+that no stream captures fails immediately (a "no responders" error), and
+nothing was stored. But a network timeout means no confirmation, not no
+write: the server may have stored the message and the ack got lost on the
+way back. So handle a failed publish by retrying it or reporting the
+failure — and make the retry safe with the `Nats-Msg-Id` header covered
+in [Avoiding duplicate writes](#avoiding-duplicate-writes) below.
 
 ## Stored versus delivered
 
@@ -126,16 +127,19 @@ JetStream they happen at different times:
 
 1. The publisher publishes. The server stores the message and returns a
    `PubAck`.
-2. Later (possibly minutes, hours, or days) a consumer reads the message.
-3. After processing it, the consumer acknowledges it. Only then is the
+2. Later (possibly minutes, hours, or days) a client reads the message
+   through a consumer.
+3. After processing it, the client acknowledges it. Only then is the
    message considered handled.
 
 The rest of this chapter covers steps 2 and 3. This page has done step 1.
 
 ## Avoiding duplicate writes
 
-A real publisher retries when a publish fails, and a plain retry stores
-the same message twice. To prevent that, tag the publish with a
+A real publisher retries when a publish fails. But a failed publish
+doesn't mean the message wasn't stored: a timeout can fire after the
+server stored the message, with only the ack lost. A plain retry then
+stores the same message twice. To prevent that, tag the publish with a
 `Nats-Msg-Id` header. The server refuses to store the same ID twice
 within the stream's duplicate-tracking window (the two-minute setting
 from the previous page's config). A blocked duplicate is the
@@ -200,15 +204,17 @@ code, check the return value; on the CLI, publish with
      data-type="learn-jetstream-publishing-confirmStored"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-A `Stored in Stream … Sequence …` line confirms the write. An error
-(no responders) means no stream captured the subject, so nothing was
-stored.
+The plain publish reports `Published` even on a subject no stream
+captures. The `--jetstream` version surfaces the miss as a "no
+responders" error, and confirms a real write with
+`Stored in Stream … Sequence …`.
 
 **Retrying without a `Nats-Msg-Id`.** A publisher that retries after a
-timeout (which any well-built publisher does) stores the message twice
-unless the retry carries the same `Nats-Msg-Id`. The duplicate-tracking
-window is two minutes by default, so a retry that arrives after that also
-stores a second copy. Don't retry a bare publish. Give every retryable
+timeout (which any well-built publisher does) can store the message twice:
+the timed-out publish may have been stored with only its ack lost, and the
+retry adds a second copy unless it carries the same `Nats-Msg-Id`. The
+duplicate-tracking window is two minutes by default, so a retry that
+arrives after that also stores a second copy. Don't retry a bare publish. Give every retryable
 publish a stable `Nats-Msg-Id`, as shown in
 [Avoiding duplicate writes](#avoiding-duplicate-writes) above.
 
@@ -225,7 +231,8 @@ The delivery-and-ack half of the story is on the
 The `ORDERS` stream now holds three messages, each confirmed by a
 `PubAck`, and a repeated publish no longer stores a second copy.
 
-No consumer has read these messages yet. The next page reads them back.
+No consumer has read these messages yet. The next page,
+[Reading back the stream](/learn/jetstream/reading-back), reads them back.
 
 ## See also
 

@@ -1,11 +1,19 @@
 #!/bin/bash
-# Plain `nats pub` is a core NATS publish: it prints "Published N bytes"
-# whether or not a stream captured the subject. That line is NOT proof of
-# storage. To confirm the message landed in ORDERS, publish with --jetstream,
-# which reads the PubAck and prints the stream and assigned sequence.
+# Plain `nats pub` is a core NATS publish: it reports "Published" whether
+# or not a stream stored the message. Publish to a subject nothing
+# captures and it still looks fine:
+nats pub invoices.created "test"
+# 17:31:21 Published 4 bytes to "invoices.created"
+
+# The same publish with --jetstream reads the PubAck -- and now the miss
+# is visible, because no stream captured the subject:
+nats pub --jetstream invoices.created "test"
+# 17:31:21 Published 4 bytes to "invoices.created"
+# nats: error: nats: no responders available for request
+
+# On a captured subject, the PubAck confirms the write with the stream
+# name and the assigned sequence:
 nats pub --jetstream orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
-
-# `Stored in Stream: ORDERS Sequence: 4` confirms the write.
-# An error (no responders) means no stream captured the subject:
-# the message was NOT stored, even though core `nats pub` would say "Published".
+# 17:31:21 Published 91 bytes to "orders.created"
+# 17:31:21 Stored in Stream: ORDERS Sequence: 4

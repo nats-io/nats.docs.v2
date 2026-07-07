@@ -196,7 +196,7 @@ function PublishAckAnimatedInner({
                 label: "orders.created",
                 labelColor: PUBLISH_COLOR,
                 animated: true,
-                interval: 1500,
+                interval: 4000,
             },
         });
     }
@@ -216,28 +216,30 @@ function PublishAckAnimatedInner({
                 label: `PubAck · seq ${seq}`,
                 labelColor: ACK_COLOR,
                 animated: true,
-                interval: 1500,
+                interval: 4000,
             },
         });
     }
 
     const stageNum = STAGE_ORDER.indexOf(stage) + 1;
 
-    const buttonStyle = (active: boolean): React.CSSProperties => ({
+    // Read-only stage indicator — the loop drives itself, clicking a stage
+    // out of order would break the one-dot-one-message reading.
+    const stepStyle = (active: boolean): React.CSSProperties => ({
         padding: "5px 12px",
         fontSize: "12px",
         border: "1px solid #d1d5db",
         borderRadius: "4px",
         backgroundColor: active ? PUBLISH_COLOR : "#ffffff",
         color: active ? "#ffffff" : "#374151",
-        cursor: "pointer",
         fontWeight: 500,
         textTransform: "capitalize",
+        transition: "background-color 0.3s ease, color 0.3s ease",
     });
 
     return (
         <div style={{ position: "relative" }}>
-            {/* Stage stepper */}
+            {/* Stage indicator */}
             <div
                 style={{
                     marginBottom: "10px",
@@ -252,13 +254,9 @@ function PublishAckAnimatedInner({
                     Step:
                 </span>
                 {STAGE_ORDER.map((s) => (
-                    <button
-                        key={s}
-                        onClick={() => setStage(s)}
-                        style={buttonStyle(stage === s)}
-                    >
+                    <span key={s} style={stepStyle(stage === s)}>
                         {s}
-                    </button>
+                    </span>
                 ))}
             </div>
 

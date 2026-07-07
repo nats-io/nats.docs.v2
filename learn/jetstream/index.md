@@ -8,8 +8,8 @@ description: Streams, consumers, and the acknowledgment loop, taught step by ste
 # JetStream Deep Dive
 
 JetStream is the part of NATS that stores messages. Once a message is stored,
-you can read it again later. It stays on disk through a server restart. And it
-keeps getting redelivered until a consumer acknowledges it.
+you can read it again later, and replay it as many times as you need. Delivery
+is tracked per reader: a message counts as handled once it's acknowledged.
 
 This chapter builds that up one page at a time, using a single running example:
 the Acme `ORDERS` platform. The same server runs across the whole chapter, and

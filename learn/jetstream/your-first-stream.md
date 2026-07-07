@@ -29,8 +29,8 @@ Services react to those messages:
 Plain core NATS drops any of these messages the moment no service is
 listening. A **stream** saves them instead. A stream is a store that
 runs on the server and keeps every message on the subjects you choose.
-You can read the saved messages again, read them after a server restart,
-or read them a month later.
+You can read the saved messages again whenever you need them, minutes
+or a month after they arrived.
 
 ## Prerequisites
 
@@ -68,7 +68,7 @@ at what those values are in a moment. For now, the defaults are fine.
 
 You should see output ending with something like:
 
-```
+```text
 Stream ORDERS was created
 ```
 
@@ -85,37 +85,48 @@ Look at what the server just created:
 The output has two halves.
 
 The **configuration** half shows what you asked for and what the
-defaults filled in:
+defaults filled in — the header plus the `Options` and `Limits`
+sections:
 
-```
+```text
 Information for Stream ORDERS
 
-Configuration:
+                     Subjects: orders.>
+                     Replicas: 1
+                      Storage: File
 
-             Subjects: orders.>
-             Replicas: 1
-              Storage: File
-   Retention Policy: Limits
-       Discard Policy: Old
-     Maximum Messages: unlimited
-        Maximum Bytes: unlimited
-          Maximum Age: unlimited
- Maximum Message Size: unlimited
-    Maximum Consumers: unlimited
-       Duplicate Tracking Window: 2m0s
+Options:
+
+                    Retention: Limits
+              Acknowledgments: true
+               Discard Policy: Old
+             Duplicate Window: 2m0s
+
+Limits:
+
+             Maximum Messages: unlimited
+          Maximum Per Subject: unlimited
+                Maximum Bytes: unlimited
+                  Maximum Age: unlimited
+         Maximum Message Size: unlimited
+            Maximum Consumers: unlimited
 ```
+
+The `Options` section also lists a `Direct Get` line and a run of
+`Allows …` feature toggles, all at their defaults; they're trimmed here
+and covered where each feature comes up.
 
 The **state** half shows what's in the stream right
 now:
 
-```
+```text
 State:
 
-             Messages: 0
-                Bytes: 0 B
-        First Sequence: 0
-         Last Sequence: 0
-        Active Consumers: 0
+                     Messages: 0
+                        Bytes: 0 B
+               First Sequence: 0
+                Last Sequence: 0
+             Active Consumers: 0
 ```
 
 A new stream is empty: zero messages, zero bytes, no consumers. The
@@ -129,21 +140,23 @@ field is left unset. Here is what each one means.
 
 - **Replicas: 1**. The stream lives on one server. If that server goes
   down, the stream goes down with it. That's fine on a laptop, but
-  risky in production. We come back to this on the "Surviving node loss"
-  page.
+  risky in production. We come back to this on the
+  [Surviving node loss](/learn/jetstream/surviving-node-loss) page.
 - **Storage: File**. Messages are written to disk. The other option is
   memory, which is faster but lost on restart.
-- **Retention Policy: Limits**. The stream keeps messages until it
+- **Retention: Limits**. The stream keeps messages until it
   hits a limit (size, age, or count). The other options are `Interest`
   and `WorkQueue`, which delete messages once a consumer has read them.
-  We cover the three policies on the "Retention policies" page.
+  We cover the three policies on the
+  [Retention policies](/learn/jetstream/retention-policies) page.
 - **Discard Policy: Old**. When the stream finally hits a limit, the
   oldest messages are deleted to make room. The other option is
   `New`, which turns away new messages when the stream is full.
 - **Maximum Messages / Bytes / Age / Message Size: unlimited**. No
   upper bound today. On a real cluster you'd always set at least
-  one of these. We do that on the "Shaping the stream" page.
-- **Duplicate Tracking Window: 2m0s**. For two minutes after a
+  one of these. We do that on the
+  [Shaping the stream](/learn/jetstream/shaping-the-stream) page.
+- **Duplicate Window: 2m0s**. For two minutes after a
   message is stored, the server turns away a second message that
   carries the same [`Nats-Msg-Id`](/reference/jetstream/api/headers)
   header. This is what lets you publish
@@ -157,16 +170,20 @@ We use only the defaults here.
 ## Subjects bind to exactly one stream
 
 Only one stream can keep a given subject. If you try to
-create a second stream that also keeps `orders.>`, the server
+create a second stream whose subjects overlap `orders.>`, the server
 turns it down:
 
 ```bash
-nats stream add ARCHIVE --subjects "orders.>" --defaults
+nats stream add ARCHIVE --subjects "orders.*" --defaults
 ```
 
+```text
+nats: error: could not create Stream: subjects overlap with an existing stream (10065)
 ```
-nats: error: nats: subjects overlap with an existing stream
-```
+
+The check covers any overlap, not just the identical filter: `ORDERS`
+keeps `orders.>`, so a new stream asking for `orders.*`, or even the
+single subject `orders.created`, is turned down the same way.
 
 This is on purpose. When a message lands on a subject, JetStream always
 knows which stream it goes into.
@@ -198,18 +215,8 @@ has no `--name` flag, and the server turns down any update that changes an
 existing stream's name with `stream configuration name must match
 original`. The only way to "rename" `ORDERS` is to delete it and create
 a new stream, which loses every order already stored. So pick the name
-carefully the first time:
-
-<div class="nats-example" data-type="learn-jetstream-your-first-stream-renameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-**Switching to or from `WorkQueue` retention is rejected.** On an existing
-stream you can move between `Limits` and `Interest`. But the server won't
-allow any change to or from `WorkQueue` at all, even on an empty stream
-(`stream configuration update can not change retention policy to/from
-workqueue`). The only way to make that change is to delete and recreate the
-stream, which drops every stored message. So decide on `WorkQueue` up front.
-The three policies, and when to use each one, are covered on the
-[Retention policies](/learn/jetstream/retention-policies) page.
+carefully the first time. If you do outgrow a name, the safe move is to
+add a new stream on new subjects and let the old one age out.
 
 ## Where you are
 
@@ -219,8 +226,8 @@ You now have:
 - zero messages in it
 - a configuration of default values
 
-The next page publishes the first few messages and shows what the
-server returns.
+The next page, [Publishing](/learn/jetstream/publishing), sends the
+first few messages and shows what the server returns.
 
 ## See also
 
