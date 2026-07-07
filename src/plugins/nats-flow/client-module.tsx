@@ -111,6 +111,8 @@ if (ExecutionEnvironment.canUseDOM) {
         fanIn: module.fanInScenario,
         toggleableSubscribers: module.toggleableSubscribersScenario,
         singleServer: module.singleServerScenario,
+        topologiesSingleServer: module.topologiesSingleServerScenario,
+        topologiesClusterMesh: module.topologiesClusterMeshScenario,
         cluster: module.clusterScenario,
         superCluster: module.superClusterScenario,
         leafNode: module.leafNodeScenario,

@@ -8,9 +8,14 @@ description: Join the east and west clusters with gateways, and keep order traff
 # Super-clusters
 
 Acme's `east` cluster is healthy: three servers form a full mesh of
-routes, with the `ORDERS` stream replicated across them. Then a second
-region comes online, a `west` data center, closer to half of Acme's
-customers.
+routes, with the `ORDERS` stream replicated across them. But half of Acme's customers are a continent away from `east`, and every
+order they place has to cross the continent to reach it. So Acme brings up
+a second region — a `west` data center near those customers, where their
+orders land with far less latency.
+
+Now two regions have to behave as one system — a publisher in either
+reaches a subscriber in the other — without dragging every message across
+the slow link between them.
 
 You could run `west` as a completely separate NATS deployment. But then
 a publisher in `west` could never reach a subscriber in `east`, and the
@@ -45,23 +50,28 @@ the full mesh from the [previous page](/learn/topologies/your-first-cluster).
 A **gateway** is a different kind of connection. It joins one *cluster*
 to another *cluster*.
 
-The distinction matters for how many connections you pay for. Routes
-mesh every server to every other server. Gateways mesh every *cluster*
-to every other *cluster*, and a single gateway connection per cluster
-pair carries all the cross-region traffic.
+A route ties two *servers* together and assumes they're close; a gateway
+ties two *clusters* together and assumes they're far apart. Stretch one
+cluster across both regions and every server holds a route to every server
+in the other region — a full mesh running over the slow link. A
+super-cluster keeps each region's mesh local and connects the regions
+through gateways instead, so the servers never mesh across the WAN,
+however many each region runs. Each server opens just one gateway connection
+to each *other cluster*, never one to every remote server.
 
-The savings grow with scale. Three clusters of three servers each, all
-meshed by routes, would need 36 route connections. Joined as a
-super-cluster instead, the same nine servers need only 18 gateway
-connections between clusters. Gateways are how NATS spans regions
-without a connection explosion.
+A gateway also carries less. A route propagates interest freely inside its
+cluster; a gateway forwards a message to another cluster only when that
+cluster has a subscriber for it, and prefers a local worker over a remote
+one. Those two behaviors — interest-based forwarding and geo-affinity —
+get their own sections below, and they're what keep the inter-region link
+quiet.
 
 A super-cluster (sometimes called a cluster of clusters, the one time
 this guide will write that phrase) is just clusters joined this way.
 Each cluster keeps running on its own. The gateway is the connection
 between them.
 
-<div class="nats-flow" data-scenario="superClusterAnimated" data-width="640" data-height="400"></div>
+<div class="nats-flow" data-scenario="superClusterAnimated" data-width="720" data-height="400"></div>
 
 ## Gateways carry only what has interest
 
@@ -105,7 +115,10 @@ gateway {
 Two things to read carefully.
 
 The `name` field identifies the *cluster*, not the server. Every server
-in `east` uses the identical gateway name `east`. A server's own entry
+in `east` uses the identical gateway name `east`. It has to match the name
+in this server's `cluster {}` block exactly — set them differently and the
+server refuses to start (`cluster name conflicts between cluster and
+gateway definitions`). A server's own entry
 in the `gateways` array is ignored automatically, so the `name` and the
 `gateways` list are identical across all three `east` servers. Only the
 `port` each one listens on differs.
@@ -119,6 +132,13 @@ in a real deployment `n1-east`, `n2-east`, and `n3-east` each bind a
 distinct gateway port, and the three `west` URLs point at three distinct
 `west` listeners. The shared part is the `name` and the `gateways` list,
 not the port.
+
+You don't have to list every cluster exhaustively, though. Like routes,
+gateways **gossip**: point a server at a few remote gateways and it
+discovers the rest, including clusters it was never told about directly.
+Seed `east` with `west` and `west` with a third region, and `east` picks up
+that region on its own. The URLs are a starting point for discovery and a
+fallback if one is down, not a list you must keep complete.
 
 The `west` servers get the mirror-image block, with local name `west`
 pointing back at the `east` gateway URLs:
@@ -140,25 +160,81 @@ Each cluster keeps the `cluster {}` block and the client `port` it had
 before. The `gateway {}` block is additive. You're not rebuilding
 `east`; you're adding a gateway connection from it to `west`.
 
-The wiring above has a runnable form: a `gateway-config.sh` script stands
-up both clusters and joins them as a super-cluster, so you can watch the
-gateway form on your own machine.
+To stand the whole thing up on your own machine without hand-editing six
+files, this script writes every config and starts all six servers. East
+uses client ports 4222-4224 and west 4225-4227; each server's gateway
+`name` matches its cluster `name`, as above.
+
+```bash
+# Write a cluster+gateway config for each server, then start the super-cluster.
+write_conf() {  # name cluster client cluster-port route gateway-port remote remote-urls
+  cat > "$1.conf" <<EOF
+server_name: $1
+listen: 127.0.0.1:$3
+cluster {
+  name: $2
+  listen: 127.0.0.1:$4
+  routes: [ nats://127.0.0.1:$5 ]
+}
+gateway {
+  name: $2
+  listen: 127.0.0.1:$6
+  gateways: [ { name: $7, urls: [ $8 ] } ]
+}
+EOF
+}
+
+EAST_URLS='nats://127.0.0.1:7222, nats://127.0.0.1:7223, nats://127.0.0.1:7224'
+WEST_URLS='nats://127.0.0.1:7322, nats://127.0.0.1:7323, nats://127.0.0.1:7324'
+
+write_conf n1-east east 4222 6222 6223 7222 west "$WEST_URLS"
+write_conf n2-east east 4223 6223 6222 7223 west "$WEST_URLS"
+write_conf n3-east east 4224 6224 6222 7224 west "$WEST_URLS"
+write_conf n1-west west 4225 6225 6226 7322 east "$EAST_URLS"
+write_conf n2-west west 4226 6226 6225 7323 east "$EAST_URLS"
+write_conf n3-west west 4227 6227 6225 7324 east "$EAST_URLS"
+
+for s in n1-east n2-east n3-east n1-west n2-west n3-west; do
+  nats-server -c "$s.conf" &
+done
+```
+
+Stop everything later with `pkill nats-server`. These configs leave
+JetStream off to keep the gateway demo simple — add the `jetstream` block
+from the [previous page](/learn/topologies/jetstream-in-a-cluster) if you
+want `ORDERS` in the mix too.
 
 ## Confirm the super-cluster formed
 
-Ask any server what gateways it sees:
+A super-cluster is only real if a message crosses it. Subscribe in `west`,
+publish in `east`, and watch the order arrive on the far side of the
+gateway.
+
+Subscribe to `orders.>` on a `west` server, in its own terminal:
 
 ```bash
-nats server report gateways
+nats sub "orders.>" --server nats://localhost:4225
 ```
 
-The report lists the local cluster and the remote clusters reachable
-through gateways. `east` should report a connection to `west`, and
-`west` a connection to `east`. The same data is on the HTTP monitoring
-endpoint at `http://127.0.0.1:8222/gatewayz` if you prefer to curl it.
+In another terminal, publish to an `east` server:
 
-Once both directions show, the gateway is live. A publisher in either
-region can now reach an interested subscriber in the other.
+```bash
+nats pub orders.created "order ord_8w2k" --server nats://localhost:4222
+```
+
+The `west` subscriber prints the order:
+
+```
+[#1] Received on "orders.created"
+order ord_8w2k
+```
+
+It was published in `east`, crossed the gateway, and arrived in `west`.
+That only happens once the gateway is live *and* `west` has advertised
+interest in `orders.>` across it — the interest-based forwarding from
+[earlier](#gateways-carry-only-what-has-interest). If nothing arrives, the
+gateway never formed: check that each server's gateway `name` matches its
+cluster `name`.
 
 ## Geo-affinity keeps traffic local
 
@@ -190,32 +266,30 @@ forwards across every gateway with interest. The queue-group rule still
 applies on the far side, so the order reaches exactly one worker, and no
 work is lost in the process.
 
-You can watch this local-first behavior with a queue subscriber running
-in each region:
+You can watch this local-first behavior. Start a queue worker in each
+region, each in its own terminal:
 
-<div class="nats-example"
-     data-type="learn-topologies-super-clusters-geo-affinity"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+```bash
+# terminal 1 — a worker in east
+nats sub orders.created --queue order-workers --server nats://localhost:4222
+```
 
-Publish in `east` while both workers run, and the `east` worker answers
-every time. Stop the `east` worker, publish again, and the order now
-crosses to `west`. That fallthrough is the gateway forwarding the message
-when no local worker is available, and nothing on the publisher changed
-to make it happen.
+```bash
+# terminal 2 — a worker in west
+nats sub orders.created --queue order-workers --server nats://localhost:4225
+```
 
-## What this does not change
+Publish an order in `east`:
 
-The application code is identical to the single `east` cluster. A
-publisher still calls publish on `orders.created`. A worker still
-subscribes to its queue group. Neither knows a second region exists.
+```bash
+nats pub orders.created "order ord_8w2k" --server nats://localhost:4222
+```
 
-What about the `ORDERS` stream and its replicas? A super-cluster lets a
-stream's replicas span regions, but where those replicas land and how
-they stay consistent across a slow link is replication mechanics, not
-topology. That belongs to the
-[Clustering & Replication](/learn/clustering) chapter, which covers
-placement across a super-cluster. All we wire here is the shape:
-gateways joining clusters.
+The `east` worker prints it and `west` stays silent — geo-affinity served
+it locally. Stop the `east` worker (`Ctrl+C`) and publish again: now `west`
+prints it. With no local worker left, the order fell through to the gateway
+and crossed to `west`, and nothing on the publisher changed to make it
+happen.
 
 ## Pitfalls
 
@@ -231,19 +305,14 @@ the slow link constantly. Don't grow a cluster across regions. Join two
 independent clusters with a `gateway {}` block instead, so only
 interested traffic crosses the gateway.
 
-**Mismatched gateway names.** The `name` in each gateway block names the
-*cluster*, and each entry in the `gateways` array must use the remote
-cluster's exact name. Get one character wrong and the server refuses the
-connection (its log reads `Connection from "west" rejected, wanted to
-connect to "east", this is "eats"`) and the gateway silently never forms.
-Always confirm both directions show up after wiring:
-
-<div class="nats-example"
-     data-type="learn-topologies-super-clusters-gateway-name-check"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-If `server report gateways` lists no remote cluster, the gateway didn't
-join. Check the names match before looking anywhere else.
+**Mismatched gateway names.** Each entry in the `gateways` array must use
+the remote cluster's exact name. Typo it — `wset` for `west` — and the
+server keeps dialing a cluster that never answers to that name
+(`Failing connection to gateway "wset", remote gateway name is "west"`),
+and the gateway never forms. Nothing fails at startup, so confirm with the
+cross-region publish from [Confirm the super-cluster
+formed](#confirm-the-super-cluster-formed): if the order never reaches the
+other side, a name is wrong.
 
 **Chatty cross-region traffic without local workers.** Geo-affinity only
 keeps traffic home when a *local* queue subscriber exists to serve it.
@@ -264,15 +333,17 @@ Acme's deployment grew from one cluster to a super-cluster:
   far side.
 - **Geo-affinity** keeps queue-group and request traffic in its home
   region, crossing the gateway only when the local side can't serve.
-- The ORDERS application code never changed.
+- Nothing about publishing or subscribing changed — the same
+  `orders.created` publish still reaches an interested subscriber, now even
+  across regions.
 
 ## What's next
 
 The next page pushes NATS past the data center entirely. A
-[leaf node](/learn/topologies/leaf-nodes) is a server that opens an
-*outbound* connection into the `east` cluster, so it can run at a
-factory or on a laptop with nothing but outbound network access, and
-still bridge order traffic in both directions.
+[leaf node](/learn/topologies/leaf-nodes) is a server that *dials out* to
+the `east` cluster — a single outbound connection, so it works from a
+factory or a laptop with no inbound ports open. That one connection is
+two-way, so once it's up the leaf bridges order traffic in both directions.
 
 ## See also
 
@@ -280,5 +351,6 @@ still bridge order traffic in both directions.
   wire-level detail of how gateways advertise interest and connect.
 - [Core Concepts → Queue Groups](/concepts/queue-groups) — the recap of
   the queue-group behavior geo-affinity steers.
-- [Operate → Clustering & Replication](/learn/clustering) — where stream
-  replicas live across a super-cluster, and how they stay consistent.
+- [Operate → Clustering & Replication](/learn/clustering) — how a stream's
+  replicas work within one cluster (a gateway carries interest across
+  regions, not stream copies).
