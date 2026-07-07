@@ -4,32 +4,37 @@
 # what the servers advertise — so a typo fails loudly instead of silently
 # placing nowhere.
 #
-# This assumes the 3-node "east" cluster is running with JetStream
-# enabled. Tag matching folds case (ssd == SSD) but is matched as an exact
-# intersection: every requested tag must be present, spelled correctly, on a
-# server for it to qualify.
+# This assumes the 3-server "east" cluster from forming-a-cluster is
+# running (its configs define the SYS user the server commands need).
 
-# Read the tags each server actually advertises. Do not assume the config
-# took — a typo in server_tags is silent until a placement asks for a tag
-# no server carries. The Tags line in the output is the source of truth.
-nats --server nats://127.0.0.1:4222 server info
-nats --server nats://127.0.0.1:4223 server info
-nats --server nats://127.0.0.1:4224 server info
+# Read the tags each server actually advertises. Name the server: asked
+# without a name, `nats server info` answers with whichever server
+# responds first, not necessarily the one you connected to. The Tags
+# line is the source of truth — do not assume the config took.
+nats server info n1-east --user sys --password sys
+nats server info n2-east --user sys --password sys
+nats server info n3-east --user sys --password sys
+# Each reply carries the tags in its Cluster section:
+#
+#   Cluster:
+#
+#                                Name: east
+#                                Tags: region:us-east, disk:ssd
+#                                Host: 127.0.0.1:6222
 
 # Now place ORDERS against exactly the tags you just read back.
-nats --server nats://127.0.0.1:4222 stream add ORDERS \
-  --subjects "orders.>" \
-  --replicas 3 \
+nats stream edit ORDERS \
+  --cluster east \
   --tag region:us-east \
   --tag disk:ssd \
-  --defaults
+  -f
 
-# If a requested tag is misspelled or missing on every server, the
-# intersection is empty and the create fails — it does NOT fall back to
-# any server:
+# If a requested tag is misspelled, or carried by fewer servers than the
+# replica count needs, the placement fails and the error names the tags
+# it could not satisfy — it does NOT fall back to any server:
 #
-#   nats: error: no suitable peers for placement
+#   nats: error: could not edit Stream ORDERS: no suitable peers for placement, tags not matched ['disk:sdd'] (10005)
 #
 # Fix the spelling to match what the servers advertise (case does not
 # matter) and re-run. Confirm the placement landed where you intended:
-nats --server nats://127.0.0.1:4222 stream info ORDERS
+nats stream info ORDERS

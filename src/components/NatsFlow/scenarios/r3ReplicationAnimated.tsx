@@ -172,7 +172,7 @@ function R3ReplicationAnimatedInner({
         markerEnd: { type: MarkerType.ArrowClosed },
         data: {
             color: n2IsAppend ? MSG_COLOR : n2IsAck ? COMMIT_COLOR : IDLE_COLOR,
-            label: n2IsAck ? "ack" : "AppendEntry",
+            label: n2IsAppend ? "AppendEntry" : n2IsAck ? "ack" : undefined,
             labelColor: n2IsAppend
                 ? MSG_COLOR
                 : n2IsAck
@@ -194,7 +194,7 @@ function R3ReplicationAnimatedInner({
         style: { opacity: n2IsAppend ? 1 : 0.35 },
         data: {
             color: n2IsAppend ? MSG_COLOR : IDLE_COLOR,
-            label: "AppendEntry",
+            label: n2IsAppend ? "AppendEntry" : undefined,
             labelColor: n2IsAppend ? MSG_COLOR : "#94a3b8",
             animated: n2IsAppend,
             interval: 1500,
@@ -217,7 +217,9 @@ function R3ReplicationAnimatedInner({
             },
             data: {
                 color: stage === "commit" ? COMMIT_COLOR : NAVY,
-                label: stage === "commit"
+                label: !showApply
+                    ? undefined
+                    : stage === "commit"
                     ? "commit (quorum 2/3)"
                     : "apply",
                 labelColor: stage === "commit" ? COMMIT_COLOR : NAVY,

@@ -10,19 +10,17 @@ description: How a NATS cluster reaches agreement — RAFT groups, leaders and f
 The [previous page](/learn/clustering/forming-a-cluster) left you with a live
 three-server cluster `east` (`n1-east`, `n2-east`, and `n3-east`) that
 discovered itself from one seed route. The servers know about each other and
-forward messages. But knowing about each other isn't the same as *agreeing*
-with each other.
+forward messages, but they don't yet agree on any shared state.
 
 Plain `orders.created` traffic needs no agreement: a publish lands on one
 server, gets forwarded, and is gone. Stored data is different. When the
 `ORDERS` stream keeps three copies of every order, the three servers holding
 those copies must agree on which orders exist and in what order, even while
-one of them is restarting or unreachable.
+one of them is down.
 
 This page is about that agreement. It introduces two ideas: a **RAFT group**
 is a set of servers that keep an identical log by consensus, and a **leader
-election** is how a group picks the one server that drives the log. Everything
-the next page does with replication rests on these two.
+election** is how a group picks the one server that drives the log.
 
 ## RAFT groups
 
@@ -53,49 +51,99 @@ across its three peers. They're independent. The meta leader and the `ORDERS`
 stream leader may be the same server or different servers, and a change to one
 doesn't move the other.
 
-You can see both. Ask any server what it knows about itself and the meta group:
+You can see both. The meta group appears in the JetStream report (a system
+command, so it needs the `SYS` user from the previous page):
 
 ```bash
-nats server info n1-east
+nats server report jetstream --user sys --password sys
 ```
 
-The output names the server, its cluster `east`, and whether it currently
-holds JetStream's meta leadership. To see a stream's group, ask the stream:
+The report's second table is the `RAFT Meta Group Information`, and its
+`Leader` column marks the meta leader:
+
+```
+│ Connection Name │ ID       │ Leader │ Current │ Online │ Active │ Lag │
+├─────────────────┼──────────┼────────┼─────────┼────────┼────────┼─────┤
+│ n1-east         │ N0TeytwJ │ yes    │ true    │ true   │ 0s     │ 0   │
+│ n2-east         │ cJ6ynrck │        │ true    │ true   │ 940ms  │ 0   │
+│ n3-east         │ h4QkFOiR │        │ true    │ true   │ 940ms  │ 0   │
+```
+
+All three servers are peers, `n1-east` is the meta leader, and each peer has
+a short `ID` the RAFT layer uses instead of the server name.
+
+The next page studies what `R=3` means for a write; here we only need the
+stream's RAFT group to exist, so create `ORDERS` now:
 
 ```bash
-nats stream info ORDERS
+nats stream add ORDERS --subjects 'orders.>' --replicas 3 --defaults
 ```
 
-The `Cluster Information` block names the stream's RAFT group, listing its
-`Leader` and each `Replica` peer:
+The create output (and `nats stream info ORDERS` from then on) describes the
+stream's RAFT group in its `Cluster Information` block:
 
 ```
 Cluster Information:
-
-           Name: east
-         Leader: n1-east
-        Replica: n2-east, current, seen 0.05s ago
-        Replica: n3-east, current, seen 0.07s ago
+                         Name: east
+                Cluster Group: S-R3F-jF1m3dMO
+                       Leader: n2-east (5ms)
+                      Replica: n1-east, current, seen 424µs ago
+                      Replica: n3-east, current, seen 5ms ago
 ```
 
-`Leader` is the stream leader. Each `Replica` line shows a follower peer,
-whether it's `current` (caught up), and how recently the leader heard from it.
-This is the `ORDERS` RAFT group, viewed from the outside.
+`Name` is the cluster the group lives in. `Cluster Group` is the RAFT group's
+generated name: `S` for stream, `R3` for three peers, `F` for file storage,
+then a random suffix — yours will differ. `Leader` is the stream leader, with
+how long it's held the role in parentheses. Each `Replica` line shows a
+follower peer, whether it's `current` (caught up), and how recently it was
+heard from. In our run the meta leader is `n1-east` while the stream leader is
+`n2-east`: the two groups elected independently.
 
-For a live view of a group's RAFT state (current term, who the leader is, each
-peer's status), check the `/raftz` monitoring endpoint. The full set of RAFT
-internals it exposes is documented in
-[Reference → /raftz](/reference/system/monitor/raftz): log compaction, the
-`$NRG.*` subjects peers vote over, snapshot timing. We only need the group, the
-leader, and the followers here.
+For a live view of a group's RAFT state, use the `/raftz` monitoring endpoint.
+It answers on the HTTP monitor port, which the previous page's configs don't
+set, so start `n1-east` with one: `nats-server -c n1-east.conf -m 8222`. Bare
+`/raftz` returns only the meta group; to see a stream group, filter by the
+account that owns the stream (`$G`, the default account, URL-encodes as
+`%24G`):
+
+```bash
+# trimmed to the fields we care about
+curl -s 'http://127.0.0.1:8222/raftz?acc=%24G'
+```
+
+```json
+{
+  "$G": {
+    "S-R3F-jF1m3dMO": {
+      "id": "N0TeytwJ",
+      "state": "FOLLOWER",
+      "size": 3,
+      "quorum_needed": 2,
+      "leader": "cJ6ynrck",
+      "term": 1,
+      "voted_for": "cJ6ynrck",
+      "peers": {
+        "cJ6ynrck": { "name": "n2-east", "known": true },
+        "h4QkFOiR": { "name": "n3-east", "known": true }
+      }
+    }
+  }
+}
+```
+
+This is `n1-east`'s own view of the `ORDERS` group: its `state` is `FOLLOWER`,
+and `leader` holds the peer ID of `n2-east`. `size` and `quorum_needed` are
+the consensus math (three peers, two needed); `term` and `voted_for` belong to
+elections, next. The full field set is documented in
+[Reference → /raftz](/reference/system/monitor/raftz). We only need the group,
+the leader, and the term here.
 
 ## Leader election
 
-A group has one leader at a time. When the leader is healthy, the steady-state
-behavior is straightforward:
-the leader sends a periodic **heartbeat** to its followers (by default about
-once a second), and as long as that heartbeat arrives, the followers stay
-followers and do nothing but accept the leader's entries.
+A group has one leader at a time. While the leader is healthy, it sends a
+periodic **heartbeat** to its followers (by default about once a second), and
+as long as that heartbeat arrives, the followers stay followers and do nothing
+but accept the leader's entries.
 
 The interesting case is when the heartbeat stops, because the leader crashed,
 hung, or got cut off by the network. The followers can't tell *why* the
@@ -108,11 +156,9 @@ and only ever goes up. Every entry and every vote is stamped with a term, so
 the group can always tell a stale message from a current one. A leader from an
 older term is automatically obsolete the moment a newer term exists.
 
-Here's the sequence when a follower's election timer fires.
-
-The follower becomes a **candidate**, the third RAFT role. It increments the
-term to one higher than any it's seen, votes for itself, and asks every other
-peer to vote for it in this new term.
+When a follower's election timer fires, it becomes a **candidate**, the third
+RAFT role. It increments the term to one higher than any it's seen, votes for
+itself, and asks every other peer to vote for it in this new term.
 
 Each peer grants its vote if it hasn't already voted in this term and the
 candidate's log is at least as up to date as its own. A peer votes for at most
@@ -130,41 +176,73 @@ The quorum rule is why a majority must survive for a group to elect a leader at
 all. A three-peer group keeps a leader as long as two peers are up; lose two and
 the survivor can't reach a majority, so it can't become leader and the group
 goes leaderless until a peer returns. This is the consensus math behind the
-odd-server-count advice the [Topologies chapter](/learn/topologies/your-first-cluster)
+odd-server-count advice the [Topologies chapter](/learn/topologies/jetstream-in-a-cluster)
 gives as a deployment choice: an even count buys no extra majority.
 
 ## Observing an election
 
-You can observe this directly. With `east` running and `ORDERS`
-replicated, find the current stream leader, kill it, and watch the survivors
-elect a new one.
-
-First, find the leader:
+You can observe this directly. Find the current stream leader:
 
 ```bash
 nats stream info ORDERS | grep Leader
 ```
 
-Say it reports `Leader: n1-east`. Stop that server: Ctrl-C its terminal, or
-kill its process. For a moment the `ORDERS` group has no leader: its heartbeat
-has stopped and the two survivors are running their election timers.
-
-Within a few seconds, ask one of the survivors:
-
-```bash
-nats stream info ORDERS --server nats://127.0.0.1:4223
+```
+                       Leader: n2-east (1m23s)
 ```
 
-The `Cluster Information` block now names a different leader, `n2-east` or
-`n3-east`, and the term has advanced. The remaining two peers held a quorum
-(two of three), so they elected a new leader and `ORDERS` is writable again,
-even with `n1-east` down.
+Ours is `n2-east`; kill whichever server yours reports. There are two ways to
+take it down, and they behave differently.
+
+First, stop it cleanly: Ctrl-C its terminal, or `kill` its process. Ask again
+right away (block trimmed to the leader and replica lines):
+
+```
+                       Leader: n3-east (378ms)
+                      Replica: n1-east, current, seen 378ms ago
+                      Replica: n2-east, outdated, OFFLINE, not seen, 4 operations behind
+```
+
+There's already a new leader. A cleanly stopped server tells the group it's
+leaving on the way down, so the followers skip the heartbeat wait: `n3-east`
+was leader 0.38 seconds after the `kill`. A clean stop never shows you the
+election timer. Restart `n2-east` before the next step; its `Replica` line
+returns to `current` once it catches up.
+
+Now crash the new leader `n3-east` instead — `kill -9` ends the process
+before it can tell anyone:
+
+```bash
+kill -9 <pid-of-n3-east>
+```
+
+This time the followers only see missing heartbeats, so they have to wait out
+their election timers, which fire between four and nine seconds after the last
+heartbeat. The winner's log shows both moments:
+
+```
+[50342] 2026/07/07 12:51:08.027229 [INF] 127.0.0.1:57944 - rid:17 - Router connection closed: Client Closed - Remote: n3-east
+[50342] 2026/07/07 12:51:14.560576 [INF] JetStream cluster new stream leader for '$G > ORDERS'
+```
+
+The gap was 6.5 seconds, inside the four-to-nine-second window. The survivors
+held a quorum (two of three), so `ORDERS` is writable again without `n3-east`:
+
+```
+                       Leader: n2-east (4.02s)
+                      Replica: n1-east, current, seen 19ms ago
+                      Replica: n3-east, outdated, not seen, 5 operations behind
+```
+
+The term advanced too: `/raftz` now reports the group at `"term": 3` — it was
+1 at creation, and each election bumped it. Restart `n3-east` and the group is
+whole again.
 
 ## Moving a leader manually
 
-Sometimes you want to move leadership without killing anything: to drain a
-server before maintenance, or to rebalance after a restart. A **stepdown** is a
-leader voluntarily yielding its role so the group elects a new one.
+Sometimes you want to move leadership without killing anything, say to drain
+a server before maintenance. A **stepdown** is a leader voluntarily yielding
+its role so the group elects a new one.
 
 For a stream leader, ask the stream's group to step down:
 
@@ -172,58 +250,124 @@ For a stream leader, ask the stream's group to step down:
 nats stream cluster step-down ORDERS
 ```
 
-The current leader yields, the group runs an election, and a different peer
-takes over. The meta group has its own stepdown, scoped to the whole cluster:
-
-```bash
-nats server cluster step-down
+```
+12:52:11 Requesting leader step down of "n2-east" for stream "ORDERS" in a 3 peer cluster group
+12:52:11 New leader elected "n3-east"
 ```
 
-That moves the *meta* leader, independently of any stream leader. Use the
-stream form to move a single stream, the server form to move cluster-wide
-assignment duty.
+The command waits for the election and reports the winner. The meta group has
+its own stepdown, scoped to the whole cluster. It's a system command:
+
+```bash
+nats server cluster step-down --user sys --password sys
+```
+
+```
+12:52:24 Requesting leader step down of "n1-east" in a 3 peer RAFT group
+12:52:24 New leader elected "n2-east"
+```
+
+That moved the *meta* leader from `n1-east` to `n2-east`, and the `ORDERS`
+stream leader stayed where it was. Use the stream form to move a single
+stream, the server form to move cluster-wide assignment duty.
+
+## When the meta leader dies
+
+The two stepdowns above left `n2-east` as meta leader and `n3-east` as the
+`ORDERS` stream leader. Crash the meta leader and watch what stops working:
+
+```bash
+kill -9 <pid-of-n2-east>
+```
+
+One second later, publish an order. It works, because the `ORDERS` group and
+its leader `n3-east` don't need the meta group to accept a write:
+
+```bash
+nats pub --jetstream orders.created '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
+```
+
+```
+12:54:22 Published 91 bytes to "orders.created"
+12:54:22 Stored in Stream: ORDERS Sequence: 1
+```
+
+Now try an *assignment* — anything that needs the meta leader to decide, like
+creating a stream:
+
+```bash
+nats stream add INVOICES --subjects 'invoices.>' --replicas 3 --defaults --timeout 3s
+```
+
+```
+nats: error: could not create Stream: context deadline exceeded
+```
+
+While the meta group elects, every assignment pauses: stream and consumer
+creates, edits, and deletes. Existing leaders keep serving, and plain NATS
+traffic never notices. The pause is one ordinary election long:
+
+```
+[50556] 2026/07/07 12:54:21.234474 [INF] 127.0.0.1:6223 - rid:20 - Router connection closed: Client Closed - Remote: n2-east
+[50556] 2026/07/07 12:54:26.070536 [INF] JetStream cluster new metadata leader: n1-east/east
+```
+
+4.8 seconds in our run, and the failed `stream add` succeeds on retry. The
+report confirms the move and shows the dead server falling behind:
+
+```
+│ Connection Name │ ID       │ Leader │ Current │ Online │ Active │ Lag │
+├─────────────────┼──────────┼────────┼─────────┼────────┼────────┼─────┤
+│ n1-east         │ N0TeytwJ │ yes    │ true    │ true   │ 0s     │ 0   │
+│ n2-east         │ cJ6ynrck │        │ false   │ true   │ 0s     │ 11  │
+│ n3-east         │ h4QkFOiR │        │ true    │ true   │ 298ms  │ 0   │
+```
+
+Restart `n2-east` to bring the cluster back to three healthy peers, and remove
+the test stream with `nats stream rm INVOICES -f`.
 
 ## Pitfalls
 
-RAFT is robust, but its timing and its layering are common sources of
-confusion. Each pitfall below is scoped to this page's two concepts: groups and
+Each pitfall below is scoped to this page's two concepts: groups and
 elections.
 
-**An election takes seconds, not milliseconds.** The election timer fires
-between four and nine seconds after the last heartbeat, deliberately staggered
-so two followers don't become candidates at the exact same instant. So when you
-kill a leader, expect a short window where `nats stream info` shows no leader
-and writes are refused. That window is RAFT working as designed, not a bug.
-Don't build a client that treats a brief "no leader" as a fatal error. Have it
-retry, since a new leader arrives within seconds.
-
-The correct handling is to retry the write rather than fail it. A `nats stream
-info` during the gap confirms what's happening:
+**An election takes seconds, not milliseconds.** After a crash, the election
+timer fires between four and nine seconds after the last heartbeat,
+deliberately staggered so two followers don't become candidates at the exact
+same instant — 6.5 seconds in the run above. During that window the `Leader`
+line is empty, writes are refused, and a query may block until a leader
+answers. That window is expected behavior. Don't build a client that
+treats a brief "no leader" as a fatal error. Have it retry, since a new leader
+arrives within seconds:
 
 ```bash
 # During the election window, the leader line is briefly empty:
 nats stream info ORDERS | grep Leader
-# Leader:
-# Re-run a few seconds later and a new leader appears:
+#                        Leader:
+# Re-run a few seconds later and the new leader appears:
 nats stream info ORDERS | grep Leader
-# Leader: n2-east
+#                        Leader: n2-east (3.93s)
 ```
 
+The window only exists for a crash: a cleanly stopped leader hands off in
+well under a second.
+
 **Stepdown moves leadership, but does not pick the successor.** `nats stream
-cluster step-down` makes the current leader yield, but the *next* leader is
-still chosen by a normal quorum election among the remaining peers. There's no
-flag that hands leadership to a specific server. Don't run stepdown expecting
-`n3-east` to win. Run it to *move leadership off* the current server, then read
-`nats stream info` to learn who actually won. (Choosing where a leader prefers
-to land at creation time is **placement**, covered on
-[Placement](/learn/clustering/placement), and even that is a hint, not a lock.)
+cluster step-down` makes the current leader yield, and by default the *next*
+leader is chosen by a normal quorum election among the remaining peers — the
+command reports whoever won, as the captures above show. There's a
+`--preferred` flag, but it's a hint tied to placement, not a lock; it's
+covered on [Placement](/learn/clustering/placement). Run a bare stepdown to
+move leadership *off* a server, not onto one, and read the `New leader
+elected` line to learn who actually won.
 
 **The meta leader and a stream leader are different groups.** Losing the meta
 leader doesn't lose the `ORDERS` stream leader, and vice versa; they're
-separate RAFT groups with separate elections. A common mistake is to see "the
-leader is down," panic, and assume the stream is unavailable when only the meta
-leader moved (or the reverse). Check the right group: `nats server info` for the
-meta leader, `nats stream info ORDERS` for the stream leader.
+separate RAFT groups with separate elections. You saw it above: with the meta
+leader dead, publishes to `ORDERS` kept landing while `stream add` timed out.
+Don't assume the stream is unavailable when only the meta leader moved, or the
+reverse. Check the right group: `nats server report jetstream` for the meta
+leader, `nats stream info ORDERS` for the stream leader.
 
 ## Where you are
 
@@ -231,21 +375,20 @@ Your cluster now has names for its moving parts:
 
 - The meta group spans all three servers and holds the cluster's
   assignments; its meta leader decides placement.
-- The `ORDERS` stream is its own RAFT group of three peers with its own
-  stream leader, independent of the meta leader.
-- You've killed a leader and watched the survivors run a leader election
-  (a candidate, a bumped term, and a quorum of votes), and you've moved
-  a leader on purpose with stepdown.
+- The `ORDERS` stream exists with three replicas: its own RAFT group of
+  three peers with its own stream leader, independent of the meta leader.
+- You've crashed a stream leader and watched a 6.5-second election replace
+  it, moved both kinds of leader on purpose with stepdown, and crashed the
+  meta leader to see assignments pause while stream traffic continued.
 
-What you haven't done yet is follow a single write through the group: how the
-leader gets an order onto all three peers and decides it's safe.
+What you haven't done yet is follow a single write through the group: how an
+order gets onto all three peers and is decided safe.
 
 ## What's next
 
-The next page traces exactly that. It follows one `orders.created` write from
-the leader's log to a quorum of peers, shows where the write **commits**, and
-explains the consistency you get from `R=3`:
-[Replication and R=3](/learn/clustering/replication-and-r3).
+The next page traces exactly that: one `orders.created` write from the
+leader's log to a quorum of peers, where it **commits**, and the consistency
+you get from `R=3`: [Replication and R=3](/learn/clustering/replication-and-r3).
 
 ## See also
 
@@ -253,5 +396,5 @@ explains the consistency you get from `R=3`:
   monitoring endpoint and its full field set.
 - [Surviving node loss](/learn/jetstream/surviving-node-loss) — the one-page
   operator view of replicas riding through a server loss.
-- [Topologies → Your first cluster](/learn/topologies/your-first-cluster) —
+- [Topologies → JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster) —
   where the odd-server-count and shape choices live.

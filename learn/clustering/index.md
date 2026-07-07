@@ -7,20 +7,18 @@ description: How a NATS cluster agrees and replicates — routes, RAFT, quorum c
 
 # Clustering & Replication Deep Dive
 
-A NATS cluster involves more than three servers wired together. Beneath
-that wiring is a mechanism by which the servers find each other, elect
-leaders, agree on every write, and keep replicas in step. This chapter
-covers that mechanism, taught one layer at a time the way you'd learn it
-by running a real cluster and watching it work.
+Three servers wired together become a cluster through a mechanism: they
+find each other, elect leaders, agree on every write, and keep replicas
+in step. This chapter covers that mechanism, taught one layer at a time
+the way you'd learn it by running a real cluster and watching it work.
 
 The [Topologies](/learn/topologies) chapter stood up the shapes (one
 server growing into the `east` cluster, then a super-cluster, then leaf
 nodes) and deliberately left the internals for here. The
 [JetStream](/learn/jetstream) chapter gave you one page on
 [surviving node loss](/learn/jetstream/surviving-node-loss): set `R=3`,
-lose a server, keep serving. This chapter explains how both of those
-work. We go beneath the shapes to the agreement and replication that make
-them work.
+lose a server, keep serving. This chapter goes beneath both: the
+agreement and replication that make them work.
 
 ## By the end you'll have
 
@@ -72,11 +70,11 @@ clusters (gateways, geo-affinity, super-cluster traffic) stays in
 
 | Page | What you learn |
 |---|---|
-| [Forming a cluster](/learn/clustering/forming-a-cluster) | Routes (explicit seed vs implicit gossip) and how one seed grows into a full mesh |
-| [Raft and leaders](/learn/clustering/raft-and-leaders) | RAFT groups, the meta leader and stream leaders, and how an election picks one |
-| [Replication and R=3](/learn/clustering/replication-and-r3) | How a quorum commits a write, then followers apply it, and the consistency you get |
-| [Placement](/learn/clustering/placement) | Constrain replicas to a cluster and tagged servers, and what a preferred leader is |
-| [Scaling and peer management](/learn/clustering/scaling-and-peers) | Add a peer with catchup, remove one safely, and never lose quorum doing it |
+| [Forming a cluster](/learn/clustering/forming-a-cluster) | Routes (explicit seed vs implicit gossip), how one seed grows into a full mesh, and the system account you inspect it with |
+| [Raft and leaders](/learn/clustering/raft-and-leaders) | RAFT groups, the meta leader and stream leaders, and how an election replaces a crashed one |
+| [Replication and R=3](/learn/clustering/replication-and-r3) | How a quorum commits a write, how followers and durable consumers apply it, and the consistency you get |
+| [Placement](/learn/clustering/placement) | Constrain replicas to a cluster and tagged servers, spread them across zones with `unique_tag`, and use a preferred leader as a hint |
+| [Scaling and peer management](/learn/clustering/scaling-and-peers) | Grow the cluster with a fourth server, migrate a replica onto it through catchup, and remove peers without losing a copy |
 | [Where to go next](/learn/clustering/where-next) | A recap of the whole mechanism and a production checklist |
 
 In summary, servers form a mesh, elect leaders, replicate
@@ -91,10 +89,8 @@ You'll need:
   first page stands up as the `east` cluster. A single server isn't
   enough here: RAFT needs a majority, so the mechanism only appears once
   three servers are talking.
-- The `nats` CLI installed. Most of this chapter is server config and
-  `nats` operator commands; a few stream operations also show the
-  JavaScript, Go, Python, Java, Rust, and C# client form, since every
-  client sets the same replica count and placement.
+- The `nats` CLI installed. The whole chapter runs through server
+  config and `nats` operator commands.
 
 Open a terminal and turn to
 [Forming a cluster](/learn/clustering/forming-a-cluster).
