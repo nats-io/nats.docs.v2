@@ -24,18 +24,18 @@ const CONTENT = {
 }
 
 const SPEC = {
-  'core-nats': 'docs/superpowers/specs/2026-06-04-core-nats-deep-dive-design.md',
-  'jetstream': 'docs/superpowers/specs/2026-05-22-jetstream-deep-dive-design.md',
-  'security': 'docs/superpowers/specs/2026-06-03-security-deep-dive-design.md',
-  'topologies': 'docs/superpowers/specs/2026-06-03-topologies-deep-dive-design.md',
-  'services': 'docs/superpowers/specs/2026-06-05-services-deep-dive-design.md',
-  'resilient-clients': 'docs/superpowers/specs/2026-06-05-resilient-clients-deep-dive-design.md',
-  'key-value': 'docs/superpowers/specs/2026-06-05-key-value-deep-dive-design.md',
-  'object-store': 'docs/superpowers/specs/2026-06-05-object-store-deep-dive-design.md',
-  'clustering': 'docs/superpowers/specs/2026-06-05-clustering-deep-dive-design.md',
-  'monitoring': 'docs/superpowers/specs/2026-06-05-monitoring-deep-dive-design.md',
-  'backup-recovery': 'docs/superpowers/specs/2026-06-05-backup-recovery-deep-dive-design.md',
-  'deployment': 'docs/superpowers/specs/2026-06-05-deployment-deep-dive-design.md',
+  'core-nats': 'specs/2026-06-04-core-nats-deep-dive-design.md',
+  'jetstream': 'specs/2026-05-22-jetstream-deep-dive-design.md',
+  'security': 'specs/2026-06-03-security-deep-dive-design.md',
+  'topologies': 'specs/2026-06-03-topologies-deep-dive-design.md',
+  'services': 'specs/2026-06-05-services-deep-dive-design.md',
+  'resilient-clients': 'specs/2026-06-05-resilient-clients-deep-dive-design.md',
+  'key-value': 'specs/2026-06-05-key-value-deep-dive-design.md',
+  'object-store': 'specs/2026-06-05-object-store-deep-dive-design.md',
+  'clustering': 'specs/2026-06-05-clustering-deep-dive-design.md',
+  'monitoring': 'specs/2026-06-05-monitoring-deep-dive-design.md',
+  'backup-recovery': 'specs/2026-06-05-backup-recovery-deep-dive-design.md',
+  'deployment': 'specs/2026-06-05-deployment-deep-dive-design.md',
 }
 
 // Which nats-mcp repos matter per chapter (a hint; the agent may widen).

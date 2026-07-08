@@ -93,7 +93,7 @@ const CHAPTERS = [
 ]
 
 // The done core-nats spec is the canonical template every spec must mirror.
-const TEMPLATE_PATH = 'docs/superpowers/specs/2026-06-04-core-nats-deep-dive-design.md'
+const TEMPLATE_PATH = 'specs/2026-06-04-core-nats-deep-dive-design.md'
 
 const VOICE = `
 VOICE (hard rules, identical to the 4 done chapters — read 2 done pages to absorb it):
@@ -202,7 +202,7 @@ CRITICAL CONSTRAINTS:
 - Bake in the standing convention: every content page has "## Pitfalls"; where-next has "## Production checklist".
 - NatsFlow: list every NEW scenario to build (name/page/description) and every existing scenario reused.
 
-WRITE the spec to: docs/superpowers/specs/2026-06-05-${ch.key}-deep-dive-design.md
+WRITE the spec to: specs/2026-06-05-${ch.key}-deep-dive-design.md
 Use the Write tool. Do NOT leak any tool-call XML tags into the file. Then return the structured summary.`,
     { label: `spec:${ch.key}`, phase: 'Spec', schema: SPEC_SCHEMA }
   )
