@@ -8,7 +8,7 @@ export const meta = {
   ],
 }
 
-const SPEC = 'docs/superpowers/specs/2026-06-09-tutorials-design.md'
+const SPEC = 'specs/2026-06-09-tutorials-design.md'
 
 const TUTORIALS = [
   { slug: 'index', type: 'index', pos: 1, num: null,

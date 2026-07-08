@@ -9,7 +9,7 @@ export const meta = {
 
 const NEW = ['services','resilient-clients','key-value','object-store','clustering','monitoring','backup-recovery','deployment']
 const ALL = ['core-nats','services','resilient-clients','key-value','object-store','jetstream','clustering','monitoring','backup-recovery','deployment','security','topologies']
-const SPEC = (ch) => `docs/superpowers/specs/2026-06-05-${ch}-deep-dive-design.md`
+const SPEC = (ch) => `specs/2026-06-05-${ch}-deep-dive-design.md`
 
 const WORLD = `
 PINNED WORLD (must be byte-identical everywhere): Acme order platform. Payload:
@@ -103,7 +103,7 @@ const fixed = await parallel(keys.map((key) => () => {
   const actionable = list.filter(i => i.severity !== 'minor' || true) // apply all; fixer judges
   const text = actionable.map((i, n) => `${n + 1}. [${i.severity}] ${i.file}: ${i.detail}`).join('\n')
   return agent(
-    `Apply these consistency fixes to the "${key}" area. Each names a file and the change. Use Edit/Write. Stay within each chapter's spec lockfiles and link allow-list (specs under docs/superpowers/specs/). Keep the pinned world consistent:
+    `Apply these consistency fixes to the "${key}" area. Each names a file and the change. Use Edit/Write. Stay within each chapter's spec lockfiles and link allow-list (specs under specs/). Keep the pinned world consistent:
 ${WORLD}
 
 FINDINGS:

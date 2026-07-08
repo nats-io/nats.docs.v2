@@ -14,7 +14,7 @@ export const meta = {
 const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
 const CN_DIR = ROOT + '/learn/core-nats'
 const CLI_DIR = ROOT + '/static/examples/snippets/cli/learn/core-nats'
-const SPEC = ROOT + '/docs/superpowers/specs/2026-06-04-core-nats-deep-dive-design.md'
+const SPEC = ROOT + '/specs/2026-06-04-core-nats-deep-dive-design.md'
 const EXEMPLARS = [
   ROOT + '/learn/jetstream/why-a-stream.md',
   ROOT + '/learn/jetstream/your-first-stream.md',

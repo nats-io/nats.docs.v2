@@ -7,7 +7,7 @@ export const meta = {
   ],
 }
 
-const SPEC = 'docs/superpowers/specs/2026-06-09-tutorials-design.md'
+const SPEC = 'specs/2026-06-09-tutorials-design.md'
 const PAGES = ['index','hello-nats','request-reply','work-queue','first-stream','stream-consumer','key-value','build-an-app']
 
 const REVIEW_SCHEMA = {

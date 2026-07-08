@@ -9,7 +9,7 @@ export const meta = {
 
 // ---------------------------------------------------------------------------
 const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
-const SPECS = ROOT + '/docs/superpowers/specs'
+const SPECS = ROOT + '/specs'
 
 // Per-chapter config. Writers Read the chapter's design spec for the full
 // lockfile / boundary / link-allow-list / pinned scenario — so per-chapter
