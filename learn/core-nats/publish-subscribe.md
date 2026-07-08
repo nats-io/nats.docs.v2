@@ -214,8 +214,8 @@ returns `nats: maximum payload exceeded`) and the connection stays open.
 The server rejects and closes the connection of any client that sends an
 oversized `PUB` anyway. The Acme order payload is tiny, but a service
 that tries to ship a large blob inside a message hits this. Don't guess
-the ceiling: ask the server for it, then keep payloads under it and pass
-a reference for anything large.
+the ceiling: the client already knows it from the connection, so keep
+payloads under it and pass a reference for anything large.
 
 <div class="nats-example" data-type="learn-core-nats-publish-subscribe-check-max-payload" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

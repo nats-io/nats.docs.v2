@@ -101,8 +101,11 @@ of three would hang forever if only two answer.
 The safer approach gathers by **deadline** instead. Collect every reply
 that arrives within a time budget, then act on whatever you have.
 
-From the CLI, `--replies 0` switches to deadline mode: it waits until the
-overall `--timeout` elapses, returning all replies seen in that window.
+From the CLI, `--replies 0` switches to deadline mode: it collects replies
+until they stop arriving. `--timeout` bounds the wait for the *first* reply,
+and `--reply-timeout` (300 ms by default) bounds the gap between replies, so
+the command returns shortly after the last quote lands instead of holding open
+for the full timeout.
 
 ```bash
 nats request shipping.quote \
@@ -110,10 +113,12 @@ nats request shipping.quote \
   --replies 0 --timeout 2s
 ```
 
-With three providers up, all three quotes arrive well inside two seconds.
-With one provider down, the client still returns after two seconds with
-the two quotes it received. A slow or missing carrier delays a decision by
-at most the deadline; it never blocks it forever.
+With three providers up, all three quotes arrive within milliseconds, and the
+command returns a reply-timeout (300 ms) after the last one, not after the full
+two seconds. With one provider down, it returns just as fast with the two quotes
+it has, once no further reply arrives within the reply-timeout. If no provider
+answers at all, it gives up after `--timeout`. Either way the wait is bounded;
+it never blocks forever.
 
 A deadline changes the rule from waiting for every responder to waiting
 only for whoever answers in time, which is the only safe assumption when
