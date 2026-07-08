@@ -313,6 +313,22 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-retention-policies-workqueueOverlap": "learn_jetstream_retention_policies_workqueue_overlap.py",
             "learn-jetstream-retention-policies-retentionSwitchRejected": "learn_jetstream_retention_policies_retention_switch_rejected.py",
         },
+    }, {
+        repo: "nats-io/nats.py",
+        branch: "core-docs",
+        directory: "examples/docs/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "learn_core_nats_publish_subscribe_publish.py",
+            "learn-core-nats-publish-subscribe-subscribe": "learn_core_nats_publish_subscribe_subscribe.py",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "learn_core_nats_subjects_and_wildcards_wildcard_single.py",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "learn_core_nats_subjects_and_wildcards_wildcard_multi.py",
+            "learn-core-nats-request-reply-respond": "learn_core_nats_request_reply_respond.py",
+            "learn-core-nats-request-reply-request": "learn_core_nats_request_reply_request.py",
+            "learn-core-nats-request-reply-replies": "learn_core_nats_request_reply_replies.py",
+            "learn-core-nats-queue-groups-queue-subscribe": "learn_core_nats_queue_groups_queue_subscribe.py",
+            "learn-core-nats-scatter-gather-provider": "learn_core_nats_scatter_gather_provider.py",
+            "learn-core-nats-scatter-gather-gather": "learn_core_nats_scatter_gather_gather.py",
+        },
     }],
     "java": [{
         repo: "nats-io/nats.java",
