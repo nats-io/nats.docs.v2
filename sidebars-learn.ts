@@ -16,8 +16,8 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
  * - Page order is the explicit `items` order below, not _category_.json.
  *
  * Full structure + page rationale:
- *   docs/superpowers/specs/2026-05-27-learn-deep-dives-section-design.md
- *   Per-chapter design specs: docs/superpowers/specs/2026-06-0*-*-deep-dive-design.md
+ *   specs/2026-05-27-learn-deep-dives-section-design.md
+ *   Per-chapter design specs: specs/2026-06-0*-*-deep-dive-design.md
  *
  * Status: all twelve chapters are written — Develop (Core NATS, Services,
  * JetStream, Resilient Clients, Key-Value, Object Store) and Operate

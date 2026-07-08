@@ -15,7 +15,7 @@ export const meta = {
 const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
 const TOPO_DIR = ROOT + '/learn/topologies'
 const CLI_DIR = ROOT + '/static/examples/snippets/cli/learn/topologies'
-const SPEC = ROOT + '/docs/superpowers/specs/2026-06-03-topologies-deep-dive-design.md'
+const SPEC = ROOT + '/specs/2026-06-03-topologies-deep-dive-design.md'
 const NF_DIR = ROOT + '/src/components/NatsFlow'
 const EXEMPLARS = [
   ROOT + '/learn/jetstream/why-a-stream.md',

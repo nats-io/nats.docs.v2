@@ -20,7 +20,7 @@ const CHAPTER_PAGES = {
   'deployment': ['index','sizing-and-resources','kubernetes','config-management','rolling-upgrades','hardening','where-next'],
 }
 
-const SPEC = (ch) => `docs/superpowers/specs/2026-06-05-${ch}-deep-dive-design.md`
+const SPEC = (ch) => `specs/2026-06-05-${ch}-deep-dive-design.md`
 
 // Build the flat work list for the chapters requested in args.
 const chapters = Array.isArray(args) ? args : Object.keys(CHAPTER_PAGES)
