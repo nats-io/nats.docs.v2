@@ -7,7 +7,8 @@ MIT License (see LICENSE).
 
 This repository contains content derived from and generated out of the
 following upstream projects, each licensed under the Apache License,
-Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0):
+Version 2.0 (a copy is provided in LICENSE-APACHE;
+http://www.apache.org/licenses/LICENSE-2.0):
 
 - nats-io/nats.docs (https://github.com/nats-io/nats.docs)
   Portions of the documentation content are derived from the official

@@ -5,7 +5,7 @@ import Link from '@docusaurus/Link';
 import {
   RocketIcon,
   LightbulbIcon,
-  GuidesIcon,
+  LearnIcon,
   TutorialsIcon,
   ReferenceIcon,
   UsersIcon,
@@ -45,15 +45,15 @@ const DocSections: DocSection[] = [
     link: '/concepts/what-is-nats',
   },
   {
-    title: 'Guides',
-    Icon: GuidesIcon,
+    title: 'Learn',
+    Icon: LearnIcon,
     accent: '#8B5CF6',
     description: (
       <>
-        Step-by-step guides for common tasks and patterns when building with NATS.
+        Long-form deep dives into Core NATS, JetStream, and operating NATS in production.
       </>
     ),
-    link: '/guides',
+    link: '/learn',
   },
   {
     title: 'Tutorials',

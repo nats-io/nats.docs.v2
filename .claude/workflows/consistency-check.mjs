@@ -2,9 +2,10 @@
 // Scans all learn/*.md, verifies internal links, nats-example div<->.sh,
 // data-scenario validity, cluster naming, and structure conventions.
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { join, dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs';
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CHAPTERS = ['core-nats','services','resilient-clients','key-value','object-store','jetstream','clustering','monitoring','backup-recovery','deployment','security','topologies'];
 const NEW = ['services','resilient-clients','key-value','object-store','clustering','monitoring','backup-recovery','deployment'];
 

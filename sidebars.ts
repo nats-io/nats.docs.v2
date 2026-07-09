@@ -42,22 +42,6 @@ const sidebars: SidebarsConfig = {
             ],
         },
     ],
-
-    tutorialsSidebar: [
-        {
-            type: "doc",
-            id: "tutorials/index",
-            label: "Tutorials",
-        },
-    ],
-
-    guidesSidebar: [
-        {
-            type: "doc",
-            id: "guides/index",
-            label: "Guides",
-        },
-    ],
 };
 
 export default sidebars;
