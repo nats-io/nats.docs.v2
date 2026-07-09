@@ -65,7 +65,6 @@ const config: Config = {
           "Connective Technology for Adaptive Edge & Distributed Systems — official NATS messaging documentation.",
         includeOrder: [
           "concepts/**",
-          "guides/**",
           "tutorials/**",
           "reference/**",
         ],

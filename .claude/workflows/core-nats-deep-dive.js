@@ -11,7 +11,7 @@ export const meta = {
 // ---------------------------------------------------------------------------
 // Shared paths
 // ---------------------------------------------------------------------------
-const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
+const ROOT = '.' // repo root — run from the repository checkout
 const CN_DIR = ROOT + '/learn/core-nats'
 const CLI_DIR = ROOT + '/static/examples/snippets/cli/learn/core-nats'
 const SPEC = ROOT + '/specs/2026-06-04-core-nats-deep-dive-design.md'

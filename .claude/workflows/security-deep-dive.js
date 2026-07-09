@@ -12,7 +12,7 @@ export const meta = {
 // ---------------------------------------------------------------------------
 // Shared paths
 // ---------------------------------------------------------------------------
-const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
+const ROOT = '.' // repo root — run from the repository checkout
 const SEC_DIR = ROOT + '/learn/security'
 const CLI_DIR = ROOT + '/static/examples/snippets/cli/learn/security'
 const SPEC = ROOT + '/specs/2026-06-03-security-deep-dive-design.md'
