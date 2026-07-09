@@ -107,8 +107,9 @@ General feature? → All available languages
 ### Writing Style
 
 Flat and plain. Explain the complex thing in everyday words and stop. The
-authority is `style-guide.pdf` (Synadia Content Style Guide); its "Sage" voice
-means making complex things simple (Orwell's rules, p19), not performing wit.
+authority is the Synadia Content Style Guide (internal document, not in this
+repo — its rules are extracted below and in the writing workflows); its "Sage"
+voice means making complex things simple (Orwell's rules), not performing wit.
 
 - Active voice, present tense, second person, contractions.
 - State each fact once, directly. No setup, no payoff, no persona.
