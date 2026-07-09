@@ -32,3 +32,6 @@ tmp/
 # Environment
 .env
 .env.*
+
+# Internal Synadia brand doc — kept locally, not distributed
+style-guide.pdf
