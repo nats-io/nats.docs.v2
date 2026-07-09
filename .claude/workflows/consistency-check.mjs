@@ -1,7 +1,7 @@
 // Deterministic consistency checker for the Learn deep dives.
 // Scans all learn/*.md, verifies internal links, nats-example div<->.sh,
 // data-scenario validity, cluster naming, and structure conventions.
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -20,15 +20,17 @@ for (const ch of CHAPTERS) {
   for (const f of readdirSync(dir)) if (f.endsWith('.md')) mdFiles.push(join('learn', ch, f));
 }
 
-// ---- valid data-scenario names from the barrel ----
-const idx = readFileSync(join(ROOT, 'src/components/NatsFlow/scenarios/index.ts'), 'utf8');
+// ---- valid data-scenario names from the loader's actual registry ----
+// client-module.tsx assigns window.NatsFlow: top-level PascalCase animated
+// components (data-scenario uses the camelCase form) plus a nested
+// `scenarios` map of static scenarios keyed by their exact data-scenario name.
+const reg = readFileSync(join(ROOT, 'src/plugins/nats-flow/client-module.tsx'), 'utf8');
 const exported = new Set();
-for (const m of idx.matchAll(/export\s*\{\s*([A-Za-z0-9_]+)\s*\}/g)) {
+for (const m of reg.matchAll(/^\s*([A-Za-z0-9_]+):\s*module\./gm)) {
   const name = m[1];
+  exported.add(name);
   exported.add(name.charAt(0).toLowerCase() + name.slice(1)); // camelCase data-scenario
 }
-// plain (non-animated) scenarios available via the scenarios map
-for (const s of ['publishSubscribe','requestReply','requestReplyScatterGather','requestReplyQueueGroup','queueGroup','fanOut','fanIn','toggleableSubscribers']) exported.add(s);
 
 // ---- helper: does an internal doc/reference path resolve? ----
 function pathResolves(p) {
@@ -71,16 +73,20 @@ for (const rel of mdFiles) {
     if (!pathResolves(target)) add('LINK', rel, `unresolved link ${target}`);
   }
 
-  // 2) nats-example div <-> .sh
-  for (const m of txt.matchAll(/class="nats-example"\s+data-type="([^"]+)"/g)) {
-    const dt = m[1];
+  // 2) nats-example div <-> .sh (only when the div declares a cli tab)
+  for (const m of txt.matchAll(/<div class="nats-example"[^>]*>/g)) {
+    const tag = m[0];
+    const dt = (tag.match(/data-type="([^"]+)"/) || [])[1];
+    if (!dt) { add('DIV', rel, 'nats-example div without data-type'); continue; }
     if (!dt.startsWith('learn-')) { add('DIV', rel, `data-type not learn-*: ${dt}`); continue; }
-    const shRel = 'static/examples/snippets/cli/' + dt.replace(/-/g, '/') + '.sh';
     // careful: chapter names contain dashes (resilient-clients), so reconstruct from known path instead
     const expected = `static/examples/snippets/cli/learn/${ch}/${slug}/`;
     // snippet name = portion after learn-<ch>-<slug>-
     const prefix = `learn-${ch}-${slug}-`;
     if (!dt.startsWith(prefix)) { add('DIV', rel, `data-type ${dt} does not match page prefix ${prefix}`); continue; }
+    // client-only examples (data-languages without "cli") need no committed .sh
+    const langs = (tag.match(/data-languages="([^"]+)"/) || [])[1];
+    if (langs && !langs.split(',').map(s => s.trim()).includes('cli')) continue;
     const snip = dt.slice(prefix.length);
     const shPath = join(ROOT, expected, snip + '.sh');
     if (!existsSync(shPath)) add('DIV', rel, `missing CLI .sh for data-type ${dt} (expected ${expected}${snip}.sh)`);
