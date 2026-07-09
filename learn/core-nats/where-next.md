@@ -53,35 +53,23 @@ differently.
 
 ## What core NATS does not store
 
-Core NATS does not store messages. A message exists only while it's in
-flight to a live subscriber. Once it's delivered, or discarded for lack
-of interest, it no longer exists anywhere. That property has a name you
-met on the first page: **at-most-once** delivery.
-
-This is a deliberate design choice rather than a missing feature. It's
-what makes core NATS fast and what keeps a publisher from blocking on
-subscribers that are slow or offline. For the Acme ORDERS world, though,
-an order that arrives while the warehouse is restarting is an order lost.
-That's exactly the gap the next chapter fills.
+Core NATS does not store messages: a message exists only while it's in
+flight to a live subscriber, then it's gone. That's the **at-most-once**
+delivery you met on the first page, and it's a deliberate choice that
+keeps a publisher from blocking on slow or offline subscribers. For Acme,
+though, an order that arrives while the warehouse is restarting is lost.
 
 The [JetStream deep dive](/learn/jetstream) adds a server-side store on
-top of the same subjects you already use. Start with
-[Why a stream](/learn/jetstream/your-first-stream#why-a-stream): it picks up the identical
-Acme ORDERS world at the exact point this chapter leaves it, and shows
-what changes when a message can wait.
+top of the same subjects. Start with
+[Why a stream](/learn/jetstream/your-first-stream#why-a-stream): it picks
+up the Acme ORDERS world where this chapter leaves it.
 
 ## Where the details live now
 
-This chapter is unversioned and concept-first. The exact flags,
-defaults, and the byte-level frames live in **Reference**, which is
-versioned and exhaustive.
-
-The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
-[Reference → Client protocol](/reference/protocols/client). We only
-needed the behavior here; that page has the bytes.
-
-The [Reference root](/reference/) is the entry point for everything
-else: every flag and default, versioned in full.
+This chapter is unversioned and concept-first. For exact flags, defaults,
+and the byte-level `PUB`/`SUB`/`MSG` frames, see
+[Reference → Client protocol](/reference/protocols/client) and the
+[Reference root](/reference/).
 
 ## Sibling deep dives
 

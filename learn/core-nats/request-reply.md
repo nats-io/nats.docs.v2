@@ -40,14 +40,13 @@ traveling back on the private subject the client made for this one
 call.
 
 Every NATS client wraps those steps in a single `request()` call, so
-you never write the subscribe-publish-wait by hand. The mechanism
-underneath is exactly the four pub/sub operations above.
+you never write the subscribe-publish-wait by hand.
 
 ## The inbox
 
-The private reply subject has a name and a convention. It's called an
-**inbox**, and clients generate it under the reserved `_INBOX.`
-prefix: something like `_INBOX.nQ4k2v8...` with a random unique tail.
+The private reply subject is called an **inbox**, and clients generate it
+under the reserved `_INBOX.` prefix: something like `_INBOX.nQ4k2v8...`
+with a random unique tail.
 
 The inbox subject is per-request, but the subscription behind it usually
 isn't. Each call to `request()` gets a fresh inbox subject: a unique
@@ -66,10 +65,6 @@ length of a single protocol line, subject plus reply subject
 combined, to 4 KB by default (`max_control_line`). Generated inbox
 names sit far under that, so this only matters if you hand-build
 unusually long subjects.
-
-The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
-[Reference → Client protocol](/reference/protocols/client). We only
-need the behavior here.
 
 ## The inventory service
 
@@ -107,11 +102,10 @@ the subscription it already holds for its inbox prefix.
 
 ## Every request needs a timeout
 
-A request can fail to come back. The responder might be slow, or busy,
-or the reply might be lost in flight. Core NATS does not retry a reply
-or hold it for later. That's the at-most-once guarantee from the
-publish-subscribe page, and it applies to replies too. A reply that
-doesn't arrive is gone.
+A request can fail to come back — the responder might be slow or busy, or
+the reply lost in flight. Replies are
+[at-most-once](/learn/core-nats/publish-subscribe#at-most-once-delivery)
+like everything else: one that doesn't arrive is gone, not retried.
 
 So every request carries a **timeout**: the longest the client will
 wait for the answer before giving up. The CLI sets `--timeout` for you
@@ -126,9 +120,9 @@ error. Your code decides what to do next: retry, fall back, or fail
 the caller. Core NATS won't make that decision for you, and it won't
 deliver the answer late.
 
-A timeout tells you the answer didn't arrive in time, but it doesn't
-tell you _why_. The responder might be slow, or it might not exist at
-all. The next section covers how to tell those two cases apart.
+A timeout tells you the answer didn't arrive in time, not _why_ — the
+responder might be slow, or not there at all. The next section tells those
+apart.
 
 ## No responders
 
@@ -166,13 +160,9 @@ line and exits cleanly; a client library surfaces the same case as a
 distinct no-responders error your code branches on. Start the service
 again and the same request succeeds.
 
-One more detail about how this works: the no-responders signal
-uses the message header mechanism. The server delivers it as a
-reply whose header line is `NATS/1.0 503`, and it includes a
-`Nats-Subject` header naming the request subject. A client must have
-header support enabled to receive it (every current client does). If a
-client somehow asks for no-responders detection without header support,
-the server refuses the connection rather than half-enable the feature.
+The signal rides the message header mechanism: the server delivers a
+reply with the header line `NATS/1.0 503`. A client needs header support
+to receive it, which every current client enables.
 
 ## Headers
 
@@ -208,23 +198,14 @@ stays on the primitives.
 
 ## Pitfalls
 
-Request-reply is pub/sub pointed back, so it inherits pub/sub's failure
-modes plus a few of its own. These are the ones that show up in the Acme
-order services.
+**A request without a timeout can wait forever.** Pass a deadline on
+every `request()` call, sized to the responder's work plus the round-trip
+— long enough not to give up on a merely-slow reply.
 
-**A request without a timeout can wait forever.** The CLI always sets
-one (`--timeout`, five seconds by default), but a client library will
-wait as long as you let it. Pass a deadline on every `request()` call,
-sized to cover the responder's work plus the round-trip. A timeout set
-too short is the other half of this: it gives up on a valid reply that
-was merely slow, so measure before you shrink it.
-
-**Treating no responders as a hang.** When nobody subscribes to the
-subject, the server returns the no-responders `503` signal in
-milliseconds; it's not a slow timeout. Branch on it separately:
-no responders means the inventory service isn't deployed, while a
-timeout means it's deployed but slow. Lumping them together hides a
-deployment bug behind a latency retry.
+**Treating no responders as a hang.** No responders comes back in
+milliseconds, not as a slow timeout. Branch on it separately: no
+responders means nothing is deployed, a timeout means it's deployed but
+slow.
 
 **Assuming exactly one reply.** A plain `request()` returns the first
 reply and discards the rest. If two inventory instances both answer on
@@ -260,9 +241,6 @@ The Acme world now has its first two-way conversation:
   a slow timeout.
 - Replies are at-most-once like everything else in core NATS: not
   retried, not held.
-
-The pub/sub subscribers from earlier pages are still running. Nothing
-about request-reply changed them.
 
 ## What's next
 

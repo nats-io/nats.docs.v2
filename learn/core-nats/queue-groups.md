@@ -41,10 +41,6 @@ learns a group exists the moment its first member subscribes.
 
 <div class="nats-flow" data-scenario="queueGroupAnimated" data-width="600" data-height="350"></div>
 
-Watch each message (a moving dot) reach exactly one worker, even though
-all of them subscribed. That single-delivery behavior is the whole point
-of a queue group.
-
 ## Add the packers pool
 
 Our running scenario carries over one `nats-server` from earlier pages,
@@ -94,10 +90,6 @@ through the members the way round-robin would. The same packer can be
 chosen twice in a row, and over a handful of messages the split can look
 lopsided. Over many messages it evens out.
 
-> The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
-> [Reference → Client protocol](/reference/protocols/client). We only
-> need the behavior here.
-
 ## Membership is dynamic
 
 A packer joins the group by subscribing and leaves by unsubscribing or
@@ -114,37 +106,24 @@ that grows to ten packers under load and shrinks to two overnight needs
 no broker reconfiguration. Each instance subscribes on start and the
 group resizes itself.
 
-One limit belongs here, because core NATS is **at-most-once**: if the
-server picks a packer and that packer dies *after* the message is
-delivered to it, that message is gone. The server already handed it off;
-it won't pick a second packer for the same message. Core NATS does not
-retry delivery to another member.
-
-Delivering work that must survive a worker crash (retry to a different
-worker, no message lost) is a job for a durable work queue in
-[JetStream](/learn/jetstream), not core NATS.
+One limit belongs here: core NATS is at-most-once, so if the server picks
+a packer and it dies *after* delivery, that message is gone — the server
+won't retry it with another member. Work that must survive a worker crash
+belongs in a durable work queue in [JetStream](/learn/jetstream).
 
 ## Queue members and plain subscribers coexist
 
-Here's the property that makes queue groups fit our scenario cleanly. A
-queue group and a plain subscriber can listen to the same subject at the
-same time, and they don't interfere.
-
-`analytics` subscribes to `orders.created` with no queue group. The three
-packers subscribe to `orders.created` in the `packers` group. For each
+A queue group and a plain subscriber can share the same subject without
+interfering. `analytics` subscribes to `orders.created` with no queue
+group; the three packers subscribe in the `packers` group. For each
 published order:
 
 - `analytics` receives it: plain subscribers always get every message.
 - exactly one packer receives it: the group gets one copy, shared.
 
-The server runs the two distributions independently. The plain
-subscription is a one-to-one fan-out, the group subscription is a
-one-to-one-of-many pick, and the same message satisfies both.
-
-This is exactly the split our scenario wants. Analytics must count every
-order, so it stays a plain subscriber. Packing must happen once per
-order, so it becomes a queue group. The same subject carries both
-behaviors with no extra configuration.
+The server runs the two distributions independently, so the same subject
+carries both behaviors with no extra configuration — analytics counts
+every order while packing happens once per order.
 
 You can confirm it. Keep the three `packers` terminals open, and in
 another terminal subscribe plain:
@@ -191,9 +170,6 @@ it works once you span regions.
 
 ## Pitfalls
 
-Queue groups are easy to mis-wire in ways the server reports no error
-for. Watch for these.
-
 **A typo in the queue group name makes a second group.** The server
 matches members by the exact name string, so `packers` and `packer` are
 two separate groups on the same subject. Both subscriptions succeed with
@@ -203,21 +179,15 @@ byte-for-byte identical name.
 
 <div class="nats-example" data-type="learn-core-nats-queue-groups-typo-splits-group" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**Don't expect ordering or an even split across members.** The server
-picks a member at random per message, not round-robin, so the same packer
-can be chosen twice in a row and a short burst can look lopsided. It evens
-out over many messages. If one packer must process `orders.created` for a
-customer strictly in order, a queue group is the wrong tool. Keep that
-work on a single subscriber.
+**Don't expect ordering or an even split.** Selection is random per
+message, not round-robin, so a short burst can look lopsided. If work must
+be strictly ordered for a customer, keep it on a single subscriber, not a
+queue group.
 
-**Make a packer's work safe to repeat.** Core NATS is at-most-once, so the
-server does not redeliver after it hands a message off. The case to watch
-for is the near-miss: a packer that's slow or briefly cut off can still be
-doing work the publisher assumes was lost. Write each packer so handling the same
-order twice is harmless (pack by `order_id`, skip an order already packed)
-rather than assuming exactly one packer ever touches it. When you need the
-server to retry a dropped message to another worker, that's a durable work
-queue in [JetStream](/learn/jetstream), not core NATS.
+**Make a packer's work safe to repeat.** A packer that's slow or briefly
+cut off can still be doing work the publisher assumes was lost, and core
+NATS won't redeliver. Write each packer so handling the same order twice
+is harmless — pack by `order_id`, skip one already packed.
 
 ## Where you are
 

@@ -52,23 +52,13 @@ aren't allowed anywhere in a subject. Stick to letters, digits, `-`, and
 
 ## Subjects cost almost nothing to create
 
-Acme just invented four new subjects without telling the server first.
-That's allowed, and it costs almost nothing.
-
-The server keeps an **interest graph**: the in-memory record of which
-subjects have subscribers, from the previous page. It only holds an
-entry for a subject once something subscribes to it. A subject nobody
-listens to has no presence on the server at all.
-
-So you don't declare subjects, allocate them, or clean them up. You
-publish to a name and the name exists for as long as that publish takes.
-A system can use millions of distinct subjects without the server
-slowing down, because matching walks the token tree rather than scanning
-every subscription.
-
-This is why subject design is cheap to get right. Put the region in the
-subject, put the order ID in the subject if you want; the server
-has no per-name cost.
+Acme just invented four new subjects without telling the server first —
+that's allowed, and it costs almost nothing. The interest graph from the
+previous page holds an entry for a subject only once something subscribes
+to it, so a subject nobody listens to has no presence on the server at
+all. You never declare or clean up subjects, and a system can use
+millions of them without slowing the server down, because matching walks
+the token tree rather than scanning every subscription.
 
 ## Wildcards: subscribe to many subjects at once
 
@@ -82,10 +72,6 @@ literal subject. NATS has exactly two of them, and they differ in how
 many tokens they match.
 
 <div class="nats-flow" data-scenario="subjectsWildcardAnimated" data-width="700" data-height="450"></div>
-
-In the animation, the subscriber's pattern matches some published
-subjects and not others. The rest of this page is the two rules behind
-which is which.
 
 ### The single-token wildcard `*`
 
@@ -150,14 +136,10 @@ When Acme publishes `orders.us.created`, every matching subscriber gets
 its own copy: the warehouse on `orders.created` does *not* (different
 subject now), the regional analytics on `orders.*.created` does, and the
 audit service on `orders.>` does. The server fans one publish out to all
-of them. Delivery is still at-most-once: a subscriber that's offline
-when the message is published does not receive it, and nothing replays
-it later.
-
-That "nothing replays it later" is the limit of core NATS. A wildcard
-lets a service that joins now see everything published *from now on*,
-not what it missed before joining. Capturing the backlog so a late
-subscriber can catch up is what [JetStream](/learn/jetstream) adds.
+of them. Delivery is still [at-most-once](/learn/core-nats/publish-subscribe#at-most-once-delivery):
+a wildcard lets a service that joins now see everything published *from
+now on*, not what it missed before joining. Capturing that backlog is
+what [JetStream](/learn/jetstream) adds.
 
 ## Reserved prefixes to avoid
 
@@ -172,9 +154,6 @@ The `_INBOX` prefix is reserved for reply subjects that clients generate
 automatically. You don't pick `_INBOX` names yourself, and you don't
 publish business messages there. The next page, on request-reply, shows
 exactly what `_INBOX` is for.
-
-Keep Acme's order traffic under `orders.` and these reservations never
-come up.
 
 ## Try it in two terminals
 
@@ -197,21 +176,11 @@ All three arrive in Terminal 1. Now restart Terminal 1 with
 `nats sub "orders.*.created"` and re-run Terminal 2: only the two
 `*.created` messages arrive; `orders.shipped` no longer matches.
 
-The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
-[Reference → Client protocol](/reference/protocols/client). We only need
-the behavior here.
-
 ## Pitfalls
 
-A few subject mistakes are easy to miss. Here are the ones to watch on this
-page.
-
-**`>` only works as the last token.** The multi-token wildcard means
-"this token and everything after it," so there's no way to anchor it in
-the middle. `orders.>.created` isn't a valid subscription pattern, and
-the server rejects it rather than guessing where the tail stops. When you
-want a free token in the middle and a fixed token at the end, that's the
-job of `*`: subscribe to `orders.*.created`, not `orders.>.created`.
+**`>` only works as the last token.** Use `*` for a free token in the
+middle: subscribe to `orders.*.created`, not the invalid `orders.>.created`,
+which the server rejects.
 
 **Publishers can't publish "to a wildcard."** Wildcards are a
 subscriber-only tool. A publisher always names one fully-qualified
@@ -242,10 +211,6 @@ reply subject: a stray space in `orders.us created` publishes to
 keep spaces out of the subject:
 
 <div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-invalid-subject-whitespace" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-(Reserved `$` and `_INBOX` prefixes are the other thing to avoid; see
-[Reserved prefixes to avoid](#reserved-prefixes-to-avoid)
-above.)
 
 ## Where you are
 
