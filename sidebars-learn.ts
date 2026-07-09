@@ -15,9 +15,10 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
  *   category whose label links to that chapter's index page.
  * - Page order is the explicit `items` order below, not _category_.json.
  *
- * Full structure + page rationale:
- *   specs/2026-05-27-learn-deep-dives-section-design.md
- *   Per-chapter design specs: specs/2026-06-0*-*-deep-dive-design.md
+ * The chapters are hand-curated; there is no generator for this section.
+ * Shared continuity canon: the pinned Acme ORDERS scenario, cluster name
+ * `east`, server names `n1-east`/`n2-east`/`n3-east` (enforced by
+ * .claude/workflows/consistency-check.mjs).
  *
  * Status: all twelve chapters are written — Develop (Core NATS, Services,
  * JetStream, Resilient Clients, Key-Value, Object Store) and Operate
