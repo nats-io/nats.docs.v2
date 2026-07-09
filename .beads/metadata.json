@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "new_nats_docs",
+  "project_id": "a89f3933-4d09-444f-b43b-66d9342f78f5"
+}
