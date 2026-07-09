@@ -11,7 +11,7 @@ export const meta = {
 // ---------------------------------------------------------------------------
 // Shared paths
 // ---------------------------------------------------------------------------
-const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
+const ROOT = '.' // repo root — run from the repository checkout
 const JS_DIR = ROOT + '/learn/jetstream'
 const CLI_DIR = ROOT + '/static/examples/snippets/cli/learn/jetstream'
 const SPEC = ROOT + '/specs/2026-05-22-jetstream-deep-dive-design.md'

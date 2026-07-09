@@ -12,7 +12,7 @@ export const meta = {
 // ---------------------------------------------------------------------------
 // Shared paths
 // ---------------------------------------------------------------------------
-const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
+const ROOT = '.' // repo root — run from the repository checkout
 const TOPO_DIR = ROOT + '/learn/topologies'
 const CLI_DIR = ROOT + '/static/examples/snippets/cli/learn/topologies'
 const SPEC = ROOT + '/specs/2026-06-03-topologies-deep-dive-design.md'

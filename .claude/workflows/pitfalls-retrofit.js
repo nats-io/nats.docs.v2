@@ -8,7 +8,7 @@ export const meta = {
 }
 
 // ---------------------------------------------------------------------------
-const ROOT = '/Users/tomaszpietrek/coding/new-nats.docs'
+const ROOT = '.' // repo root — run from the repository checkout
 const SPECS = ROOT + '/specs'
 
 // Per-chapter config. Writers Read the chapter's design spec for the full

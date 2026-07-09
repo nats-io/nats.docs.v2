@@ -16,32 +16,20 @@ Simply add a `<div>` tag with the `nats-flow` class:
 
 ### Available Scenarios
 
-#### 1. Publish-Subscribe
-Shows one-to-many messaging pattern.
+Two kinds exist (see [Adding New Scenarios](#adding-new-scenarios)):
+
+- **Animated components** — `data-scenario` names ending in `Animated`
+  (e.g. `clusterMeshAnimated`, `kvWatchAnimated`). These make up most of the
+  ~80 scenarios used across the Learn section.
+- **Static scenarios** — fixed diagrams like `publishSubscribe`,
+  `requestReply`, `queueGroup`, `fanOut`.
+
+The authoritative list is the export list in
+[`scenarios/index.ts`](./scenarios/index.ts).
 
 ```html
 <div class="nats-flow" data-scenario="publishSubscribe"></div>
-```
-
-#### 2. Request-Reply
-Shows request-response pattern with a service.
-
-```html
-<div class="nats-flow" data-scenario="requestReply"></div>
-```
-
-#### 3. Queue Groups
-Shows load-balanced message distribution.
-
-```html
-<div class="nats-flow" data-scenario="queueGroup"></div>
-```
-
-#### 4. Fan-Out
-Shows broadcasting to multiple independent services.
-
-```html
-<div class="nats-flow" data-scenario="fanOut"></div>
+<div class="nats-flow" data-scenario="clusterMeshAnimated" data-width="600" data-height="350"></div>
 ```
 
 ### Options
@@ -65,14 +53,12 @@ Customize the diagram with data attributes:
 
 #### Available Options
 
-- `data-scenario` (required): The scenario to display
-  - `publishSubscribe`
-  - `requestReply`
-  - `queueGroup`
-  - `fanOut`
+- `data-scenario` (required): The scenario to display (see
+  [`scenarios/index.ts`](./scenarios/index.ts) for the full list)
 - `data-width`: Width in pixels (default: 600)
 - `data-height`: Height in pixels (default: 400)
-- `data-show-controls`: Show zoom/pan controls (default: true)
+- `data-show-controls`: Show zoom/pan controls (default: **false**; pass
+  `data-show-controls="true"` to enable)
 
 ## Architecture
 
@@ -85,30 +71,36 @@ NatsFlow/
 ├── README.md              # This file
 ├── nodes/                 # Custom node components
 │   ├── BaseNode.tsx       # Styled base node
-│   ├── PublisherNode.tsx  # Publisher node
-│   ├── SubscriberNode.tsx # Subscriber node
-│   └── ServiceNode.tsx    # Service/responder node
+│   ├── PublisherNode.tsx / SubscriberNode.tsx / ServiceNode.tsx
+│   └── ClientNode.tsx / ServerNode.tsx / LabelNode.tsx
 ├── edges/                 # Custom edge components
-│   └── AnimatedEdge.tsx   # Animated message flow
-├── scenarios/             # Prebuilt scenarios
-│   ├── publishSubscribe.ts
-│   ├── requestReply.ts
-│   ├── queueGroup.ts
-│   └── fanOut.ts
-├── hooks/                 # React hooks
-│   └── useInterval.ts     # Interval hook
+│   ├── AnimatedEdge.tsx   # Animated message flow
+│   └── FloatingEdge.tsx   # Auto-anchoring edge for mesh topologies
+├── scenarios/             # ~100 files: static .ts scenarios + *Animated.tsx components
+├── icons/                 # Shared SVG icons
+├── hooks/                 # React hooks (useInterval)
 └── lib/                   # Utilities
-    └── utils.ts           # Helper functions
 ```
 
 ### How It Works
 
-1. **Markdown Files**: Documentation authors add `<div class="nats-flow">` tags
-2. **JavaScript Loader** (`/static/js/nats-flow-loader.js`):
-   - Scans the page for `.nats-flow` elements
-   - Dynamically imports the React component
-   - Renders the appropriate scenario into each container
-3. **React Components**: Handle the visualization and animation
+1. **Markdown files**: authors add `<div class="nats-flow" data-scenario="...">` tags
+2. **Docusaurus plugin** (`src/plugins/nats-flow/`): its client module
+   dynamically imports the NatsFlow barrel, assigns `window.NatsFlow`
+   (base component + PascalCase animated components + a nested `scenarios`
+   map of static scenarios), then fires a `natsflow-loaded` event
+3. **Loader** (`/static/js/nats-flow-loader.js`): finds uninitialized
+   `.nats-flow` divs and renders them — a `data-scenario` ending in
+   `Animated` auto-resolves to the PascalCase component (the loader never
+   needs edits for new scenarios); anything else looks up the static
+   `scenarios` map. A MutationObserver re-runs on Docusaurus SPA navigation
+4. **Build-time fallback** (`scripts/rehype-nats-flow.mjs`): replaces each
+   div in the markdown/LLM output with a titled prose description + edge
+   list, from the scenario's `description` or its `FALLBACKS`/`TITLES`
+   entries (build warns when neither exists)
+
+`src/types/global.d.ts` mirrors the `window.NatsFlow` shape by convention
+but is not typecheck-enforced — keep it in sync when registering scenarios.
 
 ### Key Features
 
@@ -239,13 +231,13 @@ Then embed it (note camelCase in the attribute):
 
 ## Styling
 
-The component uses Tailwind CSS classes for styling. Colors follow NATS brand guidelines:
+The component uses Tailwind CSS classes for styling. Animated scenarios use
+the NATS brand colors (see CLAUDE.md):
 
-- Primary Blue: `#3b82f6`
-- Green (success): `#10b981`
-- Orange (warning): `#f97316`
-- Purple (service): `#8b5cf6`
-- Cyan (info): `#06b6d4`
+- Primary Blue: `#27AAE1`
+- Navy: `#375C93`
+- Green: `#34A574`
+- Lime: `#8DC63F`
 
 ## Development
 
@@ -280,7 +272,3 @@ Add `?debug=true` to any URL to enable React DevTools.
 - `clsx` & `tailwind-merge`: Utility class management
 
 All dependencies are already included in the main project's `package.json`.
-
-## Credits
-
-Based on the React Flow implementation from the `kubecon25-flow-ui` demo, adapted for Docusaurus integration.
