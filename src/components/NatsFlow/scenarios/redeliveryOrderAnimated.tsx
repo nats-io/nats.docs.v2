@@ -195,7 +195,15 @@ function RedeliveryOrderAnimatedInner() {
 
                 <div
                     key={cycleIndex}
-                    style={{ display: "flex", gap: 8, alignItems: "flex-start" }}
+                    style={{
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "flex-start",
+                        // Reserve space for the tallest column state (message +
+                        // ack chip + Ack Wait timer) so the timer appearing and
+                        // disappearing doesn't reflow the page below.
+                        minHeight: 160,
+                    }}
                 >
                     {EVENTS.slice(0, shown).map((ev, i) => {
                         const ackShown = t >= DELIVER[i] + ACK_DELAY;

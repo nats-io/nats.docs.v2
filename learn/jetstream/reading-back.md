@@ -251,7 +251,13 @@ moves a lot of data. Read the whole history only when you want it. To start
 elsewhere, create the consumer with a different delivery policy: the most
 recent messages (`--deliver last`), messages since a point in time
 (`--deliver since`), or a known sequence (`--deliver 1000`). The full set
-is in [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
+is in [Reference → Create Consumer](/reference/jetstream/api/consumer/create).
+
+**Reusing a durable name with a different config.** A durable consumer is
+identified by its name. Create `billing` again with different settings and the
+server returns *consumer already exists*; it won't silently reconfigure a
+consumer a reader is using. Edit the consumer (`nats consumer edit`) instead,
+or pick a new name.
 
 ## Where you are
 
