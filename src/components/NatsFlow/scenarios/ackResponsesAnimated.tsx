@@ -31,15 +31,19 @@ interface Card {
     tag?: string; // small note above the card
 }
 
+// Timeline uses two fixed beats so no step is rushed: a ~650 "processing" beat
+// (deliver → answer) and a ~1050 "read" beat (answer → next delivery, how long
+// the action caption holds). The read beat is deliberately long so nak/term
+// don't flash by.
 const CARDS: Card[] = [
     { seq: 1, resp: "ack", deliver: sc(0), respondAt: sc(650) },
-    { seq: 2, resp: "nak", deliver: sc(1350), respondAt: sc(2000) },
-    { seq: 2, resp: "ack", deliver: sc(2350), respondAt: sc(3000), tag: "redelivered" },
-    { seq: 3, resp: "term", deliver: sc(3700), respondAt: sc(4350) },
-    { seq: 4, resp: "inprogress", deliver: sc(4700), respondAt: sc(5350), wheelEnd: sc(7150) },
-    { seq: 5, resp: "ack", deliver: sc(7800), respondAt: sc(8450), tag: "next" },
+    { seq: 2, resp: "nak", deliver: sc(1700), respondAt: sc(2350) },
+    { seq: 2, resp: "ack", deliver: sc(3400), respondAt: sc(4050), tag: "redelivered" },
+    { seq: 3, resp: "term", deliver: sc(5100), respondAt: sc(5750) },
+    { seq: 4, resp: "inprogress", deliver: sc(6800), respondAt: sc(7450), wheelEnd: sc(9250) },
+    { seq: 5, resp: "ack", deliver: sc(10300), respondAt: sc(10950), tag: "next" },
 ];
-const CYCLE = sc(10800);
+const CYCLE = sc(12000);
 
 const GREEN = "#34A574";
 const AMBER = "#f59e0b";
@@ -183,27 +187,27 @@ function Wheel({ progress }: { progress: number }) {
 
 function caption(t: number): { text: string; color: string } {
     if (t < 650) return { text: "Delivered #1 — the client processes it…", color: GREY };
-    if (t < 1350)
+    if (t < 1700)
         return { text: "ack #1 → the consumer hands you the next message, #2", color: GREEN };
-    if (t < 2000) return { text: "Delivered #2 — processing…", color: GREY };
-    if (t < 2350)
+    if (t < 2350) return { text: "Delivered #2 — processing…", color: GREY };
+    if (t < 3400)
         return { text: "nak #2 → the same message is redelivered right away", color: AMBER };
-    if (t < 3000) return { text: "#2 came back — processing the retry…", color: GREY };
-    if (t < 3700) return { text: "ack #2 → on to #3", color: GREEN };
-    if (t < 4350) return { text: "Delivered #3 — processing…", color: GREY };
-    if (t < 4700)
+    if (t < 4050) return { text: "#2 came back — processing the retry…", color: GREY };
+    if (t < 5100) return { text: "ack #2 → on to #3", color: GREEN };
+    if (t < 5750) return { text: "Delivered #3 — processing…", color: GREY };
+    if (t < 6800)
         return {
             text: "term #3 → dropped (it goes red); the next message, #4, is delivered at once",
             color: RED,
         };
-    if (t < 5350) return { text: "Delivered #4 — processing…", color: GREY };
-    if (t < 7150)
+    if (t < 7450) return { text: "Delivered #4 — processing…", color: GREY };
+    if (t < 9250)
         return {
             text: "in-progress #4 → the Ack Wait window keeps extending, #4 stays in flight",
             color: BLUE,
         };
-    if (t < 7800) return { text: "ack #4 → the long job finished; on to #5", color: GREEN };
-    if (t < 8450) return { text: "Delivered #5 — processing…", color: GREY };
+    if (t < 10300) return { text: "ack #4 → the long job finished; on to #5", color: GREEN };
+    if (t < 10950) return { text: "Delivered #5 — processing…", color: GREY };
     return { text: "ack #5 → done", color: GREEN };
 }
 
@@ -263,7 +267,7 @@ function AckResponsesAnimatedInner() {
 
                 <div
                     key={cycleIndex}
-                    style={{ display: "flex", gap: 10, alignItems: "flex-start", minHeight: 120 }}
+                    style={{ display: "flex", gap: 10, alignItems: "flex-start", minHeight: 165 }}
                 >
                     {shown.map((c, i) => {
                         const isInprogress = c.resp === "inprogress";

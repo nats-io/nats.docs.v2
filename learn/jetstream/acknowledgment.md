@@ -1,11 +1,11 @@
 ---
 id: acknowledgment
-title: "Acknowledgment"
+title: "Ack responses and redelivery"
 sidebar_position: 7
 description: The four ways a client answers a message, and the server controls that drive redelivery.
 ---
 
-# Acknowledgment
+# Ack responses and redelivery
 
 The `shipping` consumer was created with `AckPolicy=explicit`. That
 choice means every message it delivers must be answered. A message is
@@ -18,7 +18,7 @@ late or never comes.
 
 ## Why the server waits for an answer
 
-A message is open from the moment the server delivers it until the
+A message stays in flight from the moment the server delivers it until the
 consumer answers. The server keeps a copy on the pending list and
 starts a timer.
 
@@ -42,7 +42,8 @@ the answer you send when a message is handled.
 
 **nak**: a negative acknowledgment. The work failed, redeliver this
 message. The server puts it back for another attempt. A plain nak asks
-for redelivery right away.
+for redelivery right away, or after a delay you set — see
+[below](#negative-ack-with-a-delay).
 
 **term**: stop trying. This message can never be handled, so don't
 deliver it again to anyone. The server drops it from the pending list
@@ -58,8 +59,7 @@ in-progress extends the timer instead.
 <div class="nats-flow" data-scenario="ackResponsesAnimated" data-width="660" data-height="240"></div>
 
 The rest of this page takes the three non-trivial answers — nak, term, and the
-controls behind them — one at a time. The wire format of each answer is in
-[Reference → Consumer API](/reference/jetstream/api/consumer).
+controls behind them — one at a time.
 
 ## Negative ack with a delay
 
@@ -72,9 +72,13 @@ pause.
 
 To avoid that, nak with a delay. The client tells the server to
 redeliver the message but wait a given time first. The server holds
-the message for that delay, then puts it back.
+the message for that delay, then puts it back. Passing that delay is a
+client-library call — the CLI's `--nak` only asks for immediate
+redelivery — so there's no CLI tab here. (To space out redeliveries from
+the CLI, set a consumer [backoff](#backoff-a-growing-delay-between-attempts)
+instead.)
 
-<div class="nats-example" data-type="learn-jetstream-acknowledgment-nakWithDelay" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-acknowledgment-nakWithDelay" data-languages="js,go,python,java,rust,csharp"></div>
 
 A nak returns the message to the consumer, not to the worker that
 nak'd it. If several workers share one consumer, the redelivery can land
@@ -92,7 +96,7 @@ Backoff is covered below.
 
 Some failures aren't temporary. A message with a broken payload, or one
 that fails a check that will never pass, is a poison message.
-Redelivering it wastes attempts and holds up the messages behind it.
+Redelivering it just wastes delivery attempts.
 
 For these, the client answers term. The message leaves the pending list
 and the server never delivers it again, no matter how many attempts
@@ -185,7 +189,7 @@ If the list has fewer entries than MaxDeliver allows, the server reuses
 the last entry for the remaining attempts.
 
 The full set of backoff options is documented in
-[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
+[Reference → Consumer configuration](/reference/jetstream/api/consumer/create).
 We use only a linear range here.
 
 ## Ack policy: the other values
@@ -204,9 +208,9 @@ retires 1 through 9. A fourth value, `flow_control`, belongs to push
 consumers and paces how fast the server delivers; pull consumers like
 `shipping` don't need it.
 
-The full set of ack policies is in
-[Reference → Consumer API](/reference/jetstream/api/consumer). This page
-uses `explicit`.
+The full list of available policies is in
+[Reference → Consumer configuration](/reference/jetstream/api/consumer/create).
+This page uses `explicit`.
 
 ## Pitfalls
 
@@ -218,13 +222,6 @@ for redelivery in the same instant. A temporary failure then retries
 right away, fails again, and ties up one worker on one message. Don't
 send a bare nak for a temporary failure. Nak with a delay, or set a
 backoff on the consumer so the wait grows each round (covered above).
-
-**A poison message with no term path uses every attempt.** Without
-term, a broken payload is nak'd over and over until MaxDeliver
-gives up, using the full set of attempts and holding up the messages
-behind it. When the code can tell no future attempt will succeed,
-answer term so the message leaves the pending list at once instead of
-working through the limit.
 
 **MaxDeliver drops a message with no dead-letter.** When a message hits
 the delivery limit, the server removes it from the consumer's pending
@@ -263,9 +260,7 @@ each.
 
 ## See also
 
-- [Reference → Consumer API](/reference/jetstream/api/consumer)
-  — the exact ack reply protocol and every response type.
-- [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
+- [Reference → Consumer configuration](/reference/jetstream/api/consumer/create)
   — AckWait, MaxDeliver, backoff arrays, and every other field.
 - [Reference → Terminated advisory](/reference/jetstream/advisory/terminated),
   [Nak advisory](/reference/jetstream/advisory/nak), and
