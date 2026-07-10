@@ -84,7 +84,7 @@ Three settings define how it reads:
 - **Ack explicit** means the client acknowledges each message it handles,
   and the consumer's position advances only as acks arrive. It's the default
   for a pull consumer. On this page you read and ack on the happy path; a
-  [later page](/learn/jetstream/your-first-consumer) digs into what
+  [later page](/learn/jetstream/delivery-and-acknowledgment) digs into what
   acknowledgment buys you — the redelivery loop that makes delivery reliable.
 
 Look at the consumer before it has read anything:
@@ -170,7 +170,7 @@ read straight through, so its third delivery was stream message 3. They
 drift apart whenever a consumer delivers a different set of messages than
 the stream stores in order: one that starts partway through, one that
 [filters](/learn/jetstream/filtering) to a subset of subjects, or one that
-has a message [redelivered](/learn/jetstream/your-first-consumer). The
+has a message [redelivered](/learn/jetstream/delivery-and-acknowledgment). The
 consumer sequence counts deliveries; the stream sequence stays pinned to
 the message.
 

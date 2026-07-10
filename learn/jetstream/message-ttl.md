@@ -1,7 +1,7 @@
 ---
 id: message-ttl
 title: "Per-message TTL"
-sidebar_position: 22
+sidebar_position: 21
 description: Make a single message expire ahead of the stream's MaxAge
 ---
 

@@ -1,7 +1,7 @@
 ---
 id: get-direct
 title: "Reading messages directly"
-sidebar_position: 20
+sidebar_position: 19
 description: Get one message or a bounded batch straight from the stream with Direct Get — no consumer, served by any replica
 ---
 

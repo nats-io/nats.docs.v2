@@ -174,4 +174,4 @@ off, with nothing read twice and nothing skipped.
 
 - Next tutorial: [Build a tiny state store with Key-Value](/tutorials/key-value).
 - Now understand the why (acknowledgment, redelivery, and how the cursor
-  works): [JetStream deep dive: Your first consumer](/learn/jetstream/your-first-consumer).
+  works): [JetStream deep dive: Delivery and acknowledgment](/learn/jetstream/delivery-and-acknowledgment).

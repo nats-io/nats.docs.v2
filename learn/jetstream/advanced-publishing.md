@@ -1,7 +1,7 @@
 ---
 id: advanced-publishing
 title: "Advanced publishing"
-sidebar_position: 18
+sidebar_position: 17
 description: Async, atomic-batch, and fast-ingest publishing — what each is for, the order trap in async, and the code for every mode
 ---
 

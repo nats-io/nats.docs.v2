@@ -1,7 +1,7 @@
 ---
 id: retention-policies
 title: "Retention policies"
-sidebar_position: 15
+sidebar_position: 14
 description: The three retention policies, and how to pick one for the kind of work a stream does
 ---
 

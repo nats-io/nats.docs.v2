@@ -1,7 +1,7 @@
 ---
 id: subject-mapping
 title: Subject mapping and transforms
-sidebar_position: 21
+sidebar_position: 20
 description: Rewrite subjects on the way into a stream, and republish stored messages onto new subjects
 ---
 
