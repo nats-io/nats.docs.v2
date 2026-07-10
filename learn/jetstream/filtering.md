@@ -23,6 +23,11 @@ A **filter** is a subject pattern attached to a consumer. The consumer
 receives only the messages whose subject matches the filter; the rest of
 the stream is skipped.
 
+The pattern can be a literal subject like `orders.shipped`, or a wildcard: a
+filter of `orders.*` matches every order event, while `orders.shipped` matches
+only the ships. The `*` and `>` wildcards behave exactly as they do for a
+[core subscription](/learn/core-nats/subjects-and-wildcards).
+
 The stream still captures all of `orders.>`; nothing about the stream
 changes. The filter lives on the consumer and decides which of the
 stored messages this consumer receives.
@@ -33,7 +38,7 @@ Create the `analytics` consumer with a filter of `orders.shipped`:
      data-type="learn-jetstream-filtering-createFiltered"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The new flag is `--filter`. It ties the consumer to a single subject.
+The new flag is `--filter`. It ties the consumer to a single filter subject.
 A message on `orders.shipped` reaches `analytics`; a message on
 `orders.created` or `orders.cancelled` does not.
 
@@ -110,11 +115,12 @@ it can start, stop, or fall behind without affecting any other consumer.
 The server keeps one copy of each message and serves every consumer from
 it.
 
-This differs from the core NATS queue group you met in Core Concepts. A
-queue group splits one subject's live traffic across workers that share
-the load. Here, each consumer gets its own full view of the stored
-stream, filtered to what it asked for. Sharing load within one consumer —
-the worker-pool pattern — comes later in the chapter.
+This differs from the core NATS [queue group](/learn/core-nats/queue-groups)
+you met in core NATS. A queue group splits one subject's live traffic across
+workers that share the load. Here, each consumer gets its own full view of the
+stored stream, filtered to what it asked for. Sharing load within one consumer
+— the [worker-pool pattern](/learn/jetstream/worker-pool) — comes later in the
+chapter.
 
 ## Other filtering options
 
@@ -124,7 +130,7 @@ Those go beyond what this scenario needs.
 
 For the full set of consumer filtering options, including multiple filter
 subjects and subject transforms, see
-[Reference → Consumer Configuration](/reference/jetstream/api/consumer). We
+[Reference → Create Consumer](/reference/jetstream/api/consumer/create). We
 use only a single `Filter Subject` here.
 
 ## Pitfalls
@@ -187,7 +193,7 @@ ack adds, and how an unacked message is redelivered.
 
 ## See also
 
-- [Reference → Consumer Configuration](/reference/jetstream/api/consumer) —
+- [Reference → Create Consumer](/reference/jetstream/api/consumer/create) —
   every consumer config field, including multiple filter subjects and
   subject transforms.
 - [Reading back the stream](/learn/jetstream/reading-back) — where you met
