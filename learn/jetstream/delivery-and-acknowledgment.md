@@ -23,7 +23,7 @@ process can be killed — and the message it was working on comes back instead
 of vanishing. (At-least-once also leans on the durable stream from the earlier
 pages; the ack loop is the consumer half.)
 
-**Entering:** the orders in `ORDERS`, and the `billing` and `analytics`
+You already have the orders in `ORDERS` and the `billing` and `analytics`
 consumers from the previous pages.
 
 ## A consumer to experiment with
@@ -182,17 +182,6 @@ repeats forever. Always ack on the success path. The
 [next page](/learn/jetstream/acknowledgment) covers how to retire a message
 that genuinely can't be processed, so it stops coming back.
 
-**Acking the same message twice.** Once you ack a message, the floor moves
-past it. A second ack does nothing useful, and most clients reject it locally
-with *"message was already acknowledged"*. Ack each delivery exactly once, in
-one place in your handler.
-
-**Reusing a durable name with a different config.** A durable consumer is
-identified by its name. Run `nats consumer add ORDERS shipping` again with
-different flags and the server returns *consumer already exists*; it won't
-silently reconfigure a consumer a reader is using. Edit it
-(`nats consumer edit`) instead, or pick a new name.
-
 ## Where you are
 
 `shipping` is a durable pull consumer with explicit ack, and you've seen the
@@ -215,5 +204,5 @@ decide when a message comes back and when it stops.
 
 ## See also
 
-- [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
+- [Reference → Create Consumer](/reference/jetstream/api/consumer/create)
   — every consumer option, the four ack policies, and push consumers.
