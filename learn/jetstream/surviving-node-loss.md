@@ -1,7 +1,7 @@
 ---
 id: surviving-node-loss
 title: "Surviving node loss"
-sidebar_position: 17
+sidebar_position: 16
 description: Why R=1 is a single point of failure, why R=3 is the production floor, and what storage durability means
 ---
 

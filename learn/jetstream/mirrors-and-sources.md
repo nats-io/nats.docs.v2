@@ -1,7 +1,7 @@
 ---
 id: mirrors-and-sources
 title: "Mirrors and sources"
-sidebar_position: 19
+sidebar_position: 18
 description: Copy one stream into another, or aggregate many streams into one
 ---
 

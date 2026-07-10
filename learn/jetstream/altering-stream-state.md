@@ -1,7 +1,7 @@
 ---
 id: altering-stream-state
 title: "Altering stream state"
-sidebar_position: 16
+sidebar_position: 15
 description: Delete a single message or purge the stream by hand, and what removal does to sequence numbers
 ---
 

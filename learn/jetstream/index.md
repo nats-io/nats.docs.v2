@@ -29,7 +29,7 @@ subjects, and queue groups.
 | [Publishing](./publishing) | Publish into a stream and understand the `PubAck` contract |
 | [Reading back the stream](./reading-back) | Read stored messages back with a durable consumer |
 | [Filtering what you consume](./filtering) | Add a second consumer that reads only `orders.shipped` |
-| [Delivery and acknowledgment](./your-first-consumer) | In-flight, ack, double ack, and redelivery |
+| [Delivery and acknowledgment](./delivery-and-acknowledgment) | In-flight, ack, double ack, and redelivery |
 | [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
 | [Scaling a consumer](./worker-pool) | Many workers split the load of one consumer |

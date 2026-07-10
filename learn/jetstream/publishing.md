@@ -224,7 +224,7 @@ order shipped as soon as the `PubAck` returns is acting on a write that no
 shipping logic has seen. Keep business outcomes separate from the publish.
 The delivery-and-ack half of the story is on the
 [next page](/learn/jetstream/reading-back) and in
-[delivery and acknowledgment](/learn/jetstream/your-first-consumer).
+[delivery and acknowledgment](/learn/jetstream/delivery-and-acknowledgment).
 
 ## Where you are
 

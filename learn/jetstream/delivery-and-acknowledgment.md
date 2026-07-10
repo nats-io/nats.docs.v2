@@ -1,5 +1,5 @@
 ---
-id: your-first-consumer
+id: delivery-and-acknowledgment
 title: "Delivery and acknowledgment"
 sidebar_position: 6
 description: How a message is delivered and held in flight, what an ack and a double ack do, and how an unacked message comes back

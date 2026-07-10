@@ -1,7 +1,7 @@
 ---
 id: shaping-the-stream
 title: "Shaping the stream"
-sidebar_position: 14
+sidebar_position: 13
 description: Control stream size and age with limits, and decide what happens when a limit is reached
 ---
 

@@ -91,7 +91,7 @@ You'll need:
   the three-node `east` cluster (`n1-east`, `n2-east`, `n3-east`), the
   `ORDERS` stream, and the `shipping` and `analytics` consumers. The
   [Topologies deep dive](/learn/topologies/your-first-cluster) stands up
-  the cluster; the [JetStream deep dive](/learn/jetstream/your-first-consumer)
+  the cluster; the [JetStream deep dive](/learn/jetstream/delivery-and-acknowledgment)
   stands up the stream and consumers.
 - The monitoring port enabled on each node. It listens on `:8222` by
   default; see [Reference → http_port](/reference/config/http_port).
