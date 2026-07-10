@@ -58,14 +58,7 @@ waits up to two seconds for a fourth. When the two seconds pass, it
 returns the three it has. The timeout is the ceiling, so a fetch always
 returns within it.
 
-From the CLI, `nats consumer next` is a single fetch. The `--count` flag
-is the batch size:
-
-<div class="nats-example"
-     data-type="learn-jetstream-pull-consumers-fetch"
-     data-languages="cli"></div>
-
-Run it twice and you walk the stream a batch at a time. The consumer's
+Running a fetch again walks the stream a batch at a time. The consumer's
 cursor advances as messages are acked, the same way it did one message
 at a time on the consumer page.
 
@@ -73,11 +66,15 @@ at a time on the consumer page.
 
 A long-running worker shouldn't loop on fetch by hand. The consume
 pattern does the looping for you. It keeps pull requests open so a new
-message is delivered as soon as it's stored in the stream:
+message is delivered as soon as it's stored in the stream. This is a
+client-library construct — the library manages the stream of pull
+requests and calls your handler — so there's no CLI tab here; the CLI's
+`nats consumer next` with a large `--count` only mimics it by holding one
+long fetch open:
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-consumeContinuous"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp"></div>
 
 Your function runs once per message and acks on success. The library
 handles the pull requests, sends new ones as the old ones empty, and
@@ -102,13 +99,13 @@ batch and an expiry in flight for you, so a plain consume loop behaves
 well without tuning.
 
 For the full set of pull request fields, see
-[Reference → Consumer API](/reference/jetstream/api/consumer/get-next).
+[Reference → Get next message](/reference/jetstream/api/consumer/get-next).
 This page uses only `batch` and `expires`.
 
 ## Pitfalls
 
-A few defaults cause problems once `shipping` carries real order
-traffic. Know these before you tune anything.
+A couple of defaults trip people up once `shipping` carries real order
+traffic.
 
 **An empty fetch is normal.** When no orders are queued, a fetch returns
 nothing once `expires` elapses. The server replies with a `404 No
@@ -121,27 +118,11 @@ nothing is available right now, so keep looping: wait and fetch again.
      data-type="learn-jetstream-pull-consumers-emptyFetch"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**A fetch with no expiry can stall.** Drop `expires` and a fetch has no
-time limit. A fetch waiting for a batch that never fills hangs until
-enough orders arrive. Always set an expiry so a quiet stream returns
-control to your loop instead of blocking it. The CLI sets one for you
-from `--timeout`; in code, pass `expires` explicitly.
-
-**`MaxAckPending` set too low limits throughput.** This is the limit on
-un-acked messages the consumer hands out before it waits for acks. If you
-set it well below your batch size (a limit of ten against a batch of
-100), the server delivers ten orders, then stops until your worker acks,
-no matter how large a batch you ask for. Keep it at or above your batch
-size. The default is 1000; lower it only when you know the in-flight
-count you want. The worker pool shares this single limit across every
-worker, so it matters even more there: see [the worker pool
-page](/learn/jetstream/worker-pool).
-
 **A batch set too large uses more memory than expected.** `batch` counts
 messages, not bytes, so a large batch against large orders can pull more
-into memory in one round than you expect. The Reference link below
-covers a companion field, `max_bytes`, that caps the total size a pull
-may return; whichever limit is hit first ends the pull.
+into memory in one round than you expect. Most clients let you bound a
+pull by total size instead — a `max_bytes` option on fetch or consume —
+so you can cap memory directly; whichever limit is hit first ends the pull.
 
 ## Where you are
 
@@ -161,7 +142,7 @@ pool shares one limit between every worker.
 
 ## See also
 
-- [Reference → Consumer API](/reference/jetstream/api/consumer/get-next)
+- [Reference → Get next message](/reference/jetstream/api/consumer/get-next)
   — every field of a pull request, including `no_wait` and the
   `min_pending` controls this page left out.
 - [The worker pool page](/learn/jetstream/worker-pool) — sharing one
