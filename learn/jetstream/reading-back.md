@@ -79,8 +79,8 @@ Three settings define how it reads:
   sequence 1, so it reads the whole log.
 - **Pull** means the client asks the server for messages when it's ready,
   rather than having the server push them on its own. Pull is the default
-  for new consumers; an older push model exists, but this chapter uses pull
-  throughout.
+  for new consumers; an older push model exists, but the consumers you create
+  in this chapter are pull.
 - **Ack explicit** means the client acknowledges each message it handles,
   and the consumer's position advances only as acks arrive. It's the default
   for a pull consumer. On this page you read and ack on the happy path; a
@@ -180,7 +180,8 @@ that call. Every message a consumer delivers carries the same state in its
 pending, how many times it's been delivered. That metadata rides along with
 the delivery for free, while `nats consumer info` is a separate request to the
 server: fine for a one-off check, too costly to call for every message. In a
-handler, read the state off the message.
+handler, read the state off the message — the read example above already does
+this, pulling the stream and consumer sequence straight from each delivery.
 
 ## The consumer remembers where it stopped
 
@@ -208,9 +209,10 @@ gets to.
 ## Reading once without a named consumer
 
 Creating a durable consumer is the right move when a reader comes back. For
-a throwaway look at a stream you don't need one. Subscribe straight to the
-stream's subjects and the CLI builds an **ephemeral** consumer for you,
-reads the backlog, and discards the consumer when the command exits:
+a throwaway look at a stream you don't need one. Passing `nats sub` a
+JetStream flag like `--all` switches it from a live core subscription to a
+stream read: the CLI builds an **ephemeral** consumer, reads the backlog, and
+discards the consumer when the command exits:
 
 <div class="nats-example"
      data-type="learn-jetstream-reading-back-replay"
@@ -219,7 +221,9 @@ reads the backlog, and discards the consumer when the command exits:
 An ephemeral consumer keeps no position you can return to. It's fine for a
 one-off read, but for anything you need to resume after an interruption, use
 the durable consumer from this page: an ephemeral one is removed once it goes
-idle, and a reconnect then starts over from the beginning.
+idle, and a reconnect then starts over from the beginning. In client code, the
+same one-pass read has a dedicated form — see
+[Ordered consumers](/learn/jetstream/ordered-consumer).
 
 ## The stream is unchanged
 
@@ -248,14 +252,6 @@ elsewhere, create the consumer with a different delivery policy: the most
 recent messages (`--deliver last`), messages since a point in time
 (`--deliver since`), or a known sequence (`--deliver 1000`). The full set
 is in [Reference → Consumer Configuration](/reference/jetstream/api/consumer).
-
-Delivery policy sets *where* a consumer starts; a separate **replay policy**
-sets the *pace* once it's reading. The default, `instant`, hands messages
-over as fast as the client reads them. The other value, `original`, spaces
-deliveries out to match the gaps between the messages' original timestamps,
-replaying recorded traffic at something like its real speed. This chapter
-uses `instant` throughout; both are listed in
-[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
 
 ## Where you are
 
