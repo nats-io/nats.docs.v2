@@ -170,9 +170,9 @@ Cluster Information:
 ```
 
 The shape matches the stream's block: a generated group name (`C` for
-consumer this time), a leader, and follower peers. Note the leader: in
-our run the `shipping` group elected `n3-east` while the `ORDERS`
-stream group is led by `n1-east`. They're separate Raft groups with
+consumer this time), a leader, and follower peers. The leader is the
+tell: in our run the `shipping` group elected `n3-east` while the
+`ORDERS` stream group is led by `n1-east`. They're separate Raft groups with
 separate elections, so a consumer group has its own stepdown too:
 `nats consumer cluster step-down ORDERS shipping`.
 
@@ -203,8 +203,8 @@ there by themselves: `nats stream get` and consumer delivery are served
 by a group leader, so there's no window where your own just-acked write
 is missing.
 
-Reads served by a follower can lag. The create used `--defaults`, which
-enables [direct gets](/learn/jetstream/get-direct) — `nats stream info
+Reads served by a follower can lag. The CLI enables
+[direct gets](/learn/jetstream/get-direct) on new streams — `nats stream info
 ORDERS` reports `Direct Get: true` — so any peer
 may answer a read straight from its local store instead of forwarding to the
 leader. A follower applies committed entries slightly after the leader

@@ -7,10 +7,10 @@ description: How a NATS cluster agrees and replicates — routes, Raft, quorum c
 
 # Clustering & Replication Deep Dive
 
-Three servers wired together become a cluster through a mechanism: they
-find each other, elect leaders, agree on every write, and keep replicas
-in step. This chapter covers that mechanism, taught one layer at a time
-the way you'd learn it by running a real cluster and watching it work.
+Three servers wired together become a cluster by finding each other,
+electing leaders, agreeing on every write, and keeping replicas in
+step. This chapter covers that mechanism, one page at a time, on a
+real running cluster.
 
 The [Topologies](/learn/topologies) chapter stood up the shapes (one
 server growing into the `east` cluster, then a super-cluster, then leaf
@@ -76,10 +76,6 @@ clusters (gateways, geo-affinity, super-cluster traffic) stays in
 | [Placement](/learn/clustering/placement) | Constrain replicas to a cluster and tagged servers, spread them across zones with `unique_tag`, and use a preferred leader as a hint |
 | [Scaling and peer management](/learn/clustering/scaling-and-peers) | Grow the cluster with a fourth server, migrate a replica onto it through catchup, and remove peers without losing a copy |
 | [Where to go next](/learn/clustering/where-next) | A recap of the whole mechanism and a production checklist |
-
-In summary, servers form a mesh, elect leaders, replicate
-every write, place the replicas where you want them, and let you scale
-the peer set without losing agreement.
 
 ## Prerequisites
 

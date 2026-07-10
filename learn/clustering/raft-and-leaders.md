@@ -167,7 +167,7 @@ candidate's log is at least as up to date as its own. A peer votes for at most
 one candidate per term, which is what stops two leaders from emerging at once.
 
 The candidate becomes the leader the instant it collects a **quorum** of
-votes: a majority of the group's peers, `(N+1)/2`. For the three-peer `ORDERS`
+votes: a majority of the group's peers, `N/2 + 1`. For the three-peer `ORDERS`
 group that's two: the candidate's own vote plus one more. With the majority in
 hand, the new leader immediately starts sending heartbeats, the other peers
 return to being followers, and the group is whole again under the new term.

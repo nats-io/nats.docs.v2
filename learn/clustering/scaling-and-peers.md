@@ -107,8 +107,8 @@ nats server list --user sys --password sys
 ╰─────────┴─────────┴─────────┴─────┴───────┴──────┴────────┴────────╯
 ```
 
-`Routes` climbed from 8 to 12: three remote servers now, four pooled
-connections each. `n4-east` is in the cluster and available to
+`Routes` climbed from 8 to 12: three remote servers now, four
+connections each (the pool of three plus the system-account route). `n4-east` is in the cluster and available to
 JetStream, but it holds nothing. `ORDERS` still lives on its original
 three peers.
 
@@ -341,10 +341,8 @@ You can now resize a live Raft group without taking the stream down:
 
 ## What's next
 
-You've walked the whole mechanism: routes form the mesh, Raft groups
-agree, a quorum commits each write, placement decides where replicas
-live, and peer management grows the set safely. The last page collects
-the recap, points to where the exhaustive detail lives, and gathers
+That was the last of the mechanism. The final page collects the
+recap, points to where the exhaustive detail lives, and gathers
 every page's Pitfalls into one production checklist.
 
 Continue to [Where to go next](/learn/clustering/where-next).

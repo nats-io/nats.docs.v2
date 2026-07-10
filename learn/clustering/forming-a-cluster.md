@@ -143,8 +143,8 @@ cluster {
 }
 ```
 
-Note what the `routes` lists don't say: `n2-east` and `n3-east` never
-mention each other, and `n1-east` never mentions `n3-east`. Start all
+The `routes` lists are deliberately incomplete: `n2-east` and `n3-east`
+never mention each other, and `n1-east` never mentions `n3-east`. Start all
 three, each with its own config file:
 
 ```bash
@@ -242,7 +242,7 @@ Cluster:
                              URLs: 127.0.0.1:6223
 ```
 
-Note what `URLs` shows: only `127.0.0.1:6223`, the route address
+`URLs` shows only `127.0.0.1:6223`, the route address
 `n1-east` was *configured* with. Implicit routes never appear here, only
 in `routez`.
 
