@@ -7,16 +7,17 @@ description: One nats-server process clients connect to directly — when it's e
 
 # Single server
 
-Every topology in this chapter is built on a single server. That's
-where Acme starts.
+Every topology in this chapter is built from a set of `nats-server`
+processes connected to each other. Before connecting anything, it's
+worth looking at the building block on its own: one server.
 
 A **server** is one `nats-server` process. It accepts client connections, routes
 messages between subjects, and, if you turn JetStream on, can store them in
 streams. One process is all you need to run the entire ORDERS workload while you
 build it.
 
-This page stands up Acme's development server, `n1`, on your machine. Then it
-covers when one server is enough and the one limit that eventually leads Acme to
+This page stands up a development server, `n1`, on your machine. Then it
+covers when one server is enough and the limits that eventually lead Acme to
 add more servers.
 
 ## The simplest deployment
@@ -35,13 +36,13 @@ This is the deployment you've been using throughout the JetStream and
 Security chapters without naming it. It's the
 single-server topology, and it's a real, valid way to run NATS.
 
-## Start Acme's dev server
+## Start the dev server
 
 Give the server a config file. A single server needs almost nothing in
 it, but a few settings earn their place from day one.
 
 ```conf
-# n1.conf — Acme's development server
+# n1.conf — the development server
 server_name: n1
 port: 4222
 http_port: 8222
@@ -59,12 +60,12 @@ out here so the address is never a mystery. Clients will use
 `nats://localhost:4222`.
 
 `http_port` turns on the monitoring endpoint, as it's
-**off by default**. Acme enables it at `8222` from the start so `n1` is
+**off by default**. Enable it at `8222` from the start so `n1` is
 observable; the [Monitoring deep dive](/learn/monitoring) covers what to
 watch on it.
 
 [`jetstream`](/reference/config/jetstream) turns JetStream on and gives it a `store_dir` to
-write to. Acme enables it so `n1` can hold the same ORDERS stream it
+write to. Enable it so `n1` can hold the same ORDERS stream it
 carried through the JetStream chapter.
 
 Start `n1` with the config:
