@@ -77,10 +77,13 @@ inspection commands this chapter leans on answer only on the **system
 account**, so each config defines a `SYS` account with one user. Accounts
 themselves are covered in
 [Security → Accounts and multitenancy](/learn/security/accounts-and-multitenancy).
+Each config also sets `http_port`, the HTTP monitoring endpoint — it's
+off by default, and the next page reads live Raft state from it.
 
 ```conf title="n1-east.conf"
 server_name: n1-east
 listen: 127.0.0.1:4222
+http_port: 8222
 
 jetstream {
   store_dir: "./js/n1-east"
@@ -101,6 +104,7 @@ cluster {
 ```conf title="n2-east.conf"
 server_name: n2-east
 listen: 127.0.0.1:4223
+http_port: 8223
 
 jetstream {
   store_dir: "./js/n2-east"
@@ -121,6 +125,7 @@ cluster {
 ```conf title="n3-east.conf"
 server_name: n3-east
 listen: 127.0.0.1:4224
+http_port: 8224
 
 jetstream {
   store_dir: "./js/n3-east"
@@ -274,7 +279,7 @@ nats server report jetstream --user sys --password sys
 No streams yet, but every server runs JetStream. And the second table
 shows something the servers did on their own the moment the mesh formed:
 they elected a leader (`n1-east` in our run; which server wins differs
-run to run). That RAFT Meta Group is the next page's subject.
+run to run). That Raft Meta Group is the next page's subject.
 
 ## Trace the discovery in the logs
 
@@ -389,7 +394,7 @@ The `east` cluster is running and has discovered itself from one seed:
 
 The servers can reach each other, and the JetStream report already shows
 them agreeing on one thing: a meta group leader. The next page introduces
-**RAFT groups** and **leader election**: how the servers in `east` picked
+**Raft groups** and **leader election**: how the servers in `east` picked
 that leader, and how they pick a new one when a leader is lost.
 
 Continue to [Raft and leaders](/learn/clustering/raft-and-leaders).

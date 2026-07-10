@@ -194,7 +194,7 @@ never four or six.
 one server loss only if the three servers can fail independently. Spread across
 one rack or one availability zone, a single power or network event takes all
 three at once. Steering which servers a stream lands on is placement, covered in
-the [Clustering & Replication](/learn/clustering) deep dive. This page only
+the [Clustering & Replication](/learn/clustering/placement) deep dive. This page only
 flags that R3 alone does not guarantee independent failures.
 
 ## Where you are

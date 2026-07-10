@@ -48,7 +48,7 @@ messages. They settle that order by majority vote, so the group keeps
 working as long as more than half of its members are reachable. The
 rule they follow is called Raft. It's the method that keeps every
 server agreeing on the order of writes through that vote. The
-[Clustering & Replication](/learn/clustering) deep dive walks through it
+[Clustering & Replication](/learn/clustering/raft-and-leaders) deep dive walks through it
 on a real cluster.
 
 You can go higher. **R=5** keeps five copies and tolerates two
@@ -166,7 +166,7 @@ When you need more throughput, the tool isn't a replica:
 - To scale writes past one leader, split subjects across streams — [Subject
   mapping](/learn/jetstream/subject-mapping).
 - To spread those streams across servers, see [Clustering &
-  Replication](/learn/clustering).
+  Replication](/learn/clustering/placement).
 
 ## Turning R=3 on
 
@@ -188,7 +188,7 @@ where this page leaves off.
 
 The full set of placement controls (which servers a stream lands on
 and tag-based steering) is documented in
-the [Clustering & Replication](/learn/clustering) deep dive. We change
+the [Clustering & Replication](/learn/clustering/placement) deep dive. We change
 only the replica count here.
 
 ## Pitfalls
@@ -220,7 +220,7 @@ survive the loss of a server, and `nats stream edit ORDERS --replicas=3`
 is rejected outright because there aren't three servers to hold the
 three copies. Don't conclude a stream is fault-tolerant from a clean run
 on one server. Prove failover on a real cluster, which the
-[Clustering & Replication](/learn/clustering) deep dive walks through
+[Clustering & Replication](/learn/clustering/raft-and-leaders) deep dive walks through
 end to end.
 
 ## Where you are

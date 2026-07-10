@@ -2,7 +2,7 @@
 id: index
 title: Clustering & Replication Deep Dive
 sidebar_position: 1
-description: How a NATS cluster agrees and replicates — routes, RAFT, quorum commits, placement, and peers
+description: How a NATS cluster agrees and replicates — routes, Raft, quorum commits, placement, and peers
 ---
 
 # Clustering & Replication Deep Dive
@@ -29,7 +29,7 @@ agreement and replication that make them work.
   `order-svc` publishing `orders.created`, through the leader's log, to a
   quorum commit that survives one server dying.
 - A working mental model of the five moving parts: **routes** form the
-  mesh, **RAFT groups** agree, a **quorum** commits each write,
+  mesh, **Raft groups** agree, a **quorum** commits each write,
   **placement** decides where replicas live, and **peer management**
   grows or shrinks the set safely.
 - The commands to inspect all of it (leaders, replicas, lag) and the
@@ -49,8 +49,8 @@ find another" and build up to placement and peer management from there.
 
 ## How to read it
 
-Each page introduces at most two new concepts and carries the cluster
-forward. You stand up `n1-east`, `n2-east`, and `n3-east` on the first
+Each page is built around one or two central ideas, with the
+vocabulary that hangs off them, and carries the cluster forward. You stand up `n1-east`, `n2-east`, and `n3-east` on the first
 page and keep them running: later pages elect a leader on that same
 cluster, replicate a write to it, place the stream on tagged servers,
 and add or remove a peer. The server names, the `ORDERS` stream, and the
@@ -71,7 +71,7 @@ clusters (gateways, geo-affinity, super-cluster traffic) stays in
 | Page | What you learn |
 |---|---|
 | [Forming a cluster](/learn/clustering/forming-a-cluster) | Routes (explicit seed vs implicit gossip), how one seed grows into a full mesh, and the system account you inspect it with |
-| [Raft and leaders](/learn/clustering/raft-and-leaders) | RAFT groups, the meta leader and stream leaders, and how an election replaces a crashed one |
+| [Raft and leaders](/learn/clustering/raft-and-leaders) | Raft groups, the meta leader and stream leaders, and how an election replaces a crashed one |
 | [Replication and R=3](/learn/clustering/replication-and-r3) | How a quorum commits a write, how followers and durable consumers apply it, and the consistency you get |
 | [Placement](/learn/clustering/placement) | Constrain replicas to a cluster and tagged servers, spread them across zones with `unique_tag`, and use a preferred leader as a hint |
 | [Scaling and peer management](/learn/clustering/scaling-and-peers) | Grow the cluster with a fourth server, migrate a replica onto it through catchup, and remove peers without losing a copy |
@@ -87,7 +87,7 @@ You'll need:
 
 - Three local `nats-server` processes with JetStream enabled, which the
   first page stands up as the `east` cluster. A single server isn't
-  enough here: RAFT needs a majority, so the mechanism only appears once
+  enough here: Raft needs a majority, so the mechanism only appears once
   three servers are talking.
 - The `nats` CLI installed. The whole chapter runs through server
   config and `nats` operator commands.

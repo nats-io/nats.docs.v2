@@ -194,7 +194,7 @@ for `--replicas 1` and accept that R1 survives a process restart but
 never the loss of `n1`. When orders must survive that, grow to [Your
 first cluster](/learn/topologies/your-first-cluster). The quorum and
 replication mechanics behind R3 live in
-[Clustering & Replication](/learn/clustering).
+[Clustering & Replication](/learn/clustering/replication-and-r3).
 
 ## Where you are
 

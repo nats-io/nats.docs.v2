@@ -14,8 +14,8 @@ into the cluster and move a replica onto it, or retire a server and move
 its replica off, without taking the stream down or losing the agreement
 the rest of this chapter built.
 
-This page changes the membership of a RAFT group while it keeps serving.
-A **peer** here is a RAFT-group member, as it has been since
+This page changes the membership of a Raft group while it keeps serving.
+A **peer** here is a Raft-group member, as it has been since
 [Raft and leaders](/learn/clustering/raft-and-leaders): one server's
 role inside the `ORDERS` group. Changing that set is **peer
 management**, and it comes in two halves: **peer add** with catchup, and
@@ -28,7 +28,7 @@ config says (changing `R` is
 
 The animation shows both halves: a fourth server joins, streams the
 entries it's missing, and only then counts toward quorum; later one
-peer is removed and drops its RAFT subscriptions while the rest carry
+peer is removed and drops its Raft subscriptions while the rest carry
 on.
 
 ## Peer add: a new peer catches up before it counts
@@ -58,7 +58,7 @@ peers that already have the data while `n4-east` fills in behind them.
 Only once it reports no lag does it carry the same weight as the
 others.
 
-## Add a fourth server and move a replica onto it
+## Add a fourth server and migrate a replica onto it
 
 `n4-east` gets the same config shape as the other three, from
 [Forming a cluster](/learn/clustering/forming-a-cluster), with the next
@@ -68,6 +68,7 @@ to the `west` cluster in the Topologies chapter):
 ```conf title="n4-east.conf"
 server_name: n4-east
 listen: 127.0.0.1:4232
+http_port: 8232
 
 jetstream {
   store_dir: "./js/n4-east"
@@ -113,7 +114,7 @@ three peers.
 
 There's no peer-add command that pushes it into the group. You free a
 slot instead: remove one of the current peers, and the **meta leader**
-(the cluster-wide RAFT leader from
+(the cluster-wide Raft leader from
 [Raft and leaders](/learn/clustering/raft-and-leaders)) assigns a spare
 server — one that's in the cluster but not in this group — into the
 vacated place. With `n4-east` as the only spare, the choice is made for
@@ -130,7 +131,8 @@ nats pub --jetstream orders.created --count 5000 \
 The stream now holds about 5,000 orders. In our run `n3-east` held the
 stream leadership at this point; yours may still sit where the last
 page's step-down put it, and the removal behaves the same either way.
-Drop `n2-east`:
+Drop `n2-east` — counterintuitively, this remove *is* the add: it frees
+the slot that the meta leader hands to `n4-east`:
 
 <div class="nats-example" data-type="learn-clustering-scaling-and-peers-peerAdd" data-languages="cli"></div>
 
@@ -191,7 +193,7 @@ nats --server nats://127.0.0.1:4222 stream cluster peer-remove ORDERS n4-east
 13:42:19 Requested removal of peer "n4-east"
 ```
 
-The group commits the removal, and the dropped peer lets go of its RAFT
+The group commits the removal, and the dropped peer lets go of its Raft
 subscriptions for the group. Then the stream **migrates**: the meta
 leader looks for a server to take the empty slot, because the stream's
 config still asks for three replicas. That command shrank nothing — it
@@ -325,7 +327,7 @@ a signal you've run out of servers, not as a step that half-worked.
 
 ## Where you are
 
-You can now resize a live RAFT group without taking the stream down:
+You can now resize a live Raft group without taking the stream down:
 
 - You started `n4-east` (client port 4232), freed a slot with
   `peer-remove`, and watched the meta leader migrate a replica onto the
@@ -339,7 +341,7 @@ You can now resize a live RAFT group without taking the stream down:
 
 ## What's next
 
-You've walked the whole mechanism: routes form the mesh, RAFT groups
+You've walked the whole mechanism: routes form the mesh, Raft groups
 agree, a quorum commits each write, placement decides where replicas
 live, and peer management grows the set safely. The last page collects
 the recap, points to where the exhaustive detail lives, and gathers

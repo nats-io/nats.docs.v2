@@ -351,6 +351,6 @@ two-way, so once it's up the leaf bridges order traffic in both directions.
   wire-level detail of how gateways advertise interest and connect.
 - [Core Concepts → Queue Groups](/concepts/queue-groups) — the recap of
   the queue-group behavior geo-affinity steers.
-- [Operate → Clustering & Replication](/learn/clustering) — how a stream's
+- [Operate → Clustering & Replication](/learn/clustering/replication-and-r3) — how a stream's
   replicas work within one cluster (a gateway carries interest across
   regions, not stream copies).

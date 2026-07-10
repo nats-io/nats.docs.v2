@@ -293,7 +293,7 @@ fine for plain `orders.*` traffic, but the moment you replicate the
 to keep a stream writable when one server is lost. That's a JetStream
 concern, covered on the [next page](/learn/topologies/jetstream-in-a-cluster);
 the consensus math behind it lives in
-[Clustering & Replication](/learn/clustering). For a pure routing cluster,
+[Clustering & Replication](/learn/clustering/raft-and-leaders). For a pure routing cluster,
 any count is fine.
 
 ## Where you are

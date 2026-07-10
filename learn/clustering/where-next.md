@@ -9,7 +9,7 @@ description: Recap the clustering mechanism and point to siblings, Reference, an
 
 You started this chapter with nothing running, and by the end you have three
 servers (`n1-east`, `n2-east`, `n3-east`) that found each other from a
-single seed route, elected leaders for every RAFT group, and hold the
+single seed route, elected leaders for every Raft group, and hold the
 `ORDERS` stream at `R=3`. Along the way you started a fourth server,
 `n4-east`, and moved a replica onto it and back. A write from
 `order-svc` now lands on the leader, commits once a quorum has it, and
@@ -27,7 +27,7 @@ configure one explicit seed route, and gossip does the rest: each server
 shares the servers it knows in its INFO, so one seed grows into a full
 mesh without you listing every server.
 
-**RAFT groups** are how the cluster agrees. There's one meta group across
+**Raft groups** are how the cluster agrees. There's one meta group across
 the whole cluster plus one group per stream and per durable consumer, and
 each group runs an election to pick a single leader. The leader is the
 only member that accepts writes; the followers replicate from it.
@@ -48,7 +48,7 @@ the spare, which catches up until its lag is zero. A removal refills the
 slot rather than shrinking the group, so after each change you verify the
 replacement is a live, current server.
 
-Those five ideas are routes, RAFT, quorum, placement, and peers. Everything
+Those five ideas are routes, Raft, quorum, placement, and peers. Everything
 else in this chapter (terms, elections, append entries, apply, preferred
 leader, migration) is a refinement of those five.
 
@@ -113,7 +113,7 @@ first; the meta-level peer-remove retired it from JetStream). Or tear it
 all down with `nats stream rm ORDERS` and stop the servers when you're
 done.
 
-You hold the core model: routes form the mesh, RAFT groups agree, a quorum
+You hold the core model: routes form the mesh, Raft groups agree, a quorum
 commits each write, placement decides where the replicas live, and peer
 management grows the set without losing agreement. That model is the minimum
 you need for operating any NATS cluster in production.
@@ -135,7 +135,7 @@ explains the why.
 
 - [ ] Treat a brief "no leader" window after a crash as normal; the election timer is 4–9 seconds, so let the client retry instead of failing the write. A cleanly stopped leader hands off in under a second and never hits that timer.
 - [ ] Use `nats stream cluster step-down` to move leadership off a server, not onto one; the next election is still quorum-based, so read the `New leader elected` line to learn who won. `--preferred` is a hint, not a lock.
-- [ ] Track the meta leader and a stream leader as different RAFT groups; check `nats server report jetstream` for one and `nats stream info ORDERS` for the other, because losing one is not losing the other.
+- [ ] Track the meta leader and a stream leader as different Raft groups; check `nats server report jetstream` for one and `nats stream info ORDERS` for the other, because losing one is not losing the other.
 
 ### Replication and R=3 — see [Pitfalls](/learn/clustering/replication-and-r3#pitfalls)
 

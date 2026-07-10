@@ -263,7 +263,7 @@ asked. Its full syntax lives in
 [Reference](/reference/jetstream/api/stream). We only need to know it's a
 hint here.
 
-The word *hint* matters. Once the group is running, RAFT elections decide
+The word *hint* matters. Once the group is running, Raft elections decide
 leadership, as you saw on [Raft and leaders](/learn/clustering/raft-and-leaders).
 If the preferred server later dies, the next election picks a leader from
 the surviving quorum at random; it doesn't wait for your preferred server

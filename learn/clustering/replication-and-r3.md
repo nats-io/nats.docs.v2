@@ -20,11 +20,11 @@ mechanism behind that guarantee. It introduces two ideas: **quorum
 commit**, how the leader turns one write into a committed entry across
 the group, and the **consistency** you get back from it.
 
-## R=3 means three peers in one RAFT group
+## R=3 means three peers in one Raft group
 
 A stream's replica count is the number of copies the cluster keeps.
 `R=3` keeps three. Each copy lives on a different server, and the three
-servers holding the copies form a single RAFT group, the same kind of
+servers holding the copies form a single Raft group, the same kind of
 consensus group the last page elected a leader for.
 
 You set the count when you create the stream. This is the create the
@@ -136,7 +136,7 @@ Here's one write from `order-svc` moving through that whole sequence
 
 <div class="nats-flow" data-scenario="r3ReplicationAnimated" data-width="600" data-height="350"></div>
 
-You'll find the full set of RAFT replication parameters (append-entry
+You'll find the full set of Raft replication parameters (append-entry
 batching, heartbeat intervals, log compaction) in
 [Reference](/reference/system/monitor/raftz). All you need here is the
 append → quorum → commit → apply shape.
@@ -146,7 +146,7 @@ append → quorum → commit → apply shape.
 The stream isn't the only thing that must survive a server loss. A
 durable consumer carries state of its own, which messages are
 acknowledged and where delivery stands, and that state commits by the
-same quorum mechanism: each durable consumer gets its own RAFT group,
+same quorum mechanism: each durable consumer gets its own Raft group,
 at the stream's replica count unless you set it lower (the rule itself
 is covered on [surviving node loss](/learn/jetstream/surviving-node-loss);
 here you watch it enforced).
@@ -172,7 +172,7 @@ Cluster Information:
 The shape matches the stream's block: a generated group name (`C` for
 consumer this time), a leader, and follower peers. Note the leader: in
 our run the `shipping` group elected `n3-east` while the `ORDERS`
-stream group is led by `n1-east`. They're separate RAFT groups with
+stream group is led by `n1-east`. They're separate Raft groups with
 separate elections, so a consumer group has its own stepdown too:
 `nats consumer cluster step-down ORDERS shipping`.
 
@@ -203,9 +203,10 @@ there by themselves: `nats stream get` and consumer delivery are served
 by a group leader, so there's no window where your own just-acked write
 is missing.
 
-Reads served by a follower can lag. The create output above shows
-`Direct Get: true`: `ORDERS` allows direct gets, reads that any peer
-may answer straight from its local store instead of forwarding to the
+Reads served by a follower can lag. The create used `--defaults`, which
+enables [direct gets](/learn/jetstream/get-direct) — `nats stream info
+ORDERS` reports `Direct Get: true` — so any peer
+may answer a read straight from its local store instead of forwarding to the
 leader. A follower applies committed entries slightly after the leader
 does, so a direct get answered by `n2-east` or `n3-east` might not yet
 show the most recent order, even though that order is already committed

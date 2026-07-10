@@ -2,7 +2,7 @@
 id: raft-and-leaders
 title: "Raft and leaders"
 sidebar_position: 3
-description: How a NATS cluster reaches agreement — RAFT groups, leaders and followers, and the election that picks a leader on a quorum of votes
+description: How a NATS cluster reaches agreement — Raft groups, leaders and followers, and the election that picks a leader on a quorum of votes
 ---
 
 # Raft and leaders
@@ -18,34 +18,36 @@ server, gets forwarded, and is gone. Stored data is different. When the
 those copies must agree on which orders exist and in what order, even while
 one of them is down.
 
-This page is about that agreement. It introduces two ideas: a **RAFT group**
+This page is about that agreement. Two ideas anchor it — a **Raft group**
 is a set of servers that keep an identical log by consensus, and a **leader
-election** is how a group picks the one server that drives the log.
+election** is how a group picks the one server that drives the log — and
+the rest of the page's vocabulary (term, quorum, heartbeat, candidate)
+hangs off those two.
 
-## RAFT groups
+## Raft groups
 
-NATS reaches agreement with **RAFT**, a consensus algorithm. A **RAFT group**
+NATS reaches agreement with **Raft**, a consensus algorithm. A **Raft group**
 is a fixed set of servers (its **peers**) that maintain a single shared log
 that all of them agree on. One peer is the **leader**; the rest are
 **followers**. The leader is the only peer that accepts new entries; it copies
 each entry to the followers, and the group advances together.
 
-A cluster runs many RAFT groups at once, layered.
+A cluster runs many Raft groups at once, layered.
 
-The first is the **meta group**: one cluster-wide RAFT group whose peers are
+The first is the **meta group**: one cluster-wide Raft group whose peers are
 the servers themselves. Its log holds the cluster's *assignments* rather than your
 data: which streams exist, how many replicas each has, and which
 servers hold them. Its leader is the **meta leader**, the server that decides
 where new streams and consumers are placed. Every server in `east` is a peer of
 the meta group.
 
-The rest are **per-asset groups**: every replicated stream gets its own RAFT
+The rest are **per-asset groups**: every replicated stream gets its own Raft
 group, and so does every replicated consumer. The `ORDERS` stream running with
-three copies is one RAFT group whose three peers are the three servers holding
+three copies is one Raft group whose three peers are the three servers holding
 those copies. Its leader, the **stream leader**, is the server that accepts
 writes to `ORDERS` and replicates them.
 
-So `east` holding one replicated `ORDERS` stream runs at least two RAFT groups
+So `east` holding one replicated `ORDERS` stream runs at least two Raft groups
 at once: the meta group across all three servers, and the `ORDERS` stream group
 across its three peers. They're independent. The meta leader and the `ORDERS`
 stream leader may be the same server or different servers, and a change to one
@@ -58,7 +60,7 @@ command, so it needs the `SYS` user from the previous page):
 nats server report jetstream --user sys --password sys
 ```
 
-The report's second table is the `RAFT Meta Group Information`, and its
+The report's second table is the `Raft Meta Group Information`, and its
 `Leader` column marks the meta leader:
 
 ```
@@ -70,17 +72,17 @@ The report's second table is the `RAFT Meta Group Information`, and its
 ```
 
 All three servers are peers, `n1-east` is the meta leader, and each peer has
-a short `ID` the RAFT layer uses instead of the server name.
+a short `ID` the Raft layer uses instead of the server name.
 
 The next page studies what `R=3` means for a write; here we only need the
-stream's RAFT group to exist, so create `ORDERS` now:
+stream's Raft group to exist, so create `ORDERS` now:
 
 ```bash
 nats stream add ORDERS --subjects 'orders.>' --replicas 3 --defaults
 ```
 
 The create output (and `nats stream info ORDERS` from then on) describes the
-stream's RAFT group in its `Cluster Information` block:
+stream's Raft group in its `Cluster Information` block:
 
 ```
 Cluster Information:
@@ -91,7 +93,7 @@ Cluster Information:
                       Replica: n3-east, current, seen 5ms ago
 ```
 
-`Name` is the cluster the group lives in. `Cluster Group` is the RAFT group's
+`Name` is the cluster the group lives in. `Cluster Group` is the Raft group's
 generated name: `S` for stream, `R3` for three peers, `F` for file storage,
 then a random suffix — yours will differ. `Leader` is the stream leader, with
 how long it's held the role in parentheses. Each `Replica` line shows a
@@ -99,9 +101,9 @@ follower peer, whether it's `current` (caught up), and how recently it was
 heard from. In our run the meta leader is `n1-east` while the stream leader is
 `n2-east`: the two groups elected independently.
 
-For a live view of a group's RAFT state, use the `/raftz` monitoring endpoint.
-It answers on the HTTP monitor port, which the previous page's configs don't
-set, so start `n1-east` with one: `nats-server -c n1-east.conf -m 8222`. Bare
+For a live view of a group's Raft state, use the `/raftz` monitoring endpoint.
+It answers on the HTTP monitor port each config set with `http_port` on the
+previous page — `8222` for `n1-east`. Bare
 `/raftz` returns only the meta group; to see a stream group, filter by the
 account that owns the stream (`$G`, the default account, URL-encodes as
 `%24G`):
@@ -157,7 +159,7 @@ the group can always tell a stale message from a current one. A leader from an
 older term is automatically obsolete the moment a newer term exists.
 
 When a follower's election timer fires, it becomes a **candidate**, the third
-RAFT role. It increments the term to one higher than any it's seen, votes for
+Raft role. It increments the term to one higher than any it's seen, votes for
 itself, and asks every other peer to vote for it in this new term.
 
 Each peer grants its vote if it hasn't already voted in this term and the
@@ -363,7 +365,7 @@ elected` line to learn who actually won.
 
 **The meta leader and a stream leader are different groups.** Losing the meta
 leader doesn't lose the `ORDERS` stream leader, and vice versa; they're
-separate RAFT groups with separate elections. You saw it above: with the meta
+separate Raft groups with separate elections. You saw it above: with the meta
 leader dead, publishes to `ORDERS` kept landing while `stream add` timed out.
 Don't assume the stream is unavailable when only the meta leader moved, or the
 reverse. Check the right group: `nats server report jetstream` for the meta
@@ -375,7 +377,7 @@ Your cluster now has names for its moving parts:
 
 - The meta group spans all three servers and holds the cluster's
   assignments; its meta leader decides placement.
-- The `ORDERS` stream exists with three replicas: its own RAFT group of
+- The `ORDERS` stream exists with three replicas: its own Raft group of
   three peers with its own stream leader, independent of the meta leader.
 - You've crashed a stream leader and watched a 6.5-second election replace
   it, moved both kinds of leader on purpose with stepdown, and crashed the
@@ -392,7 +394,7 @@ you get from `R=3`: [Replication and R=3](/learn/clustering/replication-and-r3).
 
 ## See also
 
-- [Reference → /raftz](/reference/system/monitor/raftz) — the RAFT group
+- [Reference → /raftz](/reference/system/monitor/raftz) — the Raft group
   monitoring endpoint and its full field set.
 - [Surviving node loss](/learn/jetstream/surviving-node-loss) — the one-page
   operator view of replicas riding through a server loss.
