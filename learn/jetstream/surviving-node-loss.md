@@ -44,12 +44,10 @@ recovery.
 <div class="nats-flow" data-scenario="nodeLossAnimated" data-width="780" data-height="300"></div>
 
 The majority matters because the replicas have to agree on the order of
-messages. They settle that order by majority vote, so the group keeps
-working as long as more than half of its members are reachable. The
-rule they follow is called Raft. It's the method that keeps every
-server agreeing on the order of writes through that vote. The
-[Clustering & Replication](/learn/clustering) deep dive walks through it
-on a real cluster.
+messages, and they settle that order by majority vote — so the group keeps
+working as long as more than half its members are reachable. That voting rule
+is called Raft. The [Clustering & Replication](/learn/clustering) deep dive
+walks through it on a real cluster.
 
 You can go higher. **R=5** keeps five copies and tolerates two
 simultaneous server failures. Five is the maximum a stream supports.
@@ -67,8 +65,10 @@ returns the `PubAck` once a majority of replicas have the message.
 That's what makes the `PubAck` on an R=3 stream a real durability
 promise: the message survives the loss of any single server.
 
-Any replica can serve reads, so the work of reading is spread across the
-group rather than landing on one server.
+Reads spread across the group instead of all landing on the leader. A
+[Direct Get](/learn/jetstream/get-direct) can be answered by any replica, and
+a consumer is served from a copy on its own server, so read traffic doesn't
+funnel through the leader the way writes do.
 
 If the leader's server dies, the remaining replicas elect a new leader
 from among themselves, automatically. Writes pause for the short
@@ -129,7 +129,7 @@ rebuild, but never more: a consumer can't keep more copies than the
 stream it reads.
 
 The full set of consumer replica and storage options is documented in
-[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
+[Reference → Consumer Configuration](/reference/jetstream/api/consumer/create).
 Here the consumer just takes its count from the stream.
 
 ## What replicas buy, and what they cost
@@ -141,9 +141,9 @@ replicas is not how you scale throughput.
 **Stream replicas** (R=3, R=5):
 
 - Survive node loss. More copies tolerate more failures.
-- Spread reads. Any replica can serve a read, so read work moves off the
-  leader, through Direct Get or because each consumer reads from its local
-  copy.
+- Spread reads. Reads don't funnel through the leader the way writes do —
+  Direct Get can hit any replica, and each consumer reads from its own copy —
+  so read work distributes across the group.
 - Cost load across the cluster. Every replica stores the full log, and every
   write is copied to a majority before its `PubAck`. R=3 is roughly three
   times the storage and write traffic of R=1.
@@ -214,13 +214,11 @@ only one loss, the same as R=3, while paying for a fourth copy. Use odd
 counts: R=3 for the production floor, R=5 for state you can't
 re-derive. Five is the maximum a stream supports.
 
-**Reading failover from a single-server demo.** Replicas only exist
-across servers, so a one-server laptop can't show leader election or
-survive the loss of a server, and `nats stream edit ORDERS --replicas=3`
-is rejected outright because there aren't three servers to hold the
-three copies. Don't conclude a stream is fault-tolerant from a clean run
-on one server. Prove failover on a real cluster, which the
-[Clustering & Replication](/learn/clustering) deep dive walks through
+**Reading failover from a single-server demo.** A clean run on one server
+proves nothing about fault tolerance: replicas only exist across servers, so a
+one-server laptop can't elect a leader or survive a server loss. Don't conclude
+a stream is fault-tolerant until you've proven failover on a real cluster,
+which the [Clustering & Replication](/learn/clustering) deep dive walks through
 end to end.
 
 ## Where you are
@@ -252,7 +250,7 @@ publishing isn't enough.
 
 - [Operate → Clustering & Replication](/learn/clustering) — stand up a
   real three-node cluster and watch leader election and failover.
-- [Reference → Stream Configuration](/reference/jetstream/api/stream) —
+- [Reference → Stream Configuration](/reference/jetstream/api/stream/create) —
   every storage and replica option and its valid range.
-- [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
+- [Reference → Consumer Configuration](/reference/jetstream/api/consumer/create)
   — consumer-level replica and storage overrides.
