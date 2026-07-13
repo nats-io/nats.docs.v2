@@ -8,8 +8,8 @@ description: Steer which client on a pull consumer gets messages, and when
 # Priority groups
 
 The [worker pool](/learn/jetstream/worker-pool) shared work evenly. Every
-worker on the `shipping` consumer pulled, and the server delivered messages
-to whichever worker asked.
+worker on the `shipping` consumer pulled, and the server handed each message
+to the next worker asking, round-robin.
 
 Some workloads need a different split. You might want one client to
 handle all the work until it fails, or a far-away client to stay idle
@@ -46,7 +46,7 @@ The group on the pull and the group on the consumer must match.
 
 So a priority group is a name on the consumer, a policy that governs it,
 and pulls that join the group by name. The rest of this page covers the
-two policies and the problem each one solves.
+three policies and the problem each one solves.
 
 ## The overflow policy
 
@@ -182,12 +182,10 @@ State:
 A group with no active client reads `No client`. To list every fully
 pinned consumer at once, run `nats consumer find ORDERS --pinned`.
 
-:::note Client support varies
-The pinned-client steps (storing `Nats-Pin-Id`, sending it back, handling
-the `423`) work in the Go and Java clients today. Other clients let you set
-the configuration fields but may not yet run the client-side pinning loop.
-Check your client's reference before relying on it.
-:::
+**Client support varies.** The pinned-client steps (storing `Nats-Pin-Id`,
+sending it back, handling the `423`) work in the Go and Java clients today.
+Other clients let you set the configuration fields but may not yet run the
+client-side pinning loop. Check your client's reference before relying on it.
 
 ## The prioritized policy
 
@@ -218,6 +216,11 @@ nats consumer add ORDERS dispatch --prioritized-groups regions --pull --defaults
 `--prioritized-groups regions` sets the policy to `prioritized` and names the
 single group `regions`. Unlike the other two policies, prioritized keeps no
 per-client counts, so it doesn't require explicit acks.
+
+This reuses the `dispatch` name from the overflow example on purpose: overflow
+and prioritized are two ways to run the same regional-dispatch consumer, so you
+pick one. A consumer's policy is fixed at creation, so switching an existing
+`dispatch` between them means deleting and recreating it.
 
 The priority rides on the pull request, the same place overflow's thresholds
 go, so `nats consumer next` can't set it and the pull comes from a client
