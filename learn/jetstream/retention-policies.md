@@ -55,6 +55,12 @@ Limits, the limits decide. Under Interest, every consumer must ack
 before the message is removed. Under WorkQueue, the first consumer to
 ack removes it.
 
+Limits still apply under all three. Retention removes a message when
+consumers are done with it; the stream's limits remove it when the stream
+grows too old or too large. On an Interest or WorkQueue stream the limits are
+the backstop that keeps it bounded when consumers fall behind — retention
+doesn't replace limits, it adds a second way a message can leave.
+
 ## Pick the policy from the kind of work
 
 Choose a retention policy from the kind of work the stream does. The
@@ -114,6 +120,13 @@ which no limit on `ORDERS` does. The worker publishes `orders.shipped`
 back to `ORDERS` as it finishes, so the record lands in the log while the
 task drains from the queue.
 
+Those shipping workers run as a pool sharing **one** consumer on
+`FULFILLMENT`, exactly as on [Scaling a consumer](/learn/jetstream/worker-pool):
+WorkQueue hands each order to the consumer, one worker ships it, and the ack
+clears it. You scale by adding workers to that one consumer, not by adding
+consumers — WorkQueue won't let two consumers claim the same order (the
+pitfalls below cover why).
+
 ## Switching retention on a live stream
 
 Set retention when you create the stream, and leave it there.
@@ -147,12 +160,13 @@ room. Interest retention still needs limits set, and it makes watching
 consumer health more important.
 
 **WorkQueue delivers each message once.** The first ack removes the
-message for everyone. So two separate consumers on a WorkQueue stream
-don't each get a full copy. They split the messages between them, and
-neither sees the whole stream. For several consumers that each see every
-message, use Interest or Limits. A worker *pool* sharing one consumer
-(the worker-pool page) works on WorkQueue. Several separate consumers
-that each expect the full stream does not.
+message for everyone, so no two consumers can claim the same message — the
+server rejects overlapping consumers outright (the pitfall below). You can
+still run more than one consumer if their filters *partition* the subjects,
+but each then handles only its slice; none sees the whole stream. For several
+consumers that each see every message, use Interest or Limits instead. To
+scale a single workload, use a worker *pool* sharing one consumer (the
+worker-pool page), not multiple consumers.
 
 The full set of retention behavior, including how Interest and
 WorkQueue interact with stream republish, mirrors, and sources, is in
