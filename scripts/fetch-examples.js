@@ -41,6 +41,22 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.go",
+        branch: "core-docs",
+        directory: "examples/docs/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "learn-core-nats-publish-subscribe-publish/main.go",
+            "learn-core-nats-publish-subscribe-subscribe": "learn-core-nats-publish-subscribe-subscribe/main.go",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "learn-core-nats-subjects-and-wildcards-wildcard-single/main.go",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "learn-core-nats-subjects-and-wildcards-wildcard-multi/main.go",
+            "learn-core-nats-request-reply-respond": "learn-core-nats-request-reply-respond/main.go",
+            "learn-core-nats-request-reply-request": "learn-core-nats-request-reply-request/main.go",
+            "learn-core-nats-request-reply-replies": "learn-core-nats-request-reply-replies/main.go",
+            "learn-core-nats-queue-groups-queue-subscribe": "learn-core-nats-queue-groups-queue-subscribe/main.go",
+            "learn-core-nats-scatter-gather-provider": "learn-core-nats-scatter-gather-provider/main.go",
+            "learn-core-nats-scatter-gather-gather": "learn-core-nats-scatter-gather-gather/main.go",
+        },
+    }, {
+        repo: "nats-io/nats.go",
         branch: "jetstream-docs",
         directory: "examples/docs/",
         examples: {
@@ -388,6 +404,22 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.java",
+        branch: "core-docs",
+        directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "LearnCoreNatsPublishSubscribePublish.java",
+            "learn-core-nats-publish-subscribe-subscribe": "LearnCoreNatsPublishSubscribeSubscribe.java",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "LearnCoreNatsSubjectsAndWildcardsWildcardSingle.java",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "LearnCoreNatsSubjectsAndWildcardsWildcardMulti.java",
+            "learn-core-nats-request-reply-respond": "LearnCoreNatsRequestReplyRespond.java",
+            "learn-core-nats-request-reply-request": "LearnCoreNatsRequestReplyRequest.java",
+            "learn-core-nats-request-reply-replies": "LearnCoreNatsRequestReplyReplies.java",
+            "learn-core-nats-queue-groups-queue-subscribe": "LearnCoreNatsQueueGroupsQueueSubscribe.java",
+            "learn-core-nats-scatter-gather-provider": "LearnCoreNatsScatterGatherProvider.java",
+            "learn-core-nats-scatter-gather-gather": "LearnCoreNatsScatterGatherGather.java",
+        },
+    }, {
+        repo: "nats-io/nats.java",
         branch: "jetstream-docs",
         directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
         examples: {
@@ -469,6 +501,22 @@ const EXAMPLES_CONFIG = {
             "request-reply-headers": "RequestReplyHeaders.cs",
             "request-reply-calculator": "RequestReplyCalculator.cs",
             "jetstream-basic": "JetStreamBasic.cs"
+        },
+    }, {
+        repo: "nats-io/nats.net",
+        branch: "core-docs",
+        directory: "examples/Example.NatsIODocs/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "LearnCoreNatsPublishSubscribePublish.cs",
+            "learn-core-nats-publish-subscribe-subscribe": "LearnCoreNatsPublishSubscribeSubscribe.cs",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "LearnCoreNatsSubjectsAndWildcardsWildcardSingle.cs",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "LearnCoreNatsSubjectsAndWildcardsWildcardMulti.cs",
+            "learn-core-nats-request-reply-respond": "LearnCoreNatsRequestReplyRespond.cs",
+            "learn-core-nats-request-reply-request": "LearnCoreNatsRequestReplyRequest.cs",
+            "learn-core-nats-request-reply-replies": "LearnCoreNatsRequestReplyReplies.cs",
+            "learn-core-nats-queue-groups-queue-subscribe": "LearnCoreNatsQueueGroupsQueueSubscribe.cs",
+            "learn-core-nats-scatter-gather-provider": "LearnCoreNatsScatterGatherProvider.cs",
+            "learn-core-nats-scatter-gather-gather": "LearnCoreNatsScatterGatherGather.cs",
         },
     }, {
         repo: "nats-io/nats.net",
