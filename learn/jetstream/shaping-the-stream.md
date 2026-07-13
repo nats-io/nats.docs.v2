@@ -30,9 +30,9 @@ page. A limit is a ceiling on the stream. You set it with
 one of three options, depending on how you want to measure the stream:
 
 - **MaxAge** caps how old a message may get. Set it to seven days and a
-  message is discarded roughly seven days after it was stored. Most order
-  systems use this one, since you rarely need an order event from last
-  quarter in a live stream.
+  message is discarded roughly seven days after it was stored. It fits when
+  only recent events matter — a live order stream rarely needs one from last
+  quarter.
 - **MaxBytes** caps how much disk the stream may use. Set it to one
   gigabyte and the stream never grows past a gigabyte, no matter how
   old or new the messages are. This option protects the server itself.
@@ -56,7 +56,7 @@ two different triggers:
 
 Give `ORDERS` a seven-day age limit and a one-gigabyte ceiling. The
 `nats stream edit` command changes an existing stream in place, so the
-three messages already stored stay where they are.
+messages already stored stay where they are.
 
 <div class="nats-example"
      data-type="learn-jetstream-shaping-the-stream-setLimits"
@@ -140,7 +140,7 @@ hundred messages for each individual subject. That's the
 `MaxMsgsPerSubject` option.
 
 The full set of stream limit options is documented in
-[Reference → Stream Configuration](/reference/jetstream/api/stream).
+[Reference → Stream Configuration](/reference/jetstream/api/stream/create).
 We use only MaxAge, MaxBytes, and Discard here.
 
 ## Pitfalls
@@ -148,15 +148,13 @@ We use only MaxAge, MaxBytes, and Discard here.
 Limits are easy to set and easy to misread. Two traps account for most
 of the surprises.
 
-**Discard Old discards the oldest message silently.** Discard Old never
-fails a publish. When a limit is hit, the server discards the oldest
-message and the publish succeeds. That's what you want for a rolling
-window. But you lose data without notice if you expected the stream to
-refuse the new message. The publisher gets no warning, and the order
-from eight days ago is gone. When you must keep history and would rather
-slow the publisher down, switch to Discard New and handle the rejected
-publish. It fails with `maximum bytes exceeded` (or
-`maximum messages exceeded`) instead of discarding anything:
+**Discard Old loses data silently.** Discard Old never fails a publish — when
+a limit is hit, the oldest message is dropped and the publish succeeds. That's
+right for a rolling window, but if you expected the stream to refuse new
+messages, the oldest order is gone with no warning to anyone. To keep history
+and push back on the publisher instead, switch to Discard New, which rejects
+the publish (`maximum bytes exceeded` or `maximum messages exceeded`) rather
+than discarding:
 
 <div class="nats-example"
      data-type="learn-jetstream-shaping-the-stream-discardNew"
@@ -189,7 +187,7 @@ reject takes a second setting, `DiscardNewPerSubject` (the
 a publish past the per-subject ceiling fails with `maximum messages per
 subject exceeded`, a third rejection string alongside the whole-stream
 `maximum bytes exceeded` and `maximum messages exceeded`. The field is in
-[Reference → Stream Configuration](/reference/jetstream/api/stream).
+[Reference → Stream Configuration](/reference/jetstream/api/stream/create).
 
 ## Where you are
 
@@ -197,7 +195,7 @@ You now have:
 
 - an `ORDERS` stream capped at a seven-day MaxAge and a 1 GiB MaxBytes
   ceiling
-- the three messages from earlier still stored (editing limits doesn't
+- the messages from earlier still stored (editing limits doesn't
   discard messages that already sit within them)
 - Discard Old in place, so a future limit discards the oldest order, never
   the newest
@@ -210,7 +208,5 @@ versus Interest versus WorkQueue, and which one to use when.
 
 ## See also
 
-- [Reference → Stream Configuration](/reference/jetstream/api/stream)
+- [Reference → Stream Configuration](/reference/jetstream/api/stream/create)
   — every limit option, its type, range, and default.
-- [Retention policies](/learn/jetstream/retention-policies) — the next
-  page, where the retention policy changes how messages are kept.
