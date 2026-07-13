@@ -23,9 +23,9 @@ Every stored message has a sequence number, the one the `PubAck` gave
 back when you published it. To remove a specific message, give the server
 that number:
 
-```bash
-nats stream rmm ORDERS 2
-```
+<div class="nats-example"
+     data-type="learn-jetstream-altering-stream-state-deleteMessage"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 `rmm` is "remove message." It takes the stream and the sequence to drop,
 and it asks for confirmation first (`Really remove message 2 from Stream
@@ -49,9 +49,9 @@ full request is in [Reference](/reference/jetstream/api/stream/msg-delete).
 
 To clear a whole stream at once, purge it:
 
-```bash
-nats stream purge ORDERS
-```
+<div class="nats-example"
+     data-type="learn-jetstream-altering-stream-state-purge"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 That removes every message in `ORDERS` and reports how many it dropped
 (`Purged 3 messages from ORDERS`). Like `rmm`, it asks for confirmation
@@ -65,16 +65,9 @@ consumers included.)
 
 A bare purge removes everything. Three optional flags narrow it:
 
-```bash
-# Remove only the shipped events, leave everything else
-nats stream purge ORDERS --subject orders.shipped
-
-# Remove everything up to but not including sequence 100 (keep 100 onward)
-nats stream purge ORDERS --seq 100
-
-# Keep only the most recent 50 messages
-nats stream purge ORDERS --keep 50
-```
+<div class="nats-example"
+     data-type="learn-jetstream-altering-stream-state-purgeFiltered"
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 `--subject` limits the purge to one subject. `--seq` counts from the
 bottom (drop everything older than a sequence); `--keep` counts from the
