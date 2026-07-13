@@ -38,8 +38,9 @@ there's no CLI form.
 ## What the library does
 
 The simplicity hides a loop. Under the cover, the library creates a consumer
-with a short inactivity threshold and tracks the stream sequence of each
-message it delivers. As long as the sequences arrive in order, it passes them
+with a short **inactivity threshold** — a span of idle time after which the
+server deletes the consumer — and tracks the stream sequence of each message
+it delivers. As long as the sequences arrive in order, it passes them
 straight to you.
 
 When a sequence goes missing, or the consumer goes quiet — its heartbeats stop
@@ -79,7 +80,7 @@ a throwaway in-order read:
 These are the same knobs any consumer has. The ordered consumer just sets them
 all toward speed and disposability instead of durability. The full set of
 fields is in
-[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
+[Reference → Consumer Configuration](/reference/jetstream/api/consumer/create).
 
 ## What you give up
 
@@ -97,20 +98,21 @@ The trade is in what you can't do:
 In return you get a gap-free, in-order read with no ack bookkeeping and nothing
 left behind.
 
-## Where you've already met it
+## Where ordered consumers show up
 
-You've used ordered consumers without naming them. A
+Ordered consumers power features you may use elsewhere in NATS: a
 [Key-Value](/learn/key-value) watch and an [Object Store](/learn/object-store)
-read are both ordered consumers under the cover: each walks a stream straight
+read are both ordered consumers under the cover — each walks a stream straight
 through in order. Reach for one whenever you want to read a stream top to
-bottom and don't need to coordinate readers or track acks.
+bottom without coordinating readers or tracking acks.
 
 ## Pitfalls
 
 **Using it for work that must be processed once.** An ordered consumer doesn't
-ack, so a crash mid-read just means you run the pass again from the start. For
-order processing where each message has to land exactly once, use a named
-consumer with explicit ack and let redelivery cover failures.
+ack, so it can't mark individual messages handled — there's no way to record
+that order 5 shipped but order 6 didn't. For processing where each message must
+land exactly once, use a named consumer with explicit ack and let redelivery
+cover failures.
 
 **Expecting to share progress across processes.** Each reader gets its own
 ordered consumer with its own position, so two processes reading this way both
@@ -134,7 +136,7 @@ falls behind.
 
 - [ADR-17: Ordered Consumer](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-17.md)
   — the behavior the clients implement.
-- [Reference → Consumer Configuration](/reference/jetstream/api/consumer) —
+- [Reference → Consumer Configuration](/reference/jetstream/api/consumer/create) —
   every field the library sets under the cover.
 - [Key-Value](/learn/key-value) and [Object Store](/learn/object-store) —
   ordered consumers at work.
