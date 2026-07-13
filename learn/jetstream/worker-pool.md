@@ -106,11 +106,13 @@ now spread across the pool.
 
 <div class="nats-flow" data-scenario="crashRedeliveryAnimated" data-width="640" data-height="320"></div>
 
-Watch it happen. Kill one worker mid-order, wait out `AckWait`, and the order
-reappears on a surviving worker. It ships once, because some worker
-eventually acks it.
+Watch it happen. The loop above acks the instant it pulls, so there's no window
+to interrupt — a real ship takes time. Add a brief delay before the ack (a
+`sleep 5` in the shell loop, or a pause in your handler), then kill that worker
+during the delay. After `AckWait` (30 seconds by default), the order reappears
+on a surviving worker and ships once, because some worker eventually acks it.
 
-## Capping how much is in progress
+## Capping how many orders are in progress
 
 Each worker can hold an order in progress, so more workers mean more in
 progress at once. There's a ceiling on that.
@@ -123,7 +125,7 @@ not per worker: five workers get 1000 between them, not 1000 each.
 You set it when you create or update the consumer:
 
 ```bash
-nats consumer add ORDERS shipping --max-pending 1000
+nats consumer edit ORDERS shipping --max-pending 1000
 ```
 
 Set it too low and workers sit idle waiting for a slot. Set it too high and a
@@ -139,11 +141,7 @@ Running several workers makes two consumer settings, `AckWait` and
 crashes mid-order, the server gives that order to another worker after
 `AckWait`, so the work still gets done. The same order can then run twice, so
 key side effects by `order_id`. A redelivery shows up in the message's
-delivery count:
-
-<div class="nats-example"
-     data-type="learn-jetstream-worker-pool-redelivery-count"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+delivery count.
 
 The pool shares work by demand, so you don't choose which worker gets an
 order. For that control, use [priority groups](/learn/jetstream/priority-groups):
@@ -154,11 +152,7 @@ until the pool falls behind.
 across the whole consumer, not per worker. Set it to 3 and only three
 messages are ever in progress, so ten workers leave seven of them idle no
 matter how much is stored. Set the cap to at least your worker count, with
-room to spare:
-
-<div class="nats-example"
-     data-type="learn-jetstream-worker-pool-max-pending"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+room to spare.
 
 **A crashed worker holds its order until `AckWait`.** The server can't tell
 a crash from slow work; it only knows the ack hasn't come. Until the timer
@@ -167,7 +161,7 @@ one else. Set `AckWait` to your normal processing time: too short redelivers
 while a healthy worker is still working, too long leaves real failures stuck.
 The full set of in-progress and redelivery options (`AckWait`, `MaxDeliver`,
 backoff arrays) is in
-[Reference → Consumer Configuration](/reference/jetstream/api/consumer).
+[Reference → Consumer Configuration](/reference/jetstream/api/consumer/create).
 
 ## Where you are
 
@@ -176,7 +170,6 @@ You now have:
 - One `shipping` consumer, unchanged from earlier pages.
 - Several workers pulling from it, splitting the stored messages between
   them.
-- A crashed worker's message redelivered after `AckWait`, not lost.
 - A name for the ceiling on how much runs at once: `MaxAckPending`,
   shared across every worker.
 
@@ -185,16 +178,15 @@ You scale by starting more processes; the consumer is unchanged. And because
 
 ## What's next
 
-Several workers on the `ORDERS` log still leave every order in the stream
-after one of them handles it. That's right for an audit log, but wrong for a
-backlog of jobs that should disappear once they're done. The next page
-builds the [`FULFILLMENT` queue](/learn/jetstream/retention-policies): a
-**WorkQueue** stream where each order to ship is claimed by one worker and
-removed on ack, the home these shipping workers belong on.
+Every consumer so far — `billing`, `analytics`, `shipping` — was built to
+last: named, durable, resumable. The next page is the opposite kind of read:
+an [ordered consumer](/learn/jetstream/ordered-consumer), a fast single pass
+over the whole log, in order, that cleans up after itself — for a job like
+totaling every order once, with no position to keep.
 
 ## See also
 
-- [Reference → Consumer Configuration](/reference/jetstream/api/consumer)
+- [Reference → Consumer Configuration](/reference/jetstream/api/consumer/create)
   — `MaxAckPending`, `AckWait`, backoff, and every other consumer field.
 - [Core Concepts → Queue Groups](/concepts/queue-groups) — the core NATS
   balancing this page contrasts with.
