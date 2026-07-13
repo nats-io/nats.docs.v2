@@ -56,8 +56,8 @@ Clients can also pause a consumer the moment they create it. Set the
 `PauseUntil` field in the consumer config to a future time, and the
 consumer starts out paused until that deadline. It's the same fixed
 deadline the CLI sets, just given when the consumer is first created.
-See [Reference → Consumer API](/reference/jetstream/api/consumer) for the
-field.
+See [Reference → Consumer configuration](/reference/jetstream/api/consumer/create)
+for the field.
 
 The command confirms the pause and the time remaining:
 
@@ -133,17 +133,11 @@ rejects the command with a clear message.
 
 The full `PauseUntil` API and the pause notification the server sends are
 documented in
-[Reference → Consumer API](/reference/jetstream/api/consumer). We use only
+[Reference → Pause consumer](/reference/jetstream/api/consumer/pause) and the
+[pause advisory](/reference/jetstream/advisory/consumer-pause). We use only
 the pause and resume commands here.
 
 ## Pitfalls
-
-**A paused consumer looks like a stall.** A paused `shipping` consumer
-delivers nothing, which is also how a broken consumer behaves. Without
-checking, you can't tell a deliberate pause from an outage. Before you
-go chasing a stuck consumer, run `nats consumer info ORDERS shipping` and
-read the `Paused Until Deadline` line. If it's there, the consumer is
-paused on purpose, not failing.
 
 **A deadline in the past does nothing.** Pause stores a fixed moment in
 time. If that moment has already passed, the server leaves the consumer
@@ -181,7 +175,9 @@ what `ORDERS` keeps and what it drops once it fills up.
 
 ## See also
 
-- [Reference → Consumer API](/reference/jetstream/api/consumer) — the
-  `PauseUntil` field, the pause response, and the pause advisory.
+- [Reference → Pause consumer](/reference/jetstream/api/consumer/pause) — the
+  `PauseUntil` field and the pause response.
+- [Reference → Consumer pause advisory](/reference/jetstream/advisory/consumer-pause)
+  — the notification the server sends when a consumer pauses or resumes.
 - [Pull consumers in depth](/learn/jetstream/pull-consumers) — the
   consumer state that pausing preserves.
