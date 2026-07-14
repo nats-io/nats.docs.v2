@@ -215,13 +215,17 @@ function AsyncOrderingAnimatedInner() {
                 </div>
             </div>
 
-            {reordered && (
-                <div style={{ marginTop: 10, fontSize: 12, color: "#374151" }}>
-                    Stored order: <span style={{ fontFamily: "monospace" }}>#1 #2 #4 #5 #6 #3</span>. Fix it by failing the
-                    retry fast with{" "}
-                    <span style={{ fontFamily: "monospace", color: BLUE, fontWeight: 600 }}>Nats-Expected-Last-Subject-Sequence</span>.
-                </div>
-            )}
+            {/* Reserve this row's height so it doesn't shove the page down when
+                it appears only in the reorder phase. */}
+            <div style={{ marginTop: 10, minHeight: 36, fontSize: 12, color: "#374151" }}>
+                {reordered && (
+                    <>
+                        Stored order: <span style={{ fontFamily: "monospace" }}>#1 #2 #4 #5 #6 #3</span>. Fix it by failing the
+                        retry fast with{" "}
+                        <span style={{ fontFamily: "monospace", color: BLUE, fontWeight: 600 }}>Nats-Expected-Last-Subject-Sequence</span>.
+                    </>
+                )}
+            </div>
 
             <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 14 }}>
                 <button
