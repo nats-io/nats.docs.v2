@@ -122,13 +122,13 @@ everything it hasn't seen, and acknowledges each message as it goes:
 The messages arrive oldest first, each with its stream sequence:
 
 ```
-[#1] Received JetStream message: stream: ORDERS seq: 1 / pending: 2 / subject: orders.created
+[#1] Received JetStream message: stream: ORDERS seq: 1 / pending: 2 / subject: orders.created / time: 2026-05-22 10:14:22
 {"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
 
-[#2] Received JetStream message: stream: ORDERS seq: 2 / pending: 1 / subject: orders.created
+[#2] Received JetStream message: stream: ORDERS seq: 2 / pending: 1 / subject: orders.created / time: 2026-05-22 10:14:25
 {"order_id":"ord_2zr9","customer":"globex","total_cents":7800,"ts":"2026-05-22T10:14:25Z"}
 
-[#3] Received JetStream message: stream: ORDERS seq: 3 / pending: 0 / subject: orders.shipped
+[#3] Received JetStream message: stream: ORDERS seq: 3 / pending: 0 / subject: orders.shipped / time: 2026-05-22 10:14:31
 {"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:31Z"}
 ```
 
@@ -197,7 +197,7 @@ Then read again with the same command. The consumer delivers only the new
 message, not the whole log:
 
 ```
-[#1] Received JetStream message: stream: ORDERS seq: 4 / pending: 0 / subject: orders.created
+[#1] Received JetStream message: stream: ORDERS seq: 4 / pending: 0 / subject: orders.created / time: 2026-05-22 11:02:00
 {"order_id":"ord_5xk1","customer":"initech","total_cents":1500,"ts":"2026-05-22T11:02:00Z"}
 ```
 
@@ -249,8 +249,8 @@ sequence 1 and reads the entire log. On a three-message `ORDERS` stream
 that's instant. On a stream holding millions of orders it takes time and
 moves a lot of data. Read the whole history only when you want it. To start
 elsewhere, create the consumer with a different delivery policy: the most
-recent messages (`--deliver last`), messages since a point in time
-(`--deliver since`), or a known sequence (`--deliver 1000`). The full set
+recent messages (`--deliver last`), messages from a window back to now
+(`--deliver 1h`), or a known sequence (`--deliver 1000`). The full set
 is in [Reference → Create Consumer](/reference/jetstream/api/consumer/create).
 
 **Reusing a durable name with a different config.** A durable consumer is

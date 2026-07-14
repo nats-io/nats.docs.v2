@@ -49,7 +49,8 @@ Confirm it landed:
 nats stream info ORDERS
 ```
 
-The settings block gains one line:
+The `Allows Per-Message TTL` line in the settings block flips from
+`false` to `true`:
 
 ```
 Allows Per-Message TTL: true

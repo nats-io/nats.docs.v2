@@ -161,17 +161,17 @@ stream's limits, covered in [Shaping the stream](/learn/jetstream/shaping-the-st
 not by any consumer.
 
 **Overlapping filters within one consumer.** Overlap _between_ consumers
-is fine: two separate consumers whose filters match the same subject each
-get their own full copy of those messages. That's the kind of sharing
-this page relies on, and no retention policy changes it.
+is fine on limits and interest streams: two separate consumers whose
+filters match the same subject each get their own full copy of those
+messages. That's the kind of sharing this page relies on. The exception
+is work-queue retention, where consumers' filters must not overlap each
+other. See [Retention policies](/learn/jetstream/retention-policies).
 
-Overlap _inside_ one consumer is rejected by the server. You can give a
-single consumer several filter subjects. But if one of those subjects
-already covers another, the create call fails. The filters on one
-consumer must not overlap each other. This rule holds whether the stream
-uses limits, interest, or work-queue retention. For how work-queue
-retention shapes delivery once filters are in place, see
-[Retention policies](/learn/jetstream/retention-policies).
+Overlap _inside_ one consumer is different. You can give a single
+consumer several filter subjects, but if one of those subjects already
+covers another, like `orders.>` next to `orders.shipped`, the create call
+fails with `consumer subject filters cannot overlap`. Filters that only
+partly overlap, where neither covers the other, are accepted.
 
 ## Where you are
 

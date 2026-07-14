@@ -72,16 +72,22 @@ nats stream info ORDERS
 The configuration block now reports the two limits instead of
 `unlimited`:
 
-```
-Configuration:
+```text
+Options:
 
-             Subjects: orders.>
-     Retention Policy: Limits
-       Discard Policy: Old
-     Maximum Messages: unlimited
-        Maximum Bytes: 1.0 GiB
-          Maximum Age: 7d0h0m0s
- Maximum Message Size: unlimited
+                    Retention: Limits
+              Acknowledgments: true
+               Discard Policy: Old
+             Duplicate Window: 2m0s
+
+Limits:
+
+             Maximum Messages: unlimited
+          Maximum Per Subject: unlimited
+                Maximum Bytes: 1.0 GiB
+                  Maximum Age: 7d0h0m0s
+         Maximum Message Size: unlimited
+            Maximum Consumers: unlimited
 ```
 
 `Maximum Messages` is still `unlimited`, because you set only age and

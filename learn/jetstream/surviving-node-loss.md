@@ -123,10 +123,11 @@ which messages are still waiting for an ack. On an R=3 stream, the
 `shipping` consumer's state is copied the same way, so a worker pool
 keeps its place through a server failure.
 
-By default a consumer takes its stream's replica count. You can give a
-consumer fewer replicas than its stream when its state is cheap to
-rebuild, but never more: a consumer can't keep more copies than the
-stream it reads.
+By default a durable consumer takes its stream's replica count. On a
+limits-retention stream like `ORDERS` you can give a consumer fewer
+replicas than its stream when its state is cheap to rebuild, but never
+more. On interest and work-queue streams the consumer's replica count
+must match the stream's.
 
 The full set of consumer replica and storage options is documented in
 [Reference → Consumer Configuration](/reference/jetstream/api/consumer/create).
