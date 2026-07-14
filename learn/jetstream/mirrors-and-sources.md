@@ -166,11 +166,9 @@ subjects with a subject transform, or reach a stream in another account
 or JetStream domain. Each is one extra field on the mirror or source
 configuration.
 
-Reaching across an account or domain involves three subjects, and each
-has a required export type. The consumer API and flow-control subjects
-are *services*, because they work as request and reply. Delivery is a
-*stream*, because the messages flow one way. Setting the wrong type is a
-common mistake; the Pitfalls below cover what goes wrong.
+Reaching across an account or domain involves three subjects, each with a
+required export type. Setting one wrong is a common mistake — the Pitfalls
+below cover which type each subject needs and what goes wrong.
 
 The full set of mirror and source options (`filter_subject`,
 `subject_transforms`, `opt_start_seq`, `external`, and the rest) is
