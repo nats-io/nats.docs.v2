@@ -34,18 +34,19 @@ The configuration the server prints back is every KV claim from this chapter,
 written in stream terms:
 
 - **Subjects: `$KV.INVENTORY.>`**. There is one subject branch, with one key per token under it.
-- **Max Msgs Per Subject: `1`**. This *is* the history depth. You raised it to
-  keep prior revisions; the bucket's history is the stream keeping more than one
-  message per subject.
+- **Maximum Per Subject: `10`**. This *is* the history depth. You raised it to 10
+  on the history page to keep prior revisions; the bucket's history is the stream
+  keeping more than one message per subject.
 - **Discard Policy: `New`**. Once the bucket hits a limit, it rejects the
   newest write rather than silently dropping older messages to make room. This is
-  why limits matter: the bucket keeps the messages it already holds rather than
+  why limits reject: the bucket keeps the messages it already holds rather than
   evicting them.
-- **Allow Direct: `true`**. Get doesn't open a consumer. More on that next.
-- **Allow Rollup: `true`**. Purge replaces a key's whole subject with one
+- **Direct Get: `true`**. Get doesn't open a consumer. More on that next.
+- **Allows Rollups: `true`**. Purge replaces a key's whole subject with one
   message. More on that below.
-- **Deny Delete: `true`**. The stream refuses raw message deletion, so the KV
-  API stays the only way to write and remove data.
+- **Allows Msg Delete: `false`**. This maps to the stream's `deny_delete`
+  setting: the stream refuses the JetStream message-delete API, so raw stream ops
+  can't remove entries behind the KV API's back.
 
 This is the same stream-storage model the JetStream chapter drew. The animation
 below is the one from that chapter, reused on purpose: the layer under your
@@ -73,7 +74,7 @@ store even though it's built from an append-only log: the bucket interface hides
 the stream, so you see key-value pairs rather than messages. Each get returns the last
 message per subject, served directly.
 
-`Allow Direct: true` in the stream config is what enables this path. It's set
+`Direct Get: true` in the stream config is what enables this path. It's set
 for you when the bucket is created. The exhaustive direct-read API lives in
 [Reference → Get Stream Message](/reference/jetstream/api/stream/msg-get); here
 you only need its shape, which is the last message for a subject, with no consumer.
@@ -84,8 +85,9 @@ Removing a key is the one operation where the abstraction behaves differently
 depending on what you ask for, because "gone" can mean two different things underneath.
 
 A **delete** leaves a non-destructive **marker**: a message with a
-`KV-Operation: DEL` header. The key now reads empty, but every prior revision is
-still in the stream and still readable through history. Delete is the common case
+`KV-Operation: DEL` header. The key now reads empty, but every prior revision the
+bucket still keeps — up to its history depth — stays in the stream and readable
+through history. Delete is the common case
 when you want a key to read as absent but don't need its past erased. (The
 marker is what other systems call a tombstone; after this paragraph we'll call it
 a marker.)
@@ -131,10 +133,11 @@ Don't hand-edit `KV_INVENTORY`'s configuration, and don't publish to
 store correct: the expected-revision header for compare-and-swap, the
 `KV-Operation` and `Nats-Rollup` headers for delete and purge. A raw publish
 writes a bare message with none of them, so a watcher can't tell it from a real
-put and a purge you meant never happens. The stream is built with `Deny Delete`
-on for exactly this reason: to keep the API the only door. Use `nats kv put`,
-not `nats pub`; use `nats kv del` and `nats kv purge`, not stream message
-deletion.
+put and a purge you meant never happens. The stream is built with `deny_delete`
+on so raw stream operations can't remove entries behind the KV API's back, but
+that setting doesn't stop a raw publish — which is exactly why you avoid one. Use
+`nats kv put`, not `nats pub`; use `nats kv del` and `nats kv purge`, not stream
+message deletion.
 
 **A key has to be a legal subject token.** Now that you can see a key becomes
 the last token of `$KV.INVENTORY.<key>`, the name rules make sense: a key may

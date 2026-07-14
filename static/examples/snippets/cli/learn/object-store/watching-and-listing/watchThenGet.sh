@@ -17,8 +17,10 @@ nats object watch INVOICES
 #   [2026-05-22 10:16:40] PUT INVOICES > packing-slip-ord_8w2k.txt
 #
 # Step 2 — now that you know what changed, get the bytes you want. Run
-# this from another terminal for the object the watch reported:
-nats object get INVOICES packing-slip-ord_8w2k.txt --output -
+# this from another terminal for the object the watch reported. Without
+# --output the file lands in the current directory under the object's name;
+# --output writes it to a path you choose (the directory must exist):
+nats object get INVOICES packing-slip-ord_8w2k.txt --output ./packing-slip-ord_8w2k.txt
 
 # In client code the loop reads the watch, branches on the nil sentinel
 # (the snapshot/live boundary) and keeps going, then issues a get only for

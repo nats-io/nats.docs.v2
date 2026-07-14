@@ -1,13 +1,13 @@
 #!/bin/bash
-# Run the OrderInventory service. In a client library you call
-# AddService(Name, Version, Description) and then AddEndpoint to bind a
-# handler to a subject. From the CLI, `nats service serve` stands up a
-# service for you: it registers a name and version, subscribes to the
-# discovery verbs under $SRV, and answers requests on an endpoint.
+# Create the OrderInventory service. This is a client-library call, not a
+# CLI one: your code calls AddService(Name: "OrderInventory",
+# Version: "1.0.0", Description: ...) and then AddEndpoint("check", handler)
+# with the subject set to "orders.inventory.check". The framework opens the
+# subscriptions, joins the endpoint to the default queue group "q", and
+# subscribes the discovery verbs under $SRV.
 #
-# The endpoint joins the default queue group "q" automatically, so
-# running more than one copy load-balances requests across them.
-#
-# Leave this running in its own terminal. It is now OrderInventory, a
-# named service the network can discover, not an anonymous responder.
-nats service serve OrderInventory
+# The CLI cannot host this shape: `nats service serve` only runs a demo
+# echo service on <name>.echo, not a named endpoint on a subject you choose.
+# So start OrderInventory from your service program, then use the CLI to
+# talk to it. With the service running, read its registration back:
+nats service info OrderInventory

@@ -89,9 +89,14 @@ per-link `tls {}` settings are in the
 [TLS reference](/reference/config/tls).
 
 **Leaf nodes specifically.** A leaf node connects an edge server (or a
-laptop) into a hub, often across a trust boundary. How its account and
-credentials map into the hub is a security topic in its own right, and it
-lives in [Leaf nodes](/learn/topologies/leaf-nodes).
+laptop) into a hub, often across a trust boundary. It authenticates to the
+hub with the same accounts and credentials this chapter already covered:
+[Accounts and multitenancy](/learn/security/accounts-and-multitenancy)
+binds a connection to an account, and
+[Decentralized auth](/learn/security/decentralized-auth) mints the
+credentials it presents. Where those credentials attach in the hub's
+`leafnodes {}` block is shown in
+[Leaf nodes](/learn/topologies/leaf-nodes).
 
 **Hardening the deployment.** The wider posture of a production
 deployment (file permissions on creds, system-account access, limits

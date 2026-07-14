@@ -127,11 +127,11 @@ group links back to the page that explains the why.
 - [ ] Use file storage for any stream you must snapshot; a memory stream cannot be backed up and the attempt fails outright.
 - [ ] Restore to the original stream name; the name may not change during restore, so mirror or source afterward if you need a copy under a new name.
 - [ ] Reduce `--chunk-size` and `--window-size` on a slow disk or a high-latency link before the flow-control timeout fires and aborts the snapshot.
-- [ ] Pass `--consumers` for a full recovery; `--no-consumers` silently drops durable consumer config and delivery state.
+- [ ] Keep consumer state in the snapshot; it is included by default, and passing `--no-consumers` silently drops durable consumer config and delivery position.
 
 ### Mirrors as a DR tool — see [Pitfalls](/learn/backup-recovery/mirrors-and-sources#pitfalls)
 
-- [ ] Pair every mirror with snapshots; a mirror is not a backup, and a delete or corruption on the upstream follows straight to the copy.
+- [ ] Pair every mirror with snapshots; a mirror is not a backup — a corrupt write replicates to the copy, and a mirror keeps no earlier state to rewind to.
 - [ ] Plan the mirror topology upfront; a mirror's config is effectively locked after creation, so changing it means delete and recreate.
 - [ ] Read the `Lag` field before trusting a mirror; replication is eventually consistent, not synchronous.
 - [ ] Avoid Work Queue retention on a mirrored upstream; the mirror's internal consumer bypasses the work queue's subject-overlap check and breaks the single-consumer guarantee, so use Limits.

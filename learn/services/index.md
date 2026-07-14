@@ -13,8 +13,10 @@ is only a function on a wire. It has no name you can look up and no
 version. There's no way to tell how many copies are running, and no
 built-in count of how many requests it has served.
 
-The **Services framework**, imported as **micro** in every client
-library, closes that gap. It takes the same request-reply responder you
+The **Services framework** closes that gap. Its module is called `micro`
+in some client libraries (Go, Python) and `service`/`services` in others
+(JavaScript, Java, Rust, C#); the concept is the same everywhere. It takes
+the same request-reply responder you
 already know and formalizes it into a **service**: a named, versioned
 handler that the server can discover, that reports its own stats, and
 that load-balances across as many copies as you start. You add no new
@@ -96,10 +98,12 @@ You'll need:
   special enabled. It runs on ordinary request-reply, so a plain
   `nats-server` is enough. Topology is a separate concern, covered in the
   [Topologies deep dive](/learn/topologies).
-- The `nats` CLI installed and pointed at your server. The CLI can serve,
-  request, list, and inspect services directly. Each page also adds
-  JavaScript, Go, Python, Java, Rust, and C# client examples for the same
-  operations, since building a service is a client-library task.
+- The `nats` CLI installed and pointed at your server. The CLI can
+  request, list, and inspect services directly, and the examples use it
+  to drive and observe a running service. Building the service itself
+  (creating it, adding endpoints, writing handlers) is a client-library
+  task, so reach for your client library (JavaScript, Go, Python, Java,
+  Rust, or C#) when you build one for real.
 - Comfort with [request-reply](/learn/core-nats/request-reply) and
   [queue groups](/learn/core-nats/queue-groups). The framework assumes
   both.

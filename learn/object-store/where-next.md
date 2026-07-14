@@ -110,7 +110,7 @@ the why.
 
 ### Your first object — see [Pitfalls](/learn/object-store/your-first-object#pitfalls)
 
-- [ ] Check the result and error of every get before you use the bytes; a put that fails mid-stream leaves an incomplete object that fails the digest check.
+- [ ] Check the result and error of every get before you use the bytes; an interrupted put leaves no gettable object, and lost or corrupted chunks make a get fail its digest check.
 - [ ] Retry a failed get or put with backoff rather than treating one attempt as proof; a `put` isn't "done" until you confirm it.
 - [ ] Treat `ErrObjectNotFound` as a normal outcome on a missing or deleted name, not a crash.
 
@@ -123,7 +123,7 @@ the why.
 ### Metadata and links — see [Pitfalls](/learn/object-store/metadata-and-links#pitfalls)
 
 - [ ] Verify a link's target still exists before relying on get-via-link; a link is a snapshot at creation, and deleting the target makes the link fail with `ErrObjectNotFound`.
-- [ ] Prefer a bucket link when you want loose coupling that survives the target being replaced.
+- [ ] Re-create a link after you delete or rename its target; a link is a snapshot and does not follow the target, and a get on a bucket link returns an error (`ErrCantGetBucket`) rather than bytes.
 - [ ] Delete and re-put to change an object's chunk size, and delete and re-add to change a link target; `UpdateMeta` silently keeps the old chunk size and link.
 - [ ] Don't rename an object onto a name already in use; renaming onto an existing, non-deleted name fails with `ErrObjectAlreadyExists`.
 

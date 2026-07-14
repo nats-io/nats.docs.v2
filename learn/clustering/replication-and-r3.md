@@ -29,11 +29,16 @@ consensus group the last page elected a leader for.
 
 You set the count when you create the stream. On the `east` cluster,
 one flag turns the single-server `ORDERS` of the JetStream chapter into
-a three-peer stream:
+a three-peer stream. (If you ran the election exercise on
+[Raft and leaders](/learn/clustering/raft-and-leaders), `ORDERS` already
+runs at `R=3`; restart any server you stopped there, and read this as the
+create that stood it up.)
 
 <div class="nats-example" data-type="learn-clustering-replication-and-r3-createR3" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-`--replicas=3` is the whole change. The application code doesn't move:
+`--replicas=3` is the whole change. Starting from the JetStream chapter's
+`R=1` stream instead, raise it in place with
+`nats stream edit ORDERS --replicas=3`. The application code doesn't move:
 `order-svc` publishes the same payload to the same subject whether the
 stream is `R=1` or `R=3`.
 
@@ -42,9 +47,9 @@ stream is `R=1` or `R=3`.
 ```
 
 What changes is underneath. The stream now has a **leader** (one of
-the three peers, here `n1-east`) and two **followers**, `n2-east` and
-`n3-east`. Every write goes through the leader. The followers never
-take writes directly; they receive them from the leader.
+the three peers — the meta leader picks which, and an election may have
+moved it) and two **followers**. Every write goes through the leader. The
+followers never take writes directly; they receive them from the leader.
 
 Three is the minimum for production, and a stream
 supports at most `R=5`. The reasoning for *which* odd count to choose
@@ -174,9 +179,9 @@ taking a server down), verify each replica shows `current` in
 
 ## Where you are
 
-The `ORDERS` stream now runs `R=3` on the `east` cluster: a leader on
-`n1-east` and followers on `n2-east` and `n3-east`, all carrying the
-same order log.
+The `ORDERS` stream now runs `R=3` on the `east` cluster: a leader on one
+of `n1-east`, `n2-east`, or `n3-east` and followers on the other two, all
+carrying the same order log.
 
 What changed is your model of a write:
 
@@ -194,7 +199,7 @@ What changed is your model of a write:
 The stream is replicated, but the cluster chose *where* its three copies
 landed. The next page makes that choice yours: placement constrains a
 stream's replicas to a cluster and to servers carrying matching tags,
-and hints which peer should lead first.
+and lets you ask a chosen server to take leadership.
 
 Continue to [Placement](/learn/clustering/placement).
 

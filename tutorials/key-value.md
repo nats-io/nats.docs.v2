@@ -42,14 +42,16 @@ Create a bucket called `profiles`. This is where your values will live.
 
 <div class="nats-example" data-type="tutorials-key-value-create-bucket" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-You should see a confirmation that ends with the bucket's configuration:
+You should see a confirmation with the bucket's configuration:
 
 ```
-profiles Key-Value Store
+Information for Key-Value Store Bucket profiles created 2026-06-09 10:13:41
 
 Configuration:
-    Bucket Name: profiles
-        History: 1
+
+           Bucket Name: profiles
+          History Kept: 1
+    Backing Store Kind: JetStream
 ```
 
 ## Step 3: Put a value and read it back
@@ -63,7 +65,7 @@ The put echoes the value back, and the get returns the full entry:
 
 ```
 blue
-profiles > sue.color created @ ...
+profiles > sue.color revision: 1 created @ ...
 
 blue
 ```

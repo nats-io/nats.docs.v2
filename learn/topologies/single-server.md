@@ -55,12 +55,12 @@ jetstream {
 `server_name` is a human-readable name for this server. Set it to `n1`,
 so that the logs and monitoring endpoints identify it clearly.
 
-`port` is where clients connect. `4222` is the NATS default, written
-out here so the address is never a mystery. Clients will use
+`port` is where clients connect. `4222` is the NATS default; it's written
+out here so the client address is explicit. Clients use
 `nats://localhost:4222`.
 
 `http_port` turns on the monitoring endpoint, as it's
-**off by default**. Enable it at `8222` from the start so `n1` is
+off by default. Enable it at `8222` from the start so `n1` is
 observable; the [Monitoring deep dive](/learn/monitoring) covers what to
 watch on it.
 
@@ -94,8 +94,7 @@ With `n1` running, subscribe to `orders.>` in one terminal:
 nats sub "orders.>" --server nats://localhost:4222
 ```
 
-In another, connect and publish the same ORDERS payload used everywhere in
-this chapter:
+In another, connect and publish an ORDERS order:
 
 ```bash
 nats pub orders.created '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}' --server nats://localhost:4222
@@ -109,9 +108,8 @@ The subscriber prints the order:
 ```
 
 There's nothing topology-specific here. The client names one server URL and
-publishes; the same publish runs unchanged against the cluster, the
-super-cluster, and the leaf node in the pages ahead — only the connect URL
-changes.
+publishes; the same kind of publish runs unchanged against the cluster, the
+super-cluster, and the leaf node in the pages ahead.
 
 For the wire-level detail of how a client connects and authenticates,
 see [Reference → Client protocol](/reference/protocols/client).
@@ -122,10 +120,10 @@ We only need the connect URL here.
 A single server is the right tool for a real set of
 jobs.
 
-Reach for one server in **development**: a laptop, a CI run, a quick
-experiment. There's nothing to coordinate and nothing to wait for.
+Reach for one server in **development**: a laptop or a CI run. There's
+nothing to coordinate and nothing to wait for.
 
-Reach for one server when NATS runs **on the device itself**. The
+One server also fits when NATS runs **on the device itself**. The
 `nats-server` binary is one small, self-contained process, so it can run
 on edge hardware — a car, a factory machine, a point-of-sale terminal —
 or embedded in-process inside another application. Each gets a full local
@@ -133,11 +131,11 @@ NATS with no fleet to operate. A device server like this often later dials
 out to a central system as a [leaf node](/learn/topologies/leaf-nodes),
 but on its own it's still a single server.
 
-Reach for one server behind a **small, single-instance service** — an
-internal dashboard or a nightly job that already runs as one process.
-That single process is the weakest link, so clustering NATS behind it
-raises the broker's uptime but not the feature's: the service still
-fails first. Lifting the feature's availability means a second copy of
+A **small, single-instance service** is the third fit — an internal
+dashboard or a nightly job that already runs as one process.
+That service is the least available part of the feature, so clustering
+NATS behind it raises the broker's uptime but not the feature's: the
+service still fails first. Lifting the feature's availability means a second copy of
 the service too, which a small feature rarely earns.
 
 In all of these, one server is the correct amount of infrastructure

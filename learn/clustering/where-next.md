@@ -40,9 +40,10 @@ minority is down, and lose nothing when it returns.
 cluster and to servers carrying matching tags, and the meta leader assigns
 the peers from the servers that qualify.
 
-**Peer management** grows or shrinks the set. You add a peer and wait for
-its catchup to bring lag to zero before it counts toward quorum; you
-remove a peer one at a time so the group never drops below a majority.
+**Peer management** grows or shrinks the set. You raise the replica count
+and wait for the new peer's catchup to bring its lag to zero before you lean
+on it; you move a replica off a server one change at a time so the group
+never drops below a majority.
 
 Those five ideas are routes, RAFT, quorum, placement, and peers. Everything
 else in this chapter (terms, elections, append entries, apply, preferred
@@ -129,7 +130,7 @@ explains the why.
 
 - [ ] Treat a brief "no leader" window during failover as normal; the election timer is 4–9s, so let the client retry instead of failing the write.
 - [ ] Use `nats stream cluster step-down` to move leadership off a server, not to pick its successor; the next election is still quorum-based, so read `nats stream info` to learn who won.
-- [ ] Track the meta leader and a stream leader as different RAFT groups; check `nats server info` for one and `nats stream info ORDERS` for the other, because losing one is not losing the other.
+- [ ] Track the meta leader and a stream leader as different RAFT groups; check `nats server report jetstream` for one and `nats stream info ORDERS` for the other, because losing one is not losing the other.
 
 ### Replication and R=3 — see [Pitfalls](/learn/clustering/replication-and-r3#pitfalls)
 
@@ -141,13 +142,13 @@ explains the why.
 
 - [ ] Read a server's tags back before placing against them; tags are an intersection and a missing one fails with `no suitable peers for placement` rather than falling back to any server.
 - [ ] Spell tags exactly; matching folds case (`ssd` equals `SSD`) but `sdd` matches nothing.
-- [ ] Treat `preferred` as a hint for the initial leader, not a lock; if that server dies the next election is quorum-based and random, so move leadership explicitly with `step-down --preferred` when you need it somewhere specific now.
+- [ ] Remember placement can't name a leader — a `preferred` server in placement is rejected; to move leadership to a specific server use `nats stream cluster step-down --preferred` (NATS Server 2.11+), and treat it as a request the quorum election can still overrule.
 
 ### Scaling and peer management — see [Pitfalls](/learn/clustering/scaling-and-peers#pitfalls)
 
-- [ ] Remove peers one at a time; pulling two from an `R=3` group at once loses quorum and the stream goes leaderless. Remove one, wait for a named leader and zero lag, then the next.
-- [ ] Wait for a freshly added peer to show `current` with zero lag before trusting it; while it catches up it's an observer, so don't kill another server mid-catchup.
-- [ ] Know the replica count from `nats stream info` before removing anything; `peer-remove` doesn't warn you that dropping the last peer destroys the replica.
+- [ ] Make one membership change at a time; stacking a second before the replacement is `current` can drop the peers holding the data below a majority and the stream stops committing. Make one change, wait for a named leader and a caught-up replacement, then the next.
+- [ ] Wait for a freshly added peer to show `current` with zero lag before trusting it; while it catches up it can't win an election or serve a read, so don't kill another server mid-catchup.
+- [ ] Change the replica count with `nats stream edit --replicas`, not by removing the last peer; the CLI blocks removing the only peer without `--force`, and even forced the server answers `peer remap failed` rather than move the data.
 
 ## See also
 

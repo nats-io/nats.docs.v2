@@ -19,11 +19,13 @@ and meet `/jsz`, which reports JetStream state and which the next page builds on
 
 ## The monitoring port serves JSON on demand
 
-Each NATS server exposes a **monitoring port**. By default it listens
-on `:8222`, separate from the `:4222` clients use. It speaks plain HTTP,
-and it answers only when you ask; nothing is pushed. You send a `GET`,
-the server returns a JSON snapshot of its state at that instant, and the
-connection closes. The model is a synchronous request answered by an
+Each NATS server can serve a **monitoring port**, separate from the
+`:4222` clients use. It's off until you turn it on: set `http_port: 8222`
+in the node's config, or pass `-m 8222` on the command line. `8222` is the
+conventional choice, but the port is whatever you set. It speaks plain
+HTTP, and it answers only when you ask; nothing is pushed. You send a
+`GET`, the server returns a JSON snapshot of its state at that instant, and
+the connection closes. The model is a synchronous request answered by an
 on-demand response.
 
 A **monitoring endpoint** is one HTTP path on that port. Each path
@@ -50,8 +52,7 @@ curl -s http://localhost:8222/varz | jq
   "total_connections": 118,
   "in_msgs": 84213,
   "out_msgs": 251004,
-  "slow_consumers": 0,
-  "jetstream": { "stats": { "streams": 1, "consumers": 2 } }
+  "slow_consumers": 0
 }
 ```
 
@@ -75,10 +76,12 @@ result, so you fetch only the slice you care about.
 
 `/connz` lists the connected clients. On its own it returns every
 connection on the node. Scope it to the `ORDERS` account with `?acc=`,
-and ask for each connection's subscriptions with `?subs=true`:
+ask for each connection's subscriptions with `?subs=true`, and add
+`?auth=true`, which is what fills in the account and user each connection
+authenticated as:
 
 ```bash
-curl -s 'http://localhost:8222/connz?acc=ORDERS&subs=true' | jq
+curl -s 'http://localhost:8222/connz?acc=ORDERS&subs=true&auth=true' | jq
 ```
 
 ```json
@@ -134,7 +137,8 @@ parameters is documented in
 
 `/routez` answers the cluster question. Each entry is one **route**:
 the link from this node to another node in `east`. It reports the
-remote node's id, the link's round-trip time, and how much data is
+remote node's name (`remote_name`) alongside its generated server id
+(`remote_id`), the link's round-trip time, and how much data is
 pending on it:
 
 ```bash
@@ -143,19 +147,23 @@ curl -s http://localhost:8222/routez | jq
 
 ```json
 {
-  "num_routes": 2,
+  "num_routes": 8,
   "routes": [
-    { "rid": 3, "remote_id": "n2-east", "rtt": "503µs", "pending_size": 0 },
-    { "rid": 4, "remote_id": "n3-east", "rtt": "498µs", "pending_size": 0 }
+    { "rid": 3, "remote_name": "n2-east", "rtt": "503µs", "pending_size": 0 },
+    { "rid": 6, "remote_name": "n3-east", "rtt": "498µs", "pending_size": 0 }
   ]
 }
 ```
 
-On a healthy three-node cluster, `n1-east` reports two routes, one to
-each peer. A missing route or a climbing `rtt` is your first sign a node
-has dropped off the mesh. *Why* a route breaks, and how leadership
-moves when it does, belongs to [Clustering](/learn/clustering); the
-endpoint only tells you *that* it broke.
+Since 2.10, routes are pooled: each peer contributes several route entries
+(a connection pool of three plus a dedicated system-account route), so a
+default three-node cluster shows eight entries on `n1-east`, four per peer
+— the array above is trimmed to one entry per peer. Health isn't a raw
+count, then, but presence: group by `remote_name` and confirm both
+`n2-east` and `n3-east` are still there. A peer that vanishes entirely, or
+a climbing `rtt`, is your first sign a node has dropped off the mesh. *Why*
+a route breaks, and how leadership moves when it does, belongs to
+[Clustering](/learn/clustering); the endpoint only tells you *that* it broke.
 
 ## /jsz reports JetStream state
 
@@ -263,8 +271,8 @@ to the open internet by accident.
 
 ## Where you are
 
-You can now query any node in the `east` cluster on its monitoring port
-`:8222` and read its state on demand:
+You can now query a node in the `east` cluster on its monitoring port and
+read its state on demand:
 
 - `/varz` for the server: version, live `connections`, `slow_consumers`
 - `/connz?acc=ORDERS` for the clients: who's connected, as which user,
@@ -275,7 +283,7 @@ You can now query any node in the `east` cluster on its monitoring port
 
 You also know that every endpoint takes parameters to filter and page
 the result, that `/healthz` answers a yes/no health check, and that the
-port is open by default.
+port, once enabled, is unauthenticated until you lock it down.
 
 ## What's next
 

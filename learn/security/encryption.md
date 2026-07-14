@@ -46,10 +46,29 @@ TLS needs three files on the server. The server's **certificate**
 **CA certificate** (`ca_file`) is the authority the server trusts to
 have signed peer certificates.
 
+If you don't have certificates yet, mint a throwaway CA and a server
+certificate with `openssl`:
+
+```bash
+openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes \
+  -keyout ca-key.pem -out ca.pem -subj "/CN=Acme Test CA" -days 30
+openssl req -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes \
+  -keyout server-key.pem -out server.csr -subj "/CN=nats.acme.internal"
+openssl x509 -req -in server.csr -CA ca.pem -CAkey ca-key.pem \
+  -CAcreateserial -out server-cert.pem -days 30 \
+  -extfile <(printf "subjectAltName=DNS:nats.acme.internal,IP:127.0.0.1")
+```
+
+The SAN list covers the DNS name and the loopback address, so you can
+dial either. Copy the three `.pem` files to `/etc/nats/certs/`, where
+this page's config expects them. A throwaway CA is enough to follow
+along; a production server carries certificates from your
+organization's PKI or a public CA.
+
 Add a `tls {}` block to the server config:
 
 ```conf
-# nats-server.conf — client connections now require TLS
+# nats.conf — client connections now require TLS
 listen: "0.0.0.0:4222"
 
 tls {
@@ -66,11 +85,11 @@ can't finish the negotiation; too long and a stalled handshake holds a
 slot open.
 
 You can check the config before starting anything with
-`nats-server -t -c nats-server.conf`. Then start the server the same
+`nats-server -t -c nats.conf`. Then start the server the same
 way as before:
 
 ```bash
-nats-server -c nats-server.conf
+nats-server -c nats.conf
 ```
 
 The boot log includes `TLS required for client connections`. A
@@ -147,7 +166,7 @@ distinguished name. The `ANALYTICS` account and the rest of the config
 stay as they were:
 
 ```conf
-# nats-server.conf — the client certificate is the user
+# nats.conf — the client certificate is the user
 listen: "0.0.0.0:4222"
 
 tls {
@@ -171,6 +190,18 @@ accounts {
     ]
   }
 }
+```
+
+The client certificate comes from the same throwaway CA. The subject
+attributes are written smallest-last on the `openssl` command line, so
+they render in RFC 2253 order as `CN=order-svc,O=Acme` — the exact
+string the `user` field above holds:
+
+```bash
+openssl req -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes \
+  -keyout order-svc-key.pem -out order-svc.csr -subj "/O=Acme/CN=order-svc"
+openssl x509 -req -in order-svc.csr -CA ca.pem -CAkey ca-key.pem \
+  -CAcreateserial -out order-svc-cert.pem -days 30
 ```
 
 `order-svc` now connects by presenting its own certificate and key —
@@ -260,7 +291,7 @@ jetstream {
 ```
 
 ```bash
-JS_KEY="s3cr3t-master-key" nats-server -c nats-server.conf
+JS_KEY="s3cr3t-master-key" nats-server -c nats.conf
 ```
 
 The startup log confirms the cipher — ChaCha20-Poly1305 is the default;

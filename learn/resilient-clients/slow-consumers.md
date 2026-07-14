@@ -40,12 +40,20 @@ The problem is what the buffer does by default when the burst is *not*
 brief.
 
 By default the pending buffer has generous built-in limits: 500,000
-messages and 64 MB in the Go client, with similar defaults in the others.
-Those caps stop the buffer from growing without end, but they're sized
-for a typical workload, not yours. A high-rate subject or large messages
-can fill 64 MB in seconds, and a `warehouse` that stays behind hits that
-default and starts dropping messages, often well before you'd have set a
-limit yourself. The defaults serve as a backstop rather than a workload-specific tuning.
+messages and 64 MB in the Go client, and comparable caps in Python and
+Java. Those caps stop the buffer from growing without end, but they're
+sized for a typical workload, not yours. A high-rate subject or large
+messages can fill 64 MB in seconds, and a `warehouse` that stays behind
+hits that default and starts dropping messages, often well before you'd
+have set a limit yourself. The defaults serve as a backstop rather than a
+workload-specific tuning.
+
+The size and the full-buffer behavior vary by client, though. The Rust
+client bounds the buffer per connection (65,536 messages) rather than per
+subscription; C# defaults to a 1,024-message channel; and JavaScript
+leaves the buffer unbounded and never drops on the client side — its
+slow-consumer option only raises a status. Check your client's default
+before you rely on one.
 
 A **slow consumer** is a subscriber whose pending buffer fills faster
 than the handler drains it, which is what the name describes. On the default limits a
@@ -94,17 +102,21 @@ with a slow-consumer error.
 
 This is the **slow-consumer signal**: the overflow that would have grown
 the buffer is dropped, and the drop is reported. In Go the error is
-`ErrSlowConsumer`; every client surfaces the same condition under its own
-spelling. The subscription stays active; it is not closed. Once the
+`ErrSlowConsumer`, and most clients report an equivalent — though, as noted
+above, the behavior isn't universal (JavaScript, for one, raises a
+slow-consumer status without dropping the message). The subscription stays
+active; it is not closed. Once the
 handler catches up and the buffer has room, new messages arrive normally
 again. The signal tells you that, for this stretch, the application
 couldn't keep up and messages were lost.
 
 The callback is the live alert, but you can also inspect the state
 directly. The subscription's status becomes `SubscriptionSlowConsumer`
-when overflow occurs, and `PendingLimits()` reports the buffer's current
-message and byte counts. That's useful for a health check that watches how
-close a subscription is running to its limits before it starts dropping.
+when overflow occurs, and `Pending()` reports the buffer's current message
+and byte counts, which you compare against the caps that `PendingLimits()`
+returns. That's useful for a health check that watches how close a
+subscription is running to its limits before it starts dropping.
+(`Dropped()` gives the running count of messages already dropped.)
 
 That signal is only useful if something is listening for it. The async
 error callback is set on the connection. It's the single place the

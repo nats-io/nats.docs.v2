@@ -68,11 +68,16 @@ handshake. The client checks that the certificate chains to the CA it was
 given. If it does, the link is encrypted and the server is authenticated; if
 it doesn't, the client aborts before sending any credentials.
 
-The order matters here. The TLS handshake and CA validation run *first*, on top
-of the TCP dial. Only after the link is secure does the client send its
-`CONNECT` with the creds. So a secure connection is built in two layers: TLS
-proves the server, then the creds prove the client, over the now-encrypted
-link.
+The order matters here. In the default handshake the client makes the TCP
+dial and the server sends its `INFO` line in plaintext — that's where
+`tls_required` appears. The link then upgrades to TLS, the client validates
+the server's certificate against the CA, and only over the now-encrypted
+link does the client send its `CONNECT` with the creds. So a secure
+connection is still built in two layers: TLS proves the server, then the
+creds prove the client, and no credential is ever sent before TLS is
+established. (An opt-in server mode, `tls_handshake_first` — the CLI's
+`--tlsfirst` — moves the TLS handshake ahead of that first `INFO`, so TLS
+runs before any protocol byte crosses the wire.)
 
 `order-svc` connects securely by adding the CA to the same connect call. The
 CLI flag is `--tlsca`; the client libraries take a path to the same PEM file
@@ -80,8 +85,9 @@ through their TLS options. The server URL uses the `tls://` scheme:
 
 <div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-connect-tls" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The secure handshake runs in this order: the TLS step and CA validation, then
-the credentials, then `+OK`, plus the auth-failure branch.
+The secure handshake runs in this order: the plaintext `INFO`, then the TLS
+upgrade and CA validation, then the credentials in `CONNECT`, then the
+server's `PONG` — plus the auth-failure branch.
 
 <div class="nats-flow" data-scenario="tlsAuthHandshakeAnimated" data-width="600" data-height="350"></div>
 
@@ -115,20 +121,26 @@ certificate. Always supply the CA so the client validates the server. An
 encrypted link provides no protection if the server on the other end can't be
 trusted.
 
-**An unmonitored credential expiry breaks the next reconnect.** A user JWT
-has a validity window. While the connection stays up, an expired JWT goes
-unnoticed. The moment the connection drops and the client tries to
-reconnect, authentication fails and the connection can't recover. The failure
-surfaces on the disconnect/error callback from the
-[Reconnection](/learn/resilient-clients/reconnection) page, not at startup.
-Refresh credentials ahead of expiry and watch the auth-error rate so a stale
-JWT is caught before a reconnect needs it.
+**An unmonitored credential expiry drops a live connection.** A user JWT
+has a validity window, and the server enforces it on the connection itself.
+The moment the JWT expires, the server sends `-ERR 'User Authentication
+Expired'` and closes the connection — expiry itself triggers the
+disconnect, it doesn't wait for one. The client then tries to reconnect and
+authentication fails with an authorization violation until the creds are
+refreshed, so a stale JWT turns into a connection that can't recover. The
+failure surfaces on the disconnect/error callback from the
+[Reconnection](/learn/resilient-clients/reconnection) page. Refresh
+credentials ahead of expiry and watch the auth-error rate so a stale JWT is
+caught before it expires.
 
-**Rotate the creds file by opening a fresh connection, not in place.** The
-client reads the creds file once, at connect time. Overwriting that file with a
-new `.creds` while the connection is live changes nothing on the wire: the old
-identity stays in use until the connection cycles. Worse, if a reconnect happens
-to fire mid-rotation, it may read a half-written file and fail to authenticate.
+**Rotate the creds file by opening a fresh connection, not in place.** A
+live connection keeps the identity it authenticated with, so overwriting the
+`.creds` file on disk changes nothing on the wire while the link stays up.
+The change takes effect only at the next connection cycle: most clients
+(nats.go among them) re-read the creds file from disk on every reconnect
+attempt, while a few (nats.js) take the creds bytes up front at connect
+time. Because nats.go re-reads on reconnect, a reconnect that fires
+mid-rotation can read a half-written file and fail to authenticate.
 To rotate safely, open a new connection with the new creds and
 [drain](/learn/resilient-clients/drain-and-shutdown) the old one, so in-flight
 work finishes before the old identity goes away.

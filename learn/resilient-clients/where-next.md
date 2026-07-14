@@ -117,21 +117,21 @@ that explains the why.
 
 ### Reconnection — see [Pitfalls](/learn/resilient-clients/reconnection#pitfalls)
 
-- [ ] Set `MaxReconnect` to `-1` on a long-lived service so a long outage doesn't exhaust the default 60 attempts and leave the connection CLOSED.
+- [ ] Set `MaxReconnect` to `-1` on a long-lived service (in Go, Java, Python, and JavaScript, which default to a bounded count) so a long outage doesn't exhaust the attempts and leave the connection CLOSED; Rust and C# already retry forever.
 - [ ] Watch the reconnect-error callback so a long outage is loud in your logs, not a silent give-up.
 - [ ] Keep a non-zero wait and always keep jitter; a zero or fixed delay either spins the CPU or stampedes the survivor in lockstep.
 - [ ] Catch `ErrReconnectBufExceeded` and back off publishing; the reconnect buffer is 8 MB, not infinite, and the publish that overflows it fails.
-- [ ] Lower the ping interval under heavy load so you catch a wedged connection in seconds, not the default two minutes.
+- [ ] Lower the ping interval under heavy load so you catch a wedged connection in seconds, not the several minutes the defaults take (a two-minute ping interval times the allowed outstanding pings).
 
 ### Drain & Shutdown — see [Pitfalls](/learn/resilient-clients/drain-and-shutdown#pitfalls)
 
-- [ ] Drain last, not first; a publish after `Drain()` returns `ErrConnectionDraining` and never sends.
+- [ ] Drain last, not first; a publish after `Drain()` races the drain and may come back `ErrConnectionDraining` instead of sending.
 - [ ] Size the drain timeout to your slowest handler's latency; a timeout shorter than the handler discards the remaining in-flight work.
 - [ ] Ack JetStream in-flight messages before a core drain; a connection drain does not handle a consumer's ack position for you.
 
 ### Slow Consumers — see [Pitfalls](/learn/resilient-clients/slow-consumers#pitfalls)
 
-- [ ] Always set pending limits on a subscription that does real per-message work; the generous defaults (500,000 messages, 64 MB) are a backstop, not a tuning, and a high-rate subject fills them in seconds.
+- [ ] Always set pending limits on a subscription that does real per-message work; the generous defaults (500,000 messages, 64 MB in the Go client) are a backstop, not a tuning, and a high-rate subject fills them in seconds.
 - [ ] Size the pending limit to the handler's latency and the subject's peak rate, not to caps sized for someone else's workload.
 - [ ] Always set the async-error callback and log the slow-consumer error loudly; a nil one drops every overflow message silently.
 - [ ] Tell a local drop apart from a server-side disconnect; watch the async-error rate and the disconnect rate separately, since each points at a different fix.

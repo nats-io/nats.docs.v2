@@ -70,8 +70,14 @@ the verdict all happened in `auth-svc`, separate from the client.
 
 Auth callout lives in the `authorization` block, the same block that
 held the config user list on the
-[Authentication basics](/learn/security/authentication-basics) page. You
-add an `auth_callout` section to it:
+[Authentication basics](/learn/security/authentication-basics) page. So
+for this page the server leaves operator mode and goes back to a
+config-mode `nats.conf` — auth callout works in either mode, but the
+operator-mode variant needs JWT changes covered at the end. The config
+below is deliberately minimal: it declares `ORDERS` and `ANALYTICS` as
+empty accounts so the callout has somewhere to place clients, without
+the users, permissions, and export the earlier pages built. You
+add an `auth_callout` section to the `authorization` block:
 
 ```conf
 accounts {
@@ -93,7 +99,7 @@ authorization {
 ```
 
 The account `auth-svc` places a client into must exist in the config —
-here `ORDERS` and `ANALYTICS` from the earlier pages.
+here the empty `ORDERS` and `ANALYTICS` declarations above.
 
 Three fields in the `authorization` block do the work here.
 
@@ -189,8 +195,9 @@ option this page covers at the end, are there to protect.
 
 The server adds one protection automatically. On the account where auth
 callout runs, publishing to `$SYS.REQ.USER.AUTH` is denied for every
-user not listed in `auth_users`. No ordinary user can inject a fake
-request or a fake verdict onto the subject.
+user — including `auth-svc` itself, which only needs to subscribe and
+reply. No ordinary user can inject a fake request or a fake verdict
+onto the subject.
 
 That deny stops forgery, not eavesdropping, which is why ADR-26
 recommends one step further: run `auth-svc` in its own dedicated
@@ -290,7 +297,10 @@ A few parts of ADR-26 go beyond this page.
   [Reference → auth_callout](/reference/config/authorization/auth_callout).
 - An **`allowed_accounts`** field (NATS Server 2.11 and later) limits the
   delegation to the config-defined accounts you list; users of every
-  other account authenticate the ordinary way. The moment `auth_callout`
+  other account authenticate the ordinary way. One exception: a
+  connection that matches no config user lands in the global account
+  `$G`, and those connections always go through the callout, whatever
+  the list says. The moment `auth_callout`
   is on, every connection except the `auth_users` entries goes through
   it — including config users with correct passwords — so
   `allowed_accounts` lets you move one account at a time.

@@ -217,9 +217,12 @@ job of `*`: subscribe to `orders.*.created`, not `orders.>.created`.
 subscriber-only tool. A publisher always names one fully-qualified
 subject. The trap is that publishing to `orders.*.created` doesn't produce
 an error: the `*` is taken as a literal character, so the message lands on
-the odd subject `orders.*.created` and every regional subscriber misses
-it. Publish the real subject (`orders.us.created`); reserve `*` and `>`
-for `nats sub` and the subscribe call in your client.
+the odd literal subject `orders.*.created`. A service subscribed to the
+exact subject `orders.us.created` never sees it, while wildcard
+subscribers like the regional analytics on `orders.*.created` and the
+audit service on `orders.>` do get a message on a subject that should
+never exist. Publish the real subject (`orders.us.created`); reserve `*`
+and `>` for `nats sub` and the subscribe call in your client.
 
 **An over-broad `orders.>` pulls more than you want.** It's tempting to
 subscribe to `orders.>` and filter in code, but that subscriber then
@@ -230,9 +233,13 @@ subject for a single concern. Narrow interest keeps unwanted traffic off
 the wire entirely, rather than having your code discard it after delivery.
 
 **Whitespace is never allowed in a subject.** A token may not contain a
-space, tab, or line break. The client validates this before sending, so a
-typo like a stray space in the region token fails fast with an
-invalid-subject error rather than publishing somewhere surprising:
+space, tab, or line break. The CLI and most clients validate this before
+sending and fail with an invalid-subject error. A client that doesn't
+(nats.py's `publish` skips the whitespace check) writes the space
+straight into the `PUB` line, where the part after it is misread as a
+reply subject: a stray space in `orders.us created` publishes to
+`orders.us` with `created` as the reply subject. Don't rely on the check;
+keep spaces out of the subject:
 
 <div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-invalid-subject-whitespace" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

@@ -29,8 +29,8 @@ named `KV_INVENTORY` on the subjects `$KV.INVENTORY.>`. Every bucket limit
 you set (history depth, max bytes, max value size) is a stream limit.
 
 A **key** is a subject token. The key `widget-blue` is the last token of
-the subject `$KV.INVENTORY.widget-blue`. The wildcard watch `widget-*` is
-a subject filter.
+the subject `$KV.INVENTORY.widget-blue`. A watch's key filter is a subject
+filter, where `*` matches one whole token.
 
 A **put** is a message. Each value you put is one message appended to the
 stream; a **get** reads the last message for that subject.

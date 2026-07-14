@@ -325,9 +325,10 @@ each user, and whoever holds the account's seed can issue a user with any
 permissions. A scoped key pins the permissions up front, so a leaked
 signing key can only issue users with the scope you already chose (see
 [ADR-14](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-14.md)).
-Two operational limits to know: CLI v0.4.0 has no command to edit a scope
-in place, and `nats auth account keys rm` takes `--key <public-key>`, not
-the role name. Removing a key and re-adding the role creates a new key,
+One operational limit to know: the CLI has no command to edit a scope
+in place, so the only way to change one is to remove its key
+(`nats auth account keys rm --key` takes the role name or the public
+key) and re-add the role. That creates a new key,
 and every user signed by the old one is locked out at the next push with
 `nats: Authorization Violation`. Treat key removal as mass revocation, not
 as an edit.

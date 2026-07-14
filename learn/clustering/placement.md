@@ -2,7 +2,7 @@
 id: placement
 title: "Placement"
 sidebar_position: 5
-description: Constrain where a stream's replicas live using cluster and server tags, and understand preferred leader as a hint
+description: Constrain where a stream's replicas live using cluster and server tags, and ask a chosen server to take leadership
 ---
 
 # Placement
@@ -62,15 +62,19 @@ jetstream { store_dir: "/data/n1-east" }
 
 Repeat the same `server_tags` line on `n2-east` and `n3-east`, keeping
 their own `server_name`, ports, and `store_dir`. After a restart, confirm
-a server actually carries the tags you expect:
+a server actually carries the tags you expect. `nats server info` queries
+the system account (`$SYS`), so connect with a system user (see
+[Forming a cluster](/learn/clustering/forming-a-cluster)); name the server
+you mean, or the command answers for whichever server replies to the `$SYS`
+ping first:
 
 ```bash
-nats --server nats://127.0.0.1:4222 server info
+nats server info n1-east
 ```
 
-The output lists the server's tags. Read them back rather than assuming
-the config took. A typo in `server_tags` is silent until a placement asks
-for a tag no server advertises.
+The `Tags` line in the output lists the server's tags. Read them back
+rather than assuming the config took. A typo in `server_tags` is silent
+until a placement asks for a tag no server advertises.
 
 ### Placing the stream on tagged servers
 
@@ -97,10 +101,11 @@ The match folds case: `disk:ssd`, `disk:SSD`, and `disk:Ssd` are the same
 tag. Spelling, though, is exact, so `disk:sdd` matches nothing. The problem to
 watch for is typos rather than case. Ask for a tag that no server carries (a misspelling,
 or a tag you meant to add but didn't) and the intersection is empty. No
-server qualifies, and the meta leader refuses the stream with:
+server qualifies, and the meta leader refuses the stream. The error names
+the tag no server carried, in brackets:
 
 ```
-nats: error: no suitable peers for placement
+nats: error: could not create Stream: no suitable peers for placement, tags not matched ['disk:sdd'] (10005)
 ```
 
 The same error appears if you ask for three replicas but only two servers
@@ -111,32 +116,27 @@ The full set of placement and server-tag options is documented in
 [Reference](/reference/config/server_tags). We only need the cluster
 constraint and the tag intersection here.
 
-## Preferred leader is a hint for the initial leader
+## Asking a chosen server to lead
 
-Placement decides which servers hold the replicas. A separate field decides
-which of them starts as leader: the **preferred leader**.
+Placement decides which servers hold the replicas. It does not decide which
+of them leads. When you create a placed stream, the meta leader picks the
+initial leader itself, and there's no placement field that names one: set a
+`preferred` server in a stream's placement and the server rejects the config
+with `preferred server not permitted in placement`. No client library
+exposes such a field either — `Placement` carries only a cluster and tags.
 
-The preferred leader is a hint passed at placement time, naming the server
-you'd like to lead the new group. The meta leader honors it when it can,
-most usefully during scale-up, when you're adding a stream and want its
-leader on a specific server from the start. On a fresh group it shapes the
-*initial* leader assignment, sparing you a stepdown to move leadership to
-where you wanted it in the first place.
+What you can do is ask the current leader to hand off to a named peer once
+the group is running. That's a **stepdown** request with a preferred target:
 
-The field is `Placement.Preferred` (a server name) in the client libraries.
-The CLI doesn't set it on `stream add`; you nudge leadership toward a
-server after the fact with `nats stream cluster step-down --preferred
-<server>`. Its full syntax lives in
-[Reference](/reference/jetstream/api/stream). We only need to know it's a
-hint here.
+```bash
+nats stream cluster step-down ORDERS --preferred n2-east
+```
 
-The word *hint* matters here. The preferred leader applies to the
-initial placement only. Once the group is running, RAFT elections decide
-leadership, as you saw on [Raft and leaders](/learn/clustering/raft-and-leaders).
-If the preferred server later dies, the next election picks a leader from
-the surviving quorum at random; it doesn't wait for your preferred server
-to return. Use the preferred leader to shape the *start*, never to pin
-leadership for the life of the stream.
+The leader yields and the group runs an election that tries to place the new
+leader on `n2-east`. It's a request, not a lock: the quorum election still
+decides, so read `nats stream info ORDERS` afterward to see who won.
+`--preferred` needs NATS Server 2.11 or newer. Its full syntax lives in
+[Reference](/reference/jetstream/api/stream).
 
 ## Pitfalls
 
@@ -156,14 +156,16 @@ either succeed or name the missing tag:
 
 <div class="nats-example" data-type="learn-clustering-placement-verifyTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**Preferred leader is a hint that applies only to the initial leader.** Use it to shape the *initial*
-leader of a fresh group. Don't build an operational assumption ("the
-leader is always `n1-east`") on it; the moment that server dies, the next
-election is quorum-based and random among the survivors. If you need
-leadership somewhere specific *now*, move it explicitly with `nats stream
-cluster step-down --preferred <server>` (see [Raft and
-leaders](/learn/clustering/raft-and-leaders)), and re-check after any
-failover.
+**You can't name a leader at placement time.** Placement constrains which
+servers hold the replicas; it can't say which one leads, and setting a
+`preferred` server in placement is rejected outright. Don't build an
+operational assumption ("the leader is always `n1-east`") on where the group
+first landed; the moment a leader dies, the next election is quorum-based and
+picks a leader from the survivors. If you need leadership on a specific
+server, ask for it explicitly with `nats stream cluster step-down --preferred
+<server>` (see [Raft and leaders](/learn/clustering/raft-and-leaders)), then
+re-check with `nats stream info` — it's a request the election can still
+overrule.
 
 ## Where you are
 
@@ -171,8 +173,9 @@ The `ORDERS` stream is no longer placed on whichever servers the meta leader
 chose freely. You tagged `n1-east`, `n2-east`, and `n3-east`, and constrained
 the stream to servers carrying both `region:us-east` and `disk:ssd`. You
 know the tag match is an intersection that folds case, that a missing or
-misspelled tag yields `no suitable peers for placement`, and that the
-preferred leader shapes only the first election.
+misspelled tag yields `no suitable peers for placement`, and that placement
+can't name a leader — you move leadership after the fact with a stepdown
+request.
 
 The cluster is still three servers. Nothing on this page changed the peer
 count.
@@ -180,9 +183,9 @@ count.
 ## What's next
 
 Changing the peer count is the next page. **Scaling and peer management**
-grows the group by adding a fourth server, watches a new peer catch up
-before it counts toward quorum, and removes a peer without ever losing the
-majority that keeps `ORDERS` writable.
+grows the group by raising the replica count, watches a new peer catch up
+before you lean on it, and moves a replica off a server without ever losing
+the majority that keeps `ORDERS` writable.
 
 Continue to [Scaling and peer management](/learn/clustering/scaling-and-peers).
 

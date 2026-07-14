@@ -55,8 +55,8 @@ config and the shape here.
 
 Each server in `east` needs the same cluster name and its own pair of ports.
 Routes connect the servers, but the cluster name has to match for them to join:
-a mismatched name (a typo like `eats`) gets that server's route **refused** —
-the log reads `cluster name "eats" does not match "east"` — and it ends up a
+a mismatched name (a typo like `eats`) gets that server's route refused —
+the log contains `cluster name "eats" does not match "east"` — and it ends up a
 cluster of its own.
 
 Here's `n1-east`. It carries one `routes` entry, pointing at `n2-east`; the
@@ -186,9 +186,8 @@ terminal instead.
 
 ## Confirm the routes
 
-A cluster is only real if a message crosses it. Subscribe on one server,
-publish on another, and watch it arrive — that's the whole promise of "one
-logical system."
+Confirm a message crosses the cluster: subscribe on one server, publish on
+another, and watch it arrive.
 
 Subscribe to `orders.>` on `n3-east`, in its own terminal:
 
@@ -233,24 +232,27 @@ server it reached.
 
 ## Survive a server loss
 
-Now the real test. Point a publisher at **one specific server** — `n1-east`
+Next, test failover. Point a publisher at one specific server — `n1-east`
 — send a steady stream of orders, then kill `n1-east` out from under it.
 
 In its own terminal, publish an order a second to `n1-east`:
 
 ```bash
-nats pub orders.created "order {{Count}}" --count 100 --sleep 1s --server nats://localhost:4222
+nats pub orders.created "order {{Count}}" --count 100 --sleep 1s --trace --server nats://localhost:4222
 ```
 
 Let a few go by, then kill `n1-east`: `kill %1` in the terminal where you
 started the servers, or `Ctrl+C` its window if you gave it one. The
-publisher doesn't stop — it reconnects and keeps going:
+publisher doesn't stop. With `--trace` it logs each connection event, so you
+can watch it drop `n1-east` and reconnect (a couple of discovery lines are
+trimmed below):
 
 ```
+12:00:22 >>> Connected to nats://localhost:4222 (127.0.0.1:4222)
 12:00:23 Published 7 bytes to "orders.created"
 12:00:24 Published 7 bytes to "orders.created"
-12:00:25 Disconnected due to: EOF, will attempt reconnect
-12:00:25 Reconnected [nats://localhost:4223]
+12:00:25 >>> Disconnected due to: EOF, will attempt reconnect
+12:00:25 >>> Reconnected to nats://localhost:4223 (127.0.0.1:4223)
 12:00:26 Published 7 bytes to "orders.created"
 12:00:27 Published 7 bytes to "orders.created"
 ```
@@ -294,8 +296,10 @@ production require route credentials or TLS. The configs above bind it to
 
 **Plan for an even server count.** A cluster of two or four servers works
 fine for plain `orders.*` traffic, but the moment you replicate the
-`ORDERS` stream you want an *odd* count: an even set has no clean majority
-to keep a stream writable when one server is lost. That's a JetStream
+`ORDERS` stream you want an *odd* count. A two-server set loses its majority
+as soon as one server is down, and a four-server set tolerates only one loss
+— the same as three — so the extra server adds cost without buying more
+failure tolerance. That's a JetStream
 concern, covered on the [next page](/learn/topologies/jetstream-in-a-cluster);
 the consensus math behind it lives in
 [Clustering & Replication](/learn/clustering). For a pure routing cluster,

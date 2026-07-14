@@ -49,11 +49,13 @@ The private reply subject has a name and a convention. It's called an
 **inbox**, and clients generate it under the reserved `_INBOX.`
 prefix: something like `_INBOX.nQ4k2v8...` with a random unique tail.
 
-The inbox is per-request. Each call to `request()` creates a fresh
-inbox subject, subscribes to it, sends the request, waits for one
-message, then unsubscribes. The next call gets a new inbox. Nothing
-about the reply subject is shared or reused across requests, which is
-why two in-flight requests never get each other's replies.
+The inbox subject is per-request, but the subscription behind it usually
+isn't. Each call to `request()` gets a fresh inbox subject: a unique
+token under the client's own `_INBOX.<prefix>.` namespace. Most clients
+don't subscribe and unsubscribe per call, though. They keep one wildcard
+subscription on that prefix (the response mux) and route each reply back
+to the waiting request by its token. That's why two in-flight requests
+never get each other's replies, even though they share one subscription.
 
 The `_INBOX.` prefix is reserved precisely so it doesn't collide with
 your own subjects. You publish to `orders.created`; you never publish
@@ -99,8 +101,9 @@ service to answer.
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 You should see the reply printed back. Behind that one line, the
-client created an inbox, subscribed, published your payload with the
-inbox attached, received the answer, and unsubscribed the inbox.
+client picked a fresh inbox subject, published your payload with the
+inbox attached, and matched the answer back to this call by its token on
+the subscription it already holds for its inbox prefix.
 
 ## Every request needs a timeout
 
@@ -154,11 +157,14 @@ nats request orders.inventory.check \
 ```
 
 ```
-nats: error: no responders available for request
+14:02:31 Sending request on "orders.inventory.check"
+14:02:31 No responders are available
 ```
 
-The error comes back instantly, not after two seconds. Start the
-service again and the same request succeeds.
+That comes back instantly, not after two seconds. The CLI prints the
+line and exits cleanly; a client library surfaces the same case as a
+distinct no-responders error your code branches on. Start the service
+again and the same request succeeds.
 
 One more detail about how this works: the no-responders signal
 uses the message header mechanism. The server delivers it as a

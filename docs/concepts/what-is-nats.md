@@ -6,21 +6,13 @@ sidebar_position: 1
 
 # What is NATS?
 
-NATS is a connective technology that powers modern distributed systems. It provides a simple, secure, and performant communications substrate for cloud native applications, IoT, and microservices architectures.
+NATS is an open source messaging system. Applications connect to a NATS server and exchange messages by subject, without knowing each other's network addresses.
 
 ## Overview
 
 At its core, NATS is about **publishing and listening for messages**. It provides a layer between application components, allowing them to communicate without being directly connected or even aware of each other's existence.
 
-### The NATS Philosophy
-
-NATS embodies a set of principles that guide its design:
-
-- **Simplicity** - Easy to understand, easy to use
-- **Performance** - Speed and efficiency at scale
-- **Reliability** - Always on, always available
-- **Scalability** - From one to millions of nodes
-- **Security** - Secure by default
+NATS optimizes for a small single binary, low latency at high message rates, and secure defaults. It runs from one server on a laptop up to clusters of servers spanning regions.
 
 ## How NATS Works
 
@@ -48,22 +40,22 @@ See the [ecosystem page](ecosystem) for the full list with links.
 
 ## Key Differentiators
 
-### 1. Simplicity First
-Unlike complex enterprise messaging systems, NATS focuses on doing one thing exceptionally well: moving messages between applications quickly and reliably.
+### Simplicity
+NATS focuses on moving messages between applications. The server is one binary, and the client API is small.
 
-### 2. Performance at Scale
-- Process **millions of messages per second**
+### Performance
+- Process millions of messages per second
 - Sub-millisecond latency
 - Small memory footprint (typically ~15MB)
 
-### 3. Location Transparency
+### Location transparency
 Applications don't need to know where other services are located. NATS handles:
 - Service discovery
 - Load balancing
 - Fault tolerance
 
-### 4. Multi-Tenancy
-Built-in support for isolated messaging domains through accounts, enabling:
+### Multi-tenancy
+Accounts isolate messaging domains within one server or cluster, which supports:
 - Secure multi-tenant deployments
 - Department or team isolation
 - SaaS platform building
@@ -96,12 +88,6 @@ NATS excels in scenarios requiring:
 - Remote procedure calls
 - Configuration management
 - System orchestration
-
-## Summary
-
-NATS provides the connective tissue for modern distributed systems. Its simplicity, performance, and flexibility make it an ideal choice for organizations building cloud-native applications, IoT systems, or microservices architectures.
-
-Whether you're connecting a handful of services or building a global messaging infrastructure, NATS scales with your needs while maintaining its core principles of simplicity and performance.
 
 ## Next steps
 

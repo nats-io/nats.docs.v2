@@ -21,9 +21,11 @@ nats stream add ORDERS \
   --replicas=3 \
   --defaults
 
-# Publish one order as order-svc would. The PubAck returns only after the
-# leader has the write committed to a quorum (itself plus one follower).
-nats pub orders.created \
+# Publish one order as order-svc would. --jetstream makes this a JetStream
+# publish that waits for a PubAck; the PubAck returns only after the leader
+# has the write committed to a quorum (itself plus one follower). Plain
+# `nats pub` is a core publish and would not wait for one.
+nats pub --jetstream orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
 
 # Confirm the replica count and the cluster layout that R=3 produced.

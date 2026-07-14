@@ -5,17 +5,18 @@
 nats kv status INVENTORY
 
 # Expected output reports the bucket name, history depth, value count, and
-# the backing store:
+# the backing stream (labels abbreviated here):
 #
-#   INVENTORY Key-Value Store Status
+#   Information for Key-Value Store Bucket INVENTORY created <time>
 #
-#            Bucket Name: INVENTORY
-#                History: 1
-#                    TTL: 0s
-#          Backing Store: JetStream
-#     Backing Store Name: KV_INVENTORY
-#                 Values: 1
+#   Configuration:
 #
-# Backing Store Name names the stream under the bucket: KV_INVENTORY.
-# That is the proof the bucket is a stream; the under-the-hood page opens
-# it up.
+#              Bucket Name: INVENTORY
+#              History Kept: 1
+#             Values Stored: 1
+#        Backing Store Kind: JetStream
+#          JetStream Stream: KV_INVENTORY
+#
+# The "JetStream Stream" line names the stream under the bucket:
+# KV_INVENTORY. That is the proof the bucket is a stream; the
+# under-the-hood page opens it up.

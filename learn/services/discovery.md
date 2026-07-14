@@ -47,7 +47,7 @@ one instance:
 
 | Subject | Who answers |
 |---|---|
-| `$SRV.INFO` | every service on the connection |
+| `$SRV.INFO` | every service in the account |
 | `$SRV.INFO.OrderInventory` | every instance named `OrderInventory` |
 | `$SRV.INFO.OrderInventory.<id>` | the one instance with that id |
 
@@ -67,7 +67,7 @@ configured by hand earlier, but now any caller can read it back from the
 live service instead of trusting documentation.
 
 The `$SRV.PING`/`INFO`/`STATS` wire format and JSON response schemas are
-documented in [Reference](/reference/). We only need the behavior here.
+documented in [Reference](/reference/services/). We only need the behavior here.
 
 ## Discovery is broadcast, not load-balanced
 
@@ -147,7 +147,7 @@ boundaries is a separate question, covered in
 ## Where you are
 
 You can now discover the system instead of memorizing it. With `$SRV`
-PING, INFO, and STATS, you can enumerate every service on the connection,
+PING, INFO, and STATS, you can enumerate every service in the account,
 ask one service which endpoints it answers, and target a single instance
 by its id. You also know the catch: discovery is broadcast, so you gather
 replies by deadline rather than taking the first one.
@@ -170,4 +170,4 @@ Continue to [Observability](/learn/services/observability).
   `$SRV` reply rides on.
 - [Observability](/learn/services/observability) — what the STATS verb
   reports and how to read it.
-- [Reference](/reference/) — the `$SRV` wire format and response schemas.
+- [Reference](/reference/services/) — the `$SRV` wire format and response schemas.

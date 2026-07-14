@@ -66,8 +66,9 @@ User order-svc (UAKAFPCC4KDEKCAKP47VXHEYGHSL4GDET65EE7LMHMD2PCRAAWP37U2B)
 ```
 
 `nats auth operator add ACME` creates the root of trust. It never
-prompts, and it always creates two extras: a `SYSTEM` account (the name
-is fixed) and one operator signing key. The server uses the `SYSTEM`
+prompts, and it always creates two extras: a `SYSTEM` account and one
+operator signing key. `SYSTEM` plays the role the hand-made `SYS`
+account played in config mode, under a name the tooling fixes. The server uses the `SYSTEM`
 account to answer its own internal JWT-lookup requests, and the
 resolver needs it later.
 
@@ -125,9 +126,11 @@ The **account resolver** closes that gap. It's the part of the server
 config that tells `nats-server` where to find account JWTs at connect
 time. The recommended type is the full nats-based resolver: the server
 keeps every account JWT in a local directory, and you deliver new ones
-over a NATS connection. Memory and cache resolvers also exist (see
-[Reference](/reference/config/resolver)), but `nats auth` can only push
-to a full resolver.
+over a NATS connection. The nats-based resolver has a second mode,
+`cache`, which also accepts pushes but evicts unused JWTs; a static
+memory resolver exists too, but it takes no pushes at all (see
+[Reference](/reference/config/resolver)). This chapter uses the full
+resolver.
 
 `nats server generate ./acme-server` scaffolds the config. The command
 is interactive: pick the template

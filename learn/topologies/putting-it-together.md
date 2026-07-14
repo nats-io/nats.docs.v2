@@ -68,7 +68,7 @@ whole picture; each server configures only the connections it owns.
 A server can take part in more than one layer at once. `n1-east`
 carries routes to its cluster peers, a gateway to `west`, and the
 inbound leaf connection from `factory-1`, all from one config file
-with three blocks:
+with three topology blocks:
 
 ```conf
 # n1-east.conf — one server, three roles
@@ -100,14 +100,14 @@ jetstream {
 }
 ```
 
-That's three blocks for three layers on one server. The `cluster` block
+That's three topology blocks for three layers on one server. The `cluster` block
 is the same one from [Your first cluster](/learn/topologies/your-first-cluster),
 the `gateway` block is from [Super-clusters](/learn/topologies/super-clusters),
 and the `leafnodes` block is from
 [Leaf nodes](/learn/topologies/leaf-nodes). Putting them in one file is
 all "composition" means.
 
-## Composition adds reach, not boundaries
+## Composition and boundaries
 
 Stacking these shapes gives you one address space by default. Routes carry
 an account's full interest across a cluster; a gateway forwards any subject
@@ -158,7 +158,7 @@ nats server list
 ╭───────────────────────────────────────────────────────────────────────────╮
 │                                  Server Overview                            │
 ├──────────┬─────────┬──────┬─────────┬─────┬───────┬──────┬────────┬─────────┤
-│ Name     │ Cluster │ IP   │ Version │ JS  │ Conns │ Subs │ Routes │ GWs     │
+│ Name     │ Cluster │ Host │ Version │ JS  │ Conns │ Subs │ Routes │ GWs     │
 ├──────────┼─────────┼──────┼─────────┼─────┼───────┼──────┼────────┼─────────┤
 │ n1-east  │ east    │ ...  │ 2.x.x   │ yes │     4 │   12 │      2 │       1 │
 │ n2-east  │ east    │ ...  │ 2.x.x   │ yes │     3 │   12 │      2 │       1 │
@@ -178,8 +178,8 @@ nats server report leafnodes   # the leaves dialed into the hub
 ```
 
 `nats server report leafnodes` is the one that shows `factory-1`. It
-lists the leaf by name, the account it bound to, its address, and its
-round-trip time. That's the boundary the previous section described,
+lists the leaf by name, the account it's on, its address, and its
+round-trip time. That's the leaf link the previous section described,
 made visible:
 
 ```
@@ -188,15 +188,19 @@ made visible:
 ├─────────┬───────────┬─────────┬──────────────────┬──────┬─────────┤
 │ Server  │ Name      │ Account │ Address          │ RTT  │ Spoke   │
 ├─────────┼───────────┼─────────┼──────────────────┼──────┼─────────┤
-│ n1-east │ factory-1 │ ORDERS  │ 203.0.113.7:...  │ 18ms │ yes     │
+│ n1-east │ factory-1 │ $G      │ 203.0.113.7:...  │ 18ms │ false   │
 ╰─────────┴───────────┴─────────┴──────────────────┴──────┴─────────╯
 ```
 
-The `Spoke` column says `yes`: from the hub's point of view,
-`factory-1` is on the far end of an outbound connection it accepted,
-not a peer it dialed. That's the leaf direction from
-[Leaf nodes](/learn/topologies/leaf-nodes), confirmed
-by the report.
+The `Account` column reads `$G`: nothing set up a dedicated account for
+the leaf, so it lands in the default global account, and there's no
+boundary here — matching the auth-free deployment.
+
+The `Spoke` column reads `false` because this report comes from
+`n1-east`, the hub end that accepted the connection. The column is
+`true` only on the leaf's own report — `factory-1` dialed out, so from
+its side it's the spoke. Either way it's the leaf direction from
+[Leaf nodes](/learn/topologies/leaf-nodes).
 
 Run these three reports together and you've surveyed every layer of
 the deployment in one pass: routes, gateways, and leaves, each shown by
@@ -241,7 +245,7 @@ The Acme deployment is now its final, composed shape:
 - Two clusters, `east` and `west`, each a full mesh of three servers
   joined by routes.
 - The two clusters joined into a super-cluster by gateways.
-- A leaf, `factory-1`, dialed into `east`, serving isolated edge
+- A leaf, `factory-1`, dialed into `east`, serving its local edge
   clients.
 - The unchanged ORDERS workload running across all of it.
 

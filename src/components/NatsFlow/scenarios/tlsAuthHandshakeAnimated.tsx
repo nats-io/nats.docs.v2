@@ -21,7 +21,7 @@ const edgeTypes = {
 // Brand palette.
 const MSG_COLOR = "#27AAE1"; // NATS primary blue — active step in flight
 const IDLE_COLOR = "#94a3b8"; // gray — inactive link
-const SUCCESS_COLOR = "#34A574"; // NATS green — +OK accepted
+const SUCCESS_COLOR = "#34A574"; // NATS green — PONG accepted
 const FAILURE_COLOR = "#ef4444"; // red — -ERR rejected
 const ACCENT_NAVY = "#375C93"; // navy — cert / CA validation accent
 
@@ -42,13 +42,13 @@ const STAGE_DURATION_MS: Record<Stage, number> = {
 
 const CAPTION: Record<Stage, string> = {
     tls:
-        "order-svc opens a TLS handshake with the server. Before any NATS protocol flows, the transport is encrypted.",
+        "In the default handshake the server first sends its INFO line in plaintext (advertising tls_required); the link then upgrades to TLS and the transport is encrypted. No credential is sent before this.",
     verify:
         "order-svc validates the server's certificate against its trusted CA. A cert signed by an unknown CA is rejected here — this is how the client knows it reached the real server.",
     connect:
         "Over the now-encrypted link, order-svc sends CONNECT carrying its credentials (a JWT, token, or user/password).",
     ok:
-        "Credentials check out. The server replies +OK and the connection is live — order-svc can now publish and subscribe.",
+        "Credentials check out. The server confirms with a PONG and the connection is live — order-svc can now publish and subscribe.",
     reject:
         "If the credentials are wrong or expired, the server replies -ERR 'Authorization Violation' and closes the connection. The branch shows the rejected path.",
 };
@@ -193,7 +193,7 @@ function TlsAuthHandshakeAnimatedInner({
             style: { opacity: stage === "ok" ? 1 : 0.0 },
             data: {
                 color: stage === "ok" ? SUCCESS_COLOR : IDLE_COLOR,
-                label: "+OK",
+                label: "PONG",
                 labelColor: stage === "ok" ? SUCCESS_COLOR : "#64748b",
                 animated: stage === "ok",
                 interval: 1500,

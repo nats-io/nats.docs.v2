@@ -35,8 +35,10 @@ The first group is the **`nats auth` store**, the directory tree the
 Security chapter built under `$XDG_DATA_HOME/nats` (by default
 `~/.local/share/nats`). Two kinds of file live in it. A **JWT** is the
 signed identity token: one for the operator, one per account, one per
-user. A **seed** (an `.nk` file) is the private nkey that produced that
-signature. The layout for the Acme world:
+user. A **seed** (an `.nk` file) is the private half of the nkey pair
+whose public key the JWT names as its subject. Each JWT is signed by the
+key one level up the chain: the operator signs the account JWTs, and each
+account signs its own users' JWTs. The layout for the Acme world:
 
 ```text
 $XDG_DATA_HOME/nats/nsc/            # store root; the on-disk layout is nsc-compatible
@@ -57,10 +59,11 @@ $XDG_DATA_HOME/nats/nsc/            # store root; the on-disk layout is nsc-comp
 ```
 
 The `stores` half holds only JWTs, which are public; they assert
-identity, they sign nothing. The `keys` half is secret. A seed is the
-private key behind a JWT's signature, so a leaked seed lets identity be
-forged, and a lost seed means identity is lost. Protect the `keys`
-subtree with the same controls you apply to stored passwords.
+identity, they sign nothing. The `keys` half is secret. A leaked
+operator or account seed lets identity be forged, because those keys sign
+the JWTs one level down; a leaked user seed lets an attacker connect as
+that user; and a lost seed means that identity is lost. Protect the
+`keys` subtree with the same controls you apply to stored passwords.
 
 The second group is the **creds files**. A `.creds` file is a user's JWT
 and seed concatenated into one file: the thing a client points at to

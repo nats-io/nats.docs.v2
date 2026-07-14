@@ -58,13 +58,15 @@ nats service stats OrderInventory
 ```
 
 ```
-╭────────────────────────────────────────────────────────────────────────╮
-│                       OrderInventory Statistics                        │
-├──────────────────────┬──────────┬──────────┬─────────┬─────────────────┤
-│ ID                   │ Endpoint │ Requests │ Errors  │ Avg Time        │
-├──────────────────────┼──────────┼──────────┼─────────┼─────────────────┤
-│ NCXY...A9            │ check    │        3 │       0 │ 412µs           │
-╰──────────────────────┴──────────┴──────────┴─────────┴─────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                  OrderInventory Service Statistics                                   │
+├────────────────────────┬──────────┬──────────┬─────────────┬────────┬─────────────────┬──────────────┤
+│ ID                     │ Endpoint │ Requests │ Queue Group │ Errors │ Processing Time │ Average Time │
+├────────────────────────┼──────────┼──────────┼─────────────┼────────┼─────────────────┼──────────────┤
+│ IcpremQQGTYS0fK1iyfQ86 │ check    │ 3        │ q           │ 0      │ 1.236ms         │ 412µs        │
+├────────────────────────┼──────────┼──────────┼─────────────┼────────┼─────────────────┼──────────────┤
+│                        │          │ 3        │             │ 0      │ 1.236ms         │ 412µs        │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 The counters tracked here are per endpoint, not per service: a service with
@@ -72,9 +74,9 @@ The counters tracked here are per endpoint, not per service: a service with
 where you reason about load, telling you which handler is busy and which one is
 slow.
 
-[Reference](/reference/) documents the full set of fields in the STATS
-response, including the per-endpoint `queue_group` and an optional custom
-`data` blob. We only need the five counters here.
+[Reference](/reference/services/stats-response) documents the full set of
+fields in the STATS response, including the per-endpoint `queue_group` and an
+optional custom `data` blob. We only need the five counters here.
 
 ## A service error increments the error count
 
@@ -142,11 +144,11 @@ and resets the `started` timestamp, so a dashboard that assumes
 monotonically increasing counters will see a drop. Do aggregate across IDs in
 the reader; do not assume the numbers only ever grow.
 
-For richer observability, see [Monitoring](/learn/monitoring): a custom
-`StatsHandler` that adds your own `data` blob, or the server-side
+For richer observability, a custom `StatsHandler` can attach your own
+`data` blob to each endpoint's stats, and the server can emit
 service-latency advisories that measure round-trip time from outside the
-service. Those are separate mechanisms layered on top of the counters this
-page reads.
+service. Both are separate mechanisms layered on top of the counters this
+page reads; their schemas live in [Reference](/reference/services/).
 
 ## Where you are
 
@@ -170,7 +172,7 @@ Continue to [Scaling](/learn/services/scaling).
 
 - [Discovery](/learn/services/discovery) — the PING and INFO verbs that sit
   alongside STATS on the `$SRV` prefix.
-- [Monitoring](/learn/monitoring) — custom stats handlers and server-side
-  service-latency advisories.
-- [Reference](/reference/) — the full STATS response schema and every field it
-  carries.
+- [Monitoring](/learn/monitoring) — exporting server and service metrics to
+  Prometheus and building dashboards on top of them.
+- [Reference](/reference/services/) — the full STATS response schema and every
+  field it carries.

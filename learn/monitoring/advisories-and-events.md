@@ -15,9 +15,9 @@ ask. It does nothing for events that happen between two polls.
 The `shipping` consumer falling behind is a number you can poll for: its
 lag climbs and you see it on the next scrape. But a poison order that
 exhausts its deliveries is a one-time event rather than a level you read.
-By the time your next scrape runs, the order is gone and the counter that
-ticked is now part of an aggregate. You need NATS to tell you the instant
-it happens.
+By the time your next scrape runs, the moment has passed and the counter
+that ticked is now part of an aggregate. You need NATS to tell you the
+instant it happens.
 
 This page covers the two streams of events NATS publishes for exactly
 that: advisories on the `$JS.EVENT.ADVISORY.*` subjects, and system
@@ -71,10 +71,12 @@ failed, and how many times delivery was attempted:
 ```
 
 That is the whole event: stream sequence `987` was delivered five times,
-never acked, and JetStream stopped attempting delivery. The `max_deliver` advisory is
-the only built-in signal that this happened. There's no dead-letter
-queue that retains the order. If no one is subscribed when the
-advisory fires, the fact that order `987` was dropped is lost.
+never acked, and JetStream stopped attempting delivery. The message itself
+stays in the `ORDERS` stream under its retention policy; what stops is
+delivery to `shipping`. The `max_deliver` advisory is the only built-in
+signal that this happened. There's no dead-letter queue, and the advisory
+is published once. If no one is subscribed when it fires, you never learn
+that order `987` stopped being delivered.
 
 The `max_deliver` advisory is one type among several. JetStream also
 publishes a `consumer_action` advisory when a consumer is created or
@@ -83,7 +85,7 @@ message, and a `terminated` advisory when a message is removed from
 delivery. Each is a different leaf under `$JS.EVENT.ADVISORY.>`, and each
 carries its own JSON body. The full set of advisory types and their
 schemas is documented in
-[Reference → Advisories](/reference/system/advisory). We only need the
+[Reference → JetStream advisories](/reference/jetstream/advisory). We only need the
 `max_deliver` advisory here, because it's the one that tells you an order
 slipped through.
 
@@ -116,9 +118,11 @@ $SYS.ACCOUNT.ORDERS.CONNECT
 ```
 
 and the matching `$SYS.ACCOUNT.ORDERS.DISCONNECT` when it leaves. The
-body names the client and the account, so this is how you watch
-`order-svc` and `analytics-reader` come and go without polling `/connz` on
-a timer.
+account is baked into the subject, so `$SYS.ACCOUNT.ORDERS.CONNECT` watches
+`order-svc` in the `ORDERS` account. `analytics-reader` lives in the
+`ANALYTICS` account and publishes on `$SYS.ACCOUNT.ANALYTICS.CONNECT`
+instead. Subscribe to `$SYS.ACCOUNT.*.CONNECT` to watch clients across
+every account come and go without polling `/connz` on a timer.
 
 Alongside connections, each server publishes a `STATSZ` heartbeat on
 `$SYS.SERVER.<id>.STATSZ` on a fixed interval. It carries the same kind of
@@ -212,8 +216,10 @@ Continue to
 
 ## See also
 
-- [Reference → Advisories](/reference/system/advisory) — every advisory
-  and system-event subject and its JSON schema.
+- [Reference → JetStream advisories](/reference/jetstream/advisory) — every
+  JetStream advisory subject and its JSON schema.
+- [Reference → System events](/reference/system/advisory) — every `$SYS.*`
+  system-event subject and its JSON schema.
 - [JetStream → Acknowledgment](/learn/jetstream/acknowledgment) — what to
   do with a message that hit `max_deliver`.
 - [Clustering → RAFT and leaders](/learn/clustering/raft-and-leaders) —

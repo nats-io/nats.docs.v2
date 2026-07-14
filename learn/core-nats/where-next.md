@@ -8,10 +8,11 @@ description: Recap the core NATS mental model and point to what comes after the 
 # Where to go next
 
 You started this chapter with a single publish to `orders.created` and
-no guarantee anyone was subscribed. You end it with `warehouse`,
-`notifications`, and `analytics` reading the order subjects, an
-`inventory` service answering requests on `orders.inventory.check`, a
-`packers` queue group sharing the load on `orders.created`, and three
+no guarantee anyone was subscribed. You end it with `notifications` and
+`analytics` reading `orders.created`, a regional analytics view on
+`orders.*.created` and an audit service on `orders.>`, an `inventory`
+service answering requests on `orders.inventory.check`, a `packers`
+queue group sharing the load on `orders.created`, and three
 `shipping.quote` providers answering one scatter-gather request. That's
 the whole Acme ORDERS world, built on core NATS alone.
 
@@ -118,10 +119,10 @@ secure.
 ## Where you are
 
 This is the end of the chapter. The whole arc is complete, and this
-page adds no new scenario state. Your local `nats-server`, the three
-order subscribers, the `inventory` service, the `packers` queue group,
-and the `shipping.quote` providers are all still as you left them on the
-previous page. Keep experimenting, or stop the server when you're done:
+page adds no new scenario state. Your local `nats-server`, the
+`notifications` and `analytics` subscribers, the `inventory` service, the
+`packers` queue group, and the `shipping.quote` providers are all still
+as you left them on the previous page. Keep experimenting, or stop the server when you're done:
 core NATS held nothing on disk, so there's nothing to clean up.
 
 You hold the core model: a subject is an address, interest decides who

@@ -75,8 +75,8 @@ clusters (gateways, geo-affinity, super-cluster traffic) stays in
 | [Forming a cluster](/learn/clustering/forming-a-cluster) | Routes (explicit seed vs implicit gossip) and how one seed grows into a full mesh |
 | [Raft and leaders](/learn/clustering/raft-and-leaders) | RAFT groups, the meta leader and stream leaders, and how an election picks one |
 | [Replication and R=3](/learn/clustering/replication-and-r3) | How a quorum commits a write, then followers apply it, and the consistency you get |
-| [Placement](/learn/clustering/placement) | Constrain replicas to a cluster and tagged servers, and what a preferred leader is |
-| [Scaling and peer management](/learn/clustering/scaling-and-peers) | Add a peer with catchup, remove one safely, and never lose quorum doing it |
+| [Placement](/learn/clustering/placement) | Constrain replicas to a cluster and tagged servers, and move a stream's leader to a chosen server |
+| [Scaling and peer management](/learn/clustering/scaling-and-peers) | Grow the group with catchup, move a replica off a server safely, and never lose quorum doing it |
 | [Where to go next](/learn/clustering/where-next) | A recap of the whole mechanism and a production checklist |
 
 In summary, servers form a mesh, elect leaders, replicate
@@ -95,6 +95,10 @@ You'll need:
   `nats` operator commands; a few stream operations also show the
   JavaScript, Go, Python, Java, Rust, and C# client form, since every
   client sets the same replica count and placement.
+- A system account (`$SYS`) to run the `nats server` operator commands
+  against. These configs don't set one up; add a system user (the
+  [Security deep dive](/learn/security) covers it) and connect with its
+  credentials before the first `nats server list`, `info`, or `report`.
 
 Open a terminal and turn to
 [Forming a cluster](/learn/clustering/forming-a-cluster).

@@ -16,18 +16,23 @@ nats kv add CACHE \
   --max-bucket-size 16MB \
   --max-value-size 64KB
 
-# Expected output ends with the configured limits, e.g.
+# Expected output is the bucket's status. The CLI parses the sizes as
+# decimal and prints them in binary units, so 16MB shows as 15 MiB and 64KB
+# as 62 KiB (labels abbreviated here):
 #
-#   CACHE Key-Value Store
+#   Information for Key-Value Store Bucket CACHE created <time>
 #
 #   Configuration:
-#         Bucket Name: CACHE
-#             History: 1
-#                 TTL: 1h0m0s
-#       Max Bucket Size: 16 MiB
-#        Max Value Size: 64 KiB
+#
+#              Bucket Name: CACHE
+#              History Kept: 1
+#               Maximum Age: 1h0m0s
+#       Maximum Bucket Size: 15 MiB
+#        Maximum Value Size: 62 KiB
 #     ...
 #
-# A bucket at its size cap discards the OLDEST value to make room for a new
-# one (discard 'new' is not used here) — size the bucket for the working
-# set, not the average, or live values fall off the back.
+# A KV bucket uses discard-new: a put that would push it past
+# --max-bucket-size, or a value larger than --max-value-size, is rejected
+# with an error and the existing values are kept. Size the bucket for the
+# working set you need to hold, not the average, so a burst doesn't bounce
+# writes.

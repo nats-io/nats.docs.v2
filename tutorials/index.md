@@ -31,7 +31,7 @@ Work through these in order, or jump to whatever you need:
 2. **[Request/reply](/tutorials/request-reply)**: stand up a responder and call it
    to get an answer back.
 3. **[Work queue](/tutorials/work-queue)**: split a stream of jobs across two
-   workers so each job runs exactly once.
+   workers so each job goes to exactly one of them.
 4. **[Your first stream](/tutorials/first-stream)**: turn on JetStream and create a
    stream that keeps your messages so you can replay them.
 5. **[Stream consumer](/tutorials/stream-consumer)**: read a stream with a durable

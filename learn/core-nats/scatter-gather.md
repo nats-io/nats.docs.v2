@@ -82,13 +82,15 @@ replies arrive, then stop. With the three providers running, the output
 shows three quotes, one per carrier. The client compares the prices and
 keeps the lowest.
 
-A library does the same thing by hand. It subscribes to a fresh inbox,
-publishes the request with that inbox as the reply subject, then loops
-reading from the subscription and appending each reply to a list. After
-the third reply it breaks out and unsubscribes. The loop, the count, and
-the unsubscribe are all yours to manage. There's no single `request()`
-call that returns a list, because the client can't know how many
-responders exist.
+A library does the same thing, and how much you hand-roll depends on the
+client. A plain `request()` returns only the first reply. Some clients
+ship a gather helper that returns many: nats.js has `requestMany`, and
+orbit.go has `RequestMany` (both follow ADR-47, "Request Many", with
+count, stall, and sentinel stop conditions). Where no helper exists, you
+build the loop yourself: subscribe to a fresh inbox, publish the request
+with that inbox as the reply subject, then read from the subscription and
+append each reply to a list until your count or deadline is reached, then
+unsubscribe.
 
 ## Gather by deadline
 
@@ -145,10 +147,11 @@ single-reply request-reply. These are the common mistakes.
 **Taking only the first reply.** A plain `nats request` stops after one
 reply, because its `--replies` flag defaults to `1`. Point it at three
 providers and you get whichever carrier answered first; the other two
-quotes are discarded and you never learn there were more. Don't reach for
-a single `request()` call when you mean to gather: that call is built to
-return the first reply and unsubscribe. Subscribe to the inbox yourself
-and read in a loop, or use `--replies 0` from the CLI.
+quotes are discarded and you never learn there were more. A plain
+`request()` in a client library does the same. When you mean to gather,
+use `--replies 0` from the CLI, reach for your client's gather helper
+where it has one (nats.js `requestMany`, orbit.go `RequestMany`), or
+subscribe to the inbox yourself and read in a loop.
 
 <div class="nats-example"
      data-type="learn-core-nats-scatter-gather-first-reply-trap"
@@ -174,10 +177,11 @@ in [JetStream](/learn/jetstream), not in a core gather.
 The Acme ORDERS world now talks in four shapes over one local
 `nats-server`:
 
-- `warehouse`, `notifications`, and `analytics` each receive a copy of
-  every order message (publish-subscribe).
-- Regional wildcards let one subscriber span `orders.us.created` and
-  `orders.eu.created`.
+- `notifications` and `analytics` each receive their own copy of every
+  `orders.created` message (publish-subscribe).
+- Regional analytics spans `orders.us.created` and `orders.eu.created`
+  with `orders.*.created`, and an audit service reads the whole hierarchy
+  on `orders.>`.
 - The `inventory` service answers single requests on
   `orders.inventory.check` (request-reply).
 - A `packers` queue group shares the work on `orders.created`, one packer

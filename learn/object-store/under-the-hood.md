@@ -130,8 +130,11 @@ writes the soft-delete metadata message and then purges the object's chunks.
 The purge is what frees the bytes, and on a busy file-backed stream the
 on-disk space is reclaimed as the stream cleans up, not synchronously at the
 call. Don't delete a large object and immediately assert the disk is smaller.
-Do confirm the object is gone the right way — by reading its status, where
-`Deleted=true` and `Size=0` tell you the soft delete landed:
+Do confirm the object is gone the right way — a plain get or `info` returns
+the not-found error, and a `watch` reports the delete event. The tombstone
+that records `Deleted=true` and `Size=0` is hidden by default; to read it you
+pass the client's show-deleted option (`GetObjectInfoShowDeleted` or
+`ListObjectsShowDeleted` in Go), which the `nats` CLI doesn't expose:
 
 <div class="nats-example" data-type="learn-object-store-under-the-hood-status" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

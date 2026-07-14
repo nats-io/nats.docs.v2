@@ -4,14 +4,12 @@
 
 nats kv add profiles
 
-# You should see a confirmation ending with the bucket name and config:
+# You should see a confirmation with the bucket name and config:
 #
-#   profiles Key-Value Store
+#   Information for Key-Value Store Bucket profiles created 2026-06-09 10:13:41
 #
 #   Configuration:
-#       Bucket Name: profiles
-#           History: 1
-#               TTL: 0s
-#         Max Value Size: unlimited
-#        Maximum Values: unlimited
-#     ...
+#
+#              Bucket Name: profiles
+#             History Kept: 1
+#       Backing Store Kind: JetStream

@@ -67,7 +67,7 @@ Real deployments combine all of the above. Multiple clusters span regions and co
 
 <div class="nats-flow" data-scenario="massiveScale" data-width="900" data-height="650"></div>
 
-A cluster of NATS servers sits in the middle. Each cluster server can host its own clients. Leaf nodes extend outwards — every leaf brings its own group of clients, hidden behind the leaf and isolated from the cluster's address space. The same pattern keeps composing: add more leaves, add more clients, add more cluster servers, add more clusters connected by gateways. Applications talk to NATS the same way regardless of where they sit.
+A cluster of NATS servers sits in the middle. Each cluster server can host its own clients. Leaf nodes extend outwards — every leaf brings its own group of clients, and the cluster sees one leaf connection rather than the individual clients, which the leaf authenticates on its own. The leaf still bridges subject interest into the account it binds to on the hub, so the subject namespace is shared unless you bind each leaf to its own account. The same pattern keeps composing: add more leaves, add more clients, add more cluster servers, add more clusters connected by gateways. Applications talk to NATS the same way regardless of where they sit.
 
 ## Next steps
 

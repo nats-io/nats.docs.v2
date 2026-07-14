@@ -88,10 +88,12 @@ too.
 
 ## Stand up the seed and two joiners
 
-The config is the same one Topologies used to build `east`. We read it
-here for what it tells us about routes, not as a shape to choose; that
-choice belongs to
+These are the `east` configs from Topologies, with JetStream still enabled
+— the later pages replicate a stream on it. We read them here for what
+they tell us about routes, not as a shape to choose; that choice belongs to
 [Topologies → Your first cluster](/learn/topologies/your-first-cluster).
+One detail differs from that page: here `n1-east` carries no `routes` of
+its own, so the pure seed pattern stands out.
 
 `n1-east` is the seed. It carries no `routes` of its own; the others find
 it.
@@ -99,6 +101,10 @@ it.
 ```conf title="n1-east.conf"
 server_name: n1-east
 listen: 127.0.0.1:4222
+
+jetstream {
+  store_dir: "./js/n1-east"
+}
 
 cluster {
   name: east
@@ -110,9 +116,10 @@ Three things in the `cluster {}` block control formation.
 
 `name` is the cluster identifier, `east`. Every server that should join
 must set the exact same name. A route to a server whose name differs is
-closed the moment the names are compared, with no error surfaced to you;
-the odd server forms a separate cluster of its own. See
-[Pitfalls](#pitfalls) for how to catch this.
+rejected the moment the names are compared: the server logs
+`Rejecting connection, cluster name ... does not match ...` and closes the
+route, so the odd server forms a separate cluster of its own. See
+[Pitfalls](#pitfalls) for how to catch it in the log.
 
 `listen` is the route port this server accepts routes on: `6222`, one
 above the client port and never the same as it. This is the port peers
@@ -127,6 +134,10 @@ route back to the seed:
 ```conf title="n2-east.conf"
 server_name: n2-east
 listen: 127.0.0.1:4223
+
+jetstream {
+  store_dir: "./js/n2-east"
+}
 
 cluster {
   name: east
@@ -144,6 +155,10 @@ that route.
 ```conf title="n3-east.conf"
 server_name: n3-east
 listen: 127.0.0.1:4224
+
+jetstream {
+  store_dir: "./js/n3-east"
+}
 
 cluster {
   name: east
@@ -173,14 +188,16 @@ The full set of `cluster {}` fields (`pool_size`, `compression`,
 
 ## Confirm the mesh formed
 
-Check the cluster's state from the outside:
+Check the cluster's state from the outside. The `nats server` commands here
+query the system account (`$SYS`), which these configs don't set up; add one
+(the [Security deep dive](/learn/security) covers it) and connect with its
+credentials before you run them.
 
 ```bash
-nats server report
+nats server list
 ```
 
-The report lists all three servers as one cluster, each with its route
-count:
+The list shows all three servers as one cluster, each with its route count:
 
 ```
 ╭─────────────────────────────────────────────────────────────────────────╮
@@ -188,16 +205,19 @@ count:
 ├─────────┬─────────┬──────┬─────────┬─────┬───────┬──────┬────────┬────────┤
 │ Name    │ Cluster │ Host │ Version │ JS  │ Conns │ Subs │ Routes │ Uptime │
 ├─────────┼─────────┼──────┼─────────┼─────┼───────┼──────┼────────┼────────┤
-│ n1-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │      2 │  1m2s  │
-│ n2-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │      2 │  58s   │
-│ n3-east │ east    │ ...  │ 2.x.x   │ no  │     0 │    9 │      2 │  55s   │
+│ n1-east │ east    │ ...  │ 2.x.x   │ yes │     0 │    9 │      8 │  1m2s  │
+│ n2-east │ east    │ ...  │ 2.x.x   │ yes │     0 │    9 │      8 │  58s   │
+│ n3-east │ east    │ ...  │ 2.x.x   │ yes │     0 │    9 │      8 │  55s   │
 ╰─────────┴─────────┴──────┴─────────┴─────┴───────┴──────┴────────┴────────╯
 ```
 
-The `Routes` column reads `2` for every server: each holds a route to the
-other two. You configured one explicit route per joiner; gossip supplied
-the rest. The `Cluster` column reads `east` on all three rows, so they
-joined the same cluster and not three separate ones.
+Every row's `Cluster` column reads `east`, so the three joined one cluster
+and not three separate ones. The `Routes` column counts route connections,
+not peers: each link to a peer is a small pool of connections (three by
+default) plus a dedicated system-account route, so a three-server cluster
+shows several per server. What confirms the mesh is that the count is the
+same on every row and non-zero. You configured one explicit route per
+joiner; gossip supplied the rest.
 
 For one server's own view of its routes, query it directly:
 
@@ -212,22 +232,24 @@ explicit seed plus every implicit route gossip added.
 ## Pitfalls
 
 A cluster is straightforward to form, but three details have to be correct.
-Each one fails quietly: you get a running server, just not the cluster you
-meant.
+Each one leaves you with a running server that isn't in the cluster you
+meant — sometimes with nothing but a line in the server log to tell you.
 
-**A mismatched `cluster.name` silently forms two clusters.** The name is
+**A mismatched `cluster.name` forms two clusters.** The name is
 what binds servers together. Set `name: east` on two servers and
-`name: eest` on the third, and the third doesn't error. It forms its own
-one-server cluster and never merges. You're left with two clusters that
-look like one until a message fails to cross. Set the identical `name` on
-every server, then confirm they joined as one before trusting the cluster:
+`name: eest` on the third, and the third's route is rejected: its log reads
+`Rejecting connection, cluster name "east" does not match "eest"` and it
+forms its own one-server cluster that never merges. Unless you read that
+line, you're left with two clusters that look like one until a message
+fails to cross. Set the identical `name` on every server, then confirm they
+joined as one before trusting the cluster:
 
 ```bash
-nats server report
+nats server list
 ```
 
 If every row shows `east`, the mesh is complete. A stray name, or a server
-missing from the report, means it formed a separate cluster. Fix the `name`
+missing from the list, means it formed a separate cluster. Fix the `name`
 and restart it.
 
 **Pointing `routes` at the client port (4222) never forms the mesh.** The
@@ -264,7 +286,8 @@ The `east` cluster is running and has discovered itself from one seed:
 - Each joiner carried one explicit route to `n1-east`; gossip opened the
   implicit routes that complete the mesh, so every server holds a route to
   the other two.
-- `nats server report` shows all three under cluster `east` with `Routes: 2`.
+- `nats server list` shows all three under cluster `east`, each with the
+  same non-zero route count.
 
 The servers can now reach each other. What they can't yet do is *agree*:
 decide together which server owns a stream, and keep that decision when one

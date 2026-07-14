@@ -65,7 +65,7 @@ In this pattern, NATS selects one service from the queue group (Service B in thi
 - Horizontal scalability
 - Built-in failover (if one service is down, another handles it)
 
-By default, the `request()` method returns after receiving the first response. To collect multiple responses from the scatter-gather pattern, use manual inbox subscription:
+By default, the `request()` method returns the first response and drops the rest. The example below starts multiple responders and shows the client receiving a single reply. To gather every response, subscribe to a reply inbox directly and read messages until a timeout instead of calling `request()`.
 
 <div class="nats-example" data-type="request-reply-multiple-responders" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

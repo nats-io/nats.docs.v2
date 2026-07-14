@@ -113,10 +113,15 @@ It runs in four steps, in order:
    authentication is required (`auth_required`), whether TLS is required
    (`tls_required`), and more.
 3. **Client CONNECT.** The client replies with a `CONNECT` message carrying
-   its name, any credentials, and the protocol features it supports.
-4. **`+OK` or `-ERR`.** The server accepts with `+OK` or rejects with
-   `-ERR`. After `+OK`, the connection is **CONNECTED** and messages may
-   flow.
+   its name, any credentials, and the protocol features it supports, and
+   immediately follows it with a `PING`.
+4. **Server `PONG` or `-ERR`.** If the server accepts the connection it
+   answers the `PING` with a `PONG`, and the connection is **CONNECTED** and
+   messages may flow. If it rejects the connection it sends `-ERR` (for
+   example `Authorization Violation`) and closes the socket. In verbose mode
+   the server also acknowledges the `CONNECT` itself with `+OK`, but clients
+   turn verbose off by default, so the `PONG` is what confirms the
+   connection.
 
 Picture the handshake and the two end states it can reach, CONNECTED or
 rejected:
@@ -181,7 +186,7 @@ reach any server in the pool at all:
   one timeout and no more.
 
 And you can read the connect handshake: TCP, the server's `INFO`, the
-client's `CONNECT`, and the `+OK` that means CONNECTED, plus what
+client's `CONNECT`, and the `PONG` that confirms CONNECTED, plus what
 `auth_required` and `max_payload` in `INFO` mean for the client.
 
 ## What's next

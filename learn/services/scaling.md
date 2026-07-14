@@ -75,10 +75,13 @@ or shutting an instance for maintenance) means stopping an instance. Stopping it
 abruptly drops any request it was mid-handle.
 
 The framework gives you a graceful stop. Calling `Stop()` on a service
-**drains** its in-flight requests first: it lets the handler finish the work it
-already accepted, then unsubscribes the endpoint and the `$SRV` discovery verbs,
-and only then exits. From the caller's side the instance stops appearing
-in discovery and stops pulling from the queue group; nothing in flight is lost.
+**drains** each endpoint subscription: it removes the endpoint's queue-group
+interest right away, so the server stops routing new requests to this instance,
+then unsubscribes the `$SRV` discovery verbs. Requests the instance already
+accepted keep processing in the background. `Stop()` returns before that
+background processing finishes, so don't exit the process the moment it returns:
+keep the instance alive (drain the connection, or wait on the framework's
+`DoneHandler`) until the in-flight work completes, or you drop it after all.
 
 Because the endpoint leaves the queue group as part of the stop, the remaining
 instances pick up every new request automatically. There's no window where a

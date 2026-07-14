@@ -92,10 +92,10 @@ deployment can be secured independently:
 - Gateways — the connections between clusters in a super-cluster topology.
 
 Each connection type has its own TLS configuration, with support for certificate
-pinning, custom cipher suites, and mutual TLS (mTLS). When mTLS is enabled,
-client certificates double as authentication — the certificate identity becomes
-the user identity, tying the encryption layer directly into the authentication
-model.
+pinning, custom cipher suites, and mutual TLS (mTLS). mTLS proves the client
+holds a certificate signed by a trusted CA. Add the `verify_and_map` setting and
+the server maps the certificate's identity (its SAN or DN) to a configured user,
+tying the encryption layer into the authentication model.
 
 ### Encryption at Rest
 
