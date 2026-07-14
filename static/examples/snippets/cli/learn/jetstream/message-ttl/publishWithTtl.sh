@@ -1,6 +1,6 @@
 #!/bin/bash
 # Publish an orders.cancelled message that expires 60 seconds after it
-# is stored. The per-message TTL rides along as the Nats-TTL header.
+# is stored. The per-message TTL is sent in the Nats-TTL header.
 # The stream must already have AllowMsgTTL enabled (nats stream edit
 # ORDERS --allow-msg-ttl) or this publish is rejected.
 # -J makes it a JetStream publish, so the server returns a PubAck

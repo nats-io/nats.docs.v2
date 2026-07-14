@@ -2,5 +2,5 @@
 
 # Turn on Direct Get for a stream that doesn't have it. The CLI enables it
 # for new streams, so ORDERS already shows "Direct Get: true" in stream info;
-# run this only if a stream shows "Direct Get: false".
+# run this only if a stream's info shows no "Direct Get: true" line.
 nats stream edit ORDERS --allow-direct

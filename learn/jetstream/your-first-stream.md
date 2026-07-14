@@ -41,7 +41,7 @@ nats-server -js
 ```
 
 The `-js` flag turns on JetStream. Without it, the next command
-won't run.
+fails.
 
 ## Create the stream
 
@@ -63,7 +63,7 @@ a [wildcard](/concepts/subjects#wildcards). Any subject that starts with
 no change to the stream.
 
 The `--defaults` flag tells `nats` not to prompt you for the other
-settings. The server fills them in with its standard defaults. We'll look
+settings. The CLI fills them in with standard defaults. We'll look
 at what those values are in a moment. For now, the defaults are fine.
 
 You should see output ending with something like:
@@ -89,7 +89,7 @@ defaults filled in — the header plus the `Options` and `Limits`
 sections:
 
 ```text
-Information for Stream ORDERS
+Information for Stream ORDERS created 2026-07-13 10:04:12
 
                      Subjects: orders.>
                      Replicas: 1
@@ -113,8 +113,9 @@ Limits:
 ```
 
 The `Options` section also lists a `Direct Get` line and a run of
-`Allows …` feature toggles, all at their defaults; they're trimmed here
-and covered where each feature comes up.
+`Allows …` feature toggles. The CLI turns direct get on by default, so
+that line shows here; client libraries leave it off unless you set it.
+They're trimmed and covered where each feature comes up.
 
 The **state** half shows what's in the stream right
 now:
@@ -134,8 +135,8 @@ first message you publish gets sequence `1`.
 
 ## The defaults
 
-You didn't set any of the configuration values above. The server filled
-them in with its standard defaults, the values a stream gets whenever a
+You didn't set any of the configuration values above. The CLI and server filled
+them in with standard defaults, the values a stream gets whenever a
 field is left unset. Here is what each one means.
 
 - **Replicas: 1**. The stream lives on one server. If that server goes
@@ -157,9 +158,9 @@ field is left unset. Here is what each one means.
   one of these. We do that on the
   [Shaping the stream](/learn/jetstream/shaping-the-stream) page.
 - **Duplicate Window: 2m0s**. For two minutes after a
-  message is stored, the server turns away a second message that
+  message is stored, the server skips storing a second message that
   carries the same [`Nats-Msg-Id`](/reference/jetstream/api/headers)
-  header. This is what lets you publish
+  header and acknowledges it as a duplicate. This is what lets you publish
   the same message twice without storing it twice. The
   [Publishing](/learn/jetstream/publishing) page uses it.
 
@@ -171,7 +172,7 @@ We use only the defaults here.
 
 Only one stream can keep a given subject. If you try to
 create a second stream whose subjects overlap `orders.>`, the server
-turns it down:
+rejects it:
 
 ```bash
 nats stream add ARCHIVE --subjects "orders.*" --defaults
@@ -183,7 +184,7 @@ nats: error: could not create Stream: subjects overlap with an existing stream (
 
 The check covers any overlap, not just the identical filter: `ORDERS`
 keeps `orders.>`, so a new stream asking for `orders.*`, or even the
-single subject `orders.created`, is turned down the same way.
+single subject `orders.created`, is rejected the same way.
 
 This is on purpose. When a message lands on a subject, JetStream always
 knows which stream it goes into.
@@ -206,12 +207,12 @@ Messages`, `Maximum Bytes`, and `Maximum Age` are all `unlimited`. The
 `ORDERS` stream then keeps every order it ever stored until the disk
 fills up, and a full disk takes the server down with it. That's fine
 while you're learning on a laptop, but a production stream needs at least
-one limit so old orders age out before the disk does. Setting limits is
+one limit so old orders age out before the disk fills. Setting limits is
 the [Shaping the stream](/learn/jetstream/shaping-the-stream) page; here
 the defaults are deliberately left unbounded.
 
 **A stream name is permanent.** There's no rename. `nats stream edit`
-has no `--name` flag, and the server turns down any update that changes an
+has no `--name` flag, and the server rejects any update that changes an
 existing stream's name with `stream configuration name must match
 original`. The only way to "rename" `ORDERS` is to delete it and create
 a new stream, which loses every order already stored. So pick the name

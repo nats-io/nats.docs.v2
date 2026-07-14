@@ -15,5 +15,5 @@ nats consumer info ORDERS analytics-typo
 # No error tells you the filter was wrong; the consumer is simply silent.
 nats consumer next ORDERS analytics-typo --count 5 --timeout 2s
 
-# Confirm the filter never matched: Delivered shows 0 of the stored orders.
-nats consumer info ORDERS analytics-typo | grep -A1 "Delivery counts"
+# Confirm the filter never matched: Unprocessed Messages shows 0.
+nats consumer info ORDERS analytics-typo | grep "Unprocessed Messages"

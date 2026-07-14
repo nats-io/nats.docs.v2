@@ -11,6 +11,6 @@ nats consumer add ORDERS analytics \
 # Inspect it — the config now shows a Filter Subject line.
 nats consumer info ORDERS analytics
 
-# Pull from analytics: only orders.shipped messages come back.
-# orders.created and orders.cancelled are skipped for this consumer.
-nats consumer next ORDERS analytics --count 5
+# Pull from analytics: only the orders.shipped message comes back.
+# orders.created messages are skipped for this consumer.
+nats consumer next ORDERS analytics --count 1
