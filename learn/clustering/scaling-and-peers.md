@@ -102,8 +102,10 @@ and the evicted server lets go of its RAFT subscriptions for the group. The
 replacement then catches up the same way a grown peer does. If the evicted
 peer held leadership, the group elects a new leader first, so leadership
 lands on a peer that stays. If no other server qualifies — placement leaves
-nowhere to put the replica — the command fails with `peer remap failed`
-rather than leaving the stream a peer short.
+nowhere to put the replica — an R>1 stream still loses the peer: the server
+evicts it and returns `peer remap failed`, leaving the group a replica
+short. Only a single-replica stream is spared, since removing its last peer
+would brick it (the pitfall below covers that case).
 
 To change the replica *count* — shrink `R=3` to `R=1`, say — edit the stream
 instead: `nats stream edit ORDERS --replicas=1`. `peer-remove` moves a

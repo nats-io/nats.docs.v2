@@ -20,8 +20,9 @@ nats --server nats://127.0.0.1:4222 stream info ORDERS
 
 # Evict the replica from one server by name. The meta leader picks a
 # replacement server, updates the stream assignment, and n4-east drops
-# its RAFT subscriptions. If no other server qualifies, the command
-# fails with "peer remap failed" instead of leaving the stream short.
+# its RAFT subscriptions. If no other server qualifies, an R>1 stream is
+# still left a peer short: the server evicts the peer and returns "peer
+# remap failed" (only a single-replica stream is refused outright).
 # (To change the replica COUNT, use: nats stream edit ORDERS --replicas=N)
 nats --server nats://127.0.0.1:4222 stream cluster peer-remove ORDERS n4-east
 

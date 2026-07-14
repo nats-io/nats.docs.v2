@@ -105,7 +105,8 @@ You'll need:
 - A working `nats-server` with JetStream enabled. The object store is built
   on JetStream, so JetStream must be on. The simplest way is
   `nats-server -js`.
-- The `nats` CLI installed and pointed at your server. This chapter drives
-  every operation through the `nats` CLI.
+- The `nats` CLI installed and pointed at your server. This chapter uses
+  the `nats` CLI for most operations; a few, like creating a link, are
+  client-library only.
 
 Open a terminal, run `nats-server -js`, and turn the page.

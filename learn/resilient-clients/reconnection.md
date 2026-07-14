@@ -53,13 +53,12 @@ close on the first disconnect, which is rarely what a service wants.
 
 The client doesn't retry the pool at full rate. After it has tried every
 URL once and none answered, it pauses before the next sweep. That pause
-is **backoff**: a fixed wait plus jitter before each sweep, the same on
-every sweep by default rather than a wait that grows from one attempt to
-the next. Without it, a client whose server just died would spin a tight
-dial loop and consume CPU against a pool that isn't ready yet. (A wait
-that grows over successive attempts is possible, but you opt into it with
-a custom reconnect-delay callback; the plain defaults use a constant
-wait.)
+is **backoff**: a fixed wait plus jitter before each sweep. Without it, a
+client whose server just died would spin a tight dial loop and consume CPU
+against a pool that isn't ready yet. Go, Java, Python, and JavaScript use
+the same wait on every sweep by default; you can opt into a wait that grows
+over successive attempts with a custom reconnect-delay callback. The Rust
+and .NET clients grow the wait on each attempt by default.
 
 The base wait is `ReconnectWait`, default two seconds. On top of that
 the client adds **jitter**, a small random amount mixed into the wait so

@@ -121,7 +121,7 @@ that explains the why.
 - [ ] Watch the reconnect-error callback so a long outage is loud in your logs, not a silent give-up.
 - [ ] Keep a non-zero wait and always keep jitter; a zero or fixed delay either spins the CPU or stampedes the survivor in lockstep.
 - [ ] Catch `ErrReconnectBufExceeded` and back off publishing; the reconnect buffer is 8 MB, not infinite, and the publish that overflows it fails.
-- [ ] Lower the ping interval under heavy load so you catch a wedged connection in seconds, not the several minutes the defaults take (a two-minute ping interval times the allowed outstanding pings).
+- [ ] Lower the ping interval under heavy load so you catch a wedged connection in seconds, not the several minutes the defaults take (about six minutes — a two-minute ping interval, with the third unanswered ping closing the connection).
 
 ### Drain & Shutdown — see [Pitfalls](/learn/resilient-clients/drain-and-shutdown#pitfalls)
 

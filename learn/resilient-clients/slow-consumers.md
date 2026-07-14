@@ -49,8 +49,8 @@ have set a limit yourself. The defaults serve as a backstop rather than a
 workload-specific tuning.
 
 The size and the full-buffer behavior vary by client, though. The Rust
-client bounds the buffer per connection (65,536 messages) rather than per
-subscription; C# defaults to a 1,024-message channel; and JavaScript
+client defaults to a 65,536-message buffer per subscription; C# defaults
+to a 1,024-message channel; and JavaScript
 leaves the buffer unbounded and never drops on the client side — its
 slow-consumer option only raises a status. Check your client's default
 before you rely on one.

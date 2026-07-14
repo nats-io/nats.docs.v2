@@ -51,6 +51,7 @@ Configuration:
 
            Bucket Name: profiles
           History Kept: 1
+                   ...
     Backing Store Kind: JetStream
 ```
 
