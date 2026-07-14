@@ -30,11 +30,11 @@ subjects, and queue groups.
 | [Reading back the stream](./reading-back) | Read stored messages back with a durable consumer |
 | [Filtering what you consume](./filtering) | Add a second consumer that reads only `orders.shipped` |
 | [Delivery and acknowledgment](./delivery-and-acknowledgment) | In-flight, ack, double ack, and redelivery |
-| [Acknowledgment](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
+| [Ack responses and redelivery](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
 | [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
 | [Scaling a consumer](./worker-pool) | Many workers split the load of one consumer |
 | [Ordered consumers](./ordered-consumer) | A throwaway in-order read of a stream, and the config behind it |
-| [Priority groups](./priority-groups) | Steer which client gets served: overflow and pinned_client |
+| [Priority groups](./priority-groups) | Steer which client gets served: overflow, pinned_client, and prioritized |
 | [Pausing a consumer](./pausing) | Stop delivery for a window, then resume |
 | [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
 | [Retention policies](./retention-policies) | Limits, Interest, and WorkQueue retention |

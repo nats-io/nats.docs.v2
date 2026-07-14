@@ -122,7 +122,7 @@ way.
 If a consumer needs to learn that a message expired rather than just
 find it gone, the stream's `SubjectDeleteMarkerTTL` setting leaves a
 delete marker in its place; the
-[reference](/reference/jetstream/api/stream) covers it.
+[reference](/reference/jetstream/api/stream/create) covers it.
 
 Size the TTL to the work. A 60-second TTL on a cancellation only makes
 sense if the consumer that cares about cancellations reads within that
@@ -200,5 +200,5 @@ to the chapters that take it further.
 - [Reference → Per-Message TTL](/reference/jetstream/api/headers)
   — the `Nats-TTL` header, `SubjectDeleteMarkerTTL`, and delete markers
   in full.
-- [Reference → Stream Configuration](/reference/jetstream/api/stream)
+- [Reference → Stream Configuration](/reference/jetstream/api/stream/create)
   — `AllowMsgTTL` alongside every other stream field.

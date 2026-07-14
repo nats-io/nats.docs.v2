@@ -110,6 +110,7 @@ the page that explains it.
 
 - [ ] Reach for `--all` only when you want the whole history; sample the tail with `--last`, `--since`, or `--start-sequence`.
 - [ ] Use a named, durable consumer for any read you must resume after a disconnect; an ephemeral one restarts from sequence 1.
+- [ ] Edit a durable consumer to change it; recreating with a new config is rejected as already-exists.
 - [ ] Confirm `--all` versus `--new` matches the question (backlog or live traffic) before you run the command.
 - [ ] Pair `--all` with `--terminate-at-end` for a one-shot replay; on its own it drains the backlog then blocks waiting for more.
 
@@ -117,8 +118,6 @@ the page that explains it.
 
 - [ ] Set Ack Wait longer than your slowest handler, with headroom, to avoid a redelivery storm.
 - [ ] Ack on every success path, and term a genuinely unprocessable message so it stops coming back.
-- [ ] Ack each delivery exactly once, in one place in the handler.
-- [ ] Edit a durable consumer to change it; recreating with a new config is rejected as already-exists.
 
 ### Filtering — see [Pitfalls](/learn/jetstream/filtering#pitfalls)
 
@@ -126,7 +125,7 @@ the page that explains it.
 - [ ] Decide retention through stream limits, not filters; a filter narrows a view, it never deletes messages.
 - [ ] Keep multiple filter subjects on one consumer disjoint; the server rejects overlap inside a single consumer.
 
-### Acknowledgment — see [Pitfalls](/learn/jetstream/acknowledgment#pitfalls)
+### Ack responses and redelivery — see [Pitfalls](/learn/jetstream/acknowledgment#pitfalls)
 
 - [ ] Nak a transient failure with a delay, or set a backoff, instead of a bare nak that loops at network speed.
 - [ ] Term a poison message the moment the code knows no attempt will succeed, rather than burning the delivery budget.
@@ -136,8 +135,6 @@ the page that explains it.
 ### Pull consumers — see [Pitfalls](/learn/jetstream/pull-consumers#pitfalls)
 
 - [ ] Treat an empty fetch as "nothing right now" and loop; never as an error that crashes the worker.
-- [ ] Always set an `expires` on a fetch so a quiet stream returns control instead of stalling.
-- [ ] Keep `MaxAckPending` at or above your batch size so it doesn't throttle throughput.
 - [ ] Pair `batch` with `max_bytes` so a single pull is bounded by size as well as count.
 
 ### Scaling a consumer — see [Pitfalls](/learn/jetstream/worker-pool#pitfalls)
@@ -155,7 +152,6 @@ the page that explains it.
 
 ### Pausing a consumer — see [Pitfalls](/learn/jetstream/pausing#pitfalls)
 
-- [ ] Read the `Paused Until Deadline` line before debugging a "stuck" consumer; a pause looks like a stall.
 - [ ] Pause with a duration like `1h` so the deadline can never land in the past and no-op.
 - [ ] Size the stream for the longest pause you expect; publishes keep landing and count against the limits while a consumer sleeps.
 
