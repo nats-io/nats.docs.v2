@@ -151,7 +151,7 @@ function AtomicBatchAnimatedInner() {
                     <div style={{ fontSize: 10, color: abandoning ? RED : "#6b7280", textTransform: "uppercase", letterSpacing: 1, fontWeight: 600, marginBottom: 8 }}>
                         Staging buffer{abandoning ? " — discarded" : ""}
                     </div>
-                    <div style={{ display: "flex", gap: SLOT_GAP, minHeight: 36 }}>
+                    <div style={{ display: "flex", gap: SLOT_GAP, minHeight: 54 }}>
                         {staged.length === 0 && <span style={{ fontSize: 12, color: "#9ca3af", alignSelf: "center" }}>empty</span>}
                         {staged.map((m, i) => (
                             <Slot
@@ -184,7 +184,7 @@ function AtomicBatchAnimatedInner() {
                         <span>ORDERS</span>
                         <span style={{ fontFamily: "monospace" }}>{storedCount} msgs</span>
                     </div>
-                    <div style={{ display: "flex", gap: SLOT_GAP, minHeight: 36 }}>
+                    <div style={{ display: "flex", gap: SLOT_GAP, minHeight: 54 }}>
                         {storedCount === 0 && <span style={{ fontSize: 12, color: "#9ca3af", alignSelf: "center" }}>empty</span>}
                         {storedSeqs.map((seq) => (
                             <div key={seq} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
