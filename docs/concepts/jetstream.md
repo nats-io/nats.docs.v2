@@ -67,8 +67,8 @@ consumers:
 
 - **Key Value Store**: A simple key-value store with built-in replication and
   durability.
-- **Object Store**: A scalable object storage system with support for versioning
-  and metadata.
+- **Object Store**: Store objects larger than a single message, split into
+  chunks, with per-object metadata.
 
 ## Related Concepts
 
@@ -82,4 +82,4 @@ consumers:
 
 - [JetStream deep dive](/learn/jetstream) — build a stream and consumer hands-on
 - [Key-Value deep dive](/learn/key-value) — durable key-value store on JetStream
-- [Object Store deep dive](/learn/object-store) — versioned object storage on JetStream
+- [Object Store deep dive](/learn/object-store) — chunked object storage on JetStream

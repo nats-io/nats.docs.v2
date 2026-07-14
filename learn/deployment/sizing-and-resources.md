@@ -52,17 +52,21 @@ page raises it to `LimitNOFILE=800000`.
 
 ### The JetStream defaults
 
-When JetStream can't read the system's real limits, it falls back to two
-defaults worth memorizing: **memory storage 256 MB** and **file storage
-1 TB**. When it can read real system RAM, the server sizes memory
-storage to a fraction of that instead, but the file-storage default stays
-at 1 TB unless you set `max_file_store` lower.
+Left unset, JetStream sizes its limits from the system it's on. **Memory
+storage** defaults to 75% of system RAM (capped by `GOMEMLIMIT` if set),
+falling back to **256 MB** only when the server can't read system memory.
+**File storage** defaults to 75% of the disk space actually available
+under `store_dir`, falling back to **1 TB** only when the platform can't
+report disk size (Windows and a few others, or a failed `statfs`). On a
+Linux container with a 10 GiB volume the file-storage default is therefore
+about 7.5 GiB, not 1 TB.
 
-That 1 TB default is a ceiling, not a reservation: the node only writes
-what the streams actually store. But it causes a problem in a container.
-The node will accept writes up to 1 TB even if the volume mounted under it
-is 10 GiB, and the publish that crosses the real disk boundary fails. Set
-`max_file_store` to match the volume:
+Because the default tracks the real disk, the container hazard isn't the
+default itself — it's setting `max_file_store` *larger* than the volume,
+or running on a shared or thin-provisioned volume where "available" disk
+overstates what this stream may safely use. Either way the node accepts
+writes it can't ultimately store, and the publish that crosses the real
+boundary fails. Pin `max_file_store` to what the volume can actually hold:
 
 ```conf
 # n1-east.conf — pin JetStream storage to the real volume size
@@ -76,7 +80,9 @@ jetstream {
 The ORDERS stream is an R3 file stream. At R3 it keeps three copies, one
 per node, so each node stores the full stream once. A 10 GiB
 `max_file_store` per node leaves ample room for an ORDERS stream sized to
-fit the default 10 GiB volume the Kubernetes chapter provisions.
+fit the default 10 GiB volume the Kubernetes chapter provisions. The Helm
+chart already defaults `max_file_store` to the PVC size, so on Kubernetes
+this pin is usually set for you.
 
 The full set of JetStream limit keys is documented in
 [Reference → Configuration](/reference/config/jetstream). We only cover
@@ -116,8 +122,8 @@ Three more limits round out the node, and one command reads them all:
 
 <div class="nats-example" data-type="learn-deployment-sizing-and-resources-serverInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-`max_connections` caps how many clients a node accepts (default
-unlimited; it's reloadable, and overflow disconnects immediately).
+`max_connections` caps how many clients a node accepts (default 64K, i.e.
+65,536; it's reloadable, and overflow disconnects immediately).
 `max_subscriptions` caps subscriptions per connection (default
 unlimited). `max_payload` caps a single message at 1 MB by default,
 and it must stay `≤ max_pending`. The ORDERS payload is well under a
@@ -137,11 +143,12 @@ A few sizing mistakes only surface in production under load, where
 they're expensive to fix. Each is scoped to this page's two concepts: the
 node's resources and the account's limits.
 
-**Setting `max_file_store` beyond the real disk.** The 1 TB default (or
-any value larger than the mounted volume) lets the node accept writes it
-can't store. The failure is a publish error mid-stream, not a startup
-warning. Set `max_file_store` to the volume size, test small with a
-`10GB` value, and watch the real disk with `df -h`. Don't trust the
+**Setting `max_file_store` beyond the real disk.** A `max_file_store`
+larger than the mounted volume — or a shared or thin-provisioned volume
+whose "available" space the default over-reads — lets the node accept
+writes it can't store. The failure is a publish error mid-stream, not a
+startup warning. Set `max_file_store` to the volume size, test small with
+a `10GB` value, and watch the real disk with `df -h`. Don't trust the
 config number over what the device reports.
 
 **`max_payload` larger than `max_pending`.** If `max_payload` exceeds
@@ -156,13 +163,15 @@ that look like a network fault. Raise the limit (`ulimit -n 800000`)
 before the process starts; the hardened unit on the
 [hardening](/learn/deployment/hardening) page does exactly this.
 
-**JWT account limits on operator-mode clusters.** Operator-mode accounts
-enforce their limits through the account JWT; pre-v2.10 servers didn't
-validate those limits at runtime. Upgrade an operator-mode cluster
-atomically (all nodes together to v2.10+, never a rolling upgrade) so
-one node never enforces a limit that another still ignores. Read the
-active tier with `nats account info` before you size, so you plan against
-the limits the upgraded cluster will actually apply.
+**JWT account limits change only when the account JWT does.** Operator-mode
+accounts enforce their limits through the account JWT the resolver holds,
+not through server config, so raising `MaxStore` or `MaxStreams` means
+editing and pushing the JWT — a server reload or restart won't move them.
+Keep the cluster's server versions aligned as you roll upgrades so every
+node reads the same JWT limit fields (tiered R1/R3 limits, for instance,
+need servers new enough to understand them). Read the active tier with
+`nats account info` before you size, so you plan against the limits the
+cluster actually applies.
 
 The runnable fix for all four is the same first step: read the live
 limits before you size, so the numbers you plan against are the numbers
@@ -177,8 +186,9 @@ You now have a sizing baseline for the ORDERS cluster:
 - The four resources a node spends: CPU (20–30% headroom), memory
   (`order-svc` ~128 MiB), disk (`max_file_store` pinned to the volume),
   and FDs (two per stream).
-- The JetStream defaults named (memory 256 MB, file storage 1 TB) and
-  `max_file_store` set to the real 10 GiB volume.
+- The JetStream defaults named (memory and file storage both default to
+  75% of RAM and disk; 256 MB / 1 TB are only the can't-read fallbacks) and
+  `max_file_store` pinned to the real 10 GiB volume.
 - The account limits read live with `nats account info`, and the rule
   that an un-tiered R3 stream costs `replicas × bytes`.
 

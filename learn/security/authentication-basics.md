@@ -251,7 +251,12 @@ laptop, but on a shared network anyone who can reach the port can
 publish and subscribe, so don't ship it. Give every server at least
 one user list, so an unauthenticated connect fails with
 `nats: error: nats: Authorization Violation` instead of silently
-succeeding.
+succeeding. One setting can undo that lockdown:
+[`no_auth_user`](/reference/config/no_auth_user) admits unauthenticated
+connects as a named user even when a user list exists. Set it only on
+purpose; the
+[Accounts and multitenancy](/learn/security/accounts-and-multitenancy)
+page covers its traps.
 
 **Leaving plaintext passwords in a deployed config.** The server logs
 `Plaintext passwords detected, use nkeys or bcrypt` on startup, and

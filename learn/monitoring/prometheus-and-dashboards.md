@@ -44,7 +44,9 @@ port `:8222`, tell it which collectors to enable, and it serves its own
 ```bash
 # The exporter runs outside NATS. -jsz turns on the JetStream collector
 # (streams and consumers); it scrapes :8222 and serves /metrics on :7777.
-prometheus-nats-exporter -jsz=all -port 7777 http://localhost:8222
+# -prefix nats renames the metrics from the exporter's default jetstream_
+# prefix to nats_ (the same rename the NATS Helm chart applies).
+prometheus-nats-exporter -jsz=all -prefix nats -port 7777 http://localhost:8222
 ```
 
 A **scrape** is one request to an endpoint that fetches its current
@@ -59,7 +61,9 @@ named time series. The lag field `num_pending` becomes
 `nats_consumer_num_pending`; redeliveries become
 `nats_consumer_num_redelivered`; the stream message count becomes
 `nats_stream_total_messages`. The names follow the wire fields you read on the
-last page, with a `nats_` prefix.
+last page. By default the exporter prefixes JetStream metrics with
+`jetstream_`; the `-prefix nats` flag renames them to the `nats_` prefix
+used here, matching what NATS Helm deployments set.
 
 ```
 # /metrics on :7777 — the shipping consumer's lag as a Prometheus series
@@ -124,10 +128,12 @@ the line:
 
 <div class="nats-example" data-type="learn-monitoring-prometheus-and-dashboards-checkConsumer" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The same checks back **nats-surveyor**, a service that wraps
-`nats server report` and `nats server check` across a whole deployment
-and exposes the result for Prometheus to scrape. It's a fuller
-alternative to running the exporter against one node at a time.
+**nats-surveyor** is a separate service that covers the whole deployment
+at once. It connects to the system account, polls every server for its
+`Statz` (the same summary data `nats server report` reads), and exposes
+the combined metrics on one `/metrics` endpoint for Prometheus to scrape.
+It needs a system-account credential, and it's an alternative to running
+the exporter against one node at a time.
 
 The full set of metric names, check flags, and surveyor options is
 documented in [Reference](/reference/). The service-latency metrics that
@@ -141,18 +147,18 @@ Grafana. Each stays within this page's two concepts: the exporter, and
 the alert-and-chart layer behind it.
 
 **A node-local health check passes even with no quorum.** A
-`/healthz?js-server-only=true` query asks only whether *this* node's
-JetStream is up. It returns `200` even when the cluster has lost the
-quorum that keeps the `ORDERS` stream writable, because it never looks
-past the local server. Do not wire a node-local check as your only
+`/healthz?js-enabled-only=true` query asks only whether *this* node's
+JetStream subsystem is running. It returns `200` even when the cluster has
+lost the quorum that keeps the `ORDERS` stream writable, because it never
+looks past the local server. Do not wire a node-local check as your only
 JetStream alert. Add a meta-cluster check with `?js-meta-only=true`,
 which reports whether the JetStream meta layer across the `east` cluster
 is healthy:
 
 ```bash
-# Node-local: is THIS node's JetStream up? 200 even with no quorum.
+# Node-local: is THIS node's JetStream subsystem running? 200 even with no quorum.
 curl -s -o /dev/null -w "%{http_code}\n" \
-  "http://localhost:8222/healthz?js-server-only=true"
+  "http://localhost:8222/healthz?js-enabled-only=true"
 
 # Meta-cluster: is the JetStream meta layer across the cluster healthy?
 # This is the one that turns 503 when the cluster loses quorum.

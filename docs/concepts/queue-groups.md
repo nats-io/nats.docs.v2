@@ -21,7 +21,7 @@ Queue groups operate at the subject level - subscribers still filter messages by
 2. **Multiple members**: NATS randomly selects one member for each message
 3. **Member joins/leaves**: Distribution automatically adjusts without configuration
 
-The queue name is application-defined, not server-configured. Subscribers specify it when subscribing, and NATS handles the rest. If a selected member is slow or unresponsive, subsequent messages go to other members.
+The queue name is application-defined, not server-configured. Subscribers specify it when subscribing, and NATS handles the rest. Selection is random per message and does not account for how busy a member is. A member stops receiving messages only when its subscription or connection goes away, including when the server disconnects it as a slow consumer; the server then picks among the remaining members.
 
 ## Basic Queue Groups
 
@@ -111,7 +111,7 @@ service.v2.workers
 
 ### Worker Design
 
-1. **Idempotent processing**: Messages might be redelivered
+1. **At-most-once delivery**: Core queue groups never redeliver — a message sent to a worker that crashes mid-processing is lost. For redelivery and durability, use [JetStream worker pools](/learn/jetstream/worker-pool). Duplicates come only from publisher retries, so make processing idempotent if the publisher may resend.
 2. **Graceful shutdown**: Drain messages before stopping
 3. **Error handling**: Failed messages should be handled appropriately
 4. **Health checks**: Monitor worker health and availability

@@ -37,16 +37,16 @@ stays in its home region by default.
 
 This page introduces two ideas:
 
-- **Gateways**: the cluster-to-cluster connection that joins clusters
+- Gateways: the cluster-to-cluster connection that joins clusters
   into a super-cluster.
-- **Geo-affinity**: the behavior that keeps queue-group and request
+- Geo-affinity: the behavior that keeps queue-group and request
   traffic in its home region, crossing a gateway only when no local
   worker can serve it.
 
 ## How a gateway joins clusters
 
 Inside a cluster, every server holds a **route** to every other server,
-the full mesh from the [previous page](/learn/topologies/your-first-cluster).
+the full mesh from [Your first cluster](/learn/topologies/your-first-cluster).
 A **gateway** is a different kind of connection. It joins one *cluster*
 to another *cluster*.
 
@@ -66,8 +66,8 @@ one. Those two behaviors — interest-based forwarding and geo-affinity —
 get their own sections below, and they're what keep the inter-region link
 quiet.
 
-A super-cluster (sometimes called a cluster of clusters, the one time
-this guide will write that phrase) is just clusters joined this way.
+A super-cluster (sometimes called a cluster of clusters) is just clusters
+joined this way.
 Each cluster keeps running on its own. The gateway is the connection
 between them.
 
@@ -101,7 +101,7 @@ gateway connections, and a `gateways` array pointing at `west`:
 
 ```conf
 # east gateway block — the name and the gateways list are shared
-# by n1-east, n2-east, n3-east; each server picks its own port.
+# by n1-east, n2-east, n3-east; on one host each picks its own port.
 gateway {
   name: "east"
   port: 7222
@@ -112,7 +112,7 @@ gateway {
 }
 ```
 
-Two things to read carefully.
+Read two fields carefully.
 
 The `name` field identifies the *cluster*, not the server. Every server
 in `east` uses the identical gateway name `east`. It has to match the name
@@ -120,18 +120,19 @@ in this server's `cluster {}` block exactly — set them differently and the
 server refuses to start (`cluster name conflicts between cluster and
 gateway definitions`). A server's own entry
 in the `gateways` array is ignored automatically, so the `name` and the
-`gateways` list are identical across all three `east` servers. Only the
-`port` each one listens on differs.
+`gateways` list are identical across all three `east` servers. In this
+localhost demo the `port` differs per server; on separate hosts even that
+is identical.
 
 The `gateways` array lists every remote cluster, each with its `name`
 and the `urls` to reach its gateway listeners. Listing all three `west`
 URLs gives the connection somewhere to land if one `west` server is
-down. That's also the hint that each remote server runs its own
-gateway listener on its own port. The `port` line above is per server:
-in a real deployment `n1-east`, `n2-east`, and `n3-east` each bind a
-distinct gateway port, and the three `west` URLs point at three distinct
-`west` listeners. The shared part is the `name` and the `gateways` list,
-not the port.
+down. That's also the hint that each `west` server runs its own gateway
+listener. On separate hosts every `east` server can use this identical
+block, port 7222 included — each host is its own listener, so the three
+`west` URLs point at three distinct `west` listeners on three hosts. The
+distinct ports here (7222-7224) exist only because this demo runs all six
+servers on one machine, where a shared port would collide.
 
 You don't have to list every cluster exhaustively, though. Like routes,
 gateways **gossip**: point a server at a few remote gateways and it
@@ -145,7 +146,7 @@ pointing back at the `east` gateway URLs:
 
 ```conf
 # west gateway block — name and gateways list shared by
-# n1-west, n2-west, n3-west; each server picks its own port.
+# n1-west, n2-west, n3-west; on one host each picks its own port.
 gateway {
   name: "west"
   port: 7322
@@ -206,9 +207,9 @@ want `ORDERS` in the mix too.
 
 ## Confirm the super-cluster formed
 
-A super-cluster is only real if a message crosses it. Subscribe in `west`,
-publish in `east`, and watch the order arrive on the far side of the
-gateway.
+Confirm the super-cluster works by sending a message across it. Subscribe
+in `west`, publish in `east`, and watch the order arrive on the far side of
+the gateway.
 
 Subscribe to `orders.>` on a `west` server, in its own terminal:
 
@@ -232,14 +233,14 @@ order ord_8w2k
 It was published in `east`, crossed the gateway, and arrived in `west`.
 That only happens once the gateway is live *and* `west` has advertised
 interest in `orders.>` across it — the interest-based forwarding from
-[earlier](#gateways-carry-only-what-has-interest). If nothing arrives, the
-gateway never formed: check that each server's gateway `name` matches its
-cluster `name`.
+[earlier](#gateways-carry-only-what-has-interest). If nothing arrives,
+check each server's log for gateway connection errors — a typo'd remote
+name or an unreachable gateway URL keeps the connection from forming.
 
 ## Geo-affinity keeps traffic local
 
-Now the second concept. Acme runs the same fleet of order workers in
-both regions: a **queue group** named `order-workers`, where each
+The second concept is geo-affinity. Acme runs the same fleet of order
+workers in both regions: a **queue group** named `order-workers`, where each
 message goes to exactly one worker in the group. (If queue groups are
 hazy, the [queue-groups primer](/concepts/queue-groups) is the
 five-minute recap.)
@@ -262,9 +263,8 @@ serve. If every `east` worker is down, an order published in `east` has
 no local subscriber, so geo-affinity falls through and the message
 crosses the gateway to a remote cluster that has an interested worker.
 When more than one remote cluster has a worker for the queue group, NATS
-forwards across every gateway with interest. The queue-group rule still
-applies on the far side, so the order reaches exactly one worker, and no
-work is lost in the process.
+picks one of them and sends the message across that single gateway, so the
+order still reaches exactly one worker, and no work is lost in the process.
 
 You can watch this local-first behavior. Start a queue worker in each
 region, each in its own terminal:
@@ -306,13 +306,14 @@ independent clusters with a `gateway {}` block instead, so only
 interested traffic crosses the gateway.
 
 **Mismatched gateway names.** Each entry in the `gateways` array must use
-the remote cluster's exact name. Typo it — `wset` for `west` — and the
-server keeps dialing a cluster that never answers to that name
-(`Failing connection to gateway "wset", remote gateway name is "west"`),
-and the gateway never forms. Nothing fails at startup, so confirm with the
-cross-region publish from [Confirm the super-cluster
-formed](#confirm-the-super-cluster-formed): if the order never reaches the
-other side, a name is wrong.
+the remote cluster's exact name. Typo it — `wset` for `west` — and that
+entry never connects; the server logs `Failing connection to gateway
+"wset", remote gateway name is "west"` on every retry. Because the other
+cluster's config is correct, its outbound connection still lands, and the
+super-cluster forms through that reverse connection and gossip. So a
+working cross-region publish doesn't prove your config is right — the typo
+keeps failing in the background. Watch each server's log for that error
+string instead.
 
 **Chatty cross-region traffic without local workers.** Geo-affinity only
 keeps traffic home when a *local* queue subscriber exists to serve it.
@@ -329,9 +330,9 @@ work, so each region serves its own orders and the gateway stays quiet.
 Acme's deployment grew from one cluster to a super-cluster:
 
 - `east` and `west` are independent clusters, each a full mesh of routes.
-- A **gateway** joins them, carrying only traffic with interest on the
+- A gateway joins them, carrying only traffic with interest on the
   far side.
-- **Geo-affinity** keeps queue-group and request traffic in its home
+- Geo-affinity keeps queue-group and request traffic in its home
   region, crossing the gateway only when the local side can't serve.
 - Nothing about publishing or subscribing changed — the same
   `orders.created` publish still reaches an interested subscriber, now even

@@ -8,8 +8,9 @@ description: List the INVOICES bucket and watch it for new objects with the anal
 # Watching and listing
 
 The `INVOICES` bucket now holds a few objects: `invoice-ord_8w2k.pdf` with
-its description and `content-type` header, and `label-ord_8w2k.png` linked
-to it. Getting one back means knowing its name. But the `analytics`
+its description and `content-type` header, the large multi-chunk
+`invoice-ord_9x3m.pdf` from the Chunking page, and `label-ord_8w2k.png`
+linked to the first invoice. Getting one back means knowing its name. But the `analytics`
 service doesn't know the names ahead of time. It wants to discover what's
 in the bucket, and to learn the moment a new object lands.
 
@@ -29,8 +30,9 @@ Run it against `INVOICES`:
 
 <div class="nats-example" data-type="learn-object-store-watching-and-listing-list" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The result is one entry per object: `invoice-ord_8w2k.pdf` and
-`label-ord_8w2k.png`. Each entry carries the object's metadata (name,
+The result is one entry per object: `invoice-ord_8w2k.pdf`,
+`invoice-ord_9x3m.pdf`, and `label-ord_8w2k.png`. Each entry carries the
+object's metadata (name,
 size, chunk count, description, modification time) but not its bytes. A
 list is cheap: it reads metadata, never chunks. You can list a bucket of
 thousand-megabyte invoices without moving any of the object data.
@@ -148,8 +150,9 @@ the second is a real problem.
 
 You now have:
 
-- A list of `INVOICES`: a snapshot of `invoice-ord_8w2k.pdf` and
-  `label-ord_8w2k.png`, metadata only, soft-deleted objects filtered out.
+- A list of `INVOICES`: a snapshot of `invoice-ord_8w2k.pdf`,
+  `invoice-ord_9x3m.pdf`, and `label-ord_8w2k.png`, metadata only,
+  soft-deleted objects filtered out.
 - `analytics` watching the bucket, with `packing-slip-ord_8w2k.txt` added
   during the demo and surfaced as a live metadata update.
 - The two-step pattern in hand: watch tells you what changed; get fetches

@@ -165,10 +165,12 @@ is stored. The same header from a client library:
 
 Give every publish you might retry a stable `Nats-Msg-Id` that the
 producer can recompute, such as an order ID, a request ID, or a hash of
-the payload. The full set of publish headers, and how to change the
-tracking window, is in
-[Reference → JetStream Headers](/reference/jetstream/api/headers). This
-page uses only `Nats-Msg-Id`.
+the payload. The full set of publish headers is in
+[Reference → JetStream Headers](/reference/jetstream/api/headers). The
+tracking window is a stream setting, not a header: it's the
+`Duplicate Window` covered on the
+[stream page](/learn/jetstream/your-first-stream). This page uses only
+`Nats-Msg-Id`.
 
 ## What we've skipped
 

@@ -33,47 +33,71 @@ directory of the config file that contains it**, not to the directory you
 launch the server from:
 
 ```conf
-# /etc/nats/nats.conf — the main config for nats-0..2
+# /etc/nats-config/nats.conf — the main config for nats-0..2
+# The Helm chart generates the identity keys — server_name and the cluster
+# routes — uniquely per pod. You own the includes below.
+server_name: $SERVER_NAME
 listen: "0.0.0.0:4222"
 
 cluster {
   name: "east"
   listen: "0.0.0.0:6222"
+  routes: [
+    "nats://nats-0.nats-headless:6222"
+    "nats://nats-1.nats-headless:6222"
+    "nats://nats-2.nats-headless:6222"
+  ]
 }
 
 jetstream {
-  store_dir: "/var/lib/nats/jetstream"
+  store_dir: "/data/jetstream"
 }
 
-# Pull in the per-account and per-region files.
-include "accounts/orders.conf"
-include "accounts/analytics.conf"
+# Pull in the shared TLS material and the per-region routing files.
+include "tls.conf"
 include "regions/us.conf"
 include "regions/eu.conf"
 ```
 
-Each included file holds one concern. The `ORDERS` account, its
-`order-svc` user, and its limits live in their own file:
+A JetStream cluster won't boot without both `server_name` and `routes`, so
+the chart fills them in per pod; a dry-run that reports the file valid
+still can't start without them (see
+[Validate, then reload](#validate-then-reload)). The per-region files hold
+the routing each region owns, so a region's configuration can be reviewed
+and changed on its own without touching the main config or another
+region's file.
+
+Because the path is relative to the config file's directory,
+`include "regions/us.conf"` resolves to `/etc/nats-config/regions/us.conf`.
+Launch the server from `/root` or from `/`, and it still resolves the same
+way. The [Pitfalls](#pitfalls) section shows what happens when you forget
+this.
+
+An account splits into its own file the same way. This cluster runs under
+the `ACME` operator, which keeps accounts as JWTs in a resolver — you edit
+those with `nats account edit` and push them live, not through a config
+include. A deployment that keeps accounts in the config instead wraps each
+one in an `accounts` block so the server parses it:
 
 ```conf
-# /etc/nats/accounts/orders.conf
-# Owned by the orders team. Reloadable: edit and SIGHUP.
-ORDERS: {
-  jetstream: { max_memory: 256MB, max_file: 10GB }
-  users: [
-    { user: "order-svc", password: "$ORDER_SVC_PASS" }
-  ]
+# /etc/nats-config/accounts/orders.conf — config-based accounts (no operator)
+# Reloadable: edit and SIGHUP.
+accounts {
+  ORDERS: {
+    jetstream: { max_memory: 256MB, max_file: 10GB }
+    users: [
+      { user: "order-svc", password: $ORDER_SVC_PASS }
+    ]
+  }
 }
 ```
 
-The per-region files hold the routing each region owns, so a region's
-configuration can be reviewed and changed on its own without touching the
-main config or another region's file.
-
-Because the path is relative to the config file's directory, the includes
-above resolve to `/etc/nats/accounts/orders.conf` and so on. Launch the
-server from `/root` or from `/`, and they still resolve the same way. The
-[Pitfalls](#pitfalls) section shows what happens when you forget this.
+The `$ORDER_SVC_PASS` reference is unquoted on purpose: an unquoted
+`$NAME` token resolves a config-defined variable and then an environment
+variable, and an unset one is a parse error the dry-run catches. Quoting
+it (`"$ORDER_SVC_PASS"`) would store the literal string `$ORDER_SVC_PASS`
+instead — which is why bcrypt hashes, full of `$`, are the values you do
+quote.
 
 ## Reloadable versus non-reloadable keys
 
@@ -86,25 +110,30 @@ reconnect:
 
 - Account, user, and permission definitions: add `analytics-reader`,
   tighten `order-svc`'s subjects.
-- Connection and message limits: `max_connections`,
-  `max_subscriptions`, `max_payload`, `max_control_line`.
-- Most JetStream account limits.
-- TLS certificate and key paths: the server re-reads the file on the
-  next handshake.
-- Cluster and gateway routes, and logging settings.
+- Connection and message limits: `max_connections`, `max_payload`,
+  `max_control_line`. (Not `max_subscriptions` — a reload rejects a change
+  to it.)
+- Most JetStream account limits, and the `jetstream` enable flag itself
+  (a reload turns JetStream on or off).
+- TLS certificate and key paths: the server re-reads the files when it
+  reloads.
+- Cluster routes and logging settings. (Gateway routes are not
+  reloadable; a reload can only refresh their TLS material.)
 
 **Non-reloadable** keys need a process restart, because they define the
 server's identity:
 
 - `port` / `listen`: the address the server binds.
-- The `jetstream` enable flag, which turns JetStream on or off.
-- The cluster `name`.
+- The cluster's listen host and port: the address peers route to.
+- The JetStream `store_dir`: the server won't move its storage directory
+  on a reload.
 
 A reload can change *policy* (who connects, what they
-may do, how much they may store), but it can't change *identity* (the ports
-the server listens on, the cluster it belongs to). Changing one of those
-requires a [rolling upgrade](/learn/deployment/rolling-upgrades) rather
-than a reload.
+may do, how much they may store), but it can't change *identity* (the
+addresses the server and its cluster bind, or where JetStream keeps its
+data). Changing one of those requires a
+[rolling upgrade](/learn/deployment/rolling-upgrades) rather than a
+reload.
 
 The full set of reloadable keys is in
 [Reference → Configuration](/reference/config); here we cover only the
@@ -127,7 +156,10 @@ nats-server -c /etc/nats/nats.conf -t
 
 A clean config prints `nats-server: configuration file ... is valid` and
 exits zero. A broken one prints the parse error and the offending line,
-and exits non-zero, so you can gate the reload on it in a script.
+and exits non-zero, so you can gate the reload on it in a script. The
+dry-run checks syntax and validation, not whether the server can start: a
+JetStream cluster missing `server_name` or `routes` passes `-t` yet still
+fails to boot, which is why the chart supplies those keys.
 
 With the config validated, trigger the reload. The mechanism is a
 **SIGHUP** to the `nats-server` process. The systemd unit wires
@@ -160,8 +192,6 @@ reload across all three pods automatically:
 # values.yaml — the reloader ships enabled in the Helm chart
 reloader:
   enabled: true
-  # Falls back to polling when inotify is unavailable on the node.
-  # extraFlags: ["--force-poll"]
 ```
 
 The animation below traces the whole path: a config file change, the
@@ -173,7 +203,9 @@ up the new server info.
 
 The reloader retries if the server is briefly unreachable (30 retries by
 default, four seconds apart), so a reload issued during a momentary
-blip still lands.
+blip still lands. Where a node's filesystem doesn't deliver inotify
+events, add the reloader's `--force-poll` flag through `reloader.merge`,
+which replaces the container's args wholesale.
 
 ## Secrets as mounted files
 
@@ -193,8 +225,9 @@ tls {
 
 This split matters for reload. Rotating a certificate means replacing the
 file behind `cert_file` and `key_file`, then reloading; the server
-re-reads the certificate on the next TLS handshake. The config text never
-changes; only the file it points at does. The auth model behind these
+re-reads the certificates when it reloads, and new handshakes present the
+new certificate while open connections keep their session. The config text
+never changes; only the file it points at does. The auth model behind these
 credentials (operators, accounts, JWTs) is taught in
 [Security](/learn/security); here you only mount and reference them.
 
@@ -204,12 +237,13 @@ A few mistakes can turn a routine reload into an outage. Each is scoped to this
 page's two ideas: includes and live reload.
 
 **Include paths are relative to the config file, not your shell.** The
-`include "accounts/orders.conf"` directive resolves against the directory
-of the file that contains it, so a server launched from `/root` and one
-launched from `/etc/nats` both find `/etc/nats/accounts/orders.conf`. The
-trap is assuming the path is relative to your current directory, moving
-the main config, and watching the includes fail to resolve. Use absolute
-paths when in doubt, and validate before you trust it.
+`include "regions/us.conf"` directive resolves against the directory of
+the file that contains it, so a server launched from `/root` and one
+launched from `/etc/nats-config` both find
+`/etc/nats-config/regions/us.conf`. The trap is assuming the path is
+relative to your current directory, moving the main config, and watching
+the includes fail to resolve. Use absolute paths when in doubt, and
+validate before you trust it.
 
 **A reload during a rebalance can interrupt a leadership transfer.** If
 you SIGHUP a node while JetStream is moving `ORDERS` replicas or handing
@@ -226,12 +260,13 @@ an admin trims the stream back under the limit. The reload changes the
 *ceiling*, not the *contents*. Raise limits freely; lower them only after
 checking what the stream currently stores.
 
-**Rotating a TLS certificate without watching its expiry hangs old
-connections on a dead cert.** The server re-reads `cert_file` and
-`key_file` on the *next* TLS handshake, so a reload swaps the certificate
-for new connections cleanly. Connections already open keep the cert
-they negotiated with. If you let the old certificate expire before those
-clients reconnect, they hang on a cert the server no longer presents.
+**Rotating a TLS certificate late fails every new handshake.** The server
+re-reads `cert_file` and `key_file` when it reloads, so a reload swaps the
+certificate cleanly and connections already open keep the session they
+negotiated regardless of the old cert's expiry. What breaks is letting the
+certificate expire before you rotate: once it's expired the server
+presents a dead cert, and every new connection and every client reconnect
+fails its TLS handshake until you drop in a valid file and reload.
 
 Do: rotate well before expiry, and track the certificate's expiry date so
 the swap is never an emergency. Don't: wait for the alert that the cert
@@ -268,9 +303,9 @@ running cluster with a SIGHUP: no downtime, no client reconnect. On
 Kubernetes the reloader sidecar does the signaling for you whenever the
 ConfigMap changes.
 
-What a reload can't do is change the server's identity: its ports, its
-JetStream enablement, or its cluster name. Those need a process restart,
-rolled through the cluster one node at a time.
+What a reload can't do is change the server's identity: its ports, the
+addresses its cluster binds, or where JetStream keeps its data. Those need
+a process restart, rolled through the cluster one node at a time.
 
 ## What's next
 

@@ -42,21 +42,23 @@ kill -SIGUSR2 $(cat /var/run/nats/nats.pid)
 
 That one signal kicks off a sequence inside the node:
 
-1. It sets a lame-duck flag and broadcasts `INFO ldm:true` to every
-   connected client. A modern client reads that as "reconnect
-   elsewhere" and dials another node.
-2. It closes its client listener, so no *new* connection lands on a node
+1. It closes its client listener, so no *new* connection lands on a node
    that's on its way out.
-3. It transfers any Raft leadership it holds to another replica, so no
+2. It transfers any Raft leadership it holds to another replica, so no
    stream is left leaderless.
-4. It shuts down its JetStream assets cleanly, flushing to disk.
-5. It kicks remaining clients in waves, first after a short grace period
-   and then periodically, so they reconnect spread out rather than all at
-   once.
+3. It shuts down its JetStream assets cleanly, flushing to disk.
+4. It broadcasts `INFO ldm:true` to its routes and its connected clients.
+   The update drops this node from each client's server pool, so the next
+   reconnect lands elsewhere; the client takes no other action on the INFO
+   itself.
+5. After a short grace period it closes the remaining client connections,
+   spread over the lame-duck duration rather than all at once. Each client
+   sees its connection close and reconnects to another node through its
+   normal reconnect logic.
 
-Only after that does the process exit. By then the clients have already
-moved and the leadership has already transferred, so the stream never lost
-a quorum.
+Only after that does the process exit. By then leadership has transferred
+and the clients have moved off as their connections closed, so the stream
+never lost a quorum.
 
 Two settings control the timing. `lame_duck_grace_period` (default
 `10s`) is how long the node waits before it starts kicking clients.
@@ -90,10 +92,15 @@ lifecycle:
         - "-sl=ldm=/var/run/nats/nats.pid"
 ```
 
-The `-sl=ldm=...` form reads the pid file and signals the running server
-to enter lame-duck mode, identical to the `SIGUSR2` you sent above. When
-Kubernetes terminates a pod, it runs this hook first and waits for the
-node to drain before sending the kill.
+The `-sl=ldm=...` form reads the pid file, signals the running server to
+enter lame-duck mode, and returns — identical to the `SIGUSR2` you sent
+above. Kubernetes then sends SIGTERM, which the server ignores while it's
+draining, so the drain is protected only by
+`terminationGracePeriodSeconds`: when that expires the kubelet sends
+SIGKILL. The chart defaults `lame_duck_duration` to `30s` and
+`terminationGracePeriodSeconds` to `60s`. If you raise the duration, raise
+the grace period above `lame_duck_duration` plus shutdown overhead too, or
+the kubelet SIGKILLs the node mid-drain.
 
 ## Upgrade order
 
@@ -105,18 +112,30 @@ One node in the cluster is the **meta-leader**: the Raft leader for the
 cluster's own metadata, the node that coordinates where streams and
 consumers live. The other two are non-leaders. Stepping the meta-leader
 down forces a metadata election, and while that election runs, stream and
-consumer *operations* (create, update, leadership moves) pause for tens
-of seconds.
+consumer *operations* (create, update, leadership moves) pause until a new
+leader wins — typically about 5 to 10 seconds with default timeouts if the
+node was killed outright, or roughly a second if it handed leadership off
+first.
 
 So the rule is: **upgrade the non-leaders first, and the meta-leader
 last.** By the time you reach the meta-leader, the other two nodes are
 already on the new version and ready to take over, so the one unavoidable
 metadata election is short and happens once.
 
-Before you start, read the cluster's current shape so you know which node
-is the leader and confirm the stream is at full R3:
+Before you start, read the cluster's current shape and confirm the stream
+is at full R3:
 
 <div class="nats-example" data-type="learn-deployment-rolling-upgrades-streamReplicas" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+That output shows the `ORDERS` stream's own Raft leader and each replica's
+status — the per-node "current" gate you'll use between steps. The
+**meta-leader** is a separate Raft group and may sit on a different node;
+find it with `nats server report jetstream`, which marks the node leading
+the cluster's metadata:
+
+```bash
+nats server report jetstream
+```
 
 The walkthrough below assumes `nats-1` is the meta-leader. The procedure
 for each node is the same three steps:
@@ -176,9 +195,12 @@ this deployment needs here.
 ## Client reconnection during the upgrade
 
 A node leaving in lame-duck mode requires no action from a correctly
-configured client. The `INFO ldm:true` broadcast tells the client to
-reconnect, and every NATS client library reconnects automatically: it
-dials another node in the cluster, resubscribes, and resumes.
+configured client. The `INFO ldm:true` broadcast removes this node from
+the client's server pool (and fires an optional lame-duck callback if the
+app registered one); the client keeps running on its existing connection.
+When the server later closes that connection during the staggered kick,
+the client's normal reconnect logic dials another node in the cluster,
+resubscribes, and resumes.
 
 You can watch this happen. Subscribe `warehouse` to `orders.created` in
 one terminal, publish an order from `order-svc` in another, and roll a
@@ -204,11 +226,13 @@ clients and exits while the stream is still catching up. Measure how long
 a real drain takes on your cluster first, then set the duration above it
 with margin, rather than defaulting to the minimum value.
 
-**Upgrading the meta-leader without draining it blocks stream ops for
-30–60s.** Restart the meta-leader directly and the cluster has no leader
-for metadata until it elects a new one, and during that window every
-stream and consumer operation stalls. Always enter lame-duck mode so
-leadership transfers *before* the process stops, and always do the
+**Upgrading the meta-leader without draining it stalls stream ops until a
+new leader is elected.** Restart the meta-leader directly and the cluster
+has no metadata leader until the election timeout fires and a follower
+wins — about 5 to 10 seconds with default timeouts — and during that
+window every stream and consumer operation stalls. Draining it first
+transfers leadership in roughly a second instead. Always enter lame-duck
+mode so leadership transfers *before* the process stops, and always do the
 non-leaders first so the meta-leader's one election is short. Check which
 node leads before you touch anything, and re-check after each node, so
 you never take down two replicas at once:
@@ -222,13 +246,14 @@ R3 stream its quorum. Set a `PodDisruptionBudget` with `minAvailable: 2`
 so Kubernetes refuses to voluntarily evict past one pod. Don't rely on
 doing the steps slowly by hand — make the budget enforce it.
 
-**A reconnect storm on lame-duck spikes the surviving nodes.** When a
-node broadcasts `INFO ldm:true`, all of its clients reconnect at roughly
-the same moment, and that simultaneous burst of reconnects can overwhelm
-the two nodes still up. The grace period and duration already spread the
-kicks; on top of that, stagger the upgrade across ordinals, finishing one
-node and letting it rejoin before starting the next, rather than draining
-several at once.
+**A reconnect storm comes from abrupt kills, not from lame-duck.** Clients
+take no action on the `INFO ldm:true` broadcast itself — lame-duck mode
+staggers the connection closes over the duration precisely so their
+reconnects spread out instead of arriving as one burst that could
+overwhelm the two nodes still up. The storm risk is what you get *without*
+that: killing a node outright, or setting a duration so short the spread
+collapses. Keep the duration comfortable, and roll one node at a time,
+finishing one and letting it rejoin before starting the next.
 
 ## Where you are
 

@@ -101,12 +101,14 @@ digest to check them against.
 Two mistakes are common on a first object. Both come from treating put
 and get as if they couldn't fail.
 
-**A digest mismatch means do not use the bytes.** The pieces of an object
-are written as separate messages. If a put is interrupted partway (the
-process dies, the connection drops), the object can be left incomplete.
-The store guards against this on get: it verifies the reassembled bytes
-against the stored digest and returns `ErrDigestMismatch` on a mismatch.
-The mistake is to ignore that error and use the bytes anyway. Do check the
+**A digest mismatch means do not use the bytes.** The metadata record is
+written last, after the pieces, so an interrupted put (the process dies, the
+connection drops) leaves no gettable object at all: a get reports the name as
+not found, not a corrupt file. A digest mismatch is a different failure. It
+means the object was stored whole but some of its pieces were lost or
+corrupted afterward, so get verifies the reassembled bytes against the stored
+digest and returns `ErrDigestMismatch`. The mistake is to ignore that error
+and use the bytes anyway. Do check the
 get result before you act on it; an `ErrDigestMismatch` means retry the
 get, and a repeated mismatch means the object is damaged and should be
 put again. Don't assume a put "worked" without a get confirming it

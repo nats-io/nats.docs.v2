@@ -88,9 +88,9 @@ Each nak also raises a nak advisory on
 [Reference → Nak advisory](/reference/jetstream/advisory/nak).
 
 A delayed nak sets the wait one redelivery at a time, and the client
-chooses it. To have the server apply a delay schedule on its own,
-growing the wait with each attempt, set a **backoff** on the consumer.
-Backoff is covered below.
+chooses it. A **backoff** on the consumer grows the wait automatically,
+but it only shapes redeliveries that fire when the AckWait timer runs
+out — it doesn't slow a nak. Backoff is covered below.
 
 ## Term: the poison message path
 
@@ -144,9 +144,11 @@ These two cover the two ways a delivery can fail. AckWait handles the
 case where no answer arrives. MaxDeliver caps the case where a worker
 keeps sending a nak on the same message.
 
-A timeout and a nak reach the same redelivery loop. Whichever one starts
-it, the backoff schedule below sets how long the server waits before the
-next attempt. Backoff applies to timeouts as well as naks.
+A timeout and a nak both cause redelivery, but they're timed differently.
+The backoff schedule below only spaces out redeliveries that fire when the
+AckWait timer runs out. A bare nak redelivers right away, and a configured
+backoff doesn't slow it — to delay a nak, the client attaches the delay to
+the nak itself.
 
 Set both on the consumer with `nats consumer edit`:
 
@@ -159,8 +161,8 @@ Configuration:
 
            Ack Policy: Explicit
              Ack Wait: 10.00s
-   Maximum Deliveries: 5
         Replay Policy: Instant
+   Maximum Deliveries: 5
       Max Ack Pending: 1,000
 ```
 
@@ -220,8 +222,9 @@ how they combine.
 **A plain nak retries with no delay.** A nak with no delay asks
 for redelivery in the same instant. A temporary failure then retries
 right away, fails again, and ties up one worker on one message. Don't
-send a bare nak for a temporary failure. Nak with a delay, or set a
-backoff on the consumer so the wait grows each round (covered above).
+send a bare nak for a temporary failure. Nak with a delay so the
+redelivery waits before it retries (covered above). A consumer backoff
+won't help here — it spaces out AckWait timeouts, not naks.
 
 **MaxDeliver drops a message with no dead-letter.** When a message hits
 the delivery limit, the server removes it from the consumer's pending

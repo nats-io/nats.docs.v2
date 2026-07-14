@@ -16,7 +16,7 @@ published on `n1-east` reaches a subscriber on `n3-east` over a route,
 and nothing on this page changes that.
 
 What this page changes is what JetStream does on the cluster. JetStream is
-already enabled on `east` cluster, but no stream lives on it yet. This page
+already enabled on the `east` cluster, but no stream lives on it yet. This page
 creates `ORDERS` replicated across the three servers, so it survives the loss of
 any one of them.
 
@@ -53,7 +53,7 @@ covers.
 
 The meta group reaches its decisions by majority vote. A majority of a
 group needs more than half its members reachable, which is why a
-JetStream cluster wants an **odd** number of servers.
+JetStream cluster wants an odd number of servers.
 
 Three servers form a clean majority of two. Lose one server and two
 remain, still a majority, so the meta group keeps coordinating and your
@@ -61,27 +61,28 @@ streams keep serving. This is exactly why Acme runs three, not two.
 
 Lose a second server, though, and the majority is gone. With one of three
 left, no write can reach a majority, so the stream stops accepting new
-messages until a server comes back — it would rather pause than store an
-order it can't copy to a majority. Three servers is what lets any single
+messages until a server comes back. A write is never stored on a single
+copy that a majority hasn't confirmed. Three servers is what lets any single
 one fail while writes keep flowing.
 
 An even count gives you no extra protection here. Two servers have no majority once
 one is gone, and four tolerate the same single failure that three do while
 costing an extra server. That's why production clusters run an odd
-count, typically three or five; a stream replicates across at most five
-servers, so five is the practical ceiling.
+count, typically three or five — a stream keeps at most five copies, so
+more servers add capacity, not more copies of one stream.
 
 The wire-level detail of how that majority vote works (the Raft
 protocol, election timing, and log replication) lives in the
-[Clustering & Replication](/learn/clustering) deep dive. The shape we need
-here is an odd server count, a majority rule, and one coordinator.
+[Clustering & Replication](/learn/clustering) deep dive. What matters here:
+run an odd number of servers so a majority can always form, with one server
+coordinating.
 
 ## Make ORDERS survive a server loss
 
 The `ORDERS` stream lived on a single server through the [JetStream
 chapter](/learn/jetstream).
 Now that `east` is a cluster with JetStream on, you create the stream here —
-and because there are three servers, you create it **replicated**, so it
+and because there are three servers, you create it replicated, so it
 survives one of them dying.
 
 A stream picks how many copies of itself to keep: its **replica factor**.
@@ -105,7 +106,7 @@ nats stream add ORDERS --subjects "orders.>" --replicas=3 --defaults
 ```
 
 Then ask what it did. The same `nats stream info` you ran on one server now
-grows a **Cluster Information** section, because the stream lives on more
+includes a Cluster Information section, because the stream lives on more
 than one:
 
 ```bash
@@ -134,7 +135,7 @@ copies takes every write to `ORDERS` first, then sends it to the other
 replicas, and the write is acknowledged only once a majority hold it. The two
 `Replica` lines are the copies that follow. `current` means a copy has
 recently checked in and holds the same data; `seen` reports how long
-since it last reported. All three copies hold the same data.
+since it last reported.
 
 This stream's leader, `n1-east`, is whichever copy the cluster picked to
 take its writes — not necessarily the server coordinating the meta group.
@@ -195,8 +196,8 @@ OK ORDERS OK:3 peers OK:0 sources | sources=0
 **An even server count gives you no extra protection.** A majority needs more than half the
 group reachable, so four servers tolerate the same single loss that three do at
 the cost of an extra server, and two have no majority left once one is gone.
-Run an odd count of three or five (a stream replicates across at most five
-servers), never four or six.
+Run an odd number of servers so a majority can always form, never an even
+count like four or six.
 
 **All three replicas in one failure domain defeat R3.** Three copies survive
 one server loss only if the three servers can fail independently. Spread across
@@ -213,7 +214,7 @@ Acme's deployment now looks like this:
   on every server, each with its own `store_dir`.
 - The cluster elects a **meta leader** that coordinates where streams and
   consumers live.
-- `ORDERS` is an **R3** stream: three copies across the three servers,
+- `ORDERS` is an R3 stream: three copies across the three servers,
   with one of them taking every write.
 - The order service publishes exactly as it always has and gets a
   durability promise it didn't have on a single server.

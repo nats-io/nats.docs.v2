@@ -3,15 +3,16 @@
 # These are per-server ceilings: payload size, connection cap, and the
 # JetStream memory/store limits the node was started with.
 #
-# Point at one node (here n1-east) and ask it about itself.
+# `nats server info` is a system-account request, so authenticate with the
+# system account's creds, not the ORDERS-account user creds.
 nats server info n1-east \
   --server tls://nats.acme.internal:4222 \
-  --creds /etc/nats/creds/order-svc.creds
+  --creds /etc/nats/creds/sys.creds
 
 # Look for these in the output:
-#   Max Payload:     max_payload (default 1.0 MiB) — the largest single message
-#   Max Connections: max_connections (default unlimited)
-#   JetStream:       Max Memory and Max Storage configured on this node
+#   Maximum Payload:     max_payload (default 1.0 MiB) — the largest single message
+#   Maximum Connections: max_connections (default 64K, i.e. 65,536)
+#   JetStream:           Max Memory and Max Storage configured on this node
 #
 # Sizing rule: max_payload must be <= max_pending. Keep max_pending at
 # >= 10x your peak message size so a burst of large orders does not stall

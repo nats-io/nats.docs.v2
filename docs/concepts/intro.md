@@ -26,7 +26,7 @@ NATS has a vibrant and growing community:
 - Browse the documentation using the sidebar
 - Search for specific topics using the search bar
 - Join our [Slack community](https://natsio.slack.com) for real-time help
-- Check out [examples and tutorials](https://github.com/nats-io/nats-examples)
+- Check out [examples and tutorials](https://natsbyexample.com)
 
 Ready to dive in? Start with **[What is NATS?](./what-is-nats.md)** →
 

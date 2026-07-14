@@ -10,11 +10,12 @@ nats stream info KV_INVENTORY
 # The configuration half proves every framing claim from this chapter:
 #
 #   Subjects: $KV.INVENTORY.>          # one subject per key
-#   Max Msgs Per Subject: 1            # this is the history depth
 #   Discard Policy: New                # at a limit, rejects the newest write
-#   Allow Direct: true                 # get reads without a consumer
-#   Allow Rollup: true                 # purge replaces a key with one marker
-#   Deny Delete: true                  # the API owns deletion, not raw stream ops
+#   Direct Get: true                   # get reads without a consumer
+#   Allows Rollups: true               # purge replaces a key with one marker
+#   Allows Msg Delete: false           # deny_delete: no raw stream deletes
+#   Maximum Per Subject: 10            # this is the history depth (raised on
+#                                      # the history page)
 #
 # The key widget-blue is the last token of its subject. Confirm it by
 # asking the stream for the last message on that exact subject:

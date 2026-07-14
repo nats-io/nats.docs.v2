@@ -26,15 +26,17 @@ under pressure during an outage is *which tool*. Decide it ahead of time, per fa
 | What happened | Reach for | Why |
 |---|---|---|
 | The whole `east` cluster is gone | promote `ORDERS_DR` | The mirror already holds the data; promotion is minutes, a restore is hours. |
-| Someone deleted or purged `ORDERS` by mistake | restore the snapshot | The mirror followed the delete, so it's gone there too. The snapshot is the only intact copy. |
+| Someone deleted or purged `ORDERS` by mistake | recover from `ORDERS_DR`, or restore the snapshot | The mirror survives an upstream delete: it keeps every message it had copied and just stops updating, so it's usually the freshest intact copy. The snapshot is the older fallback. |
 | Messages on `ORDERS` are corrupt or wrong (a bad publisher) | restore a known-good snapshot, or purge the bad range | The bad data replicated to the mirror as well. The snapshot predates the corruption. |
 | A consumer lost its position (`shipping` redelivering from zero) | restore a `--consumers` snapshot | Only the snapshot captured the consumer's saved delivery position. |
 
-One principle runs through the whole table: **a mirror recovers a site, a
-snapshot recovers a mistake.** A mirror is an exact live copy, so it
-also copies your errors. That's why the chapter built both, and
-why [R3 replication](/learn/clustering) is on neither row: replicating a
-bad write three times doesn't undo it.
+One principle runs through the whole table: a snapshot is the only copy
+that predates a mistake. A mirror follows the upstream's live writes, so
+a corrupt write replicates into it; it survives an upstream delete but
+only as a copy frozen at the break, never an earlier point you chose.
+That's why the chapter built both, and why
+[R3 replication](/learn/clustering) is on neither row: replicating a bad
+write three times doesn't undo it.
 
 ## Failover: promote the mirror
 
@@ -76,7 +78,25 @@ Once the mirror config is gone, the stream stops following `east`. It still
 holds every message it had copied. Promotion doesn't touch the data, only
 the relationship.
 
-### Step 3 — add the subjects so it accepts writes
+### Step 3 — clear the lost stream's assignment
+
+The subject bind in the next step fails if the old `ORDERS` assignment is
+still in the JetStream metadata. The server checks the subjects you're
+adding against every stream in the account, and losing the site doesn't
+remove the dead `ORDERS` on its own, so the edit comes back with
+`subjects overlap with an existing stream (10065)`. Clear the stale entry
+first:
+
+```bash
+# Remove the assignment for the lost ORDERS so its subjects are free.
+nats --server nats://site2:4222 stream rm ORDERS --force
+```
+
+This is the official promotion order: free the mirrored stream's
+subjects, drop the mirror config (step 2), then bind those subjects to
+the promoted stream (step 4).
+
+### Step 4 — add the subjects so it accepts writes
 
 A mirror has no subjects of its own; it receives messages through the mirror
 mechanism, not by listening on `orders.>`. A writable primary needs to *bind*
@@ -91,7 +111,7 @@ nats --server nats://site2:4222 stream edit ORDERS_DR --subjects "orders.>"
 `orders.cancelled` — the same subjects the lost primary held. It now functions
 as a full primary.
 
-### Step 4 — redirect publishers and consumers
+### Step 5 — redirect publishers and consumers
 
 The last step redirects traffic. Point `order-svc` and the consumers at `site2` and
 they resume against the promoted stream:
@@ -106,6 +126,15 @@ The order JSON is byte-for-byte what `order-svc` always sent; only the server
 address changed. Failover is complete: the platform writes and reads at
 `site2`, and the data loss is exactly the stalled lag you noted in step 1.
 
+Two deployment preconditions sit under this whole sequence. First, every
+`stream rm` and `stream edit` here goes through the JetStream metadata
+group, so that group has to keep quorum after the site is lost — if the
+failed site held the meta majority, no edit succeeds until the cluster
+recovers. Second, the promoted stream must live where that quorum
+survives. That's why a DR mirror is normally placed in its own JetStream
+domain (a leaf node) or an independent cluster, rather than sharing one
+meta group that spans both sites.
+
 How the mirror replicated those messages in the first place (the config,
 the filters, the start position) is the JetStream chapter's job, covered in
 [Mirrors and sources](/learn/jetstream/mirrors-and-sources). The runbook only
@@ -113,10 +142,13 @@ reads the lag and changes the relationship.
 
 ## Recovery from a mistake: restore the snapshot
 
-The other rows of the table roll back rather than fail over. When `ORDERS`
-was deleted, purged, or filled with corrupt messages, the mirror is no help,
-because it copied the bad data. The snapshot is the intact copy, taken before the bad
-event.
+The other rows of the table roll back rather than fail over. When
+corrupt messages were written to `ORDERS`, the mirror is no help, because
+it copied the bad writes; the snapshot is the intact copy, taken before
+the bad event. An accidental delete or purge is the exception: the mirror
+keeps everything it had already replicated, so it's often the freshest
+surviving copy — recover from it when it holds more than the last
+snapshot, and fall back to the snapshot otherwise.
 
 <div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-restoreStream" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -171,8 +203,10 @@ time you run it isn't during the outage.
 You can now name a NATS failure and reach for the right tool quickly.
 A lost site means promote `ORDERS_DR`: verify lag, drop the mirror
 config, add the subjects, redirect traffic. A mistake (delete, corruption,
-or a lost consumer position) means restore the snapshot, because the mirror
-copied the mistake. R3 is on neither path; it's availability, not recovery.
+or a lost consumer position) means restore the snapshot, the copy that
+predates the mistake — a mirror copies a corrupt write and only freezes
+at an upstream delete. R3 is on neither path; it's availability, not
+recovery.
 
 The data plane is now fully covered: a snapshot you can restore to, and a site
 where you can promote the mirror.

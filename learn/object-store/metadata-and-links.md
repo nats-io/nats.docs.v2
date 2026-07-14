@@ -78,9 +78,11 @@ link to the invoice, so fetching the label returns the invoice's bytes:
 <div class="nats-example" data-type="learn-object-store-metadata-and-links-addLink" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 A link can also target a whole bucket instead of a single object. That's a
-**bucket link**: the target name is empty, and the link resolves to the
-bucket on get. Reach for a bucket link when you want a stable alias for the
-store as a whole rather than for one file inside it.
+**bucket link**: the target name is empty, so it records only a reference to
+another bucket. A `get` on a bucket link doesn't return bytes — it returns an
+error (`ErrCantGetBucket` in Go). You read the link's info to learn the target
+bucket, then open that bucket yourself. Reach for a bucket link when you want a
+stored pointer to another store, not a gettable object.
 
 Two rules constrain links, and the store enforces both. A link can't point
 at a deleted object, and a link can't point at another link — the store
@@ -103,12 +105,13 @@ traverses to a deleted object and fails with `ErrObjectNotFound`. The link
 still exists, but its destination does not. Renames break a link the same way:
 the link holds the old name, so renaming the target leaves the link
 pointing at a name that no longer resolves. Do not assume `addLink` keeps the
-target around or follows it under a rename. Do verify the target exists before
-you depend on the link, or prefer a bucket link for loose coupling so a single
-deleted or renamed object can't strand it.
+target around or follows it under a rename. Do verify the target exists with
+`info` before you depend on the link, and re-create the link after you delete
+or rename its target.
 
 You can see the failure and the safe check side by side. Delete the invoice,
-get the now-stale label link, then confirm the target with `info`:
+get the now-stale label link, confirm the target with `info`, then re-put the
+invoice so the link resolves again and the bucket is back to where you left it:
 
 <div class="nats-example" data-type="learn-object-store-metadata-and-links-staleLink" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

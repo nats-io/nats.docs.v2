@@ -26,8 +26,8 @@ message through it from both the CLI and a client.
 
 Install `nats-server` (the server) and `nats` (the command-line client).
 
-<Tabs groupId="lang">
-<TabItem value="cli" label="macOS (Homebrew)" default>
+<Tabs groupId="install-os">
+<TabItem value="macos" label="macOS (Homebrew)" default>
 
 ```bash
 brew install nats-server
@@ -35,45 +35,52 @@ brew install nats-io/nats-tools/nats
 ```
 
 </TabItem>
-<TabItem value="js" label="Linux">
+<TabItem value="linux" label="Linux">
 
 ```bash
-# Server
-curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-linux-amd64.zip -o nats-server.zip
-unzip nats-server.zip && sudo cp nats-server-*/nats-server /usr/local/bin
+# Server (installs nats-server into /usr/local/bin, prompting for sudo)
+curl -sf https://binaries.nats.dev/nats-io/nats-server/v2@latest | PREFIX=/usr/local/bin sh
 
-# CLI
-curl -L https://github.com/nats-io/natscli/releases/latest/download/nats-linux-amd64.zip -o nats.zip
-unzip nats.zip && sudo cp nats /usr/local/bin
+# CLI (installs nats into /usr/local/bin)
+curl -sf https://binaries.nats.dev/nats-io/natscli/v0@latest | PREFIX=/usr/local/bin sh
 ```
 
 </TabItem>
-<TabItem value="go" label="Docker">
+<TabItem value="docker" label="Docker">
 
 ```bash
-# Run the server in Docker instead of installing it
+# Run the server in Docker instead of installing it. This runs in the
+# foreground and ends with "[INF] Server is ready" — leave it running.
+# You already have a server this way, so skip Step 2 below.
 docker run -p 4222:4222 nats:latest
 
-# Install just the CLI on your host (macOS shown)
+# In another terminal, install just the CLI on your host (macOS shown)
 brew install nats-io/nats-tools/nats
 ```
 
 </TabItem>
 </Tabs>
 
-Check that both are installed:
+Check that the CLI is installed:
 
 ```bash
-nats-server --version
 nats --version
 ```
 
-You should see a version number printed for each, for example
-`nats-server: v2.11.0` and `nats version 0.2.0`.
+You should see a version number, for example `nats version 0.4.0`. If you
+installed the server directly (Homebrew or the Linux script, not Docker),
+check it too — you should see something like `nats-server: v2.11.0`:
+
+```bash
+nats-server --version
+```
 
 ## Step 2: Start the server
 
-In your first terminal, start the server:
+If you started the server with Docker in Step 1, it's already running — leave
+that terminal alone and skip to Step 3.
+
+Otherwise, in your first terminal, start the server:
 
 ```bash
 nats-server

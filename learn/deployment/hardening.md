@@ -73,18 +73,24 @@ cluster {
 }
 ```
 
-`verify: true` is what makes this **mTLS** (mutual TLS). Without it, the
-server proves itself to the peer but never checks the peer's certificate.
-With it, every cluster route must present a certificate that chains to
-`ca_file`, so a stray node can't join the `east` cluster just by knowing
-the route address. Use `verify_and_map: true` instead when you want the
-client certificate's subject to *be* the NATS user; the certificate
-identity mechanism is covered in
+In the top-level `tls {}` block, `verify: true` is what makes the client
+link **mTLS** (mutual TLS): without it the server proves itself to the
+client but never checks the client's certificate; with it every client
+must present a certificate that chains to `ca_file`. Cluster and gateway
+routes work differently — the server forces mutual verification on them
+whether or not you set `verify`, because each end acts as both client and
+server on the route. So the stray-node protection on `east` holds either
+way: a node can't join just by knowing the route address; it must present
+a certificate that chains to `ca_file`. Use `verify_and_map: true` on the
+client block when you want the client certificate's subject to *be* the
+NATS user; the certificate identity mechanism is covered in
 [Security → Encryption & TLS](/learn/security/encryption).
 
-Certificates are read fresh on each new handshake, so rotating them
-needs only a reload, not a restart. Drop the new certificate files in
-place and send the SIGHUP you learned on the
+The server re-reads `cert_file` and `key_file` when it reloads its
+configuration, so rotating certificates is drop-in-new-files plus a
+SIGHUP, not a restart. After the reload, new handshakes present the new
+certificate while existing connections keep their session. Drop the new
+files in place and send the SIGHUP you learned on the
 [config management](/learn/deployment/config-management) page:
 
 ```bash
@@ -189,14 +195,19 @@ not: it serves `/varz`, `/healthz`, and the rest in plaintext, and
 its `/varz` output leaks the server version, connected-client count, and
 memory usage to anyone who can reach it.
 
-Bind it to localhost so only an on-host agent (the same probe the
-[Kubernetes](/learn/deployment/kubernetes) liveness check uses) can read
-it, and let a firewall handle the rest:
+On a host, bind it to localhost so only an on-host agent can read it, and
+let a firewall handle the rest:
 
 ```conf
 # nats.conf — monitor reachable only from the host itself
 http: "127.0.0.1:8222"
 ```
+
+Don't do this on the chapter's Kubernetes deployment. The kubelet's
+startup, readiness, and liveness probes connect to the pod's IP, not its
+loopback, so a `127.0.0.1` bind fails every probe and the pods never go
+ready. There, keep the chart's default bind and restrict the port with a
+NetworkPolicy instead.
 
 ```bash
 # Firewall: clients in, cluster routes between nodes only, monitor never.
@@ -218,27 +229,31 @@ A few traps affect teams the first time they harden a NATS cluster. Each
 one comes from this page's work: the sandboxed systemd unit, and locking
 down the ports that TLS now protects.
 
-**`ProtectSystem=strict` blocks cert reload if certs live outside
-`ReadWritePaths`.** The sandbox mounts the filesystem read-only, so a
-SIGHUP that tries to re-read rotated certificates from, say,
-`/etc/nats-certs` silently fails: the server keeps the old certificate
-and the rotation never takes effect. Don't scatter certificates across
-the filesystem. Put them under `/var/lib/nats` (already in
-`ReadWritePaths`) or add an explicit `ReadWritePaths=/etc/nats-certs` line.
+**`ProtectSystem=strict` blocks writes outside `ReadWritePaths`, not
+reads.** The sandbox mounts the filesystem read-only, so reading rotated
+certificates from `/etc/nats-certs` on a SIGHUP works fine: an external
+process writes the new files, and the server only reads them. What
+genuinely fails under `strict` is the server *writing* to a path not
+listed — the JetStream `store_dir` (and the pid and ports-file
+directories) must sit inside `ReadWritePaths`, or the server can't come
+up. Keep `ReadWritePaths` covering the JetStream store; certificates need
+only read access, which `strict` already allows.
 
-**`MemoryMax` or `GOMEMLIMIT` set below the JetStream max store crashes
-startup silently.** The hardened unit can cap the process with `MemoryMax=`
-(systemd) or `GOMEMLIMIT` (the Go runtime). Set either one below what the
-`jetstream { max_memory_store }` config asks for and the server can't
-reserve its own configured memory. It fails to come up, often with nothing
-useful in the journal. Don't pin the memory cap by guesswork. Set it
-at or above the JetStream config: read `max_memory_store` (and leave headroom
-for the FD and gossip overhead that drove `LimitNOFILE=800000`), then size
-`MemoryMax`/`GOMEMLIMIT` above it.
+**A memory cap set below the working set gets the process OOM-killed under
+load.** The hardened unit can cap the process with `MemoryMax=` (systemd)
+or `GOMEMLIMIT` (the Go runtime). Neither reserves memory at startup:
+`max_memory_store` is an accounting limit checked as messages arrive, and
+`GOMEMLIMIT` is a soft target that only makes GC more aggressive. The
+failure shows up at runtime — set `MemoryMax` below what the node actually
+uses (memory-store data plus connection and route buffers plus GC
+headroom) and the cgroup OOM-kills the process once usage grows, which
+systemd logs as `Main process killed (oom-kill)`. Set `MemoryMax` above
+expected use, and `GOMEMLIMIT` somewhat below `MemoryMax` so GC reins
+memory in before the hard cap.
 
 ```ini
-# Cap the process, but never below what JetStream is configured to use.
-# If jetstream { max_memory_store: 4Gi }, keep MemoryMax above 4Gi.
+# Cap the process above what it uses at peak, not at the config number.
+# With jetstream { max_memory_store: 4Gi }, size for the store plus buffers.
 MemoryMax=6G
 Environment=GOMEMLIMIT=5500MiB
 ```

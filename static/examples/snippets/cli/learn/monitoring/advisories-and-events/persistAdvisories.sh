@@ -14,5 +14,5 @@ nats stream add ADVISORIES \
 nats stream view ADVISORIES
 
 # Or replay only the consumer max-delivery events:
-nats stream get ADVISORIES --subject \
-  '$JS.EVENT.ADVISORY.CONSUMER.MAX_DELIVERIES.ORDERS.shipping'
+nats stream view ADVISORIES --subject \
+  '$JS.EVENT.ADVISORY.CONSUMER.MAX_DELIVERIES.>'

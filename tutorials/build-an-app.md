@@ -43,7 +43,7 @@ Leave this terminal running.
 
 ## Step 2: Create the stream
 
-Open a second terminal. Create a stream named `EVENTS` that captures every
+Open a second terminal. Create a stream named `ORDERS` that captures every
 message published on subjects under `orders.>`:
 
 <div class="nats-example" data-type="tutorials-build-an-app-create-stream" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -51,7 +51,7 @@ message published on subjects under `orders.>`:
 You should see a confirmation summarizing the new stream:
 
 ```
-Stream EVENTS was created
+Stream ORDERS was created
 
 Subjects: orders.>
  Storage: File
@@ -63,7 +63,8 @@ Now write the app itself. It connects to NATS, publishes three order events into
 the stream, then subscribes to `orders.count` and replies to any request with the
 running total it published.
 
-Save this as a single file and run it in your second terminal:
+Save the code for your language as a single file, then install its
+dependencies and run it in your second terminal:
 
 <Tabs groupId="lang">
 <TabItem value="go" label="Go" default>
@@ -89,7 +90,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Publish three order events into the EVENTS stream.
+	// Publish three order events into the ORDERS stream.
 	orders := []string{"orders.created", "orders.created", "orders.shipped"}
 	for _, subject := range orders {
 		js.Publish(ctx, subject, []byte("event"))
@@ -107,6 +108,14 @@ func main() {
 }
 ```
 
+Save it as `main.go`, then set up the module and run it:
+
+```bash
+go mod init orders-app
+go get github.com/nats-io/nats.go
+go run main.go
+```
+
 </TabItem>
 <TabItem value="js" label="JavaScript/TypeScript">
 
@@ -119,7 +128,7 @@ import { jetstream } from "@nats-io/jetstream";
   const nc = await connect({ servers: "nats://localhost:4222" });
   const js = jetstream(nc);
 
-  // Publish three order events into the EVENTS stream.
+  // Publish three order events into the ORDERS stream.
   const orders = ["orders.created", "orders.created", "orders.shipped"];
   for (const subject of orders) {
     await js.publish(subject, "event");
@@ -141,6 +150,14 @@ import { jetstream } from "@nats-io/jetstream";
 })();
 ```
 
+Save it as `app.mjs` (the `.mjs` extension enables the `import` syntax),
+then install the dependencies and run it:
+
+```bash
+npm install @nats-io/transport-node @nats-io/jetstream
+node app.mjs
+```
+
 </TabItem>
 </Tabs>
 
@@ -155,7 +172,7 @@ Leave the app running.
 
 ## Step 4: Confirm the events landed in the stream
 
-Open a third terminal. Read the messages your app stored in the `EVENTS` stream:
+Open a third terminal. Read the messages your app stored in the `ORDERS` stream:
 
 <div class="nats-example" data-type="tutorials-build-an-app-view-stream" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

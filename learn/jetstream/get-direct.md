@@ -84,8 +84,9 @@ Subscribing to JetStream Stream (direct) holding messages with subject orders.> 
 
 The `(direct)` marks the path: the message came from a server's local store over
 the Direct Get API, not from the leader through the regular read. On a replicated
-stream that spreads read load across the servers, and on a stream whose origin
-sets `mirror_direct`, it lets a reader fetch from a nearby
+stream that spreads read load across the servers, and when a mirror stream sets
+`mirror_direct`, the mirror's servers also answer Direct Get requests for the
+origin, so a reader can be served by a nearby
 [mirror](/learn/jetstream/mirrors-and-sources) instead of the origin.
 
 The trade-off is freshness. A replica or mirror can sit a moment behind the
@@ -123,8 +124,8 @@ a consumer: a range from a sequence, the latest message on each of several
 subjects (`--last-per-subject`), or a point-in-time snapshot across subjects. A
 batch is bounded by a count or a byte budget; the request fields (`batch`,
 `max_bytes`, `multi_last`) are in the
-[reference](/reference/jetstream/api/stream/msg-get). The CLI and `nats.js` have batch
-Direct Get built in; Go, Rust, Java, and C# reach it through the
+[reference](/reference/jetstream/api/stream/msg-get). `nats.js` sends a batched
+Direct Get directly; Go, Rust, Java, and C# reach it through the
 [Synadia Orbit](https://github.com/synadia-io) helper libraries.
 
 A batch read is still a one-shot snapshot, not a subscription. It returns what's

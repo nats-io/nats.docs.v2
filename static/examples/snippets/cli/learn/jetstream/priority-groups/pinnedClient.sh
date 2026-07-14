@@ -14,14 +14,16 @@ nats consumer add ORDERS sequencer \
   --ack explicit \
   --defaults
 
-# Inspect it — the configuration shows Priority Policy: pinned_client,
-# Priority Groups: [ordered], and Pinned TTL: 1m30s. The State block
-# shows which client (if any) currently holds the pin.
+# Inspect it — the configuration shows Priority Policy: Pinned Client,
+# Priority Groups: ordered, and Pinned TTL: 1m30s. The State block shows
+# which client (if any) currently holds the pin.
 nats consumer info ORDERS sequencer
 
-# The Nats-Pin-Id handshake happens on the pull request, which natscli's
-# `nats consumer next` does not drive. Pull a message to see delivery:
-nats consumer next ORDERS sequencer --count 1
+# The Nats-Pin-Id handshake rides on the pull request, which natscli's
+# `nats consumer next` does not drive: a group-less pull is rejected with
+# "Bad Request - Priority Group missing". The client-side pinning loop comes
+# from a client library.
 
-# Force the server to pick a new pinned client:
-nats consumer unpin ORDERS sequencer ordered
+# Force the server to pick a new pinned client. -f skips the confirmation
+# prompt; it takes the stream, the consumer, and the group name.
+nats consumer unpin ORDERS sequencer ordered -f

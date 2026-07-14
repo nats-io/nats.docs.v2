@@ -82,10 +82,15 @@ Chunks publish one after another, so a put isn't instantaneous. A network
 drop or a crashed client can stop a put after some chunks have landed but
 before the rest do. What happens to the chunks that made it?
 
-They're purged. A put that fails mid-stream removes its partial chunks
-before it returns the error, so a failure leaves the store as it was, not
-half-written. There's no leftover sequence of orphan chunks for a later
-get to stumble on.
+The metadata message is written last, after all the chunks, so an
+interrupted put never produces a gettable object: with no metadata record,
+a get reports the name as not found rather than handing back a half-written
+file. When the client survives the failure it also purges the partial chunks
+it already wrote, so nothing is left in the stream. A hard crash is the
+exception. A process killed mid-put runs no cleanup, so the chunks it had
+already written stay in the stream as orphans: invisible to get, because no
+metadata points at them, but still holding storage until the bucket's limits
+or age reclaim them.
 
 This works because each put gets a fresh **NUID**: a unique identifier
 generated for that put alone, separate from the object's name. The chunks
@@ -96,8 +101,8 @@ The store writes the new chunks under the new identity, points the object's
 metadata at them, and the old chunks fall away. A re-put replaces the
 object cleanly rather than merging new bytes into the old ones.
 
-So two failure modes don't happen. A put that fails partway doesn't leave a
-broken object behind, and a re-put doesn't splice new bytes into old ones.
+So the object you get is never half-written. A put that fails partway leaves
+no gettable object, and a re-put doesn't splice new bytes into old ones.
 Either you get the whole object you put, or the get returns an error.
 
 ## Choosing a chunk size
@@ -123,16 +128,15 @@ the chunk size, and the integrity check on get.
 becomes thousands of tiny messages. Each chunk is a NATS message that
 carries its own protocol framing (headers and subject routing on top of
 the slice of bytes), so very small chunks waste storage on per-message
-overhead and slow puts and gets down. Set it too large and the chunk exceeds
-the backing stream's maximum message size, and the put fails outright: the
-store rejects an oversized value rather than quietly splitting some other
-way. Don't tune the
-chunk size to chase a benchmark; the 128 KB default fits almost every
-file. If you must change it, stay well inside the stream's max message
-size, covered on
-[Shaping the stream](/learn/jetstream/shaping-the-stream). Don't push the
-chunk size up to make "fewer messages" your goal; past the stream limit
-it stops storing anything.
+overhead and slow puts and gets down. Set it too large and a single chunk
+exceeds the server's maximum payload (`max_payload`, 1 MB by default) — or
+any smaller max message size an operator has set on the backing stream — and
+the put fails outright: the server rejects the oversized message rather than
+splitting some other way. Don't tune the chunk size to chase a benchmark; the
+128 KB default fits almost every file and stays well under the default
+payload limit. If you must raise it, keep each chunk under `max_payload`,
+covered on [Shaping the stream](/learn/jetstream/shaping-the-stream). Past
+that limit the put stops storing anything.
 
 **Always check the get result before you use the bytes.** A failed get
 won't hand you a truncated file, so verify success first. Because chunks
@@ -173,5 +177,5 @@ Continue to [Metadata and links](/learn/object-store/metadata-and-links).
 
 - [Your first object](/learn/object-store/your-first-object) — where you
   met put, get, and the digest.
-- [Shaping the stream](/learn/jetstream/shaping-the-stream) — the backing
-  stream's maximum message size, which bounds the chunk size.
+- [Shaping the stream](/learn/jetstream/shaping-the-stream) — the message
+  size limits that bound the chunk size.

@@ -37,11 +37,11 @@ The server the leaf dials is the **hub**. In Acme's case the hub is the
 
 Once the link is up, the leaf is a regular NATS server to anyone on the
 factory floor. A machine publishes `orders.created` to `factory-1` the
-same way it would publish to any server. It doesn't know or care that
-`factory-1` is a leaf.
+same way it would publish to any server. The machine needs no
+leaf-specific configuration.
 
-What the leaf adds, behind that ordinary front, is the bridge across
-the link. When a client somewhere on the hub subscribes to
+What the leaf adds is the bridge across the link. When a client
+somewhere on the hub subscribes to
 `orders.>`, that interest flows down the leaf link, and `factory-1`
 forwards matching messages up to the hub. When a factory machine
 subscribes, hub traffic flows down. The leaf carries only subjects that
@@ -62,7 +62,7 @@ only need the config and the bridging behavior.
 The hub opens a port for leaf nodes to dial. On every `east` server,
 add a `leafnodes {}` block with a `listen` address.
 
-The default leaf node port is **7422**. It's a fourth kind of listener,
+The default leaf node port is `7422`. It's a fourth kind of listener,
 separate from the client port (4222), the route port (6222), and the
 gateway port (7222) — one port per kind of connection.
 
@@ -73,6 +73,10 @@ accepting leaf connections. Only the `leafnodes` block is new:
 # n1-east.conf — the east cluster config, now accepting leaf connections
 server_name: n1-east
 listen: 127.0.0.1:4222
+
+jetstream {
+  store_dir: "./js/n1-east"
+}
 
 cluster {
   name: east
@@ -126,8 +130,7 @@ link — that's what lets it run on the plant network with nothing but
 egress. Its own client port (`4300`) is separate from the hub's.
 
 The `urls` point at each hub server's leafnode listen port. Listing all
-three gives the leaf somewhere to reconnect if one hub server is down; it
-tries them in turn.
+three gives the leaf somewhere to reconnect if one hub server is down.
 
 One leaf isn't limited to one hub. `remotes` is a list: a leaf can hold
 several, each dialing a different NATS system, and bridge them all through
@@ -175,15 +178,14 @@ The bridge is by *interest*, not by exposing clients. A hub subscriber
 to `orders.>` receives factory orders without ever knowing how many
 machines produced them, or that they came from a leaf at all.
 
-That covers connections. **Subjects** are separate: whether a factory
+That covers connections. Subjects are separate: whether a factory
 subject stays on the floor or reaches the hub depends on the account the
 leaf binds to. Bound to its own account, only the subjects that account
 imports and exports cross the link — that's **address-space isolation**, an
 account decision (the [production layer](#accounts-the-production-layer)
 above), not something the leaf link gives you for free. In the default
 account this page uses there's no subject boundary; interest flows across
-the leaf the way it flows across a cluster's routes. Connections hide on
-their own; subjects need an account.
+the leaf the way it flows across a cluster's routes.
 
 ## Send a message across the leaf link
 

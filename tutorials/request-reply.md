@@ -101,7 +101,7 @@ reply per call, all over NATS with no shared address between the two sides.
 ## Next
 
 - Next tutorial: [3. Work queue](/tutorials/work-queue) — split work across
-  several workers so each message is handled exactly once.
+  several workers so each message goes to exactly one of them.
 - Understand how this works: [Core NATS deep dive →
   Request-reply](/learn/core-nats/request-reply) covers the inbox, timeouts, and
   the no-responders signal.

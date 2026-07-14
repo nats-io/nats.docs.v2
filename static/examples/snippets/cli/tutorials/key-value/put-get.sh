@@ -13,6 +13,6 @@ nats kv get profiles sue.color
 
 # You should see the full entry, including the value:
 #
-#   profiles > sue.color created @ ...
+#   profiles > sue.color revision: 1 created @ ...
 #
 #   blue

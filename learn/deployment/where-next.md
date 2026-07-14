@@ -121,7 +121,7 @@ that explains the why.
 - [ ] Set `max_file_store` to a size the disk can actually hold; an oversized limit lets JetStream error mid-publish instead of failing fast. Test small (`10GB`) and watch `df -h`.
 - [ ] Keep `max_payload` at or below `max_pending`; a `max_payload` larger than `max_pending` refuses the server start. Hold `max_pending` at `≥ 10×` your peak message size.
 - [ ] Raise the file-descriptor limit before the process starts (`ulimit -n 800000`); a big cluster spends about two FDs per stream plus routes and gossip and exhausts the default cap.
-- [ ] Upgrade operator-mode clusters atomically: all nodes to v2.10+, never a rolling upgrade. Pre-v2.10 servers don't enforce JWT account limits, so a mixed-version cluster enforces them inconsistently.
+- [ ] Keep server versions aligned as you roll operator-mode upgrades, so every node reads the same JWT limit fields; account limits change only when you edit and push the account JWT, not on a server reload.
 - [ ] Read the live limits with `nats account info` before sizing, so you plan against the limits the server actually enforces.
 
 ### Kubernetes — see [Pitfalls](/learn/deployment/kubernetes#pitfalls)
@@ -129,7 +129,7 @@ that explains the why.
 - [ ] Use `volumeClaimTemplates` (the Helm default) so each PVC binds before its StatefulSet replica starts; an unbound PVC leaves the pod Pending.
 - [ ] Run the config reloader sidecar; a ConfigMap edit does not reload the server on its own.
 - [ ] Raise the readiness failure threshold so the probe doesn't flap not-ready during a healthy JetStream rebalance.
-- [ ] Never mix `nats` CLI mutations with control-loop CRDs; the NACK controller reverts manual changes in about 30 seconds.
+- [ ] Never mix `nats` CLI mutations with a CRD-owned stream; NACK re-creates a deleted stream on its ~30s resync, and in `--control-loop` mode it also reverts manual config edits on about a one-minute cycle.
 - [ ] Confirm the CRD-created stream is R3 with `nats stream info ORDERS` from nats-box before trusting the declarative path.
 
 ### Config management — see [Pitfalls](/learn/deployment/config-management#pitfalls)
@@ -143,15 +143,15 @@ that explains the why.
 ### Rolling upgrades — see [Pitfalls](/learn/deployment/rolling-upgrades#pitfalls)
 
 - [ ] Measure rebalance time before setting `lame_duck_duration`; a duration shorter than the rebalance drops clients before replicas sync.
-- [ ] Transfer leadership before killing the meta-leader; upgrading it directly blocks stream ops for 30 to 60 seconds. Do non-leaders first.
+- [ ] Transfer leadership before killing the meta-leader; upgrading it directly stalls stream ops until a new leader is elected (about 5 to 10 seconds with default timeouts). Do non-leaders first.
 - [ ] Set a PodDisruptionBudget with `minAvailable: 2`; without it an eviction can drain all three pods and lose quorum.
 - [ ] Stagger lame-duck start across ordinals; firing it on every node at once triggers a reconnect storm.
 - [ ] Read replicas and leader with `nats stream info ORDERS` before and after the upgrade to confirm the stream stayed R3.
 
 ### Hardening — see [Pitfalls](/learn/deployment/hardening#pitfalls)
 
-- [ ] Keep TLS certs under `ReadWritePaths` (for example, `/var/lib/nats`) or mount `/etc/nats-certs` explicitly; `ProtectSystem=strict` blocks a cert reload otherwise.
-- [ ] Set `MemoryMax`/`GOMEMLIMIT` at or above the JetStream max store; a limit below it fails the server start silently.
+- [ ] Keep the JetStream `store_dir` (and the pid/ports-file dirs) inside `ReadWritePaths`; `ProtectSystem=strict` blocks writes there, not the cert reads a reload does.
+- [ ] Set `MemoryMax` above the node's real peak usage (memory store plus buffers plus GC headroom); a cap below the working set gets the process OOM-killed under load, not at startup.
 - [ ] Open cluster port 6222 between nodes; a firewall that blocks it leaves nodes unable to form quorum and showing as orphans.
 - [ ] Bind the monitor port 8222 to localhost; exposed to the internet it leaks version, client count, and memory.
 - [ ] Connect with `--creds` and `--tlsca` and publish one order to prove auth and TLS are live before you call the cluster hardened.

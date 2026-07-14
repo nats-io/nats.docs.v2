@@ -75,7 +75,7 @@ that hands back a future you collect; nats.js does it by not awaiting each
 `publish()` and gathering the promises; nats.py has no first-class async publish,
 so the example approximates it with `asyncio.gather` and you add your own limit on
 how many run at once. On the CLI, the everyday `nats pub` is synchronous; the
-async path lives in the benchmark, `nats bench js pub orders.created --batch 1000`.
+async path lives in the benchmark, `nats bench js pub async orders.created --batch 1000`.
 
 ## Atomic batch publish
 
@@ -93,12 +93,14 @@ staging buffer and writes them as a unit only on commit. The committing `PubAck`
 carries two extra fields, `batch` and `count`, so you can confirm the whole group
 landed.
 
-A batch is bounded, and it can be abandoned. It's capped at 1,000 messages, a
-stream allows at most 50 batches in flight, and a batch that hits a sequence gap
-or goes ten seconds without a message is dropped — the server raises a
-`stream_batch_abandoned` advisory rather than committing a partial group. Treat
-the final `PubAck` as the only proof the batch committed. Atomic batch was added
-in server 2.12.
+A batch is bounded, and it can be abandoned. By default it's capped at 1,000
+messages and a stream allows at most 50 batches in flight — both are
+operator-configurable server limits, not fixed protocol caps. A sequence gap or
+an over-limit batch is rejected with an error `PubAck`, so the publisher hears
+about it. A batch that goes ten seconds without a message is dropped with no
+error reply — the server raises a `stream_batch_abandoned` advisory instead of
+committing a partial group. Treat the final `PubAck` as the only proof the batch
+committed. Atomic batch was added in server 2.12.
 
 Opt the stream in with `AllowAtomicPublish`, then open a batch, stage messages,
 and commit them as a unit. The CLI and nats.js have this in the core client; Go,
@@ -175,10 +177,11 @@ Collect and check every ack — and if order matters, add
 `Nats-Expected-Last-Subject-Sequence` so a retry fails fast instead of landing
 out of order.
 
-**An atomic batch can be abandoned silently.** If the batch hits a sequence gap,
-exceeds 1,000 messages, or goes ten seconds without a message, the server drops
-the whole thing and raises an advisory. Treat the final `PubAck` as the only
-proof the batch committed; don't assume a half-sent batch landed.
+**An atomic batch can be abandoned.** A sequence gap or a batch over the size
+limit (1,000 messages by default) comes back as an error `PubAck`. A batch that
+goes ten seconds without a message is dropped with no error reply — only an
+advisory. Either way the whole batch is dropped, so treat the final `PubAck` as
+the only proof it committed; don't assume a half-sent batch landed.
 
 **`AllowAtomicPublish` and async persistence don't mix.** A stream set to persist
 asynchronously (`PersistMode: async`) rejects atomic publishing, because the

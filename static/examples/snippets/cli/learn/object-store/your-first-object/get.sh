@@ -9,6 +9,7 @@
 # in the current directory.
 nats object get INVOICES invoice-ord_8w2k.pdf
 
-# Override the destination with --output. Use - to stream the bytes to
-# stdout instead of writing a file.
+# Override the destination filename with --output. The target directory
+# must already exist; the CLI writes the file, it does not create parent
+# directories.
 nats object get INVOICES invoice-ord_8w2k.pdf --output ./warehouse/invoice.pdf

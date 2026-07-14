@@ -108,9 +108,10 @@ A couple of defaults trip people up once `shipping` carries real order
 traffic.
 
 **An empty fetch is normal.** When no orders are queued, a fetch returns
-nothing once `expires` elapses. The server replies with a `404 No
-Messages` or `408 Request Timeout` status, and every client reports that
-as an empty batch (the CLI exits non-zero). A worker that treats an
+nothing once `expires` elapses. The server replies with a `408 Request
+Timeout` status (a no-wait fetch with no messages gets `404 No Messages`
+instead), and every client reports that as an empty batch (the CLI exits
+non-zero). A worker that treats an
 empty fetch as a failure fails on a quiet stream. An empty result means
 nothing is available right now, so keep looping: wait and fetch again.
 

@@ -159,11 +159,15 @@ A message payload has a maximum size. By default the server caps it at
 limit to every client when the connection opens, so the client knows
 the ceiling before it ever publishes.
 
-Exceeding the limit is not a soft failure. If a client publishes a
-payload larger than `max_payload`, the server rejects it and closes the
-connection. The Acme order payload is a few hundred bytes, so this
-never bites here, but a service that tries to ship a large blob inside
-a message will hit it.
+Exceeding the limit is caught in two places. Because the client already
+knows the advertised ceiling, an official client checks the size before
+sending: the publish call fails locally with an error (nats.go returns
+`nats: maximum payload exceeded`) and the connection stays open. The
+server is the backstop. A client that ignores the advertised limit and
+sends an oversized `PUB` anyway has the message rejected and its
+connection closed. The Acme order payload is a few hundred bytes, so
+this never bites here, but a service that tries to ship a large blob
+inside a message will hit it.
 
 The fix is not to use a bigger payload. For large data, publish a
 reference (an object-store key or a URL) and let the receiver fetch the
@@ -203,9 +207,12 @@ A few problems show up the first time you build on publish-subscribe.
 None of them is a bug; each is a direct consequence of the model this
 page just described.
 
-**Publishing over the limit drops your connection.** A payload larger
-than `max_payload` isn't truncated or queued: the server rejects it
-and closes the connection. The Acme order payload is tiny, but a service
+**Publishing over the limit fails the publish.** A payload larger than
+`max_payload` isn't truncated or queued. An official client catches it
+before it leaves the process: the publish call returns an error (nats.go
+returns `nats: maximum payload exceeded`) and the connection stays open.
+The server rejects and closes the connection of any client that sends an
+oversized `PUB` anyway. The Acme order payload is tiny, but a service
 that tries to ship a large blob inside a message hits this. Don't guess
 the ceiling: ask the server for it, then keep payloads under it and pass
 a reference for anything large.

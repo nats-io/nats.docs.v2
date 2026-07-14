@@ -24,17 +24,21 @@ pick up exactly where it left off — no message read twice, none skipped.
 
 ## Step 1: Start from a clean set of three messages
 
-So the sequence numbers in this tutorial line up, start the `EVENTS`
-stream from a known state. First clear out whatever it holds from Tutorial 4:
+So the sequence numbers in this tutorial line up, reset the `EVENTS` stream to
+a known state. Purging a stream keeps counting sequences from where it left
+off, so instead delete the stream you created in Tutorial 4 and re-create it,
+which starts sequences again at 1:
 
 ```bash
-nats stream purge EVENTS --force
+nats stream rm EVENTS --force
+nats stream add EVENTS --subjects "events.>" --defaults
 ```
 
-You should see how many messages were removed:
+The delete prints nothing; the re-create prints the new stream's configuration,
+ending with:
 
 ```
-Purged 3 messages from EVENTS
+Stream EVENTS was created
 ```
 
 Now publish three fresh messages for the consumer to work through:
@@ -45,12 +49,16 @@ nats pub events.input_changed '{"field":"email"}' --jetstream
 nats pub events.page_loaded '{"page":"/pricing"}' --jetstream
 ```
 
-You should see each publish confirmed by the server:
+You should see each publish confirmed by the server, along with the sequence
+the stream assigned it:
 
 ```
 14:22:01 Published 16 bytes to "events.page_loaded"
+14:22:01 Stored in Stream: EVENTS Sequence: 1
 14:22:01 Published 17 bytes to "events.input_changed"
+14:22:01 Stored in Stream: EVENTS Sequence: 2
 14:22:01 Published 19 bytes to "events.page_loaded"
+14:22:01 Stored in Stream: EVENTS Sequence: 3
 ```
 
 Confirm the stream now holds exactly your three messages:

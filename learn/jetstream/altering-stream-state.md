@@ -135,14 +135,17 @@ a message count as the highest sequence.
 returns. On a stream that matters, set `DenyPurge` in its config so a
 stray call can't wipe it, and keep a
 [mirror](/learn/jetstream/mirrors-and-sources) if the data is worth
-recovering.
+recovering. Setting `DenyPurge` is permanent: the server refuses any later
+update that turns it off, so the only way to purge that stream again is to
+delete and recreate it. Try it on a throwaway stream, not `ORDERS`.
 
 ```bash
 # Guard a stream so purge requests are refused
-nats stream edit ORDERS --deny-purge
+nats stream add GUARDED --subjects "guarded.>" --defaults
+nats stream edit GUARDED --deny-purge
 
 # A purge now fails instead of silently emptying the stream
-nats stream purge ORDERS
+nats stream purge GUARDED
 ```
 
 ## Where you are

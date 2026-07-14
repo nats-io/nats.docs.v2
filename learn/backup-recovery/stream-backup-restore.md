@@ -40,21 +40,23 @@ goes in `2026-06-05`, and you keep the dated snapshots under
 `./backups/orders/`. We make that automatic later; here it's one
 command.
 
-The `--consumers` flag matters more than it looks. Without it, the
-snapshot carries the messages but forgets the consumers reading them.
-With it, the snapshot also records each durable consumer's config and
-delivery position: the **consumer state**. Restore that snapshot and the
-`shipping` and `analytics` consumers come back exactly where they left
-off, not at the start of the stream. For recovery of a production stream,
-use `--consumers`.
+Consumer state matters more than it looks. By default the snapshot
+records each durable consumer's config and delivery position: the
+**consumer state**. Restore that snapshot and the `shipping` and
+`analytics` consumers come back exactly where they left off, not at the
+start of the stream. Pass `--no-consumers` and the snapshot carries the
+messages but forgets the consumers reading them, so keep the default when
+you back up a production stream.
 
 ## How the snapshot streams off the server
 
-A snapshot doesn't arrive as one big download. The server cuts the tarball into
-chunks and pushes them to an inbox subject one at a time, waiting for the
-client to acknowledge each chunk before sending the next. That
-backpressure keeps a large stream from overwhelming a slow disk or a
-high-latency link.
+A snapshot doesn't arrive as one big download. The server cuts the
+tarball into chunks and pushes them to an inbox subject, keeping up to a
+window's worth of unacknowledged chunks in flight at once — 8 MiB by
+default, which is 64 of the default 128 KiB chunks. Each client ack frees
+a slot for the next chunk, and if no ack arrives for about five seconds
+the backup aborts. That windowed backpressure keeps a large stream from
+overwhelming a slow disk or a high-latency link.
 
 <div class="nats-flow" data-scenario="streamSnapshotAnimated" data-width="600" data-height="350"></div>
 
@@ -144,11 +146,11 @@ nats stream backup ORDERS ./backups/orders/2026-06-04 \
   --consumers --chunk-size 64k --window-size 1m
 ```
 
-**`--no-consumers` silently drops consumer state.** Skip `--consumers`
-(or pass `--no-consumers`) and the snapshot carries messages only. The
-restore rebuilds the stream with no consumers, and nothing warns you
-until `shipping` is missing in production. Use `--consumers` for a full
-recovery unless you plan to recreate every consumer by hand.
+**`--no-consumers` silently drops consumer state.** Consumer state is
+included by default; pass `--no-consumers` and the snapshot carries
+messages only. The restore rebuilds the stream with no consumers, and
+nothing warns you until `shipping` is missing in production. Keep the
+default unless you plan to recreate every consumer by hand.
 
 ## Where you are
 

@@ -12,51 +12,47 @@ one, and you never had to think about who wrote last. That works
 until two writers touch the same key at the same time.
 
 This page adds the two ideas that make concurrent writes safe. The first
-is the revision: every key carries a revision that counts its writes,
-and `history` keeps the prior ones. The second is compare-and-swap (CAS): a write
-that only succeeds if the key still holds the revision you read. Together
-they let the inventory service decrement `widget-blue` from 41 to 40
-without ever losing a sale.
+is the revision: a number the bucket assigns to every write, in sequence,
+and `history` keeps a key's prior ones. The second is compare-and-swap
+(CAS): a write that only succeeds if the key still holds the revision you
+read. Together they let the inventory service decrement `widget-blue` from
+41 to 40 without ever losing a sale.
 
 You still have the `INVENTORY` bucket from the first page. After the live
-update on the watching page, `widget-blue` sits at 41 (its second
-revision), and the warehouse dashboard from that page is still attached.
-This page builds on both of those.
+update on the watching page, `widget-blue` holds 41, and the warehouse
+dashboard from that page is still attached. This page builds on both of
+those.
 
-## Every put bumps the revision
+## Revisions and history
 
-A **revision** is a per-key integer that counts the key's writes. It starts
-at 1 when you first put a key, and every write that changes the key's value bumps it by one.
-The revision isn't something you set; the server assigns it, and `get`
+A **revision** is the number the server assigns to a write. The bucket
+keeps one counter across all of its keys, and every write — to any key —
+takes the next number. So a revision always increases when you write a key,
+but not by one each time: writes to other keys advance the counter in
+between. You don't set the revision; the server assigns it, and `get`
 returns it alongside the value as part of the **entry**.
 
-The entry you got back on the first page already carried it. When you put
-`widget-blue 42`, that value landed at revision 1. Put `41` over it and
-the value is now at revision 2. The revision is the key's own count of how
-many times it's been written, and you'll use it in a moment to write
-safely.
+The entry you got back on the first page already carried it. Your put of
+`widget-blue 42` landed at revision 1, the first write to an empty bucket.
+The put of `41` over it on the watching page landed at revision 2. The
+puts to `widget-red` and `gadget-pro` that followed took their own numbers,
+so `widget-blue`'s next write won't be revision 3. What matters for a safe
+write is only that the revision you read names the exact version you saw,
+which you'll use in a moment.
 
 The bucket also keeps the **history**: the prior revisions of a key, up to
 the bucket's history depth. You set that depth when you created the bucket
-with `--history`. A bucket created with `--history 1` keeps only the
-latest value, so there's no prior revision to look at. A bucket with a
-deeper history keeps prior revisions you can read back.
+with `--history`, and `INVENTORY` was created with `--history 1`, which
+keeps only the latest value of each key. Raise it now so a key remembers
+where it's been:
 
-Read the history of `widget-blue`:
+```bash
+nats kv edit INVENTORY --history 10
+```
 
-<div class="nats-example" data-type="learn-key-value-history-and-revisions-keyHistory" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-With `--history 1`, history shows one entry: the current value. To keep a
-trail, you'd have created the bucket with a larger depth, and each
-revision would appear as its own line: value, revision, timestamp, and
-operation. The history depth caps at 64 revisions per key; the full set of
-bucket configuration options is documented in
-[Reference → Create Stream](/reference/jetstream/api/stream/create).
-
-History holds the prior revisions of a single key. It isn't an audit log of the
-whole bucket, and it doesn't grow without bound: once a key has more
-revisions than the depth allows, the oldest one is removed. Each key keeps
-a fixed-length set of its recent revisions.
+The depth caps at 64. Raising it keeps every future write to a key, up to
+ten revisions deep. The values written before the raise are already gone,
+because at depth 1 each new write dropped the one before it.
 
 ## Compare-and-swap: writing without locks
 
@@ -101,6 +97,27 @@ already bumped the key to revision 8. The server rejects the update on the
 revision mismatch. The service re-gets (now revision 8) and retries with
 the fresh revision, which the server accepts. No write was lost, and the
 service never held a lock.
+
+## Read the history back
+
+With the depth raised, the trail behind `widget-blue` is now visible. Read
+its history:
+
+<div class="nats-example" data-type="learn-key-value-history-and-revisions-keyHistory" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+You see two revisions: `41` from the watching page and `40` from the
+decrement you just made. Their revision numbers aren't consecutive — the
+puts to `widget-red` and `gadget-pro` took the numbers in between — which
+is the revision counter being bucket-wide, not per key. Each entry is one
+line: the key, its revision, the operation, when it was written, and the
+value. The `42` written before the raise isn't here; depth 1 had already
+dropped it.
+
+History holds the prior revisions of a single key, up to the depth. It
+isn't an audit log of the whole bucket, and it doesn't grow without bound:
+once a key has more revisions than the depth allows, the oldest one is
+removed. The full set of bucket configuration options is documented in
+[Reference → Create Stream](/reference/jetstream/api/stream/create).
 
 ## Pitfalls
 

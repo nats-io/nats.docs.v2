@@ -9,11 +9,14 @@
 
 nats kv add INVENTORY --history 1
 
-# Expected output ends with a line confirming the bucket was created:
+# Expected output is the bucket's status, ending with its configuration
+# (labels abbreviated here):
 #
-#   INVENTORY Key-Value Store
+#   Information for Key-Value Store Bucket INVENTORY created <time>
 #
 #   Configuration:
-#     Bucket Name: INVENTORY
-#         History: 1
+#
+#              Bucket Name: INVENTORY
+#              History Kept: 1
+#          JetStream Stream: KV_INVENTORY
 #     ...

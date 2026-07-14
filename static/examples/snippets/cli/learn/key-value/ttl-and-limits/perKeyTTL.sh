@@ -12,18 +12,20 @@ nats kv edit INVENTORY --marker-ttl 1h
 # Note: TTL is accepted on CREATE only.
 nats kv create INVENTORY flash-sale 99 --ttl 30m
 
-# Expected: the key is written and counts down on its own.
+# Expected: create echoes the value it stored, and the key counts down on
+# its own:
 #
-#   INVENTORY > flash-sale created
+#   99
 #
 # Per-key TTL requires nats-server 2.11 or newer. On an older server the
 # create is rejected because the bucket cannot enable Limit Markers.
 
 # --- Per-key TTL is create-only: to change it, delete then create ---------
 #
-# There is no --ttl on put or update. Passing one does nothing; the key
-# keeps its original TTL. To give flash-sale a different lifetime, remove
-# it and create it again with the new TTL:
+# Neither put nor update takes a --ttl; the CLI rejects the flag. Writing
+# flash-sale again with put or update appends a new value with no TTL, so
+# the key stops expiring rather than keeping its clock. To give flash-sale
+# a different lifetime, remove it and create it again with the new TTL:
 nats kv del INVENTORY flash-sale --force
 nats kv create INVENTORY flash-sale 99 --ttl 10m
 

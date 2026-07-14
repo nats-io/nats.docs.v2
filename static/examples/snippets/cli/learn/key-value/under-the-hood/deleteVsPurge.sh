@@ -13,14 +13,17 @@ nats kv del INVENTORY widget-blue
 # revisions that came before:
 nats kv history INVENTORY widget-blue
 #
-# Expected output: the old PUT revisions PLUS a final DEL marker, e.g.
+# Expected output: the kept PUT revisions PLUS a final DELETE marker
+# (columns abbreviated here):
 #
-#   REV  OP   VALUE
-#   1    PUT  42
-#   2    DEL
+#   Key          Revision  Op      Value
+#   widget-blue  2         PUT     41
+#   widget-blue  5         PUT     40
+#   widget-blue  9         DELETE
 #
-# The values are still on disk. Delete is reversible knowledge: a deleted
-# key can be put again, and its past is intact.
+# The values are still on disk, up to the bucket's history depth (raised to
+# 10 on the history-and-revisions page). Delete is reversible knowledge: a
+# deleted key can be put again, and its past is intact.
 
 # Purge is destructive. It drops every prior revision for the key and
 # leaves a single rollup marker behind, so history collapses to one entry.
@@ -28,10 +31,11 @@ nats kv purge INVENTORY widget-red
 
 nats kv history INVENTORY widget-red
 #
-# Expected output: a single PURGE marker, the prior values gone:
+# Expected output: a single PURGE marker, the prior value gone
+# (columns abbreviated here):
 #
-#   REV  OP     VALUE
-#   3    PURGE
+#   Key         Revision  Op     Value
+#   widget-red  10        PURGE
 #
 # Reach for purge when you must actually remove the old values (size or
 # privacy); reach for delete when "this key is gone for now" is enough.

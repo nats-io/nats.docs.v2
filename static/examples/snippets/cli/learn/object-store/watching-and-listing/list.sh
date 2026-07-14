@@ -11,9 +11,10 @@ nats object ls INVOICES
 
 # Expected output: one row per object, metadata only, e.g.
 #
-#   Name                   Size    Time
-#   invoice-ord_8w2k.pdf   18 KiB  2026-05-22 10:14:22
-#   label-ord_8w2k.png     0 B     2026-05-22 10:15:01
+#   Name                   Size     Time
+#   invoice-ord_8w2k.pdf   18 KiB   2026-05-22 10:14:22
+#   invoice-ord_9x3m.pdf   3.0 MiB  2026-05-22 10:15:30
+#   label-ord_8w2k.png     0 B      2026-05-22 10:15:01
 #
 # An empty bucket is not an error — it lists zero rows. In client code an
 # empty bucket surfaces as a "no objects found" condition; treat it as the

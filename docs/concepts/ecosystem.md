@@ -119,7 +119,7 @@ Per-language implementations for issuing and verifying NATS account / user JWT c
 | Name | Description |
 |---|---|
 | [k8s](https://github.com/nats-io/k8s) | Official Helm charts for deploying `nats-server` clusters, surveyor, and related components |
-| [nack](https://github.com/nats-io/nack) | Kubernetes controllers and CRDs for managing JetStream streams, consumers, and KV / Object stores declaratively. Successor to the archived `nats-operator` |
+| [nack](https://github.com/nats-io/nack) | Kubernetes controllers and CRDs for managing JetStream streams, consumers, and KV / Object stores declaratively |
 
 ## Observability
 

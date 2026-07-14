@@ -8,7 +8,9 @@
 
 nats kv put INVENTORY widget-blue 42
 
-# The put returns the new revision of the key. The first write to a fresh
-# key lands at revision 1:
+# The put API returns the new revision to client code; the CLI just echoes
+# the value it stored. Because INVENTORY is empty, this first write lands at
+# revision 1, which you can confirm with `nats kv get`. The output here is
+# only the value:
 #
-#   INVENTORY > widget-blue revision: 1 created @ ...
+#   42

@@ -38,9 +38,9 @@ its limits.
 <div class="nats-flow" data-scenario="limitsRetentionAnimated" data-width="580" data-height="284"></div>
 
 **Interest** keeps a message only while some consumer still wants it. A
-message is removed once *every* consumer on the stream has acked it. If
-no consumer is interested in a subject, a message on that subject is
-removed right away.
+message is removed once *every* consumer whose filter covers it has acked
+it. If no consumer is interested in a subject, a message on that subject
+is removed right away.
 
 <div class="nats-flow" data-scenario="interestRetentionAnimated" data-width="580" data-height="300"></div>
 
@@ -150,14 +150,13 @@ and it stays Limits.
 Interest and WorkQueue each have a way they can go wrong. Know it before
 you use them.
 
-**Interest can fill the disk.** A message is only removed once all
-consumers ack it. The stream tracks the lowest ack position across every
-consumer and only deletes up to that point. So a single slow consumer
-holds up cleanup for the whole stream. If a consumer stalls (a stuck
-worker, a service that's down), its unacked messages never become ready
-to leave, and the stream grows until it hits its limits or runs out of
-room. Interest retention still needs limits set, and it makes watching
-consumer health more important.
+**Interest can fill the disk.** A message is removed only when every
+consumer whose filter covers it has acked it. A slow consumer holds up
+cleanup for every message it still owes an ack on. If a consumer stalls
+(a stuck worker, a service that's down), its unacked messages never
+become ready to leave, and the stream grows until it hits its limits or
+runs out of room. Interest retention still needs limits set, and it makes
+watching consumer health more important.
 
 **WorkQueue delivers each message once.** The first ack removes the
 message for everyone, so no two consumers can claim the same message — the

@@ -55,8 +55,9 @@ schema of an INFO response, that's where to look.
 
 The [Reference root](/reference/) is the entry point. The handoff phrases
 throughout this chapter ("the full set of service configuration fields is
-documented in Reference") all point into it. The `$SRV` wire format lives
-under [the client protocol reference](/reference/protocols/client).
+documented in Reference") all point into it. The `$SRV` wire format and its
+PING, INFO, and STATS response schemas live under
+[the services reference](/reference/services/).
 
 ## Sibling deep dives
 
@@ -85,8 +86,10 @@ The [Security deep dive](/learn/security) covers subject isolation for `$SRV`
 subjects, account access control, and cross-account service placement.
 
 The [Monitoring deep dive](/learn/monitoring) goes past per-endpoint stats to
-the server-side view: service-latency advisories and the metrics that tell
-you a service is slow before a caller complains.
+the server-side view: exporting metrics to Prometheus and building the
+dashboards that tell you a service is slow before a caller complains. The
+service-latency advisory schema itself lives in
+[Reference](/reference/services/).
 
 The [Topologies deep dive](/learn/topologies) covers running services across
 more than one server: how `$SRV` and service subjects propagate across leaf

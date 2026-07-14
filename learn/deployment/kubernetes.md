@@ -49,10 +49,6 @@ config:
     fileStore:
       pvc:
         size: 10Gi       # the sizing baseline from the previous page
-
-# Bring all three pods up at once instead of one-at-a-time, so the
-# cluster forms in a single pass rather than waiting on ordinals.
-podManagementPolicy: Parallel
 ```
 
 Install it with the chart's release name `nats`, which is what gives the
@@ -63,17 +59,20 @@ helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 helm install nats nats/nats -f values.yaml
 ```
 
-Two things are worth naming. `podManagementPolicy: Parallel` tells the
-StatefulSet to start all three pods together. The default starts them in
-order, waiting for each to become ready before the next. That deadlocks
-a NATS cluster, because no single node is ready until it can see its
-peers. Parallel lets them find each other and form the cluster in one
-pass.
+Two things are worth naming. The chart already sets
+`podManagementPolicy: Parallel` on the StatefulSet, so you don't add it to
+`values.yaml`. It starts all three pods together instead of one at a time;
+the ordered default would wait for each pod to become ready before
+starting the next, and that deadlocks a NATS cluster, because no single
+node is ready until it can see its peers. Parallel lets them find each
+other and form the cluster in one pass.
 
 The second is the **headless service**. It gives each pod a stable DNS
-name of the form `nats-0.nats.default.svc.cluster.local`. The nodes use
-those names to route to each other, and a client inside the Kubernetes
-cluster dials the same service to reach any of them.
+name of the form `nats-0.nats-headless.default.svc.cluster.local`, and the
+nodes use those names to route to each other. Clients don't dial the
+headless service: the chart also creates a regular ClusterIP service named
+`nats`, and that's the address a client inside the Kubernetes cluster
+connects to — the one readiness pulls a not-ready pod out of.
 
 The chart has many more values, with sensible defaults for almost all of
 them. Every server configuration option is documented in
@@ -213,28 +212,28 @@ restarts. Turning a ConfigMap change into a live reload is its own
 subject, covered on
 [Config management](/learn/deployment/config-management).
 
-**A flapping readiness probe during a rebalance is normal.** When
-JetStream moves R3 replicas between pods (after a restart, or when you
-scale), the readiness probe can briefly report a pod as not-ready even
-though the cluster is healthy. The probe is doing its job: it pulls a
-pod out of the service rotation while that pod catches up. You can watch
-it happen:
-
-```bash
-kubectl describe pod nats-0
-# Events: ... Readiness probe failed ... then recovers as the replica syncs
-```
-
-Don't restart the pod chasing it. If the flapping is frequent enough to
-disrupt clients, raise the readiness probe's `failureThreshold` in
-`values.yaml` so a mid-rebalance blip doesn't pull the pod out.
+**Replica catch-up shows up in the startup probe, not readiness.** The
+chart points the readiness probe at `/healthz?js-server-only=true`, which
+checks only that the server and its JetStream subsystem are up — it
+deliberately skips every stream, consumer, and meta-assignment check. So a
+pod catching its R3 replicas up after a restart still reports ready and
+keeps serving clients. The plain `/healthz` the startup probe uses is the
+strict one: it checks the meta layer and every stream and consumer asset,
+which is why the chart sets its `failureThreshold` to 90 — a wide window
+for a rebooting node to finish syncing before Kubernetes gives up on it.
+To widen that window further, override the probe fields through the
+chart's container `merge`/`patch`; there's no named `failureThreshold`
+value.
 
 **Never mix CLI and CRD management of the same stream.** The NACK
-controller continuously reconciles the CRD against the cluster. If you
-run `nats stream edit ORDERS` by hand while a `Stream` CRD owns it, the
-controller sees the drift and reverts your change within about 30
-seconds — your edit silently vanishes. Pick one owner per stream: either
-the CRD or the CLI, never both.
+controller reconciles the `Stream` CRD against the cluster, but what it
+enforces depends on its mode. By default it re-creates a stream that's
+been deleted (it notices on its ~30-second resync), yet it does *not*
+revert a manual `nats stream edit`: a config change sticks until the CRD
+itself next changes. Run the controller in its `--control-loop` mode and
+it also enforces config drift, reverting manual edits on about a
+one-minute cycle. Either way, pick one owner per stream — let the CRD own
+it or the CLI own it, never both.
 
 Whichever owner you pick, verify the stream the controller created is
 actually the R3 stream you declared. Open a shell in `nats-box` and read

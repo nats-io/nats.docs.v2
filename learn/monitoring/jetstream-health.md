@@ -107,10 +107,12 @@ called **in-flight** (`num_ack_pending`). Five `shipping` workers are
 holding five orders, working on them, and haven't confirmed them back.
 In-flight measures work in progress, which is a different thing from lag.
 
-**Redelivered Messages** (`num_redelivered`) counts how many orders the
-server has had to deliver more than once since the consumer was created:
-three so far. A redelivery happens when a worker takes an order and never
-acks it, so the server hands it to someone else.
+**Redelivered Messages** (`num_redelivered`) is how many orders the server
+is currently tracking as delivered more than once: three right now. It's
+not a lifetime tally — when one of those orders is finally acked the server
+stops tracking it and the count drops back down. A redelivery happens when
+a worker takes an order and never acks it, or negative-acks it with a
+`nak`, so the server hands it to another worker.
 
 The full set of consumer state fields is documented in
 [Reference → consumer API](/reference/jetstream/api/consumer). We only
@@ -136,9 +138,8 @@ Twenty orders are waiting for a `shipping` worker to fetch them. That's
 what "the shipping consumer is behind" means as a number. A pull consumer
 also reports this same value directly as **Unprocessed Messages**
 (`num_pending`), so most of the time you read it off `nats consumer info`
-rather than subtracting by hand. You compute it yourself when you want to
-cross-check that the reported number is fresh, a point the Pitfalls
-return to.
+rather than subtracting by hand. Computing it from the two source fields
+yourself is worth doing once, to see exactly what `num_pending` measures.
 
 Three numbers now describe the full state of the `shipping` consumer:
 
@@ -147,11 +148,11 @@ Three numbers now describe the full state of the `shipping` consumer:
 - **redelivered = 3**: orders the server had to hand out again
   (`num_redelivered`)
 
-A healthy consumer keeps lag near zero and redelivery flat. Lag climbing
-while `last_seq` climbs means orders arrive faster than `shipping`
-processes them. Redelivery climbing means workers are taking orders and
-failing to ack them. Each symptom has a different cause, and naming
-which number moved is the first step every time.
+A healthy consumer keeps lag near zero and `num_redelivered` near zero. Lag
+climbing while `last_seq` climbs means orders arrive faster than `shipping`
+processes them. A `num_redelivered` that stays high or keeps growing means
+workers keep taking orders and failing to ack them. Each symptom has a
+different cause, and naming which number moved is the first step every time.
 
 This animation shows the three numbers as positions on the stream log:
 orders append and push `last_seq` up, the consumer cursor advances as
@@ -172,19 +173,20 @@ These traps are scoped to this page's two concepts: reading consumer
 state, and reading lag from it. Each one is a number that misleads if you
 read it without context.
 
-**Pull-consumer lag is only fresh when a client is fetching.** A pull
-consumer reports `num_pending` based on what it knew the last time a
-worker asked for messages. If every `shipping` worker has crashed, no one
-is fetching, and the number can sit stale at its last value while orders
-keep arriving. Don't trust a flat `num_pending` as proof the consumer is
-healthy; cross-check it. Compute lag yourself from the two source fields
-and compare:
+**Crashed workers show up as rising lag with nobody fetching.** When every
+`shipping` worker has crashed, `num_pending` keeps climbing: the server
+updates it on every new matching order, whether or not any client is
+fetching. So a high `num_pending` on its own is ambiguous — a healthy
+consumer draining a backlog looks the same for a moment. The signature of
+crashed workers is the combination: lag rising while **Waiting Pulls**
+(`num_waiting`) sits at `0` and `delivered.stream_seq` stops advancing.
+Read all three together:
 
 <div class="nats-example" data-type="learn-monitoring-jetstream-health-consumerState" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-Read `stream.last_seq` and `consumer.delivered.stream_seq`, subtract, and
-if your computed lag is large while `num_pending` looks small, the
-reported number is stale and the workers are gone.
+If `num_pending` is large and climbing while `num_waiting` is `0` and
+`delivered.stream_seq` hasn't moved, no worker is fetching and the pool is
+gone.
 
 **In-flight is not lag.** `num_ack_pending` counts orders a worker
 already holds; `num_pending` counts orders no worker has taken yet.

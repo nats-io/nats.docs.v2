@@ -12,9 +12,9 @@ between them — the shape a deployment takes. NATS scales by composing
 servers, so growing a deployment means building bigger topologies out of
 smaller ones.
 
-This chapter walks through the shapes those servers form (single server, a
-cluster, a super-cluster, leaf nodes), the way a real deployment grows: start
-small, add servers when you need them, stretch across regions, push to the edge.
+This chapter walks through the shapes those servers form — single server,
+cluster, super-cluster, leaf nodes — in the order a real deployment grows
+through them.
 
 The idea that ties the whole chapter together is that the application
 never changes. The same server binary and the same client code run on
@@ -23,8 +23,9 @@ every shape, so you change the deployment rather than the code.
 ## The growing deployment
 
 We follow one company, Acme, and one workload: its ORDERS system. The
-application publishes order events on orders.* and consumes them from the ORDERS
-stream — the same small payload in every example.
+application publishes order events on subjects under `orders.` (like
+`orders.created`) and consumes them from the ORDERS stream — the same small
+payload in every example.
 
 What grows across the chapter is the deployment under that workload, in
 four stages:
@@ -65,7 +66,8 @@ the same fabric: the topology moves messages, and JetStream persists and
 replicates them.
 
 Most of what a topology does is the first layer, and the animations
-reflect that. JetStream enters on the
+reflect that. JetStream's cluster behavior — the meta layer and replication —
+enters on the
 [JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster) page.
 When a page talks about a message reaching a subscriber, that's core
 messaging; when it talks about a stream surviving a lost server, that's
@@ -73,14 +75,14 @@ JetStream on top.
 
 ## Scope of this chapter
 
-This is the Operate-half companion to the
-[Core Concepts → Topologies](/concepts/topologies) primer. The concept
+This chapter, in the Operate section of Learn, is the hands-on companion to
+the [Core Concepts → Topologies](/concepts/topologies) primer. The concept
 page is the five-minute overview. This chapter wires each shape up for
 real, providing config you can copy-paste, `nats-server` processes you
 can run locally, and the "when and why" behind each step.
 
-This chapter teaches the **shapes and the wiring**, rather than the
-**mechanics** of replication: Raft, quorum, leader election, stream
+This chapter teaches the shapes and the wiring, not the replication mechanics
+underneath: the Raft protocol, election timing, log replication, and stream
 placement. Those live in the
 [Clustering & Replication](/learn/clustering) deep dive.
 

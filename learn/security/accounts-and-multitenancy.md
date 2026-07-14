@@ -131,8 +131,11 @@ The one new field is
 JetStream, declaring an `accounts` block makes JetStream opt-in per
 account: an account without the field gets
 `JetStream not enabled for account (10039)` on every JetStream call.
-This line is what keeps the `ORDERS` streams from the JetStream chapter
-working; `ANALYTICS` doesn't need one.
+This line lets `order-svc` keep using streams; `ANALYTICS` doesn't need
+one. Each account gets its own JetStream store, though — a stream
+created back in `$G` before the accounts existed doesn't follow
+`order-svc` into `ORDERS`, so recreate the `ORDERS` stream inside the
+account if you want the JetStream chapter's setup here.
 
 Start the server with this config:
 
@@ -252,8 +255,21 @@ block and the server still creates `$SYS`, but with no user inside it
 you can't connect there. The server's monitoring and management events
 on `$SYS.SERVER.>` become unreachable, so `nats server account info`
 and event tooling stop working. Do declare a `SYS` account with a user
-and set [`system_account: SYS`](/reference/config/system_account). The
-example below proves a tenant user
+and set [`system_account: SYS`](/reference/config/system_account) —
+this addition to the config above stays for the rest of the chapter's
+config-mode pages:
+
+```conf
+accounts {
+  # ORDERS and ANALYTICS unchanged
+  SYS: {
+    users: [ { user: sys-admin, password: syspass } ]
+  }
+}
+system_account: SYS
+```
+
+The example below proves a tenant user
 sees only its own account while the system-account user reaches the
 server events:
 

@@ -63,14 +63,30 @@ their pull gets nothing, the same as if the stream were empty.
 
 <div class="nats-flow" data-scenario="priorityOverflowAnimated" data-width="640" data-height="340"></div>
 
-Create an overflow consumer on the `ORDERS` stream:
+Create an overflow consumer on the `ORDERS` stream from a config file:
 
 ```bash
-nats consumer add ORDERS dispatch --overflow-groups regions --ack explicit --pull --defaults
+nats consumer add ORDERS dispatch --config overflow-consumer.json
 ```
 
-The `--overflow-groups regions` flag sets the policy to `overflow` and
-names the single group `regions`. Confirm it:
+where `overflow-consumer.json` sets the policy and its single group:
+
+```json
+{
+  "durable_name": "dispatch",
+  "ack_policy": "explicit",
+  "priority_policy": "overflow",
+  "priority_groups": ["regions"]
+}
+```
+
+The intended shorthand is `nats consumer add ORDERS dispatch --overflow-groups
+regions --ack explicit --pull`, but through natscli v0.4.x that flag sets the
+policy without attaching the group, so the server rejects the create with error
+`10159`. Use `--config` until the fix ships. The pinned and prioritized creates
+later on this page use their flags normally.
+
+Confirm the consumer:
 
 ```bash
 nats consumer info ORDERS dispatch
@@ -83,8 +99,8 @@ Configuration:
 
               Pull Mode: true
              Ack Policy: Explicit
-        Priority Policy: overflow
-        Priority Groups: [regions]
+        Priority Policy: Overflow
+        Priority Groups: regions
 ```
 
 The threshold goes on the pull request, not on the consumer. A
@@ -176,7 +192,7 @@ state. `nats consumer info ORDERS sequencer` shows the live pin in its
 ```
 State:
 
-          Priority Groups: ordered: pinned <client-id> at 2026-06-02T10:14:22Z
+          Priority Groups: ordered: pinned <client-id> at 2026-06-02 12:14:22
 ```
 
 A group with no active client reads `No client`. To list every fully

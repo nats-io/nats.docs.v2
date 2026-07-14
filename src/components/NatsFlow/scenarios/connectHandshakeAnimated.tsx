@@ -21,7 +21,7 @@ const edgeTypes = {
 // Brand-ish palette.
 const IDLE_COLOR = "#94a3b8"; // gray — quiet link
 const MSG_COLOR = "#27AAE1"; // NATS primary blue — frame in flight
-const SUCCESS_COLOR = "#34A574"; // NATS green — accepted (+OK / CONNECTED)
+const SUCCESS_COLOR = "#34A574"; // NATS green — accepted (PONG / CONNECTED)
 const FAILURE_COLOR = "#ef4444"; // red — rejected (-ERR)
 const NAVY_COLOR = "#375C93"; // navy accent — credentials
 
@@ -47,9 +47,9 @@ const CAPTION: Record<Stage, string> = {
     info:
         "The server speaks first, sending an INFO frame that advertises its capabilities (server id, TLS, max payload) and whether auth is required.",
     connect:
-        "order-svc replies with a CONNECT frame carrying its credentials (user/password, token, JWT, or nkey signature) and client options.",
+        "order-svc replies with a CONNECT frame carrying its credentials (user/password, token, JWT, or nkey signature) and client options, immediately followed by a PING.",
     ok:
-        "The server accepts the credentials and returns +OK. order-svc is now CONNECTED and can publish and subscribe.",
+        "The server answers the PING with a PONG. order-svc is now CONNECTED and can publish and subscribe. (Only in verbose mode does the server also send +OK for the CONNECT itself.)",
     err:
         "If the credentials are wrong, the server returns -ERR 'Authorization Violation' instead and closes the socket — order-svc stays rejected.",
 };
@@ -192,7 +192,7 @@ function ConnectHandshakeAnimatedInner({
             style: { opacity: connected ? 1 : 0.3 },
             data: {
                 color: connected ? SUCCESS_COLOR : IDLE_COLOR,
-                label: "+OK",
+                label: "PONG",
                 labelColor: connected ? SUCCESS_COLOR : "#94a3b8",
                 animated: connected,
                 interval: 1500,

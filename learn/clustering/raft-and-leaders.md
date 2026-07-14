@@ -53,14 +53,15 @@ across its three peers. They're independent. The meta leader and the `ORDERS`
 stream leader may be the same server or different servers, and a change to one
 doesn't move the other.
 
-You can see both. Ask any server what it knows about itself and the meta group:
+You can see both. The JetStream report names the meta group's leader:
 
 ```bash
-nats server info n1-east
+nats server report jetstream
 ```
 
-The output names the server, its cluster `east`, and whether it currently
-holds JetStream's meta leadership. To see a stream's group, ask the stream:
+Its `RAFT Meta Group Information` table lists every server and marks the one
+that holds meta leadership. To see a stream's group, ask the stream (you
+stand `ORDERS` up in the exercise below):
 
 ```bash
 nats stream info ORDERS
@@ -135,9 +136,16 @@ gives as a deployment choice: an even count buys no extra majority.
 
 ## Observing an election
 
-You can observe this directly. With `east` running and `ORDERS`
-replicated, find the current stream leader, kill it, and watch the survivors
-elect a new one.
+You can observe this directly. This exercise needs the replicated `ORDERS`
+stream; the [next page](/learn/clustering/replication-and-r3) creates it in
+full, but one command stands it up now:
+
+```bash
+nats stream add ORDERS --subjects 'orders.>' --replicas=3 --defaults
+```
+
+With `east` running and `ORDERS` replicated, find the current stream leader,
+kill it, and watch the survivors elect a new one.
 
 First, find the leader:
 
@@ -209,21 +217,22 @@ nats stream info ORDERS | grep Leader
 # Leader: n2-east
 ```
 
-**Stepdown moves leadership, but does not pick the successor.** `nats stream
-cluster step-down` makes the current leader yield, but the *next* leader is
-still chosen by a normal quorum election among the remaining peers. There's no
-flag that hands leadership to a specific server. Don't run stepdown expecting
-`n3-east` to win. Run it to *move leadership off* the current server, then read
-`nats stream info` to learn who actually won. (Choosing where a leader prefers
-to land at creation time is **placement**, covered on
-[Placement](/learn/clustering/placement), and even that is a hint, not a lock.)
+**Stepdown moves leadership, but the election still picks the successor.**
+`nats stream cluster step-down` makes the current leader yield, and the *next*
+leader is chosen by a quorum election among the remaining peers. You can name
+a preferred successor with `nats stream cluster step-down --preferred <server>`
+(NATS Server 2.11+), but that's a request, not a guarantee — the election can
+still land elsewhere. So run stepdown to *move leadership off* the current
+server, then read `nats stream info` to learn who actually won. Stream
+placement (cluster and tags) can't name a leader at all; that's covered on
+[Placement](/learn/clustering/placement).
 
 **The meta leader and a stream leader are different groups.** Losing the meta
 leader doesn't lose the `ORDERS` stream leader, and vice versa; they're
 separate RAFT groups with separate elections. A common mistake is to see "the
 leader is down," panic, and assume the stream is unavailable when only the meta
-leader moved (or the reverse). Check the right group: `nats server info` for the
-meta leader, `nats stream info ORDERS` for the stream leader.
+leader moved (or the reverse). Check the right group: `nats server report
+jetstream` for the meta leader, `nats stream info ORDERS` for the stream leader.
 
 ## Where you are
 

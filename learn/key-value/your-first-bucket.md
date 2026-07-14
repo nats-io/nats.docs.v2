@@ -60,11 +60,14 @@ SKU, and the **value** is the count stored as bytes:
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-putValue" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 That's a **put**: an unconditional write. It stores the value whether or
-not the key already exists, and it hands back the key's new **revision**,
-a number the bucket bumps on every write. The first write to a fresh key
-lands at revision 1. Revisions are how the bucket tracks change over time;
-[History and revisions](./history-and-revisions) builds on them, and for now
-the number only confirms the write happened.
+not the key already exists. Each write also gets a **revision**: a number
+the bucket assigns from a single counter it keeps across every key, not a
+per-key count. Because `INVENTORY` is empty, this first write lands at
+revision 1; in a bucket that already holds other keys, the same put would
+take the next number in the bucket's sequence instead. The put API returns
+that revision to client code; the CLI prints only the value you stored.
+Revisions are how the bucket tracks change over time, and
+[History and revisions](./history-and-revisions) builds on them.
 
 Now read it back:
 
@@ -107,25 +110,28 @@ it directly.
 Two mistakes are common on your very first bucket, and each is easy to avoid
 once you've seen it.
 
-**A get returns an entry rather than a value, and a missing key is an error
-rather than an empty value.** Reaching straight for the value bytes works only
+**A get returns an entry rather than a value, and a missing key is signaled
+distinctly from an empty one.** Reaching straight for the value bytes works only
 when the key exists. A key that was never put doesn't return an empty
-entry; it returns a key-not-found error. Those are two different
-situations: an empty value is a value, and a missing key is the absence of
-one. Don't treat a failed get as "the count is zero." The get example
-above ends with exactly this case: its last line gets a SKU that was never
-stocked, the get fails, and the program decides what a missing SKU means
-instead of reading a stale or zero count by accident. Check the error
-first, then read the value.
+entry: the CLI and some clients (Go, Python, C#) fail with a key-not-found
+error, while others (JavaScript, Rust, Java) return null or None. Either
+way, absence is reported as its own thing, separate from a value that
+happens to be empty: an empty value is a value, and a missing key is the
+absence of one. Don't treat a missing key as "the count is zero." The get
+example above ends with exactly this case: its last line gets a SKU that
+was never stocked, the get signals absence, and the program decides what a
+missing SKU means instead of reading a stale or zero count by accident.
+Check for absence first, then read the value.
 
 **Bucket and key names are validated.** A bucket name may contain only
 letters, digits, dash, and underscore, and it can't be empty. A key is
 more permissive (letters, digits, and the characters `-`, `/`, `_`, `=`,
 and `.`), but nothing beyond that set, no leading or trailing dot, and no
 two dots in a row (`a..b` is rejected even though `a.b` is fine). An order
-id like `ord:8w2k` has a colon, so it can't be a key; the server rejects
-the write rather than storing a broken key. Pick names from the allowed
-set, and reach for an underscore or dash where you'd have used a colon:
+id like `ord:8w2k` has a colon, so it can't be a key; the client library
+validates the name and rejects the write before it's sent, rather than
+storing a broken key. Pick names from the allowed set, and reach for an
+underscore or dash where you'd have used a colon:
 
 <div class="nats-example" data-type="learn-key-value-your-first-bucket-nameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

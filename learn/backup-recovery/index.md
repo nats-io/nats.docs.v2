@@ -39,9 +39,10 @@ them protects the others. Keep this in mind for the whole chapter:
   is allowed to read. They're the keys that prove who you are.
 
 A snapshot won't bring a dead site back quickly, a mirror won't save you
-from a delete (delete the upstream stream and the mirror deletes too),
-and neither one matters if you've lost the keys. You need all three, and
-this chapter takes them one at a time.
+from bad data (a corrupt write replicates to the mirror, and a mirror
+keeps no earlier state to rewind to), and neither one matters if you've
+lost the keys. You need all three, and this chapter takes them one at a
+time.
 
 ### Why R3 is not on the list
 

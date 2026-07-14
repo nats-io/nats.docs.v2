@@ -34,9 +34,8 @@ brew install nats-server
 
 #### Linux
 ```
-curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-linux-amd64.zip -o nats-server.zip
-unzip nats-server.zip
-sudo cp nats-server /usr/local/bin
+curl -sf https://binaries.nats.dev/nats-io/nats-server/v2@latest | sh
+sudo mv nats-server /usr/local/bin/
 ```
 
 #### Windows
@@ -76,9 +75,8 @@ The NATS CLI tool helps you interact with NATS:
 brew install nats-io/nats-tools/nats
 
 # Linux
-curl -L https://github.com/nats-io/natscli/releases/latest/download/nats-linux-amd64.zip -o nats-cli.zip
-unzip nats-cli.zip
-sudo cp nats /usr/local/bin
+curl -sf https://binaries.nats.dev/nats-io/natscli/nats@latest | sh
+sudo mv nats /usr/local/bin/
 ```
 
 ## Your First NATS Application
@@ -274,5 +272,4 @@ NATS has official clients for:
 ### Resources
 
 - [NATS by Example](https://natsbyexample.com) - Interactive examples
-- [GitHub Examples](https://github.com/nats-io/nats-examples) - Sample applications
 - [Slack Community](https://natsio.slack.com) - Get help from the community

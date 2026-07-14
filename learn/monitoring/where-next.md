@@ -119,7 +119,7 @@ back to the page that explains the why.
 
 ### JetStream health — see [Pitfalls](/learn/monitoring/jetstream-health#pitfalls)
 
-- [ ] Cross-check `delivered.stream_seq` against the stream's `LastSeq` yourself; a pull consumer's `num_pending` is only fresh when a client fetches, so a crashed client leaves it stale.
+- [ ] Read crashed workers as rising `num_pending` with `num_waiting` at `0` and `delivered.stream_seq` stalled; `num_pending` keeps climbing whether or not a client is fetching, so watch those three fields together.
 - [ ] Read in-flight (`num_ack_pending`) and lag (`num_pending`) as two separate numbers; confusing the two hides a stuck handler.
 - [ ] Remember a filtered consumer's `num_pending` counts only matching subjects; empty pending does not mean an empty stream.
 
@@ -131,7 +131,7 @@ back to the page that explains the why.
 
 ### Prometheus and dashboards — see [Pitfalls](/learn/monitoring/prometheus-and-dashboards#pitfalls)
 
-- [ ] Use `/healthz?js-meta-only=true` to check cluster quorum; `?js-server-only=true` checks only the local node and returns 200 even with no quorum.
+- [ ] Use `/healthz?js-meta-only=true` to check cluster quorum; `?js-enabled-only=true` checks only whether the local node's JetStream is running and returns 200 even with no quorum.
 - [ ] Set explicit `nats server check` thresholds like `--unprocessed-critical`; defaults don't know your SLA, and a check with no threshold never fires.
 - [ ] Put Prometheus behind the exporter; the exporter stores no history, so on its own you only ever see "now."
 

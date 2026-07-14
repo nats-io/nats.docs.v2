@@ -23,12 +23,15 @@ the **drain timeout** that bounds how long drain is allowed to take.
 
 ## Close drops in-flight work
 
-A **close** is an abrupt teardown: the client shuts the TCP socket
-immediately, sends no UNSUB, and abandons anything in flight. In the
-client libraries this is the `Close()` call (the CLI's equivalent is
-killing the process with `SIGKILL`).
+A **close** is an abrupt teardown: the client shuts the TCP socket right
+away, sends no UNSUB, and doesn't wait for in-flight work. In the client
+libraries this is the `Close()` call. It flushes whatever is already in the
+write buffer on its way out, but it stops delivering buffered inbound
+messages to your handlers and drops the reconnect buffer. Killing the
+process with `SIGKILL` is harsher still: it loses the write buffer too.
 
-Two kinds of work are in flight at shutdown, and close abandons both.
+Two kinds of work are in flight at shutdown, and close treats them
+differently.
 
 An **in-flight message** is one the server has already delivered to the
 subscriber but the handler hasn't finished; it's sitting in the
@@ -37,8 +40,10 @@ buffered `orders.created` event that hasn't run yet is dropped, and the
 handler never sees it.
 
 A pending publish is the other kind: `order-svc` called publish, but the
-bytes are still in the client's write buffer, not yet on the wire. Close
-discards them too. The server never receives that order.
+bytes are still in the client's write buffer, not yet on the wire. A
+library `Close()` flushes that buffer as it tears down, so a clean close
+usually still gets the order to the server; an abrupt exit — a crash or a
+`SIGKILL` — loses it, because the write buffer dies with the process.
 
 Close is the right call only when you're tearing down a connection you no
 longer care about, such as a failed health check, a test, or an error path
@@ -71,15 +76,24 @@ handlers, flushes the pending publish, and only then closes.
 ## Drain on a shutdown signal
 
 The place to call drain is your process's shutdown handler. When the
-runtime receives SIGTERM, instead of letting the process exit, you call
-`Drain()` and wait for it to return. The `warehouse` subscriber drains its
-buffered orders; `order-svc` flushes its pending publish. Both exit having
-handled everything they had.
+runtime receives SIGTERM, instead of letting the process exit, you start
+the drain and wait for the connection to report CLOSED before the process
+exits. The `warehouse` subscriber drains its buffered orders; `order-svc`
+flushes its pending publish. Both exit having handled everything they had.
 
-The `nats` CLI models this with SIGINT. Press Ctrl-C against a running
-`nats sub` and it unsubscribes, lets the messages already in its buffer
-print, and then closes. That's the CLI's stand-in for `Drain()`. The
-client tabs show the real call wired to a SIGTERM handler.
+How you wait for completion depends on the client. In JavaScript and Python
+`await nc.drain()` resolves only once the drain is done. In Go `Drain()`
+returns immediately and drains in the background, so you register a closed
+handler (`nats.ClosedHandler`) and wait on it — returning from `Drain()` is
+not the signal that draining finished, and a process that exits on that
+return loses the very work drain was meant to save.
+
+The `nats` CLI shows both sides of this on SIGINT. Press Ctrl-C against a
+running `nats sub` and the process just exits, abandoning in-flight
+messages — that's the close case. `nats reply`, by contrast, installs an
+interrupt handler that calls `Drain()`: Ctrl-C against a running `nats
+reply` unsubscribes, lets its in-flight requests finish, and then closes.
+The client tabs show the real `Drain()` call wired to a SIGTERM handler.
 
 <div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-on-signal" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -90,12 +104,16 @@ other page:
 {"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
 ```
 
-After `Drain()` is called the connection is in a draining state and
-refuses new work. A publish attempted at that point doesn't queue and
-doesn't silently vanish. It returns a draining error
-(`ErrConnectionDraining` in nats.go, the equivalent in each library) so
-you can tell the connection is shutting down. Drain is the last thing your
-shutdown does, after the application has stopped producing.
+The two phases from above also decide what a late publish does. While the
+connection is draining its subscriptions (DRAINING_SUBS), most clients still
+accept a publish — deliberately, so a handler can send its reply as it
+finishes. Once the connection moves on to flushing publishes (DRAINING_PUBS)
+it refuses new ones, and a publish then returns a draining error
+(`ErrConnectionDraining` in nats.go, the equivalent in each library). So a
+publish issued right after `Drain()` races the phase change: it may slip
+through or it may be rejected. That race, not a guaranteed error, is why
+drain is the last thing your shutdown does, after the application has
+stopped producing.
 
 ## The drain timeout bounds how long drain waits
 
@@ -140,11 +158,13 @@ Three mistakes turn a clean shutdown back into a lossy one. Each comes
 back to this page's two concepts: drain versus close, and the drain
 timeout.
 
-**Publishing after you call drain.** Drain can't be reversed: once the
-connection is draining it refuses new publishes. Code that calls `Drain()`
-and *then* tries to emit a final "shutting down" event gets a draining
-error and the event is lost. Drain last, after the application has stopped
-producing work. Don't interleave a publish with the shutdown.
+**Publishing after you call drain.** Drain can't be reversed. Code that
+calls `Drain()` and *then* tries to emit a final "shutting down" event is
+racing the drain: depending on which phase the connection has reached, the
+publish either slips through unnoticed or comes back with a draining error
+(`ErrConnectionDraining` in nats.go) and the event is lost. You can't count
+on either outcome. Drain last, after the application has stopped producing
+work, so no publish ever has to win that race.
 
 Handle the draining error instead of letting it look like success:
 

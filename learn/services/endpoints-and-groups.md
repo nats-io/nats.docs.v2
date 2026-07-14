@@ -106,10 +106,14 @@ documented in [Reference](/reference/). We only need the behavior here.
 
 <div class="nats-flow" data-scenario="serviceEndpointsAnimated" data-width="600" data-height="350"></div>
 
-The animation shows one service with two endpoints. A request to
-`orders.inventory.check` lights the `check` endpoint; a request to
-`shipping.quote` lights the grouped endpoint. It's the same service on the
-same connection, with two named handlers chosen by subject.
+The animation isolates the routing rule. It puts two endpoints on one
+service, `check` on `orders.inventory.check` and a grouped `quote` on
+`shipping.quote`, and shows the subject on each request selecting the
+handler: a request to `orders.inventory.check` runs `check`, a request to
+`shipping.quote` runs `quote`, and only the endpoint whose subject matches
+runs. In this chapter those two subjects belong to two separate services,
+`OrderInventory` and `ShippingQuote`, but the selection rule is identical
+when one service hosts several endpoints.
 
 ## Pitfalls
 

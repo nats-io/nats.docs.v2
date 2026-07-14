@@ -76,10 +76,12 @@ stand on their own and don't imply anything about `INVENTORY`:
 
 The `--ttl` on the bucket above is a different clock from the per-key TTL.
 A bucket TTL expires *every* value once it reaches that age; the per-key
-TTL expires *one* value. The bucket-wide form is the general per-message
-expiry mechanism applied to a whole bucket, and its details live with
-[message TTL](/learn/jetstream/message-ttl) in JetStream. This chapter
-teaches the per-key form, which is the one unique to key-value.
+TTL expires *one* value. The bucket-wide form is the stream's `MaxAge`
+limit — one deadline applied to every value in the bucket — and it lives
+with the other [stream limits](/learn/jetstream/shaping-the-stream). The
+per-key form is the one built on JetStream's
+[per-message TTL](/learn/jetstream/message-ttl), and it's the form unique to
+key-value that this chapter teaches.
 
 The full set of bucket configuration options is documented in
 [Reference → Create Stream](/reference/jetstream/api/stream/create),
@@ -95,18 +97,18 @@ key-value is marker, and a TTL expiry leaves one with the reason
 `MaxAge`: the value aged out.
 
 The marker matters because of the warehouse dashboard. A watcher receives
-the marker as a delete on the key, exactly as if someone had removed it by
-hand. Without the marker, a watcher that saw `flash-sale` appear would
-never learn it had vanished, and its view of the bucket would drift out of
-date. The marker is how live readers stay correct when a value expires on
-its own.
+the marker as a purge on the key — the CLI prints `PURGE` — just as if
+someone had purged it by hand. Without the marker, a watcher that saw
+`flash-sale` appear would never learn it had vanished, and its view of the
+bucket would drift out of date. The marker is how live readers stay correct
+when a value expires on its own.
 
 <div class="nats-flow" data-scenario="kvTtlExpiryAnimated" data-width="600" data-height="350"></div>
 
 The animation walks the timeline: the inventory service creates
 `flash-sale` with a 30-minute TTL; the clock advances past it; the server
 places a marker on the key with reason `MaxAge`; and the warehouse
-dashboard receives that marker as a delete. The value expired without
+dashboard receives that marker as a purge. The value expired without
 any service modifying it, and the watcher was still notified through the
 marker.
 
@@ -116,13 +118,13 @@ Two mistakes are common the first time you add a TTL or a limit to a
 bucket. Both come from expecting a TTL or a limit to behave in a way it
 does not.
 
-**A per-key TTL is set at create, and only at create.** There's no
-`--ttl` on put or on update; passing one does nothing, and the key keeps
-whatever TTL it had. The instinct to "extend the TTL" by writing the
-key again doesn't work: a put leaves the original clock running, and an
-update resets it to no TTL at all. To give a key a different TTL, you
-delete it and create it again with the new TTL. Use delete-then-create
-to change a TTL, not put or update.
+**A per-key TTL is set at create, and only at create.** Neither put nor
+update takes a `--ttl`; the CLI rejects the flag outright. And writing the
+key again doesn't extend its TTL: a put or an update appends a new latest
+value with no TTL of its own, so the key simply stops expiring — put and
+update behave the same way here. To give a key a different TTL, delete it
+and create it again with the new one. Use delete-then-create to change a
+TTL, not put or update.
 
 The handling is in the create snippet above: after the timed create, it
 deletes `flash-sale` and creates it again with a shorter TTL, which is the
@@ -149,7 +151,7 @@ You now have:
   and history depth) that bound the whole bucket.
 - A working model of the expiry marker: when a value ages out, the server
   leaves a marker with reason `MaxAge`, and the warehouse dashboard
-  receives it as a delete.
+  receives it as a purge.
 
 The bucket is now complete. It holds keys with values, keeps history,
 supports safe concurrent writes, and has values that remove themselves
@@ -168,6 +170,9 @@ Continue to [Under the hood](/learn/key-value/under-the-hood).
 - [Reference → Create Stream](/reference/jetstream/api/stream/create) —
   every bucket limit and its valid range.
 - [JetStream → Message TTL](/learn/jetstream/message-ttl) — the
-  per-message expiry mechanism the bucket-wide TTL is built on.
+  per-message expiry mechanism the per-key TTL is built on.
+- [JetStream → Shaping the stream](/learn/jetstream/shaping-the-stream) —
+  `MaxAge` and the other stream limits the bucket-wide TTL and size caps
+  map onto.
 - [Object Store](/learn/object-store) — where large values belong when
   they outgrow a key-value bucket.

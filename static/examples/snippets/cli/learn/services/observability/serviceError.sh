@@ -6,11 +6,10 @@
 # and Nats-Service-Error-Code headers, sends the reply, and bumps num_errors
 # and last_error for the endpoint.
 #
-# Send one bad request (total_cents is 0). Use --raw and inspect headers so
-# you can see the error response the handler returned.
-nats request orders.inventory.check \
-  '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":0,"ts":"2026-05-22T10:14:22Z"}' \
-  --raw
+# Send one bad request (total_cents is 0). The default output prints the
+# reply headers, so you can see the error response the handler returned.
+nats service request OrderInventory check \
+  '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":0,"ts":"2026-05-22T10:14:22Z"}'
 
 # Expected: the reply carries headers like
 #   Nats-Service-Error-Code: 400

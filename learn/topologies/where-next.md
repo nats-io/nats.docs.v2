@@ -25,8 +25,8 @@ swapping binaries or rewriting Acme's publisher.
 There are four shapes, and they stack on top of each other.
 
 A **single server** is one `nats-server` process. Clients connect to it
-directly. It's the right tool for development and small workloads, and
-elsewhere it's a single point of failure.
+directly. Use it for development and small workloads; in production it's
+a single point of failure.
 
 A **cluster** is servers joined by **routes** into a full mesh. Clients
 connect to any server and reconnect to another when one dies. This is the
@@ -42,7 +42,6 @@ remote NATS system and bridges subject interest. It runs anywhere with
 outbound access, such as a factory, an edge device, or a laptop, and
 hides its local clients behind it. This is how NATS reaches the edge.
 
-The four shapes are single server, cluster, super-cluster, and leaf.
 Everything in the
 [Putting it together](/learn/topologies/putting-it-together) page was one
 of those four shapes, or a composition of them.
@@ -91,10 +90,11 @@ cluster without dropping clients, hardening servers, and sizing servers
 for a workload.
 
 Once a topology is live, you watch it with the
-[Monitoring](/learn/monitoring) deep dive. The routes, gateways, and leaf
-connections you wired by hand here each show up on a monitoring endpoint —
-the same ones you scrape in production to know the mesh is healthy and
-traffic is flowing where you expect.
+[Monitoring](/learn/monitoring) deep dive. The routes you wired by hand
+here show up on the `/routez` endpoint it covers; gateways and leaf
+connections have their own `/gatewayz` and `/leafz` endpoints you scrape
+the same way to know the mesh is healthy and traffic is flowing where you
+expect.
 
 ## Securing a leaf
 
@@ -105,8 +105,8 @@ leaving account binding and credentials for production.
 A leaf opens a connection across a trust boundary, often the public
 internet, so authenticating that connection and scoping what the leaf
 can publish and subscribe is not optional in production. The
-[Security](/learn/security) deep dive covers leaf authentication,
-accounts, and the credentials a leaf remote presents to its hub.
+[Security](/learn/security) deep dive covers accounts, the credential
+types you'd mint for a leaf, and TLS on the leafnode block.
 
 ## Wire-level detail
 
@@ -147,13 +147,14 @@ shapes in production.
 ## Production checklist
 
 Each shape in this chapter flags what to watch for. Here they are
-collected into one pass over a deployment before it carries real traffic:
-the thing to do, grouped by the page that explains why.
+collected into one pass to run before a deployment carries real traffic.
+Each group links to the page that explains why.
 
-**Single server**: see [The limits of one server](/learn/topologies/single-server#the-limits-of-one-server)
+**Single server**: see [Pitfalls](/learn/topologies/single-server#pitfalls)
 
 - [ ] Move production workloads off a single server before a reboot can drop orders in flight.
 - [ ] Plan for horizontal growth, not a bigger box; vertical scaling has a ceiling.
+- [ ] Add redundancy before an outage, not after; one server can't hold a replicated stream, so R1 survives a restart but never the loss of the box.
 
 **Cluster**: see [Pitfalls](/learn/topologies/your-first-cluster#pitfalls)
 
@@ -170,7 +171,7 @@ the thing to do, grouped by the page that explains why.
 **Super-cluster**: see [Pitfalls](/learn/topologies/super-clusters#pitfalls)
 
 - [ ] Join regions with a `gateway {}` block, never a `cluster {}` stretched across them.
-- [ ] Match each gateway `name` to its cluster's, then confirm a publish crosses to the other region.
+- [ ] Match the local gateway `name` to the `cluster {}` name (the server won't start otherwise), and each `gateways` entry to the remote cluster's exact name — a remote typo fails silently, so confirm a publish crosses to the other region.
 - [ ] Place a queue subscriber for each workload in every region that produces it.
 
 **Leaf nodes**: see [Pitfalls](/learn/topologies/leaf-nodes#pitfalls)
@@ -180,7 +181,7 @@ the thing to do, grouped by the page that explains why.
 
 **Composing shapes**: see [Pitfalls](/learn/topologies/putting-it-together#pitfalls)
 
-- [ ] Reach for accounts — with a leaf where the boundary follows a network edge — when you need an isolation wall, not another route or gateway.
+- [ ] Reach for accounts — with a leaf where the boundary follows a network edge — when you need an isolation wall, not another route or gateway. See [Composition adds reach, not boundaries](/learn/topologies/putting-it-together#composition-adds-reach-not-boundaries).
 - [ ] Add each layer only when the current one runs out of room.
 
 ## See also

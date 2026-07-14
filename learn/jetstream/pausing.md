@@ -77,18 +77,24 @@ delivery to the consumer, not storage in the stream.
 nats consumer info ORDERS shipping
 ```
 
-A paused consumer shows the deadline and how long is left:
+A paused consumer shows the deadline in the Configuration section, and the
+cursor in the State section below it:
 
 ```
+Configuration:
+
+     Paused Until Deadline: 2026-05-22 11:14:22 (57m11s remaining)
+
 State:
 
-   Paused Until Deadline: 2026-05-22 11:14:22 (57m11s remaining)
-              Last Delivered Message: Consumer sequence: 12 Stream sequence: 12
-                Acknowledgment Floor: Consumer sequence: 12 Stream sequence: 12
+    Last Delivered Message: Consumer sequence: ... Stream sequence: ...
+      Acknowledgment Floor: Consumer sequence: ... Stream sequence: ...
 ```
 
-The cursor values (last delivered and acknowledgment floor) are exactly
-where they were before the pause.
+The `Paused Until Deadline` line sits under Configuration, with the deadline
+and how long is left. The cursor values under State — last delivered and
+acknowledgment floor — stay wherever they were; whatever they are, the pause
+doesn't move them.
 
 ## Resume early
 
