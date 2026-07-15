@@ -118,6 +118,7 @@ the page that explains it.
 
 - [ ] Set Ack Wait longer than your slowest handler, with headroom, to avoid a redelivery storm.
 - [ ] Ack on every success path, and term a genuinely unprocessable message so it stops coming back.
+- [ ] Ack each delivery exactly once, in one place in your handler; a second ack is a no-op the server ignores.
 
 ### Filtering — see [Pitfalls](/learn/jetstream/filtering#pitfalls)
 
@@ -135,6 +136,8 @@ the page that explains it.
 ### Pull consumers — see [Pitfalls](/learn/jetstream/pull-consumers#pitfalls)
 
 - [ ] Treat an empty fetch as "nothing right now" and loop; never as an error that crashes the worker.
+- [ ] Always set an `expires` on a fetch so a quiet stream returns control instead of stalling.
+- [ ] Keep `MaxAckPending` at or above your batch size so it doesn't throttle throughput.
 - [ ] Pair `batch` with `max_bytes` so a single pull is bounded by size as well as count.
 
 ### Scaling a consumer — see [Pitfalls](/learn/jetstream/worker-pool#pitfalls)
@@ -142,6 +145,12 @@ the page that explains it.
 - [ ] Key every side effect by `order_id` so a redelivered message is a no-op, not a double shipment.
 - [ ] Size `MaxAckPending` to at least your worker count, with headroom; the cap is shared across the whole pool.
 - [ ] Tune `AckWait` to real processing time so a crashed worker's message recovers without redelivering honest work.
+
+### Ordered consumers — see [Pitfalls](/learn/jetstream/ordered-consumer#pitfalls)
+
+- [ ] Reach for an ordered consumer only for a read you can restart from the top; for work that must land once, use a named consumer with explicit ack.
+- [ ] Split work across processes with a named consumer and a worker pool; two ordered consumers each read the whole stream instead of sharing it.
+- [ ] Don't build a resumable job on an ordered consumer; its cursor is disposable by design and starts over after a crash.
 
 ### Priority groups — see [Pitfalls](/learn/jetstream/priority-groups#pitfalls)
 
@@ -184,12 +193,33 @@ the page that explains it.
 - [ ] Use odd replica counts: R=3 for the production floor, R=5 for state you can't re-derive.
 - [ ] Prove failover on a real cluster; a green single-node run can't show leader election or a node loss.
 
+### Advanced publishing — see [Pitfalls](/learn/jetstream/advanced-publishing#pitfalls)
+
+- [ ] Collect and check every `PubAck` on an async publish; add `Nats-Expected-Last-Subject-Sequence` when order matters so a retry fails fast.
+- [ ] Treat the final `PubAck` as the only proof an atomic batch committed; a sequence gap, an oversized batch, or a ten-second idle drops the whole batch.
+- [ ] Keep atomic publishing off a stream set to `PersistMode: async`; the server rejects it, though fast-ingest batches are fine there.
+- [ ] Choose `gap: ok` only when a lost message is acceptable; use `gap: fail` or an atomic batch for anything you can't lose.
+
 ### Mirrors and sources — see [Pitfalls](/learn/jetstream/mirrors-and-sources#pitfalls)
 
-- [ ] Publish to the upstream stream, not the mirror; a mirror captures no subjects and replies `no responders`.
+- [ ] Publish to the upstream stream, not the mirror; a mirror captures no subjects, so a plain publish lands in the origin, and forcing the mirror by name errors with `expected stream does not match`.
 - [ ] Read the `Lag` field before assuming a mirror is current; a mirror is eventually consistent, not synchronous.
 - [ ] Pick `filter_subject` or `subject_transforms` on one entry, never both; the server rejects a config that sets both.
 - [ ] Verify each export type for cross-domain sourcing; a wrong type lets the mirror silently never catch up.
+
+### Reading messages directly — see [Pitfalls](/learn/jetstream/get-direct#pitfalls)
+
+- [ ] Confirm `Direct Get: true`, or set `--allow-direct`, before a direct read; without it the request just times out.
+- [ ] Keep direct reads off read-after-write checks; they can answer from a trailing replica, so read with `nats stream get` against the leader there.
+- [ ] Use a consumer, not a direct batch, when you need to follow the stream; a batch reads the backlog once and stops.
+
+### Subject mapping — see [Pitfalls](/learn/jetstream/subject-mapping#pitfalls)
+
+- [ ] Keep every token a downstream consumer filters on in the transform's destination; dropping a `{{wildcard}}` collapses messages under one subject.
+- [ ] Use a consumer when a reader has to catch up on what it missed; republish is fire-and-forget core NATS with no storage or replay.
+- [ ] Point a republish destination at a separate subject space, not one under the stream's own subjects; an overlap is rejected as a cycle (`10052`).
+- [ ] Re-namespace existing data by sourcing it into a new stream with the transform; editing a transform leaves already-stored messages untouched.
+- [ ] Pick the partition count up front; raising it later re-hashes keys, so a consumer's filter quietly starts covering a different set.
 
 ## See also
 

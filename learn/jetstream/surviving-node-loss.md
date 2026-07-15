@@ -65,10 +65,13 @@ returns the `PubAck` once a majority of replicas have the message.
 That's what makes the `PubAck` on an R=3 stream a real durability
 promise: the message survives the loss of any single server.
 
-Reads spread across the group instead of all landing on the leader. A
-[Direct Get](/learn/jetstream/get-direct) can be answered by any replica, and
-a consumer is served from a copy on its own server, so read traffic doesn't
-funnel through the leader the way writes do.
+Reads work differently from writes. Writes flow through the stream leader, but
+each consumer has a leader of its own that can sit on any of the stream's
+replicas, so delivery spreads across those replica servers instead of piling on
+one. A [Direct Get](/learn/jetstream/get-direct) spreads load further: any of
+the stream's replicas can answer it directly, leader or not. The full picture —
+stream leaders, consumer leaders, and the cluster-wide meta leader — is the
+[Clustering & Replication](/learn/clustering) deep dive's job.
 
 If the leader's server dies, the remaining replicas elect a new leader
 from among themselves, automatically. Writes pause for the short
@@ -142,9 +145,11 @@ replicas is not how you scale throughput.
 **Stream replicas** (R=3, R=5):
 
 - Survive node loss. More copies tolerate more failures.
-- Spread reads. Reads don't funnel through the leader the way writes do —
-  Direct Get can hit any replica, and each consumer reads from its own copy —
-  so read work distributes across the group.
+- Spread reads. Writes flow through the stream leader, but a consumer's own
+  leader can sit on any of the stream's replicas, so delivery spreads across
+  them; and a [Direct Get](/learn/jetstream/get-direct) is answered by any of
+  the stream's replicas directly. Read work doesn't funnel through the stream
+  leader the way writes do.
 - Cost load across the cluster. Every replica stores the full log, and every
   write is copied to a majority before its `PubAck`. R=3 is roughly three
   times the storage and write traffic of R=1.

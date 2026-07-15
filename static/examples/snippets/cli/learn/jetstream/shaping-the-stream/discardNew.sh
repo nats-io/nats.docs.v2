@@ -18,13 +18,10 @@
 nats stream edit ORDERS --discard new --max-msgs 1
 
 # ORDERS is now full. Under Discard New this publish fails instead of
-# succeeding silently, so the publisher can retry, alert, or shed load.
-# --jetstream (-J) makes the CLI wait for the stream's ack and report the
-# rejection; a plain `nats pub` is fire-and-forget and prints only
-# "Published N bytes" whether or not the stream accepted the message.
-nats pub --jetstream orders.created \
+# succeeding silently, so the publisher can retry, alert, or shed load:
+nats pub orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
-# -> nats: error: maximum messages exceeded (10077)
+# -> nats: maximum messages exceeded
 
 # Put ORDERS back the way it was: Discard Old and no message-count cap. The
 # 7-day age and 1 GiB byte limits set earlier stay in place.

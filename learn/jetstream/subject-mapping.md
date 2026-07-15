@@ -39,7 +39,7 @@ pulls matched tokens back in by position:
   can't be `.`, which already separates tokens), or cut it at a character
   position.
 
-The reference has the complete list. You'll mostly reach for `wildcard` and
+ADR-30 (linked below) has the complete list. You'll mostly reach for `wildcard` and
 `partition`; `split`, `splitfromleft`/`splitfromright`, and
 `slicefromleft`/`slicefromright` chop a single token when you need it.
 
@@ -208,8 +208,7 @@ giving a single message a shorter lifespan than the rest of the stream.
 ## See also
 
 - [Reference → Create Stream](/reference/jetstream/api/stream/create) — the
-  `subject_transform`, `republish`, and per-source `subject_transforms` fields,
-  and the full transform function list.
+  `subject_transform`, `republish`, and per-source `subject_transforms` fields.
 - [ADR-36: Subject Mapping Transforms in Streams](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-36.md)
   — where a transform attaches to a stream, a source, or a mirror.
 - [ADR-30: Subject Transform](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-30.md)

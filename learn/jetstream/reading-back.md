@@ -253,6 +253,14 @@ recent messages (`--deliver last`), messages from a window back to now
 (`--deliver 1h`), or a known sequence (`--deliver 1000`). The full set
 is in [Reference → Create Consumer](/reference/jetstream/api/consumer/create).
 
+Delivery policy sets *where* a consumer starts; a separate **replay policy**
+sets the *pace* once it's reading. The default, `instant`, hands messages
+over as fast as the client reads them. The other value, `original`, spaces
+deliveries out to match the gaps between the messages' original timestamps,
+replaying recorded traffic at something like its real speed. This chapter
+uses `instant` throughout; both are listed in
+[Reference → Create Consumer](/reference/jetstream/api/consumer/create).
+
 **Reusing a durable name with a different config.** A durable consumer is
 identified by its name. Create `billing` again with different settings and the
 server returns *consumer already exists*; it won't silently reconfigure a
