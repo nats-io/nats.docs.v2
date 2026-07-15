@@ -181,7 +181,7 @@ Each group links to the page that explains why.
 
 **Composing shapes**: see [Pitfalls](/learn/topologies/putting-it-together#pitfalls)
 
-- [ ] Reach for accounts — with a leaf where the boundary follows a network edge — when you need an isolation wall, not another route or gateway. See [Composition adds reach, not boundaries](/learn/topologies/putting-it-together#composition-adds-reach-not-boundaries).
+- [ ] Reach for accounts — with a leaf where the boundary follows a network edge — when you need an isolation wall, not another route or gateway. See [Composition adds reach, not boundaries](/learn/topologies/putting-it-together#composition-and-boundaries).
 - [ ] Add each layer only when the current one runs out of room.
 
 ## See also
