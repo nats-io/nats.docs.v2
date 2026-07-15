@@ -190,9 +190,15 @@ nats consumer edit ORDERS shipping --backoff=linear --backoff-steps=5 --backoff-
 If the list has fewer entries than MaxDeliver allows, the server reuses
 the last entry for the remaining attempts.
 
-The full set of backoff options is documented in
-[Reference → Consumer configuration](/reference/jetstream/api/consumer/create).
-We use only a linear range here.
+Setting a backoff replaces AckWait: the first entry in the list becomes
+the wait before the first redelivery, so it's also the ack deadline for
+the first delivery. Here `--backoff-min=1s` drops the effective AckWait
+to 1 second, overriding the 10 seconds set earlier. Pick a `--backoff-min`
+at least as long as normal processing takes, or a slow job trips
+redelivery while it's still running.
+
+`nats consumer edit --help` lists every backoff flag. We use only a
+linear range here.
 
 ## Ack policy: the other values
 
@@ -206,9 +212,10 @@ message as done the moment it's delivered, so there's no pending list, no
 Ack Wait, and no redelivery, and nothing on this page applies. `all` lets
 one ack answer every earlier message too — cheaper, but it only fits a
 consumer that processes strictly in order, since acking message 10 also
-retires 1 through 9. A fourth value, `flow_control`, belongs to push
-consumers and paces how fast the server delivers; pull consumers like
-`shipping` don't need it.
+retires 1 through 9. A fourth value, `flow_control`, is for the push
+consumers the server creates for durable mirrors and sources: acks ride
+the flow-control responses and behave like `all`. You won't set it on a
+work consumer like `shipping`.
 
 The full list of available policies is in
 [Reference → Consumer configuration](/reference/jetstream/api/consumer/create).
@@ -225,6 +232,13 @@ right away, fails again, and ties up one worker on one message. Don't
 send a bare nak for a temporary failure. Nak with a delay so the
 redelivery waits before it retries (covered above). A consumer backoff
 won't help here — it spaces out AckWait timeouts, not naks.
+
+**A poison message with no term path uses every attempt.** Without
+term, a broken payload is nak'd over and over until MaxDeliver
+gives up, using the full set of attempts and holding up the messages
+behind it. When the code can tell no future attempt will succeed,
+answer term so the message leaves the pending list at once instead of
+working through the limit.
 
 **MaxDeliver drops a message with no dead-letter.** When a message hits
 the delivery limit, the server removes it from the consumer's pending

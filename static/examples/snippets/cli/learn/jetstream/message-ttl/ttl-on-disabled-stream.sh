@@ -3,9 +3,8 @@
 # JetStream publish fails loudly (err_code 10166) and stores nothing —
 # the message is not quietly kept forever without a TTL.
 
-# A stream that never enabled AllowMsgTTL. Its config shows
-# "Allows Per-Message TTL: false" (the line always prints; the value
-# flips to true once you opt in).
+# A stream that never enabled AllowMsgTTL. Its config has no
+# "Allows Per-Message TTL" line (the line only appears once it's on).
 nats stream add ORDERS_NO_TTL --subjects "no-ttl.>" --defaults
 
 # A JetStream publish (-J) with a TTL header is rejected: nats pub exits

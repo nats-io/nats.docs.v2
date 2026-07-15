@@ -34,14 +34,16 @@ already holds the orders from earlier pages; now add a fresh handful of
 have something to compete for:
 
 ```bash
-nats pub orders.shipped '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
-nats pub orders.shipped '{"order_id":"ord_2zr9","customer":"globex","total_cents":7800,"ts":"2026-05-22T10:14:25Z"}'
-nats pub orders.shipped '{"order_id":"ord_5k1m","customer":"initech","total_cents":1500,"ts":"2026-05-22T10:14:29Z"}'
+nats pub --jetstream orders.shipped '{"order_id":"ord_9x3f","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T11:01:50Z"}'
+nats pub --jetstream orders.shipped '{"order_id":"ord_7p4d","customer":"globex","total_cents":7800,"ts":"2026-05-22T11:01:55Z"}'
+nats pub --jetstream orders.shipped '{"order_id":"ord_5xk1","customer":"initech","total_cents":1500,"ts":"2026-05-22T11:02:00Z"}'
 ```
 
-The server hands each waiting order to one worker, rotating round-robin
-through the workers that have a pull request open. No two workers get the same
-order, so the three split the backlog evenly:
+Each `--jetstream` publish returns a `PubAck` confirming the order landed in
+`ORDERS`. The server hands each waiting order to one worker, serving pull
+requests in the order they arrived. No two workers get the same order, so the
+three split the backlog roughly evenly, because each loop pulls one order at a
+time:
 
 <div class="nats-flow" data-scenario="workerPoolAnimated" data-width="640" data-height="320"></div>
 
@@ -60,13 +62,16 @@ nats consumer info ORDERS shipping
 ```
 State:
 
-  Last Delivered Message: Consumer sequence: 3 Stream sequence: 6
-     Acknowledgment Floor: Consumer sequence: 3 Stream sequence: 6
+  Last Delivered Message: Consumer sequence: ... Stream sequence: ...
+     Acknowledgment Floor: Consumer sequence: ... Stream sequence: ...
          Outstanding Acks: 0 out of maximum 1,000
 ```
 
-The position belongs to the consumer, not to each worker, so it advances the
-same whether one process pulls or three.
+Your exact sequence numbers depend on the earlier pages; what matters is the
+shape. The two Acknowledgment Floor numbers advance together as workers ack,
+and the Last Delivered pair sits at or ahead of them. The position belongs to
+the consumer, not to each worker, so it advances the same whether one process
+pulls or three.
 
 ## This works on the log you already have
 
@@ -110,7 +115,9 @@ Watch it happen. The loop above acks the instant it pulls, so there's no window
 to interrupt — a real ship takes time. Add a brief delay before the ack (a
 `sleep 5` in the shell loop, or a pause in your handler), then kill that worker
 during the delay. After `AckWait` (30 seconds by default), the order reappears
-on a surviving worker and ships once, because some worker eventually acks it.
+on a surviving worker and ships once, because some worker eventually acks it. If
+the dead worker had already shipped the order before crashing, it ships twice;
+the pitfall below covers keying side effects by `order_id`.
 
 ## Capping how many orders are in progress
 

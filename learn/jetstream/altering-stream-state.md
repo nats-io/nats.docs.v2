@@ -54,10 +54,10 @@ To clear a whole stream at once, purge it:
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 That removes every message in `ORDERS` and reports how many it dropped
-(`Purged 3 messages from ORDERS`). Like `rmm`, it asks for confirmation
-first; add `--force` to skip the prompt in a script. The stream itself
-stays: same config,
-same consumers, same name. Only the messages go. (Don't confuse it with
+(`Purged N messages from ORDERS`, for whatever the stream held). Like
+`rmm`, it asks for confirmation first; add `--force` to skip the prompt in
+a script. The stream itself stays: same config, same consumers, same
+name — only the messages are removed. (Don't confuse it with
 `nats stream rm ORDERS`, which deletes the whole stream, config and
 consumers included.)
 
@@ -157,10 +157,12 @@ the server never fills back in, and that the sequence counter only ever
 climbs.
 
 If you ran a full `nats stream purge ORDERS` above, the stream is empty
-now; republish the three orders from the [publishing
-page](/learn/jetstream/publishing) to carry a populated `ORDERS` into the
-next page. Everything else about the stream, its config and its consumers,
-is exactly as the previous page left it.
+now; republish the orders from the [publishing
+page](/learn/jetstream/publishing) to repopulate `ORDERS` for the next
+page. The new orders get fresh, higher sequence numbers, not `1`, `2`,
+`3` — purge left the counter where it was, so publishing continues from
+one past the stream's last sequence. Everything else about the stream, its
+config and its consumers, is exactly as the previous page left it.
 
 ## What's next
 

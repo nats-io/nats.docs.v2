@@ -13,11 +13,11 @@ nats consumer add ORDERS dispatch \
   --pull \
   --defaults
 
-# Inspect it — the configuration shows Priority Policy: Prioritized and
-# Priority Groups: regions.
+# Inspect it — the configuration shows Priority Policy: prioritized and
+# Priority Groups: [regions].
 nats consumer info ORDERS dispatch
 
-# The priority rides on the pull request. natscli's `nats consumer next` sends
-# a group-less pull that the server rejects with "Bad Request - Priority Group
-# missing", so the prioritized pull itself — with group and priority set on the
-# request — comes from a client library.
+# The priority rides on the pull request, which natscli's `nats consumer next`
+# does not expose a flag for. A worker pulls plainly (priority 0) and is
+# served ahead of any higher-numbered pull:
+nats consumer next ORDERS dispatch --count 5

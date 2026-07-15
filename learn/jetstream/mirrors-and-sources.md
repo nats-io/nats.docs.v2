@@ -31,7 +31,7 @@ mirror too.
 
 A mirror is read-only. You can't publish to it directly, because it
 listens on no subjects of its own. Its only job is to follow the
-upstream. A `nats pub` aimed at the mirror reaches no stream that accepts it.
+upstream. A publish lands in whatever stream owns the subject, not the mirror.
 
 A mirror keeps its own retention. The upstream might keep messages for
 seven days while the mirror keeps them forever — the mirror's own limits
@@ -118,8 +118,8 @@ Mirror Information:
 
 **Stream Name** is the upstream the mirror follows. **Lag** is how many
 messages it's still behind — `0` means fully caught up, and a lag that
-climbs and stays high means it can't keep pace. **Last Seen** is how long
-since it last heard from the upstream; a small, steady value is healthy.
+climbs and stays high means it can't keep pace. **Last Seen** is the time
+since the last message or heartbeat from the upstream; a small, steady value is healthy.
 
 Publish a fourth order into `ORDERS`, then re-run `nats stream info
 ORDERS-ARCHIVE`. The mirror picks it up on its own, with no consumer and no
@@ -186,13 +186,15 @@ Mirrors and sources add little configuration, but a few of their rules
 are easy to get wrong the first time.
 
 **Treating a mirror as writable.** A mirror listens on no subjects of its
-own, so there's nothing on the mirror's name for a publish to reach. A
-`nats pub --jetstream` aimed at `ORDERS-ARCHIVE` waits for a `PubAck`
-that never comes and reports `no responders available`, because no stream
-is listening on that name. (A plain `nats pub` reports that it published
-and the message silently goes nowhere.) Don't publish to the mirror.
-Publish to the upstream `ORDERS` stream and let the mirror copy the
-message on its own.
+own, so no subject routes a publish to it. Publish `orders.shipped` and the
+message lands in the origin `ORDERS` stream that owns that subject — never in
+`ORDERS-ARCHIVE`. A plain publish reaches the origin unless subject mapping or
+a cross-domain setup redirects it, in which case it fails. Force the mirror by
+name with a `Nats-Expected-Stream: ORDERS-ARCHIVE` header and the server rejects
+the publish with `expected stream does not match` (error `10060`), because the
+subject still routed to `ORDERS`, not the mirror. A mirror is read-only either
+way: publish to the upstream `ORDERS` and let the mirror copy the message on
+its own.
 
 <div class="nats-example"
      data-type="learn-jetstream-mirrors-and-sources-publishToMirror"

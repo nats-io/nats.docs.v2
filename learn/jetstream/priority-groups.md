@@ -8,8 +8,8 @@ description: Steer which client on a pull consumer gets messages, and when
 # Priority groups
 
 The [worker pool](/learn/jetstream/worker-pool) shared work evenly. Every
-worker on the `shipping` consumer pulled, and the server handed each message
-to the next worker asking, round-robin.
+worker on the `shipping` consumer pulled, and the server delivered messages
+to whichever worker asked.
 
 Some workloads need a different split. You might want one client to
 handle all the work until it fails, or a far-away client to stay idle
@@ -175,11 +175,11 @@ The other way is an operator forcing a switch. `nats consumer unpin`
 clears the current pin and makes the server choose again:
 
 ```bash
-nats consumer unpin ORDERS sequencer ordered
+nats consumer unpin ORDERS sequencer ordered -f
 ```
 
-The command takes the stream, the consumer, and the group name. It
-reports the client it dropped:
+The command takes the stream, the consumer, and the group name; `-f` skips
+the confirmation prompt. It reports the client it dropped:
 
 ```
 Unpinned client <client-id> from Priority Group ORDERS > sequencer > ordered
@@ -198,10 +198,12 @@ State:
 A group with no active client reads `No client`. To list every fully
 pinned consumer at once, run `nats consumer find ORDERS --pinned`.
 
-**Client support varies.** The pinned-client steps (storing `Nats-Pin-Id`,
-sending it back, handling the `423`) work in the Go and Java clients today.
-Other clients let you set the configuration fields but may not yet run the
+:::note Client support varies
+The pinned-client steps (storing `Nats-Pin-Id`, sending it back, handling
+the `423`) run in the Go, Java, JavaScript/TypeScript, and .NET clients today.
+Rust and Python let you set the configuration fields but don't yet run the
 client-side pinning loop. Check your client's reference before relying on it.
+:::
 
 ## The prioritized policy
 

@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# Direct Get's batch form returns many messages from one request: set `batch`
-# in the request and the server streams them back, then closes with an EOB
-# marker. The client examples use it that way. This CLI reads the same range but
-# pages through it one message per request. Every message carries a
-# Nats-Num-Pending header: how many still match in the stream after it.
+# Direct Get can return a batch of messages over a single request. Ask for three
+# starting at sequence 1; the server streams them back without a round trip
+# each, every message carrying a Nats-Num-Pending header that counts down to 0
+# on the last one.
 nats sub --stream ORDERS --direct --start-sequence 1 --count 3

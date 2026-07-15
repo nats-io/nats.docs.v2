@@ -146,13 +146,13 @@ The stream opts in with `AllowBatchPublish`. Fast-ingest was added in server
 | CLI | `nats bench js pub fast` (benchmark only) |
 | Go | Synadia Orbit — `jetstreamext.NewFastPublisher` |
 | Rust | Synadia Orbit — `jetstream_extra`'s `fast_publish` |
-| nats.js | internal API (`startFastIngest`), not yet public |
-| Python, Java, .NET | `AllowBatchPublish` stream flag only — no publisher yet |
+| nats.js | Synadia Orbit — `@synadiaorbit/fastingest` (`startFastIngest`) |
+| Python, Java, .NET | `AllowBatchPublish` stream flag; Orbit publishers catching up |
 
 Because there's no stable public publisher in most clients, this page doesn't
 show per-language code for it. When you need fast ingest today, the practical
-paths are the Orbit libraries for Go and Rust; the rest will follow. The
-flow-control protocol is in
+paths are the Orbit libraries for Go, Rust, and JavaScript; the rest will follow.
+The flow-control protocol is in
 [ADR-50](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-50.md).
 
 ## Choosing a mode

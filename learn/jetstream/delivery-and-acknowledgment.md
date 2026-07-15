@@ -71,8 +71,11 @@ Pull one message from `shipping` and ack it:
 You get the first stored order, and the ack confirms it:
 
 ```
-subj: orders.created / tries: 1 / cons seq: 1 / str seq: 1 / pending: 2
+[10:14:52] subj: orders.created / tries: 1 / cons seq: 1 / str seq: 1 / pending: 2
+
 {"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
+
+Acknowledged message
 ```
 
 `tries: 1` is the delivery count — this is the first time the message has gone
@@ -181,6 +184,12 @@ and it's redelivered — and with the default unlimited delivery limit, that
 repeats forever. Always ack on the success path. The
 [next page](/learn/jetstream/acknowledgment) covers how to retire a message
 that genuinely can't be processed, so it stops coming back.
+
+**Acking the same message twice.** Once you ack a message, the floor moves
+past it. A second ack does nothing useful. Some clients (Go, Python) reject it
+locally with *"message was already acknowledged"*; others ignore or resend it,
+and the server ignores the duplicate either way. Ack each delivery exactly
+once, in one place in your handler.
 
 ## Where you are
 
