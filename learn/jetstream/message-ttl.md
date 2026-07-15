@@ -121,9 +121,11 @@ the message expires unread. The server deletes it on schedule either
 way.
 
 If a consumer needs to learn that a message expired rather than just
-find it gone, the stream's `SubjectDeleteMarkerTTL` setting leaves a
-delete marker in its place; the
-[reference](/reference/jetstream/api/stream/create) covers it.
+find it gone, the stream's `SubjectDeleteMarkerTTL` setting can leave a
+delete marker in its place, but only when the expired message was the
+last one on its subject. On an active subject with newer messages, no
+marker is placed. The setting also has its own conditions; the
+[reference](/reference/jetstream/api/stream/create) covers them.
 
 Size the TTL to the work. A 60-second TTL on a cancellation only makes
 sense if the consumer that cares about cancellations reads within that
@@ -142,7 +144,8 @@ The result is the same: no message stored. But the cause differs, so
 the two error codes are worth telling apart when you read a failed
 `PubAck`.
 
-In both cases the server never quietly drops the header. A TTL publish
+In both cases the server never quietly drops the header. On a stream
+like `ORDERS`, which has no `SubjectDeleteMarkerTTL` set, a TTL publish
 either honors the TTL or returns an error.
 
 ## Pitfalls
@@ -199,7 +202,7 @@ to the chapters that take it further.
 ## See also
 
 - [Reference → Per-Message TTL](/reference/jetstream/api/headers)
-  — the `Nats-TTL` header, `SubjectDeleteMarkerTTL`, and delete markers
-  in full.
+  — the `Nats-TTL` header and the delete-marker headers in full.
 - [Reference → Stream Configuration](/reference/jetstream/api/stream/create)
-  — `AllowMsgTTL` alongside every other stream field.
+  — `AllowMsgTTL` and `SubjectDeleteMarkerTTL` alongside every other
+  stream field.

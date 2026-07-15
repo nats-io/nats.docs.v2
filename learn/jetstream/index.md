@@ -54,5 +54,3 @@ You'll need:
 - A running `nats-server` with JetStream turned on. The simplest way to get one
   is `nats-server -js` (see [Getting Started](/concepts/getting-started/)).
 - The `nats` CLI installed and pointed at your server.
-
-Open a terminal and run `nats-server -js`.

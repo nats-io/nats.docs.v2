@@ -58,7 +58,16 @@ waits up to two seconds for a fourth. When the two seconds pass, it
 returns the three it has. The timeout is the ceiling, so a fetch always
 returns within it.
 
-Running a fetch again walks the stream a batch at a time. The consumer's
+The CLI has no single batch fetch. `nats consumer next --count N`
+retrieves N messages by issuing N single-message pulls in a row, each
+bounded by `--timeout`, so it approximates a fetch loop rather than one
+batch request:
+
+<div class="nats-example"
+     data-type="learn-jetstream-pull-consumers-fetch"
+     data-languages="cli"></div>
+
+Run it twice and you walk the stream a batch at a time. The consumer's
 cursor advances as messages are acked, the same way it did one message
 at a time on the consumer page.
 
@@ -66,15 +75,11 @@ at a time on the consumer page.
 
 A long-running worker shouldn't loop on fetch by hand. The consume
 pattern does the looping for you. It keeps pull requests open so a new
-message is delivered as soon as it's stored in the stream. This is a
-client-library construct — the library manages the stream of pull
-requests and calls your handler — so there's no CLI tab here; the CLI's
-`nats consumer next` with a large `--count` only mimics it by holding one
-long fetch open:
+message is delivered as soon as it's stored in the stream:
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-consumeContinuous"
-     data-languages="js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 Your function runs once per message and acks on success. The library
 handles the pull requests, sends new ones as the old ones empty, and
@@ -118,6 +123,24 @@ nothing is available right now, so keep looping: wait and fetch again.
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-emptyFetch"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
+
+**A raw fetch with no expiry can stall.** A pull request with `expires`
+set to zero never times out: the server holds it until the batch fills.
+Client libraries protect you from that with a default of about 30
+seconds, so a fetch from client code returns control on a quiet stream
+even when you don't set `expires`. Set it yourself when you want a
+specific ceiling instead of relying on the default. The CLI bounds each
+pull with `--timeout`.
+
+**`MaxAckPending` set too low limits throughput.** This is the limit on
+un-acked messages the consumer hands out before it waits for acks. If you
+set it well below your batch size (a limit of ten against a batch of
+100), the server delivers ten orders, then stops until your worker acks,
+no matter how large a batch you ask for. Keep it at or above your batch
+size. The default is 1000; lower it only when you know the in-flight
+count you want. The worker pool shares this single limit across every
+worker, so it matters even more there: see [the worker pool
+page](/learn/jetstream/worker-pool).
 
 **A batch set too large uses more memory than expected.** `batch` counts
 messages, not bytes, so a large batch against large orders can pull more

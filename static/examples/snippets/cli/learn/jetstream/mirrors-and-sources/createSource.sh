@@ -1,14 +1,14 @@
 #!/bin/bash
 # Sources aggregate many streams into one. First, the three regional streams
 # ALL-ORDERS will pull from — each owns its own subjects:
-nats stream add ORDERS-US   --subjects 'us.orders.>'   --defaults
-nats stream add ORDERS-EU   --subjects 'eu.orders.>'   --defaults
-nats stream add ORDERS-APAC --subjects 'apac.orders.>' --defaults
+nats stream add ORDERS-US   --subjects 'us.orders.>'
+nats stream add ORDERS-EU   --subjects 'eu.orders.>'
+nats stream add ORDERS-APAC --subjects 'apac.orders.>'
 
 # Create ALL-ORDERS as an aggregate of all three. A sourced stream can list
 # several upstreams (a mirror takes exactly one). It needs no --subjects of
 # its own.
-nats stream add ALL-ORDERS --source ORDERS-US --source ORDERS-EU --source ORDERS-APAC --defaults
+nats stream add ALL-ORDERS --source ORDERS-US --source ORDERS-EU --source ORDERS-APAC
 
 # Confirm. The Source Information section lists each upstream, with its own Lag.
 nats stream info ALL-ORDERS

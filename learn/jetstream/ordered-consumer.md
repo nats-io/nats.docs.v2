@@ -52,8 +52,8 @@ it; the recovery is invisible.
 
 That recovery is what lets an ordered consumer drop acks and still keep order.
 Without acks there's nothing to trigger a redelivery, so a plain no-ack
-consumer that missed a message would hand you the gap and read on out of
-order. The ordered consumer instead spots the gap and rebuilds itself from the
+consumer that missed a message would skip it and read on with a gap. The
+ordered consumer instead spots the gap and rebuilds itself from the
 missing sequence — the message is still in the stream — so the order holds with
 no acks at all.
 
@@ -73,9 +73,9 @@ a throwaway in-order read:
 - **A short inactivity threshold** (five minutes). The server deletes the
   consumer once it sits idle that long, so it disappears on its own after the
   pass. This is the part that cleans up after you.
-- **Start by sequence.** It begins where you ask — sequence 1 for the whole
-  log, or a later point — and resumes from the next sequence it expected after
-  a recovery.
+- **Start where you ask.** The first consumer uses the start point you pick —
+  the whole log, a specific sequence, or a point in time. After a recovery, the
+  library pins the replacement consumer to the next sequence it expected.
 
 These are the same knobs any consumer has. The ordered consumer just sets them
 all toward speed and disposability instead of durability. The full set of

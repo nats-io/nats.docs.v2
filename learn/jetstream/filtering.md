@@ -57,9 +57,12 @@ Configuration:
                 Name: analytics
            Pull Mode: true
       Filter Subject: orders.shipped
+      Deliver Policy: All
           Ack Policy: Explicit
             Ack Wait: 30.00s
        Replay Policy: Instant
+     Max Ack Pending: 1,000
+   Max Waiting Pulls: 512
 ```
 
 `Filter Subject: orders.shipped` is the line that matters. The
@@ -125,11 +128,11 @@ chapter.
 ## Other filtering options
 
 The `analytics` consumer filters on a single subject. A consumer can also
-filter on several subjects at once, or rewrite subjects as it reads them.
-Those go beyond what this scenario needs.
+filter on several subjects at once. That goes beyond what this scenario
+needs.
 
 For the full set of consumer filtering options, including multiple filter
-subjects and subject transforms, see
+subjects, see
 [Reference → Create Consumer](/reference/jetstream/api/consumer/create). We
 use only a single `Filter Subject` here.
 
@@ -194,7 +197,6 @@ ack adds, and how an unacked message is redelivered.
 ## See also
 
 - [Reference → Create Consumer](/reference/jetstream/api/consumer/create) —
-  every consumer config field, including multiple filter subjects and
-  subject transforms.
+  every consumer config field, including multiple filter subjects.
 - [Reading back the stream](/learn/jetstream/reading-back) — where you met
   the consumer cursor this page builds on.

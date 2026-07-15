@@ -109,10 +109,12 @@ the oldest is discarded.
 
 <div class="nats-flow" data-scenario="discardOldAnimated" data-width="540" data-height="250"></div>
 
-**Discard New** is the opposite. When a limit is hit, the server discards
-the *new* message: it rejects the publish, which fails with an error.
-Messages already stored are never discarded. Once the stream is full, it
-refuses more.
+**Discard New** is the opposite. When a size or count limit is hit — `MaxMsgs`,
+`MaxBytes`, or a per-subject cap — the server discards the *new* message: it
+rejects the publish, which fails with an error, and nothing already stored is
+dropped to make room. `MaxAge` isn't a Discard-policy choice: it expires stored
+messages on its own timer under either policy. The rule from the top of the page
+still holds — **the first limit to hit applies.**
 
 <div class="nats-flow" data-scenario="discardNewAnimated" data-width="540" data-height="250"></div>
 
@@ -154,13 +156,14 @@ We use only MaxAge, MaxBytes, and Discard here.
 Limits are easy to set and easy to misread. Two traps account for most
 of the surprises.
 
-**Discard Old loses data silently.** Discard Old never fails a publish — when
-a limit is hit, the oldest message is dropped and the publish succeeds. That's
-right for a rolling window, but if you expected the stream to refuse new
-messages, the oldest order is gone with no warning to anyone. To keep history
-and push back on the publisher instead, switch to Discard New, which rejects
-the publish (`maximum bytes exceeded` or `maximum messages exceeded`) rather
-than discarding:
+**Discard Old discards the oldest message silently.** Discard Old never fails a
+publish. When a size or count limit is hit, the server drops the oldest message
+and the publish succeeds — right for a rolling window, but the publisher gets no
+warning and the oldest order is gone. To keep history and push back on the
+publisher, switch to Discard New, which rejects the publish (`maximum bytes
+exceeded` or `maximum messages exceeded`) instead of dropping a stored message.
+Discard New still leaves `MaxAge` in force — **the first limit to hit applies** —
+so if you must keep history, remove or raise the age limit too:
 
 <div class="nats-example"
      data-type="learn-jetstream-shaping-the-stream-discardNew"
