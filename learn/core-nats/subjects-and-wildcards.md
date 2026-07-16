@@ -1,7 +1,7 @@
 ---
 id: subjects-and-wildcards
 title: "Subjects & wildcards"
-sidebar_position: 3
+sidebar_position: 4
 description: How NATS addresses messages with dot-delimited subjects, and how subscribers match many of them at once with wildcards
 ---
 
@@ -88,15 +88,14 @@ The `*` sits in the region position. Walk through what it catches:
 
 - `orders.us.created` matches: `*` takes the single token `us`.
 - `orders.eu.created` matches: `*` takes the single token `eu`.
-- `orders.created` does **not** match: there's no token in the
+- `orders.created` does not match: there's no token in the
   region position, and `*` needs exactly one.
-- `orders.us.west.created` does **not** match: two tokens sit where
+- `orders.us.west.created` does not match: two tokens sit where
   `*` allows only one.
 
-The position of `*` is fixed; the token in it is free. That's the whole
-rule. You can also use more than one: `orders.*.*` matches any
-three-token subject under `orders`, with both middle and last tokens
-free.
+The position of `*` is fixed; the token in it is free. You can also use
+more than one: `orders.*.*` matches any three-token subject under
+`orders`, with both middle and last tokens free.
 
 ### The multi-token wildcard `>`
 
@@ -114,14 +113,13 @@ depth, regardless of region or action. One subscription covers it:
 - `orders.us.created` matches: `>` takes the two tokens `us.created`.
 - `orders.us.west.created` matches: `>` takes all three remaining
   tokens.
-- `orders` does **not** match: `>` needs at least one token after the
+- `orders` does not match: `>` needs at least one token after the
   prefix.
 
 Because `>` matches a token *and everything after it*, it only makes
-sense at the end. `orders.>.created` is invalid and the server rejects
-it immediately with a validation error when you subscribe. There's no
-way to anchor a tail wildcard in the middle and still know where it
-stops.
+sense at the end. `orders.>.created` is invalid: the server rejects the
+subscription with an Invalid Subject error. There's no way to anchor a
+tail wildcard in the middle and still know where it stops.
 
 This is the difference to keep: `*` is a placeholder for one token in a
 known shape; `>` is "everything from here down."
@@ -143,7 +141,7 @@ what [JetStream](/learn/jetstream) adds.
 
 ## Reserved prefixes to avoid
 
-Acme can name subjects almost anything. Two prefixes are spoken for.
+Acme can name subjects almost anything, but two prefixes are reserved.
 
 Subjects beginning with `$` belong to the server and its subsystems:
 `$SYS` for system events, and `$JS`, `$KV`, `$O`, and `$SRV` for the
@@ -189,26 +187,30 @@ an error: the `*` is taken as a literal character, so the message lands on
 the odd literal subject `orders.*.created`. A service subscribed to the
 exact subject `orders.us.created` never sees it, while wildcard
 subscribers like the regional analytics on `orders.*.created` and the
-audit service on `orders.>` do get a message on a subject that should
-never exist. Publish the real subject (`orders.us.created`); reserve `*`
+audit service on `orders.>` do get it — a subscription's `*` matches any
+single token, including a literal `*` — which makes the mistake confusing
+to debug. Publish the real subject (`orders.us.created`); reserve `*`
 and `>` for `nats sub` and the subscribe call in your client.
 
 **An over-broad `orders.>` pulls more than you want.** It's tempting to
 subscribe to `orders.>` and filter in code, but that subscriber then
-receives *every* order message at every depth: shipped, cancelled,
-every region, forever. Subscribe to the narrowest pattern that covers
-your need: `orders.*.created` for regional new-order analytics, the exact
-subject for a single concern. Narrow interest keeps unwanted traffic off
-the wire entirely, rather than having your code discard it after delivery.
+receives *every* order message at every depth, for all regions and
+actions, including subjects created later. Subscribe to the narrowest
+pattern that covers your need: `orders.*.created` for regional new-order
+analytics, the exact subject for a single concern. Narrow interest keeps
+unwanted traffic off the wire entirely, rather than having your code
+discard it after delivery.
 
-**Whitespace is never allowed in a subject.** A token may not contain a
-space, tab, or line break. The CLI and most clients validate this before
-sending and fail with an invalid-subject error. A client that doesn't
-(nats.py's `publish` skips the whitespace check) writes the space
-straight into the `PUB` line, where the part after it is misread as a
-reply subject: a stray space in `orders.us created` publishes to
-`orders.us` with `created` as the reply subject. Don't rely on the check;
-keep spaces out of the subject:
+**Whitespace is never allowed in a subject.** A token can't contain a
+space, tab, or line break: on the wire, a space separates the subject
+from the reply subject and byte count, so a space inside a subject would
+be read as a boundary. The CLI and most clients catch this before
+sending — publishing to `orders.us created` fails with `nats: invalid
+subject`, and nothing is sent. A client that skips the check (nats.py's
+`publish` does) writes the space straight into the `PUB` line, and the
+server silently misroutes: `orders.us` becomes the subject and `created`
+a reply subject. Don't rely on the check; keep spaces out of the
+subject:
 
 <div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-invalid-subject-whitespace" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

@@ -13,7 +13,7 @@ nats pub orders.created '{"order_id":"ord_8w2k","customer":"acme-co","total_cent
 # Publishing over the ceiling fails immediately, client-side, before the
 # message reaches the server. Try a 2 MB payload:
 #
-#   nats pub orders.created "$(head -c 2000000 /dev/zero | tr '\0' x)"
+#   head -c 2000000 /dev/zero | tr '\0' x | nats pub orders.created --force-stdin
 #   nats: error: nats: maximum payload exceeded
 #
 # So keep payloads small and pass a reference (an object-store key or a URL)

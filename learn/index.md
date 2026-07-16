@@ -31,8 +31,9 @@ remaining detail.
 Build applications with NATS.
 
 - **[Core NATS](/learn/core-nats/)** the foundation:
-  publish-subscribe, subjects and wildcards, request-reply, queue
-  groups, and scatter-gather.
+  connections, publish-subscribe, subjects and wildcards,
+  request-reply, queue groups, scatter-gather, headers, and
+  server-side subject mapping.
 - **[Services](/learn/services/)** the micro request-reply
   framework: endpoints, groups, discovery, observability, and scaling.
 - **[JetStream](/learn/jetstream/)** the persistence layer:

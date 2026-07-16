@@ -65,9 +65,12 @@ You don't need to have run NATS clients in production before. We start
 from "open a connection the right way" and grow one fault at a time.
 
 Unlike the other Learn chapters, this one has no Core Concepts primer to
-read first; the connection lifecycle is taught here and nowhere else. So
-every term gets defined in the page that first uses it: DISCONNECTED,
-drain, slow consumer, no responders, and the rest.
+read first. [Core NATS → Connection lifecycle](/learn/core-nats/connection-lifecycle)
+introduces the model — what a drop does to your client, the reconnect
+callbacks, and the buffer that holds your publishes through the gap — and
+this chapter takes it to production depth. Every term still gets defined
+in the page that first uses it: DISCONNECTED, drain, slow consumer, no
+responders, and the rest.
 
 ## How to read it
 

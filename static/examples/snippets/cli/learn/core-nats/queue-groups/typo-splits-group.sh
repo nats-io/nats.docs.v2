@@ -10,7 +10,7 @@
 nats sub orders.created --queue packers   # terminal 1: group "packers"
 nats sub orders.created --queue packer    # terminal 2: group "packer" (typo)
 
-# Now publish three orders from a third terminal:
+# Now publish the same test order three times from a third terminal:
 #   nats pub orders.created '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}' --count 3
 #
 # Each order is delivered to ONE member of EACH group, so BOTH terminals

@@ -286,3 +286,6 @@ Continue to [Hardening](/learn/deployment/hardening).
   how leadership transfer and re-election actually work underneath.
 - [Surviving node loss](/learn/jetstream/surviving-node-loss) — why an R3
   stream survives one node leaving, and what a quorum buys you.
+- [Core NATS → Connection lifecycle](/learn/core-nats/connection-lifecycle) —
+  the client's side of lame-duck mode: how it reconnects to another node
+  before its socket closes.
