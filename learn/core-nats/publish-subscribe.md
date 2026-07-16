@@ -9,11 +9,8 @@ description: Fire-and-forget publish, the in-memory interest graph, and core NAT
 
 Core NATS has one fundamental operation: a client publishes a message to a
 subject, and every client subscribed to that subject right now gets a
-copy. This page examines that operation in detail.
-
-The concept primer already says *what* publish-subscribe is. This page
-shows *how* it behaves on the wire: where the copies come from, what
-happens when nobody is listening, and exactly what core NATS promises
+copy. This page shows how that behaves on the wire: where the copies come
+from, what happens when nobody is listening, and what core NATS promises
 about delivery.
 
 ## The scenario
@@ -83,9 +80,8 @@ message. Run a second subscriber for `notifications` and a third for
 `analytics`, each on `orders.created`, and every one of them receives
 its own copy of the next publish.
 
-A subscriber doesn't consume or remove the message. Subscribing isn't
-taking from a queue. Each subscriber gets an independent copy, and
-one subscriber receiving a message takes nothing away from another.
+Each subscriber gets an independent copy; subscribing isn't taking from
+a queue, and one subscriber receiving a message takes nothing from another.
 
 If you want one subscriber to see *all* order subjects at once, it can
 subscribe to `orders.>` instead of a single subject. That `>` is a
@@ -124,14 +120,9 @@ deliver to, and the message is discarded.
 
 This is the behavior to internalize: a publish with no interest isn't
 an error and isn't a stored backlog. It is a silent no-op. The publisher
-can't tell the difference between "delivered to three subscribers" and
-"delivered to nobody", because both look like a successful publish.
-
-That gap matters for orders. If the warehouse is restarting when an
-`orders.created` message is published, that message is gone, and no
-restart brings it back. Remembering messages for absent subscribers is
-exactly what core NATS does not do. The [JetStream deep
-dive](/learn/jetstream/your-first-stream#why-a-stream) is the layer that adds it.
+can't tell "delivered to three subscribers" from "delivered to nobody" —
+both look like a successful publish. If the warehouse is restarting when
+an `orders.created` message is published, that message is gone.
 
 ## At-most-once delivery
 
@@ -140,11 +131,10 @@ connected and interested when the message is published gets it once. A
 subscriber that's absent, slow, or disconnected at that instant gets
 it zero times. There's no second attempt.
 
-At-most-once is a precise promise, so it's worth stating what it rules
-out. Core NATS doesn't retry a missed message, doesn't detect or
-suppress duplicates, and doesn't guarantee that two subscribers see
-messages in the same order under load. Each of those is a property you
-add with [JetStream](/learn/jetstream), not something core provides.
+Core NATS doesn't retry a missed message, doesn't detect or suppress
+duplicates, and doesn't guarantee that two subscribers see messages in
+the same order under load. Each is a property you add with
+[JetStream](/learn/jetstream), not something core provides.
 
 At-most-once is the right guarantee for a large class of messages:
 telemetry you sample, cache invalidations, a live dashboard feed. For
@@ -169,14 +159,8 @@ connection closed. The Acme order payload is a few hundred bytes, so
 this never bites here, but a service that tries to ship a large blob
 inside a message will hit it.
 
-The fix is not to use a bigger payload. For large data, publish a
-reference (an object-store key or a URL) and let the receiver fetch the
-bytes out of band. Subjects have low overhead, while large messages do
-not.
-
-The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
-[Reference → Client protocol](/reference/protocols/client). We only
-need the behavior here.
+For large data, publish a reference (an object-store key or a URL) and
+let the receiver fetch the bytes out of band.
 
 ## Try it in two terminals
 
@@ -203,10 +187,6 @@ at-most-once delivery in action.
 
 ## Pitfalls
 
-A few problems show up the first time you build on publish-subscribe.
-None of them is a bug; each is a direct consequence of the model this
-page just described.
-
 **Publishing over the limit fails the publish.** A payload larger than
 `max_payload` isn't truncated or queued. An official client catches it
 before it leaves the process: the publish call returns an error (nats.go
@@ -214,8 +194,8 @@ returns `nats: maximum payload exceeded`) and the connection stays open.
 The server rejects and closes the connection of any client that sends an
 oversized `PUB` anyway. The Acme order payload is tiny, but a service
 that tries to ship a large blob inside a message hits this. Don't guess
-the ceiling: ask the server for it, then keep payloads under it and pass
-a reference for anything large.
+the ceiling: the client already knows it from the connection, so keep
+payloads under it and pass a reference for anything large.
 
 <div class="nats-example" data-type="learn-core-nats-publish-subscribe-check-max-payload" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

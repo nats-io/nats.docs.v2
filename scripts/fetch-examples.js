@@ -41,6 +41,22 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.go",
+        branch: "core-docs",
+        directory: "examples/docs/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "learn-core-nats-publish-subscribe-publish/main.go",
+            "learn-core-nats-publish-subscribe-subscribe": "learn-core-nats-publish-subscribe-subscribe/main.go",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "learn-core-nats-subjects-and-wildcards-wildcard-single/main.go",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "learn-core-nats-subjects-and-wildcards-wildcard-multi/main.go",
+            "learn-core-nats-request-reply-respond": "learn-core-nats-request-reply-respond/main.go",
+            "learn-core-nats-request-reply-request": "learn-core-nats-request-reply-request/main.go",
+            "learn-core-nats-request-reply-replies": "learn-core-nats-request-reply-replies/main.go",
+            "learn-core-nats-queue-groups-queue-subscribe": "learn-core-nats-queue-groups-queue-subscribe/main.go",
+            "learn-core-nats-scatter-gather-provider": "learn-core-nats-scatter-gather-provider/main.go",
+            "learn-core-nats-scatter-gather-gather": "learn-core-nats-scatter-gather-gather/main.go",
+        },
+    }, {
+        repo: "nats-io/nats.go",
         branch: "jetstream-docs",
         directory: "examples/docs/",
         examples: {
@@ -119,6 +135,22 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.rs",
+        branch: "core-docs",
+        directory: "async-nats/examples/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "docs_learn_core_nats_publish_subscribe_publish.rs",
+            "learn-core-nats-publish-subscribe-subscribe": "docs_learn_core_nats_publish_subscribe_subscribe.rs",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "docs_learn_core_nats_subjects_and_wildcards_wildcard_single.rs",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "docs_learn_core_nats_subjects_and_wildcards_wildcard_multi.rs",
+            "learn-core-nats-request-reply-respond": "docs_learn_core_nats_request_reply_respond.rs",
+            "learn-core-nats-request-reply-request": "docs_learn_core_nats_request_reply_request.rs",
+            "learn-core-nats-request-reply-replies": "docs_learn_core_nats_request_reply_replies.rs",
+            "learn-core-nats-queue-groups-queue-subscribe": "docs_learn_core_nats_queue_groups_queue_subscribe.rs",
+            "learn-core-nats-scatter-gather-provider": "docs_learn_core_nats_scatter_gather_provider.rs",
+            "learn-core-nats-scatter-gather-gather": "docs_learn_core_nats_scatter_gather_gather.rs",
+        },
+    }, {
+        repo: "nats-io/nats.rs",
         branch: "jetstream-docs",
         directory: "async-nats/examples/",
         examples: {
@@ -194,6 +226,22 @@ const EXAMPLES_CONFIG = {
             "request-reply-headers": "request-reply-headers.ts",
             "request-reply-calculator": "request-reply-calculator.ts",
             "jetstream-basic": "jetstream-basic.ts"
+        },
+    }, {
+        repo: "nats-io/nats.js",
+        branch: "core-docs",
+        directory: "docs-io-nats-examples/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "learn-core-nats-publish-subscribe-publish.ts",
+            "learn-core-nats-publish-subscribe-subscribe": "learn-core-nats-publish-subscribe-subscribe.ts",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "learn-core-nats-subjects-and-wildcards-wildcard-single.ts",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "learn-core-nats-subjects-and-wildcards-wildcard-multi.ts",
+            "learn-core-nats-request-reply-respond": "learn-core-nats-request-reply-respond.ts",
+            "learn-core-nats-request-reply-request": "learn-core-nats-request-reply-request.ts",
+            "learn-core-nats-request-reply-replies": "learn-core-nats-request-reply-replies.ts",
+            "learn-core-nats-queue-groups-queue-subscribe": "learn-core-nats-queue-groups-queue-subscribe.ts",
+            "learn-core-nats-scatter-gather-provider": "learn-core-nats-scatter-gather-provider.ts",
+            "learn-core-nats-scatter-gather-gather": "learn-core-nats-scatter-gather-gather.ts",
         },
     }, {
         repo: "nats-io/nats.js",
@@ -313,6 +361,22 @@ const EXAMPLES_CONFIG = {
             "learn-jetstream-retention-policies-workqueueOverlap": "learn_jetstream_retention_policies_workqueue_overlap.py",
             "learn-jetstream-retention-policies-retentionSwitchRejected": "learn_jetstream_retention_policies_retention_switch_rejected.py",
         },
+    }, {
+        repo: "nats-io/nats.py",
+        branch: "core-docs",
+        directory: "examples/docs/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "learn_core_nats_publish_subscribe_publish.py",
+            "learn-core-nats-publish-subscribe-subscribe": "learn_core_nats_publish_subscribe_subscribe.py",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "learn_core_nats_subjects_and_wildcards_wildcard_single.py",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "learn_core_nats_subjects_and_wildcards_wildcard_multi.py",
+            "learn-core-nats-request-reply-respond": "learn_core_nats_request_reply_respond.py",
+            "learn-core-nats-request-reply-request": "learn_core_nats_request_reply_request.py",
+            "learn-core-nats-request-reply-replies": "learn_core_nats_request_reply_replies.py",
+            "learn-core-nats-queue-groups-queue-subscribe": "learn_core_nats_queue_groups_queue_subscribe.py",
+            "learn-core-nats-scatter-gather-provider": "learn_core_nats_scatter_gather_provider.py",
+            "learn-core-nats-scatter-gather-gather": "learn_core_nats_scatter_gather_gather.py",
+        },
     }],
     "java": [{
         repo: "nats-io/nats.java",
@@ -337,6 +401,22 @@ const EXAMPLES_CONFIG = {
             "request-reply-headers": "RequestReplyHeaders.java",
             "request-reply-calculator": "RequestReplyCalculator.java",
             "jetstream-basic": "JetStreamBasic.java"
+        },
+    }, {
+        repo: "nats-io/nats.java",
+        branch: "core-docs",
+        directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "LearnCoreNatsPublishSubscribePublish.java",
+            "learn-core-nats-publish-subscribe-subscribe": "LearnCoreNatsPublishSubscribeSubscribe.java",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "LearnCoreNatsSubjectsAndWildcardsWildcardSingle.java",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "LearnCoreNatsSubjectsAndWildcardsWildcardMulti.java",
+            "learn-core-nats-request-reply-respond": "LearnCoreNatsRequestReplyRespond.java",
+            "learn-core-nats-request-reply-request": "LearnCoreNatsRequestReplyRequest.java",
+            "learn-core-nats-request-reply-replies": "LearnCoreNatsRequestReplyReplies.java",
+            "learn-core-nats-queue-groups-queue-subscribe": "LearnCoreNatsQueueGroupsQueueSubscribe.java",
+            "learn-core-nats-scatter-gather-provider": "LearnCoreNatsScatterGatherProvider.java",
+            "learn-core-nats-scatter-gather-gather": "LearnCoreNatsScatterGatherGather.java",
         },
     }, {
         repo: "nats-io/nats.java",
@@ -421,6 +501,22 @@ const EXAMPLES_CONFIG = {
             "request-reply-headers": "RequestReplyHeaders.cs",
             "request-reply-calculator": "RequestReplyCalculator.cs",
             "jetstream-basic": "JetStreamBasic.cs"
+        },
+    }, {
+        repo: "nats-io/nats.net",
+        branch: "core-docs",
+        directory: "examples/Example.NatsIODocs/",
+        examples: {
+            "learn-core-nats-publish-subscribe-publish": "LearnCoreNatsPublishSubscribePublish.cs",
+            "learn-core-nats-publish-subscribe-subscribe": "LearnCoreNatsPublishSubscribeSubscribe.cs",
+            "learn-core-nats-subjects-and-wildcards-wildcard-single": "LearnCoreNatsSubjectsAndWildcardsWildcardSingle.cs",
+            "learn-core-nats-subjects-and-wildcards-wildcard-multi": "LearnCoreNatsSubjectsAndWildcardsWildcardMulti.cs",
+            "learn-core-nats-request-reply-respond": "LearnCoreNatsRequestReplyRespond.cs",
+            "learn-core-nats-request-reply-request": "LearnCoreNatsRequestReplyRequest.cs",
+            "learn-core-nats-request-reply-replies": "LearnCoreNatsRequestReplyReplies.cs",
+            "learn-core-nats-queue-groups-queue-subscribe": "LearnCoreNatsQueueGroupsQueueSubscribe.cs",
+            "learn-core-nats-scatter-gather-provider": "LearnCoreNatsScatterGatherProvider.cs",
+            "learn-core-nats-scatter-gather-gather": "LearnCoreNatsScatterGatherGather.cs",
         },
     }, {
         repo: "nats-io/nats.net",

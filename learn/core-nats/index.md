@@ -78,43 +78,14 @@ shipping-quote providers that each reply to the same question.
 You keep one `nats-server` running through the whole chapter and add
 subscribers and services as you go. No page resets the world.
 
-## By the end you will have
-
-- A `warehouse`, `notifications`, and `analytics` set of subscribers
-  receiving order messages with no coupling to the publisher.
-- A working feel for the **interest graph** (the in-memory map of
-  who's subscribed to what) and why an unmatched message is discarded.
-- Regional `orders.us.*` and `orders.eu.*` subjects matched with
-  single-token and multi-token wildcards.
-- An `inventory` service answering on `orders.inventory.check` over
-  request-reply, and the `_INBOX` mechanism that routes a reply back
-  to the requester.
-- A `packers` pool sharing a queue group name on `orders.created`, so
-  each order is handled by exactly one packer.
-- A scatter-gather query to three `shipping.quote` providers, gathered
-  by count and deadline so you can pick the best price.
-
 ## Who this is for
 
 You've read the [Core Concepts → Publish & Subscribe](/concepts/pub-sub-basics)
 primer, or you're otherwise comfortable with the idea of subjects and
 subscribers. Rather than re-teaching the *what*, this chapter shows
 the *how*: the mechanism on the wire, the trade-off behind each
-pattern, and a runnable session you build up command by command.
-
-You don't need to know anything beyond core NATS. This is usually the
-first deep dive a reader does.
-
-## How to read it
-
-Each page introduces at most two new ideas and builds on the one
-before it. Every page uses the same Acme ORDERS world, so you can
-keep one terminal open from the first page to the last without
-resetting state.
-
-The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
-[Reference → Client protocol](/reference/protocols/client). We only
-need the behavior here, not the byte layout.
+pattern, and a runnable session you build up command by command. Each
+page introduces at most two new ideas and builds on the one before it.
 
 ## Map
 

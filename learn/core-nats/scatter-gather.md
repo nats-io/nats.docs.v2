@@ -23,25 +23,18 @@ with three quote providers.
 
 ## Why one request can produce many replies
 
-Recall how request-reply works. The client subscribes to a unique
-`_INBOX` subject, then publishes the request carrying that inbox as its
-reply subject. Every responder publishes its answer back to the inbox.
+Recall how request-reply works: the client subscribes to a unique
+`_INBOX` subject and publishes the request carrying that inbox as its
+reply subject. Nothing in that mechanism limits the number of responders.
+If three providers subscribe to `shipping.quote`, all three receive the
+request (plain publish-subscribe) and all three can reply to the inbox.
+The single reply you saw earlier was just one responder plus a client
+that stopped after the first answer.
 
-Nothing in that mechanism limits the number of responders. The request
-is an ordinary publish to `shipping.quote`. If three providers subscribe
-to `shipping.quote`, all three receive a copy (that's plain
-publish-subscribe), and all three can reply to the inbox.
-
-The single-reply case felt like one answer only because two things were
-true. There was one responder, and the client stopped listening after
-the first reply. Remove the first assumption and you have many responders.
-Remove the second and the client gathers all of them.
-
-This works only when the responders are **not** in a queue group. A queue
-group would hand each request to exactly one member, which is load
-balancing, not scatter-gather. Scatter-gather needs every responder to
-see the request, so every responder subscribes plainly. We make that
-explicit in the CLI demo below, because the CLI's default trips on it.
+This works only when the responders are **not** in a queue group — a queue
+group hands each request to one member, which is load balancing, not
+scatter-gather. Every responder must subscribe plainly. The CLI demo below
+makes that explicit, because the CLI's default trips on it.
 
 ## Set up three quote providers
 
@@ -101,8 +94,11 @@ of three would hang forever if only two answer.
 The safer approach gathers by **deadline** instead. Collect every reply
 that arrives within a time budget, then act on whatever you have.
 
-From the CLI, `--replies 0` switches to deadline mode: it waits until the
-overall `--timeout` elapses, returning all replies seen in that window.
+From the CLI, `--replies 0` switches to deadline mode: it collects replies
+until they stop arriving. `--timeout` bounds the wait for the *first* reply,
+and `--reply-timeout` (300 ms by default) bounds the gap between replies, so
+the command returns shortly after the last quote lands instead of holding open
+for the full timeout.
 
 ```bash
 nats request shipping.quote \
@@ -110,10 +106,12 @@ nats request shipping.quote \
   --replies 0 --timeout 2s
 ```
 
-With three providers up, all three quotes arrive well inside two seconds.
-With one provider down, the client still returns after two seconds with
-the two quotes it received. A slow or missing carrier delays a decision by
-at most the deadline; it never blocks it forever.
+With three providers up, all three quotes arrive within milliseconds, and the
+command returns a reply-timeout (300 ms) after the last one, not after the full
+two seconds. With one provider down, it returns just as fast with the two quotes
+it has, once no further reply arrives within the reply-timeout. If no provider
+answers at all, it gives up after `--timeout`. Either way the wait is bounded;
+it never blocks forever.
 
 A deadline changes the rule from waiting for every responder to waiting
 only for whoever answers in time, which is the only safe assumption when
@@ -121,28 +119,14 @@ the responder set isn't fixed.
 
 ## Delivery guarantees
 
-Scatter-gather inherits the at-most-once delivery of core NATS. A reply
-dropped in transit is just absent from the gathered set; nothing
-redelivers it. If your client crashes after the second reply, the third is
-gone.
-
-That's acceptable for a shipping quote: re-asking is cheap and the
-answer is fresh each time. It's not acceptable when each reply must
-survive a crash and be handled reliably. Recoverable work of that kind
-belongs in [JetStream](/learn/jetstream), not in a core NATS gather.
-
-Because nothing redelivers a lost reply, the order in which replies land
-carries no meaning either: a provider that's slow this second may be fast
-the next. Treat the gathered set as whatever answers happened to arrive,
-never as a ranked list.
-
-The wire-level `PUB`/`SUB`/`MSG` protocol is documented in
-[Reference](/reference/protocols/client). We only need the behavior here.
+Scatter-gather is [at-most-once](/learn/core-nats/publish-subscribe#at-most-once-delivery)
+like everything else: a reply dropped in transit is just absent from the
+gathered set, nothing redelivers it, and arrival order carries no meaning.
+Treat the set as whatever answers happened to arrive, not a ranked list.
+That's fine for a shipping quote — re-asking is cheap. When each reply must
+survive a crash, that's [JetStream](/learn/jetstream), not a core gather.
 
 ## Pitfalls
-
-Scatter-gather looks like one more request, so it inherits the habits of
-single-reply request-reply. These are the common mistakes.
 
 **Taking only the first reply.** A plain `nats request` stops after one
 reply, because its `--replies` flag defaults to `1`. Point it at three
@@ -158,19 +142,13 @@ subscribe to the inbox yourself and read in a loop.
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
 **No deadline, so you wait for replies that never come.** Gathering by a
-fixed count assumes you know how many providers are up. If you wait for
-three and only two answer (a carrier is down), a hand-rolled loop with no
-time budget blocks forever on the reply that never lands. Always bound the
-wait: gather by deadline (`--replies 0 --timeout 2s`) so a missing carrier
-costs you the deadline, not the whole request.
+fixed count blocks forever if a provider is down. Bound the wait: gather by
+deadline (`--replies 0 --timeout 2s`) so a missing carrier costs the
+deadline, not the whole request.
 
-**Reading the gathered set as ranked.** Replies arrive in whatever order
-the providers happen to answer, and core NATS is at-most-once, so a dropped
-reply is just absent. The first quote back isn't the best one, and a
-short set isn't an error. Compare every reply you received on its merits
-(here, the lowest `quote_cents`) and never treat arrival order as
-priority. Replies that must survive a crash and be handled reliably belong
-in [JetStream](/learn/jetstream), not in a core gather.
+**Reading the gathered set as ranked.** Arrival order isn't priority and a
+short set isn't an error. Compare every reply on its merits (here, the
+lowest `quote_cents`).
 
 ## Where you are
 
