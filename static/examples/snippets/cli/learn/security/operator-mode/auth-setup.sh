@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Build the ACME trust chain: operator -> accounts -> users -> creds.
 # Run once on a trusted machine. nats auth generates the nkeys and
 # signs every JWT with the correct key in the chain.

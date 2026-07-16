@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Prove that mTLS actually rejects a client with no certificate.
 # Run this against a server that has verify: true (or verify_and_map: true).
 #

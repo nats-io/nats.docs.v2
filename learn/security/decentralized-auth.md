@@ -58,40 +58,45 @@ can verify from any link back up to the root.
 ## How an identity signs the next
 
 Each identity holds a key it signs and verifies with. In NATS these are
-**nkeys**, built on Ed25519, the same elliptic-curve signature scheme used
-for SSH and modern code signing. An nkey comes in two forms: a public nkey
+**NKeys**, built on Ed25519, the same elliptic-curve signature scheme used
+for SSH and modern code signing. An NKey comes in two forms: a public NKey
 others verify against, and a private seed the signer keeps. The signer
-signs with the seed; everyone else needs only the public nkey to check the
-signature. The server only ever handles public nkeys and signatures, never
+signs with the seed; everyone else needs only the public NKey to check the
+signature. The server only ever handles public NKeys and signatures, never
 anyone's seed.
 
-An nkey is easy to recognize because its first letter names its role: an
-operator nkey starts with `O`, an account nkey with `A`, a user nkey with
-`U`, and any seed with `S`. So `OD2A...` is an operator's public nkey and
-`SUAH...` is a user's seed.
+An NKey is easy to recognize because its first letter names its role: an
+operator NKey starts with `O`, an account NKey with `A`, a user NKey with
+`U`, and any seed also prepends `S`.
+So `OD2A...` is an operator's public NKey and `SUAH...` is a user's seed.
 
 An identity isn't limited to its one built-in key pair. An account can
 hold extra **signing keys** that also count as valid issuers for its
 users — you'll use one shortly — and the operator can hold signing keys
 for accounts the same way. A user signed by an account signing key carries
 an `issuer_account` field in its JWT naming the account it belongs to.
+(There's always an issuer, it's just that the default is implicit and is the
+signing key inherent in the account rather than an added key.)
 
 ## The user JWT
 
-A user proves who it is by presenting a **JSON Web Token (JWT)**. A JWT is
-a small, signed document that states a set of claims and carries the
+A user connection proves who it is by presenting a **JSON Web Token (JWT)**,
+which provably carries in it the public key corresponding to the private key
+which signed the server's challenge.
+A JWT is a small, signed document that states a set of claims and carries the
 signature proving those claims haven't been altered.
 
-A JWT isn't the "token" from
+A user JWT isn't the "token" from
 [Authentication basics](/learn/security/authentication-basics): that token
 is a password-style secret the server compares against its config, while
-a JWT is a signed document anyone can inspect but only the right key can
-produce. The credentials file from the previous page holds the user JWT in
+a user JWT is a signed document anyone can inspect but only the right account
+(signing) key can produce.
+The credentials file from the previous page holds the user JWT in
 its first block; the second block is the user's seed, and the next section
 shows why the client needs both.
 
 A user JWT names the user and the account that issued it. When
-`order-svc` connects, it presents its user JWT. The server reads which
+`order-svc` connects, it presents its user JWT. The server reads from it which
 account issued it, fetches that account's own JWT from the resolver, and
 checks that the account JWT was signed by the operator. Each JWT
 references the next one up the chain.
@@ -131,6 +136,8 @@ homemade user JWT fails check 2, because the attacker holds no key of
 `ORDERS`. A homemade account JWT fails check 3, because only the
 operator's seed can produce a signature the server's operator JWT vouches
 for.
+
+(But see below, re Bearer Tokens, for an exception to this.)
 
 ## Why removing the user list matters
 
@@ -191,7 +198,7 @@ permission set shown is the role's — the same `orders.>` publish and
 The scoped key lives inside the `ORDERS` account JWT, so the server
 doesn't know it yet. Until you push, the new credentials are rejected:
 
-```bash
+```sh
 nats pub orders.created '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200}' --creds order-svc.creds
 ```
 
@@ -210,7 +217,7 @@ and try again:
 Anything outside the scope now fails, and this time it's a permission
 error rather than an authentication one:
 
-```bash
+```sh
 nats pub billing.charge 'x' --creds order-svc.creds
 ```
 
@@ -298,6 +305,22 @@ because a non-bearer JWT arrives with no nonce signature, the second
 because the account still disallows bearer tokens. Only after the
 account-level allow is pushed does the JWT connect on its own.
 
+## Multiple Operators
+
+The nats-server supports having multiple operators configured.  They are
+equivalent, and the namespace of accounts is flat across all operators.
+If you need to rotate operators (operator key compromised) then it is
+technically possible to rotate by adopting existing accounts into the new
+operator and migrating gradually.
+
+It is not easy and there are no current affordances in the tooling to assist
+with such a migration.
+
+Use operator signing keys and keep at least one off-line, and only keep one
+operator signing key exposed to risk.  Then you can manage a migration between
+the signing keys of the existing operator instead of between operators.  There
+still aren't many helpers for this, at this time.
+
 ## Pitfalls
 
 Four things commonly catch teams new to decentralized authentication.
@@ -308,13 +331,13 @@ tooling has nothing to sign with. Back the operator up before you build
 anything on top of it: `nats auth operator backup ACME acme-operator.backup`
 writes a portable backup file — a JSON document holding the operator's
 keys and JWTs, so an unencrypted backup contains the operator seed in
-cleartext — and `--key` encrypts it with a curve nkey (pass a file
+cleartext — and `--key` encrypts it with a curve NKey (pass a file
 containing the key). Restore it with
 `nats auth operator restore ACME acme-operator.backup`. Store the file
 offline.
 
 **Pasting a seed where a public key belongs.** Server config and JWT
-fields only ever take public nkeys (`O...`, `A...`, `U...`). If you paste
+fields only ever take public NKeys (`O...`, `A...`, `U...`). If you paste
 a seed (`S...`) into a config, a chat message, or a log, you've handed out
 the one secret that must stay private, and the only fix is to rotate the
 key. Treat every `S`-prefixed string like a password.

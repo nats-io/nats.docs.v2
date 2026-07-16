@@ -10,10 +10,10 @@ description: Subject permissions, allow and deny lists, and the rule that an all
 By the end of [Authentication
 basics](/learn/security/authentication-basics), `order-svc` and
 `analytics-reader` can prove who they are. The server checks their
-passwords and admits the connections.
+authentication data (e.g., passwords) and admits the connections.
 
-That's authentication: the server knows who each connection is, but
-nothing limits what it can do. Right now `order-svc` can publish to any
+That's authentication: the server knows _who_ each connection is, but
+nothing limits _what_ it can do. Right now `order-svc` can publish to any
 subject on the server and subscribe to any subject.
 
 This page adds those limits. Authorization is what a user may do, and
@@ -40,8 +40,9 @@ the reverse.
 Permissions use the same subject wildcards you already know from
 [Core Concepts → Subjects](/concepts/subjects). `*` matches one token;
 `>` matches one or more trailing tokens. `orders.>` covers
-`orders.created`, `orders.shipped`, and `orders.cancelled` in one
-grant.
+`orders.created`, `orders.shipped`, and `orders.cancelled`, all in one grant.
+(Here, using `orders.*` would work equally well, but would not match a subject
+such as `orders.at.northpole`, where `orders.>` does match it.)
 
 ## Restricting order-svc
 
@@ -133,8 +134,8 @@ allow. With this block `order-svc` could publish `orders.created` and
 `orders.shipped` but never `orders.secret`, even though the wildcard
 covers it.
 
-You rarely need both lists, but when you do, deny is what the server
-applies last.
+You rarely need both lists, but when you do, an explicit deny is what
+the server applies last.
 
 ## Observing a denial
 
@@ -162,8 +163,10 @@ surface it differently: some log it, some raise it on the next
 operation, and some expose it through an async error handler.
 
 One shape of denial does look silent: a denied request. A request is a
-publish, so when the publish is denied, no responder ever sees it and
-the requester just times out. Every JetStream API call is a request
+pairing of publish with a reply "inbox" subscribe;
+so when the publish is denied, no responder ever sees it and
+the requester just times out waiting for the expected reply.
+Every JetStream API call is a request
 under the hood, so a locked-down user running `nats stream info` fails
 with `context deadline exceeded` rather than a permission error. When a
 request times out for no clear reason, check the server log — every

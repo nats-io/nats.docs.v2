@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Start the server with the generated resolver config, then push the
 # ACME accounts so it can validate users in ORDERS and ANALYTICS.
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # A service export is request/reply, not publish/subscribe. If ANALYTICS calls
 # a service subject that ORDERS exports but no responder is running, the
 # request comes back as "No responders are available" right away.

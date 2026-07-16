@@ -24,20 +24,20 @@ credentials they connect with. No user lives in the server config.
 ## Why you use a tool
 
 What happens if you try to build the chain by hand? You generate an
-operator nkey, then an account nkey, then sign the account JWT with the
-operator's private seed, then a user nkey, then sign the user JWT with
+operator NKey, then an account NKey, then sign the account JWT with the
+operator's private seed, then a user NKey, then sign the user JWT with
 the account's seed. Each step uses a different key, and each signature
 has to be exact or the whole chain breaks. Do it manually and one wrong
 seed produces a JWT the server silently rejects at connect time.
 
 The **`nats auth`** commands, part of the same `nats` CLI you've used
-all chapter, do this for you. They generate the nkeys, build the JWTs,
+all chapter, do this for you. They generate the NKeys, build the JWTs,
 sign each one with the correct key in the chain, and store everything
 in a local directory tree under `$XDG_DATA_HOME/nats` — JWTs in a
 `stores` directory, private seeds in a `keys` directory. That store holds
 every private key in the trust chain, which is why you run the tool on
 a trusted machine and never on the server. It produces two kinds of
-output: account JWTs the server fetches, and credentials clients
+output: account JWTs the server fetches, and credentials which clients
 connect with.
 
 **Coming from nsc?** The `nats auth` store is nsc-compatible on disk:
@@ -88,13 +88,23 @@ is permissions: both users can publish and subscribe anywhere in their
 own account for now. Permissions arrive on the next page through scoped
 signing keys.
 
+Notice that the long IDs for each Operator, Account, or User, each starts with
+`O`, `A`, or `U`, respectively.  This is a guarantee and is designed to
+allow a human to immediately tell what they're looking at.  If you ever see an
+ID which starts with an `S` (`SO`, `SA`, `SU`) then _be very careful_ because
+you're looking at the NKey Seed (roughly the private key).
+
 ## The credentials the client presents
 
 A user JWT alone can't connect. The JWT is a public claim; to prove it
-owns that identity, the client also needs the user's private nkey seed
+owns that identity, the client also needs the user's private NKey seed
 to sign the server's challenge. That's why `--credential` packaged both
-into a single file. Open `order-svc.creds` and you see two labeled
-sections:
+into a single file.
+
+(There's an exception to this, Bearer JWTs, which you have to explicitly opt
+into. You should avoid them unless you need them for WebSockets connections.)
+
+Open `order-svc.creds` and you see two labeled sections:
 
 ```
 -----BEGIN NATS USER JWT-----
@@ -116,21 +126,21 @@ from the store.
 
 ## Why the server needs a resolver
 
-The server now trusts `ACME`. When `order-svc` connects, the server
-reads the user JWT, sees it was signed by `ORDERS`, and tries to
-verify that `ORDERS` was in turn signed by the operator. It has never
-seen the `ORDERS` JWT, so it can't finish the chain and the connection
-fails.
+The server now trusts `ACME`. When `order-svc` connects, the client library
+signs the server's presented nonce with the private key, and presents both the
+signature and the user JWT to the server as part of the authentication step.
+The server parses that user JWT, sees it was signed by a key for the `ORDERS`
+account, and tries to verify that `ORDERS` was in turn signed by the operator.
+It has never seen the `ORDERS` JWT, so it can't finish the chain and the
+connection fails.
 
 The **account resolver** closes that gap. It's the part of the server
 config that tells `nats-server` where to find account JWTs at connect
 time. The recommended type is the full nats-based resolver: the server
 keeps every account JWT in a local directory, and you deliver new ones
-over a NATS connection. The nats-based resolver has a second mode,
-`cache`, which also accepts pushes but evicts unused JWTs; a static
-memory resolver exists too, but it takes no pushes at all (see
-[Reference](/reference/config/resolver)). This chapter uses the full
-resolver.
+over a NATS connection. Memory, cache, and URL resolvers also exist (see
+[Reference](/reference/config/resolver)), but `nats auth` can only push
+to a full resolver.
 
 `nats server generate ./acme-server` scaffolds the config. The command
 is interactive: pick the template
@@ -173,7 +183,7 @@ where account JWT files land, one per account.
 
 Start the server with it and the boot log shows the trust anchor:
 
-```bash
+```sh
 nats-server -c ./acme-server/server.conf
 ```
 
@@ -221,9 +231,10 @@ back from the server with
 `nats auth account query ORDERS -s nats://127.0.0.1:4222 --creds sys.creds`,
 which pulls the copy the resolver holds.
 
-The user JWTs weren't pushed. Users never go to the
-server. A client presents its own user JWT at connect time, inside the
-credentials file.
+The user JWTs weren't pushed.
+User definitions do not live in the server.
+A client presents its own user JWT at connect time, inside the credentials
+file; the server will remember the JWT details for the life of the connection.
 
 ## Connecting with the credentials
 
@@ -237,7 +248,7 @@ has its credentials, so it can now publish an order.
 ```
 
 The client reads the credentials file, presents the user JWT, and signs
-the server's challenge with the nkey seed. The server verifies the JWT
+the server's challenge with the NKey seed. The server verifies the JWT
 was signed by `ORDERS`, that `ORDERS` was signed by `ACME`, and that
 the challenge signature matches the JWT's public key. The whole chain
 checks out, and the 91-byte order lands on `orders.created`.
@@ -295,13 +306,19 @@ bites when the operator JWT was built by hand or imported from a tool
 that didn't set a system account.
 
 **Leaking the `.creds` file.** The credentials file carries the user's
-private nkey seed, so anyone holding it can connect as `order-svc`. There's no
+private NKey seed, so anyone holding it can connect as `order-svc`. There's no
 password to guess and no list to revoke against. Never bake it into an
 image, log it, or commit it; give it `0600` permissions and mount it to
 the one client that needs it. To cut off a leaked credential, revoke
 the user and re-push the account; the next page,
 [Decentralized authentication](/learn/security/decentralized-auth),
 shows the command and why the revocation sticks.
+
+**Credential expiration.** User credentials can have an expiration time
+associated with them. This has operational benefits paired with operational
+costs. You can reduce the impact of credential compromise without needing a
+signing key rotation; but now you potentially have a set of objects to
+monitor for expiration.
 
 ## Where you are
 

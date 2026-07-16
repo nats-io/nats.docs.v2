@@ -28,10 +28,10 @@ Each of those is a separate connection type, and each one carries its
 own TLS configuration. The top-level `tls {}` block secures client
 connections. It doesn't touch the others.
 
-The cluster, leafnode, and gateway connections have their own `tls {}`
-sub-blocks, nested inside their own configuration. Turning on TLS for
-clients leaves cluster routes plaintext until you configure the cluster
-block too.
+The monitoring, websocket, mqtt, leafnode, cluster, and gateway connections
+have their own `tls {}` sub-blocks, nested inside their own configuration.
+Turning on TLS for clients leaves cluster routes plaintext until you configure
+the cluster block too.
 
 This independence is deliberate: a laptop client and an inter-datacenter
 gateway have different threat models, so each link gets its own
@@ -88,7 +88,7 @@ You can check the config before starting anything with
 `nats-server -t -c nats.conf`. Then start the server the same
 way as before:
 
-```bash
+```sh
 nats-server -c nats.conf
 ```
 
@@ -99,8 +99,9 @@ authentication.
 ## The client must trust the CA
 
 A TLS client verifies the server's certificate before it sends a single
-byte of credentials. To do that, the client needs the same CA
-certificate the server's chain was signed by.
+byte of credentials. To do that, the client needs to have in its CA
+certificate pool store a CA certificate which is valid for the signing path to
+the NATS server's TLS-enabled certificate.
 
 `order-svc` connects exactly as it did on the
 [Authentication basics](/learn/security/authentication-basics) page,
@@ -115,19 +116,32 @@ the client libraries take a path to the same PEM file.
 
 The payload is the same 91 bytes of order JSON. The link now encrypts
 them in transit, and the client has verified it's talking to the real
-server. This is per hop, not end to end — the server decrypts the
-traffic before it routes it.
+server.  The server which you talk to is itself the TLS end-point and so sees
+the plaintext traffic; any routed copies of the traffic will happen outside of
+your TLS connection and so depend upon whatever other TLS configuration, if
+any, exists for those onward links.
 
 TLS verification checks that the hostname you
 dial matches a name inside the server certificate. A certificate issued
-for `nats.acme.internal` rejects a client that connects to `127.0.0.1`,
-because the address isn't listed in the certificate. Match the
-connection address to a name the certificate covers.
+for `nats.acme.internal` rejects a client that specifies to connect to
+`127.0.0.1`, because the address isn't listed in the certificate.
+Match the connection address to a name the certificate covers.
+If `nats.acme.internal` happens to resolve to `127.0.0.1` (and your DNS
+resolvers do not filter such claims) then that would still work.
 
 The full set of TLS options (cipher suites, curve preferences, and
 certificate pinning) is documented in
 [Reference](/reference/config/tls). This page uses only `cert_file`,
 `key_file`, `ca_file`, and `timeout`.
+
+Note that NATS supports learning the connection addresses of servers in the
+same cluster as the server which you connected to (configurable for a given
+server with the `client_advertise` option); this functionality supports
+automatic reconnections gracefully handling lame-duck server shutdowns, etc.
+If, and only if, a NATS client sees an IP address in the advertised server
+lists, then that is treated as equivalent to an updated DNS entry, and when
+reconnecting the NATS client should use the original DNS hostname as the
+server identity to verify even as it connects to a specific different IP.
 
 ## Mutual TLS: mapping the certificate to the identity
 
@@ -136,9 +150,9 @@ itself to the server with its own certificate, that's
 **mutual TLS (mTLS)**.
 
 mTLS demands a certificate from every connecting client and rejects any
-client whose certificate doesn't chain to `ca_file`. That proves the
-client holds a valid certificate, but it doesn't yet say who the
-client is.
+client whose certificate doesn't chain to the receiving server's `ca_file`.
+That proves the client holds a valid certificate, but it doesn't yet say who
+the client is.
 
 [`verify_and_map: true`](/reference/config/tls/verify_and_map) covers
 both steps. It requires and verifies the
@@ -217,6 +231,10 @@ no password, no creds file. The CLI passes the client certificate with
 The server reads `CN=order-svc,O=Acme` from the certificate, matches it
 to the user in `ORDERS`, and applies that user's permissions.
 
+Note that the rules for matching certificate DNs can be a little complex and
+are more than just a simple string equality match.  The NATS server handles
+the rules and can deal with DNs which contain sets, and so forth.
+
 `verify_and_map` includes everything `verify: true` does and adds the
 mapping step, so you don't set both. Reach for plain `verify` only when
 an external system already maps certificates to users and the server
@@ -270,6 +288,15 @@ rather than a TLS record — that error doesn't mean TLS is broken. With
 `handshake_first` on, the port behaves like any TLS endpoint and
 `s_client` works.
 
+If you have the GnuTLS CLI tools installed, then you can use:
+
+```sh
+gnutls-cli --starttls --port 4222 server.host.name
+```
+
+and then after you see the `INFO` line, type Control-D to start the TLS
+handshake.
+
 ## Encryption at rest
 
 TLS protects messages in transit. It does nothing for messages
@@ -279,6 +306,12 @@ stream data and metadata on disk with an AEAD cipher. It's global, not
 per account, and independent of everything above — a stream can be
 encrypted on disk behind a plaintext link, or plaintext on disk behind
 TLS.
+
+Note that some disk controllers can handle encryption-at-rest at the block
+layer, beneath the visibility of processes such as the nats-server, and do so
+at high performance without impacting upon server CPU.  You should carefully
+evaluate if having the nats-server do the encryption itself is the right
+solution for your deployment scenario.
 
 Give the `jetstream {}` block a key, and keep the key itself out of the
 config file with an environment variable:
@@ -290,7 +323,7 @@ jetstream {
 }
 ```
 
-```bash
+```sh
 JS_KEY="s3cr3t-master-key" nats-server -c nats.conf
 ```
 

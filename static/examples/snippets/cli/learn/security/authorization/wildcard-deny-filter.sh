@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # order-svc's subscribe section allows the wildcard but denies the audit branch:
 #   permissions: {
 #     publish: { allow: ["orders.>"] }

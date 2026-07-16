@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Confirm the system account is reachable once you declare a user for it.
 #
 # nats.conf for this example adds a SYS account to the page's config:

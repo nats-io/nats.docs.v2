@@ -23,9 +23,10 @@ service instead.
 ## What auth callout is
 
 **Auth callout** delegates the authentication decision to an external
-NATS service. When a client connects, the server doesn't check the
-client itself. It packages up what the client presented and sends that to
-a service you run, then waits for a verdict.
+NATS service. When a client connects, the server doesn't make the
+authentication decisions about the client itself.
+The server packages up what the client presented and some details about the
+connection, and sends that to a service you run, then waits for a verdict.
 
 That service is the **auth service**: in our scenario, `auth-svc`. It
 receives each connection attempt, applies its own logic, and replies
@@ -90,7 +91,7 @@ authorization {
     users: [ { user: auth-svc, password: c4llout } ]
 
     auth_callout {
-        # Public account nkey allowed to sign the response.
+        # Public account NKey allowed to sign the response.
         issuer: "ABJHLOVMPA4CI6R5KLNGOB4GSLNIY7IOUPAJC4YFNDLQVIOBYQGUWVLA"
         # Users that bypass the callout (the auth service itself).
         auth_users: [ auth-svc ]
@@ -103,7 +104,7 @@ here the empty `ORDERS` and `ANALYTICS` declarations above.
 
 Three fields in the `authorization` block do the work here.
 
-`issuer` is the public account nkey allowed to sign the response. The
+`issuer` is the public account NKey allowed to sign the response. The
 server admits a client only if the reply was signed by this key. It
 starts with `A` because it's an account key, the same prefix you read
 on the [Decentralized authentication](/learn/security/decentralized-auth)
@@ -160,7 +161,7 @@ in FIPS-140 mode and can't be configured there.
 
 `$SYS.REQ.USER.AUTH` carries every connection attempt on the server.
 Each request includes whatever the client presented: its token, its
-password, its nkey. Anything that can read this subject can harvest
+password, its NKey. Anything that can read this subject can harvest
 other clients' credentials.
 
 You can watch that happen. The bypass user subscribes to the subject, a
@@ -189,7 +190,7 @@ exactly as the flow describes, and each attempt carries its own fresh
 `user_nkey`. The `auth_token` is the client's credential in plaintext:
 base64 is encoding, not encryption, so any subscriber decodes it in one
 line. The server redacts `client_info.user`, but the raw token the client
-presented rides along readable, and a password or nkey seed would sit
+presented rides along readable, and a password or NKey seed would sit
 there the same way. That's what account isolation below, and the `xkey`
 option this page covers at the end, are there to protect.
 
@@ -218,7 +219,7 @@ surface. If anything could publish a fake reply, it could forge any
 user. Signatures and a one-time key protect against that.
 
 The server signs the request. Every request it sends to
-`$SYS.REQ.USER.AUTH` is a JWT signed by an nkey the server generated
+`$SYS.REQ.USER.AUTH` is a JWT signed by an NKey the server generated
 fresh at startup, carrying the server's own ID as issuer and the fixed
 string `nats-authorization-request` as audience. `auth-svc` can check
 the request is self-consistent and unmodified, but the key isn't an
@@ -227,10 +228,10 @@ another client from provoking a verdict is the publish deny from the
 previous section: only the server can get a request onto the subject.
 
 The request also pins a one-time identity. The server generates a fresh
-public user nkey for this connection and places it in the request, in a
+public user NKey for this connection and places it in the request, in a
 field called `user_nkey`. The reply is only valid if it names that exact
-nkey as its subject. A captured old reply can't be replayed against a
-new connection, because each connection carries its own nkey.
+NKey as its subject. A captured old reply can't be replayed against a
+new connection, because each connection carries its own NKey.
 
 `auth-svc` signs the response, and the response is two JWTs, one inside
 the other. The outer one is the verdict. Its subject is the connection's
@@ -416,7 +417,7 @@ Continue to [Encryption & TLS](/learn/security/encryption).
   every field of the `auth_callout` block, including `xkey` and
   `allowed_accounts`.
 - [Decentralized authentication](/learn/security/decentralized-auth) —
-  the user JWTs and account nkeys that the callout response reuses.
+  the user JWTs and account NKeys that the callout response reuses.
 - [ADR-26](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-26.md) —
   the full protocol: request and response claims, signing rules, and
   xkey encryption.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Connect and publish as order-svc over mutual TLS.
 # The client still trusts the CA (--tlsca), but now also presents its own
 # certificate (--tlscert) and private key (--tlskey). With verify_and_map

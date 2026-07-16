@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # An edit only changes the local JWT in the nats auth store. The server
 # keeps validating against its stored copy, so until you push, the edit
 # silently has no effect: existing creds still connect, old limits hold.

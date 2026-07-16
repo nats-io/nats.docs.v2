@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # analytics-reader (in ANALYTICS) subscribes to the imported orders.shipped
 # while order-svc (in ORDERS) publishes it. The export/import pair makes the
 # message cross the account boundary.
