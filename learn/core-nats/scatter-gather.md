@@ -1,7 +1,7 @@
 ---
 id: scatter-gather
 title: "Scatter-gather"
-sidebar_position: 6
+sidebar_position: 7
 description: Fan one request to many responders and gather every reply by count or deadline
 ---
 
@@ -31,10 +31,10 @@ request (plain publish-subscribe) and all three can reply to the inbox.
 The single reply you saw earlier was just one responder plus a client
 that stopped after the first answer.
 
-This works only when the responders are **not** in a queue group — a queue
+This works only when the responders are not in a queue group — a queue
 group hands each request to one member, which is load balancing, not
 scatter-gather. Every responder must subscribe plainly. The CLI demo below
-makes that explicit, because the CLI's default trips on it.
+makes that explicit, because the CLI's default does the opposite.
 
 ## Set up three quote providers
 
@@ -70,35 +70,39 @@ collects replies until it's heard from every provider.
      data-type="learn-core-nats-scatter-gather-gather"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-The CLI uses `--replies 3`: keep reading from the inbox until three
-replies arrive, then stop. With the three providers running, the output
-shows three quotes, one per carrier. The client compares the prices and
-keeps the lowest.
+The CLI uses `--replies 3`: read from the inbox until three replies
+arrive, then stop — or until replies stop arriving, whichever comes
+first. With the three providers running, the output shows three quotes,
+one per carrier. The client compares the prices and keeps the lowest.
 
 A library does the same thing, and how much you hand-roll depends on the
-client. A plain `request()` returns only the first reply. Some clients
-ship a gather helper that returns many: nats.js has `requestMany`, and
-orbit.go has `RequestMany` (both follow ADR-47, "Request Many", with
-count, stall, and sentinel stop conditions). Where no helper exists, you
-build the loop yourself: subscribe to a fresh inbox, publish the request
-with that inbox as the reply subject, then read from the subscription and
-append each reply to a list until your count or deadline is reached, then
+client. A plain `request()` returns only the first reply — no single call
+returns a list, because the client can't know how many responders exist.
+Some clients ship a gather helper that returns many: nats.js has
+`requestMany` and orbit.go has `RequestMany` (both follow ADR-47,
+"Request Many", with count, stall, and sentinel stop conditions), and the
+.NET client has `RequestManyAsync`. Where no helper exists, you build the
+loop yourself: subscribe to a fresh inbox, publish the request with that
+inbox as the reply subject, then read from the subscription and append
+each reply to a list until your count or deadline is reached, then
 unsubscribe.
 
 ## Gather by deadline
 
 Counting replies assumes you know how many providers there are. Often you
-don't. Carriers come and go; one might be down. Waiting for a fixed count
-of three would hang forever if only two answer.
+don't. Carriers come and go; one might be down. Write that gather yourself
+with no read deadline, and waiting for a fixed count of three blocks
+forever if only two answer — the read for the third reply never returns.
 
 The safer approach gathers by **deadline** instead. Collect every reply
 that arrives within a time budget, then act on whatever you have.
 
-From the CLI, `--replies 0` switches to deadline mode: it collects replies
-until they stop arriving. `--timeout` bounds the wait for the *first* reply,
-and `--reply-timeout` (300 ms by default) bounds the gap between replies, so
-the command returns shortly after the last quote lands instead of holding open
-for the full timeout.
+From the CLI, `--replies 0` switches to deadline mode: `--timeout` becomes
+the whole collection window. The command reads replies for the full window
+and returns when it closes, so `--replies 0 --timeout 2s` gathers everything
+that arrives in those two seconds. It's a fixed, predictable budget, and
+`--reply-timeout` has no effect in this mode — it only bounds the gap
+between replies when you gather by count.
 
 ```bash
 nats request shipping.quote \
@@ -106,16 +110,24 @@ nats request shipping.quote \
   --replies 0 --timeout 2s
 ```
 
-With three providers up, all three quotes arrive within milliseconds, and the
-command returns a reply-timeout (300 ms) after the last one, not after the full
-two seconds. With one provider down, it returns just as fast with the two quotes
-it has, once no further reply arrives within the reply-timeout. If no provider
-answers at all, it gives up after `--timeout`. Either way the wait is bounded;
-it never blocks forever.
+With three providers up, all three quotes arrive within milliseconds, but the
+command still holds open for the full two seconds before returning the set.
+With one provider down, you get the two quotes that answered and wait out the
+same two-second window. If no provider is subscribed at all, the command
+returns right away with a no responders signal instead of waiting — though a
+provider that's subscribed but slow to answer still costs the full `--timeout`.
+Either way the wait is bounded; it never blocks forever.
 
 A deadline changes the rule from waiting for every responder to waiting
 only for whoever answers in time, which is the only safe assumption when
 the responder set isn't fixed.
+
+There's a third way to end a gather: a **sentinel**. With
+`--wait-for-empty`, the command keeps collecting until a reply arrives with
+an empty payload, which a responder sends to mark the end of the set. This
+counts replies rather than watching a single deadline, so if the sentinel
+never comes the `--reply-timeout` bounds the gap between replies and the
+wait still ends.
 
 ## Delivery guarantees
 
@@ -141,10 +153,11 @@ subscribe to the inbox yourself and read in a loop.
      data-type="learn-core-nats-scatter-gather-first-reply-trap"
      data-languages="cli,js,go,python,java,rust,csharp"></div>
 
-**No deadline, so you wait for replies that never come.** Gathering by a
-fixed count blocks forever if a provider is down. Bound the wait: gather by
-deadline (`--replies 0 --timeout 2s`) so a missing carrier costs the
-deadline, not the whole request.
+**No deadline, so you wait for replies that never come.** A hand-rolled
+gather that reads with no deadline blocks forever if a provider is down —
+the read for the missing reply never returns. Bound the wait: gather by
+deadline (`--replies 0 --timeout 2s`) so a missing carrier just leaves its
+quote out of the set.
 
 **Reading the gathered set as ranked.** Arrival order isn't priority and a
 short set isn't an error. Compare every reply on its merits (here, the
@@ -173,9 +186,11 @@ remembered after it's delivered.
 
 ## What's next
 
-The next page maps the road beyond the foundation: where to go when you
-need persistence, services, resilience, security, or scale across regions.
-Continue to [Where to go next](/learn/core-nats/where-next).
+The next page adds a third piece to every message, beside its subject
+and payload: headers, a set of key/value metadata. You'll put a
+request id and a trace id on the orders flow and read the status header
+the server uses to signal no responders. Continue to [Message
+headers](/learn/core-nats/headers).
 
 ## See also
 

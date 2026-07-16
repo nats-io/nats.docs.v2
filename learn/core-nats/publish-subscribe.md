@@ -1,7 +1,7 @@
 ---
 id: publish-subscribe
 title: "Publish-subscribe"
-sidebar_position: 2
+sidebar_position: 3
 description: Fire-and-forget publish, the in-memory interest graph, and core NATS at-most-once delivery
 ---
 
@@ -40,14 +40,16 @@ packs the box when an order is created. The `notifications` service
 emails the customer. The `analytics` service counts everything. None
 of them knows the others exist.
 
-You need one local `nats-server` running for the rest of this chapter:
+[Connecting](/learn/core-nats/connecting) already started one local
+`nats-server`. Leave it running for the rest of this chapter. If you
+landed here directly, start one now:
 
 ```bash
 nats-server
 ```
 
 That's the whole deployment, with no flags, no persistence, and no
-cluster. Leave it running and add services to it as the chapter grows.
+cluster. Add services to it as the chapter grows.
 
 ## Publishing a message
 
@@ -88,11 +90,29 @@ subscribe to `orders.>` instead of a single subject. That `>` is a
 wildcard, and the [next page](/learn/core-nats/subjects-and-wildcards)
 is where we explain it.
 
+## Unsubscribing
+
+When a subscriber unsubscribes, the server removes its interest in that
+subject as soon as it processes the request. Any message published
+after that doesn't reach it, and there's nothing to clean up on the
+server side.
+
+You can also have a subscription end itself after a fixed number of
+messages, without tracking the count yourself. This is
+**auto-unsubscribe**: a client calls its auto-unsubscribe method
+(`AutoUnsubscribe(N)` in Go), which tells the server to end the
+subscription once it has delivered N messages. The CLI's `nats sub
+--count N` gets the same result by counting messages itself and
+unsubscribing when it hits the limit. It fits a take-exactly-N flow,
+such as reading the next three orders and stopping.
+
+<div class="nats-example" data-type="learn-core-nats-publish-subscribe-unsubscribe-after-n" data-languages="cli,js,go,python,java,rust,csharp"></div>
+
 ## The interest graph
 
 The server tracks who's subscribed to what in an in-memory structure
 called the **interest graph**. Each subscription adds an entry; each
-disconnect removes it.
+unsubscribe or disconnect removes it.
 
 <div class="nats-flow" data-scenario="publishSubscribeAnimated" data-width="600" data-height="350"></div>
 
@@ -118,8 +138,8 @@ publish still succeeds, and the message is dropped. The server
 finds no matching entry in the interest graph, so there's nothing to
 deliver to, and the message is discarded.
 
-This is the behavior to internalize: a publish with no interest isn't
-an error and isn't a stored backlog. It is a silent no-op. The publisher
+A publish with no interest is a silent no-op: no error, no stored
+backlog. The publisher
 can't tell "delivered to three subscribers" from "delivered to nobody" —
 both look like a successful publish. If the warehouse is restarting when
 an `orders.created` message is published, that message is gone.
@@ -140,7 +160,7 @@ At-most-once is the right guarantee for a large class of messages:
 telemetry you sample, cache invalidations, a live dashboard feed. For
 those, a missed message costs nothing because another is already on
 the way. For an order that must be packed exactly once, it isn't
-enough. That's the boundary this chapter respects.
+enough. That's the boundary of core NATS.
 
 ## The 1 MB payload limit
 
@@ -149,15 +169,14 @@ A message payload has a maximum size. By default the server caps it at
 limit to every client when the connection opens, so the client knows
 the ceiling before it ever publishes.
 
-Exceeding the limit is caught in two places. Because the client already
-knows the advertised ceiling, an official client checks the size before
-sending: the publish call fails locally with an error (nats.go returns
-`nats: maximum payload exceeded`) and the connection stays open. The
-server is the backstop. A client that ignores the advertised limit and
-sends an oversized `PUB` anyway has the message rejected and its
-connection closed. The Acme order payload is a few hundred bytes, so
-this never bites here, but a service that tries to ship a large blob
-inside a message will hit it.
+Because the client knows the ceiling, it checks the payload before
+sending. An official client fails the publish call with `nats: maximum
+payload exceeded` and leaves the connection up, so the message never
+leaves the client. The server is the backstop for a client that sends
+an oversized message anyway: it replies `-ERR 'Maximum Payload
+Violation'` and closes the connection. The Acme order payload is a few
+hundred bytes, well under the ceiling, but a service that tries to ship
+a large blob inside a message will hit it.
 
 For large data, publish a reference (an object-store key or a URL) and
 let the receiver fetch the bytes out of band.
@@ -187,15 +206,11 @@ at-most-once delivery in action.
 
 ## Pitfalls
 
-**Publishing over the limit fails the publish.** A payload larger than
-`max_payload` isn't truncated or queued. An official client catches it
-before it leaves the process: the publish call returns an error (nats.go
-returns `nats: maximum payload exceeded`) and the connection stays open.
-The server rejects and closes the connection of any client that sends an
-oversized `PUB` anyway. The Acme order payload is tiny, but a service
-that tries to ship a large blob inside a message hits this. Don't guess
-the ceiling: the client already knows it from the connection, so keep
-payloads under it and pass a reference for anything large.
+**Publishing over the limit fails the publish.** An official client
+checks the payload against `max_payload` and fails the call with `nats:
+maximum payload exceeded` before anything goes out; the connection
+stays up. Keep payloads under the limit and pass a reference for
+anything large.
 
 <div class="nats-example" data-type="learn-core-nats-publish-subscribe-check-max-payload" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -203,14 +218,22 @@ payloads under it and pass a reference for anything large.
 call returns immediately because the client buffers the message and
 sends it in the background. A short-lived publisher that exits right
 after the call can quit before that buffered message reaches the server,
-and the message is gone. Flush (or drain) before you exit so the client
-waits for the server to acknowledge the buffered publishes:
+and the message is gone. Flush (or drain) before you exit. The client
+waits for a round trip to the server, so everything buffered before it
+has arrived:
 
 ```go
 nc.Publish("orders.created", payload)
 nc.Flush() // wait until the server has the message, then exit
 nc.Close()
 ```
+
+**A connection receives the messages it publishes.** When one
+connection both publishes and subscribes to the same subject, it
+gets a copy of its own messages, because echo is on by default for
+every connection. A service that publishes status updates and also
+subscribes to them can process its own updates in a loop.
+[Connecting](/learn/core-nats/connecting) covers turning it off.
 
 **A slow subscriber gets cut off.** A subscriber that can't keep up
 with the rate of matching messages builds a backlog on the server. Past
@@ -245,6 +268,6 @@ match many subjects at once, including regional orders like
 - [Core Concepts → Publish-subscribe](/concepts/pub-sub-basics) — the
   five-minute overview of this pattern.
 - [Learn → JetStream → Why a stream](/learn/jetstream/your-first-stream#why-a-stream) —
-  the layer that remembers messages core NATS discards.
+  the layer that keeps the messages core NATS discards.
 - [Reference → Client protocol](/reference/protocols/client) — the
   wire-level `PUB`/`SUB`/`MSG` details.

@@ -1,12 +1,10 @@
 ---
 id: queue-groups
 title: "Queue groups"
-sidebar_position: 5
+sidebar_position: 6
 description: Share one subject across a pool of subscribers, so each message is handled by exactly one of them
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 # Queue groups
 
@@ -14,10 +12,10 @@ So far every subscriber on a subject gets a copy of every message.
 That's what you want for `notifications` and `analytics`: each of them
 needs to see every order. It's not what you want for `warehouse`.
 
-The warehouse does real work for each order: it picks a box, prints a
-label, packs the items. One process can't keep up with a busy day. You
-want a pool of packers, and you want each order packed by exactly one of
-them, not zero and not two.
+The warehouse does real work for each order: it prints a label and packs
+the box. One process can't keep up with a busy day. You want a pool of
+packers, and you want each order packed by exactly one of them, not zero
+and not two.
 
 Plain pub/sub can't do that. Run three copies of the `warehouse`
 subscriber and all three pack the same order. This page introduces the
@@ -186,8 +184,8 @@ queue group.
 
 **Make a packer's work safe to repeat.** A packer that's slow or briefly
 cut off can still be doing work the publisher assumes was lost, and core
-NATS won't redeliver. Write each packer so handling the same order twice
-is harmless — pack by `order_id`, skip one already packed.
+NATS won't send it again. Write each packer so handling the same order
+twice is harmless — pack by `order_id`, skip one already packed.
 
 ## Where you are
 

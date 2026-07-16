@@ -1,7 +1,7 @@
 ---
 id: request-reply
 title: "Request-reply"
-sidebar_position: 4
+sidebar_position: 5
 description: Build a reply on top of pub/sub with a private inbox, a timeout, and the no-responders signal
 ---
 
@@ -48,23 +48,37 @@ The private reply subject is called an **inbox**, and clients generate it
 under the reserved `_INBOX.` prefix: something like `_INBOX.nQ4k2v8...`
 with a random unique tail.
 
-The inbox subject is per-request, but the subscription behind it usually
-isn't. Each call to `request()` gets a fresh inbox subject: a unique
-token under the client's own `_INBOX.<prefix>.` namespace. Most clients
-don't subscribe and unsubscribe per call, though. They keep one wildcard
-subscription on that prefix (the response mux) and route each reply back
-to the waiting request by its token. That's why two in-flight requests
-never get each other's replies, even though they share one subscription.
+The inbox is per-request: each `request()` uses a fresh inbox, so two
+in-flight requests never get each other's replies. The `_INBOX.` prefix
+is reserved, so it never collides with the subjects you pick yourself;
+the client owns that namespace.
 
-The `_INBOX.` prefix is reserved precisely so it doesn't collide with
-your own subjects. You publish to `orders.created`; you never publish
-to `_INBOX.something` yourself. The client owns that namespace.
+A client doesn't open a subscription for every `request()`. On its
+first request it subscribes once to a wildcard that stays fixed for the
+connection — a subject shaped like `_INBOX.<connection>.*` — and reuses
+that one subscription for every request after. Each request adds only
+its own final token to that prefix, so the per-request fresh inbox
+amounts to that fresh token, and the client routes each reply back to
+the request waiting on its token.
+
+That's why thousands of concurrent requests cost one subscription, not
+thousands: every reply arrives on the same wildcard, and its final
+token identifies which request it belongs to. (Clients can be
+configured to fall back to one subscription per request; the shared one
+is the default.)
 
 There's a size budget on the reply subject. The server limits the
 length of a single protocol line, subject plus reply subject
 combined, to 4 KB by default (`max_control_line`). Generated inbox
 names sit far under that, so this only matters if you hand-build
 unusually long subjects.
+
+The default `_INBOX.` prefix is configurable per connection — a client
+option, exposed in natscli as the global `--inbox-prefix` flag. It
+exists for permissions: with a distinct prefix per application, an
+operator can grant each one its own reply-subject namespace instead of
+a shared `_INBOX.>`. Subject permissions are covered on the
+[Authorization](/learn/security/authorization) page.
 
 ## The inventory service
 
@@ -73,7 +87,8 @@ Now make the responder real. The inventory service subscribes to
 in-stock answer.
 
 From the CLI, `nats reply` does exactly this: it subscribes to the
-subject and publishes a reply to whatever inbox each request carries.
+subject (joining the default queue group `NATS-RPLY-22`) and publishes
+a reply to whatever inbox each request carries.
 
 <div class="nats-example"
      data-type="learn-core-nats-request-reply-respond"
@@ -82,8 +97,7 @@ subject and publishes a reply to whatever inbox each request carries.
 Leave that running. It's now the one service in the Acme world that
 answers questions instead of just receiving messages. The warehouse,
 notifications, and analytics subscribers from the earlier pages keep
-running unchanged. Request-reply doesn't replace them; it runs
-alongside them.
+running unchanged, and request-reply runs alongside them.
 
 ## Sending a request
 
@@ -155,10 +169,11 @@ nats request orders.inventory.check \
 14:02:31 No responders are available
 ```
 
-That comes back instantly, not after two seconds. The CLI prints the
-line and exits cleanly; a client library surfaces the same case as a
-distinct no-responders error your code branches on. Start the service
-again and the same request succeeds.
+The no-responders signal comes back instantly, not after two seconds.
+The CLI prints the line and exits cleanly; a client library surfaces
+the same case as a distinct error you can branch on (`ErrNoResponders`
+in the Go client, with an equivalent in each language). Start the
+service again and the same request succeeds.
 
 The signal rides the message header mechanism: the server delivers a
 reply with the header line `NATS/1.0 503`. A client needs header support
@@ -172,8 +187,9 @@ payload in a format that looks like HTTP. A request can attach
 headers, and so can a reply.
 
 You won't need them for the inventory call, so this page doesn't
-build with them. The full header format and the API on each client are
-in [Reference](/reference/). Reach for them when you want metadata
+build with them. [Message headers](/learn/core-nats/headers) shows how
+to set and read them; the full wire format is in
+[Reference](/reference/). Reach for them when you want metadata
 that isn't part of the business payload: a request ID, a trace
 context, a content type.
 

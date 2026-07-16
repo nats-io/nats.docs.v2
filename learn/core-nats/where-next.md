@@ -1,20 +1,21 @@
 ---
 id: where-next
 title: "Where to go next"
-sidebar_position: 7
+sidebar_position: 12
 description: Recap the core NATS mental model and point to what comes after the foundation
 ---
 
 # Where to go next
 
-You started this chapter with a single publish to `orders.created` and
-no guarantee anyone was subscribed. You end it with `notifications` and
-`analytics` reading `orders.created`, a regional analytics view on
-`orders.*.created` and an audit service on `orders.>`, an `inventory`
-service answering requests on `orders.inventory.check`, a `packers`
-queue group sharing the load on `orders.created`, and three
-`shipping.quote` providers answering one scatter-gather request. That's
-the whole Acme ORDERS world, built on core NATS alone.
+You started this chapter by opening one connection, then a single
+publish to `orders.created` with no guarantee anyone was subscribed. You
+end it with `notifications` and `analytics` reading `orders.created`, a
+regional analytics view on `orders.*.created` and an audit service on
+`orders.>`, an `inventory` service answering requests on
+`orders.inventory.check`, a `packers` queue group sharing the load on
+`orders.created`, and three `shipping.quote` providers answering one
+scatter-gather request. That's the whole Acme ORDERS world, built on
+core NATS alone.
 
 This page doesn't teach anything new. It collects the model you built
 into one place and points you at the chapters and Reference that take it
@@ -22,8 +23,7 @@ further.
 
 ## The four core ideas
 
-Every page in this chapter circled the same four ideas. If you remember
-nothing else, remember these.
+Every pattern in this chapter circled the same four ideas.
 
 A **subject** is the address. A publisher publishes to a subject and
 never names a receiver. The subject is the only thing the publisher and
@@ -48,8 +48,8 @@ with no broker or coordinator deciding for you.
 The four ideas are subject, interest, reply subject, and queue group.
 Scatter-gather is not a fifth idea. It is a reply subject with the
 first-answer-wins step removed, gathering every responder instead of
-one. Everything in core NATS is those four mechanics arranged
-differently.
+one. Every messaging pattern in core NATS is those four mechanics
+arranged differently.
 
 ## What core NATS does not store
 
@@ -79,24 +79,27 @@ four mechanics you just learned.
 The [Services deep dive](/learn/services) takes the
 [request-reply](/learn/core-nats/request-reply) and
 [queue group](/learn/core-nats/queue-groups) patterns and wraps them in a
-framework that adds discovery, schemas, and built-in metrics. If you find
+framework that adds discovery, versioning, and built-in metrics. If you find
 yourself hand-rolling many request-reply responders, that's the chapter
 to read next. Start with
 [your first service](/learn/services/your-first-service).
 
-The [Resilient clients deep dive](/learn/resilient-clients) covers the
-client-side behavior this chapter set aside: what happens when the
-connection drops, how a client reconnects, and how to drain cleanly
-without losing in-flight work. Its pages on
+The [Resilient clients deep dive](/learn/resilient-clients) picks up
+where [Connection lifecycle](/learn/core-nats/connection-lifecycle)
+left off. That page introduced the drop-and-reconnect cycle; Resilient
+clients tunes it for production, covering reconnect backoff and retry
+limits, sizing the reconnect buffer, draining a connection cleanly, and
+handling a slow consumer. Its pages on
 [reconnection](/learn/resilient-clients/reconnection) and
 [slow consumers](/learn/resilient-clients/slow-consumers) matter the
 moment you move off a single local server.
 
-The [Topologies deep dive](/learn/topologies/super-clusters) explains how
+The [Topologies deep dive](/learn/topologies) explains how
 the interest graph you met in
 [publish-subscribe](/learn/core-nats/publish-subscribe) stretches across
 clustered and geographically separated servers, including how a queue group
-prefers a local member when the same group spans regions.
+prefers a local member when the same group spans regions — see
+[Super-clusters](/learn/topologies/super-clusters).
 
 The [Security deep dive](/learn/security) covers who's allowed to
 publish or subscribe to which subjects. The subject hierarchy from
@@ -108,15 +111,11 @@ secure.
 
 This is the end of the chapter. The whole arc is complete, and this
 page adds no new scenario state. Your local `nats-server`, the
-`notifications` and `analytics` subscribers, the `inventory` service, the
-`packers` queue group, and the `shipping.quote` providers are all still
-as you left them on the previous page. Keep experimenting, or stop the server when you're done:
-core NATS held nothing on disk, so there's nothing to clean up.
-
-You hold the core model: a subject is an address, interest decides who
-receives, a reply subject makes the exchange two-way, and a queue group
-shares the load. That model is the floor every other NATS feature stands
-on.
+`notifications` and `analytics` subscribers, the regional analytics and
+audit views, the `inventory` service, the `packers` queue group, and the
+`shipping.quote` providers are all still as you left them. Keep
+experimenting, or stop the server when you're done: core NATS held
+nothing on disk, so there's nothing to clean up.
 
 ## What's next
 
@@ -130,6 +129,14 @@ right where you are now.
 The pitfalls scattered across this chapter collapse into one list. Run
 through it before you put a core NATS service in front of real traffic.
 Each group links back to the page that explains the why.
+
+### Connecting — see [Pitfalls](/learn/core-nats/connecting#pitfalls)
+
+- [ ] Open one connection per process and share it; don't connect per
+  message or per request.
+- [ ] Decide about echo up front: a service that publishes and subscribes
+  on the same subject receives its own messages unless it connects with
+  echo off.
 
 ### Publish-subscribe — see [Pitfalls](/learn/core-nats/publish-subscribe#pitfalls)
 
@@ -164,8 +171,8 @@ Each group links back to the page that explains the why.
 - [ ] Give every member the byte-for-byte identical queue group name.
 - [ ] Don't expect ordering or an even split; keep strictly-ordered work
   on a single subscriber.
-- [ ] Make a member's work safe to repeat, since core NATS does not
-  redeliver after a hand-off.
+- [ ] Make a member's work safe to repeat, since core NATS does not send
+  a message again after a hand-off.
 
 ### Scatter-gather — see [Pitfalls](/learn/core-nats/scatter-gather#pitfalls)
 
@@ -174,6 +181,39 @@ Each group links back to the page that explains the why.
   timeout.
 - [ ] Treat the gathered set as unordered; compare every reply on its
   merits, never by arrival order.
+
+### Message headers — see [Pitfalls](/learn/core-nats/headers#pitfalls)
+
+- [ ] Treat header keys as case-sensitive; read them back with the exact
+  case you set.
+- [ ] Budget headers into `max_payload`; keep bulk data in the payload,
+  not the headers.
+
+### Subject mapping — see [Pitfalls](/learn/core-nats/subject-mapping#pitfalls)
+
+- [ ] Dry-run every mapping with `nats server mappings` before you deploy
+  it.
+- [ ] Make weighted destinations sum to 100 unless you intend to drop a
+  share.
+- [ ] Treat the partition count as part of the subject contract; changing
+  it reshuffles every key.
+
+### Connection lifecycle — see [Pitfalls](/learn/core-nats/connection-lifecycle#pitfalls)
+
+- [ ] Wire the disconnect, reconnect, and async error callbacks first,
+  and keep them to a log line or a signal.
+- [ ] Log the drop from the disconnect handler and every failed attempt
+  from the reconnect-error callback.
+- [ ] Treat the reconnect buffer as best-effort client memory, not a
+  delivery guarantee.
+
+### Debugging delivery — see [Pitfalls](/learn/core-nats/debugging-delivery#pitfalls)
+
+- [ ] Don't leave a `>` wire tap running against production traffic.
+- [ ] Remember `nats trace` publishes its own test message; it doesn't
+  prove an earlier publish arrived.
+- [ ] Keep the monitoring port off the public network; it answers without
+  authentication.
 
 ## See also
 

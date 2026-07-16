@@ -2,7 +2,7 @@
 id: index
 title: Core NATS Deep Dive
 sidebar_position: 1
-description: Publish-subscribe, subjects, request-reply, queue groups, and scatter-gather, built up step by step
+description: Publish-subscribe, subjects, request-reply, queue groups, and scatter-gather — from the first connection to debugging delivery, built up step by step
 ---
 
 # Core NATS Deep Dive
@@ -14,11 +14,15 @@ copy. There's no broker queue, no storage, and no acknowledgment. The
 message goes to whoever is listening right now, and it goes to nobody
 else.
 
-That single idea, subjects plus interest, is enough to build five
-distinct communication patterns. This chapter walks through them the
-way you'd discover them while writing real code: start with one
-publisher and one subscriber, then add addressing, replies, load
-balancing, and reply gathering, one page at a time.
+That single idea, subjects plus interest, is enough to build four
+communication patterns and the addressing they share. This chapter
+walks through them the way you'd discover them while writing real
+code: start with one publisher and one subscriber, then add
+addressing, replies, load balancing, and reply gathering, one page
+at a time. The chapter starts a step before that, with the
+connection every client opens first, and continues past the
+patterns into message headers, server-side subject mapping,
+connection lifecycle, and debugging delivery.
 
 <div class="nats-flow" data-scenario="publishSubscribeAnimated" data-width="600" data-height="350"></div>
 
@@ -70,13 +74,15 @@ example in this chapter:
 
 Several services care about these messages. A `warehouse` process
 packs the box on `orders.created`. A `notifications` service emails
-the customer on `orders.shipped`. An `analytics` pipeline counts
-everything. Later pages add an `inventory` service that answers
-requests, a pool of `packers` that share the load, and three
-shipping-quote providers that each reply to the same question.
+the customer when an order ships. An `analytics` pipeline counts
+everything. Later pages add regional analytics and audit views on
+wildcard subjects, an `inventory` service that answers requests, a pool
+of `packers` that share the load, and three shipping-quote providers
+that each reply to the same question.
 
-You keep one `nats-server` running through the whole chapter and add
-subscribers and services as you go. No page resets the world.
+You keep a single local `nats-server` through the whole chapter —
+two later pages restart it with a flag or a config file — and add
+subscribers and services as you go.
 
 ## Who this is for
 
@@ -85,18 +91,23 @@ primer, or you're otherwise comfortable with the idea of subjects and
 subscribers. Rather than re-teaching the *what*, this chapter shows
 the *how*: the mechanism on the wire, the trade-off behind each
 pattern, and a runnable session you build up command by command. Each
-page introduces at most two new ideas and builds on the one before it.
+page introduces one or two new ideas and builds on the one before it.
 
 ## Map
 
 | Page | What you learn |
 |---|---|
-| [Publish-subscribe](/learn/core-nats/publish-subscribe) | Fire-and-forget publish, the interest graph, at-most-once delivery, and the 1 MB max payload |
+| [Connecting](/learn/core-nats/connecting) | One long-lived connection per client, the connect URL and handshake, connection names, and PING/PONG heartbeats |
+| [Publish-subscribe](/learn/core-nats/publish-subscribe) | Fire-and-forget publish, subscribing and unsubscribing, the interest graph, at-most-once delivery, and the 1 MB max payload |
 | [Subjects & wildcards](/learn/core-nats/subjects-and-wildcards) | Dot-delimited subject hierarchies and the `*` and `>` subscriber wildcards |
 | [Request-reply](/learn/core-nats/request-reply) | The `_INBOX` reply subject, timeouts, and the no-responders signal |
 | [Queue groups](/learn/core-nats/queue-groups) | Load balancing where each message goes to exactly one group member |
 | [Scatter-gather](/learn/core-nats/scatter-gather) | Fan one request to many responders and gather the replies |
-| [Where to go next](/learn/core-nats/where-next) | A map of what's beyond the foundation |
+| [Message headers](/learn/core-nats/headers) | Key/value metadata in the `NATS/1.0` format, setting and reading it, and the status codes the server sends in-band |
+| [Subject mapping](/learn/core-nats/subject-mapping) | Server-side rewriting of a subject before routing, to rename it, split its traffic by weight, or shard it by a hashed token |
+| [Connection lifecycle](/learn/core-nats/connection-lifecycle) | What a dropped connection does to your client and in-flight messages, the client-owned reconnect, and the lifecycle callbacks that watch it |
+| [Debugging delivery](/learn/core-nats/debugging-delivery) | Why a published message never arrived, found with a wire tap, the server's subscription list, and message tracing |
+| [Where to go next](/learn/core-nats/where-next) | The four-idea recap and a map of what's beyond the foundation |
 
 ## Prerequisites
 
@@ -104,17 +115,26 @@ You'll need:
 
 - A single local `nats-server`. The default build is all you need;
   core NATS requires no flags. Start it with `nats-server`.
-- The `nats` CLI installed and pointed at your server. The first pages
-  use only the CLI; later pages add JavaScript, Go, Python, Java,
-  Rust, and C# client examples for the same operations.
+- The `nats` CLI installed and pointed at your server. Every example
+  leads with the CLI; most pages show the same operation in
+  JavaScript, Go, Python, Java, Rust, and C# as well. The two
+  server-side pages (Subject mapping, Debugging delivery) are
+  CLI-only.
+- One later page, [Subject mapping](/learn/core-nats/subject-mapping),
+  starts the server from a config file with `nats-server -c
+  server.conf`; that page gives you the file.
+- [Debugging delivery](/learn/core-nats/debugging-delivery) reads the
+  server's monitoring port, which you turn on with `nats-server -m
+  8222`.
 
 Open a terminal, run `nats-server`, and continue to the next page.
 
 ## What's next
 
-Start with [Publish-subscribe](/learn/core-nats/publish-subscribe):
-one publisher, three subscribers, and the interest graph that decides
-who gets a copy.
+Start with [Connecting](/learn/core-nats/connecting): the one
+long-lived connection every client opens before it can publish or
+subscribe, and the handshake that opens it and the heartbeats that
+keep it alive.
 
 ## See also
 

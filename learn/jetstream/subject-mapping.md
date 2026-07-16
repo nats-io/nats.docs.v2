@@ -148,7 +148,7 @@ one stream. That belongs with the copying mechanics, so it's covered on
 
 ## Not the same as account subject mapping
 
-NATS also has account-level subject mapping, configured on the server, not on a
+NATS also has [account-level subject mapping](/learn/core-nats/subject-mapping), configured on the server, not on a
 stream. It reroutes *core* subjects before they're ever published into a stream.
 That's a server-configuration topic, separate from the stream transforms on this
 page.

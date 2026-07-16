@@ -10,11 +10,10 @@
 nats request shipping.quote \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
 
-# RIGHT — gather every quote, then pick the cheapest. --replies 0 keeps
-# collecting until replies stop: --timeout bounds the wait for the first reply
-# and --reply-timeout (300ms default) bounds the gap between replies, so it
-# returns soon after the last quote -- even if a carrier is down and never
-# answers.
+# RIGHT — gather every quote, then pick the cheapest. --replies 0 collects
+# every reply that arrives during the full --timeout window, then returns —
+# a fixed, predictable budget. If a carrier is down, its quote is simply
+# absent from the set; --reply-timeout has no effect in this mode.
 nats request shipping.quote \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}' \
   --replies 0 --timeout 2s
