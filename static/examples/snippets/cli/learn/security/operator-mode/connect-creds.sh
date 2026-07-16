@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Publish an order as order-svc using the generated creds file.
 # The creds file is the identity: no --user or --password is needed.
 # The client presents the user JWT and signs the server's challenge with the nkey seed.

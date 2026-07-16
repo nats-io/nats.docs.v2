@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Pitfall: auth_users is not a convenience allow-list. Every user listed
 # there skips the callout entirely and connects with no external check.
 # It exists for one job: letting auth-svc itself in so it can receive

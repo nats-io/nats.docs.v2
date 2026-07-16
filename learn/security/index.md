@@ -22,8 +22,9 @@ across the whole chapter, reconfigured a step at a time.
 Every page in this chapter belongs to one of three parts.
 
 **Authentication** answers who you are. A connecting application
-presents proof of identity (a password, a token, an nkey, or a
-JWT), and the server decides whether to admit it. The authentication
+presents proof of identity (a password, a token, a bearer JWT; or presents a
+signature using a secret: mTLS or NKeys (perhaps with non-bearer JWTs)),
+and the server decides whether to admit it. The authentication
 pages cover this, from [Authentication basics](./authentication-basics)
 through [Operator mode](./operator-mode) and
 [Decentralized authentication](./decentralized-auth), plus
@@ -52,6 +53,9 @@ connects them.
 
 A user authenticates into an account, where permissions decide what it
 may do, over a connection that TLS keeps safe.
+
+If your server configuration does not appear to configure accounts, then
+you are using the implicit global account (`$G`).
 
 ## What you'll have built
 

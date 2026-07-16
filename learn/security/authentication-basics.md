@@ -31,6 +31,13 @@ server config and the user list is small and slow to change. It lives
 entirely in one file, so it's the easiest model to read and reason
 about.
 
+As your deployment grows beyond a good fit here, you may be able to
+buy yourself a tiny bit of operational headroom by using the NATS
+configuration file's `include` directive, splitting authentication
+data into one or more separate files. If you find yourself doing this,
+then treat it only as buying time before you move away from centralized
+configuration.
+
 ## Giving order-svc a credential
 
 The chapter's order platform needs a user for its order service,
@@ -105,24 +112,28 @@ An unauthenticated connect — no flags at all — fails with the same
 a wrong password and an unknown user, so a failed login doesn't reveal
 which half was wrong.
 
-A client offers credentials once, when it connects. Authentication
-decides the user for the whole life of that connection. What the user
-may then publish or subscribe to is a separate question:
+A client offers credentials once per connection, when it connects.
+Authentication decides the user for the whole life of that connection.
+What the user may then publish or subscribe to is a separate question:
 authorization, covered on the
 [Authorization](/learn/security/authorization) page.
+
+A given client may need to reconnect and this usually happens transparently.
+The authentication happens again, midway through a session, to authenticate
+this new connection.
 
 ### Other ways a user entry can authenticate
 
 `order-svc` used a password, but config auth offers three credential
-styles in all: user/password, nkey, and token. The model doesn't
+styles in all: user/password, NKey, and token. The model doesn't
 change; only the field differs.
 
 **user/password** is the pair you just used: the client sends a
 username and a password, and the server compares the password against
 the stored value.
 
-**nkey** is a public-key credential: the user entry holds only a
-public nkey — it replaces the whole user/password pair, and the server
+**NKey** is a public-key credential: the user entry holds only a
+public NKey — it replaces the whole user/password pair, and the server
 rejects an entry that mixes them. The client holds the matching
 private seed and proves ownership by signing a server-issued nonce, so
 nothing secret crosses the wire:
@@ -133,7 +144,7 @@ users: [
 ]
 ```
 
-Generate the keypair, add the printed public key to the user list, and
+Generate the keypair, add the printed _public_ key to the user list, and
 connect with the seed file:
 
 <div class="nats-example" data-type="learn-security-authentication-basics-nkey-user" data-languages="cli"></div>
@@ -143,11 +154,11 @@ UAPZQH4MNJCOVEJFERB3NFSIROQ5RE7CGBEPKAZSB6QB7IQHBKXHZPVP
 18:02:29 Published 91 bytes to "orders.created"
 ```
 
-`gen` writes the private seed to `user.nk` and prints nothing, `show`
-prints the public key the config entry above holds, and the publish
-authenticated with only the seed file — a seed the server doesn't know
-fails with the same `Authorization Violation` as a wrong password. We
-come back to nkeys on the
+`nats auth nkey gen` writes the private seed to `user.nk` and prints nothing,
+`nats auth nkey show` prints the public key the config entry above holds,
+and the `nats pub` publishing authenticated with only the seed file — a seed
+for which the server doesn't know a public key fails with the same
+`Authorization Violation` as a wrong password. We come back to NKeys on the
 [Decentralized authentication](/learn/security/decentralized-auth)
 page; here they're just one more way to authenticate a config user.
 
@@ -170,7 +181,7 @@ The config above stored `order-svc`'s password in plaintext. That's
 fine for a laptop, but not for a config file others can read.
 
 The server flags this itself: on startup it scans the user list, and
-if any password is plaintext it logs a warning:
+if any password is plaintext then it logs a warning:
 
 ```
 [WRN] Plaintext passwords detected, use nkeys or bcrypt
@@ -181,10 +192,12 @@ bcrypt is a one-way hash: the server keeps the hash, the client still
 sends the plaintext password, and the server hashes the input to
 compare. The stored value reveals nothing usable if the config leaks.
 
-Generate a hash with the CLI:
+Generate a hash with the CLI; here we use a leading-space because
+many shell setups will skip writing such lines to the shell history,
+but in general be cautious with supplying secrets in command flag values:
 
-```bash
-nats server passwd --pass "s3cr3t-rotate-me-later"
+```sh
+ nats server passwd --pass "s3cr3t-rotate-me-later"
 ```
 
 ```
@@ -199,11 +212,15 @@ long`), which is why this example hashes the longer
 `s3cr3t-rotate-me-later`.
 
 The printed hash starts with `$2a$11$` — Go's bcrypt prefix at cost
-11. The server recognizes any value matching `$2a$`, `$2b$`, `$2x$`,
-or `$2y$` as a bcrypt hash and compares everything else as plaintext.
+11. The server recognizes some variant prefixes as bcrypt indicators,
+to match industry practices, but don't rely upon those.  The server
+will match everything else as plaintext, and reserves the right to use
+any string starting `$` as a hash indicator, so don't use plaintext
+starting with a dollar sign.
 
 Paste the hash into the config in place of the plaintext password;
-quotes around it are optional:
+quotes around it are optional; note that a trailing full stop,
+if present, is part of the value:
 
 ```conf
 authorization {
@@ -238,8 +255,9 @@ the credential. That ties into TLS, so the
 
 The other open question is scale. Centralized auth keeps every user in
 one config file, which is exactly what breaks down when many tenants
-manage their own users. The [Operator mode](/learn/security/operator-mode)
-page introduces the model built for that.
+manage their own users or the set of users needs to be dynamic.
+The [Operator mode](/learn/security/operator-mode) page introduces the model
+built for those scenarios.
 
 ## Pitfalls
 
@@ -286,9 +304,15 @@ command line:
 ```
 
 The context holds `order-svc`'s password; the publish command carries
-none. While `NATS_PASSWORD` is exported the CLI prints
+none. If `NATS_PASSWORD` is exported then CLI prints
 `WARNING: Shell environment overrides in place using NATS_PASSWORD`,
-so unset it once the context is saved.
+so either don't export it or unset it once the context is saved.
+
+Note that the way a Unix shell works, the `"$NATS_PASSWORD"` is handled by the
+shell, and is replaced with the real value before the `nats` command is
+invoked.  The value will still show up in process listings by other users!
+(Modern Unix will typically not make process environments visible to other
+users.)
 
 ## Where you are
 

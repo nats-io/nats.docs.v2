@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Eavesdrop demo: what actually crosses $SYS.REQ.USER.AUTH. The server's
 # automatic deny stops other users from PUBLISHING a fake request or
 # verdict, but it does not hide the request from anything that can read
@@ -47,9 +47,9 @@ nats --server nats://localhost:4222 \
 #    claims — and the plaintext falls straight out. tr fixes base64url
 #    characters; the loop pads to a multiple of four so base64 -d does not
 #    truncate.
-P=$(nats --server nats://localhost:4222 \
+P="$(nats --server nats://localhost:4222 \
   --user auth-svc --password c4llout \
-  sub '$SYS.REQ.USER.AUTH' --count 1 --raw | cut -d. -f2 | tr '_-' '/+')
+  sub '$SYS.REQ.USER.AUTH' --count 1 --raw | cut -d. -f2 | tr '_-' '/+')"
 while [ $(( ${#P} % 4 )) -ne 0 ]; do P="${P}="; done
 printf '%s' "$P" | base64 -d
 # (run the terminal-two publish again to trigger a fresh request)

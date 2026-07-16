@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Re-issue order-svc from a scoped signing key instead of the ORDERS
 # account's identity key. The scoped key carries a fixed permission set,
 # so every user it issues gets exactly those permissions.

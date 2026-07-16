@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Connect and publish as order-svc over TLS.
 # The client trusts the CA that signed the server certificate (--tlsca),
 # verifies the server's identity, then publishes the canonical order JSON

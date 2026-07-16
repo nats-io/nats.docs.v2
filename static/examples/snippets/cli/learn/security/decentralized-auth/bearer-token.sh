@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 # Connect with a user JWT alone, no seed. The JWT is the first block of
 # a creds file; v0.4.0 has no command that prints it by itself, so cut
 # it out with sed.
-JWT=$(sed -n '/BEGIN NATS USER JWT/,/END NATS USER JWT/{/---/d;p;}' order-svc.creds)
+JWT="$(sed -n '/BEGIN NATS USER JWT/,/END NATS USER JWT/{/---/d;p;}' order-svc.creds)"
 
 # A normal user's JWT alone is rejected: with no seed, the client
 # can't sign the server's nonce.
@@ -17,7 +17,7 @@ nats auth account push ORDERS -s nats://127.0.0.1:4222 --creds sys.creds
 
 # Marking the user isn't enough: ORDERS still has Bearer Tokens
 # Allowed: false, so its JWT alone gets the same rejection.
-JWT=$(sed -n '/BEGIN NATS USER JWT/,/END NATS USER JWT/{/---/d;p;}' orders-dashboard.creds)
+JWT="$(sed -n '/BEGIN NATS USER JWT/,/END NATS USER JWT/{/---/d;p;}' orders-dashboard.creds)"
 nats pub orders.created 'x' --jwt "$JWT"
 # nats: error: nats: Authorization Violation
 

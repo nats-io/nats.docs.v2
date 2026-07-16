@@ -27,7 +27,7 @@ Two accounts on the same server never see each other's traffic. A
 publish inside account `ORDERS` reaches subscribers in `ORDERS` and
 nobody else. The subject `orders.shipped` in `ORDERS` and a subject
 `orders.shipped` in another account are two different subjects that
-happen to share a name.
+happen to share the same user-visible name.
 
 This is stronger than the permissions the
 [previous page](/learn/security/authorization) built. Permissions
@@ -70,7 +70,8 @@ Both accounts are created for you, and only `$G` is a reserved name:
 declaring your own account called `$G` is a config error. You can
 declare `$SYS` yourself — an account with that name automatically
 becomes the system account — but it's clearer to avoid the `$` prefix
-for your own account names.
+for your own account names.  You can rename the system account using
+the `system_account` configuration top-level directive.
 
 The full set of system-account subjects and events is documented in
 [Reference](/reference/system). We use only the two account names here.
@@ -108,8 +109,8 @@ accounts {
 }
 ```
 
-Each named entry (`ORDERS`, `ANALYTICS`) is one account. The name is
-the tenant's identity. It appears in
+Each named first-level entry (`ORDERS`, `ANALYTICS`) is one account.
+The name is the tenant's identity. It appears in
 [cross-account](/learn/security/cross-account) sharing later and in the
 server's own logs.
 
@@ -119,7 +120,7 @@ the client inside that account's subject space. Because the username is
 what selects the account, it must be unique across all accounts — a
 duplicate is a startup error: `Duplicate user "order-svc" detected`.
 The entries themselves are the same shape as before: user and password
-here, and an nkey user drops into the same list.
+here, and an NKey user drops into the same list.
 
 `order-svc`'s permissions block is unchanged from the previous page.
 The subjects it names now resolve inside `ORDERS`: the allow list
@@ -139,7 +140,7 @@ account if you want the JetStream chapter's setup here.
 
 Start the server with this config:
 
-```bash
+```sh
 nats-server -c nats.conf
 ```
 
@@ -147,7 +148,7 @@ Because the config defines tenant accounts, connections no longer land
 in `$G` by default. Every client must now name a user that exists in
 one of the two accounts; an unauthenticated connect is rejected:
 
-```bash
+```sh
 nats pub orders.shipped 'hi'
 ```
 

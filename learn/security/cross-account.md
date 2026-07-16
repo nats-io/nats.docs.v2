@@ -110,6 +110,9 @@ export down to named accounts, list them on the export entry:
 
 The order platform is fine with a public export here.
 
+(More sophisticated export restrictions are available when using
+[Operator mode](./operator-mode).)
+
 ## Import the subject into ANALYTICS
 
 The export alone shares nothing yet: `ANALYTICS` has to ask, by
@@ -201,6 +204,10 @@ exported.
 The boundary stays closed by default and opens one named subject at a
 time: you can read an account's `exports` array and know the complete
 list of what leaves it.
+
+A third account will not see the messages unless it too imports the exported
+subject.  It could import on a distinct name, without impacting upon
+existing importers.
 
 ## The same share in operator mode
 

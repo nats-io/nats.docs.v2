@@ -167,6 +167,7 @@ the page that explains it.
 - [ ] Run `nats auth account push` after every account change — including user revocations and signing-key changes, which live in the account JWT — so the server's resolver matches your store.
 - [ ] Keep the system account configured; the nats-based resolver refuses to start without it.
 - [ ] Give `.creds` files `0600` permissions; never bake, log, or commit them.
+- [ ] Consider monitoring issues if using credentials which have expiration times baked in
 
 ### Decentralized authentication — see [Pitfalls](/learn/security/decentralized-auth#pitfalls)
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Revoke order-svc and watch when the revocation actually bites. The
 # creds keep working until the updated account JWT reaches the server.
 

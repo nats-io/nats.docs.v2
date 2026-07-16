@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Generate a user nkey and authenticate with it. The server config
 # holds only the public key; the private seed stays with the client.
 

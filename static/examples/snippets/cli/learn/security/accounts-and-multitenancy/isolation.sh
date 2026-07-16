@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 # Prove that two accounts never see each other's traffic.
 #
-# This uses the two-account nats.conf from the page. order-svc carries the
+# This uses the two-account nats.conf from the web-page. order-svc carries the
 # permissions built on the Authorization page:
 #
 #   accounts {

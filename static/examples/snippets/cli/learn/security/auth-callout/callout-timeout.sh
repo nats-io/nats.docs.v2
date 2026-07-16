@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Pitfall: the callout sits on the connection path. If auth-svc is slow,
 # down, or crashed, every new connection waits for the response and is
 # then rejected when the wait runs out. The wait is the `timeout` field

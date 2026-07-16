@@ -15,10 +15,10 @@ For a runnable, step-by-step treatment, see the [Security deep dive](/learn/secu
 
 ## Accounts and Users
 
-NATS is multitenant by design. Each NATS user belongs to an account — a
+NATS is multi-tenant by design. Each NATS user belongs to an account — a
 self-contained tenant with its own isolated subject space, users, and
 permissions. Multiple tenants can share a single NATS deployment without ever
-seeing each other's traffic. Unrelated tenants can even use the same subject
+seeing each other's traffic. Unrelated tenants can use the same subject
 names without any risk of collision.
 
 <img src="/img/concepts/security-accounts-isolation.png" alt="NATS account isolation" class="security-image" />
@@ -29,7 +29,7 @@ Cross-account communication is possible but requires explicit configuration.
 
 Authentication verifies the identity of clients connecting to the NATS server.
 NATS doesn't require it by default, so production deployments should always
-configure one of the two methods below:
+configure one of the three methods below:
 
 - **Config-based authentication**: Define accounts, users, and credentials
   directly in the server configuration file. This is the simplest option for
@@ -43,7 +43,8 @@ configure one of the two methods below:
   verifies cryptographically, with no server-side user list. Because accounts
   can issue and revoke their own users independently, operator mode scales
   naturally to multi-tenant or large deployments where centralized credential
-  management isn't practical.
+  management isn't practical.  You choose a resolver model, for the server to
+  locate account information.
 - **Auth callouts**: Delegate the authentication decision to an
   application-defined NATS service that returns a signed JWT. This is useful for
   advanced setups, like integrating with external identity providers (e.g.,
@@ -92,10 +93,11 @@ deployment can be secured independently:
 - Gateways — the connections between clusters in a super-cluster topology.
 
 Each connection type has its own TLS configuration, with support for certificate
-pinning, custom cipher suites, and mutual TLS (mTLS). mTLS proves the client
-holds a certificate signed by a trusted CA. Add the `verify_and_map` setting and
-the server maps the certificate's identity (its SAN or DN) to a configured user,
-tying the encryption layer into the authentication model.
+pinning, CA certificate pools, custom cipher suites, and mutual TLS
+(mTLS). mTLS proves the client holds a certificate signed by a trusted
+CA. Add the `verify_and_map` setting and the server maps the
+certificate's identity (its SAN or DN) to a configured user, tying the
+encryption layer into the authentication model.
 
 ### Encryption at Rest
 
