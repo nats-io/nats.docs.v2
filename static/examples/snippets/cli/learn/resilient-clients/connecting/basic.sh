@@ -2,8 +2,9 @@
 # Open order-svc's connection to a single server and give it a name.
 #
 # The --connection-name flag labels the connection so it is identifiable
-# in `nats server report connections`. Without it, the server only sees an
-# anonymous client and you cannot tell order-svc apart from anything else.
+# in `nats server report connections`. Without it, the CLI connects under
+# its default name (`NATS CLI Version <version>`), so you cannot tell
+# order-svc apart from any other CLI run.
 #
 # This publishes the canonical order event once the connection is up.
 

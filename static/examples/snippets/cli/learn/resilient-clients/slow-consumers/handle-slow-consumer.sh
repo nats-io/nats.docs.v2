@@ -6,7 +6,7 @@
 # callback. The CLI does not expose either knob — both are client-library
 # calls (SetPendingLimits plus the async-error handler) — so this stands
 # in for them with a named async subscribe. The other tabs set the limit
-# and wire a callback that logs every slow-consumer drop loudly.
+# and wire a callback that logs the slow-consumer error loudly.
 #
 # Flood orders.> faster than the handler drains it to trigger the signal;
 # the published events use the canonical order shape.

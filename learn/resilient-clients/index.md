@@ -26,7 +26,7 @@ CONNECTED client to RECONNECTING. A clean shutdown moves it to DRAINING
 and then CLOSED. Once you can picture that machine, each mechanism in this
 chapter is one well-defined edge on it.
 
-We harden one running system: the Acme **ORDERS** app you already know.
+We harden one running system: the Acme `ORDERS` app you already know.
 The `order-svc` publisher and the `warehouse`, `notifications`, and
 `analytics` subscribers keep their code; what changes is the connection
 each one opens. Every example uses the same order event:
@@ -40,16 +40,19 @@ each one opens. Every example uses the same order event:
 - An `order-svc` connection that opens with a name, a **server pool**
   (the list of server URLs the client may connect to), and a sane connect
   timeout, instead of a bare default connection.
-- A connection that **reconnects** with backoff and jitter when a server
+- A connection that reconnects with backoff and jitter when a server
   goes away, cycling the `n1`/`n2`/`n3` pool and flushing buffered
   publishes the moment it rejoins.
-- A clean shutdown that **drains** in-flight work instead of dropping it,
+- A connection whose events are all wired to one place and whose state
+  feeds a readiness probe, so a recoverable disconnect and a permanent
+  close each get the right response instead of going unnoticed.
+- A clean shutdown that drains in-flight work instead of dropping it,
   triggered on a SIGTERM.
-- Subscribers that bound their memory with **pending limits** and surface
+- Subscribers that bound their memory with pending limits and surface
   a backlog through the async error callback instead of growing until the
   process is killed.
 - A request-reply call that tells "the responder is absent" apart from
-  "the responder is slow" and **retries** each one differently and safely.
+  "the responder is slow" and retries each one differently and safely.
 - A connection that presents the `order-svc` credentials over a
   CA-validated TLS link.
 
@@ -69,7 +72,7 @@ read first. [Core NATS → Connection lifecycle](/learn/core-nats/connection-lif
 introduces the model — what a drop does to your client, the reconnect
 callbacks, and the buffer that holds your publishes through the gap — and
 this chapter takes it to production depth. Every term still gets defined
-in the page that first uses it: DISCONNECTED, drain, slow consumer, no
+in the page that first uses it: RECONNECTING, drain, slow consumer, no
 responders, and the rest.
 
 ## How to read it
@@ -77,10 +80,11 @@ responders, and the rest.
 Each page introduces at most two new concepts and carries the same
 `order-svc` connection forward. You [open the connection](/learn/resilient-clients/connecting),
 [make it reconnect](/learn/resilient-clients/reconnection),
+[watch its events](/learn/resilient-clients/connection-events),
 [drain it](/learn/resilient-clients/drain-and-shutdown), and so on: one
 resilience option per page, never a fresh example.
 
-This chapter only ever talks about what the **client** does. When a page
+This chapter only ever talks about what the client does. When a page
 reaches the edge of the client (*why* a server went away, *how* a
 credential was issued, what happens to a JetStream consumer's
 acknowledgment position across a reconnect), it names the gap in one
@@ -90,20 +94,22 @@ lives in [JetStream → Acknowledgment](/learn/jetstream/acknowledgment);
 issuing credentials lives in [Security](/learn/security).
 
 Where a feature has a long list of options, the page covers only the ones
-that change how a connection behaves under fault. You'll find the full
-set of connection options in [Reference](/reference/).
+that change how a connection behaves under fault. The exact option names
+and defaults live in your client's API reference, while
+[Reference](/reference/) covers the wire protocol and server configuration.
 
 ## Map
 
 | Page | What you learn |
 |---|---|
-| Resilient Clients Deep Dive | The connection as a state machine, and the seven faults this chapter survives |
+| Resilient Clients Deep Dive | The connection as a state machine, and the faults this chapter survives |
 | [Connecting](/learn/resilient-clients/connecting) | Open `order-svc` with a name, a server pool, and a connect timeout, and read the connect handshake |
-| [Reconnection](/learn/resilient-clients/reconnection) | Reconnect with backoff and jitter, cycle the server pool, and buffer publishes while disconnected |
-| [Drain & Shutdown](/learn/resilient-clients/drain-and-shutdown) | Drain in-flight work on shutdown instead of dropping it with a bare close |
+| [Reconnection](/learn/resilient-clients/reconnection) | Reconnect with backoff and jitter, retry the first connect, cycle the pool, and buffer publishes while disconnected |
+| [Connection Events](/learn/resilient-clients/connection-events) | Wire every connection event and poll the connection state for a health check |
+| [Drain & Shutdown](/learn/resilient-clients/drain-and-shutdown) | Drain in-flight work on shutdown, drain one subscription on its own, and flush pending publishes |
 | [Slow Consumers](/learn/resilient-clients/slow-consumers) | Bound a subscription's pending buffer and detect overflow before it OOMs |
 | [Request-Reply Resilience](/learn/resilient-clients/request-reply-resilience) | Tell no-responders apart from a timeout, and retry each one safely |
-| [TLS & Auth](/learn/resilient-clients/tls-and-auth) | Consume a credentials file and trust a CA so the connection is authenticated and encrypted |
+| [TLS & Auth](/learn/resilient-clients/tls-and-auth) | Consume a credentials file, trust a CA, and stop retrying on a repeated auth error |
 | [Where Next](/learn/resilient-clients/where-next) | A production checklist and a map of what's beyond the client |
 
 ## Prerequisites
@@ -112,9 +118,10 @@ You'll need:
 
 - A working `nats-server`. The early pages use a single
   `nats-server`; once reconnection enters, the pages point the client at
-  the `n1`/`n2`/`n3` cluster from the
-  [Topologies deep dive](/learn/topologies), used only as a server pool
-  the client connects to.
+  the three-server cluster from the
+  [Topologies deep dive](/learn/topologies) (built there as
+  `n1-east`/`n2-east`/`n3-east`; this chapter shortens the names to
+  `n1`/`n2`/`n3`), used only as a server pool the client connects to.
 - The `nats` CLI installed and pointed at your server. The CLI carries
   the first tab of each example; the JavaScript, Go, Python, Java, Rust,
   and C# tabs carry the client options the CLI can't express, such as
@@ -129,5 +136,6 @@ Open a terminal, start your server, and turn to
   and request-reply calls this chapter hardens.
 - [JetStream deep dive](/learn/jetstream) — the `ORDERS` stream and
   consumers whose connections this chapter makes resilient.
-- [Topologies deep dive](/learn/topologies) — the `n1`/`n2`/`n3` cluster
-  this chapter treats only as a server pool.
+- [Topologies deep dive](/learn/topologies) — how to build the
+  three-server cluster this chapter treats only as a server pool
+  (`n1`/`n2`/`n3` here, `n1-east`/`n2-east`/`n3-east` there).

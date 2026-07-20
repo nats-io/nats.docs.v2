@@ -106,6 +106,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "resilient-clients/connecting",
             "resilient-clients/reconnection",
+            "resilient-clients/connection-events",
             "resilient-clients/drain-and-shutdown",
             "resilient-clients/slow-consumers",
             "resilient-clients/request-reply-resilience",
