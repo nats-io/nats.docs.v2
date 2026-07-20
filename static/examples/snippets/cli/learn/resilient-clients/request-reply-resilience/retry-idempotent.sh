@@ -14,15 +14,18 @@ MAX_ATTEMPTS=5
 
 attempt=1
 while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
-  # Same order_id on every attempt -> the responder treats a retry as the
-  # same question and returns the cached answer instead of acting twice.
-  if nats request orders.inventory.check "$PAYLOAD" --timeout 2s; then
-    echo "inventory check answered on attempt $attempt"
+  # The CLI exits 0 even when no reply arrives (it logs "No responders are
+  # available" or silently gives up on timeout), so test for a reply body
+  # instead of the exit code. Same order_id on every attempt -> the responder
+  # treats a retry as the same question and returns the cached answer.
+  reply=$(nats request orders.inventory.check "$PAYLOAD" --timeout 2s --raw 2>/dev/null)
+  if [ -n "$reply" ]; then
+    echo "inventory check answered on attempt $attempt: $reply"
     exit 0
   fi
 
   # Grow the wait, with a little jitter, so a fleet of requesters does not
-  # retry in lockstep and stampede the responder the instant it returns.
+  # retry in lockstep and overwhelm the responder the instant it returns.
   wait=$(( attempt * attempt ))
   jitter=$(( RANDOM % 2 ))
   echo "attempt $attempt failed; backing off ${wait}s before retry" >&2

@@ -8,9 +8,11 @@
 #
 # Run this with no `nats reply orders.inventory.check ...` running, and
 # the CLI prints the no-responders error right away. Start a responder
-# and the same request gets an answer instead. The client libraries
+# and the same request gets an answer instead. Most client libraries
 # surface this as a distinct no-responders error you can branch on,
-# separate from a timeout -- see the other tabs.
+# separate from a timeout; in Java you opt in with
+# Options.Builder.reportNoResponders() and use the CompletableFuture-based
+# request -- see the other tabs.
 
 nats request orders.inventory.check \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}' \

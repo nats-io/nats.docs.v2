@@ -1,7 +1,7 @@
 ---
 id: where-next
 title: "Where Next"
-sidebar_position: 8
+sidebar_position: 9
 description: Recap the connection lifecycle, point to the sibling deep dives, and collect every page's pitfalls into one production checklist
 ---
 
@@ -31,10 +31,12 @@ between them. A server dying moves a CONNECTED client to RECONNECTING. A
 SIGTERM moves it to DRAINING and then CLOSED. A blocked dial keeps it in
 CONNECTING until the timeout fires.
 
-Each page added exactly one transition the Acme clients couldn't handle
+Most pages added exactly one transition the Acme clients couldn't handle
 before. Connecting taught the CONNECTING → CONNECTED edge and the
 handshake that walks it. Reconnection taught the CONNECTED → RECONNECTING
-→ CONNECTED loop with backoff and jitter. Drain & Shutdown taught the
+→ CONNECTED loop with backoff and jitter. Connection Events added no new
+edge; it made every transition observable, wiring each one to a callback
+and the live state to a health check. Drain & Shutdown taught the
 CONNECTED → DRAINING → CLOSED edge that loses no work. Slow Consumers kept
 a CONNECTED client healthy under load instead of letting a subscriber's
 buffer grow without bound. Request-Reply Resilience made a single
@@ -42,21 +44,21 @@ buffer grow without bound. Request-Reply Resilience made a single
 the edge into CONNECTED so the link is encrypted and the client is who it
 claims to be.
 
-Those six mechanisms all act on one machine. Everything else is a
-refinement of those edges: the exact flags, the defaults, the
-per-language spelling.
+Those six mechanisms all act on one machine, and Connection Events makes
+that machine observable. Everything else is a refinement of those edges:
+the exact flags, the defaults, the per-language spelling.
 
 ## Where the details live
 
-The chapter is unversioned and concept-first. The exact option names,
-defaults, and ranges live in **Reference**, which is versioned and
-exhaustive. When you need the precise type of a connection option or the
-full list of error codes a `-ERR` can carry, that's where to look.
+The chapter is unversioned and concept-first. The wire protocol, the
+server's `-ERR` strings, and the server configuration live in
+[Reference](/reference/), which is versioned. The exact client option
+names, types, and defaults live in each client library's API reference.
 
-[Reference](/reference/) documents the full set of connection options.
-Here we covered only the ones that change how a connection behaves under
-fault; the handoff phrases throughout this chapter all point into that
-root.
+Here we covered only the options that change how a connection behaves
+under fault. For the full list of error codes a `-ERR` can carry, look in
+Reference; for a connection option's precise type or default, look in your
+client library's API docs.
 
 ## Sibling deep dives
 
@@ -67,7 +69,8 @@ own what this one only consumes.
 
 The [Topologies deep dive](/learn/topologies) explains the server pool
 this chapter only connects to: why a server goes away, how the
-`n1`/`n2`/`n3` cluster forms, and what a client's disconnect looks like
+`n1`/`n2`/`n3` cluster forms (built there as `n1-east`/`n2-east`/`n3-east`,
+shortened here), and what a client's disconnect looks like
 from the server side. Resilient Clients treats "the server is gone" as a
 given fact, while Topologies explains why it happens.
 
@@ -81,13 +84,15 @@ The [Security deep dive](/learn/security) issues the credentials and the
 CA this chapter loads. TLS & Auth *consumes* the `order-svc` `.creds` and
 the cluster CA; Security shows how both are created.
 
-The [Services deep dive](/learn/services) builds the request-reply pattern
-into a framework with built-in retries. If you found yourself wrapping
-every `request()` in backoff, that's the next step.
+The [Services deep dive](/learn/services) formalizes the request-reply
+pattern into a named, discoverable service with per-endpoint stats and
+queue-group scaling. If your responder side has outgrown a single
+hand-rolled handler, that's the next step.
 
 The [Monitoring deep dive](/learn/monitoring) watches the same connections
-from the server side: the `slow_consumers` metric, the advisories, and the
-health endpoints that tell you a client is struggling before its users do.
+from the server side: the `slow_consumers` metric and the advisories that
+show a client falling behind, and the health endpoints that watch the
+servers themselves.
 
 ## Where you are
 
@@ -112,6 +117,7 @@ that explains the why.
 ### Connecting — see [Pitfalls](/learn/resilient-clients/connecting#pitfalls)
 
 - [ ] Pass the whole server pool (several URLs, or several IPs behind one name) so a single unreachable server isn't fatal at connect time.
+- [ ] Configure every server the client must rely on and treat discovered servers as additions; a one-URL setup that leans on gossip loses its failover where `no_advertise` is set or the advertised addresses aren't reachable.
 - [ ] Set a deliberate connect timeout so a blocked dial costs one timeout, not a hung startup that looks dead.
 - [ ] Keep messages under the server's `max_payload` and store large bodies elsewhere; an oversized publish fails before it's sent, and that's not a connection problem.
 
@@ -119,13 +125,20 @@ that explains the why.
 
 - [ ] Set `MaxReconnect` to `-1` on a long-lived service (in Go, Java, Python, and JavaScript, which default to a bounded count) so a long outage doesn't exhaust the attempts and leave the connection CLOSED; Rust and C# already retry forever.
 - [ ] Watch the reconnect-error callback so a long outage is loud in your logs, not a silent give-up.
-- [ ] Keep a non-zero wait and always keep jitter; a zero or fixed delay either spins the CPU or stampedes the survivor in lockstep.
-- [ ] Catch `ErrReconnectBufExceeded` and back off publishing; the reconnect buffer is 8 MB, not infinite, and the publish that overflows it fails.
-- [ ] Lower the ping interval under heavy load so you catch a wedged connection in seconds, not the several minutes the defaults take (about six minutes — a two-minute ping interval, with the third unanswered ping closing the connection).
+- [ ] If you turn on retry for a failed first connect, keep the reconnect-error callback wired and alert on a service still in RECONNECTING after a deploy; the opt-in hides a bad server URL that would otherwise fail loudly at startup.
+- [ ] Keep a non-zero wait and always keep jitter; a zero or fixed delay either spins the CPU or makes a fleet of clients retry the one remaining server at the same instant.
+- [ ] Handle a full reconnect buffer and back off publishing; the buffer is bounded (8 MB by default in Go and Java, 2 MB in Python), and the publish that overflows it either fails (Go: `ErrReconnectBufExceeded`) or blocks under backpressure (Rust).
+- [ ] Lower the ping interval under heavy load so you catch a wedged connection in seconds, not the several minutes the defaults take (about six minutes in most clients — a two-minute ping interval, with the third unanswered ping closing the connection; the Rust client pings every minute, so about three).
+
+### Connection Events — see [Pitfalls](/learn/resilient-clients/connection-events#pitfalls)
+
+- [ ] Poll the connection state for dashboards, metrics, and readiness probes, and drive reactions through the events instead; a status poll used as a trigger races the state machine.
+- [ ] Wire a closed observer on every long-lived service, even with unlimited retries; without it a permanent close is logged as a disconnect and then nothing, while the process still reports healthy.
+- [ ] Count connection events and async errors separately; rising disconnects point at the network or the servers, rising async errors at your application.
 
 ### Drain & Shutdown — see [Pitfalls](/learn/resilient-clients/drain-and-shutdown#pitfalls)
 
-- [ ] Drain last, not first; a publish after `Drain()` races the drain and may come back `ErrConnectionDraining` instead of sending.
+- [ ] Drain last, not first; a publish after `Drain()` races the drain and may come back with a draining error (`ErrConnectionDraining` in nats.go) instead of sending.
 - [ ] Size the drain timeout to your slowest handler's latency; a timeout shorter than the handler discards the remaining in-flight work.
 - [ ] Ack JetStream in-flight messages before a core drain; a connection drain does not handle a consumer's ack position for you.
 
@@ -141,19 +154,19 @@ that explains the why.
 - [ ] Measure the responder's p99 and set the request timeout to two or three times it; a timeout under the real latency retries a responder that was about to answer.
 - [ ] Handle no-responders and a timeout separately; an absent responder warrants a backoff, a slow one warrants a fast retry.
 - [ ] Key retries by `order_id` and de-dupe on the responder so a re-sent request is a no-op, not a double action.
-- [ ] Cap the retry count and add jitter; an unbounded retry loop hammers a struggling responder in lockstep.
+- [ ] Cap the retry count and add jitter; an unbounded retry loop pins a CPU against a responder that's already behind and never reports the problem.
 
 ### TLS & Auth — see [Pitfalls](/learn/resilient-clients/tls-and-auth#pitfalls)
 
 - [ ] Load credentials from a file or environment and never commit a `.creds` to source.
 - [ ] Always supply the CA certificate in production; skip-verify TLS encrypts the link but authenticates nothing.
-- [ ] Refresh a credentials JWT before it expires, or monitor the auth-error rate, so an expired token doesn't silently break the next reconnect.
+- [ ] Refresh a credentials JWT before it expires and watch the auth-error rate; at expiry the server closes the live connection, and most clients abort the reconnect on the repeated authorization violation and land in CLOSED rather than looping, so recovery needs fresh creds or a restart.
 - [ ] Rotate credentials with a fresh connection and drain the old one; reloading a creds file mid-connection races the live link.
 
 ## See also
 
-- [Reference](/reference/) — every connection option, default, and error
-  code, versioned and exhaustive.
+- [Reference](/reference/) — the wire protocol, `-ERR` strings, and server
+  configuration, versioned.
 - [Topologies deep dive](/learn/topologies) — the server pool this
   chapter only connects to, explained from the server side.
 - [Security deep dive](/learn/security) — issuing the credentials and CA

@@ -1,7 +1,7 @@
 ---
 id: request-reply-resilience
 title: "Request-Reply Resilience"
-sidebar_position: 6
+sidebar_position: 7
 description: Tell a slow responder apart from an absent one, then retry the request safely with backoff and idempotent IDs
 ---
 
@@ -16,20 +16,28 @@ application is blocked on the reply.
 
 Core NATS already taught you the mechanics of request-reply: the client
 sends a request, the responder answers on a private `_INBOX` subject, and
-the reply finds its way back. This page assumes that machinery and covers
+the reply is routed back to the requester. Clients can change the
+`_INBOX` prefix (nats.js calls the option `inboxPrefix`; Go calls it
+`CustomInboxPrefix`). That matters when a user's permissions are
+restricted: a client whose subscribe permissions don't cover the default
+`_INBOX.>` can't receive replies, so the operator grants subscribe
+permission on a dedicated prefix and the client sets it
+([Security → Authorization](/learn/security/authorization#restricting-order-svc)
+covers the permission side). This page assumes that machinery and covers
 what happens when the reply doesn't come. A request can fail in two
 different ways, and the two mean different things, so the client must tell
 them apart before it retries.
 
-This page introduces two new ideas: the request timeout and the
-no-responders signal, and retry with backoff plus idempotency. We'll
-define each before we use it.
+This page introduces two new ideas: telling the two failures apart (a
+timeout versus the no-responders signal), and retrying safely (backoff
+plus idempotency). We'll define each before we use it.
 
 ## A request has three outcomes
 
-A bare `request` from Core NATS takes a subject, a payload, and a
-**timeout**: the deadline by which a reply must arrive. Wait on it and
-exactly one of three things happens.
+A bare `request` from Core NATS sends a subject and a payload and waits
+under a **timeout**: the deadline by which a reply must arrive. Some
+clients take the deadline on the call, others set it once on the
+connection. Wait on it and exactly one of three things happens.
 
 The first is the happy path: the `inventory` responder answers, and the
 reply comes back inside the deadline. The application reads it and moves
@@ -39,7 +47,8 @@ The second is a timeout. The deadline passes with no reply. A timeout
 doesn't mean the responder is gone, only that no answer arrived *in time*.
 The `inventory` responder may be up but slow, for example because of a
 long database query, a GC pause, or a burst of load. The request was
-delivered to a live listener; the reply just didn't come back fast enough.
+delivered to a matching subscription; the reply just didn't come back in
+time.
 
 The third is **no responders**. The moment the client sends the request,
 the server already knows whether any subscription is listening on
@@ -51,8 +60,9 @@ can't see the subject. Rather than a slow answer, this means there is no
 one to answer.
 
 Here's `order-svc` asking the inventory question with a timeout set. The
-CLI prints the reply on success, a timeout message if the deadline
-passes, and the 503 immediately if nobody is listening:
+CLI prints the reply on success. If the deadline passes it exits without
+printing a reply, and if nobody is listening it prints `No responders are
+available` at once:
 
 <div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-request-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -63,13 +73,14 @@ this chapter:
 {"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}
 ```
 
-The full set of request options is documented in
-[Reference](/reference/). Here we cover only the ones that change how a
-request behaves under fault.
+Here we cover only the options that change how a request behaves under
+fault; the exact option names and defaults live in your client's API
+reference, while [Reference](/reference/) covers the wire protocol and
+server configuration.
 
 ## Why no-responders is useful
 
-You might treat a missing answer as just a missing answer and stop
+You might treat both failures as the same missing answer and stop
 there. But the no-responders signal is the most useful failure NATS
 gives you, because it's fast and certain. Without it, a request to a
 subject nobody listens on would sit until the timeout expired: two
@@ -117,8 +128,7 @@ the attempts (five is a reasonable default) and add jitter to the wait so
 a fleet of requesters doesn't retry in lockstep and overwhelm the
 responder the instant it returns.
 
-There's one more thing a retry needs to be safe, and it's the second
-concept of this page: **idempotency**. A retried request is a *duplicate*
+There's one more thing a retry needs to be safe: **idempotency**. A retried request is a *duplicate*
 request. If the first attempt actually reached the `inventory` responder
 and only the reply was lost, the retry asks the same question a second
 time. If asking twice causes two effects (two stock reservations, two
@@ -206,4 +216,6 @@ Continue to [TLS & Auth](/learn/resilient-clients/tls-and-auth).
   `_INBOX` mechanism this page assumes.
 - [Services](/learn/services) — the framework that builds discovery,
   endpoints, and metrics on top of raw request-reply.
-- [Reference](/reference/) — the full set of request and timeout options.
+- [Reference](/reference/) — the wire protocol and server configuration;
+  the request and timeout option names and defaults live in your client's
+  API reference.

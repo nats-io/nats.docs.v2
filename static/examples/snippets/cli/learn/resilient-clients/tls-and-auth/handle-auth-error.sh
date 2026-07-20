@@ -14,7 +14,11 @@
 # disconnect/error callback during a reconnect — see the other tabs. In
 # nats.go the authorization side arrives as one of ErrAuthorization,
 # ErrAuthExpired, ErrAuthRevoked, ErrPermissionViolation, or
-# ErrMaxConnectionsExceeded; the equivalents exist in every client.
+# ErrMaxConnectionsExceeded. Other clients split these differently: nats.py
+# raises AuthorizationError only for an authorization violation and reports
+# expired, revoked, and connection-limit errors as a generic error carrying
+# the server's message, and nats.rs reports an authorization-violation kind
+# and passes the rest through as server error strings.
 
 if nats pub orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}' \

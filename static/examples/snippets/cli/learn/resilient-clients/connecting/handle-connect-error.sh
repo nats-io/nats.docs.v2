@@ -1,8 +1,7 @@
 #!/bin/bash
-# Connecting can fail before any message moves. Two failures matter here:
-# the credentials are the wrong type for the server (authorization error),
-# and the message is larger than the server's max_payload (the publish is
-# refused before it leaves the client).
+# Connecting can fail before any message moves. This script handles the case
+# the page's pitfalls build up to: no server in the pool is reachable, so the
+# connect itself fails.
 #
 # With the CLI, a failed connect prints the error and exits non-zero, so
 # you can branch on it. The client libraries surface the same failures as

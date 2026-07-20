@@ -6,8 +6,9 @@
 # credentials, so the link is encrypted AND the server is authenticated.
 # --creds then authenticates order-svc over that secure link.
 #
-# The client libraries take the same CA path and creds path through their
-# TLS and credentials-file options (see the other tabs).
+# The client libraries load the same CA and creds through their TLS and
+# credentials-file options (see the other tabs); most take file paths, a few
+# take a TLS context or the file's bytes instead.
 
 nats pub orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}' \
