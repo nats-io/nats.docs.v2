@@ -41,6 +41,27 @@ const STAGE_DURATION_MS: Record<Stage, number> = {
     err: 4500,
 };
 
+// Each stage lights up exactly one direction of the link. `null` = the dim
+// idle lane. Keeping one edge per direction means the two lanes never overlap
+// and only one label is on screen at a time.
+type ActiveEdge = { color: string; label: string } | null;
+
+const FORWARD: Record<Stage, ActiveEdge> = {
+    tcp: { color: MSG_COLOR, label: "TCP connect" },
+    info: null,
+    connect: { color: NAVY_COLOR, label: "CONNECT + creds, then PING" },
+    ok: null,
+    err: null,
+};
+
+const BACKWARD: Record<Stage, ActiveEdge> = {
+    tcp: null,
+    info: { color: MSG_COLOR, label: "INFO" },
+    connect: null,
+    ok: { color: SUCCESS_COLOR, label: "PONG" },
+    err: { color: FAILURE_COLOR, label: "-ERR auth violation" },
+};
+
 const CAPTION: Record<Stage, string> = {
     tcp:
         "order-svc opens a TCP connection to the server. No NATS protocol has been spoken yet — just a socket.",
@@ -108,97 +129,57 @@ function ConnectHandshakeAnimatedInner({
         },
     ];
 
-    const edges: any[] = [];
+    // One edge per direction, re-keyed per stage so the AnimatedEdge remounts
+    // and spawns a fresh bubble at every stage change. The server → client
+    // direction pins the request-reply handles so the edge runs between the
+    // facing sides of the pair instead of looping around.
+    const forward = FORWARD[stage];
+    const backward = BACKWARD[stage];
 
-    // --- TCP connect: client -> server ---
-    edges.push({
-        id: `tcp-${stage}`,
-        source: "client",
-        target: "server",
-        type: "animated",
-        animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: { opacity: stage === "tcp" ? 1 : 0.3 },
-        data: {
-            color: stage === "tcp" ? MSG_COLOR : IDLE_COLOR,
-            label: "TCP connect",
-            labelColor: stage === "tcp" ? MSG_COLOR : "#94a3b8",
-            animated: stage === "tcp",
-            interval: 1500,
-        },
-    });
-
-    // --- INFO frame: server -> client ---
-    edges.push({
-        id: `info-${stage}`,
-        source: "server",
-        target: "client",
-        type: "animated",
-        animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: { opacity: stage === "info" ? 1 : 0.3 },
-        data: {
-            color: stage === "info" ? MSG_COLOR : IDLE_COLOR,
-            label: "INFO",
-            labelColor: stage === "info" ? MSG_COLOR : "#94a3b8",
-            animated: stage === "info",
-            interval: 1500,
-        },
-    });
-
-    // --- CONNECT frame (with credentials): client -> server ---
-    edges.push({
-        id: `connect-${stage}`,
-        source: "client",
-        target: "server",
-        type: "animated",
-        animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: { opacity: stage === "connect" ? 1 : 0.3 },
-        data: {
-            color: stage === "connect" ? NAVY_COLOR : IDLE_COLOR,
-            label: "CONNECT + creds",
-            labelColor: stage === "connect" ? NAVY_COLOR : "#94a3b8",
-            animated: stage === "connect",
-            interval: 1500,
-        },
-    });
-
-    // --- Final reply: +OK (accepted) or -ERR (rejected) ---
-    if (rejected) {
-        edges.push({
-            id: "err-reply",
-            source: "server",
-            target: "client",
+    const edges: any[] = [
+        {
+            id: `fwd-${stage}`,
+            source: "client",
+            target: "server",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
+            style: { opacity: forward ? 1 : 0.3 },
             data: {
-                color: FAILURE_COLOR,
-                label: "-ERR auth violation",
-                labelColor: FAILURE_COLOR,
-                animated: true,
+                bow: -55,
+                color: forward ? forward.color : IDLE_COLOR,
+                ...(forward
+                    ? { label: forward.label, labelColor: forward.color }
+                    : {}),
+                animated: forward !== null,
                 interval: 1500,
             },
-        });
-    } else {
-        edges.push({
-            id: `ok-reply-${stage}`,
+        },
+        {
+            id: `back-${stage}`,
             source: "server",
             target: "client",
+            sourceHandle: "reply-out",
+            targetHandle: "reply",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
-            style: { opacity: connected ? 1 : 0.3 },
+            style: { opacity: backward ? 1 : 0.3 },
             data: {
-                color: connected ? SUCCESS_COLOR : IDLE_COLOR,
-                label: "PONG",
-                labelColor: connected ? SUCCESS_COLOR : "#94a3b8",
-                animated: connected,
+                bow: 55,
+                color: backward ? backward.color : IDLE_COLOR,
+                ...(backward
+                    ? {
+                        label: backward.label,
+                        labelColor: backward.color,
+                        labelOffset: 15,
+                    }
+                    : {}),
+                animated: backward !== null,
                 interval: 1500,
             },
-        });
-    }
+        },
+    ];
 
     const stageNum = STAGE_ORDER.indexOf(stage) + 1;
 

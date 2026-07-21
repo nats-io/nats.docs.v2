@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, ServiceNode } from "../nodes";
+import { PublisherNode, ServerNode, ServiceNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     service: ServiceNode,
     server: ServerNode,
@@ -101,9 +102,9 @@ function ConfigReloadAnimatedInner({
         // --- Config file (left, drawn as a publisher-style source node) ---
         {
             id: "config",
-            type: "publisher",
+            type: "box",
             position: { x: -70, y: 60 },
-            data: { label: "nats.conf" },
+            data: { label: "nats.conf", subtitle: "file on disk" },
             style: {
                 opacity: 1,
                 filter: fileChanged ? "none" : "grayscale(0.2)",
@@ -113,9 +114,9 @@ function ConfigReloadAnimatedInner({
         // --- Reloader sidecar ---
         {
             id: "reloader",
-            type: "service",
+            type: "box",
             position: { x: 150, y: 60 },
-            data: { label: "reloader" },
+            data: { label: "reloader", subtitle: "sidecar" },
         },
         // --- nats-server process ---
         {
@@ -199,13 +200,19 @@ function ConfigReloadAnimatedInner({
     if (reloading) {
         edges.push({
             id: "srv-reload",
-            source: "config",
+            // Genuinely a self-loop: the server re-reads its own config. It
+            // sourced from `config` before, which both contradicted the id and
+            // stacked a second label on the config -> server edge.
+            source: "server",
             target: "server",
+            sourceHandle: "top-out",
+            targetHandle: "reply-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
             style: { opacity: 0.9 },
             data: {
+                bow: -45,
                 color: LIME,
                 label: "reload in place",
                 labelColor: "#5a7f1f",
@@ -220,6 +227,8 @@ function ConfigReloadAnimatedInner({
         id: `srv-cli-${stage}`,
         source: "server",
         target: "client",
+        sourceHandle: "bottom-out",
+        targetHandle: "top-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },

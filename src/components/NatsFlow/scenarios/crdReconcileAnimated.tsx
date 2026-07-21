@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, ServiceNode } from "../nodes";
+import { PublisherNode, ServerNode, ServiceNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     service: ServiceNode,
     server: ServerNode,
@@ -105,23 +106,23 @@ function CrdReconcileAnimatedInner({
         // --- admin / kubectl client ---
         {
             id: "admin",
-            type: "publisher",
+            type: "box",
             position: { x: -40, y: 40 },
             data: { label: "kubectl" },
         },
         // --- Kubernetes API / etcd (holds the CRD desired state) ---
         {
             id: "k8s",
-            type: "server",
+            type: "box",
             position: { x: 200, y: 40 },
-            data: { label: "K8s API / etcd" },
+            data: { label: "K8s API / etcd", subtitle: "Kubernetes" },
         },
         // --- NACK controller (the reconciler) ---
         {
             id: "nack",
-            type: "service",
+            type: "box",
             position: { x: 200, y: 240 },
-            data: { label: "NACK controller" },
+            data: { label: "NACK controller", subtitle: "controller" },
         },
         // --- nats cluster (R3) ---
         {
@@ -183,10 +184,13 @@ function CrdReconcileAnimatedInner({
         id: `nack-watch-${stage}`,
         source: "k8s",
         target: "nack",
+        sourceHandle: "bottom-out",
+        targetHandle: "top-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
         data: {
+            bow: -40,
             color: stage === "watch" ? NAVY_COLOR : IDLE_COLOR,
             label: stage === "watch" ? "watch CRD" : undefined,
             labelColor: stage === "watch" ? NAVY_COLOR : "#64748b",
@@ -252,11 +256,14 @@ function CrdReconcileAnimatedInner({
         id: `nack-status-${stage}`,
         source: "nack",
         target: "k8s",
+        sourceHandle: "out-top",
+        targetHandle: "bottom-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { opacity: stage === "status" ? 1 : 0.35 },
         data: {
+            bow: 40,
             color: stage === "status" ? SUCCESS_COLOR : IDLE_COLOR,
             label: stage === "status" ? "write .status: Ready" : undefined,
             labelColor: SUCCESS_COLOR,

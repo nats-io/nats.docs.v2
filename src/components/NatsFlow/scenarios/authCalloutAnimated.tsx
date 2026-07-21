@@ -105,13 +105,13 @@ function AuthCalloutAnimatedInner({
         {
             id: "server",
             type: "server",
-            position: { x: 240, y: 150 },
+            position: { x: 348, y: 150 },
             data: { label: "NATS (operator ACME)" },
         },
         {
             id: "auth-svc",
             type: "service",
-            position: { x: 480, y: 150 },
+            position: { x: 696, y: 150 },
             data: { label: "auth-svc" },
         },
     ];
@@ -169,7 +169,7 @@ function AuthCalloutAnimatedInner({
             data: {
                 color: REQUEST_COLOR,
                 animated: true,
-                label: "$SYS.REQ.USER.AUTH (signed request)",
+                label: "$SYS.REQ.USER.AUTH",
                 labelColor: REQUEST_COLOR,
             },
         });
@@ -178,6 +178,8 @@ function AuthCalloutAnimatedInner({
             id: "e-auth-server-reply",
             source: "auth-svc",
             target: "server",
+            sourceHandle: "reply-out",
+            targetHandle: "reply-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },

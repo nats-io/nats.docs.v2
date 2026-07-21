@@ -232,8 +232,8 @@ function CentralizedAuthAnimatedInner({
                 <div
                     style={{
                         position: "absolute",
-                        right: "16px",
-                        top: "60%",
+                        left: "16px",
+                        bottom: "14px",
                         width: "160px",
                         padding: "8px 10px",
                         background: "#f9fafb",

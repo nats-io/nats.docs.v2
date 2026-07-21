@@ -120,7 +120,7 @@ export const requestReplyQueueGroupScenario: NatsFlowScenario = {
       data: {
         color: '#f97316',
         animated: true,
-        label: 'work.process',
+        
         labelOffset: -20,
         labelColor: '#f97316',
         delay: 6000,
@@ -169,7 +169,7 @@ export const requestReplyQueueGroupScenario: NatsFlowScenario = {
       data: {
         color: '#10b981',
         animated: true,
-        label: '1 reply',
+        
         labelOffset: 20,
         labelColor: '#10b981',
         delay: 10500,
@@ -190,7 +190,7 @@ export const requestReplyQueueGroupScenario: NatsFlowScenario = {
       data: {
         color: '#f97316',
         animated: true,
-        label: 'work.process',
+        
         labelOffset: -20,
         labelColor: '#f97316',
         delay: 12000,
@@ -239,7 +239,7 @@ export const requestReplyQueueGroupScenario: NatsFlowScenario = {
       data: {
         color: '#10b981',
         animated: true,
-        label: '1 reply',
+        
         labelOffset: 20,
         labelColor: '#10b981',
         delay: 16500,

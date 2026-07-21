@@ -34,6 +34,7 @@ export type AnimatedEdgeData = {
   interval?: number; // Interval in milliseconds between circles (default: 2000)
   straight?: boolean;
   dashed?: boolean;
+  bow?: number; // Vertical arc, in px, for edges that share a node pair: negative bows the path up, positive down, so parallel lanes don't overlap
 };
 
 export type NatsNodeData = {

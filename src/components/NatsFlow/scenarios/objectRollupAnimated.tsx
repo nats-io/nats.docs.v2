@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode } from "../nodes";
+import { PublisherNode, ServerNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     server: ServerNode,
 };
@@ -111,14 +112,14 @@ function ObjectRollupAnimatedInner({
         // The server backing the object store.
         {
             id: "server",
-            type: "server",
+            type: "box",
             position: { x: 230, y: 130 },
-            data: { label: "OBJ_INVOICES" },
+            data: { label: "OBJ_INVOICES", subtitle: "object store" },
         },
         // First metadata message (seq #1).
         {
             id: "meta1",
-            type: "server",
+            type: "box",
             position: { x: 470, y: 40 },
             data: {
                 label: firstPurged
@@ -126,6 +127,7 @@ function ObjectRollupAnimatedInner({
                     : firstStored
                     ? "#1 invoice.pdf"
                     : "#1 …",
+                subtitle: "stream message",
             },
             style: {
                 opacity: firstGone ? 0 : firstPurged ? 0.2 : firstStored ? 1 : 0.15,
@@ -136,10 +138,11 @@ function ObjectRollupAnimatedInner({
         // Second metadata message (seq #2) — the survivor.
         {
             id: "meta2",
-            type: "server",
+            type: "box",
             position: { x: 470, y: 220 },
             data: {
                 label: secondCurrent ? "#2 current" : "#2 invoice.pdf",
+                subtitle: "stream message",
             },
             style: {
                 opacity: secondPublished ? 1 : 0.12,

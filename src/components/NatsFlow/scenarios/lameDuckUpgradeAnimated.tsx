@@ -227,7 +227,7 @@ function LameDuckUpgradeAnimatedInner({
     // --- nats-0 -> nats-1: ORDERS replica also moves to the new leader ---
     if (stage === "rebalance") {
         edges.push({
-            id: "nats0-nats1-rebalance",
+            id: "nats0-nats1-rebalance-handoff",
             source: "nats0",
             target: "nats1",
             type: "animated",

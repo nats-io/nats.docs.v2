@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
     Background,
+    Handle,
     MarkerType,
+    Position,
     ReactFlow,
     ReactFlowProvider,
 } from "@xyflow/react";
@@ -9,9 +11,36 @@ import "@xyflow/react/dist/style.css";
 import { PublisherNode, ServerNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
+// The trust anchor is a certificate the client holds, not a NATS server, so it
+// gets a plain box rather than the branded server node.
+function CaNode({ data }: { data: any }) {
+    return (
+        <div
+            style={{
+                border: "2px dashed #375C93",
+                borderRadius: "8px",
+                background: "#ffffff",
+                padding: "8px 14px",
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "#375C93",
+                whiteSpace: "nowrap",
+            }}
+        >
+            {data.label}
+            <Handle
+                type="target"
+                position={Position.Bottom}
+                style={{ opacity: 0 }}
+            />
+        </div>
+    );
+}
+
 const nodeTypes = {
     publisher: PublisherNode,
     server: ServerNode,
+    ca: CaNode,
 };
 
 const edgeTypes = {
@@ -38,6 +67,26 @@ const STAGE_DURATION_MS: Record<Stage, number> = {
     connect: 3000,
     ok: 4000,
     reject: 4500,
+};
+
+// Each stage lights up at most one edge. `null` = the dim idle link. One edge
+// per direction keeps the lanes and their labels from stacking up.
+type ActiveEdge = { color: string; label: string } | null;
+
+const FORWARD: Record<Stage, ActiveEdge> = {
+    tls: { color: MSG_COLOR, label: "TLS handshake" },
+    verify: null,
+    connect: { color: ACCENT_NAVY, label: "CONNECT + creds" },
+    ok: null,
+    reject: null,
+};
+
+const BACKWARD: Record<Stage, ActiveEdge> = {
+    tls: null,
+    verify: null,
+    connect: null,
+    ok: { color: SUCCESS_COLOR, label: "PONG" },
+    reject: { color: FAILURE_COLOR, label: "-ERR Authorization Violation" },
 };
 
 const CAPTION: Record<Stage, string> = {
@@ -78,7 +127,7 @@ function TlsAuthHandshakeAnimatedInner({
         {
             id: "client",
             type: "publisher",
-            position: { x: 60, y: 140 },
+            position: { x: 60, y: 180 },
             data: { label: "order-svc" },
             style: {
                 opacity: rejected ? 0.55 : 1,
@@ -88,7 +137,7 @@ function TlsAuthHandshakeAnimatedInner({
         {
             id: "server",
             type: "server",
-            position: { x: 420, y: 140 },
+            position: { x: 460, y: 180 },
             data: { label: "server (cert)" },
             style: {
                 opacity: rejected ? 0.85 : 1,
@@ -96,11 +145,13 @@ function TlsAuthHandshakeAnimatedInner({
                 transition: "opacity 0.4s ease, filter 0.4s ease",
             },
         },
-        // Trust anchor the client checks the server cert against.
+        // Trust anchor the client checks the server cert against. It sits
+        // directly above the client so its edge runs straight up, clear of the
+        // two client ↔ server lanes.
         {
             id: "ca",
-            type: "server",
-            position: { x: 60, y: -20 },
+            type: "ca",
+            position: { x: 55, y: 30 },
             data: { label: "trusted CA" },
             style: {
                 opacity: stage === "verify" ? 1 : 0.4,
@@ -109,97 +160,83 @@ function TlsAuthHandshakeAnimatedInner({
         },
     ];
 
-    const edges: any[] = [];
+    // One edge per direction of the client ↔ server link, plus the vertical
+    // edge to the trust anchor. Every edge is re-keyed per stage so the
+    // AnimatedEdge remounts and spawns a fresh bubble at each stage change.
+    // The server → client direction pins the request-reply handles so the edge
+    // runs between the facing sides of the pair instead of looping around.
+    const forward = FORWARD[stage];
+    const backward = BACKWARD[stage];
+    const verifying = stage === "verify";
 
-    // --- 1. TLS handshake: client -> server ---
-    edges.push({
-        id: `tls-${stage}`,
-        source: "client",
-        target: "server",
-        type: "animated",
-        animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        data: {
-            color: stage === "tls" ? MSG_COLOR : IDLE_COLOR,
-            label: "TLS handshake",
-            labelColor: stage === "tls" ? MSG_COLOR : "#64748b",
-            animated: stage === "tls",
-            interval: 1500,
-        },
-    });
-
-    // --- 2. Cert validation: client checks server cert against the CA ---
-    edges.push({
-        id: `verify-${stage}`,
-        source: "client",
-        target: "ca",
-        type: "animated",
-        animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: { opacity: stage === "verify" ? 1 : 0.3 },
-        data: {
-            color: stage === "verify" ? ACCENT_NAVY : IDLE_COLOR,
-            label: "verify cert vs CA",
-            labelColor: stage === "verify" ? ACCENT_NAVY : "#64748b",
-            animated: stage === "verify",
-            interval: 1500,
-        },
-    });
-
-    // --- 3. CONNECT carrying credentials: client -> server ---
-    edges.push({
-        id: `connect-${stage}`,
-        source: "client",
-        target: "server",
-        type: "animated",
-        animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        // Offset slightly so it reads as a second client->server message.
-        style: { opacity: stage === "connect" ? 1 : 0.0 },
-        data: {
-            color: stage === "connect" ? MSG_COLOR : IDLE_COLOR,
-            label: "CONNECT + creds",
-            labelColor: stage === "connect" ? MSG_COLOR : "#64748b",
-            animated: stage === "connect",
-            interval: 1500,
-        },
-    });
-
-    // --- 4 / 5. Server reply: +OK (green) on success, -ERR (red) on reject ---
-    if (rejected) {
-        edges.push({
-            id: "reply-reject",
-            source: "server",
-            target: "client",
+    const edges: any[] = [
+        {
+            id: `fwd-${stage}`,
+            source: "client",
+            target: "server",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
+            style: { opacity: forward ? 1 : 0.3 },
             data: {
-                color: FAILURE_COLOR,
-                label: "-ERR Authorization Violation",
-                labelColor: FAILURE_COLOR,
-                animated: true,
+                bow: -55,
+                color: forward ? forward.color : IDLE_COLOR,
+                ...(forward
+                    ? { label: forward.label, labelColor: forward.color }
+                    : {}),
+                animated: forward !== null,
                 interval: 1500,
             },
-        });
-    } else {
-        edges.push({
-            id: `reply-ok-${stage}`,
+        },
+        {
+            id: `back-${stage}`,
             source: "server",
             target: "client",
+            sourceHandle: "reply-out",
+            targetHandle: "reply",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
-            style: { opacity: stage === "ok" ? 1 : 0.0 },
+            style: { opacity: backward ? 1 : 0.3 },
             data: {
-                color: stage === "ok" ? SUCCESS_COLOR : IDLE_COLOR,
-                label: "PONG",
-                labelColor: stage === "ok" ? SUCCESS_COLOR : "#64748b",
-                animated: stage === "ok",
+                bow: 55,
+                color: backward ? backward.color : IDLE_COLOR,
+                ...(backward
+                    ? {
+                        label: backward.label,
+                        labelColor: backward.color,
+                        labelOffset: 15,
+                    }
+                    : {}),
+                animated: backward !== null,
                 interval: 1500,
             },
-        });
-    }
+        },
+        // Cert validation: the client checks the server cert against its CA.
+        {
+            id: `verify-${stage}`,
+            source: "client",
+            target: "ca",
+            sourceHandle: "top-out",
+            type: "animated",
+            animated: true,
+            markerEnd: { type: MarkerType.ArrowClosed },
+            style: { opacity: verifying ? 1 : 0.3 },
+            data: {
+                straight: true,
+                color: verifying ? ACCENT_NAVY : IDLE_COLOR,
+                ...(verifying
+                    ? {
+                        label: "verify cert vs CA",
+                        labelColor: ACCENT_NAVY,
+                        labelOffset: 0,
+                    }
+                    : {}),
+                animated: verifying,
+                interval: 1500,
+            },
+        },
+    ];
 
     const stageNum = STAGE_ORDER.indexOf(stage) + 1;
 

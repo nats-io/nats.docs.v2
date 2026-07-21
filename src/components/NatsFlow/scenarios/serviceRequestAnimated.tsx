@@ -84,19 +84,19 @@ function ServiceRequestAnimatedInner({
         {
             id: "client",
             type: "publisher",
-            position: { x: 40, y: 150 },
+            position: { x: 58, y: 150 },
             data: { label: "order-svc" },
         },
         {
             id: "nats",
             type: "server",
-            position: { x: 300, y: 150 },
+            position: { x: 435, y: 150 },
             data: { label: "NATS" },
         },
         {
             id: "service",
             type: "service",
-            position: { x: 540, y: 150 },
+            position: { x: 783, y: 150 },
             data: { label: "OrderInventory" },
             style: {
                 // The handler "lights up" while it runs.
@@ -141,7 +141,7 @@ function ServiceRequestAnimatedInner({
             markerEnd: { type: MarkerType.ArrowClosed },
             data: {
                 color: active ? ROUTE_COLOR : IDLE_COLOR,
-                label: 'endpoint "check" · queue group "q"',
+                label: 'queue group "q"',
                 labelColor: active ? ROUTE_COLOR : "#64748b",
                 animated: active,
                 interval: 1500,
@@ -156,6 +156,7 @@ function ServiceRequestAnimatedInner({
             id: `reply-${stage}`,
             source: "service",
             target: "nats",
+            targetHandle: "reply-in",
             type: "animated",
             animated: true,
             sourceHandle: "reply",
@@ -164,6 +165,7 @@ function ServiceRequestAnimatedInner({
             data: {
                 color: active ? REPLY_COLOR : IDLE_COLOR,
                 label: "_INBOX reply",
+                labelOffset: 20,
                 labelColor: active ? REPLY_COLOR : "#64748b",
                 animated: active,
                 interval: 1500,
@@ -178,11 +180,16 @@ function ServiceRequestAnimatedInner({
             id: `deliver-${stage}`,
             source: "nats",
             target: "client",
+            // The client sits to the left, so leave from the server's left-hand
+            // reply handle and take a lane under the outbound request.
+            sourceHandle: "reply-out",
+            targetHandle: "reply",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
             style: { opacity: active || stage === "reply" ? 1 : 0.35 },
             data: {
+                bow: 55,
                 color: active ? REPLY_COLOR : IDLE_COLOR,
                 label: "reply",
                 labelColor: active ? REPLY_COLOR : "#64748b",

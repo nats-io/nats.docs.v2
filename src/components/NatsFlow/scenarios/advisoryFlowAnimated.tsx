@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ServerNode, SubscriberNode } from "../nodes";
+import { ServerNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     subscriber: SubscriberNode,
     server: ServerNode,
 };
@@ -124,9 +125,9 @@ function AdvisoryFlowAnimatedInner({
         // --- the advisory subject node ---
         {
             id: "subject",
-            type: "server",
+            type: "box",
             position: { x: 470, y: 70 },
-            data: { label: "$JS.EVENT.ADVISORY…\nMAX_DELIVERIES.ORDERS.shipping" },
+            data: { label: "$JS.EVENT.ADVISORY…\nMAX_DELIVERIES.ORDERS.shipping", subtitle: "advisory subject" },
             style: {
                 opacity: advisoryLive || monitorGotIt ? 1 : 0.4,
                 transition: "opacity 0.4s ease",

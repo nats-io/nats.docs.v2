@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ServerNode, ServiceNode } from "../nodes";
+import { ServerNode, ServiceNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     server: ServerNode,
     service: ServiceNode,
 };
@@ -106,14 +107,14 @@ function MetricsScrapeAnimatedInner({
         },
         {
             id: "exporter",
-            type: "service",
-            position: { x: 220, y: 100 },
+            type: "box",
+            position: { x: 286, y: 100 },
             data: { label: "exporter :7777" },
         },
         {
             id: "prometheus",
-            type: "service",
-            position: { x: 430, y: 100 },
+            type: "box",
+            position: { x: 559, y: 100 },
             data: { label: "Prometheus" },
             style: {
                 opacity: promActive ? 1 : 0.55,
@@ -123,8 +124,8 @@ function MetricsScrapeAnimatedInner({
         },
         {
             id: "grafana",
-            type: "service",
-            position: { x: 640, y: 100 },
+            type: "box",
+            position: { x: 832, y: 100 },
             data: { label: "Grafana" },
             style: {
                 opacity: grafanaActive ? 1 : 0.5,
@@ -134,8 +135,8 @@ function MetricsScrapeAnimatedInner({
         },
         {
             id: "check",
-            type: "service",
-            position: { x: 430, y: 280 },
+            type: "box",
+            position: { x: 559, y: 280 },
             data: { label: isAlert ? "check: CRIT" : "alert check" },
             style: {
                 opacity: isAlert ? 1 : 0.5,
@@ -181,9 +182,9 @@ function MetricsScrapeAnimatedInner({
                 ? MSG_COLOR
                 : IDLE_COLOR,
             label: stage === "transform"
-                ? "nats_consumer_num_pending"
+                ? "num_pending metric"
                 : stage === "scrape"
-                ? "scrape :7777/metrics"
+                ? "scrape /metrics"
                 : "/metrics",
             labelColor: stage === "transform"
                 ? "#5a8a1f"

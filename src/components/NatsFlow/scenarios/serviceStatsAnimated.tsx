@@ -104,21 +104,21 @@ function ServiceStatsAnimatedInner({
         {
             id: "client",
             type: "publisher",
-            position: { x: -40, y: 150 },
+            position: { x: -52, y: 150 },
             data: { label: isStats ? "monitor" : "client" },
         },
         // --- Server ---
         {
             id: "server",
             type: "server",
-            position: { x: 230, y: 150 },
+            position: { x: 299, y: 150 },
             data: { label: "server" },
         },
         // --- Service endpoint with live stats counter in its label ---
         {
             id: "svc",
             type: "service",
-            position: { x: 520, y: 150 },
+            position: { x: 676, y: 150 },
             data: {
                 label: "OrderInventory",
             },
@@ -181,6 +181,7 @@ function ServiceStatsAnimatedInner({
         id: `svc-server-reply-${stage}`,
         source: "svc",
         target: "server",
+        targetHandle: "reply-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
@@ -192,6 +193,7 @@ function ServiceStatsAnimatedInner({
                 ? FAILURE_COLOR
                 : SUCCESS_COLOR,
             label: isStats ? "stats reply" : isError ? "error reply" : "reply",
+                labelOffset: 20,
             labelColor: isStats
                 ? STATS_COLOR
                 : isError
@@ -207,11 +209,16 @@ function ServiceStatsAnimatedInner({
         id: `server-client-reply-${stage}`,
         source: "server",
         target: "client",
+        // The client sits to the left, so leave from the server's left-hand
+        // reply handle and take a lane under the outbound request.
+        sourceHandle: "reply-out",
+        targetHandle: "reply",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { opacity: 0.95 },
         data: {
+            bow: 55,
             color: isStats
                 ? STATS_COLOR
                 : isError

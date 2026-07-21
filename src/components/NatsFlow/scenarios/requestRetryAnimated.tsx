@@ -98,19 +98,19 @@ function RequestRetryAnimatedInner({
         {
             id: "client",
             type: "publisher",
-            position: { x: 40, y: 140 },
+            position: { x: 54, y: 140 },
             data: { label: "order-svc" },
         },
         {
             id: "server",
             type: "server",
-            position: { x: 280, y: 140 },
+            position: { x: 378, y: 140 },
             data: { label: "server" },
         },
         {
             id: "inventory",
             type: "service",
-            position: { x: 520, y: 140 },
+            position: { x: 702, y: 140 },
             data: { label: "inventory" },
             // The responder is "gone" in the no-responders branch.
             style: {
@@ -209,6 +209,7 @@ function RequestRetryAnimatedInner({
             markerEnd: { type: MarkerType.ArrowClosed },
             style: { opacity: 0.6 },
             data: {
+                bow: 55,
                 color: FAIL_COLOR,
                 label: "timeout — no reply",
                 labelColor: FAIL_COLOR,
@@ -224,12 +225,16 @@ function RequestRetryAnimatedInner({
             id: "noresp-server-client",
             source: "server",
             target: "client",
+            sourceHandle: "reply-out",
+            targetHandle: "reply",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
             data: {
                 color: FAIL_COLOR,
+                bow: 60,
                 label: "503 no responders",
+                labelOffset: 22,
                 labelColor: FAIL_COLOR,
                 animated: true,
                 interval: 1500,

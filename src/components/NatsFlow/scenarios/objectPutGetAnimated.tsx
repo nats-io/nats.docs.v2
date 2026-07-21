@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, SubscriberNode } from "../nodes";
+import { PublisherNode, ServerNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     subscriber: SubscriberNode,
     server: ServerNode,
@@ -111,9 +112,9 @@ function ObjectPutGetAnimatedInner({
         // --- The INVOICES bucket (server) in the middle ---
         {
             id: "invoices",
-            type: "server",
+            type: "box",
             position: { x: 250, y: 150 },
-            data: { label: "INVOICES" },
+            data: { label: "INVOICES", subtitle: "object store" },
         },
         // --- Subscriber: warehouse on the right ---
         {
@@ -159,9 +160,10 @@ function ObjectPutGetAnimatedInner({
         markerEnd: { type: MarkerType.ArrowClosed },
         style: {
             opacity: stage === "put-meta" ? 1 : 0.18,
-            // Bow this edge so it reads as a separate metadata write.
+            // Bowed so it reads as a separate metadata write.
         },
         data: {
+            bow: 55,
             color: stage === "put-meta" ? NAVY : IDLE_COLOR,
             label: stage === "put-meta" ? "metadata + SHA-256" : "meta subj",
             labelColor: stage === "put-meta" ? NAVY : "#94a3b8",
@@ -197,6 +199,7 @@ function ObjectPutGetAnimatedInner({
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { opacity: stage === "get-chunks" ? 1 : 0.25 },
         data: {
+            bow: 55,
             color: verified
                 ? SUCCESS_COLOR
                 : stage === "get-chunks"

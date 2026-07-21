@@ -17,11 +17,11 @@ export const topologiesClusterMeshScenario: NatsFlowScenario = {
   description:
     'The east cluster: three servers meshed by routes, one order hopping from n1-east down to n2-east',
   nodes: [
-    { id: 'order-svc', type: 'publisher', position: { x: 30, y: 95 }, data: { label: 'order-svc' } },
-    { id: 'n1-east', type: 'server', position: { x: 180, y: 70 }, data: { label: 'n1-east', circular: true } },
-    { id: 'n3-east', type: 'server', position: { x: 430, y: 70 }, data: { label: 'n3-east', circular: true } },
-    { id: 'n2-east', type: 'server', position: { x: 180, y: 320 }, data: { label: 'n2-east', circular: true } },
-    { id: 'warehouse', type: 'subscriber', position: { x: 540, y: 345 }, data: { label: 'warehouse' } },
+    { id: 'order-svc', type: 'publisher', position: { x: 38, y: 95 }, data: { label: 'order-svc' } },
+    { id: 'n1-east', type: 'server', position: { x: 225, y: 70 }, data: { label: 'n1-east', circular: true } },
+    { id: 'n3-east', type: 'server', position: { x: 538, y: 70 }, data: { label: 'n3-east', circular: true } },
+    { id: 'n2-east', type: 'server', position: { x: 225, y: 320 }, data: { label: 'n2-east', circular: true } },
+    { id: 'warehouse', type: 'subscriber', position: { x: 675, y: 345 }, data: { label: 'warehouse' } },
   ],
   edges: [
     // Idle route mesh — gray, undirected (no arrowheads), no animation.

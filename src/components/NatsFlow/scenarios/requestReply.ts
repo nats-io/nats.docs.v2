@@ -34,6 +34,7 @@ export const requestReplyScenario: NatsFlowScenario = {
       type: 'animated',
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        bow: -45,
         color: '#f97316',
         animated: true,
         label: 'get.user.150',
@@ -54,6 +55,7 @@ export const requestReplyScenario: NatsFlowScenario = {
       type: 'animated',
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        bow: -45,
         color: '#f97316',
         animated: true,
         label: 'get.user.150',
@@ -74,6 +76,7 @@ export const requestReplyScenario: NatsFlowScenario = {
       type: 'animated',
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        bow: 45,
         color: '#10b981',
         animated: true,
         label: '_INBOX.<nuid>',
@@ -95,6 +98,7 @@ export const requestReplyScenario: NatsFlowScenario = {
       type: 'animated',
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        bow: 45,
         color: '#10b981',
         animated: true,
         label: '_INBOX.<nuid>',

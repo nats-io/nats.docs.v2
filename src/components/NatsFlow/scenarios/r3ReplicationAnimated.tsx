@@ -147,11 +147,16 @@ function R3ReplicationAnimatedInner({
         id: `wal-${stage}`,
         source: "n1",
         target: "n1",
+        // Both default handles sit at the node's mid-height on opposite sides,
+        // so the path ran back through the node. Loop over the top instead.
+        sourceHandle: "top-out",
+        targetHandle: "top-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { opacity: stage === "append" ? 1 : 0.25 },
         data: {
+            bow: -50,
             color: stage === "append" ? LIME : IDLE_COLOR,
             label: "write WAL",
             labelColor: stage === "append" ? LIME : "#94a3b8",
@@ -216,6 +221,7 @@ function R3ReplicationAnimatedInner({
                 strokeDasharray: "4 4",
             },
             data: {
+                bow: 55,
                 color: stage === "commit" ? COMMIT_COLOR : NAVY,
                 label: stage === "commit"
                     ? "commit (quorum 2/3)"

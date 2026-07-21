@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, SubscriberNode } from "../nodes";
+import { PublisherNode, ServerNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     subscriber: SubscriberNode,
     server: ServerNode,
@@ -92,29 +93,29 @@ function StreamSnapshotAnimatedInner({
         // --- The ORDERS stream, living on the server ---
         {
             id: "stream",
-            type: "server",
-            position: { x: 60, y: 150 },
-            data: { label: "ORDERS stream" },
+            type: "box",
+            position: { x: 78, y: 150 },
+            data: { label: "ORDERS stream", subtitle: "stream" },
         },
         // --- The backup client driving the snapshot ---
         {
             id: "client",
             type: "publisher",
-            position: { x: 320, y: 30 },
+            position: { x: 416, y: 30 },
             data: { label: "backup client" },
         },
         // --- The ephemeral deliver_subject inbox ---
         {
             id: "inbox",
             type: "subscriber",
-            position: { x: 320, y: 250 },
+            position: { x: 416, y: 250 },
             data: { label: "_INBOX deliver" },
         },
         // --- The off-site backup store ---
         {
             id: "store",
             type: "subscriber",
-            position: { x: 580, y: 150 },
+            position: { x: 754, y: 150 },
             data: {
                 label: landed ? "store ✓" : "backup store",
             },
@@ -133,6 +134,8 @@ function StreamSnapshotAnimatedInner({
         id: `req-${stage}`,
         source: "client",
         target: "stream",
+        sourceHandle: "out-left",
+        targetHandle: "reply-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
@@ -188,6 +191,10 @@ function StreamSnapshotAnimatedInner({
         id: `ack-${stage}`,
         source: "inbox",
         target: "stream",
+        // The stream sits up and to the left of the inbox, so leave from the
+        // inbox's left and arrive on the stream's right-hand reply handle.
+        sourceHandle: "out-left",
+        targetHandle: "reply-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
@@ -195,6 +202,7 @@ function StreamSnapshotAnimatedInner({
         data: {
             color: ackActive ? ACK_COLOR : IDLE_COLOR,
             label: "flow-control ack",
+            labelOffset: 26,
             labelColor: ackActive ? "#5a8a1f" : "#94a3b8",
             animated: ackActive,
             interval: 1500,
@@ -212,7 +220,7 @@ function StreamSnapshotAnimatedInner({
         style: { opacity: landed ? 1 : 0.35 },
         data: {
             color: landed ? COMMIT_COLOR : IDLE_COLOR,
-            label: landed ? "backup.json + stream.tar.s2" : "to store",
+            label: landed ? "backup.json + tar.s2" : "to store",
             labelColor: landed ? COMMIT_COLOR : "#94a3b8",
             animated: landed,
             interval: 1500,

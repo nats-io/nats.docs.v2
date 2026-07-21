@@ -37,9 +37,32 @@ export function AnimatedEdge(props: EdgeProps) {
 
   const edgeData = data as AnimatedEdgeData;
 
-  const [edgePath, labelX, labelY] = edgeData?.straight
+  const bow = edgeData?.bow;
+
+  const [defaultPath, defaultLabelX, defaultLabelY] = edgeData?.straight
     ? getStraightPath({ sourceX, sourceY, targetX, targetY })
     : getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+
+  // A bowed path arcs away from the straight line between the two handles, so
+  // several edges sharing a node pair each get their own lane. A mostly-vertical
+  // edge bows sideways instead — offsetting it vertically would only stretch it.
+  const midX = (sourceX + targetX) / 2;
+  const midY = (sourceY + targetY) / 2;
+  const vertical = Math.abs(targetY - sourceY) > Math.abs(targetX - sourceX);
+
+  let edgePath = defaultPath;
+  let labelX = defaultLabelX;
+  let labelY = defaultLabelY;
+
+  if (bow && vertical) {
+    edgePath = `M ${sourceX},${sourceY} C ${sourceX + bow},${midY} ${targetX + bow},${midY} ${targetX},${targetY}`;
+    labelX = midX + bow * 0.75;
+    labelY = midY;
+  } else if (bow) {
+    edgePath = `M ${sourceX},${sourceY} C ${midX},${sourceY + bow} ${midX},${targetY + bow} ${targetX},${targetY}`;
+    labelX = midX;
+    labelY = midY + bow * 0.75;
+  }
 
   // Add a circle every interval (default 2 seconds) if animated
   useEffect(() => {

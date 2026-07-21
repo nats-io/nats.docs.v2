@@ -46,6 +46,7 @@ export const requestReplyScatterGatherScenario: NatsFlowScenario = {
       type: 'animated',
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        bow: -45,
         color: '#f97316',
         animated: true,
         label: 'get.status',
@@ -164,6 +165,7 @@ export const requestReplyScatterGatherScenario: NatsFlowScenario = {
       type: 'animated',
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        bow: 45,
         color: '#10b981',
         animated: true,
         label: '3 replies',

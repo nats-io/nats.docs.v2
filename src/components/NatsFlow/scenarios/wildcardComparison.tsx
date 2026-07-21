@@ -171,6 +171,7 @@ function WildcardComparisonInner({
       animated: true,
       markerEnd: {type: MarkerType.ArrowClosed},
       data: {
+        bow: -66,
         color: '#10b981',
         animated: true,
         delay: 3000,
@@ -199,6 +200,7 @@ function WildcardComparisonInner({
         animated: true,
         markerEnd: {type: MarkerType.ArrowClosed},
         data: {
+          bow: -22,
           color: '#dc2626',
           animated: true,
           delay: 6000,
@@ -227,6 +229,7 @@ function WildcardComparisonInner({
       animated: true,
       markerEnd: {type: MarkerType.ArrowClosed},
       data: {
+        bow: 22,
         color: '#3b82f6',
         animated: true,
         delay: 9000,
@@ -255,6 +258,7 @@ function WildcardComparisonInner({
       animated: true,
       markerEnd: {type: MarkerType.ArrowClosed},
       data: {
+        bow: 66,
         color: '#f59e0b',
         animated: true,
         delay: 12000,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { BaseNode } from './BaseNode';
+import { BaseNode, nodeLabel, nodeStack, nodeSubLabel } from './BaseNode';
 import { NatsIcon } from '../icons/NatsIcon';
 import LeafIcon from '../../Icons/LeafIcon';
 import type { NatsNodeData } from '../types';
@@ -44,10 +44,15 @@ export function ServerNode({ data, selected }: NodeProps) {
 
   return (
     <BaseNode selected={selected}>
-      <div className="flex flex-col items-center gap-1">
+      <div style={nodeStack}>
         <NatsIcon width={32} height={32} />
-        <div className="font-semibold text-gray-800">{nodeData.label}</div>
-        <div className="text-xs text-gray-500">Server</div>
+        <div style={nodeLabel}>{nodeData.label}</div>
+        {/* Defaults to "Server"; pass data.subtitle to say something more useful,
+            or an empty string to drop the line. Anything that isn't a NATS
+            server should use BoxNode instead of overriding this. */}
+        {(data as any).subtitle !== "" && (
+          <div style={nodeSubLabel}>{(data as any).subtitle ?? 'Server'}</div>
+        )}
       </div>
       {/* Default handles for pub-sub */}
       <Handle
@@ -89,6 +94,13 @@ export function ServerNode({ data, selected }: NodeProps) {
         className="!h-3 !w-3 !bg-blue-500"
         style={{ opacity: 0 }}
       />
+      {/* Vertical + reverse handles, for a peer stacked above or below (or to
+          the left of) this node. Declared last so unnamed edges keep using the
+          handles above. */}
+      <Handle type="target" position={Position.Top} id="top-in" style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Top} id="top-out" style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Bottom} id="bottom-in" style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Bottom} id="bottom-out" style={{ opacity: 0 }} />
     </BaseNode>
   );
 }

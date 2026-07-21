@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ServerNode, ServiceNode, SubscriberNode } from "../nodes";
+import { ServerNode, ServiceNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     service: ServiceNode,
     server: ServerNode,
     subscriber: SubscriberNode,
@@ -82,10 +83,11 @@ function KvTtlExpiryAnimatedInner({
         // --- The KV bucket, backed by a stream on the server ---
         {
             id: "server",
-            type: "server",
-            position: { x: 250, y: 120 },
+            type: "box",
+            position: { x: 362, y: 120 },
             data: {
                 label: valueLabel,
+                subtitle: "KV bucket",
             },
             style: {
                 filter: expired ? "grayscale(0.4)" : "none",
@@ -96,21 +98,21 @@ function KvTtlExpiryAnimatedInner({
         {
             id: "inventory",
             type: "service",
-            position: { x: 20, y: 120 },
+            position: { x: 29, y: 120 },
             data: { label: "inventory" },
         },
         // --- The watcher: warehouse dashboard ---
         {
             id: "dashboard",
             type: "subscriber",
-            position: { x: 490, y: 120 },
+            position: { x: 710, y: 120 },
             data: { label: "warehouse-dashboard" },
         },
         // --- TTL clock indicator above the bucket ---
         {
             id: "clock",
-            type: "service",
-            position: { x: 260, y: -30 },
+            type: "box",
+            position: { x: 377, y: -30 },
             data: {
                 label: ttlElapsed ? "clock: 30m+ elapsed" : "ttl: 30m",
             },
@@ -129,6 +131,7 @@ function KvTtlExpiryAnimatedInner({
         id: `put-${stage}`,
         source: "inventory",
         target: "server",
+        sourceHandle: "out-right",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },

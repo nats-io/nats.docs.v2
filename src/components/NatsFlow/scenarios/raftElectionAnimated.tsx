@@ -145,6 +145,8 @@ function RaftElectionAnimatedInner({
 
     // --- Term-4 heartbeats from n1 (leader) to its followers ---
     // Healthy + animated only during "steady"; turn red/idle once silent.
+    // n1 sits above both followers, so these leave from its bottom edge —
+    // the default left/right handles would loop the n2 hop around the node.
     const heartbeatTargets: Array<{ id: string; target: "n2" | "n3" }> = [
         { id: "hb-n1-n2", target: "n2" },
         { id: "hb-n1-n3", target: "n3" },
@@ -156,6 +158,8 @@ function RaftElectionAnimatedInner({
             id: `${hb.id}-${stage}`,
             source: "n1",
             target: hb.target,
+            sourceHandle: "bottom-out",
+            targetHandle: "top-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },

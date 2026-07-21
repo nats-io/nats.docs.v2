@@ -120,13 +120,13 @@ function ServiceScalingAnimatedInner({
         {
             id: "client",
             type: "publisher",
-            position: { x: -40, y: instanceY(2) },
+            position: { x: -54, y: instanceY(2) },
             data: { label: "client" },
         },
         {
             id: "server",
             type: "server",
-            position: { x: 230, y: instanceY(2) - 10 },
+            position: { x: 310, y: instanceY(2) - 10 },
             data: { label: "nats-server" },
         },
     ];
@@ -136,7 +136,7 @@ function ServiceScalingAnimatedInner({
         nodes.push({
             id,
             type: "service",
-            position: { x: 540, y: instanceY(idx) },
+            position: { x: 729, y: instanceY(idx) },
             data: { label: `OrderInventory ${id}` },
             style: {
                 opacity: hotInstance && !isHot ? 0.4 : 1,
@@ -205,8 +205,12 @@ function ServiceScalingAnimatedInner({
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
             data: {
+                // The server sits between the instances and the client, so this
+                // arcs under it rather than laying its label on the node.
+                bow: 115,
                 color: REPLY_COLOR,
                 label: "reply",
+                labelOffset: 92,
                 labelColor: REPLY_COLOR,
                 animated: true,
                 interval: 1500,

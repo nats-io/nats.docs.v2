@@ -69,7 +69,7 @@ const CAPTION: Record<Stage, string> = {
     overflow:
         "The next message can't fit. Rather than block the whole server, NATS drops the overflow message for this one slow subscriber.",
     drop:
-        "NATS fires a SlowConsumer async error back to the warehouse client so the app can react — scale out, drop work, or fix the handler.",
+        "The warehouse client drops the overflow and fires its async error callback — the signal is raised inside the application, nothing crosses the wire. The app can react: scale out, drop work, or fix the handler.",
 };
 
 function SlowConsumerAnimatedInner({
@@ -187,24 +187,10 @@ function SlowConsumerAnimatedInner({
         });
     }
 
-    // --- warehouse -> server: the SlowConsumer async error fires back ---
-    if (erroring) {
-        edges.push({
-            id: "slowconsumer-err",
-            source: "warehouse",
-            target: "server",
-            type: "animated",
-            animated: true,
-            markerEnd: { type: MarkerType.ArrowClosed },
-            data: {
-                color: ERROR_COLOR,
-                label: "SlowConsumer",
-                labelColor: ERROR_COLOR,
-                animated: true,
-                interval: 1500,
-            },
-        });
-    }
+    // The slow-consumer signal is deliberately not an edge. This page covers the
+    // *local* slow consumer: the client library drops the overflow and fires the
+    // async error callback inside the application, so nothing travels back to
+    // the server. It shows as a badge on the warehouse client instead.
 
     const stageNum = STAGE_ORDER.indexOf(stage) + 1;
     const filled = BUFFER_FILL[stage];
@@ -290,6 +276,30 @@ function SlowConsumerAnimatedInner({
                 >
                     <Background />
                 </ReactFlow>
+
+                {/* The async error callback firing, on the client itself */}
+                {erroring && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            right: "16px",
+                            bottom: "110px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            background: "#fef2f2",
+                            border: `1px solid ${ERROR_COLOR}`,
+                            borderRadius: "999px",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            color: "#b91c1c",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        ⚠ async error callback — SlowConsumer
+                    </div>
+                )}
 
                 {/* Pending-buffer overlay, anchored under the warehouse node */}
                 <div
