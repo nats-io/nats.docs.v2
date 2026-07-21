@@ -31,8 +31,8 @@ region in the middle:
 ```
 orders.us.created
 orders.eu.created
-orders.us.cancelled
-orders.eu.cancelled
+orders.us.canceled
+orders.eu.canceled
 ```
 
 Each of those is three tokens. The first token groups them all under

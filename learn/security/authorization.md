@@ -40,14 +40,14 @@ the reverse.
 Permissions use the same subject wildcards you already know from
 [Core Concepts → Subjects](/concepts/subjects). `*` matches one token;
 `>` matches one or more trailing tokens. `orders.>` covers
-`orders.created`, `orders.shipped`, and `orders.cancelled`, all in one grant.
+`orders.created`, `orders.shipped`, and `orders.canceled`, all in one grant.
 (Here, using `orders.*` would work equally well, but would not match a subject
 such as `orders.at.northpole`, where `orders.>` does match it.)
 
 ## Restricting order-svc
 
 `order-svc` exists to publish order events: `orders.created`,
-`orders.shipped`, and `orders.cancelled`. It also makes the occasional
+`orders.shipped`, and `orders.canceled`. It also makes the occasional
 request — a lookup before confirming an order — and a request needs a
 reply, which arrives on a temporary inbox subject under `_INBOX.`.
 That's its whole footprint: publish under `orders.`, subscribe to its

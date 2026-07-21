@@ -52,12 +52,12 @@ its foundation, before it adds any persistence. The order services
 talk over core NATS only.
 
 Three things happen to an order: it's created, shipped, or
-cancelled. Each one shows up as a message on a subject:
+canceled. Each one shows up as a message on a subject:
 
 ```
 orders.created
 orders.shipped
-orders.cancelled
+orders.canceled
 ```
 
 The payload is a small JSON object, the same shape across every

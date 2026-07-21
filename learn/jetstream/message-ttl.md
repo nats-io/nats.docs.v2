@@ -14,7 +14,7 @@ stream. Sometimes one message needs a different lifespan.
 
 ## When one message should expire sooner
 
-Consider an `orders.cancelled` message that only matters for an hour. A
+Consider an `orders.canceled` message that only matters for an hour. A
 service that reads from the stream has 60 minutes to react to a
 cancellation. After that the message is no longer useful, and you don't
 want it in the stream for the full seven days.
@@ -67,7 +67,7 @@ exist and the edit has no effect. The rest of this page assumes 2.11+.
 
 ## Publish a short-lived message
 
-With the feature on, publish an `orders.cancelled` message that expires
+With the feature on, publish an `orders.canceled` message that expires
 in 60 seconds. The TTL travels along as the `Nats-TTL` header:
 
 <div class="nats-example"
@@ -185,7 +185,7 @@ and expect to undo it.
 ## Where you are
 
 `ORDERS` now has `AllowMsgTTL` turned on, a switch you can't turn back
-off. You published an `orders.cancelled` message with a 60-second
+off. You published an `orders.canceled` message with a 60-second
 `Nats-TTL` and saw it expire while the rest of the stream remained. The
 earlier of TTL and `MaxAge` always applies.
 

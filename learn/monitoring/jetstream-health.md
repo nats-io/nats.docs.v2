@@ -60,7 +60,7 @@ order, `1000` in our snapshot. Every published order gets the next
 sequence, so `last_seq` only ever climbs. You'll use it in a moment to
 measure how far any consumer is behind. **Num Subjects** (`num_subjects`)
 is how many distinct subjects the stream has seen: `orders.created`,
-`orders.shipped`, `orders.cancelled`, and one regional subject make four.
+`orders.shipped`, `orders.canceled`, and one regional subject make four.
 
 The full set of stream state fields is documented in
 [Reference → jsz](/reference/system/monitor/jsz) and

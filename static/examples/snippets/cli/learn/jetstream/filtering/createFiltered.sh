@@ -12,5 +12,5 @@ nats consumer add ORDERS analytics \
 nats consumer info ORDERS analytics
 
 # Pull from analytics: only orders.shipped messages come back.
-# orders.created and orders.cancelled are skipped for this consumer.
+# orders.created and orders.canceled are skipped for this consumer.
 nats consumer next ORDERS analytics --count 5

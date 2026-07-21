@@ -18,7 +18,7 @@ message on a [subject](/concepts/subjects):
 
 - `orders.created` — a new order comes in
 - `orders.shipped` — the order leaves the warehouse
-- `orders.cancelled` — the order is called off
+- `orders.canceled` — the order is called off
 
 Services react to those messages:
 
@@ -59,7 +59,7 @@ every command and every error message in this chapter.
 The second is the **subjects** the stream keeps: `orders.>`. That's
 a [wildcard](/concepts/subjects#wildcards). Any subject that starts with
 `orders.` goes into this stream. `orders.created`, `orders.shipped`, and
-`orders.cancelled` all match. So would `orders.refunded` next month, with
+`orders.canceled` all match. So would `orders.refunded` next month, with
 no change to the stream.
 
 The `--defaults` flag tells `nats` not to prompt you for the other

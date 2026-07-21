@@ -108,7 +108,7 @@ nats --server nats://site2:4222 stream edit ORDERS_DR --subjects "orders.>"
 ```
 
 `ORDERS_DR` now captures `orders.created`, `orders.shipped`,
-`orders.cancelled` — the same subjects the lost primary held. It now functions
+`orders.canceled` — the same subjects the lost primary held. It now functions
 as a full primary.
 
 ### Step 5 — redirect publishers and consumers
