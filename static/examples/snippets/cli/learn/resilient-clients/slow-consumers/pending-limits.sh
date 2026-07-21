@@ -5,7 +5,7 @@
 # subscription's in-memory pending buffer before it starts dropping the
 # overflow. They are a client-library call (SetPendingLimits and friends),
 # so there is no CLI flag for them — the closest the CLI does is a plain
-# async subscribe, shown here. The other tabs carry the actual limit.
+# async subscribe, shown here. Setting the actual limit is client code.
 #
 # To see the buffer fill, flood orders.> faster than a handler can drain
 # it; against this subscriber the pending count climbs until it overflows.

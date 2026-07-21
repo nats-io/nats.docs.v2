@@ -122,10 +122,10 @@ You'll need:
   [Topologies deep dive](/learn/topologies) (built there as
   `n1-east`/`n2-east`/`n3-east`; this chapter shortens the names to
   `n1`/`n2`/`n3`), used only as a server pool the client connects to.
-- The `nats` CLI installed and pointed at your server. The CLI carries
-  the first tab of each example; the JavaScript, Go, Python, Java, Rust,
-  and C# tabs carry the client options the CLI can't express, such as
-  pending limits and the reconnect callbacks.
+- The `nats` CLI installed and pointed at your server. The examples run
+  in the CLI; client options the CLI can't express, such as pending
+  limits and the reconnect callbacks, appear in the text as the named
+  client-library calls.
 
 Open a terminal, start your server, and turn to
 [Connecting](/learn/resilient-clients/connecting).

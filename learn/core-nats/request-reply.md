@@ -34,10 +34,9 @@ and publishes its answer there. The client's subscription receives it.
 
 <div class="nats-flow" data-scenario="requestReply" data-width="800" data-height="350"></div>
 
-The orange arrow is the request traveling out on
-`orders.inventory.check`. The green dashed arrow is the reply
-traveling back on the private subject the client made for this one
-call.
+The orange arrow is the request traveling out on the request subject.
+The green dashed arrow is the reply traveling back on the private
+subject the client made for this one call.
 
 Every NATS client wraps those steps in a single `request()` call, so
 you never write the subscribe-publish-wait by hand.

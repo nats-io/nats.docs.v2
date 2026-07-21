@@ -101,8 +101,8 @@ calls `Drain()` on Ctrl-C — the right place for the call. It exits as soon
 as `Drain()` returns, though, without waiting for the background drain to
 complete, so it shows where the drain belongs rather than a finished drain.
 That's the Go pitfall from the previous paragraph in practice: exiting on
-`Drain()`'s return abandons the work drain was meant to save. The client
-tabs show the full pattern: `Drain()` wired to a SIGTERM handler that waits
+`Drain()`'s return abandons the work drain was meant to save. In client
+code the full pattern is `Drain()` wired to a SIGTERM handler that waits
 for CLOSED before the process exits.
 
 <div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-on-signal" data-languages="cli,js,go,python,java,rust,csharp"></div>
@@ -161,9 +161,9 @@ server stops sending, lets the handler finish the messages already
 buffered for that one subscription, and leaves the connection and every
 other subscription open.
 
-The `warehouse` subscribers already run as a queue group ([Core NATS →
-Queue groups](/learn/core-nats/queue-groups)): several members share the
-`orders.>` load. Rotating one member out is the canonical use. Drain that
+The `warehouse` subscribers run as a queue group ([Core NATS →
+Queue groups](/learn/core-nats/queue-groups) covers the mechanism):
+several members share the `orders.>` load. Rotating one member out is the canonical use. Drain that
 member's subscription and it finishes the orders it holds while the server
 keeps delivering new orders to the remaining members; nothing is dropped
 and the group never stops consuming.
@@ -188,8 +188,8 @@ real work.
 
 The CLI can't demonstrate a per-subscription drain: `nats sub` holds
 exactly one subscription, and Ctrl-C closes it, as this page covered. The
-CLI tab runs one `warehouse` queue-group member — the subscriber the
-client tabs then rotate out with a subscription drain:
+CLI example runs one `warehouse` queue-group member — the subscriber a
+client would then rotate out with a subscription drain:
 
 <div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-subscription" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -230,8 +230,8 @@ returns the duration directly, and Rust's async client exposes neither the
 probe nor a round-trip flush. The `nats` CLI has the probe as `nats rtt`:
 for each server it can reach, it runs five round trips and prints the
 averaged time per address. Flush itself is a library call with no CLI
-equivalent, so the CLI tab shows `nats rtt` against the pool and the
-client tabs carry the flush:
+equivalent, so the CLI example shows `nats rtt` against the pool; the
+flush itself is the client-library call:
 
 <div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-flush" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

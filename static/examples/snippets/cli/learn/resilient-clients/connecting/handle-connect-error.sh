@@ -5,7 +5,7 @@
 #
 # With the CLI, a failed connect prints the error and exits non-zero, so
 # you can branch on it. The client libraries surface the same failures as
-# an error you catch at connect time — see the other tabs.
+# an error you catch at connect time.
 
 # A pool whose first URL is unreachable: the client tries the next one.
 # If every dial fails, the command exits non-zero and prints the reason.

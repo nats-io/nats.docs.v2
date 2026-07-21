@@ -195,9 +195,11 @@ this deployment needs here.
 ## Client reconnection during the upgrade
 
 A node leaving in lame-duck mode requires no action from a correctly
-configured client. The `INFO ldm:true` broadcast removes this node from
-the client's server pool (and fires an optional lame-duck callback if the
-app registered one); the client keeps running on its existing connection.
+configured client. The `INFO ldm:true` broadcast tells the client the
+node is going away (and fires an optional lame-duck callback if the app
+registered one); the client keeps running on its existing connection, and
+because the node stops accepting new connections, no client dials it
+again.
 When the server later closes that connection during the staggered kick,
 the client's normal reconnect logic dials another node in the cluster,
 resubscribes, and resumes.
@@ -287,5 +289,5 @@ Continue to [Hardening](/learn/deployment/hardening).
 - [Surviving node loss](/learn/jetstream/surviving-node-loss) — why an R3
   stream survives one node leaving, and what a quorum buys you.
 - [Core NATS → Connection lifecycle](/learn/core-nats/connection-lifecycle) —
-  the client's side of lame-duck mode: how it reconnects to another node
-  before its socket closes.
+  the client's side of lame-duck mode: what the notice means and how the
+  client ends up on another node.

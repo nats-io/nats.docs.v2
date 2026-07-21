@@ -8,7 +8,7 @@
 # than to observe a finished drain. (`nats sub` has no such handler: Ctrl-C
 # just terminates the process and abandons any in-flight messages.)
 #
-# The client tabs (JS/Go/etc.) show the full pattern: Drain() wired to a
+# In a client library the full pattern is Drain() wired to a
 # SIGTERM handler that waits for CLOSED before the process exits.
 
 nats reply "orders.lookup" \

@@ -132,17 +132,17 @@ const FALLBACKS = {
   objectWatchSyncAnimated:
     'A watch on the INVOICES object store is metadata-then-bytes. order-svc puts an object; the watch pushes a metadata-only update to the analytics watcher, which then issues a separate get to fetch the actual bytes. The update tells the watcher what changed; the bytes come only when it asks for them.',
   connectHandshakeAnimated:
-    'The NATS client connect handshake, one frame at a time. order-svc opens a TCP connection; the server sends its INFO frame; the client replies with a CONNECT frame carrying its credentials; the server answers +OK and the client is connected. The rejected branch shows the same exchange ending in -ERR authorization violation.',
+    'The NATS client connect handshake, one frame at a time. order-svc opens a TCP connection; the server sends its INFO frame; the client replies with a CONNECT frame carrying its credentials; the server confirms with PONG and the client is connected. The rejected branch shows the same exchange ending in -ERR authorization violation.',
   drainVsCloseAnimated:
     'Close versus drain, shown side by side over the same orders.* subscription. On the top row Close() tears the connection down at once — in-flight messages and pending publishes are dropped. On the bottom row Drain() sends an unsubscribe first, lets the last delivered messages run through the handler, flushes pending work, and only then closes the connection cleanly.',
   reconnectBackoffAnimated:
-    'A publisher loses its server and reconnects. Its dial to n1 comes back connection refused, so the client waits out a backoff delay and dials the next server in its pool, n2, which answers +OK. Messages buffered while it was disconnected then flush to n2, and the dead link to n1 fades.',
+    'A publisher loses its server and reconnects. Its dial to n1 comes back connection refused, so the client waits out a backoff delay and dials the next server in its pool, n2, which accepts the connection. Messages buffered while it was disconnected then flush to n2, and the dead link to n1 fades.',
   requestRetryAnimated:
     'Two outcomes for a request. When the inventory responder is present but slow, the first request times out with no reply, the client waits a backoff, retries, and the retry gets a reply. When no responder is subscribed at all, the server returns a no-responders 503 immediately instead of leaving the caller to wait for a timeout.',
   slowConsumerAnimated:
     'A fast publisher outruns a slow subscriber. order-svc keeps pushing orders while the warehouse handler drains its pending buffer too slowly; the buffer fills to its limit, the next message cannot be buffered and is dropped, and the server raises a SlowConsumer error back to that subscriber.',
   tlsAuthHandshakeAnimated:
-    "TLS and authentication end to end. order-svc completes a TLS handshake with the server, checks the server's certificate against its trusted CA, then sends a CONNECT frame carrying credentials. The server answers +OK on success; the rejected branch ends in -ERR authorization violation.",
+    "TLS and authentication end to end. order-svc completes a TLS handshake with the server, checks the server's certificate against its trusted CA, then sends a CONNECT frame carrying credentials. The server confirms with PONG on success; the rejected branch ends in -ERR authorization violation.",
   serviceRequestAnimated:
     "A single request to a micro service. order-svc sends a request on orders.inventory.check; NATS routes it to the OrderInventory service's check endpoint, which belongs to queue group q. The handler runs and its reply travels back through NATS to the caller's _INBOX. To the client it is an ordinary request/reply.",
   serviceEndpointsAnimated:

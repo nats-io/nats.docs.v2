@@ -76,8 +76,9 @@ first. With the three providers running, the output shows three quotes,
 one per carrier. The client compares the prices and keeps the lowest.
 
 A library does the same thing, and how much you hand-roll depends on the
-client. A plain `request()` returns only the first reply — no single call
-returns a list, because the client can't know how many responders exist.
+client. A plain `request()` returns only the first reply — on its own it
+never returns a list, because the client can't know how many responders
+exist.
 Some clients ship a gather helper that returns many: nats.js has
 `requestMany` and orbit.go has `RequestMany` (both follow ADR-47,
 "Request Many", with count, stall, and sentinel stop conditions), and the

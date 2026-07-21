@@ -6,8 +6,8 @@
 #
 # The CLI cannot express it -- `nats sub` holds exactly one subscription
 # and Ctrl-C closes rather than drains. This runs one warehouse member
-# of the queue group; the drain call that rotates it out is in the
-# client tabs.
+# of the queue group; the drain call that rotates it out is a
+# client-library call.
 
 nats sub "orders.>" \
   --queue warehouse \

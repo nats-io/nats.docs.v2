@@ -7,7 +7,7 @@ description: Find out why a published message never arrived, using a wire tap, t
 
 # Debugging delivery
 
-You publish an `orders.created` message and the warehouse never packs the
+You publish an `orders.created` message and no packer packs the
 box. The publish returned without an error, so the message left your
 client, but nothing arrived. In core NATS that has one of three causes:
 
@@ -88,8 +88,9 @@ subscriptions it holds right now.
 `subs=1` adds a `subscriptions_list`, one entry per subscription, with the
 account, the subject, and the connection id (`cid`) behind it. `acc=$G`
 scopes the counts to your own account; without it, `num_subscriptions`
-spans every account, including the internal subscriptions the server keeps
-in the system account. The `test` parameter then answers the delivery
+spans every account, including the system account's. Even scoped, the
+list carries a few `$SYS.REQ.*` service subscriptions the server keeps in
+every account — they show up next to your own. The `test` parameter then answers the delivery
 question directly: give it the literal subject you published, and `/subsz`
 returns only the subscriptions that a message on that subject would match,
 wildcards included.

@@ -9,7 +9,7 @@
 # The nats CLI has no scriptable "publish after drain" path: once it
 # unsubscribes on Ctrl-C it exits, so there is no later publish to reject.
 # The CLI cannot race a drain, so this snippet only carries the message
-# shape. The teaching point lives in the client tabs: handle the draining
+# shape. The teaching point is for client code: handle the draining
 # error from a publish issued after Drain() instead of assuming the call
 # succeeded -- drain last, after the application has stopped producing. Do
 # not interleave a final "shutting down" publish with the shutdown.
