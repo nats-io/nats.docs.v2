@@ -11,7 +11,7 @@ The `billing` consumer from the previous page reads every message in
 the `ORDERS` stream — no filter, the whole log.
 
 A reporting job needs only one thing: when an order ships. It has no use for
-`orders.created` or `orders.cancelled`, so delivering those messages to it
+`orders.created` or `orders.canceled`, so delivering those messages to it
 would be wasted work on both sides.
 
 This page adds a second consumer that reads only `orders.shipped`, and shows
@@ -40,7 +40,7 @@ Create the `analytics` consumer with a filter of `orders.shipped`:
 
 The new flag is `--filter`. It ties the consumer to a single filter subject.
 A message on `orders.shipped` reaches `analytics`; a message on
-`orders.created` or `orders.cancelled` does not.
+`orders.created` or `orders.canceled` does not.
 
 Ask the server to describe the consumer:
 
@@ -157,7 +157,7 @@ When a pull comes back empty, run `nats consumer info` and check the
 
 **Expecting a filter to delete from the stream.** A filter narrows one
 consumer's view; it never removes messages. After `analytics` reads
-`orders.shipped`, every `orders.created` and `orders.cancelled` message is
+`orders.shipped`, every `orders.created` and `orders.canceled` message is
 still stored and still readable by `billing`. Don't use a filter to
 prune a stream. What stays and what ages out is controlled by the
 stream's limits, covered in [Shaping the stream](/learn/jetstream/shaping-the-stream),

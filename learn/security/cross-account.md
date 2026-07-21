@@ -198,7 +198,7 @@ configuration.
 
 Sharing one subject changes nothing else. `analytics-reader` still
 sees only `orders.shipped`. Subscribing to `orders.created` or
-`orders.cancelled` delivers nothing, because those subjects were never
+`orders.canceled` delivers nothing, because those subjects were never
 exported.
 
 The boundary stays closed by default and opens one named subject at a

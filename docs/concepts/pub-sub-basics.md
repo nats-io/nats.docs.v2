@@ -85,7 +85,7 @@ NATS subjects support hierarchical naming using dots (`.`) as delimiters:
 ```text
 orders.us.created
 orders.eu.created
-orders.us.cancelled
+orders.us.canceled
 ```
 
 This creates logical namespaces for organizing your messages. You can use wildcards to subscribe across hierarchies — `orders.*.created` catches orders from any region.

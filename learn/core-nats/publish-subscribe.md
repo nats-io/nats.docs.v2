@@ -21,7 +21,7 @@ one is a message on its own subject:
 ```
 orders.created
 orders.shipped
-orders.cancelled
+orders.canceled
 ```
 
 Every message in this chapter carries the same small JSON payload:
