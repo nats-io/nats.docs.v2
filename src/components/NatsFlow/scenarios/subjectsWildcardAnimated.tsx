@@ -139,11 +139,11 @@ function SubjectsWildcardAnimatedInner({
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
       data: {
+        bow: 55,
         color: '#3b82f6', // Blue (from publisher 2)
         animated: true,
         delay: 5000, // Starts after message reaches server from pub 2
         interval: 10000, // Repeat every 10 seconds
-        label: 'orders.retail.*',
       },
     },
   ];

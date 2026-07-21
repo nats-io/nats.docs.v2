@@ -193,6 +193,8 @@ function MirrorFailoverAnimatedInner({
         id: `mirror-${stage}`,
         source: "site1",
         target: "site2",
+        sourceHandle: "bottom-out",
+        targetHandle: "top-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },

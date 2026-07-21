@@ -110,21 +110,21 @@ function DrainVsCloseAnimatedInner({
         {
             id: "closeApp",
             type: "publisher",
-            position: { x: -40, y: 30 },
+            position: { x: -56, y: 30 },
             data: { label: "App (Close)" },
             style: dimStyle(false),
         },
         {
             id: "closeSub",
             type: "subscriber",
-            position: { x: 210, y: 30 },
+            position: { x: 294, y: 30 },
             data: { label: "orders.* sub" },
             style: dimStyle(closeTorn),
         },
         {
             id: "closeServer",
             type: "server",
-            position: { x: 460, y: 30 },
+            position: { x: 644, y: 30 },
             data: { label: "server" },
             style: dimStyle(false),
         },
@@ -132,21 +132,21 @@ function DrainVsCloseAnimatedInner({
         {
             id: "drainApp",
             type: "publisher",
-            position: { x: -40, y: 250 },
+            position: { x: -56, y: 250 },
             data: { label: "App (Drain)" },
             style: dimStyle(false),
         },
         {
             id: "drainSub",
             type: "subscriber",
-            position: { x: 210, y: 250 },
+            position: { x: 294, y: 250 },
             data: { label: "orders.* sub" },
             style: dimStyle(drainClosed),
         },
         {
             id: "drainServer",
             type: "server",
-            position: { x: 460, y: 250 },
+            position: { x: 644, y: 250 },
             data: { label: "server" },
             style: dimStyle(false),
         },
@@ -249,6 +249,7 @@ function DrainVsCloseAnimatedInner({
                 : stage === "drainFlush"
                 ? "flush"
                 : undefined,
+            labelOffset: -72,
             labelColor: stage === "drainUnsub" ? SUCCESS_COLOR : MSG_COLOR,
             animated: stage === "drainUnsub" || stage === "drainFlush",
             interval: 1500,
@@ -294,6 +295,7 @@ function DrainVsCloseAnimatedInner({
                 ? MSG_COLOR
                 : IDLE_COLOR,
             label: drainClosed ? "closed" : undefined,
+            labelOffset: -72,
             labelColor: SUCCESS_COLOR,
             animated: stage === "drainFlush",
             interval: 1500,

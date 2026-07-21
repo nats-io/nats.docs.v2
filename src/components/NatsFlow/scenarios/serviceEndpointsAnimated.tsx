@@ -99,20 +99,20 @@ function ServiceEndpointsAnimatedInner({
         {
             id: "server",
             type: "server",
-            position: { x: 200, y: 150 },
+            position: { x: 260, y: 150 },
             data: { label: "server" },
         },
         {
             id: "service",
             type: "service",
-            position: { x: 400, y: 150 },
+            position: { x: 520, y: 150 },
             data: { label: "inventory svc" },
         },
         // --- Endpoint: check (exact subject) ---
         {
             id: "check",
             type: "service",
-            position: { x: 620, y: 60 },
+            position: { x: 806, y: 60 },
             data: { label: "check" },
             style: {
                 opacity: !checkActive && (quoteActive) ? 0.4 : 1,
@@ -124,7 +124,7 @@ function ServiceEndpointsAnimatedInner({
         {
             id: "quote",
             type: "service",
-            position: { x: 620, y: 250 },
+            position: { x: 806, y: 250 },
             data: { label: "quote" },
             style: {
                 opacity: !quoteActive && checkActive ? 0.4 : 1,
@@ -183,6 +183,7 @@ function ServiceEndpointsAnimatedInner({
         id: `service-check-${stage}`,
         source: "service",
         target: "check",
+        sourceHandle: "out-right",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
@@ -205,6 +206,7 @@ function ServiceEndpointsAnimatedInner({
         id: `service-quote-${stage}`,
         source: "service",
         target: "quote",
+        sourceHandle: "out-right",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },

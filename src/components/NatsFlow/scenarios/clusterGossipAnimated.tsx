@@ -77,19 +77,19 @@ function ClusterGossipAnimatedInner({
         {
             id: "n1",
             type: "server",
-            position: { x: 60, y: 70 },
+            position: { x: 72, y: 70 },
             data: { label: "n1-east" },
         },
         {
             id: "n2",
             type: "server",
-            position: { x: 380, y: 70 },
+            position: { x: 456, y: 70 },
             data: { label: "n2-east" },
         },
         {
             id: "n3",
             type: "server",
-            position: { x: 220, y: 290 },
+            position: { x: 264, y: 290 },
             data: { label: "n3-east" },
             style: {
                 opacity: n3Known ? 1 : 0.3,
@@ -120,6 +120,7 @@ function ClusterGossipAnimatedInner({
                 ? SUCCESS_COLOR
                 : IDLE_COLOR,
             label: "explicit route",
+            labelOffset: 26,
             labelColor: explicitActive
                 ? MSG_COLOR
                 : explicitFormed
@@ -138,6 +139,8 @@ function ClusterGossipAnimatedInner({
             id: `info-n2-n1-${stage}`,
             source: "n2",
             target: "n1",
+            sourceHandle: "reply-out",
+            targetHandle: "reply-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
@@ -160,6 +163,8 @@ function ClusterGossipAnimatedInner({
             id: `r-n1-n3-${stage}`,
             source: "n1",
             target: "n3",
+            sourceHandle: "bottom-out",
+            targetHandle: "top-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
@@ -180,6 +185,8 @@ function ClusterGossipAnimatedInner({
             id: "r-n2-n3-mesh",
             source: "n2",
             target: "n3",
+            sourceHandle: "bottom-out",
+            targetHandle: "top-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },

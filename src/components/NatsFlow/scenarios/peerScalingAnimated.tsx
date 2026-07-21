@@ -101,7 +101,7 @@ function PeerScalingAnimatedInner({
         {
             id: "n1",
             type: "server",
-            position: { x: 90, y: 60 },
+            position: { x: 108, y: 60 },
             data: { label: "n1-east (leader)" },
             style: {
                 outline: `2px solid ${NAVY}`,
@@ -112,20 +112,20 @@ function PeerScalingAnimatedInner({
         {
             id: "n2",
             type: "server",
-            position: { x: 380, y: 50 },
+            position: { x: 456, y: 50 },
             data: { label: "n2-east" },
         },
         {
             id: "n3",
             type: "server",
-            position: { x: 150, y: 280 },
+            position: { x: 180, y: 280 },
             data: { label: "n3-east" },
         },
         // --- New peer joining / leaving ---
         {
             id: "n4",
             type: "server",
-            position: { x: 470, y: 270 },
+            position: { x: 564, y: 270 },
             data: {
                 label: n4InGroup ? "n4-east" : "n4-east (new)",
             },
@@ -140,9 +140,24 @@ function PeerScalingAnimatedInner({
     const edges: any[] = [];
 
     // --- Existing RAFT mesh among the three established peers ---
-    const meshMeta: Array<{ id: string; source: string; target: string }> = [
+    const meshMeta: Array<
+        {
+            id: string;
+            source: string;
+            target: string;
+            sourceHandle?: string;
+            targetHandle?: string;
+        }
+    > = [
         { id: "m-n1-n2", source: "n1", target: "n2" },
-        { id: "m-n2-n3", source: "n2", target: "n3" },
+        // n3 sits to n2's left, so this hop leaves from n2's left edge.
+        {
+            id: "m-n2-n3",
+            source: "n2",
+            target: "n3",
+            sourceHandle: "reply-out",
+            targetHandle: "reply-in",
+        },
         { id: "m-n1-n3", source: "n1", target: "n3" },
     ];
 
@@ -154,12 +169,16 @@ function PeerScalingAnimatedInner({
             id: `${m.id}-${stage}`,
             source: m.source,
             target: m.target,
+            ...(m.sourceHandle
+                ? { sourceHandle: m.sourceHandle, targetHandle: m.targetHandle }
+                : {}),
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
             data: {
                 color: carriesProposal ? MSG_COLOR : IDLE_COLOR,
                 label: "RAFT",
+                labelOffset: 26,
                 labelColor: carriesProposal ? MSG_COLOR : "#64748b",
                 animated: carriesProposal,
                 interval: 1500,
@@ -225,6 +244,8 @@ function PeerScalingAnimatedInner({
             id: "n2-n4-caughtup",
             source: "n2",
             target: "n4",
+            sourceHandle: "bottom-out",
+            targetHandle: "top-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },

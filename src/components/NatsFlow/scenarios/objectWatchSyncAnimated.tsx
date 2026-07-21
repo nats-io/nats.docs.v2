@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, SubscriberNode } from "../nodes";
+import { PublisherNode, ServerNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     subscriber: SubscriberNode,
     server: ServerNode,
@@ -110,9 +111,9 @@ function ObjectWatchSyncAnimatedInner({
         },
         {
             id: "server",
-            type: "server",
+            type: "box",
             position: { x: 230, y: 130 },
-            data: { label: "INVOICES" },
+            data: { label: "INVOICES", subtitle: "object store" },
         },
         {
             id: "watcher",
@@ -167,11 +168,16 @@ function ObjectWatchSyncAnimatedInner({
             id: "fetch-req",
             source: "watcher",
             target: "server",
+            // Points back at the store, so it runs right to left in its own
+            // lane under the watch updates coming the other way.
+            sourceHandle: "out-left",
+            targetHandle: "reply-in",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
             style: { opacity: 1 },
             data: {
+                bow: 55,
                 color: SUCCESS_COLOR,
                 label: "get invoice-7841 bytes",
                 labelColor: SUCCESS_COLOR,

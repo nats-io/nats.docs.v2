@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ServerNode, ServiceNode } from "../nodes";
+import { ServerNode, ServiceNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     service: ServiceNode,
     server: ServerNode,
 };
@@ -97,11 +98,12 @@ function KvCasRetryAnimatedInner({
         // --- The KV bucket, backed by a stream on the server ---
         {
             id: "kv",
-            type: "server",
+            type: "box",
             position: { x: 360, y: 150 },
             data: {
                 label: "KV_INVENTORY",
-                subline: `widget-blue · rev ${revision}`,
+                // Was `subline`, which no node type has ever rendered.
+                subtitle: `widget-blue · rev ${revision}`,
             },
         },
         // --- The concurrent writer that races the service ---
@@ -153,6 +155,7 @@ function KvCasRetryAnimatedInner({
         id: `inv-kv-${stage}`,
         source: "inventory",
         target: "kv",
+        sourceHandle: "out-right",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
@@ -170,6 +173,8 @@ function KvCasRetryAnimatedInner({
         id: `writer-kv-${stage}`,
         source: "writer",
         target: "kv",
+        sourceHandle: "out-bottom",
+        targetHandle: "top-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },

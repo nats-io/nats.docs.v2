@@ -102,19 +102,19 @@ function ResolverPushAnimatedInner({
         {
             id: "workstation",
             type: "service",
-            position: { x: 20, y: 40 },
+            position: { x: 28, y: 40 },
             data: { label: "workstation (nats auth)" },
         },
         {
             id: "server",
             type: "server",
-            position: { x: 300, y: 150 },
+            position: { x: 420, y: 150 },
             data: { label: "acme-1" },
         },
         {
             id: "order-svc",
             type: "publisher",
-            position: { x: 20, y: 260 },
+            position: { x: 28, y: 260 },
             data: { label: "order-svc" },
             style: {
                 opacity: active === "push" || active === "store" ? 0.6 : 1,
@@ -137,6 +137,7 @@ function ResolverPushAnimatedInner({
             id: "e-ws-server-push",
             source: "workstation",
             target: "server",
+            sourceHandle: "out-right",
             type: "animated",
             animated: true,
             markerEnd: { type: MarkerType.ArrowClosed },
@@ -153,6 +154,7 @@ function ResolverPushAnimatedInner({
             id: `e-ws-server-idle-${active}`,
             source: "workstation",
             target: "server",
+            sourceHandle: "out-right",
             type: "animated",
             animated: false,
             markerEnd: { type: MarkerType.ArrowClosed },
@@ -178,7 +180,7 @@ function ResolverPushAnimatedInner({
                 // Freeze the connect edge during verify: the line stays
                 // blue, only the bubble stops while the overlays pulse.
                 animated: active === "connect",
-                label: "connect: user JWT + signed challenge (creds)",
+                label: "user JWT + signed challenge",
                 labelColor: CONNECT_COLOR,
                 interval: 1500,
             },

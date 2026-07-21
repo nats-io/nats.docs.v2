@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, SubscriberNode } from "../nodes";
+import { PublisherNode, ServerNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     subscriber: SubscriberNode,
     server: ServerNode,
@@ -99,14 +100,14 @@ function MonitoringEndpointsAnimatedInner({
         {
             id: "n1",
             type: "server",
-            position: { x: 240, y: 140 },
+            position: { x: 324, y: 140 },
             data: { label: "n1-east :8222" },
         },
         // --- Endpoint result cards (light up only when queried) ---
         {
             id: "varz",
-            type: "subscriber",
-            position: { x: 500, y: 20 },
+            type: "box",
+            position: { x: 675, y: 20 },
             data: { label: "/varz JSON" },
             style: {
                 opacity: activeCard === "varz" ? 1 : 0.4,
@@ -116,8 +117,8 @@ function MonitoringEndpointsAnimatedInner({
         },
         {
             id: "connz",
-            type: "subscriber",
-            position: { x: 500, y: 150 },
+            type: "box",
+            position: { x: 675, y: 150 },
             data: { label: "/connz JSON" },
             style: {
                 opacity: activeCard === "connz" ? 1 : 0.4,
@@ -127,8 +128,8 @@ function MonitoringEndpointsAnimatedInner({
         },
         {
             id: "jsz",
-            type: "subscriber",
-            position: { x: 500, y: 280 },
+            type: "box",
+            position: { x: 675, y: 280 },
             data: { label: "/jsz JSON" },
             style: {
                 opacity: activeCard === "jsz" ? 1 : 0.4,

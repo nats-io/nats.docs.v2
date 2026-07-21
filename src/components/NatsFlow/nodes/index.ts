@@ -1,4 +1,5 @@
-export { BaseNode } from './BaseNode';
+export { BaseNode, nodeLabel, nodeStack, nodeSubLabel } from './BaseNode';
+export { BoxNode } from './BoxNode';
 export { PublisherNode } from './PublisherNode';
 export { SubscriberNode } from './SubscriberNode';
 export { ServiceNode } from './ServiceNode';

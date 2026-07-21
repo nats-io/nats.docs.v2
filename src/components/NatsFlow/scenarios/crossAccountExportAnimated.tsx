@@ -323,8 +323,8 @@ function CrossAccountExportAnimatedInner({
                     <div
                         style={{
                             position: "absolute",
-                            bottom: "-12px",
-                            left: "8px",
+                            bottom: "10px",
+                            left: "10px",
                             ...badgeStyle(),
                         }}
                     >
@@ -367,8 +367,8 @@ function CrossAccountExportAnimatedInner({
                     <div
                         style={{
                             position: "absolute",
-                            top: "-12px",
-                            right: "8px",
+                            bottom: "10px",
+                            right: "10px",
                             ...badgeStyle(),
                         }}
                     >

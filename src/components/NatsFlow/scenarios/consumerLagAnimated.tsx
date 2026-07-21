@@ -6,10 +6,11 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { PublisherNode, ServerNode, SubscriberNode } from "../nodes";
+import { PublisherNode, ServerNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
 const nodeTypes = {
+    box: BoxNode,
     publisher: PublisherNode,
     subscriber: SubscriberNode,
     server: ServerNode,
@@ -100,9 +101,9 @@ function ConsumerLagAnimatedInner({
         },
         {
             id: "stream",
-            type: "server",
+            type: "box",
             position: { x: 210, y: 60 },
-            data: { label: `ORDERS  LastSeq ${lastSeq}` },
+            data: { label: `ORDERS  LastSeq ${lastSeq}`, subtitle: "stream" },
         },
         {
             id: "cursor",
@@ -155,6 +156,8 @@ function ConsumerLagAnimatedInner({
         id: `stream-cursor-${stage}`,
         source: "stream",
         target: "cursor",
+        sourceHandle: "bottom-out",
+        targetHandle: "top-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },

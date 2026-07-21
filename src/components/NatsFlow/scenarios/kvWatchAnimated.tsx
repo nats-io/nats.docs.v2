@@ -6,10 +6,47 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ServerNode, ServiceNode, SubscriberNode } from "../nodes";
+import { ServerNode, ServiceNode, SubscriberNode, BoxNode } from "../nodes";
 import { AnimatedEdge } from "../edges";
 
+// The server boundary the bucket and its consumer live inside. Drawn as a node
+// rather than an overlay so it scales and stays aligned with what it encloses.
+function BoundaryNode({ data }: { data: any }) {
+    return (
+        <div
+            style={{
+                width: data.width,
+                height: data.height,
+                border: "1px dashed #94a3b8",
+                borderRadius: "10px",
+                background: "rgba(148, 163, 184, 0.05)",
+                position: "relative",
+                pointerEvents: "none",
+            }}
+        >
+            <span
+                style={{
+                    position: "absolute",
+                    top: "-9px",
+                    left: "12px",
+                    background: "#ffffff",
+                    padding: "0 6px",
+                    fontSize: "10px",
+                    fontWeight: 600,
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                    color: "#6b7280",
+                }}
+            >
+                {data.label}
+            </span>
+        </div>
+    );
+}
+
 const nodeTypes = {
+    boundary: BoundaryNode,
+    box: BoxNode,
     subscriber: SubscriberNode,
     service: ServiceNode,
     server: ServerNode,
@@ -75,32 +112,47 @@ function KvWatchAnimatedInner({
     // The ordered consumer only exists once the watch is open.
     const consumerLive = stage !== "open" ? 1 : 0.35;
 
+    // The bucket and the consumer both live on the server — the consumer is a
+    // cursor over the bucket's backing stream, not a hop on the wire between
+    // the server and the client. Only one link crosses the boundary.
     const nodes: any[] = [
+        {
+            id: "server-boundary",
+            type: "boundary",
+            position: { x: 20, y: 40 },
+            data: { label: "NATS server", width: 300, height: 330 },
+            zIndex: 0,
+            selectable: false,
+            draggable: false,
+        },
         // The backing KV store (a JetStream stream under the hood).
         {
             id: "kv",
-            type: "server",
-            position: { x: 80, y: 150 },
-            data: { label: "KV_INVENTORY" },
+            type: "box",
+            position: { x: 70, y: 90 },
+            data: { label: "KV_INVENTORY", subtitle: "KV bucket" },
+            zIndex: 1,
         },
-        // The ephemeral ordered consumer created for this watch.
+        // The ephemeral ordered consumer this watch creates, inside the server.
         {
             id: "consumer",
             type: "service",
-            position: { x: 340, y: 150 },
+            position: { x: 70, y: 265 },
             data: { label: "ordered consumer" },
+            zIndex: 1,
             style: {
                 opacity: consumerLive,
                 filter: stage === "open" ? "grayscale(0.6)" : "none",
                 transition: "opacity 0.4s ease, filter 0.4s ease",
             },
         },
-        // The client watching for changes.
+        // The client watching for changes, outside the server.
         {
             id: "watcher",
             type: "subscriber",
-            position: { x: 600, y: 150 },
+            position: { x: 560, y: 180 },
             data: { label: "warehouse-dashboard" },
+            zIndex: 1,
         },
     ];
 
@@ -111,13 +163,17 @@ function KvWatchAnimatedInner({
         id: `open-${stage}`,
         source: "watcher",
         target: "kv",
+        sourceHandle: "out-left",
+        targetHandle: "reply-in",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { opacity: stage === "open" ? 1 : 0.3 },
         data: {
+            bow: -60,
             color: stage === "open" ? MSG_COLOR : IDLE_COLOR,
             label: stage === "open" ? "watch()" : undefined,
+            labelOffset: -18,
             labelColor: ACCENT_NAVY,
             animated: stage === "open",
             interval: 1500,
@@ -132,6 +188,8 @@ function KvWatchAnimatedInner({
         id: `kv-consumer-${stage}`,
         source: "kv",
         target: "consumer",
+        sourceHandle: "bottom-out",
+        targetHandle: "in-top",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
@@ -160,6 +218,7 @@ function KvWatchAnimatedInner({
         id: `consumer-watcher-${stage}`,
         source: "consumer",
         target: "watcher",
+        sourceHandle: "out-right",
         type: "animated",
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed },
