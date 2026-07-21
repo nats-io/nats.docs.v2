@@ -80,8 +80,9 @@ that another packer already took.
 ## How the server picks a member
 
 The server keeps the live members of a group in a list. For each message,
-it picks a random index into that list and delivers to that member. The
-selection is uniform-random across the available members.
+it picks a random index into that list and delivers to that member. On a
+single server the selection is uniform-random across the available
+members; a cluster adds a locality preference, covered below.
 
 Random selection has one consequence: the server doesn't rotate fairly
 through the members the way round-robin would. The same packer can be
@@ -197,10 +198,11 @@ Your running session now looks like this:
 - `analytics` still a plain subscriber on `orders.created`, seeing every
   order, undisturbed by the group.
 
-You can do load-balanced *work* now. The piece you haven't seen is
-load-balanced *requests*: many copies of a service answering on one
-subject, each request handled once. That's a queue group applied to
-request-reply, and it leads straight into the next pattern.
+You can do load-balanced *work* now, and the same mechanics apply to
+request-reply: a queue group of responders on one subject answers each
+request exactly once. The next pattern is the opposite case — one request
+where you *want* every responder to answer, and you gather all the
+replies.
 
 ## What's next
 

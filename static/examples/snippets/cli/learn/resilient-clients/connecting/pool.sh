@@ -7,8 +7,8 @@
 # sent.
 #
 # --connection-name labels the connection. The CLI does not expose the
-# connect-timeout knob (the client libraries do) — see the other tabs for
-# setting the timeout that bounds how long each dial may block.
+# connect-timeout knob; in a client library, set the timeout that bounds
+# how long each dial may block.
 
 nats pub orders.created \
   '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}' \

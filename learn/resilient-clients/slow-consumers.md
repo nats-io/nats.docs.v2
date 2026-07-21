@@ -40,8 +40,8 @@ The problem is what the buffer does by default when the burst is *not*
 brief.
 
 By default the pending buffer has generous built-in limits: 500,000
-messages and 64 MB in the Go client, and comparable caps in Python and
-Java. Those caps stop the buffer from growing without end, but they're
+messages and 64 MB in the Go client, and similarly large caps in Python
+and Java. Those caps stop the buffer from growing without end, but they're
 sized for a typical workload, not yours. A high-rate subject or large
 messages can fill 64 MB in seconds, and a `warehouse` that stays behind
 hits that default and starts dropping messages, often well before you'd
@@ -74,8 +74,8 @@ to every subscription. Rust and C# cap message count only, not bytes.
 
 Set `warehouse`'s pending limits so its buffer is bounded instead of
 open-ended. The CLI can't set this knob; it's a client-library call. So
-the CLI tab shows the closest thing, a plain subscribe, and the client
-tabs carry the actual limit:
+the CLI example shows the closest thing, a plain subscribe, and the text
+above names the actual limit calls:
 
 <div class="nats-example" data-type="learn-resilient-clients-slow-consumers-pending-limits" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

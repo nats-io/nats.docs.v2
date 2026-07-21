@@ -6,7 +6,8 @@
 # /subsz lists the subscriptions the server holds right now. subs=1 adds the
 # per-subscription detail (account, subject, cid) on top of the summary counts.
 # acc=$G scopes the counts to your own account; without it num_subscriptions
-# spans every account, including the internal subscriptions in the system account.
+# spans every account, including the system account. Even scoped, a few
+# $SYS.REQ.* service subscriptions the server keeps in every account show up.
 curl -s 'http://localhost:8222/subsz?subs=1&acc=$G' | jq
 
 # The test parameter answers "who would receive a publish to THIS subject?"

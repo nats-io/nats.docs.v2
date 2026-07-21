@@ -11,7 +11,7 @@
 #   >>> Discovered new servers, known servers are now ...
 #
 # followed by the full pool. The client libraries expose the same
-# signal as a callback or event -- see the other tabs.
+# signal as a callback or event.
 
 nats sub "orders.>" \
   --server nats://n1:4222 \

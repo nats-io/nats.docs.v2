@@ -131,8 +131,7 @@ auth error twice in a row; the `IgnoreAuthErrorAbort()` option opts out.
 nats.js aborts the reconnect after two auth errors in a row unless
 `ignoreAuthErrorAbort` is set. nats.net stops retrying when the same auth
 error repeats twice in a row, with the same-named opt-out. nats.java closes
-when a server returns the same auth error twice without a successful
-connection in between. In all four, the abort applies regardless of the retry
+when the same server returns the same auth error twice. In all four, the abort applies regardless of the retry
 budget: unlimited reconnects don't override it. nats.py and nats.rs have no
 abort rule — a rejection counts as one more failed attempt, so nats.py keeps
 cycling until every server exceeds `max_reconnect_attempts` (60 by default)

@@ -11,7 +11,7 @@
 # With the CLI a failed connect prints the reason and exits non-zero, so
 # you can branch on it. The client libraries surface the same two cases as
 # distinct errors (an auth error vs. a TLS error) on connect and on the
-# disconnect/error callback during a reconnect — see the other tabs. In
+# disconnect/error callback during a reconnect. In
 # nats.go the authorization side arrives as one of ErrAuthorization,
 # ErrAuthExpired, ErrAuthRevoked, ErrPermissionViolation, or
 # ErrMaxConnectionsExceeded. Other clients split these differently: nats.py

@@ -2,7 +2,7 @@
 # Watch the full connection event surface from the CLI.
 #
 # The CLI wires every connection event handler itself, so there are no
-# flags for wiring your own — the client tabs show that. What the CLI
+# flags for wiring your own — that wiring is a client-library call. What the CLI
 # does offer is the output of those handlers: with --trace it prints a
 # ">>>" line per event. Restart a server in the pool and you see:
 #

@@ -5,7 +5,7 @@
 # dropped message is reported only through the connection's async error
 # callback. The CLI does not expose either knob — both are client-library
 # calls (SetPendingLimits plus the async-error handler) — so this stands
-# in for them with a named async subscribe. The other tabs set the limit
+# in for them with a named async subscribe. In a client library you set the limit
 # and wire a callback that logs the slow-consumer error loudly.
 #
 # Flood orders.> faster than the handler drains it to trigger the signal;

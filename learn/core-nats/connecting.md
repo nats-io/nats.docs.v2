@@ -43,7 +43,7 @@ publish and subscribe is the pattern the clients are built for.
 ## The connect URL
 
 The client opens a connection by dialing a **connect URL**: the address of the
-server, in the form `nats://host:port`. Servers listen on port **4222** by
+server, in the form `nats://host:port`. Servers listen on port 4222 by
 default, so a server on your own machine is `nats://127.0.0.1:4222`. That's also
 what a client dials when you don't give it a URL, and what the `nats` CLI uses
 until you point it elsewhere with `--server` or a saved context.

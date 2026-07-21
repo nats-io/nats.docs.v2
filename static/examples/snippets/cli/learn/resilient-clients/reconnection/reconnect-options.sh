@@ -5,7 +5,7 @@
 #
 # The CLI reconnects automatically and cannot script every client
 # option (ReconnectWait, ReconnectJitter, a negative MaxReconnect for
-# unlimited retries) the way the library tabs do. What it can show is
+# unlimited retries) the way the client libraries do. What it can show is
 # the pool itself: pass the whole cluster as the server list so the
 # client has somewhere to fail over to when one node goes away.
 #

@@ -7,7 +7,7 @@
 # and exits non-zero -- the message never reaches the server.
 nats pub "orders.us created" '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
 
-# (An older client -- nats.go before v1.49.0 -- or a raw-protocol writer skips
+# (An older client -- nats.go before v1.48.0 -- or a raw-protocol writer skips
 # this check and would instead misroute silently: the server would read
 # "orders.us" as the subject and "created" as a reply subject.)
 

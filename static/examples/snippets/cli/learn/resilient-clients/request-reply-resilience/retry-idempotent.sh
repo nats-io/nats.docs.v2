@@ -3,7 +3,7 @@
 # key the request by order_id so a duplicate is a no-op on the responder.
 #
 # The CLI does not expose a per-failure backoff strategy the way the
-# client libraries do (see the other tabs for fast-retry-on-timeout vs
+# client libraries do (fast-retry-on-timeout vs
 # exponential-backoff-on-no-responders). Here we show the same shape with
 # a bounded loop and growing waits, and we keep the payload -- including
 # its order_id -- byte-identical on every attempt so the inventory

@@ -35,7 +35,7 @@ The client has to re-send its subscriptions because the server keeps no
 per-client memory. A subscription exists only as an entry in the server's
 in-memory interest graph, tied to one socket. When that socket dies the entry
 is gone, and to the server the reconnecting client is a brand-new connection.
-So the `warehouse` subscriber's interest in `orders.created` isn't restored
+So a packer's interest in `orders.created` isn't restored
 by the server; the client library restores it by subscribing again.
 
 That leaves the messages, and the client treats the ones you send and the
@@ -52,7 +52,7 @@ without limit. Sizing it, and handling that overflow, belongs to
 The messages *other* publishers send while you're away are gone, and no
 buffer on your side can change that. Core NATS is
 [at-most-once](/learn/core-nats/publish-subscribe#at-most-once-delivery):
-while the `warehouse` subscription is missing, an `orders.created` message
+while your subscription is missing, an `orders.created` message
 from another service finds no interest to match, so the server discards it.
 When you reconnect your subscription is back, but that message was never kept
 and isn't coming.
@@ -125,9 +125,10 @@ accepting new connections, announces to every connected client that it's
 about to go away, and then closes the existing ones gradually rather than
 all at once.
 
-From the client's side this is a gentler disconnect. A client told its server
-is draining can reconnect to another server in the pool *before* its socket is
-cut, so it moves without ever seeing a hard drop. Even a client that does
+From the client's side this is a gentler disconnect. A client that watches
+for the notice can reconnect to another server in the pool *before* its
+socket is cut — the lame-duck callback wired to a forced reconnect — and
+move without ever seeing a hard drop. Even a client that does
 nothing special is disconnected in a spread-out wave, instead of every client
 on the server reconnecting at the same instant.
 

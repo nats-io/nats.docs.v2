@@ -6,7 +6,7 @@
 #
 # The CLI does not expose a separate drain-timeout flag -- its global
 # --timeout bounds how long a single operation waits. The point this
-# snippet stands in for is the client tabs: size the drain timeout to your
+# snippet stands in for lives in client code: size the drain timeout to your
 # slowest handler so a clean shutdown does not silently drop work.
 #
 # This publishes the canonical order event with a generous operation

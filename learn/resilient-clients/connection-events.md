@@ -82,8 +82,8 @@ JavaScript's `update` status carries the change itself: which servers
 were added and which were deleted.
 
 Wire the full surface on `order-svc` and log each event as it arrives.
-The CLI wires all of these handlers internally, so its tab watches the
-events rather than wiring them:
+The CLI wires all of these handlers internally, so its example watches
+the events rather than wiring them:
 
 <div class="nats-example" data-type="learn-resilient-clients-connection-events-watch-events" data-languages="cli,js,go,python,java,rust,csharp"></div>
 
@@ -186,8 +186,8 @@ round trip, each against a warning and a critical threshold, then exits
 with the Nagios convention's code: 0 OK, 1 warning, 2 critical, 3
 unknown. `--format` switches the output between `nagios`, `json`,
 `prometheus`, and `text`. An external probe tells you the pool is
-reachable and fast — it can't read *your* process's connection state, so
-the client tabs carry the in-process check:
+reachable and fast — it can't read *your* process's connection state; the
+in-process check is a client-library call:
 
 <div class="nats-example" data-type="learn-resilient-clients-connection-events-health-check" data-languages="cli,js,go,python,java,rust,csharp"></div>
 

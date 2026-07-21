@@ -3,7 +3,7 @@
 # Keep retrying through a long outage and make every disconnect and
 # reconnect visible.
 #
-# The library tabs set MaxReconnect to -1 (retry without limit) and
+# In a client library you set MaxReconnect to -1 (retry without limit) and
 # register a reconnect-error callback that logs each failed attempt.
 # The CLI has no callback to register. It always logs the disconnect;
 # --trace also makes it log each reconnect delay and the reconnect
