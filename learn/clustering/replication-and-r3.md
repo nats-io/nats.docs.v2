@@ -34,7 +34,7 @@ a three-peer stream. (If you ran the election exercise on
 runs at `R=3`; restart any server you stopped there, and read this as the
 create that stood it up.)
 
-<div class="nats-example" data-type="learn-clustering-replication-and-r3-createR3" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-clustering-replication-and-r3-createR3" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 `--replicas=3` is the whole change. Starting from the JetStream chapter's
 `R=1` stream instead, raise it in place with
@@ -166,7 +166,7 @@ you trust it.
 Check the leader and each replica's lag before assuming all copies are
 current:
 
-<div class="nats-example" data-type="learn-clustering-replication-and-r3-inspectReplicas" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-clustering-replication-and-r3-inspectReplicas" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **A `PubAck` proves quorum, not full replication.** The leader returns
 the `PubAck` the instant a quorum holds the entry: for `R=3`, the

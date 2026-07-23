@@ -40,7 +40,7 @@ Leave this running and open a new terminal for the next steps.
 
 Create a bucket called `profiles`. This is where your values will live.
 
-<div class="nats-example" data-type="tutorials-key-value-create-bucket" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-key-value-create-bucket" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see a confirmation with the bucket's configuration:
 
@@ -60,7 +60,7 @@ Configuration:
 Store a value under a key, then get it back. The key is `sue.color` and the
 value is `blue`.
 
-<div class="nats-example" data-type="tutorials-key-value-put-get" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-key-value-put-get" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The put echoes the value back, and the get returns the full entry:
 
@@ -78,7 +78,7 @@ You now have one value stored and confirmed.
 A watch streams every change to the bucket as it happens. Open a **second
 terminal** and start watching `profiles`.
 
-<div class="nats-example" data-type="tutorials-key-value-watch" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-key-value-watch" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The watch first replays the current value, then waits:
 
@@ -95,7 +95,7 @@ a value, and the watcher receives it live.
 
 Back in your **first terminal**, put a new value for the same key.
 
-<div class="nats-example" data-type="tutorials-key-value-update" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-key-value-update" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The put returns the new value:
 

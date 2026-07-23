@@ -34,7 +34,7 @@ has one endpoint, `quote`, and because you want it to answer on
 `shipping.quote` rather than on the bare name `quote`, you set the subject
 explicitly:
 
-<div class="nats-example" data-type="learn-services-endpoints-and-groups-secondService" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-endpoints-and-groups-secondService" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Two services now run against the same `nats-server`. `OrderInventory`
 answers on `orders.inventory.check`; `ShippingQuote` answers on
@@ -66,7 +66,7 @@ inside the `orders.inventory` group answers on `orders.inventory.check`;
 an endpoint named `reserve` answers on `orders.inventory.reserve`. You
 write the prefix once and the framework joins it to each endpoint name.
 
-<div class="nats-example" data-type="learn-services-endpoints-and-groups-addGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-endpoints-and-groups-addGroup" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The subject a caller sends to is always `{group}.{endpoint}`. There's no
 separate routing layer; the group is just a way to build the subject. A
@@ -96,7 +96,7 @@ them set anything, the endpoint falls back to `"q"`.
 You override the queue group on an endpoint with one option. Here `check`
 joins a custom queue group instead of the default `"q"`:
 
-<div class="nats-example" data-type="learn-services-endpoints-and-groups-customQueueGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-endpoints-and-groups-customQueueGroup" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Most services never need this. The default `"q"` already load-balances all
 instances of a service against each other, which is what you want almost
@@ -136,7 +136,7 @@ subset of endpoints to load-balance separately; never disable it on an
 endpoint that responds. Send a request and inspect the endpoint to confirm
 which queue group it joined (the default `"q"`, an override, or none):
 
-<div class="nats-example" data-type="learn-services-endpoints-and-groups-customQueueGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-endpoints-and-groups-customQueueGroup" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Endpoints are immutable once added.** There's no remove. You can't
 detach an endpoint, rename it, or change its subject on a running service.
@@ -151,7 +151,7 @@ running service to see exactly which endpoints, subjects, and queue groups
 it registered; to change any of them, stop the service and start a
 replacement:
 
-<div class="nats-example" data-type="learn-services-endpoints-and-groups-immutableEndpoints" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-endpoints-and-groups-immutableEndpoints" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

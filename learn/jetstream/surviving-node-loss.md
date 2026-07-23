@@ -180,7 +180,7 @@ On a cluster you raise the replica count with one command:
 
 <div class="nats-example"
      data-type="learn-jetstream-surviving-node-loss-set-replicas"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 This command needs a real cluster behind it. A single server rejects
 `--replicas=3`, because there aren't three servers to hold the three
@@ -210,7 +210,7 @@ count rather than assuming it.
 
 <div class="nats-example"
      data-type="learn-jetstream-surviving-node-loss-check-replicas"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Setting an even replica count.** Fault tolerance comes from a
 majority, and a majority needs an odd number. R=2 still has a single

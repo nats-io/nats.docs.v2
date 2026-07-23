@@ -36,7 +36,7 @@ changes with every published order.
 
 Read it with `nats stream info`, or fetch the same fields from any client:
 
-<div class="nats-example" data-type="learn-monitoring-jetstream-health-streamState" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-monitoring-jetstream-health-streamState" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The output has a configuration half and a state half. Only the state half
 moves. For the `ORDERS` stream it looks like this:
@@ -74,7 +74,7 @@ A consumer keeps its own state. Where the stream state describes what's
 Read it with `nats consumer info`, or with `consumer_info` from any
 client:
 
-<div class="nats-example" data-type="learn-monitoring-jetstream-health-consumerState" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-monitoring-jetstream-health-consumerState" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 For the `shipping` consumer the state half reads:
 
@@ -182,7 +182,7 @@ crashed workers is the combination: lag rising while **Waiting Pulls**
 (`num_waiting`) sits at `0` and `delivered.stream_seq` stops advancing.
 Read all three together:
 
-<div class="nats-example" data-type="learn-monitoring-jetstream-health-consumerState" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-monitoring-jetstream-health-consumerState" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 If `num_pending` is large and climbing while `num_waiting` is `0` and
 `delivered.stream_seq` hasn't moved, no worker is fetching and the pool is

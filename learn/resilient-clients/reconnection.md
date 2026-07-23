@@ -173,7 +173,7 @@ Here's `order-svc` connecting to the pool with reconnect tuned for a
 long-lived service: unlimited retries, a two-second base wait, and
 jitter left at its sensible default.
 
-<div class="nats-example" data-type="learn-resilient-clients-reconnection-reconnect-options" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-reconnection-reconnect-options" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The published message is the same canonical order shape used everywhere
 in this chapter:
@@ -277,7 +277,7 @@ silent. (The Rust and C# clients already retry forever by default.)
 Wire up unlimited retries and a callback that records every failed
 attempt, so a long outage is logged rather than silently fatal:
 
-<div class="nats-example" data-type="learn-resilient-clients-reconnection-handle-reconnect-errors" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-reconnection-handle-reconnect-errors" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Retry on a failed first connect hides a bad address.** With the
 opt-in from [Retrying the first connect](#retrying-the-first-connect)

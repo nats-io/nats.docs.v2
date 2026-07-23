@@ -42,7 +42,7 @@ single message is sent.
 Here's `order-svc` opening a named connection to a single server, the
 laptop setup from Core NATS:
 
-<div class="nats-example" data-type="learn-resilient-clients-connecting-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-connecting-basic" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Every example on this page publishes the same canonical order event:
 
@@ -69,7 +69,7 @@ restart of every `order-svc` instance doesn't overload one server.
 pool of three URLs the client can reach, not as a thing this chapter
 explains:
 
-<div class="nats-example" data-type="learn-resilient-clients-connecting-pool" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-connecting-pool" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Why the cluster exists, and how those three servers coordinate behind the
 pool, belongs to [Topologies → Your first
@@ -118,7 +118,7 @@ and when a server the client hasn't seen before joins the cluster, it logs
 `>>> Discovered new servers, known servers are now ...` with the whole
 pool:
 
-<div class="nats-example" data-type="learn-resilient-clients-connecting-discovered" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-connecting-discovered" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 All of this depends on the operator leaving advertising on: with
 `no_advertise` set in the cluster configuration, `INFO` carries no
@@ -240,7 +240,7 @@ Handle the connect failures at the boundary instead of letting them surface
 deep in the application. The handler branches on whether the client could
 reach any server in the pool at all:
 
-<div class="nats-example" data-type="learn-resilient-clients-connecting-handle-connect-error" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-connecting-handle-connect-error" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

@@ -141,7 +141,7 @@ change, wait for a named leader and a caught-up replacement, then the next.
 The handling is the verify step itself. Make exactly one change, then read
 the `Cluster` block back before going further:
 
-<div class="nats-example" data-type="learn-clustering-scaling-and-peers-peerRemove" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-clustering-scaling-and-peers-peerRemove" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 If that second `stream info` shows `no leader`, stop. You've lost
 quorum, and the fix is to restore a peer, not make another change.

@@ -57,7 +57,7 @@ A **publisher** is a client that sends a message to a subject. The
 warehouse doesn't subscribe to anything yet, so start by publishing
 one `orders.created` message:
 
-<div class="nats-example" data-type="learn-core-nats-publish-subscribe-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-publish-subscribe-publish" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The publish call returns immediately. It doesn't wait for a
 subscriber, and it doesn't tell you how many subscribers received the
@@ -75,7 +75,7 @@ A **subscriber** is a client that registers interest in a subject and
 receives a copy of every matching message. Start the warehouse service
 as a subscriber on `orders.created`:
 
-<div class="nats-example" data-type="learn-core-nats-publish-subscribe-subscribe" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-publish-subscribe-subscribe" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Now publish again with the snippet above. The warehouse receives the
 message. Run a second subscriber for `notifications` and a third for
@@ -106,7 +106,7 @@ subscription once it has delivered N messages. The CLI's `nats sub
 unsubscribing when it hits the limit. It fits a take-exactly-N flow,
 such as reading the next three orders and stopping.
 
-<div class="nats-example" data-type="learn-core-nats-publish-subscribe-unsubscribe-after-n" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-publish-subscribe-unsubscribe-after-n" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## The interest graph
 
@@ -212,7 +212,7 @@ maximum payload exceeded` before anything goes out; the connection
 stays up. Keep payloads under the limit and pass a reference for
 anything large.
 
-<div class="nats-example" data-type="learn-core-nats-publish-subscribe-check-max-payload" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-publish-subscribe-check-max-payload" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Exiting before the publish leaves the client drops it.** The publish
 call returns immediately because the client buffers the message and

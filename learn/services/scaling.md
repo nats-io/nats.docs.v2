@@ -46,7 +46,7 @@ NATS, now applied automatically across instances; the mechanics live on
 
 Start a second instance, send a burst of orders, and watch them spread:
 
-<div class="nats-example" data-type="learn-services-scaling-runInstances" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-scaling-runInstances" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Six requests across two instances land roughly three and three. The split isn't
 a round-robin you control: the server delivers each message to whichever
@@ -88,7 +88,7 @@ instances pick up every new request automatically. There's no window where a
 request lands on a queue group whose only member just vanished. Stop one
 instance and the others absorb the load:
 
-<div class="nats-example" data-type="learn-services-scaling-stopService" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-scaling-stopService" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 After the stop, a PING returns one fewer reply, and `nats service stats`
 aggregates the survivors. Roll a new version by starting fresh instances, then
@@ -135,7 +135,7 @@ safe. A graceful stop drains in-flight work and hands new requests to the
 survivors, which is what you want when an instance is slow, overloaded, or being
 replaced. Stop one and the rest carry on:
 
-<div class="nats-example" data-type="learn-services-scaling-stopService" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-scaling-stopService" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 If the request after the stop still gets an answer, the queue group rebalanced
 cleanly and no order was dropped.

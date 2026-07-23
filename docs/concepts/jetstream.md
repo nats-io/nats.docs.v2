@@ -58,7 +58,7 @@ specific time.
 
 ## Putting It Together
 
-<div class="nats-example" data-type="jetstream-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="jetstream-basic" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Beyond Streams and Consumers
 

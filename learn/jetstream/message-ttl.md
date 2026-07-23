@@ -72,7 +72,7 @@ in 60 seconds. The TTL travels along as the `Nats-TTL` header:
 
 <div class="nats-example"
      data-type="learn-jetstream-message-ttl-publishWithTtl"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The publish returns a normal `PubAck`. The message is stored in the
 stream like any other, with a sequence number. The one difference is
@@ -163,7 +163,7 @@ on a stream you haven't confirmed opted in.
 
 <div class="nats-example"
      data-type="learn-jetstream-message-ttl-ttl-on-disabled-stream"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **A short TTL deletes the message whether or not a consumer read it.**
 The TTL is a deadline on the *stored copy*, not a guarantee about

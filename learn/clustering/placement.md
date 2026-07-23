@@ -85,7 +85,7 @@ a list. The example also names the cluster with `--cluster east`, a no-op
 in a single cluster, shown so the syntax is familiar when you place across
 clusters later:
 
-<div class="nats-example" data-type="learn-clustering-placement-placeTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-clustering-placement-placeTags" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The meta leader now picks three servers that carry *both* tags. Read the
 result in the `Cluster` block of `nats stream info ORDERS`: the leader and
@@ -154,7 +154,7 @@ they advertise.
 Verify the tags exist before you trust a placement, and watch the placement
 either succeed or name the missing tag:
 
-<div class="nats-example" data-type="learn-clustering-placement-verifyTags" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-clustering-placement-verifyTags" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **You can't name a leader at placement time.** Placement constrains which
 servers hold the replicas; it can't say which one leads, and setting a

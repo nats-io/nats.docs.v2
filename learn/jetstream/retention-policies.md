@@ -96,7 +96,7 @@ door. That's a job queue, not a log — each task goes to one worker and is
 gone once it's done. Give it its own `FULFILLMENT` stream with WorkQueue
 retention:
 
-<div class="nats-example" data-type="learn-jetstream-retention-policies-workQueueCreate" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-retention-policies-workQueueCreate" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The `--retention work` flag is the only change from how you built
 `ORDERS`. `nats stream info FULFILLMENT` shows it in the `Options` block:
@@ -190,7 +190,7 @@ WorkQueue. Create a new stream with the policy you want and move the
 data. The edit below is rejected with `stream configuration update can
 not change retention policy to/from workqueue`.
 
-<div class="nats-example" data-type="learn-jetstream-retention-policies-retentionSwitchRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-retention-policies-retentionSwitchRejected" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **WorkQueue rejects consumers that overlap.** The first ack removes a
 message for everyone, so the server won't let two consumers claim the
@@ -203,7 +203,7 @@ Give each consumer a filter that splits the subjects between them, so no
 message belongs to two consumers. A worker *pool* sharing one consumer
 is the other valid setup; see [A pool of workers](/learn/jetstream/worker-pool).
 
-<div class="nats-example" data-type="learn-jetstream-retention-policies-workqueueOverlap" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-retention-policies-workqueueOverlap" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

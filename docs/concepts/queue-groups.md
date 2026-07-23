@@ -29,7 +29,7 @@ Multiple subscribers use the same queue group name when subscribing to a subject
 
 Common use cases: background job processing, API request handling across service instances, event processing pipelines, batch operations.
 
-<div class="nats-example" data-type="queue-groups-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="queue-groups-basic" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Dynamic Scaling
 
@@ -37,7 +37,7 @@ Add or remove workers at any time and NATS automatically adjusts distribution. W
 
 Perfect for auto-scaling scenarios where orchestration systems (Kubernetes, ECS) spin up new workers based on metrics. Supports gradual rollouts, traffic spike handling, and cost optimization.
 
-<div class="nats-example" data-type="queue-groups-dynamic-scaling" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="queue-groups-dynamic-scaling" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Queue Groups with Request-Reply
 
@@ -45,7 +45,7 @@ Queue groups enable horizontally scalable services without a service mesh or API
 
 Your service code doesn't need to know about other instances, handle leader election, or coordinate work. Just subscribe with a queue group name and respond to requests.
 
-<div class="nats-example" data-type="queue-groups-request-reply" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="queue-groups-request-reply" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Mixed Subscribers
 
@@ -53,7 +53,7 @@ Queue groups coexist with regular subscribers on the same subject. Regular subsc
 
 Use queue groups for operational work that needs to happen exactly once, and regular subscribers for observational tasks (audit logging, monitoring, analytics).
 
-<div class="nats-example" data-type="queue-groups-mixed-subscribers" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="queue-groups-mixed-subscribers" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Geo-Affinity in Super-Clusters
 

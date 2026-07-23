@@ -44,7 +44,7 @@ In the second terminal, create a stream named `EVENTS` that captures every
 subject beginning with `events.`. The `--defaults` flag fills in sensible
 starting values so you aren't prompted for anything.
 
-<div class="nats-example" data-type="tutorials-first-stream-create" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-first-stream-create" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see output ending with:
 
@@ -59,7 +59,7 @@ Your stream now exists and is waiting for messages.
 Publish three messages to subjects under `events.`. Because each subject matches
 the stream, the server stores every one.
 
-<div class="nats-example" data-type="tutorials-first-stream-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-first-stream-publish" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 For each publish you should see two lines: one confirming the message was sent,
 and one confirming the stream stored it with an assigned sequence number:
@@ -98,7 +98,7 @@ Now read the messages back. This replays every message the stream holds, oldest
 first, starting from the very first one. Nothing is removed: replaying a stream
 is a read.
 
-<div class="nats-example" data-type="tutorials-first-stream-replay" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-first-stream-replay" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see all three messages, in the order they were published:
 

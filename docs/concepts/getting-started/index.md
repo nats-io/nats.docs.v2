@@ -157,11 +157,11 @@ See [NATS.Net on NuGet](https://www.nuget.org/packages/NATS.Net) for the latest 
 
 ### Publisher Example
 
-<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ### Subscriber Example
 
-<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="getting-started-subscribe" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ### Running the Examples
 

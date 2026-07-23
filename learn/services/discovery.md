@@ -59,7 +59,7 @@ service, identified by the **service id** the framework generated for it.
 Ask `OrderInventory` to describe itself at the name level, and read the
 endpoint list out of the reply:
 
-<div class="nats-example" data-type="learn-services-discovery-discoverInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-discovery-discoverInfo" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The reply tells you the `check` endpoint listens on
 `orders.inventory.check` in queue group `"q"`. That's the same fact you
@@ -98,7 +98,7 @@ service that's running many.
 The third level reaches exactly one instance, so you expect a single
 reply and don't need a deadline loop:
 
-<div class="nats-example" data-type="learn-services-discovery-targetInstance" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-discovery-targetInstance" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Collecting replies with the CLI
 
@@ -129,7 +129,7 @@ the rest, so five running instances appear as one. Don't treat a discovery
 request like a normal request-reply call. Wait a deadline and collect
 every reply, exactly as the CLI does:
 
-<div class="nats-example" data-type="learn-services-discovery-discoverInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-discovery-discoverInfo" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The reverse holds too: when you want one specific instance, use the
 `$SRV.STATS.OrderInventory.<id>` level instead of filtering a broadcast.

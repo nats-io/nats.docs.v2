@@ -47,7 +47,7 @@ lives. Add one endpoint, `check`, on the subject `orders.inventory.check`
 (the same subject the Core NATS responder used) and give it the handler
 that answers the in-stock question.
 
-<div class="nats-example" data-type="learn-services-your-first-service-addService" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-your-first-service-addService" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Two details matter. First, the endpoint joins the framework's
 default **queue group**, `"q"`, automatically. That's the same queue
@@ -84,7 +84,7 @@ With the service running, a caller asks the same question as before. The
 `order-svc` client sends the canonical order payload to the `check`
 endpoint and waits for one reply:
 
-<div class="nats-example" data-type="learn-services-your-first-service-requestService" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-your-first-service-requestService" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The request travels to `orders.inventory.check`, the framework routes it
 into the `check` endpoint's queue subscription, your handler runs, and
@@ -119,7 +119,7 @@ the next caller.
 Send a deliberately malformed body and watch the service answer with the
 error rather than fall over:
 
-<div class="nats-example" data-type="learn-services-your-first-service-validateInput" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-your-first-service-validateInput" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The full mechanics of reading that error code back live on the
 [observability](/learn/services/observability#pitfalls) page; here the

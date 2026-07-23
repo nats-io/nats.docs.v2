@@ -64,7 +64,7 @@ CLI prints the reply on success. If the deadline passes it exits without
 printing a reply, and if nobody is listening it prints `No responders are
 available` at once:
 
-<div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-request-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-request-basic" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The request carries the same canonical order shape used everywhere in
 this chapter:
@@ -105,7 +105,7 @@ client that advertised support for it during the connect handshake. Both
 have been the default for years; you get it for free on any current
 setup. You can see it yourself by requesting a subject nobody answers:
 
-<div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-no-responders" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-no-responders" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Retry differently per failure
 
@@ -183,7 +183,7 @@ Here's the safe pattern: branch on the failure, bound the retries, and
 key the request by `order_id` so a duplicate is a no-op on the responder
 side:
 
-<div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-retry-idempotent" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-request-reply-resilience-retry-idempotent" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

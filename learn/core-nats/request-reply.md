@@ -91,7 +91,7 @@ a reply to whatever inbox each request carries.
 
 <div class="nats-example"
      data-type="learn-core-nats-request-reply-respond"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Leave that running. It's now the one service in the Acme world that
 answers questions instead of just receiving messages. The warehouse,
@@ -106,7 +106,7 @@ service to answer.
 
 <div class="nats-example"
      data-type="learn-core-nats-request-reply-request"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the reply printed back. Behind that one line, the
 client picked a fresh inbox subject, published your payload with the
@@ -230,7 +230,7 @@ may answer, ask for it explicitly and gather by count or deadline:
 
 <div class="nats-example"
      data-type="learn-core-nats-request-reply-replies"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 When you actually want every responder to answer, that's
 [scatter-gather](/learn/core-nats/scatter-gather), not a bug. When you

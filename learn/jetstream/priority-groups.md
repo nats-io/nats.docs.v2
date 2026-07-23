@@ -113,7 +113,7 @@ delivery.
 The `nats consumer next` command issues a plain pull and has no flag for
 these thresholds, so the overflow pull below comes from a client library:
 
-<div class="nats-example" data-type="learn-jetstream-priority-groups-overflowPull" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-priority-groups-overflowPull" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The near-region worker, pulling without a threshold, empties the backlog
 as fast as it processes. The far-region worker gets messages only when the
@@ -156,7 +156,7 @@ the whole cycle fits.
 
 The pinned client earns and keeps the pin like this:
 
-<div class="nats-example" data-type="learn-jetstream-priority-groups-pinnedClient" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-priority-groups-pinnedClient" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The client and server agree on the pin through a header. When the server
 pins a client, the first message it delivers carries a `Nats-Pin-Id`
@@ -244,7 +244,7 @@ The priority rides on the pull request, the same place overflow's thresholds
 go, so `nats consumer next` can't set it and the pull comes from a client
 library:
 
-<div class="nats-example" data-type="learn-jetstream-priority-groups-prioritizedPull" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-priority-groups-prioritizedPull" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 This is the immediate counterpart to overflow. Overflow waits for the backlog
 to cross a threshold before a standby gets anything, which avoids churn but
@@ -268,7 +268,7 @@ only the first group and ignores the rest. Multiple groups per consumer is
 planned for a future server release. To split work by region or tier now,
 run separate consumers on the same stream, each with its own group.
 
-<div class="nats-example" data-type="learn-jetstream-priority-groups-oneGroup" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-priority-groups-oneGroup" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **The pin does not give one client sole ownership.** The server can switch
 the pinned client while that client still believes it holds the pin, so a

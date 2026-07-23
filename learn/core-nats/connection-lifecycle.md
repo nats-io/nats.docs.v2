@@ -134,7 +134,7 @@ on the server reconnecting at the same instant.
 
 An operator triggers it with a signal to the server process:
 
-<div class="nats-example" data-type="learn-core-nats-connection-lifecycle-lame-duck-signal" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-connection-lifecycle-lame-duck-signal" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The server-side details, the signal itself and the timing it uses to spread
 the disconnects, are an operations task covered in [Deployment → Rolling
@@ -151,7 +151,7 @@ in one terminal, then stop and restart the server underneath it. The
 subscriber logs the drop, reconnects on its own, and resumes, and you never
 restart the subscriber:
 
-<div class="nats-example" data-type="learn-core-nats-connection-lifecycle-observe-reconnect" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-connection-lifecycle-observe-reconnect" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Publish an `orders.created` message once the server is back and the subscriber
 prints it, which proves the subscription was restored on the new connection.

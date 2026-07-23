@@ -75,7 +75,7 @@ Create a durable pull consumer named `worker` on the `EVENTS` stream. A pull
 consumer hands you messages when you ask for them, and acknowledges them one at
 a time.
 
-<div class="nats-example" data-type="tutorials-stream-consumer-add-consumer" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-stream-consumer-add-consumer" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the consumer created and its configuration printed:
 
@@ -97,7 +97,7 @@ place in the stream) by name after you stop pulling.
 
 Ask the consumer for its next message and acknowledge it:
 
-<div class="nats-example" data-type="tutorials-stream-consumer-pull-and-ack" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-stream-consumer-pull-and-ack" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the first message, followed by the acknowledgment:
 

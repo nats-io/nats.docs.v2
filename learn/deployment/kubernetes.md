@@ -239,7 +239,7 @@ Whichever owner you pick, verify the stream the controller created is
 actually the R3 stream you declared. Open a shell in `nats-box` and read
 it back:
 
-<div class="nats-example" data-type="learn-deployment-kubernetes-streamLs" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-kubernetes-streamLs" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The line that matters is `Replicas: 3`. If it reads `1`, the CRD spec is
 missing `replicas: 3`, or the controller hasn't finished reconciling;

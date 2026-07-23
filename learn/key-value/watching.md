@@ -26,7 +26,7 @@ from now on.
 Start the warehouse dashboard watching the whole bucket. Run this in its
 own terminal and leave it running:
 
-<div class="nats-example" data-type="learn-key-value-watching-watchBucket" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-watching-watchBucket" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The snapshot comes first. The watch immediately prints the current value
 of every key already in the bucket; right now that's one line for
@@ -88,7 +88,7 @@ snapshot-plus-live or live-only when you open the watch. The idea is the
 same everywhere, a boundary between the snapshot and the live changes; only
 the signal differs. The example below shows the nil-entry form:
 
-<div class="nats-example" data-type="learn-key-value-watching-eoiHandling" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-watching-eoiHandling" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The signal is useful beyond bookkeeping. A dashboard can
 hold its "loading" state until the nil entry arrives, then flip to "live"
@@ -118,7 +118,7 @@ matches both.
 With flat SKU names, watch a subset by naming an exact key. The dashboard
 for the blue widget watches just `widget-blue`:
 
-<div class="nats-example" data-type="learn-key-value-watching-watchFiltered" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-watching-watchFiltered" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The snapshot now lists only `widget-blue`, and the live stream only
 carries changes to it. A put to `gadget-pro` or `widget-red` never reaches
@@ -156,7 +156,7 @@ treating the end of the snapshot as the end of the watch.
 The handling example above doubles as the demo: the loop continues past
 the nil entry instead of stopping on it.
 
-<div class="nats-example" data-type="learn-key-value-watching-eoiHandling" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-watching-eoiHandling" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **A watch is live state, not a point read.** A watch is an ephemeral
 ordered consumer: it exists only while your process holds it open, and it

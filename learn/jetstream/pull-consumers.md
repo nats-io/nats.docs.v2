@@ -46,7 +46,7 @@ to ten messages and waiting up to two seconds for them:
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-fetchBatch"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Two outcomes are normal.
 
@@ -79,7 +79,7 @@ message is delivered as soon as it's stored in the stream:
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-consumeContinuous"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Your function runs once per message and acks on success. The library
 handles the pull requests, sends new ones as the old ones empty, and
@@ -122,7 +122,7 @@ nothing is available right now, so keep looping: wait and fetch again.
 
 <div class="nats-example"
      data-type="learn-jetstream-pull-consumers-emptyFetch"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **A raw fetch with no expiry can stall.** A pull request with `expires`
 set to zero never times out: the server holds it until the batch fills.

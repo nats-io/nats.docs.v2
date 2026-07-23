@@ -49,7 +49,7 @@ Each packer subscribes to `orders.created` and names the queue group
 `packers`. The `--queue` flag is what turns a plain subscription into a
 queue-group membership:
 
-<div class="nats-example" data-type="learn-core-nats-queue-groups-queue-subscribe" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-queue-groups-queue-subscribe" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The queue group name here is `packers`. It's a plain string the
 application chooses. Pick a name that says what the group does;
@@ -176,7 +176,7 @@ no warning, and each published order goes to one member of *each* group:
 the work is double-handled instead of load-balanced. Give every member the
 byte-for-byte identical name.
 
-<div class="nats-example" data-type="learn-core-nats-queue-groups-typo-splits-group" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-queue-groups-typo-splits-group" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Don't expect ordering or an even split.** Selection is random per
 message, not round-robin, so a short burst can look lopsided. If work must

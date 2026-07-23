@@ -77,7 +77,7 @@ open-ended. The CLI can't set this knob; it's a client-library call. So
 the CLI example shows the closest thing, a plain subscribe, and the text
 above names the actual limit calls:
 
-<div class="nats-example" data-type="learn-resilient-clients-slow-consumers-pending-limits" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-slow-consumers-pending-limits" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The messages flowing through carry the same canonical order shape used
 everywhere in this chapter:
@@ -200,7 +200,7 @@ fires when the subscription enters the slow-consumer state, not once per
 dropped message; in Go, read `Dropped()` for the running count of lost
 messages:
 
-<div class="nats-example" data-type="learn-resilient-clients-slow-consumers-handle-slow-consumer" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-slow-consumers-handle-slow-consumer" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Don't confuse the local drop with the server-side disconnect.** A burst
 of slow-consumer errors on the async callback means your handler is too

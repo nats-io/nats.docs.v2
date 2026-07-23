@@ -47,12 +47,12 @@ service that ignores headers sees the same JSON it always did.
 From the CLI, `-H` (or `--header`) attaches a header as a `Key:Value` pair, and
 you repeat the flag for each one you want. `nats pub` takes it:
 
-<div class="nats-example" data-type="learn-core-nats-headers-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-headers-publish" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 On the receiving side, `nats sub` prints each header as a `Key: Value` line
 above the body, so you can see exactly what the publisher attached:
 
-<div class="nats-example" data-type="learn-core-nats-headers-subscribe" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-headers-subscribe" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Client libraries expose the same thing as a header type on the message. You
 build it with `Set` to give a key a value or `Add` to append another value to
@@ -77,7 +77,7 @@ Attach an `Acme-Request-Id` to name this one call, and an `Acme-Trace-Id`, a
 carries, so you can follow one order across services. The responder reads the
 trace ID off the request and copies it onto the reply:
 
-<div class="nats-example" data-type="learn-core-nats-headers-request" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-headers-request" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Because the reply comes back carrying the trace ID you sent, you can match this
 answer to the order you asked about, even with many checks in flight at once.
