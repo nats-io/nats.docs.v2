@@ -17,7 +17,7 @@ const https = require("https");
 const EXAMPLES_CONFIG = {
     "go": [{
         repo: "nats-io/nats.go",
-        branch: "doc-examples",
+        branch: "main",
         directory: "examples/docs/",
         examples: {
             "basics-publish": "basics-publish/main.go",
@@ -41,7 +41,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.go",
-        branch: "core-docs",
+        branch: "main",
         directory: "examples/docs/",
         examples: {
             "learn-core-nats-publish-subscribe-publish": "learn-core-nats-publish-subscribe-publish/main.go",
@@ -57,7 +57,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.go",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "examples/docs/",
         examples: {
             "learn-jetstream-your-first-stream-create": "learn-jetstream-your-first-stream-create/main.go",
@@ -102,7 +102,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "synadia-io/orbit.go",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "jetstreamext/examples/",
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "atomicbatchdocs/main.go",
@@ -135,7 +135,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.rs",
-        branch: "core-docs",
+        branch: "main",
         directory: "async-nats/examples/",
         examples: {
             "learn-core-nats-publish-subscribe-publish": "docs_learn_core_nats_publish_subscribe_publish.rs",
@@ -151,7 +151,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.rs",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "async-nats/examples/",
         examples: {
             "learn-jetstream-your-first-stream-create": "docs_learn_jetstream_your_first_stream_create.rs",
@@ -196,7 +196,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "synadia-io/orbit.rs",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "jetstream-extra/examples/",
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "docs_atomic_batch.rs",
@@ -293,7 +293,7 @@ const EXAMPLES_CONFIG = {
     }],
     "python": [{
         repo: "nats-io/nats.py",
-        branch: "doc-examples",
+        branch: "main",
         directory: "examples/docs/",
         examples: {
             "basics-publish": "basics_publish.py",
@@ -317,7 +317,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.py",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "examples/docs/",
         examples: {
             "learn-jetstream-your-first-stream-create": "learn_jetstream_your_first_stream_create.py",
@@ -363,7 +363,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.py",
-        branch: "core-docs",
+        branch: "main",
         directory: "examples/docs/",
         examples: {
             "learn-core-nats-publish-subscribe-publish": "learn_core_nats_publish_subscribe_publish.py",
@@ -404,7 +404,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.java",
-        branch: "core-docs",
+        branch: "main",
         directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
         examples: {
             "learn-core-nats-publish-subscribe-publish": "LearnCoreNatsPublishSubscribePublish.java",
@@ -420,7 +420,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.java",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "examples/src/main/java/io/nats/examples/natsIoDoc/",
         examples: {
             "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.java",
@@ -465,14 +465,14 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "synadia-io/orbit.java",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "batch-publish/src/examples/java/io/synadia/examples/",
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "AtomicBatchDocExample.java",
         },
     }, {
         repo: "synadia-io/orbit.java",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "direct-batch/src/examples/java/io/synadia/examples/",
         examples: {
             "learn-jetstream-get-direct-batch-get": "LearnJetStreamGetDirectBatchGet.java",
@@ -504,7 +504,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.net",
-        branch: "core-docs",
+        branch: "main",
         directory: "examples/Example.NatsIODocs/",
         examples: {
             "learn-core-nats-publish-subscribe-publish": "LearnCoreNatsPublishSubscribePublish.cs",
@@ -520,7 +520,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "nats-io/nats.net",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "examples/Example.NatsIODocs/",
         examples: {
             "learn-jetstream-your-first-stream-create": "LearnJetStreamYourFirstStreamCreate.cs",
@@ -565,7 +565,7 @@ const EXAMPLES_CONFIG = {
         },
     }, {
         repo: "synadia-io/orbit.net",
-        branch: "jetstream-docs",
+        branch: "main",
         directory: "tools/DocsExamples/",
         examples: {
             "learn-jetstream-advanced-publishing-atomic": "ExampleAtomicBatchDoc.cs",
