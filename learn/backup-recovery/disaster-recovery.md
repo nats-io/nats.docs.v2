@@ -54,7 +54,7 @@ hasn't copied yet. Promote it while lag is non-zero and you start publishing on
 top of a stream that's still missing its tail. So the first runbook step is
 always the same: read the lag.
 
-<div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-checkLag" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-checkLag" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 If the `east` site is fully unreachable, the mirror can't reach its upstream and the lag
 stops at whatever it was when contact dropped. That stalled number is your

@@ -31,13 +31,13 @@ In the animation above:
 
 ## Basic Request-Reply
 
-<div class="nats-example" data-type="request-reply-basic" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="request-reply-basic" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Handling Timeouts
 
 Timeouts are crucial in request-reply to prevent indefinite waiting. All NATS clients support configurable timeouts:
 
-<div class="nats-example" data-type="request-reply-timeout" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="request-reply-timeout" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Multiple Responders
 
@@ -67,19 +67,19 @@ In this pattern, NATS selects one service from the queue group (Service B in thi
 
 By default, the `request()` method returns the first response and drops the rest. The example below starts multiple responders and shows the client receiving a single reply. To gather every response, subscribe to a reply inbox directly and read messages until a timeout instead of calling `request()`.
 
-<div class="nats-example" data-type="request-reply-multiple-responders" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="request-reply-multiple-responders" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## No Responders Detection
 
 NATS will detect when no services are available to handle a request. When there are no subscribers for the request subject, NATS server will return a "no responders" error immediately:
 
-<div class="nats-example" data-type="request-reply-no-responders" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="request-reply-no-responders" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Request with Headers
 
 NATS supports headers in request-reply, enabling metadata exchange:
 
-<div class="nats-example" data-type="request-reply-headers" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="request-reply-headers" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Best Practices
 
@@ -132,7 +132,7 @@ Use publish-subscribe when you need:
 
 Create a simple calculator service:
 
-<div class="nats-example" data-type="request-reply-calculator" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="request-reply-calculator" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Next steps
 

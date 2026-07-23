@@ -43,7 +43,7 @@ expires. A bucket needs limit markers enabled before any key in it
 can carry a TTL. `INVENTORY` was created without them, so you turn them on
 once, then create the timed key:
 
-<div class="nats-example" data-type="learn-key-value-ttl-and-limits-perKeyTTL" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-ttl-and-limits-perKeyTTL" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The `flash-sale` key now holds `99` and will remove itself 30 minutes
 later. Because the TTL is stored with the value, this happens without a
@@ -72,7 +72,7 @@ them when you create the bucket. Three of them matter most:
 Here those limits go on a throwaway `CACHE` bucket, so the numbers
 stand on their own and don't imply anything about `INVENTORY`:
 
-<div class="nats-example" data-type="learn-key-value-ttl-and-limits-bucketWithLimits" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-ttl-and-limits-bucketWithLimits" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The `--ttl` on the bucket above is a different clock from the per-key TTL.
 A bucket TTL expires *every* value once it reaches that age; the per-key

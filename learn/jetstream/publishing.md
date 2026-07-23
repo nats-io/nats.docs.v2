@@ -74,7 +74,7 @@ Here are the same three publishes from a client library:
 
 <div class="nats-example"
      data-type="learn-jetstream-publishing-sync"
-     data-languages="js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp,c"></div>
 
 Two details show up in every one of these snippets:
 
@@ -161,7 +161,7 @@ is stored. The same header from a client library:
 
 <div class="nats-example"
      data-type="learn-jetstream-publishing-dedup"
-     data-languages="js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp,c"></div>
 
 Give every publish you might retry a stable `Nats-Msg-Id` that the
 producer can recompute, such as an order ID, a request ID, or a hash of
@@ -204,7 +204,7 @@ code, check the return value; on the CLI, publish with
 
 <div class="nats-example"
      data-type="learn-jetstream-publishing-confirmStored"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The plain publish reports `Published` even on a subject no stream
 captures. The `--jetstream` version surfaces the miss as a "no

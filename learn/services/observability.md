@@ -44,7 +44,7 @@ of one service, and `$SRV.STATS.OrderInventory.<id>` hits one instance.
 Send a few requests to `orders.inventory.check`, then read the accumulated
 stats back:
 
-<div class="nats-example" data-type="learn-services-observability-serviceStats" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-observability-serviceStats" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The response is one `stats_response` per instance, and each lists its endpoints
 with the five counters above. After three successful `check` requests you'd
@@ -94,7 +94,7 @@ endpoint in the same step.
 Here's the `check` handler returning a service error when the order total
 isn't a positive amount, followed by the stats showing the error recorded:
 
-<div class="nats-example" data-type="learn-services-observability-serviceError" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-observability-serviceError" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Watch the stats accumulate as requests flow, and the one errored request bump
 the error counter while the rest tick the request counter:
@@ -133,7 +133,7 @@ directly; in code you read `Nats-Service-Error-Code` and branch on whether
 it's set. Send a request the handler rejects, inspect the headers on the reply,
 and confirm the error in the stats:
 
-<div class="nats-example" data-type="learn-services-observability-serviceError" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-services-observability-serviceError" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Stats are per instance, and `Reset()` zeroes them.** Each running instance
 keeps its own counters, so `$SRV.STATS.OrderInventory` returns one

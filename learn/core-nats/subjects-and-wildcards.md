@@ -82,7 +82,7 @@ Acme wants one analytics view of created orders across every region.
 Instead of subscribing to `orders.us.created` and `orders.eu.created`
 separately, it subscribes once to `orders.*.created`:
 
-<div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-wildcard-single" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-wildcard-single" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The `*` sits in the region position. Walk through what it catches:
 
@@ -105,7 +105,7 @@ be the last token in the pattern.
 Acme is adding an audit service that wants every order message, at every
 depth, regardless of region or action. One subscription covers it:
 
-<div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-wildcard-multi" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-wildcard-multi" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 `orders.>` reaches the entire hierarchy under `orders`:
 
@@ -212,7 +212,7 @@ server silently misroutes: `orders.us` becomes the subject and `created`
 a reply subject. Don't rely on the check; keep spaces out of the
 subject:
 
-<div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-invalid-subject-whitespace" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-subjects-and-wildcards-invalid-subject-whitespace" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

@@ -101,7 +101,7 @@ is: confirm the broken stream is gone (or remove it), then restore.
 A restore you didn't check is unverified. The last step is always to read
 the rebuilt stream's state back and confirm it matches the source.
 
-<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verify-counts" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-verify-counts" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Look at the `State` block. `Messages` and `Last Sequence` must match the
 stream you snapshotted, and `Active Consumers` shows `shipping` and

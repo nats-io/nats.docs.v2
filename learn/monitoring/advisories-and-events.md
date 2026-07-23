@@ -54,7 +54,7 @@ for `shipping`.
 Subscribe to the whole advisory tree and receive these events from the
 deployment:
 
-<div class="nats-example" data-type="learn-monitoring-advisories-and-events-subscribeAdvisories" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-monitoring-advisories-and-events-subscribeAdvisories" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 When the poison order finally exceeds its delivery limit, one message
 arrives. Its body names the stream, the consumer, the sequence that
@@ -164,7 +164,7 @@ The fix is to point a stream at the advisory subjects. A stream is always
 subscribed and stores what it captures, so you can read events back long
 after they fired:
 
-<div class="nats-example" data-type="learn-monitoring-advisories-and-events-persistAdvisories" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-monitoring-advisories-and-events-persistAdvisories" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **A `max_deliver` advisory is the only built-in signal a message was
 dropped.** JetStream has no dead-letter queue. When the `shipping`

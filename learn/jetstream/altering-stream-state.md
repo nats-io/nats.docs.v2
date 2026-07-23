@@ -25,7 +25,7 @@ that number:
 
 <div class="nats-example"
      data-type="learn-jetstream-altering-stream-state-deleteMessage"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 `rmm` is "remove message." It takes the stream and the sequence to drop,
 and it asks for confirmation first (`Really remove message 2 from Stream
@@ -51,7 +51,7 @@ To clear a whole stream at once, purge it:
 
 <div class="nats-example"
      data-type="learn-jetstream-altering-stream-state-purge"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 That removes every message in `ORDERS` and reports how many it dropped
 (`Purged N messages from ORDERS`, for whatever the stream held). Like
@@ -67,7 +67,7 @@ A bare purge removes everything. Three optional flags narrow it:
 
 <div class="nats-example"
      data-type="learn-jetstream-altering-stream-state-purgeFiltered"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 `--subject` limits the purge to one subject. `--seq` counts from the
 bottom (drop everything older than a sequence); `--keep` counts from the

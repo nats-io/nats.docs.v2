@@ -47,7 +47,7 @@ its creds file. The CLI flag is `--creds`; most client libraries take a path to
 the same file through their credentials-file loader, and nats.js takes the
 file's contents as bytes instead.
 
-<div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-connect-creds" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-connect-creds" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Every example on this page publishes the same canonical order event:
 
@@ -95,7 +95,7 @@ options — most take the PEM path directly, and nats.py and nats.java take a
 TLS context you build with the CA loaded into it. The server URL uses the
 `tls://` scheme:
 
-<div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-connect-tls" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-connect-tls" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The secure handshake runs in this order: the plaintext `INFO`, then the TLS
 upgrade and CA validation, then the credentials in `CONNECT`, then the
@@ -220,7 +220,7 @@ certificate isn't trusted) and authorization (the creds are wrong, expired,
 or revoked). They mean different things, so handle them as separate cases at
 the connect boundary rather than collapsing both into one network error:
 
-<div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-handle-auth-error" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-handle-auth-error" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

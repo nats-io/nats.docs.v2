@@ -23,7 +23,7 @@ you published it. Give the server that number and it hands the message back:
 
 <div class="nats-example"
      data-type="learn-jetstream-get-direct-by-sequence"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ```
 Item: ORDERS#2 received 2026-05-22 10:14:25 +0000 UTC (36h2m11s) on Subject orders.created
@@ -36,7 +36,7 @@ recent message. `--last-for` returns the last message stored on a subject:
 
 <div class="nats-example"
      data-type="learn-jetstream-get-direct-last-for-subject"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ```
 Item: ORDERS#3 received 2026-05-22 10:14:31 +0000 UTC (36h2m05s) on Subject orders.shipped
@@ -68,14 +68,14 @@ it — turn it on for a stream that doesn't:
 
 <div class="nats-example"
      data-type="learn-jetstream-get-direct-enable"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 With it on, read directly with the Direct Get API. This fetches the message at
 sequence 1 from any replica that holds it, not just the leader:
 
 <div class="nats-example"
      data-type="learn-jetstream-get-direct-direct-read"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ```
 Subscribing to JetStream Stream (direct) holding messages with subject orders.> starting with sequence 1

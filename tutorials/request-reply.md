@@ -34,7 +34,7 @@ back as the reply.
 
 <div class="nats-example"
      data-type="tutorials-request-reply-responder"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see it start up and wait:
 
@@ -52,7 +52,7 @@ message on `time` and waits for a single reply, up to the global `--timeout`
 
 <div class="nats-example"
      data-type="tutorials-request-reply-request"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see one reply printed, the current date and time from the responder:
 

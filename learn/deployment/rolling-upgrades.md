@@ -125,7 +125,7 @@ metadata election is short and happens once.
 Before you start, read the cluster's current shape and confirm the stream
 is at full R3:
 
-<div class="nats-example" data-type="learn-deployment-rolling-upgrades-streamReplicas" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-rolling-upgrades-streamReplicas" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 That output shows the `ORDERS` stream's own Raft leader and each replica's
 status — the per-node "current" gate you'll use between steps. The
@@ -210,7 +210,7 @@ node mid-stream. The subscriber logs a reconnect and keeps printing
 messages; the published order still lands in the `ORDERS` stream, because
 the two nodes still up hold a quorum:
 
-<div class="nats-example" data-type="learn-deployment-rolling-upgrades-requestDuringUpgrade" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-rolling-upgrades-requestDuringUpgrade" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 This is why the order and the timing matter: get them right and a
 version upgrade has no observable effect on `warehouse`, `notifications`,
@@ -239,7 +239,7 @@ non-leaders first so the meta-leader's one election is short. Check which
 node leads before you touch anything, and re-check after each node, so
 you never take down two replicas at once:
 
-<div class="nats-example" data-type="learn-deployment-rolling-upgrades-streamReplicas" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-rolling-upgrades-streamReplicas" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Evicting pods without a PDB can drain all three at once.** A node
 drain, a cluster autoscaler, or a careless `kubectl delete` can take two

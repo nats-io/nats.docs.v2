@@ -46,7 +46,7 @@ Leave this terminal running.
 Open a second terminal. Create a stream named `ORDERS` that captures every
 message published on subjects under `orders.>`:
 
-<div class="nats-example" data-type="tutorials-build-an-app-create-stream" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-build-an-app-create-stream" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see a confirmation summarizing the new stream:
 
@@ -174,7 +174,7 @@ Leave the app running.
 
 Open a third terminal. Read the messages your app stored in the `ORDERS` stream:
 
-<div class="nats-example" data-type="tutorials-build-an-app-view-stream" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-build-an-app-view-stream" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the three order events the app published, each on its subject:
 
@@ -192,7 +192,7 @@ The events are now in the stream, ready for a consumer to read back:
 
 Still in your third terminal, send a request to the app on `orders.count`:
 
-<div class="nats-example" data-type="tutorials-build-an-app-call-app" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-build-an-app-call-app" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the app's reply come straight back:
 

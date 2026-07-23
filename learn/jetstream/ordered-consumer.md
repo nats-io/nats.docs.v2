@@ -29,7 +29,7 @@ one continuous flow.
 
 <div class="nats-example"
      data-type="learn-jetstream-ordered-consumer-read"
-     data-languages="go,js,python,java,rust,csharp"></div>
+     data-languages="go,js,python,java,rust,csharp,c"></div>
 
 That's the whole client-side surface: ask for an ordered consumer, loop until
 the log is drained. The ordered consumer is a client-library construct, so

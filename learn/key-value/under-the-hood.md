@@ -28,7 +28,7 @@ stream is `KV_INVENTORY`, its subjects are `$KV.INVENTORY.>`, and the key
 The KV commands don't show the stream name, but the stream commands report it
 directly. Ask the server for the stream behind the bucket:
 
-<div class="nats-example" data-type="learn-key-value-under-the-hood-streamInfoOfBucket" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-under-the-hood-streamInfoOfBucket" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The configuration the server prints back is every KV claim from this chapter,
 written in stream terms:
@@ -99,7 +99,7 @@ collapses to a single entry; the prior values are gone from disk. Reach for purg
 when you must actually remove the old values (for size, or because they were
 sensitive), not just hide them.
 
-<div class="nats-example" data-type="learn-key-value-under-the-hood-deleteVsPurge" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-under-the-hood-deleteVsPurge" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Both make a `get` report the key as gone. The difference is entirely in what
 history can still show you afterward: delete keeps the prior revisions, while

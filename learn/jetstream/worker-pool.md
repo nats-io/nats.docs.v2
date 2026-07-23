@@ -26,7 +26,7 @@ Start that loop in several processes at once:
 
 <div class="nats-example"
      data-type="learn-jetstream-worker-pool-worker"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Open three terminals and run that loop in each. The `ORDERS` stream
 already holds the orders from earlier pages; now add a fresh handful of

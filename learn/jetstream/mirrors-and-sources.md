@@ -96,7 +96,7 @@ and give it no limits, so it becomes a permanent record of every order:
 
 <div class="nats-example"
      data-type="learn-jetstream-mirrors-and-sources-createMirror"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The `--mirror ORDERS` flag tells the server this new stream is a mirror of
 `ORDERS` rather than a normal stream. You don't give it `--subjects`,
@@ -133,7 +133,7 @@ once:
 
 <div class="nats-example"
      data-type="learn-jetstream-mirrors-and-sources-createSource"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 `ALL-ORDERS` takes no `--subjects` of its own here; it just lists its
 upstreams. Its info carries a Source Information section — one block per
@@ -210,7 +210,7 @@ the mirror can't keep pace.
 
 <div class="nats-example"
      data-type="learn-jetstream-mirrors-and-sources-mirrorLag"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Combining a filter with a transform on one source.** On a single source
 or mirror entry, you can set `filter_subject` or `subject_transforms`,

@@ -101,7 +101,7 @@ Open a **second terminal**. A subscriber registers interest in a
 subject and receives a copy of every matching message. Subscribe to
 the `greet` subject:
 
-<div class="nats-example" data-type="tutorials-hello-nats-subscribe" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-hello-nats-subscribe" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the subscriber start and wait:
 
@@ -116,7 +116,7 @@ Leave this terminal running and listening.
 Open a **third terminal**. A publisher sends a message to a subject.
 Publish `Hello NATS!` to `greet`:
 
-<div class="nats-example" data-type="tutorials-hello-nats-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-hello-nats-publish" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 In this third terminal you should see the publish confirmed:
 

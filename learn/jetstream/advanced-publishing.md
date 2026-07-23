@@ -68,7 +68,7 @@ awaiting each ack, then collects and checks them all afterward:
 
 <div class="nats-example"
      data-type="learn-jetstream-advanced-publishing-async"
-     data-languages="js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp,c"></div>
 
 A note per language: Go, Java, .NET, and Rust have a dedicated async-publish call
 that hands back a future you collect; nats.js does it by not awaiting each
@@ -111,7 +111,7 @@ order:
 
 <div class="nats-example"
      data-type="learn-jetstream-advanced-publishing-atomic"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The wire protocol is the same underneath — the `Nats-Batch-Id`,
 `Nats-Batch-Sequence`, and `Nats-Batch-Commit` headers — so a client without an

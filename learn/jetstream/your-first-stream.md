@@ -47,7 +47,7 @@ won't run.
 
 In another terminal:
 
-<div class="nats-example" data-type="learn-jetstream-your-first-stream-create" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-your-first-stream-create" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Two parts of that command matter.
 
@@ -80,7 +80,7 @@ answers the request. Restart it with the flag and try again.
 
 Look at what the server just created:
 
-<div class="nats-example" data-type="learn-jetstream-your-first-stream-info" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-your-first-stream-info" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The output has two halves.
 

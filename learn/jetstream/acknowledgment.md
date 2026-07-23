@@ -78,7 +78,7 @@ redelivery — so there's no CLI tab here. (To space out redeliveries from
 the CLI, set a consumer [backoff](#backoff-a-growing-delay-between-attempts)
 instead.)
 
-<div class="nats-example" data-type="learn-jetstream-acknowledgment-nakWithDelay" data-languages="js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-acknowledgment-nakWithDelay" data-languages="js,go,python,java,rust,csharp,c"></div>
 
 A nak returns the message to the consumer, not to the worker that
 nak'd it. If several workers share one consumer, the redelivery can land
@@ -102,7 +102,7 @@ For these, the client answers term. The message leaves the pending list
 and the server never delivers it again, no matter how many attempts
 remain.
 
-<div class="nats-example" data-type="learn-jetstream-acknowledgment-termPoison" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-acknowledgment-termPoison" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **After a term**, the message is gone from this consumer but not from the
 stream. Term runs through the same path as an ack: the pending entry clears and
@@ -251,7 +251,7 @@ message goes past its limit
 ([Reference → Max-deliveries advisory](/reference/jetstream/advisory/max-deliver)).
 Subscribe to it so a poison `order_id` isn't dropped without notice:
 
-<div class="nats-example" data-type="learn-jetstream-acknowledgment-watchMaxDeliveries" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-jetstream-acknowledgment-watchMaxDeliveries" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **AckWait shorter than real processing time causes double work.** If a
 job often takes longer than AckWait and the worker never sends

@@ -71,7 +71,7 @@ Create a consumer named `billing`:
 
 <div class="nats-example"
      data-type="learn-jetstream-reading-back-create"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Three settings define how it reads:
 
@@ -117,7 +117,7 @@ everything it hasn't seen, and acknowledges each message as it goes:
 
 <div class="nats-example"
      data-type="learn-jetstream-reading-back-read"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The messages arrive oldest first, each with its stream sequence:
 

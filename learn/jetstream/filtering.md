@@ -36,7 +36,7 @@ Create the `analytics` consumer with a filter of `orders.shipped`:
 
 <div class="nats-example"
      data-type="learn-jetstream-filtering-createFiltered"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The new flag is `--filter`. It ties the consumer to a single filter subject.
 A message on `orders.shipped` reaches `analytics`; a message on
@@ -149,7 +149,7 @@ subject the stream actually stores.
 
 <div class="nats-example"
      data-type="learn-jetstream-filtering-filterMatchesNothing"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 When a pull comes back empty, run `nats consumer info` and check the
 `Filter Subject` line against the stream's subjects. A filter outside

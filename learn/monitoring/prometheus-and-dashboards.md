@@ -126,7 +126,7 @@ plain script can read. Pointed at the `shipping` consumer with a lag
 threshold, it turns the 20-pending number into an alert when it crosses
 the line:
 
-<div class="nats-example" data-type="learn-monitoring-prometheus-and-dashboards-checkConsumer" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-monitoring-prometheus-and-dashboards-checkConsumer" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **nats-surveyor** is a separate service that covers the whole deployment
 at once. It connects to the system account, polls every server for its

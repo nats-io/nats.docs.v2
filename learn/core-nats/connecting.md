@@ -69,7 +69,7 @@ The server accepts, and the connection is ready to carry messages.
 You can watch the first half of that exchange directly. Point any raw TCP tool
 at the server and it prints the `INFO` line the instant it connects:
 
-<div class="nats-example" data-type="learn-core-nats-connecting-see-the-handshake" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-connecting-see-the-handshake" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 These messages are plain text, each line ending in a carriage return and line
 feed, the same wire format as the `PUB` and `SUB` lines that carry your
@@ -90,7 +90,7 @@ The `nats` CLI sets the name with the global `--connection-name` flag. Name a
 connection after the service that owns it. Here it's `warehouse`, the first
 Acme service, which opens a connection and confirms it can reach the server:
 
-<div class="nats-example" data-type="learn-core-nats-connecting-connect-and-name" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-core-nats-connecting-connect-and-name" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The name then surfaces wherever the server lists its connections: `nats server
 report connections` and the [monitoring

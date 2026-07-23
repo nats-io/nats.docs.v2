@@ -43,7 +43,7 @@ with a price. Run three of them, each quoting a different number.
 
 <div class="nats-example"
      data-type="learn-core-nats-scatter-gather-provider"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 There's one trap to know about with `nats reply`. By default, the CLI
 subscribes inside a queue group named `NATS-RPLY-22`. Three
@@ -68,7 +68,7 @@ collects replies until it's heard from every provider.
 
 <div class="nats-example"
      data-type="learn-core-nats-scatter-gather-gather"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The CLI uses `--replies 3`: read from the inbox until three replies
 arrive, then stop — or until replies stop arriving, whichever comes
@@ -152,7 +152,7 @@ subscribe to the inbox yourself and read in a loop.
 
 <div class="nats-example"
      data-type="learn-core-nats-scatter-gather-first-reply-trap"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **No deadline, so you wait for replies that never come.** A hand-rolled
 gather that reads with no deadline blocks forever if a provider is down —

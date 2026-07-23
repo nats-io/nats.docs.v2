@@ -83,7 +83,7 @@ takes its revision, computes the new count, and calls update with that
 revision. If the key is still at the revision it read, the write lands. If
 not, the write is rejected and nothing is lost.
 
-<div class="nats-example" data-type="learn-key-value-history-and-revisions-casUpdate" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-history-and-revisions-casUpdate" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 This is the read-modify-write you use whenever the new value depends
 on the old one, such as a decrement, an increment, or a status transition. The
@@ -103,7 +103,7 @@ service never held a lock.
 With the depth raised, the trail behind `widget-blue` is now visible. Read
 its history:
 
-<div class="nats-example" data-type="learn-key-value-history-and-revisions-keyHistory" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-history-and-revisions-keyHistory" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You see two revisions: `41` from the watching page and `40` from the
 decrement you just made. Their revision numbers aren't consecutive — the
@@ -136,7 +136,7 @@ that loop you have the same lost-write bug `put` had.
 Here's the handling: get the current revision, attempt the update, and on
 a mismatch re-get and retry once with the new revision.
 
-<div class="nats-example" data-type="learn-key-value-history-and-revisions-casConflictRetry" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-history-and-revisions-casConflictRetry" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Do not use put for a read-modify-write.** Put is unconditional: it
 writes no matter what the key holds now, so it will overwrite a

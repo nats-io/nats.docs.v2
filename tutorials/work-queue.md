@@ -42,7 +42,7 @@ In the second terminal, subscribe to the `tasks` subject as a member of
 the `workers` queue group. The `--queue` flag is what makes this a queue
 group member instead of a plain subscriber:
 
-<div class="nats-example" data-type="tutorials-work-queue-worker" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-work-queue-worker" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the worker waiting for messages:
 
@@ -58,7 +58,7 @@ In the third terminal, run the exact same command. Because it names the
 same queue group `workers` on the same subject `tasks`, it joins the same
 group:
 
-<div class="nats-example" data-type="tutorials-work-queue-worker" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-work-queue-worker" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the same waiting line:
 
@@ -75,7 +75,7 @@ In the fourth terminal, publish six messages to `tasks`. The `--count`
 flag repeats the publish six times, and the CLI replaces `{{ Count }}`
 with the message number:
 
-<div class="nats-example" data-type="tutorials-work-queue-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-work-queue-publish" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You should see the publisher confirm one line per message:
 
@@ -123,7 +123,7 @@ never varies: every message goes to exactly one worker.
 
 Publish again to see it balance once more:
 
-<div class="nats-example" data-type="tutorials-work-queue-publish" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="tutorials-work-queue-publish" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The new batch spreads across the two workers the same way. Press Ctrl-C
 in each terminal to stop.

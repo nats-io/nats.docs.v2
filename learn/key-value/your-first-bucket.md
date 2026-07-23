@@ -32,7 +32,7 @@ nats-server -js
 
 In another terminal, create the bucket:
 
-<div class="nats-example" data-type="learn-key-value-your-first-bucket-createBucket" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-your-first-bucket-createBucket" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Two parts of this command matter. The first is the **bucket name**: `INVENTORY`. Bucket names are
 case-sensitive identifiers, and they show up in every command and every
@@ -57,7 +57,7 @@ as a stream. We use only `History` here.
 The bucket is empty. Put the first stock count into it. The **key** is the
 SKU, and the **value** is the count stored as bytes:
 
-<div class="nats-example" data-type="learn-key-value-your-first-bucket-putValue" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-your-first-bucket-putValue" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 That's a **put**: an unconditional write. It stores the value whether or
 not the key already exists. Each write also gets a **revision**: a number
@@ -71,7 +71,7 @@ Revisions are how the bucket tracks change over time, and
 
 Now read it back:
 
-<div class="nats-example" data-type="learn-key-value-your-first-bucket-getValue" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-your-first-bucket-getValue" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 A **get** returns an **entry** rather than a bare
 value: the value together with its revision and
@@ -96,7 +96,7 @@ get you already made.
 
 One command summarizes the bucket as a whole:
 
-<div class="nats-example" data-type="learn-key-value-your-first-bucket-bucketStatus" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-your-first-bucket-bucketStatus" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The status reports the bucket name, the history depth you set, and how many
 values it holds. It also reports the **backing stream**: the stream the
@@ -133,7 +133,7 @@ validates the name and rejects the write before it's sent, rather than
 storing a broken key. Pick names from the allowed set, and reach for an
 underscore or dash where you'd have used a colon:
 
-<div class="nats-example" data-type="learn-key-value-your-first-bucket-nameRejected" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-key-value-your-first-bucket-nameRejected" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

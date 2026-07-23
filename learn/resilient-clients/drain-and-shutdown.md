@@ -105,7 +105,7 @@ That's the Go pitfall from the previous paragraph in practice: exiting on
 code the full pattern is `Drain()` wired to a SIGTERM handler that waits
 for CLOSED before the process exits.
 
-<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-on-signal" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-on-signal" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The message moving through the drain is the same order event as every
 other page:
@@ -143,7 +143,7 @@ seconds to write an order to a database, a one-second drain timeout will
 cut it off mid-write every deploy. Size the timeout to your handler
 latency rather than to a round number.
 
-<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-timeout" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-timeout" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Here we cover only the options that change how a connection behaves under
 fault; the exact option names and defaults live in your client's API
@@ -191,7 +191,7 @@ exactly one subscription, and Ctrl-C closes it, as this page covered. The
 CLI example runs one `warehouse` queue-group member — the subscriber a
 client would then rotate out with a subscription drain:
 
-<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-subscription" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-drain-subscription" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Flush
 
@@ -233,7 +233,7 @@ averaged time per address. Flush itself is a library call with no CLI
 equivalent, so the CLI example shows `nats rtt` against the pool; the
 flush itself is the client-library call:
 
-<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-flush" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-flush" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## When the server drains first
 
@@ -272,7 +272,7 @@ work, so no publish ever has to win that race.
 
 Handle the draining error instead of letting it look like success:
 
-<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-publish-after-drain" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-drain-and-shutdown-publish-after-drain" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **A drain timeout shorter than your slowest handler.** When the timeout
 fires, in-flight work is discarded rather than finished. Set it below the

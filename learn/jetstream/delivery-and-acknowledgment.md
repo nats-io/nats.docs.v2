@@ -35,7 +35,7 @@ previous pages:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-create"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 It starts at the beginning of `ORDERS`, so it has the stored orders to work
 through.
@@ -66,7 +66,7 @@ Pull one message from `shipping` and ack it:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-pullAndAck"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 You get the first stored order, and the ack confirms it:
 
@@ -117,7 +117,7 @@ message and double-ack it:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-doubleAck"
-     data-languages="js,go,python,java,rust,csharp"></div>
+     data-languages="js,go,python,java,rust,csharp,c"></div>
 
 The call is named differently across clients — `DoubleAck` in Go, `ackAck` in
 JavaScript, `ack_sync` in Python, `ackSync` in Java, `AckAsync` (with the
@@ -130,7 +130,7 @@ To see redelivery, pull a message but skip the ack:
 
 <div class="nats-example"
      data-type="learn-jetstream-your-first-consumer-next"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 This delivers the next order, sequence 2, and leaves it in flight. The state
 now shows the gap:

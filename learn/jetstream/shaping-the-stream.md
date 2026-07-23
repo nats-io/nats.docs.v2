@@ -60,7 +60,7 @@ messages already stored stay where they are.
 
 <div class="nats-example"
      data-type="learn-jetstream-shaping-the-stream-setLimits"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 `nats stream edit` shows the change and asks for confirmation before
 applying it. Confirm, then read the stream back:
@@ -167,7 +167,7 @@ so if you must keep history, remove or raise the age limit too:
 
 <div class="nats-example"
      data-type="learn-jetstream-shaping-the-stream-discardNew"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The same quiet discard applies to MaxAge and MaxBytes together. The two
 limits work separately, so whichever is reached first triggers the
@@ -185,7 +185,7 @@ add a per-subject ceiling with `MaxMsgsPerSubject`:
 
 <div class="nats-example"
      data-type="learn-jetstream-shaping-the-stream-perSubjectLimit"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Under Discard Old, a per-subject ceiling discards the oldest message *for
 that subject* once it fills. Discard New doesn't change that on its own:

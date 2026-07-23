@@ -119,7 +119,7 @@ encrypts), presents the `order-svc` credentials (so the server
 authenticates the user), and publishes one canonical order to
 `orders.created`:
 
-<div class="nats-example" data-type="learn-deployment-hardening-credsConnect" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-hardening-credsConnect" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The payload is the same Acme order shape you've carried through every
 chapter:

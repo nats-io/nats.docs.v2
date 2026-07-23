@@ -85,7 +85,7 @@ Wire the full surface on `order-svc` and log each event as it arrives.
 The CLI wires all of these handlers internally, so its example watches
 the events rather than wiring them:
 
-<div class="nats-example" data-type="learn-resilient-clients-connection-events-watch-events" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-connection-events-watch-events" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Disconnected versus closed
 
@@ -189,7 +189,7 @@ unknown. `--format` switches the output between `nagios`, `json`,
 reachable and fast — it can't read *your* process's connection state; the
 in-process check is a client-library call:
 
-<div class="nats-example" data-type="learn-resilient-clients-connection-events-health-check" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-connection-events-health-check" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Force reconnect
 
@@ -253,7 +253,7 @@ it's the one most often left unwired. Wire it everywhere, even with
 unlimited retries — a `Close()` on an error path or an authentication
 failure can still get you to CLOSED:
 
-<div class="nats-example" data-type="learn-resilient-clients-connection-events-handle-closed" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-resilient-clients-connection-events-handle-closed" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Connection events and async errors are different signals.** The events
 on this page report state transitions of the connection. The async error

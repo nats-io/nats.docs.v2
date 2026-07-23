@@ -46,7 +46,7 @@ Pause the `shipping` consumer for one hour:
 
 <div class="nats-example"
      data-type="learn-jetstream-pausing-pauseResume"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 The CLI accepts two forms for the deadline. A duration like `1h` or
 `30m` means "from now." A time like `2026-05-22 14:30:00` means that
@@ -153,7 +153,7 @@ measured from now and can't land in the past.
 
 <div class="nats-example"
      data-type="learn-jetstream-pausing-pastDeadline"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 **Pausing does not stop publishers.** Pause is a consumer setting, so it
 doesn't change the stream. New messages keep arriving while the

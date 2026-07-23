@@ -95,7 +95,7 @@ The server config sizes the *node*, while **account limits** size the
 `MaxStore`, `MaxStreams`, `MaxConsumers`), and the server enforces them
 no matter how much disk the node has. Read them live before you size:
 
-<div class="nats-example" data-type="learn-deployment-sizing-and-resources-accountInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-sizing-and-resources-accountInfo" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 One subtlety in that output decides your storage math: how replication
 counts against `MaxStore`. There are two cases.
@@ -120,7 +120,7 @@ bytes.
 
 Three more limits round out the node, and one command reads them all:
 
-<div class="nats-example" data-type="learn-deployment-sizing-and-resources-serverInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-sizing-and-resources-serverInfo" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 `max_connections` caps how many clients a node accepts (default 64K, i.e.
 65,536; it's reloadable, and overflow disconnects immediately).
@@ -177,7 +177,7 @@ The runnable fix for all four is the same first step: read the live
 limits before you size, so the numbers you plan against are the numbers
 the server enforces.
 
-<div class="nats-example" data-type="learn-deployment-sizing-and-resources-accountInfo" data-languages="cli,js,go,python,java,rust,csharp"></div>
+<div class="nats-example" data-type="learn-deployment-sizing-and-resources-accountInfo" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 ## Where you are
 

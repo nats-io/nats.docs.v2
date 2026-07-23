@@ -71,7 +71,7 @@ three buckets by hashing the customer token:
 
 <div class="nats-example"
      data-type="learn-jetstream-subject-mapping-transform"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Publish a few customers' orders, and each lands under
 `orders.<bucket>.<customer>`:
@@ -107,7 +107,7 @@ dashboard or a monitor from a stored stream.
 
 <div class="nats-example"
      data-type="learn-jetstream-subject-mapping-republish"
-     data-languages="cli,js,go,python,java,rust,csharp"></div>
+     data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
 Now a plain core subscription sees each order as it lands:
 

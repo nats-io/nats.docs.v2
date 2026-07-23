@@ -15,9 +15,10 @@ const LANG_INFO = {
   java: { label: 'Java', fence: 'java' },
   rust: { label: 'Rust', fence: 'rust' },
   csharp: { label: 'C#/.NET', fence: 'csharp' },
+  c: { label: 'C', fence: 'c' },
 };
 
-const LANG_ORDER = ['cli', 'js', 'javascript', 'go', 'python', 'java', 'rust', 'csharp'];
+const LANG_ORDER = ['cli', 'js', 'javascript', 'go', 'python', 'java', 'rust', 'csharp', 'c'];
 
 const TABS_COMPONENT = '__NatsExampleTabs';
 const TAB_ITEM_COMPONENT = '__NatsExampleTabItem';
