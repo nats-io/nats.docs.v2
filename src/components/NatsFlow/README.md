@@ -245,7 +245,7 @@ the NATS brand colors (see CLAUDE.md):
 
 1. Start the dev server:
 ```bash
-cd new-nats.docs
+cd nats.docs
 npm start
 ```
 

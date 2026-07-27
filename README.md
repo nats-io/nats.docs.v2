@@ -45,8 +45,8 @@ code examples pulled from the client repositories.
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/synadia-labs/new-nats.docs.git
-cd new-nats.docs
+git clone https://github.com/synadia-labs/nats.docs.git
+cd nats.docs
 ```
 
 2. Install dependencies:
@@ -229,7 +229,7 @@ This site is built with:
 ### Project Structure
 
 ```
-new-nats.docs/
+nats.docs/
 ├── docs/                      # Core Concepts pages (served at "/")
 │   └── concepts/
 ├── learn/                     # Learn deep dives (own docs instance, "/learn")
@@ -418,7 +418,7 @@ For the best experience, clone the client repositories alongside this docs repos
 
 ```bash
 ~/coding/
-├── new-nats.docs/           # This repository
+├── nats.docs/               # This repository
 ├── nats.go-docs/            # Go examples
 ├── nats.rs-docs/            # Rust examples
 └── nats.js-docs/            # JavaScript/TypeScript examples

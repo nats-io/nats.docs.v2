@@ -27,7 +27,7 @@ git commit -m "Add [page]-[snippet] example"
 git push origin doc-examples
 
 # 5. Update fetch config and test locally
-cd ~/coding/new-nats.docs
+cd ~/coding/nats.docs
 # Add entries to scripts/fetch-examples.js
 npm run fetch-examples
 
@@ -172,7 +172,7 @@ git push origin doc-examples
 ### 4. Update Fetch Configuration
 
 ```bash
-cd ~/coding/new-nats.docs
+cd ~/coding/nats.docs
 
 # Edit scripts/fetch-examples.js
 # Add to "go" section:

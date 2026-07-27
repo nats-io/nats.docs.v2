@@ -181,7 +181,7 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
           beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
           editUrl:
-            "https://github.com/synadia-labs/new-nats.docs/edit/main/",
+            "https://github.com/synadia-labs/nats.docs/edit/main/",
         },
         blog: false,
         theme: {
