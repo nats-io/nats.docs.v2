@@ -272,4 +272,4 @@ NATS has official clients for:
 ### Resources
 
 - [NATS by Example](https://natsbyexample.com) - Interactive examples
-- [Slack Community](https://natsio.slack.com) - Get help from the community
+- [Slack Community](https://slack.nats.io) - Get help from the community
