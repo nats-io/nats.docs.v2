@@ -1,4 +1,4 @@
-module github.com/synadia-labs/config-generator
+module github.com/nats-io/nats.docs.v2/tools/config-generator
 
 go 1.19
 
