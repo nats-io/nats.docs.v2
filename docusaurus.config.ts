@@ -29,7 +29,9 @@ const referenceVersions: DocsOptions["versions"] = Object.fromEntries(
     {
       label: v.status === "latest" ? `${v.name} (latest)` : v.name,
       path: v.status === "latest" ? "" : v.name,
-      ...(v.status === "unmaintained" ? { banner: "unmaintained" as const } : {}),
+      // Docusaurus defaults every version below lastVersion to the
+      // 'unmaintained' banner, so 'maintained' must opt out explicitly.
+      banner: v.status === "unmaintained" ? ("unmaintained" as const) : ("none" as const),
     },
   ]),
 );
