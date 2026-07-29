@@ -65,4 +65,4 @@
 # - linear.api_key  → use LINEAR_API_KEY env var instead
 # - github.token    → use GITHUB_TOKEN env var instead
 
-sync.remote: "git+https://github.com/synadia-labs/new-nats.docs.git"
+sync.remote: "git+https://github.com/nats-io/nats.docs.v2.git"

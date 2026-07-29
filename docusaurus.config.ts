@@ -23,6 +23,12 @@ import rehypeStripHeadingAnchors from "./scripts/rehype-strip-heading-anchors.mj
 // instances; module-level caches inside the plugins are shared too.
 const SHARED_REHYPE_PLUGINS = [rehypeNatsExample, rehypeNatsFlow];
 
+// Base for "Edit this page" links. Docusaurus appends the instance's content
+// dir (docs/, learn/, tutorials/) plus the doc path, so one base serves all
+// instances. The versioned 'reference' instance deliberately has no editUrl:
+// its pages are generated from nats-server/jsm.go and must not be hand-edited.
+const EDIT_URL = "https://github.com/nats-io/nats.docs.v2/edit/main/";
+
 const referenceVersions: DocsOptions["versions"] = Object.fromEntries(
   docVersions.versions.map((v) => [
     v.name,
@@ -121,6 +127,7 @@ const config: Config = {
         // Long-form deep dives. Unversioned — concepts only; version-bound
         // behavior is linked out to the versioned 'reference' instance.
         includeCurrentVersion: true,
+        editUrl: EDIT_URL,
         beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
       } satisfies DocsOptions,
     ],
@@ -135,6 +142,7 @@ const config: Config = {
         // Unversioned; each tutorial hands off to the versioned reference and
         // the Learn deep dives for the "why".
         includeCurrentVersion: true,
+        editUrl: EDIT_URL,
         beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
       } satisfies DocsOptions,
     ],
@@ -149,7 +157,7 @@ const config: Config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "nats-io", // Usually your GitHub org/user name.
-  projectName: "nats.docs", // Usually your repo name.
+  projectName: "nats.docs.v2", // Usually your repo name.
 
   onBrokenLinks: "warn", // Changed from "throw" to allow production build
 
@@ -182,8 +190,7 @@ const config: Config = {
           routeBasePath: "",
           sidebarPath: "./sidebars.ts",
           beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
-          editUrl:
-            "https://github.com/synadia-labs/new-nats.docs/edit/main/",
+          editUrl: EDIT_URL,
         },
         blog: false,
         theme: {
@@ -309,6 +316,10 @@ const config: Config = {
             {
               label: "GitHub",
               href: "https://github.com/nats-io",
+            },
+            {
+              label: "Contribute to these docs",
+              href: "https://github.com/nats-io/nats.docs.v2",
             },
             {
               label: "NATS.io",
