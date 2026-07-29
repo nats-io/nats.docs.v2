@@ -263,7 +263,7 @@ const config: Config = {
           position: "right",
         },
         {
-          href: "https://natsio.slack.com",
+          href: "https://slack.nats.io",
           label: "Slack",
           position: "right",
         },
