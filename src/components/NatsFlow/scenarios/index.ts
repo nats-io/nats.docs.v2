@@ -96,3 +96,6 @@ export { AccountIsolationAnimated } from './accountIsolationAnimated';
 export { CrossAccountExportAnimated } from './crossAccountExportAnimated';
 export { ResolverPushAnimated } from './resolverPushAnimated';
 export { TlsFirstHandshakeAnimated } from './tlsFirstHandshakeAnimated';
+// --- MQTT deep-dive scenarios ---
+export { MqttBridgeAnimated } from './mqttBridgeAnimated';
+export { MqttRetainedAnimated } from './mqttRetainedAnimated';

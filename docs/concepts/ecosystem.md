@@ -13,7 +13,7 @@ If you only want to pick a client and start building, jump to [Tier 1 clients](#
 
 ## Server
 
-The single binary that does all message routing. Clustering, JetStream persistence, leaf nodes, MQTT, and WebSocket are all enabled through configuration on the same `nats-server` — there are no separate components to install.
+The single binary that does all message routing. Clustering, JetStream persistence, leaf nodes, [MQTT](/learn/mqtt/), and WebSocket are all enabled through configuration on the same `nats-server` — there are no separate components to install.
 
 | Name | Description |
 |---|---|

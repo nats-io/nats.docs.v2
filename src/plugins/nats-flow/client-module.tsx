@@ -105,6 +105,9 @@ if (ExecutionEnvironment.canUseDOM) {
       CrossAccountExportAnimated: module.CrossAccountExportAnimated,
       ResolverPushAnimated: module.ResolverPushAnimated,
       TlsFirstHandshakeAnimated: module.TlsFirstHandshakeAnimated,
+      // --- MQTT deep-dive scenarios ---
+      MqttBridgeAnimated: module.MqttBridgeAnimated,
+      MqttRetainedAnimated: module.MqttRetainedAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,

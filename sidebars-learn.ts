@@ -20,13 +20,16 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
  * `east`, server names `n1-east`/`n2-east`/`n3-east` (enforced by
  * .claude/workflows/consistency-check.mjs).
  *
- * Status: all twelve chapters are written — Develop (Core NATS, Services,
+ * Status: all thirteen chapters are written — Develop (Core NATS, Services,
  * JetStream, Resilient Clients, Key-Value, Object Store) and Operate
  * (Topologies, Security, Clustering, Monitoring, Backup & Recovery,
- * Deployment). Each page follows the deep-dive conventions: pinned Acme
+ * Deployment, MQTT). Each page follows the deep-dive conventions: pinned Acme
  * ORDERS scenario, nats-example divs + committed CLI snippets, animated
  * NatsFlow scenarios, per-page Pitfalls, and a Production checklist in
  * each where-next.
+ *
+ * Exception: the MQTT chapter uses inline config/mosquitto/nats-CLI blocks
+ * rather than nats-example divs, since MQTT interop is not a NATS-client task.
  */
 const sidebars: SidebarsConfig = {
   learnSidebar: [
@@ -226,6 +229,18 @@ const sidebars: SidebarsConfig = {
             "deployment/rolling-upgrades",
             "deployment/hardening",
             "deployment/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "MQTT",
+          link: { type: "doc", id: "mqtt/index" },
+          items: [
+            "mqtt/your-first-mqtt-client",
+            "mqtt/topics-and-subjects",
+            "mqtt/qos-sessions-and-retained",
+            "mqtt/auth-and-clustering",
+            "mqtt/where-next",
           ],
         },
       ],
