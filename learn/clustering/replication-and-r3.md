@@ -249,11 +249,11 @@ write is safe, but it reaches each follower's stream store slightly after
 the leader applies it. A direct read aimed at a follower can therefore
 return data that's correct but not the newest. Don't assume any peer
 is current just because the write was acked. For read-after-write, read
-from the leader; to confirm a copy is caught up, read its status before
-you trust it.
+from the leader.
 
-Check the leader and each replica's lag before assuming all copies are
-current:
+Check the leader and each replica's lag when you need to know how far
+behind the group's followers are running, not as a way to decide
+whether a particular read is fresh:
 
 <div class="nats-example" data-type="learn-clustering-replication-and-r3-inspectReplicas" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
