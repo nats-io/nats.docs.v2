@@ -25,7 +25,7 @@ intend:
 ```conf
 authorization {
   users = [
-    { user: order-svc, password: "svc-pass" }
+    { user: order-svc, password: s3cr3t }
     {
       user: sensor
       password: "s3cret"
@@ -58,7 +58,7 @@ the default.
 ## Permissions for MQTT users
 
 Permissions are written against converted subjects, as
-[Topics and subjects](./topics-and-subjects#permissions-apply-to-the-subject)
+[Topics and subjects](/learn/mqtt/topics-and-subjects#permissions-apply-to-the-subject)
 covered. A device publishing `sensors/warehouse/cold-1/temp` needs
 publish permission on `sensors.warehouse.cold-1.temp`.
 
@@ -127,16 +127,21 @@ non-empty username, and the server authenticates on the JWT alone.
 
 Because the JWT travels as a bearer credential with no signature step,
 the user has to be a **bearer** user. That takes two steps, since
-accounts disallow bearer tokens by default:
+accounts disallow bearer tokens by default. Here the devices live in
+their own account, `SENSORS`, keeping their subjects separate from the
+ORDERS workload:
 
 ```bash
 nats auth account edit SENSORS --bearer
 nats auth user add sensor SENSORS --bearer
 ```
 
-Miss either one and the connection is refused with `Authorization
-Violation` — the server is waiting for a nonce signature that MQTT can't
-produce, or the account still disallows bearer tokens.
+Miss either one and the connection is refused: the server is waiting for
+a nonce signature that MQTT can't produce, or the account still
+disallows bearer tokens. The device sees a CONNACK with return code 5,
+"not authorized" — MQTT clients get that rather than the
+`Authorization Violation` error a NATS client would receive, so check
+the CONNACK code rather than looking for that string.
 
 Two consequences of a bearer credential are worth stating plainly.
 Anyone holding the JWT can connect as that user, since there's no key to
@@ -155,7 +160,7 @@ A standalone server can go without `server_name`. Once the server has a
 `cluster` or `gateway` block, MQTT requires it, and startup fails
 otherwise:
 
-```
+```text
 mqtt requires server name to be explicitly set
 ```
 
@@ -189,17 +194,30 @@ Add the same `mqtt {}` block to `n2-east` and `n3-east`, giving each its
 own MQTT port if they share a machine. A device can then connect to any
 of the three.
 
-### Replication comes for free
+### Stream replicas in a cluster
 
-The streams holding MQTT state are replicated automatically, with the
-replica count derived from the cluster size. On a three-node cluster
-they're `R=3`, so sessions and retained messages survive losing a
-server.
+The streams holding MQTT state are replicated automatically once
+JetStream is clustered, and you don't create them. The replica count is
+derived from the **`routes` you configured**, not from how many servers
+the cluster actually has: the server counts the addresses in its own
+`routes` list, then clamps the result to between 1 and 3.
 
-`stream_replicas` overrides that when you want something other than the
-default. Ask for more replicas than the cluster can satisfy and the
-stream fails to create, which surfaces as MQTT clients being unable to
-connect.
+That distinction matters for the config above. `n1-east` lists two
+routes, so its MQTT streams come up at `R=2`, not `R=3` — enough to
+survive one server, but not what you'd guess from a three-node cluster.
+If you want three replicas, either list all the peers in `routes` or set
+it explicitly:
+
+```conf
+mqtt {
+  listen: 127.0.0.1:1883
+  stream_replicas: 3
+}
+```
+
+`stream_replicas` overrides the derived value. Ask for more replicas
+than the cluster can satisfy and the streams fail to create, which
+surfaces as MQTT clients being unable to connect.
 
 ## Limitations
 
@@ -224,8 +242,9 @@ answer.
 The rest apply on any deployment:
 
 - Messages published by NATS clients reach MQTT subscribers as QoS 0.
-- Topics containing whitespace or DEL are rejected: publishing closes
-  the connection, subscribing returns a failure code in the SUBACK.
+- Topics containing whitespace or control characters are rejected:
+  publishing closes the connection, subscribing returns a failure code
+  in the SUBACK.
 - A subscription filter ending in `#` creates two NATS subscriptions and
   consumes twice the `max_ack_pending` budget.
 - Only MQTT v3.1.1 is supported; a client requesting v5 is rejected at
@@ -244,9 +263,11 @@ and 2 subscriptions — they fail in the SUBACK while QoS 0 keeps working,
 so the fleet looks half-broken. Leave those subjects out of the list.
 
 **Forgetting `--bearer` in operator mode.** The device presents a
-perfectly valid JWT and is still refused with `Authorization Violation`.
+perfectly valid JWT and is still refused with CONNACK return code 5.
 The credential is fine; either the user isn't marked as a bearer or the
-account still disallows bearer tokens. Both have to be set.
+account still disallows bearer tokens. Both have to be set. Don't go
+looking for an `Authorization Violation` in the client's output — MQTT
+clients never receive that message, only the CONNACK code.
 
 **Adding a cluster block without `server_name`.** The server starts fine
 as a standalone and then refuses to start the moment you add clustering.
@@ -270,15 +291,13 @@ Acme's fleet is now production-shaped:
 ## What's next
 
 That's the whole of MQTT support.
-[Where to go next](./where-next) collects the model into one place and
+[Where to go next](/learn/mqtt/where-next) collects the model into one place and
 points at the chapters that take each piece further.
 
 ## See also
 
 - [Security → Authorization](/learn/security/authorization) — how
   publish and subscribe permissions are evaluated
-- [Security → Operator mode](/learn/security/operator-mode) — accounts,
-  users, and the JWTs this page hands to devices
 - [Topologies → Your first cluster](/learn/topologies/your-first-cluster)
   — building the `east` cluster this page enables MQTT on
 - [Reference → mqtt](/reference/config/mqtt/) — `stream_replicas` and

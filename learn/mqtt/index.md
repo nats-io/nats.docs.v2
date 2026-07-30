@@ -8,8 +8,9 @@ description: Run nats-server as the MQTT broker for your devices, so their topic
 # Connect MQTT devices to NATS
 
 `nats-server` speaks MQTT. Add one configuration block and the same
-binary that serves your NATS clients also accepts MQTT connections.
-There's no bridge process to deploy and no second broker to run.
+binary that serves your NATS clients also accepts MQTT connections, on
+its own listener on port 1883. There's no bridge process to deploy and
+no second broker to run.
 
 An MQTT device keeps its own client library, its topics, and its QoS
 settings. It connects to `nats-server` the way it would connect to any
@@ -79,19 +80,22 @@ keep speaking MQTT to what they think is a plain broker.
 
 | Page | What you learn |
 |---|---|
-| [Your first MQTT client](./your-first-mqtt-client) | Enable MQTT, connect a device, and watch its message reach a NATS subscriber |
-| [Topics and subjects](./topics-and-subjects) | The conversion rules, wildcards, and which characters are rejected |
-| [QoS, sessions, and retained messages](./qos-sessions-and-retained) | Delivery guarantees, redelivery, session identity, and retained messages |
-| [Auth and clustering](./auth-and-clustering) | Restrict a user to MQTT, grant the QoS 1 permission, and run MQTT on a cluster |
-| [Where to go next](./where-next) | A map of what's beyond this chapter |
+| [Your first MQTT client](/learn/mqtt/your-first-mqtt-client) | Enable MQTT, connect a device, and watch its message reach a NATS subscriber |
+| [Topics and subjects](/learn/mqtt/topics-and-subjects) | The conversion rules, wildcards, and which characters are rejected |
+| [QoS, sessions, and retained messages](/learn/mqtt/qos-sessions-and-retained) | Delivery guarantees, redelivery, session identity, and retained messages |
+| [Auth and clustering](/learn/mqtt/auth-and-clustering) | Restrict a user to MQTT, grant the QoS 1 permission, and run MQTT on a cluster |
+| [Where to go next](/learn/mqtt/where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites
 
 You'll need:
 
-- **`nats-server` 2.2 or later**, with JetStream enabled. MQTT support
-  landed in 2.2. A single local server is enough until the last page,
-  which uses the `east` cluster.
+- **`nats-server` 2.10 or later**, with JetStream enabled. MQTT support
+  landed in 2.2, but this chapter uses QoS 2 and the `.`-in-topic
+  conversion, both of which arrived in 2.10. A single local server is
+  enough until
+  [Auth and clustering](/learn/mqtt/auth-and-clustering), which uses the
+  `east` cluster.
 - **An MQTT client.** The examples use
   [`mosquitto_pub` and `mosquitto_sub`](https://mosquitto.org/download/),
   which are small and available everywhere. Any MQTT v3.1.1 client works.
@@ -99,7 +103,7 @@ You'll need:
   every example.
 
 Open a terminal and turn to
-[Your first MQTT client](./your-first-mqtt-client).
+[Your first MQTT client](/learn/mqtt/your-first-mqtt-client).
 
 ## See also
 
@@ -109,5 +113,3 @@ Open a terminal and turn to
   — the subject rules that MQTT topics are converted into
 - [JetStream deep dive](/learn/jetstream) — the persistence layer MQTT
   sessions and retained messages are stored in
-- [MQTT implementation overview](https://github.com/nats-io/nats-server/blob/main/server/README-MQTT.md)
-  — how the server implements MQTT, in the `nats-server` repo

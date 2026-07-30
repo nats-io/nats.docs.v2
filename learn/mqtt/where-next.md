@@ -27,15 +27,17 @@ clients and another for MQTT devices, and the conversion between them
 happens inside the server.
 
 A **topic becomes a subject** on the way through: `/` turns into `.`,
-`.` turns into `//`, and the awkward positions are escaped so the result
-is always a valid subject. Everything downstream — subscriptions,
-permissions, streams — is written against the converted subject, not the
-topic the device sent.
+`.` turns into `//`, and the awkward positions are escaped. A few
+characters have no encoding at all — a space above all — and those
+topics are refused rather than converted. Everything downstream —
+subscriptions, permissions, streams — is written against the converted
+subject, not the topic the device sent.
 
 **QoS is an MQTT-side contract.** The server honors 0, 1, and 2 between
-MQTT clients, holding unacknowledged messages until a PUBACK or until
-`ack_wait` expires. It can't extend that contract to NATS publishes,
-which arrive as QoS 0, because a NATS message carries no QoS to inherit.
+MQTT clients, holding each unacknowledged message and redelivering it
+once `ack_wait` expires, until the client acknowledges. It can't extend
+that contract to NATS publishes, which arrive as QoS 0, because a NATS
+message carries no QoS to inherit.
 
 **MQTT's state lives in JetStream.** Sessions, retained messages, and
 in-flight QoS 1 and 2 deliveries are all stored in streams the server
@@ -70,7 +72,7 @@ using what the sensors send. The same chapter explains the machinery
 behind MQTT's own sessions and retained messages.
 
 **[Security](/learn/security)** finishes the auth story.
-[Auth and clustering](./auth-and-clustering) restricted a user to MQTT
+[Auth and clustering](/learn/mqtt/auth-and-clustering) restricted a user to MQTT
 connections and handed devices a bearer JWT, but stopped short of the
 model underneath: accounts as subject isolation, how permissions are
 evaluated, and [operator mode](/learn/security/operator-mode) end to end.
@@ -88,30 +90,30 @@ Every content page closed with a Pitfalls section. This collects their
 action items into one pass to make before you point real devices at a
 server. Each group links back to the page that explains why.
 
-### Your first MQTT client — see [Pitfalls](./your-first-mqtt-client#pitfalls)
+### Your first MQTT client — see [Pitfalls](/learn/mqtt/your-first-mqtt-client#pitfalls)
 
 - [ ] Enable JetStream on the server and on the account your MQTT users bind to; without it the server won't start and MQTT clients can't connect.
 - [ ] Point plain MQTT clients at the MQTT port and MQTT-over-WebSocket clients at the WebSocket listener; the two are not interchangeable.
 
-### Topics and subjects — see [Pitfalls](./topics-and-subjects#pitfalls)
+### Topics and subjects — see [Pitfalls](/learn/mqtt/topics-and-subjects#pitfalls)
 
 - [ ] Write every permission as a NATS subject with NATS wildcards; a rule written with `/` or `#` never matches.
-- [ ] Grant both `sensors.>` and `sensors` for a device subscribing to `sensors/#`, since the server creates a subscription for each.
+- [ ] Grant both `sensors.>` and `sensors` for a device subscribing to `sensors/#`; missing the second one fails the whole filter with `0x80`, not just the parent level.
 - [ ] Normalize leading and trailing slashes across the fleet, or account for both subject trees; `sensors/temp` and `/sensors/temp` are different subjects.
-- [ ] Sanitize anything interpolated into a topic; whitespace closes the connection on publish and fails the SUBACK on subscribe.
+- [ ] Sanitize anything interpolated into a topic; a space closes the connection on publish and fails the SUBACK on subscribe.
 
-### QoS, sessions, and retained messages — see [Pitfalls](./qos-sessions-and-retained#pitfalls)
+### QoS, sessions, and retained messages — see [Pitfalls](/learn/mqtt/qos-sessions-and-retained#pitfalls)
 
 - [ ] Don't rely on a QoS 1 subscription to make NATS-originated traffic durable; it arrives as QoS 0. Put that data in a stream instead.
 - [ ] Give every device its own client ID, ideally derived from hardware; duplicates evict each other on every reconnect.
-- [ ] Count subscriptions before raising `max_ack_pending`; the per-session total is capped at 65535 and every `#` subscription costs double.
+- [ ] Count subscriptions against `max_ack_pending`; at the default of 1024 a session fits about 64 subscriptions (32 if they end in `#`) before the 65535 per-session cap refuses one with `0x80`.
 - [ ] Use JetStream where you need history; only the last retained value per topic is kept.
 
-### Auth and clustering — see [Pitfalls](./auth-and-clustering#pitfalls)
+### Auth and clustering — see [Pitfalls](/learn/mqtt/auth-and-clustering#pitfalls)
 
 - [ ] Put credentials and TLS on the MQTT listener before it leaves a lab; an open port 1883 accepts any device that can reach it.
 - [ ] Keep `$MQTT.sub.>` out of permission lists entirely — allowing it is unnecessary from 2.14, and denying it silently breaks QoS 1 and 2.
-- [ ] Set `--bearer` on both the account and the user for operator-mode devices; missing either gives `Authorization Violation` with a valid JWT.
+- [ ] Set `--bearer` on both the account and the user for operator-mode devices; missing either refuses a valid JWT with CONNACK return code 5.
 - [ ] Set `server_name` on every server; MQTT requires it as soon as a cluster or gateway block exists.
 
 ## See also
@@ -122,5 +124,3 @@ server. Each group links back to the page that explains why.
   persistence MQTT itself runs on
 - [Security deep dive](/learn/security) — accounts, permissions, and
   operator mode for device credentials
-- [Topologies deep dive](/learn/topologies) — leaf nodes for devices at
-  the edge

@@ -49,12 +49,18 @@ topic was rejected the way whitespace still is.
 
 ## Characters with no conversion
 
-Whitespace has no valid encoding, so the server refuses it. That means
-the space, tab, newline, carriage return, and form feed. A subject
-containing whitespace would break the NATS wire protocol when forwarded
-to other connection types, since the control line could be split. The
-DEL character (`0x7f`) is refused for a similar reason: the subject
-index uses it internally as a marker.
+Some characters have no valid encoding, and the server refuses the topic
+rather than converting it.
+
+The **space** is the one to design around. It has never been accepted on
+any version: a subject containing a space would break the NATS wire
+protocol when forwarded to other connection types, because the control
+line could be split. Newer releases widen the same refusal to other
+whitespace and to control characters.
+
+Rather than track which release refuses which byte, treat whitespace and
+control characters as unusable in topics and keep them out at the
+source.
 
 The refusal shows up differently depending on what the client was doing:
 
@@ -64,8 +70,8 @@ The refusal shows up differently depending on what the client was doing:
   the SUBACK packet, so the subscription isn't created and the
   connection survives.
 
-Device firmware that builds topics from free-text fields (a location
-name, say) is where this usually bites. Strip whitespace before it
+This most often comes up in device firmware that builds topics from
+free-text fields, such as a location name. Strip whitespace before it
 reaches the topic.
 
 ## Wildcards
@@ -103,7 +109,7 @@ already matches everything, so one subscription is enough.
 
 This is worth remembering because the pair counts twice against limits.
 A subscription ending in `#` consumes twice the `max_ack_pending`
-budget, which the [next page](./qos-sessions-and-retained) covers.
+budget, which the [next page](/learn/mqtt/qos-sessions-and-retained) covers.
 
 ## NATS wildcards inside MQTT topics
 
@@ -114,9 +120,9 @@ wildcard.
 
 | MQTT topic | NATS subject | How NATS reads it |
 |---|---|---|
-| `fleet*/status` | `fleet*.status` | literal — `*` is only part of the token |
-| `fleet>/status` | `fleet>.status` | literal — same reason |
-| `fleet/*/status` | `fleet.*.status` | wildcard — `*` is the whole token |
+| `fleet*/telemetry` | `fleet*.telemetry` | literal — `*` is only part of the token |
+| `fleet>/telemetry` | `fleet>.telemetry` | literal — same reason |
+| `fleet/*/telemetry` | `fleet.*.telemetry` | wildcard — `*` is the whole token |
 | `fleet/>` | `fleet.>` | wildcard — `>` is the whole token |
 
 The server doesn't reject these. The publish-time wildcard check covers
@@ -125,11 +131,11 @@ characters as far as MQTT is concerned, so they pass straight through.
 
 That leaves two different problems depending on direction:
 
-- **Subscribing** to `fleet/*/status` creates a real NATS wildcard
-  subscription on `fleet.*.status`. The device asked for one literal
-  topic and receives every `fleet/<anything>/status` instead.
-- **Publishing** to `fleet/*/status` succeeds and lands on the subject
-  `fleet.*.status`, which is not a subject any device is reading
+- **Subscribing** to `fleet/*/telemetry` creates a real NATS wildcard
+  subscription on `fleet.*.telemetry`. The device asked for one literal
+  topic and receives every `fleet/<anything>/telemetry` instead.
+- **Publishing** to `fleet/*/telemetry` succeeds and lands on the subject
+  `fleet.*.telemetry`, which is not a subject any device is reading
   literally.
 
 Keep `*` and `>` out of topic names unless you mean the NATS behavior.
@@ -147,16 +153,15 @@ the whole fleet. A rule written `sensors/#` never matches anything.
 Subscribe permissions need one more step, because of the two-subscription
 rule above. A device subscribing to `sensors/#` makes the server create
 subscriptions on both `sensors.>` and `sensors`, and permissions are
-checked for each. Allow only `sensors.>` and the second one is denied.
-Grant both:
+checked for each. Allow only `sensors.>` and the second one is denied —
+which fails the *whole* filter, not just the parent level. Grant both:
 
-```text
+```conf
 subscribe: ["sensors.>", "sensors"]
 ```
 
-The full permission setup for MQTT users, including the extra subject a
-QoS 1 subscription needs, is on
-[Auth and clustering](./auth-and-clustering).
+The full permission setup for MQTT users is on
+[Auth and clustering](/learn/mqtt/auth-and-clustering).
 
 ## See a conversion for yourself
 
@@ -204,8 +209,10 @@ rejected.
 **Granting only `sensors.>` for a `#` subscription.** A device
 subscribing to `sensors/#` needs both `sensors.>` and `sensors`, because
 the server creates a subscription for each. Grant only the first and the
-device connects, subscribes, and silently never receives anything
-published to the parent level.
+second is denied, at which point the server refuses the entire filter:
+it returns `0x80` in the SUBACK and tears down the `sensors.>`
+subscription it had already created. The device receives nothing on
+`sensors/#` at all, not merely nothing from the parent level.
 
 **Assuming a leading or trailing slash is cosmetic.** `sensors/temp` and
 `/sensors/temp` convert to different subjects (`sensors.temp` and
@@ -227,7 +234,8 @@ mapping:
 - `/` becomes `.`, with escaping at the start, at the end, and between
   adjacent slashes
 - `.` becomes `//`
-- whitespace and DEL are refused
+- whitespace and control characters are refused, the space on every
+  version
 - `+` becomes `*`, `#` becomes `>`, and `#` below the top level costs two
   subscriptions
 - permissions, subscriptions, and stream subjects are all written against
@@ -237,7 +245,7 @@ mapping:
 
 You can now predict which subject any topic lands on. The next question
 is what the server promises about delivering it.
-[QoS, sessions, and retained messages](./qos-sessions-and-retained)
+[QoS, sessions, and retained messages](/learn/mqtt/qos-sessions-and-retained)
 covers the delivery guarantees, what the server stores between
 connections, and why messages from the NATS side always arrive as QoS 0.
 

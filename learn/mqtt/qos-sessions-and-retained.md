@@ -59,8 +59,13 @@ side, in a stream, rather than expecting MQTT redelivery to cover it.
 
 When the server delivers a QoS 1 or 2 message to a matching
 subscription, it keeps the message until the client acknowledges the
-packet identifier with a PUBACK. If no PUBACK arrives within `ack_wait`,
-the server sends the message again, flagged as a duplicate.
+packet identifier. If that acknowledgment doesn't arrive within
+`ack_wait`, the server sends the message again, flagged as a duplicate.
+
+The two levels acknowledge differently. QoS 1 is a single PUBACK. QoS 2
+is a four-packet handshake — the client answers with PUBREC, the server
+replies PUBREL, and the client closes it with PUBCOMP — which is what
+lets the server drop duplicates instead of delivering them.
 
 `ack_wait` defaults to 30 seconds. Set it in the `mqtt {}` block:
 
@@ -84,22 +89,26 @@ matter should be idempotent.
 
 `max_ack_pending` caps how many QoS 1 and 2 messages (combined) the
 server will send to a subscription before it has to wait for
-acknowledgments. It defaults to 100, and the valid range is 0 to 65535.
+acknowledgments. It defaults to **1024**, and the valid range is 0 to
+65535. Setting it to `0` doesn't mean "nothing in flight" — the server
+reads 0 as "use the default" and applies 1024.
 
-Two limits follow from that, and both surface as a subscription failure
-rather than an error you can catch later:
+Two limits follow from that:
 
 - The total across all of a session's subscriptions can't exceed
   **65535**. A subscription that would push the total over the limit is
   refused, and the server returns `0x80` in the SUBACK for it.
 - A subscription ending in `#` counts **twice**, because of the two
   subscriptions the server creates for it (see
-  [Topics and subjects](./topics-and-subjects#why--sometimes-creates-two-subscriptions)).
+  [Topics and subjects](/learn/mqtt/topics-and-subjects#why--sometimes-creates-two-subscriptions)).
 
-With the default of 100, a session has room for roughly 655 plain
-subscriptions, or about half that if they all end in `#`. Devices with
-many subscriptions and a raised `max_ack_pending` hit the ceiling much
-sooner. Like `ack_wait`, a change applies only to new subscriptions.
+Those two combine into a tighter ceiling than the 65535 suggests. At the
+default of 1024, a session has room for about 64 plain subscriptions, or
+32 if they all end in `#`. A device that subscribes to many topics can
+hit that, and the symptom is a subscription refused with `0x80` rather
+than an error your code can catch later. Lower `max_ack_pending` if you
+need more subscriptions per session. Like `ack_wait`, a change applies
+only to new subscriptions.
 
 ## Sessions
 
@@ -133,8 +142,10 @@ first one and accepts the newcomer.
 That rule is harsh when it happens by accident. Deploy the same client
 ID to two devices and each connection evicts the other; if both have
 reconnect logic, they take turns kicking each other off as fast as they
-can reconnect. To keep that from becoming a hot loop, the server delays
-closing the old connection, which slows the flapping rather than
+can reconnect. The old connection is closed straight away. What keeps
+this from becoming a hot loop is on the other side: the server records
+the client ID as flapping and holds off letting a new connection take
+that session over for about a second. It slows the cycle rather than
 stopping it.
 
 The check works across a cluster too, and there it's less immediate:
@@ -242,9 +253,9 @@ Your setup is unchanged, and you now know what the server is holding:
 
 Everything so far ran on one server with no authentication. Devices in
 the field need credentials, and the fleet needs more than one server.
-[Auth and clustering](./auth-and-clustering) restricts a user to MQTT
-connections, grants the extra permission a QoS 1 subscription needs, and
-covers what changes when MQTT runs on the `east` cluster.
+[Auth and clustering](/learn/mqtt/auth-and-clustering) restricts a user to MQTT
+connections, writes permissions for a device fleet, and covers what
+changes when MQTT runs on the `east` cluster.
 
 ## See also
 
@@ -252,5 +263,5 @@ covers what changes when MQTT runs on the `east` cluster.
   `max_ack_pending`, and the rest of the block
 - [JetStream → Delivery and acknowledgment](/learn/jetstream/delivery-and-acknowledgment)
   — the same redelivery idea on the NATS side, where MQTT's state is stored
-- [Topics and subjects](./topics-and-subjects) — the `#` rule that makes
+- [Topics and subjects](/learn/mqtt/topics-and-subjects) — the `#` rule that makes
   a subscription cost double
