@@ -180,7 +180,7 @@ function PropertyRenderer({
             <span className={styles.enumLabel}>Allowed values:</span>
             {property.enum.map((value, i) => (
               <code key={i} className={styles.enumValue}>
-                {String(value)}
+                {String(value) === "" ? '""' : String(value)}
               </code>
             ))}
           </div>
