@@ -36,7 +36,8 @@ JetStream introduces three pieces working together:
 A stream is bound to one or more subject patterns. When a publisher sends a
 message to a matching subject, the server appends it to the stream and
 assigns it a sequence number. Streams are configurable for storage (memory
-or disk), retention (how long messages are kept), replication, and more.
+or disk), retention (whether limits or consumer acks remove messages),
+replication, and more.
 
 ## Consumers
 

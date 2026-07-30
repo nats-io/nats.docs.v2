@@ -1,7 +1,7 @@
 ---
 id: where-next
 title: "Where to go next"
-sidebar_position: 22
+sidebar_position: 23
 description: Recap the JetStream model and point to what comes after this chapter
 ---
 
@@ -174,6 +174,8 @@ the page that explains it.
 
 - [ ] Create a new stream to move to or from WorkQueue; the server locks that change on a live stream.
 - [ ] Give each WorkQueue consumer a disjoint filter, or share one consumer as a pool; overlapping consumers are rejected.
+- [ ] Watch disk on an Interest stream with a stopped consumer; interest means messages wait for every registered consumer's ack.
+- [ ] Treat a live switch from Limits to Interest as destructive; it re-applies to stored messages and can drop already-acked history.
 
 ### Per-message TTL — see [Pitfalls](/learn/jetstream/message-ttl#pitfalls)
 
@@ -220,6 +222,13 @@ the page that explains it.
 - [ ] Point a republish destination at a separate subject space, not one under the stream's own subjects; an overlap is rejected as a cycle (`10052`).
 - [ ] Re-namespace existing data by sourcing it into a new stream with the transform; editing a transform leaves already-stored messages untouched.
 - [ ] Pick the partition count up front; raising it later re-hashes keys, so a consumer's filter quietly starts covering a different set.
+
+### Stream and consumer policies — see [Pitfalls](/learn/jetstream/policies#pitfalls)
+
+- [ ] Settle the fixed policies — storage, persist mode, deliver, ack, and replay — before creating anything durable; `stream edit` and `consumer edit` can't change them.
+- [ ] Plan the data move when a fixed policy must change; recreating a stream needs a mirror or a re-publish, and a recreated consumer starts fresh, not where the old one stopped.
+- [ ] Treat `--deliver new` as a one-time start position, not a per-restart skip; a durable resumes from its saved position on reconnect.
+- [ ] Check whether "last per subject" means the deliver policy or the Direct Get flag before copying a command.
 
 ## See also
 

@@ -195,9 +195,9 @@ Nothing else changed.
 
 ## What's next
 
-That's the last of the stream and consumer mechanics. [Where to go
-next](/learn/jetstream/where-next) recaps the model you built and points
-to the chapters that take it further.
+That's the last of the stream and consumer mechanics. Before the chapter
+closes, [Stream and consumer policies](/learn/jetstream/policies) lines
+up every policy you've met, and the few you haven't, in one place.
 
 ## See also
 

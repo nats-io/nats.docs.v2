@@ -246,7 +246,8 @@ The next page covers [reading messages directly](/learn/jetstream/get-direct):
 getting one message or a batch straight from the stream, with no consumer,
 served by any replica or mirror. After that,
 [subject mapping](/learn/jetstream/subject-mapping),
-[per-message TTL](/learn/jetstream/message-ttl), then
+[per-message TTL](/learn/jetstream/message-ttl), and
+[stream and consumer policies](/learn/jetstream/policies), then
 [Where to go next](/learn/jetstream/where-next) recaps the chapter.
 
 ## See also
