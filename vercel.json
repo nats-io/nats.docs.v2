@@ -1,0 +1,2594 @@
+{
+  "redirects": [
+    {
+      "source": "/README",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/overview",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/feature_comparison",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/overview/compare-nats",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/whats_new",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/whats_new_214",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/whats_new_212",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/whats_new_211",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/whats_new_210",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/whats_new_22",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/whats_new_20",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/what-is-nats",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/what-is-nats/",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/what-is-nats/walkthrough_setup",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/subjects",
+      "destination": "/concepts/subjects",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/publish-subscribe/pubsub",
+      "destination": "/concepts/pub-sub-basics",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/publish-subscribe/pubsub_walkthrough",
+      "destination": "/tutorials/hello-nats",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/request-reply/reqreply",
+      "destination": "/concepts/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/request-reply/reqreply_walkthrough",
+      "destination": "/tutorials/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/queue-groups/queue",
+      "destination": "/concepts/queue-groups",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/queue-groups/queues_walkthrough",
+      "destination": "/learn/core-nats/queue-groups",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream",
+      "destination": "/concepts/jetstream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/",
+      "destination": "/concepts/jetstream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/streams",
+      "destination": "/learn/jetstream/your-first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/source_and_mirror",
+      "destination": "/learn/jetstream/mirrors-and-sources",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/source_and_mirror_example",
+      "destination": "/learn/jetstream/mirrors-and-sources",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/consumers",
+      "destination": "/learn/jetstream/pull-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/example_configuration",
+      "destination": "/learn/jetstream/shaping-the-stream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/js_walkthrough",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/key-value-store",
+      "destination": "/learn/key-value/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/key-value-store/",
+      "destination": "/learn/key-value/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/key-value-store/kv_walkthrough",
+      "destination": "/tutorials/key-value",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/object-store",
+      "destination": "/learn/object-store/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/object-store/obj_store",
+      "destination": "/learn/object-store/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/object-store/obj_walkthrough",
+      "destination": "/learn/object-store/your-first-object",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/headers",
+      "destination": "/learn/core-nats/headers",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/subject_mapping",
+      "destination": "/learn/core-nats/subject-mapping",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/service_infrastructure",
+      "destination": "/concepts/topologies",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/adaptive_edge_deployment",
+      "destination": "/concepts/topologies",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/security",
+      "destination": "/concepts/security",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/connectivity",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/acks",
+      "destination": "/learn/core-nats/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/seq_num",
+      "destination": "/learn/core-nats/debugging-delivery",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nats_cli",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nats_cli/",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nats_cli/natsbench",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nk",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nats_top",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nats_top/",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nats_top/nats-top-tutorial",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/basics",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/managed",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/streams",
+      "destination": "/learn/security/cross-account",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/services",
+      "destination": "/learn/security/cross-account",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/signing_keys",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/revocation",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/developer",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/anatomy",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/default_server",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/specific_server",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/cluster",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/name",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/connect_timeout",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/pingpong",
+      "destination": "/learn/core-nats/connection-lifecycle",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/noecho",
+      "destination": "/learn/core-nats/connection-lifecycle",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/misc",
+      "destination": "/learn/core-nats/connection-lifecycle",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/security/userpass",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/security/token",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/security/nkey",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/security/creds",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/connecting/security/tls",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect/",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect/disable",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect/max",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect/random",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect/wait",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect/events",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/reconnect/buffer",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/events",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/events/",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/events/events",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/events/slow",
+      "destination": "/learn/resilient-clients/slow-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/sync",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/async",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/unsubscribing",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/unsub_after",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/structure",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/reply",
+      "destination": "/learn/core-nats/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/wildcards",
+      "destination": "/learn/core-nats/subjects-and-wildcards",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/queues",
+      "destination": "/learn/core-nats/queue-groups",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/receiving/drain",
+      "destination": "/learn/resilient-clients/drain-and-shutdown",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/sending",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/sending/",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/sending/structure",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/sending/replyto",
+      "destination": "/learn/core-nats/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/sending/request_reply",
+      "destination": "/learn/core-nats/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/sending/caches",
+      "destination": "/learn/core-nats/debugging-delivery",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/services",
+      "destination": "/learn/services/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/services/",
+      "destination": "/learn/services/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/tutorials",
+      "destination": "/tutorials/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/tutorials/",
+      "destination": "/tutorials/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/tutorials/custom_dialer",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/js/streams",
+      "destination": "/learn/jetstream/your-first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/js/consumers",
+      "destination": "/learn/jetstream/pull-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/js/publish",
+      "destination": "/learn/jetstream/publishing",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/js/context",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/js/kv",
+      "destination": "/learn/key-value/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/js/object",
+      "destination": "/learn/object-store/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/develop_jetstream",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/concepts",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/concepts/",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/getting_started",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/getting_started/",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/getting_started/using_source",
+      "destination": "/learn/jetstream/mirrors-and-sources",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/model_deep_dive",
+      "destination": "/learn/jetstream/delivery-and-acknowledgment",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/nats_api_reference",
+      "destination": "/reference/jetstream/api/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/introduction",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/installation",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/windows_srv",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/flags",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/environment",
+      "destination": "/learn/deployment/sizing-and-resources",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/clients",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/nats_docker",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/nats_docker/",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/nats_docker/nats-docker-tutorial",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/nats_docker/docker_swarm",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/nats_docker/jetstream_docker",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/nats_docker/ngs-docker-python",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/nats_docker/ngs-leafnodes-docker",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/nats-kubernetes",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/jetstream-config/resource_management",
+      "destination": "/reference/config/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/jetstream-config/configuration_mgmt",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/jetstream-config/configuration_mgmt/",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/jetstream-config/configuration_mgmt/nats-admin-cli",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/jetstream-config/configuration_mgmt/terraform",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/jetstream-config/configuration_mgmt/github_actions",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/jetstream-config/configuration_mgmt/kubernetes_controller",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering",
+      "destination": "/learn/clustering/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/",
+      "destination": "/learn/clustering/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/cluster_config",
+      "destination": "/learn/clustering/forming-a-cluster",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/v2_routes",
+      "destination": "/reference/config/cluster/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/cluster_tls",
+      "destination": "/learn/deployment/hardening",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/jetstream_clustering",
+      "destination": "/learn/topologies/jetstream-in-a-cluster",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/jetstream_clustering/",
+      "destination": "/learn/topologies/jetstream-in-a-cluster",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/jetstream_clustering/administration",
+      "destination": "/learn/clustering/raft-and-leaders",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/jetstream_clustering/troubleshooting",
+      "destination": "/learn/monitoring/jetstream-health",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/gateways",
+      "destination": "/learn/topologies/super-clusters",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/gateways/",
+      "destination": "/learn/topologies/super-clusters",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/gateways/gateway",
+      "destination": "/reference/config/gateway/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/leafnodes",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/leafnodes/",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/leafnodes/leafnode_conf",
+      "destination": "/reference/config/leafnodes/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/leafnodes/jetstream_leafnodes",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/logging",
+      "destination": "/reference/config/logfile",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/monitoring",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/mqtt",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/mqtt/",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/mqtt/mqtt_config",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/mqtt/mqtt_conf",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/configuring_subject_mapping",
+      "destination": "/learn/core-nats/subject-mapping",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/sys_accounts",
+      "destination": "/learn/monitoring/advisories-and-events",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/sys_accounts/",
+      "destination": "/learn/monitoring/advisories-and-events",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/sys_accounts/sys_accounts",
+      "destination": "/learn/monitoring/advisories-and-events",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/websocket",
+      "destination": "/reference/config/websocket/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/websocket/",
+      "destination": "/reference/config/websocket/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/websocket/websocket_conf",
+      "destination": "/reference/config/websocket/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/ocsp",
+      "destination": "/reference/config/ocsp/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats",
+      "destination": "/learn/security/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/",
+      "destination": "/learn/security/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/tls",
+      "destination": "/learn/security/encryption",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_intro",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_intro/",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_intro/tokens",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_intro/username_password",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_intro/nkey_auth",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_intro/tls_mutual_auth",
+      "destination": "/learn/security/encryption",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_intro/auth_timeout",
+      "destination": "/reference/config/authorization/timeout",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/authorization",
+      "destination": "/learn/security/authorization",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/accounts",
+      "destination": "/learn/security/accounts-and-multitenancy",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/auth_callout",
+      "destination": "/learn/security/auth-callout",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/jwt",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/jwt/",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/jwt/resolver",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/jwt/mem_resolver",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/jwt/jwt_nkey_auth",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin",
+      "destination": "/learn/monitoring/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/",
+      "destination": "/learn/monitoring/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/monitoring",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/monitoring/",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/monitoring/monitoring_jetstream",
+      "destination": "/learn/monitoring/jetstream-health",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/account",
+      "destination": "/learn/deployment/sizing-and-resources",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/naming",
+      "destination": "/learn/jetstream/your-first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/streams",
+      "destination": "/learn/jetstream/your-first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/consumers",
+      "destination": "/learn/jetstream/pull-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/replication",
+      "destination": "/learn/clustering/replication-and-r3",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/disaster_recovery",
+      "destination": "/learn/backup-recovery/disaster-recovery",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/encryption_at_rest",
+      "destination": "/learn/security/encryption",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/security",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jwt",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/upgrading_cluster",
+      "destination": "/learn/deployment/rolling-upgrades",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/slow_consumers",
+      "destination": "/learn/resilient-clients/slow-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/signals",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/lame_duck_mode",
+      "destination": "/learn/deployment/rolling-upgrades",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/profiling",
+      "destination": "/reference/system/monitor/profilez",
+      "permanent": false
+    },
+    {
+      "source": "/reference/faq",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/reference-protocols",
+      "destination": "/reference/protocols/",
+      "permanent": false
+    },
+    {
+      "source": "/reference/nats-protocol/nats-protocol",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/reference/nats-protocol/nats-protocol/",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/reference/nats-protocol/nats-protocol/nats-client-dev",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/reference/nats-protocol/nats-protocol-demo",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/reference/nats-protocol/nats-server-protocol",
+      "destination": "/reference/protocols/route",
+      "permanent": false
+    },
+    {
+      "source": "/reference/roadmap",
+      "destination": "https://nats.io/about/#roadmap",
+      "permanent": false
+    },
+    {
+      "source": "/reference/contributing",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nas",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nas/dir_store",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nas/inspecting_jwts",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nas/nas_conf",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nas/notifications",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/acks",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/connecting",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/durables",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/protocol",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/publishing",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/queues",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/receiving",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/streaming",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/channels",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/channels/message-log",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/channels/subscriptions",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/channels/subscriptions/durable",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/channels/subscriptions/queue-group",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/channels/subscriptions/redelivery",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/channels/subscriptions/regular",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/client-connections",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/clustering",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/clustering/auto-configuration",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/clustering/configuration",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/clustering/containers",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/clustering/supported-stores",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/ft",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/ft/active-server",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/ft/failover",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/ft/shared-state",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/ft/standby-server",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/intro",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/monitoring",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/monitoring/endpoints",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/partitioning",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/relation-to-nats",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/store-encryption",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/store-interface",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/changes",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/install",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/run",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/README",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/cmdline",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/cfgfile",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/storelimits",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/persistence/README",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/persistence/file_store",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/persistence/sql_store",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/configuring/tls",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/process-signaling",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/windows-service",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/embedding",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/swarm",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/kubernetes/stan-kubernetes",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/kubernetes/stan-ft-k8s-aws",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/pubsub",
+      "destination": "/concepts/pub-sub-basics",
+      "permanent": false
+    },
+    {
+      "source": "/walkthrough/pubsub",
+      "destination": "/tutorials/hello-nats",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/queue",
+      "destination": "/concepts/queue-groups",
+      "permanent": false
+    },
+    {
+      "source": "/walkthrough/queues",
+      "destination": "/learn/core-nats/queue-groups",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core_nats",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core_nats/",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/reqreply",
+      "destination": "/concepts/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/walkthrough/reqreply",
+      "destination": "/tutorials/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream",
+      "destination": "/concepts/jetstream",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/",
+      "destination": "/concepts/jetstream",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/concepts/consumers",
+      "destination": "/learn/jetstream/pull-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/concepts/configuration",
+      "destination": "/learn/jetstream/shaping-the-stream",
+      "permanent": false
+    },
+    {
+      "source": "/walkthrough/js",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/walkthrough/kv",
+      "destination": "/tutorials/key-value",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/kv_store",
+      "destination": "/learn/key-value/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/kv_store/",
+      "destination": "/learn/key-value/",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/concepts/streams",
+      "destination": "/learn/jetstream/your-first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/compare-nats",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/intro",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/intro/",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/walkthrough/walkthrough_setup",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/faq",
+      "destination": "/concepts/what-is-nats",
+      "permanent": false
+    },
+    {
+      "source": "/roadmap",
+      "destination": "https://nats.io/about/#roadmap",
+      "permanent": false
+    },
+    {
+      "source": "/contributing",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-protocol/nats-protocol-demo",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/nats-protocol/nats-protocol",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/nats-protocol/nats-protocol/",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/nats-protocol/nats-protocol/nats-client-dev",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/nats-protocol/nats-server-protocol",
+      "destination": "/reference/protocols/route",
+      "permanent": false
+    },
+    {
+      "source": "/whats_new_20",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/whats_new_22",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/clients",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/clustering",
+      "destination": "/learn/clustering/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/clustering/",
+      "destination": "/learn/clustering/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/clustering/cluster_config",
+      "destination": "/learn/clustering/forming-a-cluster",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/clustering/cluster_tls",
+      "destination": "/learn/deployment/hardening",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/clustering",
+      "destination": "/learn/topologies/jetstream-in-a-cluster",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/clustering/",
+      "destination": "/learn/topologies/jetstream-in-a-cluster",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/clustering/administration",
+      "destination": "/learn/clustering/raft-and-leaders",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/configuring_subject_mapping",
+      "destination": "/learn/core-nats/subject-mapping",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/gateways",
+      "destination": "/learn/topologies/super-clusters",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/gateways/",
+      "destination": "/learn/topologies/super-clusters",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/gateways/gateway",
+      "destination": "/reference/config/gateway/",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/configuration_mgmt",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/configuration_mgmt/",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/configuration_mgmt/github_actions",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/configuration_mgmt/kubernetes_controller",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/configuration_mgmt/nats-admin-cli",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/configuration_mgmt/terraform",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/resource_management",
+      "destination": "/reference/config/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/leafnodes",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/leafnodes/",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/leafnodes",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/leafnodes/leafnode_conf",
+      "destination": "/reference/config/leafnodes/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/logging",
+      "destination": "/reference/config/logfile",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/monitoring",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/mqtt",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/mqtt/",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/mqtt/mqtt_conf",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/mqtt/mqtt_config",
+      "destination": "/reference/config/mqtt/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/ocsp",
+      "destination": "/reference/config/ocsp/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/accounts",
+      "destination": "/learn/security/accounts-and-multitenancy",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/auth_intro",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/auth_intro/",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/auth_intro/auth_timeout",
+      "destination": "/reference/config/authorization/timeout",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/auth_intro/nkey_auth",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/auth_intro/tls_mutual_auth",
+      "destination": "/learn/security/encryption",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/auth_intro/tokens",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/auth_intro/username_password",
+      "destination": "/learn/security/authentication-basics",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/authorization",
+      "destination": "/learn/security/authorization",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/jwt",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/jwt/",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/jwt/jwt_nkey_auth",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/jwt/mem_resolver",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/jwt/resolver",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/securing_nats/tls",
+      "destination": "/learn/security/encryption",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/sys_accounts",
+      "destination": "/learn/monitoring/advisories-and-events",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/sys_accounts/",
+      "destination": "/learn/monitoring/advisories-and-events",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/sys_accounts/sys_accounts",
+      "destination": "/learn/monitoring/advisories-and-events",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/websocket",
+      "destination": "/reference/config/websocket/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/websocket/",
+      "destination": "/reference/config/websocket/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/configuration/websocket/websocket_conf",
+      "destination": "/reference/config/websocket/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/installation",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/running-nats-intro",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/create-k8s-cluster",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/from-zero-to-leafnodes",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/helm-charts",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/minimal-setup",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/nats-cluster-and-cert-manager",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/nats-external-nlb",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/nats-kubernetes",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/operator-tls-setup-with-cfssl",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/super-cluster-on-digital-ocean",
+      "destination": "/learn/topologies/super-clusters",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/administration",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/administration/",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/administration/account",
+      "destination": "/learn/deployment/sizing-and-resources",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/administration/consumers",
+      "destination": "/learn/jetstream/pull-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/disaster_recovery",
+      "destination": "/learn/backup-recovery/disaster-recovery",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/encryption_at_rest",
+      "destination": "/learn/security/encryption",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/administration/naming",
+      "destination": "/learn/jetstream/your-first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/replication",
+      "destination": "/learn/clustering/replication-and-r3",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/administration/streams",
+      "destination": "/learn/jetstream/your-first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_admin/lame_duck_mode",
+      "destination": "/learn/deployment/rolling-upgrades",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/monitoring",
+      "destination": "/learn/monitoring/jetstream-health",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_admin/monitoring",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_admin/monitoring/",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_admin/signals",
+      "destination": "/learn/deployment/config-management",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_admin/slow_consumers",
+      "destination": "/learn/resilient-clients/slow-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_admin/upgrading_cluster",
+      "destination": "/learn/deployment/rolling-upgrades",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/running",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/running/",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/flags",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_docker",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_docker/",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_docker/docker_swarm",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/getting_started/using_docker",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_docker/nats-docker-tutorial",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/nats_docker/ngs-docker-python",
+      "destination": "/concepts/getting-started/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/running/windows_srv",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/cluster",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/connect_timeout",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/default_server",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/misc",
+      "destination": "/learn/core-nats/connection-lifecycle",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/name",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/noecho",
+      "destination": "/learn/core-nats/connection-lifecycle",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/pingpong",
+      "destination": "/learn/core-nats/connection-lifecycle",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/connecting/specific_server",
+      "destination": "/learn/core-nats/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/developer",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/events",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/events/",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/events/events",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/events/slow",
+      "destination": "/learn/resilient-clients/slow-consumers",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/async",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/drain",
+      "destination": "/learn/resilient-clients/drain-and-shutdown",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/queues",
+      "destination": "/learn/core-nats/queue-groups",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/reply",
+      "destination": "/learn/core-nats/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/structure",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/sync",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/unsub_after",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/unsubscribing",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/receiving/wildcards",
+      "destination": "/learn/core-nats/subjects-and-wildcards",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect/",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect/buffer",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect/disable",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect/events",
+      "destination": "/learn/resilient-clients/connection-events",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect/max",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect/random",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/reconnect/wait",
+      "destination": "/learn/resilient-clients/reconnection",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/security",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/security/creds",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/security/nkey",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/security/tls",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/security/token",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/security/userpass",
+      "destination": "/learn/resilient-clients/tls-and-auth",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/sending",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/sending/",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/sending/caches",
+      "destination": "/learn/core-nats/debugging-delivery",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/sending/replyto",
+      "destination": "/learn/core-nats/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/sending/request_reply",
+      "destination": "/learn/core-nats/request-reply",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/sending/structure",
+      "destination": "/learn/core-nats/publish-subscribe",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/tutorials",
+      "destination": "/tutorials/",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/tutorials/",
+      "destination": "/tutorials/",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/tutorials/custom_dialer",
+      "destination": "/learn/resilient-clients/connecting",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/tutorials/jwt",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/concepts",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/concepts/",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/jetstream",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/getting_started",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/getting_started/",
+      "destination": "/tutorials/first-stream",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/getting_started/using_source",
+      "destination": "/learn/jetstream/mirrors-and-sources",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/model_deep_dive",
+      "destination": "/learn/jetstream/delivery-and-acknowledgment",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/nats_api_reference",
+      "destination": "/reference/jetstream/api/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/natsbench",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/natscli",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nats_top",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nats_top/",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nats_top/nats-top-tutorial",
+      "destination": "/learn/monitoring/monitoring-endpoints",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nk",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc/",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc/basics",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc/managed",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc/revocation",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc/services",
+      "destination": "/learn/security/cross-account",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc/signing_keys",
+      "destination": "/learn/security/decentralized-auth",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nsc/streams",
+      "destination": "/learn/security/cross-account",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nats-tools",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/create-k8s-cluster",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/from-zero-to-leafnodes",
+      "destination": "/learn/topologies/leaf-nodes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/helm-charts",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/nats-cluster-and-cert-manager",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/nats-external-nlb",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/operator-tls-setup-with-cfssl",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/super-cluster-on-digital-ocean",
+      "destination": "/learn/topologies/super-clusters",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/nas/:path*",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-concepts/:path*",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-streaming-server/:path*",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats-streaming/:path*",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/legacy/:path*",
+      "destination": "https://nats-io.gitbook.io/legacy-nats-docs",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/core-nats/:path*",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/key-value-store/:path*",
+      "destination": "/learn/key-value/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/object-store/:path*",
+      "destination": "/learn/object-store/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/jetstream/:path*",
+      "destination": "/concepts/jetstream",
+      "permanent": false
+    },
+    {
+      "source": "/nats-concepts/:path*",
+      "destination": "/concepts/intro",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/js/:path*",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/developing-with-nats/:path*",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/jetstream/:path*",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/nsc/:path*",
+      "destination": "/learn/security/operator-mode",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/nats-tools/:path*",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/using-nats/:path*",
+      "destination": "/learn/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/securing_nats/:path*",
+      "destination": "/learn/security/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/clustering/:path*",
+      "destination": "/learn/clustering/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/configuration/:path*",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/jetstream_admin/:path*",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats_admin/:path*",
+      "destination": "/learn/monitoring/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/nats-on-kubernetes/:path*",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/running/:path*",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/running-a-nats-service/:path*",
+      "destination": "/learn/deployment/",
+      "permanent": false
+    },
+    {
+      "source": "/release_notes/:path*",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/reference/nats-protocol/:path*",
+      "destination": "/reference/protocols/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-server/:path*",
+      "destination": "/reference/config/",
+      "permanent": false
+    },
+    {
+      "source": "/developing-with-nats/:path*",
+      "destination": "/learn/core-nats/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-tools/:path*",
+      "destination": "/concepts/ecosystem",
+      "permanent": false
+    },
+    {
+      "source": "/jetstream/:path*",
+      "destination": "/learn/jetstream/",
+      "permanent": false
+    },
+    {
+      "source": "/walkthrough/:path*",
+      "destination": "/tutorials/",
+      "permanent": false
+    },
+    {
+      "source": "/nats-on-kubernetes/:path*",
+      "destination": "/learn/deployment/kubernetes",
+      "permanent": false
+    }
+  ]
+}
