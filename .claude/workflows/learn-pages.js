@@ -18,12 +18,64 @@ const CHAPTER_PAGES = {
   'monitoring': ['index','monitoring-endpoints','jetstream-health','advisories-and-events','prometheus-and-dashboards','where-next'],
   'backup-recovery': ['index','stream-backup-restore','mirrors-and-sources','disaster-recovery','config-and-jwt-backup','where-next'],
   'deployment': ['index','sizing-and-resources','kubernetes','config-management','rolling-upgrades','hardening','where-next'],
+  'mqtt': ['index','your-first-mqtt-client','topics-and-subjects','qos-sessions-and-retained','auth-and-clustering','where-next'],
 }
 
-const SPEC = (ch) => `specs/2026-06-05-${ch}-deep-dive-design.md`
+// Most chapters share the 2026-06-05 spec naming; MQTT has its own.
+const SPEC_PATH = {
+  'mqtt': 'docs/superpowers/specs/2026-07-30-mqtt-docs-design.md',
+}
+const SPEC = (ch) => SPEC_PATH[ch] || `specs/2026-06-05-${ch}-deep-dive-design.md`
 
-// Build the flat work list for the chapters requested in args.
-const chapters = Array.isArray(args) ? args : Object.keys(CHAPTER_PAGES)
+// Chapters that deliberately diverge from the standing conventions above.
+// These OVERRIDE the conventions and must be honoured by write, review and fix.
+const CHAPTER_EXCEPTIONS = {
+  'mqtt': `
+MQTT CHAPTER EXCEPTIONS — these OVERRIDE the standing conventions above. Do NOT
+"fix" the page toward the standing convention where it conflicts here:
+- NO nats-example divs and NO CLI .sh snippet files anywhere in this chapter.
+  Every example is an inline fenced block: "conf" for server config, "bash" for
+  mosquitto commands (the MQTT side) and nats CLI commands (the NATS side).
+  MQTT interop is not a NATS-client task, so the multi-language example system
+  does not apply. Never add a div or a .sh file to this chapter.
+- Titles carry NO leading number on any page.
+- where-next skeleton is: recap intro -> "## The core idea" -> "## Where the
+  reference details live" -> "## What to read next" -> "## Production checklist"
+  -> "## See also". There is deliberately NO "## Sibling deep dives" and NO
+  "## Where you are" section on where-next.
+- Scenario: Acme's MQTT devices (cold-1 sensor on
+  sensors/warehouse/cold-1/temp, truck-17 on fleet/truck-17/telemetry) feeding a
+  DEVICES stream that the ORDERS platform consumes. Cluster "east" with
+  n1-east/n2-east/n3-east.
+- Valid data-scenario names for this chapter: mqttBridgeAnimated,
+  mqttRetainedAnimated. There is deliberately no QoS-1 redelivery diagram.
+`,
+}
+
+// args: ["mqtt"]  or  { chapters: ["mqtt"], mode: "review" }
+// mode: "full" (write+review+fix, the authoring path) | "review" (review only,
+// applies nothing) | "review-fix" (review then apply findings).
+// The harness may deliver args as a JSON string rather than a value, so
+// normalize before inspecting it. A bare "mqtt" or "mqtt,services" also works.
+let A = args
+if (typeof A === 'string') {
+  const s = A.trim()
+  try { A = JSON.parse(s) } catch { A = s.split(/[\s,]+/).filter(Boolean) }
+}
+const argChapters = Array.isArray(A)
+  ? A
+  : (A && Array.isArray(A.chapters) ? A.chapters : null)
+const MODE = (A && !Array.isArray(A) && A.mode) || 'full'
+
+// A string arg used to fall through to Object.keys(CHAPTER_PAGES) and rewrite
+// EVERY chapter. That has destroyed finished work. Refuse instead.
+if (!argChapters || !argChapters.length) {
+  throw new Error(
+    'learn-pages: pass chapters explicitly, e.g. args: ["mqtt"] or ' +
+    '{chapters:["mqtt"],mode:"review"}. Refusing to default to every chapter.'
+  )
+}
+const chapters = argChapters
 const PAGES = []
 for (const ch of chapters) {
   const slugs = CHAPTER_PAGES[ch]
@@ -35,6 +87,14 @@ for (const ch of chapters) {
     const pos = idx + 1
     PAGES.push({ ch, slug, type, num, pos })
   })
+}
+// A prose string passed as args resolves to a list of non-chapters, which would
+// silently do nothing (or, before the guard above, everything). Fail loudly.
+if (!PAGES.length) {
+  throw new Error(
+    `learn-pages: no known chapters in args (got: ${chapters.join(', ')}). ` +
+    `Known: ${Object.keys(CHAPTER_PAGES).join(', ')}.`
+  )
 }
 log(`Pages to write: ${PAGES.length} across ${chapters.length} chapters (${chapters.join(', ')})`)
 
@@ -99,11 +159,10 @@ const FIX_SCHEMA = {
   properties: { page: { type: 'string' }, applied: { type: 'number' }, notes: { type: 'string' } },
 }
 
-phase('Write')
+phase(MODE === 'full' ? 'Write' : 'Review')
+log(`mode=${MODE} — ${MODE === 'full' ? 'write + review + fix' : MODE === 'review' ? 'review only, applies nothing' : 'review + fix'}`)
 
-const results = await pipeline(
-  PAGES,
-  // Stage 1 — WRITE the page + its CLI snippets
+const writeStage = // Stage 1 — WRITE the page + its CLI snippets
   (p) => agent(
     `You are a NATS technical writer. Write the "${p.ch}" deep-dive page "${p.slug}" (type: ${p.type}).
 
@@ -116,6 +175,7 @@ READ THESE GOLD PAGES to lock voice + structure (do not copy content, copy the s
 Also read the current stub at learn/${p.ch}/${p.slug}.md (confirm slug/title) and, if useful for continuity, one adjacent already-written page in this chapter.
 
 ${CONVENTIONS}
+${CHAPTER_EXCEPTIONS[p.ch] || ''}
 
 THIS PAGE:
 - Path: learn/${p.ch}/${p.slug}.md
@@ -126,11 +186,12 @@ ${p.type === 'content' ? '- Include a "## Pitfalls" section (2-4 gotchas, do/don
 
 Use the Write tool for the .md AND for each CLI .sh. Keep the pinned Acme ORDERS payload + entity names byte-identical to the spec. Return {page, snippets, natsflow, lines}.`,
     { label: `write:${p.ch}/${p.slug}`, phase: 'Write', schema: WRITE_SCHEMA }
-  ),
-  // Stage 2 — REVIEW (read-only) against the spec
+  )
+
+const reviewStage = // Stage 2 — REVIEW (read-only) against the spec
   (w, p) => agent(
     `Read-only review of learn/${p.ch}/${p.slug}.md against its spec ${SPEC(p.ch)}. Do NOT edit.
-
+${CHAPTER_EXCEPTIONS[p.ch] || ''}
 Check and report concrete, actionable issues:
 1. Links: every internal link is in the spec's §5.4 allow-list and resolves (sibling slugs that exist; /reference and /concepts paths from the list). Flag any invented path.
 2. nats-example divs: each has data-type "learn-${p.ch}-${p.slug}-<snippet>" AND a matching committed file static/examples/snippets/cli/learn/${p.ch}/${p.slug}/<snippet>.sh whose dash-joined path equals the data-type. Flag missing/mismatched .sh.
@@ -142,8 +203,9 @@ Check and report concrete, actionable issues:
 
 Return {clean, issues[]} with severity blocker|major|minor and a precise fix for each. If perfect, clean=true and empty issues.`,
     { label: `review:${p.ch}/${p.slug}`, phase: 'Review', agentType: 'Explore', schema: REVIEW_SCHEMA }
-  ).then(r => ({ review: r, p })),
-  // Stage 3 — FIX (apply the findings)
+  ).then(r => ({ review: r, p }))
+
+const fixStage = // Stage 3 — FIX (apply the findings)
   (rp, p) => {
     const review = rp && rp.review
     if (!review || review.clean || !(review.issues || []).length) {
@@ -152,7 +214,7 @@ Return {clean, issues[]} with severity blocker|major|minor and a precise fix for
     const list = review.issues.map((i, n) => `${n + 1}. [${i.severity}] ${i.detail}`).join('\n')
     return agent(
       `Apply these review findings to learn/${p.ch}/${p.slug}.md (and its CLI .sh files where relevant). Spec: ${SPEC(p.ch)}.
-
+${CHAPTER_EXCEPTIONS[p.ch] || ''}
 FINDINGS:
 ${list}
 
@@ -160,8 +222,28 @@ Fix every blocker and major; fix minors where quick. Use Edit/Write. Keep the pa
       { label: `fix:${p.ch}/${p.slug}`, phase: 'Fix', schema: FIX_SCHEMA }
     )
   }
-)
 
+// Assemble the pipeline for the requested mode. "review" applies nothing, so
+// finished work can be audited without any agent holding a Write tool over it.
+const stages = []
+if (MODE === 'full') stages.push(writeStage)
+stages.push(reviewStage)
+if (MODE !== 'review') stages.push(fixStage)
+
+const results = await pipeline(PAGES, ...stages)
 const ok = results.filter(Boolean)
+
+if (MODE === 'review') {
+  // Surface the findings rather than silently applying them.
+  const report = ok.map((r) => ({
+    page: r && r.p ? `learn/${r.p.ch}/${r.p.slug}.md` : 'unknown',
+    clean: !!(r && r.review && r.review.clean),
+    issues: (r && r.review && r.review.issues) || [],
+  }))
+  const total = report.reduce((n, r) => n + r.issues.length, 0)
+  log(`Review complete: ${total} issues across ${report.length} pages (nothing applied)`)
+  return { mode: MODE, chapters, pages: report.length, totalIssues: total, report }
+}
+
 log(`Pages done: ${ok.length}/${PAGES.length}`)
-return { pages: ok.length, chapters }
+return { mode: MODE, pages: ok.length, chapters }
