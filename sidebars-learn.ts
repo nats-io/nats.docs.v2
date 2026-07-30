@@ -99,6 +99,7 @@ const sidebars: SidebarsConfig = {
             "jetstream/get-direct",
             "jetstream/subject-mapping",
             "jetstream/message-ttl",
+            "jetstream/policies",
             "jetstream/where-next",
           ],
         },
