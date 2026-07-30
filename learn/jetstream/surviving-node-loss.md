@@ -119,6 +119,12 @@ three copies, each on disk. R=3 memory storage survives a single server
 crash through its replicas but loses everything if the whole group
 restarts at once.
 
+File storage doesn't sync every write to disk right away, either. A
+write can still sit unsynced after it gets a `PubAck`, long enough
+that an OS crash could lose it, no full restart required.
+[Replication and R=3](/learn/clustering/replication-and-r3) covers how
+a write gets that `PubAck`, and this gap in what it guarantees.
+
 ## Consumers replicate too
 
 A consumer also has state worth protecting: how far it has read and

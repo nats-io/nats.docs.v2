@@ -2,7 +2,7 @@
 id: replication-and-r3
 title: Replication and R=3
 sidebar_position: 4
-description: How a replicated stream commits a write by quorum, and the consistency you get from it
+description: How a replicated stream commits a write by quorum, the consistency you get from it, and what quorum does and doesn't guarantee once the write reaches disk
 ---
 
 # Replication and R=3
@@ -18,7 +18,9 @@ the JetStream chapter gave you the one-line version: `R=3` keeps three
 copies, so the loss of one server costs nothing. This page explains the
 mechanism behind that guarantee. It introduces two ideas: **quorum
 commit**, how the leader turns one write into a committed entry across
-the group, and the **consistency** you get back from it.
+the group, and the **consistency** you get back from it. It also
+covers a narrower gap worth knowing before you rely on either: what
+quorum commit does, and doesn't, guarantee once the write reaches disk.
 
 ## R=3 means three peers in one RAFT group
 
@@ -139,13 +141,100 @@ every copy is identical at every instant, it promises that every copy
 *converges*, in order, and that a committed write survives one server
 loss. When you need to confirm where the copies actually stand, the
 `Cluster` block of `nats stream info` reports each replica's status and
-how far behind it is, which is exactly the next section's first trap.
+how far behind it is, which is exactly the first trap under Pitfalls,
+below.
+
+## Syncing data to disk
+
+Quorum commit protects against losing a server, not against losing a
+server's disk. For file storage, applying a committed entry writes it
+to disk — but JetStream doesn't `fsync` every write immediately. It
+batches disk syncs on a timer, `sync_interval`, which defaults to 2
+minutes. Until the next sync, an applied write can sit in the OS's
+write cache without reaching physical disk.
+
+That gap means a `PubAck` only confirms quorum; the disk sync still
+happens later, on the next timer tick. Two peers can hold a write in
+memory and still lose it if the underlying hardware fails before
+either one's next sync:
+
+- Multiple peers suffer an OS failure within the same `sync_interval`
+  window, before any of them synced the write.
+- A peer that lost unsynced data in an OS crash rejoins the group and,
+  together with a peer that never held the write, reaches a new
+  quorum — one that never saw it.
+
+A shorter `sync_interval` narrows this window, at the cost of write
+throughput. Setting it to `always` closes the window entirely: every
+write syncs to disk before the leader returns its `PubAck`. Combined
+with peers spread across availability zones, `always` gives you the
+strongest durability guarantee available, at the cost of the slowest
+writes.
+
+The 2-minute default balances that risk against performance for a
+typical production deployment spread across multiple availability
+zones. Here's how narrow the failure window actually is. Take `ORDERS`
+at `R=3`, its three peers spread across three zones. For its log to
+diverge, all of this has to happen, in order:
+
+- One of the three peers is already offline, isolated, or
+  partitioned, and never gets the write.
+- A second peer's OS crashes and loses the write: it was one of only
+  two peers holding it, and neither had synced yet.
+- The leader — the third peer, the one that did have the write — goes
+  down or gets isolated too.
+- The offline peer reconnects, but the leader isn't reachable anymore.
+- The crashed peer comes back and reaches the reconnected peer, but
+  not the leader.
+
+Now two peers are up, neither holding the write, and together they
+form a new quorum. They start accepting new writes, silently dropping
+some of what the old leader had acked.
+
+This is a real way for a stream's log to diverge, but it takes several
+independent faults landing in exactly this order, across separate
+availability zones.
+
+One mitigation: keep the crashed server offline instead of restarting
+it right away. A NATS server rejoins its cluster automatically on
+restart, so the safeguard is in when you restart it — wait until
+`nats stream info` shows the remaining peers are fully caught up
+before bringing it back. Or remove the crashed peer and let it rejoin
+as a wiped, empty peer that resyncs over the network — safer, though
+expensive if there's a lot of data to resync.
+
+If minimizing loss matters more than throughput, use
+`sync_interval: always`. It costs performance cluster-wide, even for
+streams that don't need the extra durability, so weigh it against
+your own durability, cost, and performance requirements before you
+turn it on everywhere.
+
+You don't have to pick one setting for the whole deployment. Run most
+clusters on the default `sync_interval`, and add a separate cluster
+tagged for `sync_interval: always`. Then place only the streams that
+need the strongest durability there, using [placement
+tags](/learn/clustering/placement).
+
+```conf
+# Configure a cluster that's dedicated to always sync writes.
+server_tags: ["sync:always"]
+
+jetstream {
+    sync_interval: always
+}
+```
+
+Create a replicated stream pinned to that cluster, so only the writes
+that need this level of durability pay for it.
+
+```bash
+nats stream add --replicas 3 --tag sync:always
+```
 
 ## Pitfalls
 
 These are three common mistakes the first time you trust a replicated
-stream. Each is scoped to this page's two ideas: how a write commits,
-and the consistency it gives back.
+stream.
 
 **`R=1` has no copy.** A stream at `R=1` lives on exactly one server.
 There's no second peer, so there's no quorum and nothing to commit
