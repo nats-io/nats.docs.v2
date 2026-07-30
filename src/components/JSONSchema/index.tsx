@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import type { JSX } from "react";
+import { enumDescriptions } from "@site/src/schemas/enum-descriptions";
 import styles from "./styles.module.css";
 
 interface JSONSchemaProperty {
@@ -24,6 +25,7 @@ interface JSONSchemaProperty {
   allOf?: JSONSchemaProperty[];
   $comment?: string;
   deprecationMessage?: string;
+  "x-enum-descriptions"?: { [value: string]: string };
 }
 
 interface JSONSchemaProps {
@@ -69,6 +71,18 @@ function getTypeDisplay(property: JSONSchemaProperty): string {
     return "allOf";
   }
   return "any";
+}
+
+function getEnumValueDescription(
+  propertyName: string,
+  value: any,
+  property: JSONSchemaProperty
+): string | undefined {
+  const key = String(value);
+  return (
+    property["x-enum-descriptions"]?.[key] ??
+    enumDescriptions[propertyName]?.[key]
+  );
 }
 
 function PropertyRenderer({
@@ -142,16 +156,35 @@ function PropertyRenderer({
         </div>
       )}
 
-      {property.enum && (
-        <div className={styles.enum}>
-          <span className={styles.enumLabel}>Allowed values:</span>
-          {property.enum.map((value, i) => (
-            <code key={i} className={styles.enumValue}>
-              {String(value)}
-            </code>
-          ))}
-        </div>
-      )}
+      {property.enum &&
+        (property.enum.some((value) =>
+          getEnumValueDescription(name, value, property)
+        ) ? (
+          <div className={styles.enum}>
+            <span className={styles.enumLabel}>Allowed values:</span>
+            <div className={styles.enumGrid}>
+              {property.enum.map((value, i) => (
+                <React.Fragment key={i}>
+                  <code className={styles.enumValue}>
+                    {String(value) === "" ? '""' : String(value)}
+                  </code>
+                  <span className={styles.enumDescription}>
+                    {getEnumValueDescription(name, value, property)}
+                  </span>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className={styles.enum}>
+            <span className={styles.enumLabel}>Allowed values:</span>
+            {property.enum.map((value, i) => (
+              <code key={i} className={styles.enumValue}>
+                {String(value)}
+              </code>
+            ))}
+          </div>
+        ))}
 
       {property.pattern && (
         <div className={styles.pattern}>
