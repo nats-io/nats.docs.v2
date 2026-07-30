@@ -213,9 +213,9 @@ Ack Wait, and no redelivery, and nothing on this page applies. `all` lets
 one ack answer every earlier message too — cheaper, but it only fits a
 consumer that processes strictly in order, since acking message 10 also
 retires 1 through 9. Strict order is a requirement you have to create,
-not something a consumer does by default: the
-[previous page](/learn/jetstream/delivery-and-acknowledgment) showed
-that a redelivery arrives after later messages unless `MaxAckPending`
+not something a consumer does by default:
+[Delivery and acknowledgment](/learn/jetstream/delivery-and-acknowledgment)
+showed that a redelivery arrives after later messages unless `MaxAckPending`
 is 1. On a consumer without that setting, acking message 10 also
 retires a message 7 that failed and was waiting to come back — silent
 data loss. A fourth value, `flow_control`, is for the push

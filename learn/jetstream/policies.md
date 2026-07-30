@@ -114,13 +114,16 @@ policy uses, are in
 Five of the nine policies are fixed at creation. The server enforces
 this on update, so settle these before you create anything you'll keep:
 
-| Policy | On a live stream or consumer |
+| Stream policy | On a live stream |
 | --- | --- |
 | Retention | `limits` ↔ `interest` allowed, though the switch re-applies to messages already stored; to or from `workqueue` refused |
 | Discard | Can change |
 | Storage | Fixed at creation |
 | Compression | Can change; takes effect after a server or leader restart |
 | Persist mode | Fixed at creation |
+
+| Consumer policy | On a live consumer |
+| --- | --- |
 | Deliver policy | Fixed at creation |
 | Ack policy | Fixed at creation |
 | Replay policy | Fixed at creation |
@@ -159,7 +162,7 @@ phrase means the same thing in both places.
 
 `ORDERS` and its consumers are unchanged. You now have:
 
-- the nine policies mapped, each to the page where you used it
+- the nine policies mapped, most to the page where you used them
 - compression and persist mode placed, the two `ORDERS` never set
 - the five policies that are fixed at creation, and what the server
   says when you try to change one
