@@ -70,6 +70,9 @@ Run, scale, and secure NATS.
 - **[Deployment & Upgrades](/learn/deployment/)**
   production: sizing, Kubernetes, config management, rolling upgrades,
   and hardening.
+- **[MQTT](/learn/mqtt/)** running `nats-server` as the MQTT
+  broker for your devices: topic-to-subject conversion, QoS, sessions
+  and retained messages, and MQTT users on a cluster.
 
 ## Where to start
 

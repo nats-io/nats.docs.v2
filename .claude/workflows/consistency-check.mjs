@@ -6,7 +6,7 @@ import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const CHAPTERS = ['core-nats','services','resilient-clients','key-value','object-store','jetstream','clustering','monitoring','backup-recovery','deployment','security','topologies'];
+const CHAPTERS = ['core-nats','services','resilient-clients','key-value','object-store','jetstream','clustering','monitoring','backup-recovery','deployment','security','topologies','mqtt'];
 const NEW = ['services','resilient-clients','key-value','object-store','clustering','monitoring','backup-recovery','deployment'];
 
 const problems = [];
