@@ -203,6 +203,29 @@
   margin-right: 0.5rem;
 }
 
+.enumGrid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+}
+
+.enumGrid .enumValue {
+  margin-right: 0;
+  justify-self: start;
+}
+
+.enumDescription {
+  font-family: var(--ifm-font-family-base);
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .enumDescription {
+  color: var(--ifm-color-emphasis-700);
+}
+
 .nestedProperties {
   margin-top: 1rem;
   margin-left: 20px;
