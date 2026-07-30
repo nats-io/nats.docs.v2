@@ -32,7 +32,7 @@ mqtt requires JetStream to be enabled if running in standalone mode
 
 Turn JetStream on and the server creates the streams it needs on its
 own. You never manage them; they're covered in
-[QoS, sessions, and retained messages](./qos-sessions-and-retained).
+[QoS, sessions, and retained messages](/learn/mqtt/qos-sessions-and-retained).
 
 ## Enable MQTT
 
@@ -70,7 +70,7 @@ The log line to look for confirms the listener is up:
 
 There's no `authorization` block yet, so devices connect without
 credentials. That's fine on a laptop and wrong in production;
-[Auth and clustering](./auth-and-clustering) locks it down.
+[Auth and clustering](/learn/mqtt/auth-and-clustering) locks it down.
 
 The full field list for the block — TLS, timeouts, replica counts —
 is in [Reference → mqtt](/reference/config/mqtt/). The three pages after
@@ -144,7 +144,7 @@ One detail matters later: a message published by a NATS client always
 arrives at an MQTT subscriber as QoS 0, whatever QoS the subscription
 asked for. A NATS publish carries no QoS, so there's nothing to promote
 it with. [QoS, sessions, and retained
-messages](./qos-sessions-and-retained) covers what that costs you.
+messages](/learn/mqtt/qos-sessions-and-retained) covers what that costs you.
 
 ## What the server does with a subscription
 
@@ -179,24 +179,19 @@ nats stream add DEVICES \
   --defaults
 ```
 
-Every reading published by any device is now stored for 30 days, and the
-ORDERS platform consumes `DEVICES` like any other stream: a cold-chain
-excursion flags the order for the shipment it belongs to, and truck
-telemetry updates a delivery's position. Consumers, filtering, and
-replay work exactly as the [JetStream deep
-dive](/learn/jetstream) describes, because this is a normal stream —
-nothing about it is MQTT-specific.
+Everything on those two subject trees is now stored for 30 days — sensor
+readings, truck telemetry, and the dispatch instructions published from
+the NATS side. The ORDERS platform consumes `DEVICES` like any other
+stream: a cold-chain excursion flags the order for the shipment it
+belongs to, and truck telemetry updates a delivery's position.
+Consumers, filtering, and replay work exactly as the
+[JetStream deep dive](/learn/jetstream) describes, because this is a
+normal stream — nothing about it is MQTT-specific.
 
-The devices know none of this. They publish MQTT to what they believe is
-a plain broker, and their data ends up durable, replayable, and joined to
-the rest of the business. That's the whole point of running MQTT on
-`nats-server` rather than beside it.
-
-Note what this buys you that MQTT alone doesn't. A QoS 0 reading is gone
-the moment it's delivered, and even QoS 1 only guarantees delivery to
-subscribers that exist at the time. Stored in `DEVICES`, a reading
-survives, and a consumer written next month can still read what a sensor
-sent today.
+The devices know none of this; they publish MQTT to what they believe is
+a plain broker. A QoS 0 reading is gone once it is delivered, and QoS 1
+only reaches subscribers that exist at the time. Stored in `DEVICES`, a
+reading is still readable by a consumer written next month.
 
 ## Pitfalls
 
@@ -236,7 +231,7 @@ Keep the server and the stream; the next pages build on both.
 The conversion worked cleanly here because the topics were simple. Real
 device fleets use leading slashes, empty levels, and wildcards, and some
 characters have no valid subject to convert to.
-[Topics and subjects](./topics-and-subjects) covers the full set of
+[Topics and subjects](/learn/mqtt/topics-and-subjects) covers the full set of
 rules.
 
 ## See also
