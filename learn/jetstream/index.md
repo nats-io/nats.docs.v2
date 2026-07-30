@@ -45,6 +45,7 @@ subjects, and queue groups.
 | [Reading messages directly](./get-direct) | Get one message or a batch straight from the stream, no consumer |
 | [Subject mapping and transforms](./subject-mapping) | Rewrite subjects on the way into a stream, and republish stored messages |
 | [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
+| [Stream and consumer policies](./policies) | Every stream and consumer policy, and which are fixed at creation |
 | [Where to go next](./where-next) | A map of what's beyond this chapter |
 
 ## Prerequisites

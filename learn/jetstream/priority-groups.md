@@ -237,8 +237,9 @@ per-client counts, so it doesn't require explicit acks.
 
 This reuses the `dispatch` name from the overflow example on purpose: overflow
 and prioritized are two ways to run the same regional-dispatch consumer, so you
-pick one. A consumer's policy is fixed at creation, so switching an existing
-`dispatch` between them means deleting and recreating it.
+pick one. The server does let you switch a live consumer's policy, though
+`nats consumer edit` has no flag for it; you'd pass a full config with
+`--config`.
 
 The priority rides on the pull request, the same place overflow's thresholds
 go, so `nats consumer next` can't set it and the pull comes from a client
