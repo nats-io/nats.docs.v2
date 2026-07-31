@@ -56,6 +56,16 @@
       "permanent": false
     },
     {
+      "source": "/release-notes/whats_new",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
+      "source": "/release-notes/whats_new/:path*",
+      "destination": "/reference/",
+      "permanent": false
+    },
+    {
       "source": "/nats-concepts/what-is-nats",
       "destination": "/concepts/what-is-nats",
       "permanent": false
@@ -1138,6 +1148,41 @@
     {
       "source": "/reference/nats-protocol/nats-server-protocol",
       "destination": "/reference/protocols/route",
+      "permanent": false
+    },
+    {
+      "source": "/reference/reference-protocols",
+      "destination": "/reference/protocols/",
+      "permanent": false
+    },
+    {
+      "source": "/reference/reference-protocols/nats-protocol",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/reference/reference-protocols/nats-protocol/nats-client-dev",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/reference/reference-protocols/nats-protocol-demo",
+      "destination": "/reference/protocols/client",
+      "permanent": false
+    },
+    {
+      "source": "/reference/reference-protocols/nats-server-protocol",
+      "destination": "/reference/protocols/route",
+      "permanent": false
+    },
+    {
+      "source": "/reference/reference-protocols/nats_api_reference",
+      "destination": "/reference/jetstream/api/",
+      "permanent": false
+    },
+    {
+      "source": "/reference/reference-protocols/:path*",
+      "destination": "/reference/protocols/",
       "permanent": false
     },
     {
