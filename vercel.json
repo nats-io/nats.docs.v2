@@ -852,12 +852,12 @@
     },
     {
       "source": "/running-a-nats-service/configuration/mqtt",
-      "destination": "/reference/config/mqtt/",
+      "destination": "/learn/mqtt/",
       "permanent": false
     },
     {
       "source": "/running-a-nats-service/configuration/mqtt/",
-      "destination": "/reference/config/mqtt/",
+      "destination": "/learn/mqtt/",
       "permanent": false
     },
     {
@@ -1717,12 +1717,12 @@
     },
     {
       "source": "/nats-server/configuration/mqtt",
-      "destination": "/reference/config/mqtt/",
+      "destination": "/learn/mqtt/",
       "permanent": false
     },
     {
       "source": "/nats-server/configuration/mqtt/",
-      "destination": "/reference/config/mqtt/",
+      "destination": "/learn/mqtt/",
       "permanent": false
     },
     {
