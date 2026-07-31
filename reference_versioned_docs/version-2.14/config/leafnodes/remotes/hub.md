@@ -1,6 +1,6 @@
 # hub
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 
 ## Types
 

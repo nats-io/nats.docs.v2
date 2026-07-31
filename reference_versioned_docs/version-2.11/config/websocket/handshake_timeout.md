@@ -1,6 +1,6 @@
 # handshake_timeout
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 This is the total time allowed for the server to
 read the client request and write the response back
 to the client. This includes the time needed for the

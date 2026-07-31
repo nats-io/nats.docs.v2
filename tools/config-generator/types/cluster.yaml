@@ -5,25 +5,79 @@ types:
     disabled: true
     properties:
       name:
+        reloadable: reloadable
         type: string
         description: |-
           Name of the cluster.
 
       host:
+        reloadable: not-reloadable
         type: host
         description: |-
           Host for cluster route connections.
 
       port:
+        reloadable: not-reloadable
         type: integer
         description: |-
           Port for cluster route connections.
         default: 6222
 
       listen:
+        reloadable: not-reloadable
+        reloadable_note: |-
+          Only a listen string whose host is unchanged AND whose port is `-1`
+          survives reload.
         type: listen
 
       tls:
+        properties:
+          ca_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to route connections created after the reload.
+          cipher_suites:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to route connections created after the reload.
+          curve_preferences:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to route connections created after the reload.
+          insecure:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to route connections created after the reload.
+          key_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to route connections created after the reload.
+          pinned_certs:
+            reloadable: reloadable
+            reloadable_note: |-
+              One of the few settings in this domain that also acts on
+              EXISTING connections — routes whose cert no longer matches
+              are disconnected.
+          timeout:
+            reloadable: reloadable
+            reloadable_note: |-
+              Read at handshake time, so it applies to every route
+              connection established after the reload. Contrast with
+              gateway.tls.timeout, which hard-fails the reload.
+          verify:
+            reloadable: noop
+            reloadable_note: |-
+              Setting verify:false changes nothing; client cert
+              verification is always required for routes.
+          verify_and_map:
+            reloadable: reloadable
+            reloadable_note: |-
+              Evaluated when a route authorizes, i.e. for connections
+              established after the reload.
+        reloadable: reloadable
+        reloadable_note: |-
+          New TLS settings apply to route connections established after the
+          reload; existing routes keep the old TLS session.
         type: tls
         description: |-
           TLS configuration for securing cluster connections.
@@ -31,6 +85,7 @@ types:
           both client and server for mutual TLS.
 
       advertise:
+        reloadable: reloadable
         type: string
         description: |-
           Advertised cluster `<host>:<port>`. Useful for cluster setups since
@@ -41,12 +96,17 @@ types:
           - cluster_advertise
 
       no_advertise:
+        reloadable: reloadable
         type: boolean
         description: |-
           If true, the server will not send or gossip its client URLs to other servers in the cluster, nor
           will it tell its clients about other servers' client URLs.
 
       routes:
+        reloadable_note: |-
+          Routes are diffed on reload: added ones are solicited and removed
+          ones torn down. The cluster listener is not restarted.
+        reloadable: reloadable
         type: array(string)
         description: |-
           A list of server URLs to cluster with. Self-routes are ignored. Should authentication via token or username/password
@@ -61,6 +121,10 @@ types:
               ]
 
       connect_retries:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applies to route connection attempts started after the reload; an
+          in-progress retry loop keeps the old value.
         type: integer
         default: 0
         description: |-
@@ -68,6 +132,50 @@ types:
           When enabled, attempts will be made once a second. This, does not apply to explicitly configured routes.
 
       authorization:
+        properties:
+          default_permissions:
+            properties:
+              allow_responses:
+                reloadable: noop
+                reloadable_note: |-
+                  Silently discarded — no warning, no error, no
+                  runtime effect.
+                properties:
+                  expires:
+                    reloadable: noop
+                  max:
+                    reloadable: noop
+              publish:
+                reloadable: reloadable
+                properties:
+                  allow:
+                    reloadable: reloadable
+                  deny:
+                    reloadable: reloadable
+              subscribe:
+                reloadable: reloadable
+                properties:
+                  allow:
+                    reloadable: reloadable
+                  deny:
+                    reloadable: reloadable
+          password:
+            reloadable: reloadable
+          timeout:
+            reloadable: reloadable
+            reloadable_note: |-
+              Takes effect only for route connections created after the
+              reload.
+          username:
+            reloadable: reloadable
+          users:
+            # opts.go:1942 — "Cluster authorization does not allow multiple
+            # users". Setting it stops the server from starting.
+            omit: true
+        reloadable: reloadable
+        reloadable_note: |-
+          Only username/password/timeout/default_permissions are legal under
+          cluster authorization.
         type: network-authorization
         description: |-
           Authorization map for configuring cluster routes. When a single username/password is used, it defines the authentication mechanism
@@ -79,7 +187,59 @@ types:
           used, but they have to map to the same `username`. The authorization map also allows for timeout which is honored but users and
           token configuration are not supported and will prevent the server from starting. The `permissions` block is ignored.
 
+      permissions:
+        reloadable: reloadable
+        type: permissions
+        description: |-
+          Subject permissions applied to routes, limiting what this cluster
+          will export to and import from its peers.
+
+      ping_interval:
+        reloadable: reloadable
+        type: duration
+        default: 2m
+        description: |-
+          How often the server pings an idle route.
+
+      ping_max:
+        reloadable: reloadable
+        type: integer
+        default: 2
+        description: |-
+          Unanswered pings before the route is closed.
+
+      connect_backoff:
+        version: "2.12"
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Back off between route reconnect attempts instead of retrying at a
+          fixed interval.
+
+      write_deadline:
+        version: "2.12"
+        reloadable: reloadable
+        type: duration
+        default: 10s
+        description: |-
+          How long a route write may block before the connection is treated
+          as stalled.
+
+      write_timeout:
+        version: "2.12"
+        reloadable: reloadable
+        type: string
+        choices:
+          - default
+          - close
+          - retry
+        default: default
+        description: |-
+          What to do when a route misses its `write_deadline`.
+
       pool_size:
+        reloadable: reloadable
         type: integer
         default: 3
         description: |-
@@ -87,6 +247,10 @@ types:
           accounts.
 
       accounts:
+        reloadable: reloadable
+        reloadable_note: |-
+          Reload fails if a newly added pinned account cannot be resolved by
+          s.LookupAccount.
         type: array(string)
         description: |-
           A list of accounts to *pin*, each of which will have their own dedicated
@@ -94,6 +258,7 @@ types:
           from the pool.
 
       compression:
+        reloadable: reloadable
         types:
           - compression-mode
           - compression-map
@@ -131,8 +296,10 @@ types:
     type: object
     properties:
       mode:
+        reloadable: reloadable
         type: compression-mode
       rtt_thresholds:
+        reloadable: reloadable
         type: array(duration)
         default: [10ms, 50ms, 100ms]
         description: |-

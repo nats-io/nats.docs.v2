@@ -1,6 +1,6 @@
 # mode
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 The OCSP stapling mode to adhere to.
 
 

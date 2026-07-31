@@ -1,7 +1,7 @@
 # pidfile
 
-<Aliases aliases="`pid_file`" />
-<Reloadable /> 
+<Aliases aliases="pid_file" />
+<Reloadable state="reloadable" />
 
 ## Types
 

@@ -1,6 +1,6 @@
 # max_traced_msg_len
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 Set a limit to the trace of the payload of a message.
 
 

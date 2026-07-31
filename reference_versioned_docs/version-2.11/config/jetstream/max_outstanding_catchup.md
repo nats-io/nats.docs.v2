@@ -1,6 +1,6 @@
 # max_outstanding_catchup
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Max in-flight bytes for stream catch-up. This was introduced to
 control how much bandwidth should be dedicated during catch-up to
 guard against saturating and degrading performance of the network.

@@ -1,6 +1,6 @@
 # http
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Listen specification `<host>:<port>` for server monitoring.
 
 

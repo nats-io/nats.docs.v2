@@ -1,6 +1,6 @@
 # listen
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" note="Only a listen string whose host is unchanged AND whose port is `-1` survives reload." />
 
 ## Types
 

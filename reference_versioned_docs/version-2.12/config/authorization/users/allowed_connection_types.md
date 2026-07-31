@@ -1,6 +1,6 @@
 # allowed_connection_types
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 If specified, the user is constrained to the specified connection
 types.
 

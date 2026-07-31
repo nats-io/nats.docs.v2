@@ -27,6 +27,39 @@
             "id": "config/tls/index"
           },
           "items": [
+            "config/tls/cert_store",
+            {
+              "type": "category",
+              "label": "certs",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/tls/certs/index"
+              },
+              "items": [
+                "config/tls/certs/cert_file",
+                "config/tls/certs/key_file"
+              ]
+            },
+            "config/tls/handshake_first",
+            "config/tls/min_version",
+            {
+              "type": "category",
+              "label": "ocsp_peer",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/tls/ocsp_peer/index"
+              },
+              "items": [
+                "config/tls/ocsp_peer/verify",
+                "config/tls/ocsp_peer/ca_timeout",
+                "config/tls/ocsp_peer/allowed_clockskew",
+                "config/tls/ocsp_peer/unknown_is_good",
+                "config/tls/ocsp_peer/warn_only",
+                "config/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+              ]
+            },
             "config/tls/cert_file",
             "config/tls/key_file",
             "config/tls/ca_file",
@@ -58,6 +91,20 @@
         },
         {
           "type": "category",
+          "label": "ocsp_cache",
+          "collapsed": true,
+          "link": {
+            "type": "doc",
+            "id": "config/ocsp_cache/index"
+          },
+          "items": [
+            "config/ocsp_cache/type",
+            "config/ocsp_cache/local_store",
+            "config/ocsp_cache/preserve_revoked"
+          ]
+        },
+        {
+          "type": "category",
           "label": "mqtt",
           "collapsed": true,
           "link": {
@@ -77,6 +124,39 @@
                 "id": "config/mqtt/tls/index"
               },
               "items": [
+                "config/mqtt/tls/cert_store",
+                {
+                  "type": "category",
+                  "label": "certs",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/mqtt/tls/certs/index"
+                  },
+                  "items": [
+                    "config/mqtt/tls/certs/cert_file",
+                    "config/mqtt/tls/certs/key_file"
+                  ]
+                },
+                "config/mqtt/tls/handshake_first",
+                "config/mqtt/tls/min_version",
+                {
+                  "type": "category",
+                  "label": "ocsp_peer",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/mqtt/tls/ocsp_peer/index"
+                  },
+                  "items": [
+                    "config/mqtt/tls/ocsp_peer/verify",
+                    "config/mqtt/tls/ocsp_peer/ca_timeout",
+                    "config/mqtt/tls/ocsp_peer/allowed_clockskew",
+                    "config/mqtt/tls/ocsp_peer/unknown_is_good",
+                    "config/mqtt/tls/ocsp_peer/warn_only",
+                    "config/mqtt/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+                  ]
+                },
                 "config/mqtt/tls/cert_file",
                 "config/mqtt/tls/key_file",
                 "config/mqtt/tls/ca_file",
@@ -110,6 +190,11 @@
             "config/mqtt/ack_wait",
             "config/mqtt/max_ack_pending",
             "config/mqtt/js_domain",
+            "config/mqtt/consumer_memory_storage",
+            "config/mqtt/consumer_replicas",
+            "config/mqtt/js_api_timeout",
+            "config/mqtt/reject_qos2_publish",
+            "config/mqtt/downgrade_qos2_subscribe",
             "config/mqtt/stream_replicas",
             "config/mqtt/consumer_inactive_threshold"
           ]
@@ -136,6 +221,39 @@
                 "id": "config/websocket/tls/index"
               },
               "items": [
+                "config/websocket/tls/cert_store",
+                {
+                  "type": "category",
+                  "label": "certs",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/websocket/tls/certs/index"
+                  },
+                  "items": [
+                    "config/websocket/tls/certs/cert_file",
+                    "config/websocket/tls/certs/key_file"
+                  ]
+                },
+                "config/websocket/tls/handshake_first",
+                "config/websocket/tls/min_version",
+                {
+                  "type": "category",
+                  "label": "ocsp_peer",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/websocket/tls/ocsp_peer/index"
+                  },
+                  "items": [
+                    "config/websocket/tls/ocsp_peer/verify",
+                    "config/websocket/tls/ocsp_peer/ca_timeout",
+                    "config/websocket/tls/ocsp_peer/allowed_clockskew",
+                    "config/websocket/tls/ocsp_peer/unknown_is_good",
+                    "config/websocket/tls/ocsp_peer/warn_only",
+                    "config/websocket/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+                  ]
+                },
                 "config/websocket/tls/cert_file",
                 "config/websocket/tls/key_file",
                 "config/websocket/tls/ca_file",
@@ -170,7 +288,11 @@
                 "config/websocket/authorization/timeout"
               ]
             },
-            "config/websocket/jwt_token",
+            "config/websocket/headers",
+            "config/websocket/user_cookie",
+            "config/websocket/pass_cookie",
+            "config/websocket/token_cookie",
+            "config/websocket/jwt_cookie",
             "config/websocket/no_auth_user"
           ]
         },
@@ -519,6 +641,19 @@
             },
             {
               "type": "category",
+              "label": "msg_trace",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/accounts/msg_trace/index"
+              },
+              "items": [
+                "config/accounts/msg_trace/dest",
+                "config/accounts/msg_trace/sampling"
+              ]
+            },
+            {
+              "type": "category",
               "label": "mappings",
               "collapsed": true,
               "link": {
@@ -579,6 +714,39 @@
             "id": "config/resolver_tls/index"
           },
           "items": [
+            "config/resolver_tls/cert_store",
+            {
+              "type": "category",
+              "label": "certs",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/resolver_tls/certs/index"
+              },
+              "items": [
+                "config/resolver_tls/certs/cert_file",
+                "config/resolver_tls/certs/key_file"
+              ]
+            },
+            "config/resolver_tls/handshake_first",
+            "config/resolver_tls/min_version",
+            {
+              "type": "category",
+              "label": "ocsp_peer",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/resolver_tls/ocsp_peer/index"
+              },
+              "items": [
+                "config/resolver_tls/ocsp_peer/verify",
+                "config/resolver_tls/ocsp_peer/ca_timeout",
+                "config/resolver_tls/ocsp_peer/allowed_clockskew",
+                "config/resolver_tls/ocsp_peer/unknown_is_good",
+                "config/resolver_tls/ocsp_peer/warn_only",
+                "config/resolver_tls/ocsp_peer/cache_ttl_when_next_update_unset"
+              ]
+            },
             "config/resolver_tls/cert_file",
             "config/resolver_tls/key_file",
             "config/resolver_tls/ca_file",
@@ -619,6 +787,39 @@
                 "id": "config/cluster/tls/index"
               },
               "items": [
+                "config/cluster/tls/cert_store",
+                {
+                  "type": "category",
+                  "label": "certs",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/cluster/tls/certs/index"
+                  },
+                  "items": [
+                    "config/cluster/tls/certs/cert_file",
+                    "config/cluster/tls/certs/key_file"
+                  ]
+                },
+                "config/cluster/tls/handshake_first",
+                "config/cluster/tls/min_version",
+                {
+                  "type": "category",
+                  "label": "ocsp_peer",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/cluster/tls/ocsp_peer/index"
+                  },
+                  "items": [
+                    "config/cluster/tls/ocsp_peer/verify",
+                    "config/cluster/tls/ocsp_peer/ca_timeout",
+                    "config/cluster/tls/ocsp_peer/allowed_clockskew",
+                    "config/cluster/tls/ocsp_peer/unknown_is_good",
+                    "config/cluster/tls/ocsp_peer/warn_only",
+                    "config/cluster/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+                  ]
+                },
                 "config/cluster/tls/cert_file",
                 "config/cluster/tls/key_file",
                 "config/cluster/tls/ca_file",
@@ -648,72 +849,6 @@
               "items": [
                 "config/cluster/authorization/username",
                 "config/cluster/authorization/password",
-                "config/cluster/authorization/token",
-                {
-                  "type": "category",
-                  "label": "users",
-                  "collapsed": true,
-                  "link": {
-                    "type": "doc",
-                    "id": "config/cluster/authorization/users/index"
-                  },
-                  "items": [
-                    "config/cluster/authorization/users/username",
-                    "config/cluster/authorization/users/password",
-                    "config/cluster/authorization/users/nkey",
-                    {
-                      "type": "category",
-                      "label": "permissions",
-                      "collapsed": true,
-                      "link": {
-                        "type": "doc",
-                        "id": "config/cluster/authorization/users/permissions/index"
-                      },
-                      "items": [
-                        {
-                          "type": "category",
-                          "label": "publish",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/cluster/authorization/users/permissions/publish/index"
-                          },
-                          "items": [
-                            "config/cluster/authorization/users/permissions/publish/allow",
-                            "config/cluster/authorization/users/permissions/publish/deny"
-                          ]
-                        },
-                        {
-                          "type": "category",
-                          "label": "subscribe",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/cluster/authorization/users/permissions/subscribe/index"
-                          },
-                          "items": [
-                            "config/cluster/authorization/users/permissions/subscribe/allow",
-                            "config/cluster/authorization/users/permissions/subscribe/deny"
-                          ]
-                        },
-                        {
-                          "type": "category",
-                          "label": "allow_responses",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/cluster/authorization/users/permissions/allow_responses/index"
-                          },
-                          "items": [
-                            "config/cluster/authorization/users/permissions/allow_responses/max",
-                            "config/cluster/authorization/users/permissions/allow_responses/expires"
-                          ]
-                        }
-                      ]
-                    },
-                    "config/cluster/authorization/users/allowed_connection_types"
-                  ]
-                },
                 {
                   "type": "category",
                   "label": "default_permissions",
@@ -767,6 +902,58 @@
                 "config/cluster/authorization/timeout"
               ]
             },
+            {
+              "type": "category",
+              "label": "permissions",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/cluster/permissions/index"
+              },
+              "items": [
+                {
+                  "type": "category",
+                  "label": "publish",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/cluster/permissions/publish/index"
+                  },
+                  "items": [
+                    "config/cluster/permissions/publish/allow",
+                    "config/cluster/permissions/publish/deny"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "subscribe",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/cluster/permissions/subscribe/index"
+                  },
+                  "items": [
+                    "config/cluster/permissions/subscribe/allow",
+                    "config/cluster/permissions/subscribe/deny"
+                  ]
+                },
+                {
+                  "type": "category",
+                  "label": "allow_responses",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/cluster/permissions/allow_responses/index"
+                  },
+                  "items": [
+                    "config/cluster/permissions/allow_responses/max",
+                    "config/cluster/permissions/allow_responses/expires"
+                  ]
+                }
+              ]
+            },
+            "config/cluster/ping_interval",
+            "config/cluster/ping_max",
             "config/cluster/pool_size",
             "config/cluster/accounts",
             {
@@ -807,6 +994,39 @@
                 "id": "config/gateway/tls/index"
               },
               "items": [
+                "config/gateway/tls/cert_store",
+                {
+                  "type": "category",
+                  "label": "certs",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/gateway/tls/certs/index"
+                  },
+                  "items": [
+                    "config/gateway/tls/certs/cert_file",
+                    "config/gateway/tls/certs/key_file"
+                  ]
+                },
+                "config/gateway/tls/handshake_first",
+                "config/gateway/tls/min_version",
+                {
+                  "type": "category",
+                  "label": "ocsp_peer",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/gateway/tls/ocsp_peer/index"
+                  },
+                  "items": [
+                    "config/gateway/tls/ocsp_peer/verify",
+                    "config/gateway/tls/ocsp_peer/ca_timeout",
+                    "config/gateway/tls/ocsp_peer/allowed_clockskew",
+                    "config/gateway/tls/ocsp_peer/unknown_is_good",
+                    "config/gateway/tls/ocsp_peer/warn_only",
+                    "config/gateway/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+                  ]
+                },
                 "config/gateway/tls/cert_file",
                 "config/gateway/tls/key_file",
                 "config/gateway/tls/ca_file",
@@ -834,72 +1054,6 @@
               "items": [
                 "config/gateway/authorization/username",
                 "config/gateway/authorization/password",
-                "config/gateway/authorization/token",
-                {
-                  "type": "category",
-                  "label": "users",
-                  "collapsed": true,
-                  "link": {
-                    "type": "doc",
-                    "id": "config/gateway/authorization/users/index"
-                  },
-                  "items": [
-                    "config/gateway/authorization/users/username",
-                    "config/gateway/authorization/users/password",
-                    "config/gateway/authorization/users/nkey",
-                    {
-                      "type": "category",
-                      "label": "permissions",
-                      "collapsed": true,
-                      "link": {
-                        "type": "doc",
-                        "id": "config/gateway/authorization/users/permissions/index"
-                      },
-                      "items": [
-                        {
-                          "type": "category",
-                          "label": "publish",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/gateway/authorization/users/permissions/publish/index"
-                          },
-                          "items": [
-                            "config/gateway/authorization/users/permissions/publish/allow",
-                            "config/gateway/authorization/users/permissions/publish/deny"
-                          ]
-                        },
-                        {
-                          "type": "category",
-                          "label": "subscribe",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/gateway/authorization/users/permissions/subscribe/index"
-                          },
-                          "items": [
-                            "config/gateway/authorization/users/permissions/subscribe/allow",
-                            "config/gateway/authorization/users/permissions/subscribe/deny"
-                          ]
-                        },
-                        {
-                          "type": "category",
-                          "label": "allow_responses",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/gateway/authorization/users/permissions/allow_responses/index"
-                          },
-                          "items": [
-                            "config/gateway/authorization/users/permissions/allow_responses/max",
-                            "config/gateway/authorization/users/permissions/allow_responses/expires"
-                          ]
-                        }
-                      ]
-                    },
-                    "config/gateway/authorization/users/allowed_connection_types"
-                  ]
-                },
                 {
                   "type": "category",
                   "label": "default_permissions",
@@ -974,6 +1128,39 @@
                     "id": "config/gateway/gateways/tls/index"
                   },
                   "items": [
+                    "config/gateway/gateways/tls/cert_store",
+                    {
+                      "type": "category",
+                      "label": "certs",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/gateway/gateways/tls/certs/index"
+                      },
+                      "items": [
+                        "config/gateway/gateways/tls/certs/cert_file",
+                        "config/gateway/gateways/tls/certs/key_file"
+                      ]
+                    },
+                    "config/gateway/gateways/tls/handshake_first",
+                    "config/gateway/gateways/tls/min_version",
+                    {
+                      "type": "category",
+                      "label": "ocsp_peer",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/gateway/gateways/tls/ocsp_peer/index"
+                      },
+                      "items": [
+                        "config/gateway/gateways/tls/ocsp_peer/verify",
+                        "config/gateway/gateways/tls/ocsp_peer/ca_timeout",
+                        "config/gateway/gateways/tls/ocsp_peer/allowed_clockskew",
+                        "config/gateway/gateways/tls/ocsp_peer/unknown_is_good",
+                        "config/gateway/gateways/tls/ocsp_peer/warn_only",
+                        "config/gateway/gateways/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+                      ]
+                    },
                     "config/gateway/gateways/tls/cert_file",
                     "config/gateway/gateways/tls/key_file",
                     "config/gateway/gateways/tls/ca_file",
@@ -1013,6 +1200,39 @@
                 "id": "config/leafnodes/tls/index"
               },
               "items": [
+                "config/leafnodes/tls/cert_store",
+                {
+                  "type": "category",
+                  "label": "certs",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/leafnodes/tls/certs/index"
+                  },
+                  "items": [
+                    "config/leafnodes/tls/certs/cert_file",
+                    "config/leafnodes/tls/certs/key_file"
+                  ]
+                },
+                "config/leafnodes/tls/handshake_first",
+                "config/leafnodes/tls/min_version",
+                {
+                  "type": "category",
+                  "label": "ocsp_peer",
+                  "collapsed": true,
+                  "link": {
+                    "type": "doc",
+                    "id": "config/leafnodes/tls/ocsp_peer/index"
+                  },
+                  "items": [
+                    "config/leafnodes/tls/ocsp_peer/verify",
+                    "config/leafnodes/tls/ocsp_peer/ca_timeout",
+                    "config/leafnodes/tls/ocsp_peer/allowed_clockskew",
+                    "config/leafnodes/tls/ocsp_peer/unknown_is_good",
+                    "config/leafnodes/tls/ocsp_peer/warn_only",
+                    "config/leafnodes/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+                  ]
+                },
                 "config/leafnodes/tls/cert_file",
                 "config/leafnodes/tls/key_file",
                 "config/leafnodes/tls/ca_file",
@@ -1022,10 +1242,8 @@
                 "config/leafnodes/tls/timeout",
                 "config/leafnodes/tls/verify",
                 "config/leafnodes/tls/verify_and_map",
-                "config/leafnodes/tls/verify_cert_and_check_known_urls",
                 "config/leafnodes/tls/connection_rate_limit",
-                "config/leafnodes/tls/pinned_certs",
-                "config/leafnodes/tls/handshake_first"
+                "config/leafnodes/tls/pinned_certs"
               ]
             },
             "config/leafnodes/advertise",
@@ -1041,7 +1259,6 @@
               "items": [
                 "config/leafnodes/authorization/username",
                 "config/leafnodes/authorization/password",
-                "config/leafnodes/authorization/token",
                 {
                   "type": "category",
                   "label": "users",
@@ -1052,112 +1269,12 @@
                   },
                   "items": [
                     "config/leafnodes/authorization/users/username",
-                    "config/leafnodes/authorization/users/password",
-                    "config/leafnodes/authorization/users/nkey",
-                    {
-                      "type": "category",
-                      "label": "permissions",
-                      "collapsed": true,
-                      "link": {
-                        "type": "doc",
-                        "id": "config/leafnodes/authorization/users/permissions/index"
-                      },
-                      "items": [
-                        {
-                          "type": "category",
-                          "label": "publish",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/leafnodes/authorization/users/permissions/publish/index"
-                          },
-                          "items": [
-                            "config/leafnodes/authorization/users/permissions/publish/allow",
-                            "config/leafnodes/authorization/users/permissions/publish/deny"
-                          ]
-                        },
-                        {
-                          "type": "category",
-                          "label": "subscribe",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/leafnodes/authorization/users/permissions/subscribe/index"
-                          },
-                          "items": [
-                            "config/leafnodes/authorization/users/permissions/subscribe/allow",
-                            "config/leafnodes/authorization/users/permissions/subscribe/deny"
-                          ]
-                        },
-                        {
-                          "type": "category",
-                          "label": "allow_responses",
-                          "collapsed": true,
-                          "link": {
-                            "type": "doc",
-                            "id": "config/leafnodes/authorization/users/permissions/allow_responses/index"
-                          },
-                          "items": [
-                            "config/leafnodes/authorization/users/permissions/allow_responses/max",
-                            "config/leafnodes/authorization/users/permissions/allow_responses/expires"
-                          ]
-                        }
-                      ]
-                    },
-                    "config/leafnodes/authorization/users/allowed_connection_types"
+                    "config/leafnodes/authorization/users/password"
                   ]
                 },
-                {
-                  "type": "category",
-                  "label": "default_permissions",
-                  "collapsed": true,
-                  "link": {
-                    "type": "doc",
-                    "id": "config/leafnodes/authorization/default_permissions/index"
-                  },
-                  "items": [
-                    {
-                      "type": "category",
-                      "label": "publish",
-                      "collapsed": true,
-                      "link": {
-                        "type": "doc",
-                        "id": "config/leafnodes/authorization/default_permissions/publish/index"
-                      },
-                      "items": [
-                        "config/leafnodes/authorization/default_permissions/publish/allow",
-                        "config/leafnodes/authorization/default_permissions/publish/deny"
-                      ]
-                    },
-                    {
-                      "type": "category",
-                      "label": "subscribe",
-                      "collapsed": true,
-                      "link": {
-                        "type": "doc",
-                        "id": "config/leafnodes/authorization/default_permissions/subscribe/index"
-                      },
-                      "items": [
-                        "config/leafnodes/authorization/default_permissions/subscribe/allow",
-                        "config/leafnodes/authorization/default_permissions/subscribe/deny"
-                      ]
-                    },
-                    {
-                      "type": "category",
-                      "label": "allow_responses",
-                      "collapsed": true,
-                      "link": {
-                        "type": "doc",
-                        "id": "config/leafnodes/authorization/default_permissions/allow_responses/index"
-                      },
-                      "items": [
-                        "config/leafnodes/authorization/default_permissions/allow_responses/max",
-                        "config/leafnodes/authorization/default_permissions/allow_responses/expires"
-                      ]
-                    }
-                  ]
-                },
-                "config/leafnodes/authorization/timeout"
+                "config/leafnodes/authorization/timeout",
+                "config/leafnodes/authorization/account",
+                "config/leafnodes/authorization/nkey"
               ]
             },
             "config/leafnodes/min_version",
@@ -1184,6 +1301,8 @@
               },
               "items": [
                 "config/leafnodes/remotes/url",
+                "config/leafnodes/remotes/nkey",
+                "config/leafnodes/remotes/first_info_timeout",
                 "config/leafnodes/remotes/no_randomize",
                 "config/leafnodes/remotes/account",
                 "config/leafnodes/remotes/credentials",
@@ -1196,6 +1315,39 @@
                     "id": "config/leafnodes/remotes/tls/index"
                   },
                   "items": [
+                    "config/leafnodes/remotes/tls/cert_store",
+                    {
+                      "type": "category",
+                      "label": "certs",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/leafnodes/remotes/tls/certs/index"
+                      },
+                      "items": [
+                        "config/leafnodes/remotes/tls/certs/cert_file",
+                        "config/leafnodes/remotes/tls/certs/key_file"
+                      ]
+                    },
+                    "config/leafnodes/remotes/tls/handshake_first",
+                    "config/leafnodes/remotes/tls/min_version",
+                    {
+                      "type": "category",
+                      "label": "ocsp_peer",
+                      "collapsed": true,
+                      "link": {
+                        "type": "doc",
+                        "id": "config/leafnodes/remotes/tls/ocsp_peer/index"
+                      },
+                      "items": [
+                        "config/leafnodes/remotes/tls/ocsp_peer/verify",
+                        "config/leafnodes/remotes/tls/ocsp_peer/ca_timeout",
+                        "config/leafnodes/remotes/tls/ocsp_peer/allowed_clockskew",
+                        "config/leafnodes/remotes/tls/ocsp_peer/unknown_is_good",
+                        "config/leafnodes/remotes/tls/ocsp_peer/warn_only",
+                        "config/leafnodes/remotes/tls/ocsp_peer/cache_ttl_when_next_update_unset"
+                      ]
+                    },
                     "config/leafnodes/remotes/tls/cert_file",
                     "config/leafnodes/remotes/tls/key_file",
                     "config/leafnodes/remotes/tls/ca_file",
@@ -1205,10 +1357,8 @@
                     "config/leafnodes/remotes/tls/timeout",
                     "config/leafnodes/remotes/tls/verify",
                     "config/leafnodes/remotes/tls/verify_and_map",
-                    "config/leafnodes/remotes/tls/verify_cert_and_check_known_urls",
                     "config/leafnodes/remotes/tls/connection_rate_limit",
-                    "config/leafnodes/remotes/tls/pinned_certs",
-                    "config/leafnodes/remotes/tls/handshake_first"
+                    "config/leafnodes/remotes/tls/pinned_certs"
                   ]
                 },
                 "config/leafnodes/remotes/hub",
@@ -1252,6 +1402,27 @@
             "config/jetstream/encryption_key",
             "config/jetstream/cipher",
             "config/jetstream/extension_hint",
+            "config/jetstream/prev_encryption_key",
+            "config/jetstream/strict",
+            "config/jetstream/max_buffered_msgs",
+            "config/jetstream/max_buffered_size",
+            "config/jetstream/request_queue_limit",
+            {
+              "type": "category",
+              "label": "tpm",
+              "collapsed": true,
+              "link": {
+                "type": "doc",
+                "id": "config/jetstream/tpm/index"
+              },
+              "items": [
+                "config/jetstream/tpm/keys_file",
+                "config/jetstream/tpm/encryption_password",
+                "config/jetstream/tpm/srk_password",
+                "config/jetstream/tpm/pcr",
+                "config/jetstream/tpm/cipher"
+              ]
+            },
             {
               "type": "category",
               "label": "limits",
@@ -1289,10 +1460,12 @@
         },
         "config/debug",
         "config/trace",
+        "config/trace_headers",
         "config/trace_verbose",
         "config/logtime",
         "config/logtime_utc",
         "config/logfile",
+        "config/logfile_max_num",
         "config/logfile_size_limit",
         "config/syslog",
         "config/remote_syslog",
@@ -1314,6 +1487,9 @@
         "config/max_subscription_tokens",
         "config/ping_interval",
         "config/ping_max",
+        "config/max_closed_clients",
+        "config/no_fast_producer_stall",
+        "config/default_sentinel",
         "config/write_deadline",
         "config/no_header_support",
         "config/disable_sublist_cache",
@@ -1321,6 +1497,7 @@
         "config/lame_duck_grace_period",
         "config/pidfile",
         "config/ports_file_dir",
+        "config/prof_block_rate",
         "config/prof_port",
         "config/default_js_domain"
       ]

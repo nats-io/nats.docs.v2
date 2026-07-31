@@ -4,12 +4,14 @@ types:
     disabled: true
     properties:
       name:
+        reloadable: not-reloadable
         type: string
         description: |-
           Name of this cluster. All gateway connections belonging to the
           same cluster must specify the same name.
 
       reject_unknown_cluster:
+        reloadable: not-reloadable
         type: boolean
         default: false
         description: |-
@@ -20,6 +22,7 @@ types:
           restrict a configured gateway, thus cluster, from dynamically growing.
 
       host:
+        reloadable: not-reloadable
         type: host
         default: 0.0.0.0
         description: |-
@@ -27,17 +30,82 @@ types:
           connections.
 
       port:
+        reloadable: not-reloadable
         type: integer
         default: 7222
         description: |-
           Port where the gateway will listen for incoming gateway connections.
 
       listen:
+        reloadable: not-reloadable
         type: listen
         description: |-
           `<host>:<port>` format. Alternative to `host`/`port`.
 
       tls:
+        reloadable_note: |-
+          Certificate material reloads and is used by connections established
+          afterwards. Changing `timeout`, `verify_and_map` or
+          `verify_cert_and_check_known_urls` fails the reload.
+        versions:
+          # Before 2.14, TLSPinnedCerts was not blanked before the gateway
+          # block's DeepEqual, so a change to it aborted the whole reload.
+          "2.11, 2.12":
+            reloadable_note: |-
+              Certificate material reloads and is used by connections
+              established afterwards. Changing `timeout`, `verify_and_map`,
+              `verify_cert_and_check_known_urls` or `pinned_certs` fails the
+              reload.
+        properties:
+          ca_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to gateway connections established after the reload.
+          cert_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to gateway connections established after the reload;
+              existing gateway connections are not renegotiated.
+          cipher_suites:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to gateway connections established after the reload.
+          connection_rate_limit:
+            reloadable: noop
+            reloadable_note: |-
+              Silently discarded by parseGateway.
+          curve_preferences:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to gateway connections established after the reload.
+          insecure:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to gateway connections established after the reload.
+          key_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to gateway connections established after the reload.
+          pinned_certs:
+            reloadable: reloadable
+            reloadable_note: |-
+              Reloads, and also re-checks gateway connections that are already
+              established, disconnecting any whose certificate is no longer
+              pinned.
+            versions:
+              "2.11, 2.12":
+                reloadable: not-reloadable
+                reloadable_note: |-
+                  Changing the pinned certificates fails the whole reload, so
+                  the server has to be restarted. Reloading them is supported
+                  from 2.14.
+          verify:
+            reloadable: noop
+            reloadable_note: |-
+              Setting verify:false changes nothing for gateways.
+          verify_cert_and_check_known_urls:
+            reloadable: not-reloadable
+        reloadable: reloadable
         type: tls
         description: |-
           A `tls` configuration map for securing gateway connections. `verify`
@@ -45,12 +113,14 @@ types:
           client certificate.
 
       advertise:
+        reloadable: not-reloadable
         type: string
         description: |-
           `<host>:<port>` to advertise how this server can be contacted by
           other gateway members. This is useful in setups with NAT.
 
       connect_retries:
+        reloadable: not-reloadable
         type: integer
         default: 0
         description: |-
@@ -60,6 +130,42 @@ types:
           apply to explicitly configured gateways.
 
       authorization:
+        properties:
+          default_permissions:
+            reloadable: noop
+            reloadable_note: |-
+              Parsed and thrown away; there is no gateway permissions
+              field in the server at any version.
+            properties:
+              allow_responses:
+                reloadable: noop
+                properties:
+                  expires:
+                    reloadable: noop
+                  max:
+                    reloadable: noop
+              publish:
+                reloadable: noop
+                properties:
+                  allow:
+                    reloadable: noop
+                  deny:
+                    reloadable: noop
+              subscribe:
+                reloadable: noop
+                properties:
+                  allow:
+                    reloadable: noop
+                  deny:
+                    reloadable: noop
+          users:
+            # opts.go:2185 — "Gateway authorization does not allow multiple
+            # users". Setting it stops the server from starting.
+            omit: true
+        reloadable: not-reloadable
+        reloadable_note: |-
+          Any change to gateway username, password or timeout fails the whole
+          reload.
         type: network-authorization
         description: |-
           Authorization map for gateways. When a single username/password is
@@ -76,7 +182,41 @@ types:
           users and token configuration are not supported and will prevent the
           server from starting. The permissions block is ignored.
 
+      connect_backoff:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: boolean
+        default: false
+        description: |-
+          Back off between gateway reconnect attempts instead of retrying at
+          a fixed interval.
+
+      write_deadline:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: duration
+        default: 10s
+        description: |-
+          How long a gateway write may block before the connection is
+          treated as stalled.
+
+      write_timeout:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: string
+        choices:
+          - default
+          - close
+          - retry
+        default: default
+        description: |-
+          What to do when a gateway connection misses its `write_deadline`.
+
       gateways:
+        reloadable: not-reloadable
+        reloadable_note: |-
+          Only per-remote TLS *material* may change; the set of remotes and
+          their names/URLs is fixed until restart.
         type: array(gateway)
         description: |-
           List of gateway entries.
@@ -85,20 +225,80 @@ types:
     type: object
     properties:
       name:
+        reloadable: not-reloadable
         type: string
         description: |-
           Name of the gateway being connected to.
       url:
+        reloadable: not-reloadable
         type: string
         description: |-
           A single URL to connect to.
 
       urls:
+        reloadable: not-reloadable
         type: array(string)
         description: |-
           A list of URLs to connect to (multiple servers in a cluster).
 
       tls:
+        properties:
+          ca_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to outbound gateway connections established after
+              the reload.
+          cert_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to outbound gateway connections established after
+              the reload.
+          cipher_suites:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to outbound gateway connections established after
+              the reload.
+          connection_rate_limit:
+            reloadable: noop
+            reloadable_note: |-
+              Silently discarded by parseGateways.
+          curve_preferences:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to outbound gateway connections established after
+              the reload.
+          insecure:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to outbound gateway connections established after
+              the reload.
+          key_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to outbound gateway connections established after
+              the reload.
+          pinned_certs:
+            reloadable: noop
+            reloadable_note: |-
+              Silently discarded by parseGateways.
+          verify:
+            reloadable: noop
+            reloadable_note: |-
+              No runtime effect at all for a remote gateway entry.
+          verify_and_map:
+            reloadable: noop
+            reloadable_note: |-
+              Silently discarded by parseGateways.
+          verify_cert_and_check_known_urls:
+            reloadable: noop
+            reloadable_note: |-
+              Silently discarded by parseGateways; only the top-level
+              gateway{tls{}} block honours it.
+        reloadable: reloadable
+        reloadable_note: |-
+          Reloadable for
+          cert_file/key_file/ca_file/cipher_suites/curve_preferences; timeout
+          hard-fails; everything else is discarded.
         type: tls
         description: |-
           A TLS configuration map for creating a secure gateway connection.

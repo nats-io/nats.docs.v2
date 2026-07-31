@@ -1,6 +1,6 @@
 # port
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Port where the gateway will listen for incoming gateway connections.
 
 

@@ -1,6 +1,6 @@
 # allow
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 List of subjects that are allowed to the client.
 
 

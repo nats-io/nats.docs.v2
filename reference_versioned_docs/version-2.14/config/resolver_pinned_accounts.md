@@ -1,6 +1,6 @@
 # resolver_pinned_accounts
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 
 ## Types
 

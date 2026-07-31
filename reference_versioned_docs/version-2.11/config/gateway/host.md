@@ -1,6 +1,7 @@
 # host
 
-<Reloadable /> 
+<Aliases aliases="net" />
+<Reloadable state="not-reloadable" />
 Interface where the gateway will listen for incoming gateway
 connections.
 

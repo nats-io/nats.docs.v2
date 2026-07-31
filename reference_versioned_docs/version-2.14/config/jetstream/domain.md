@@ -1,6 +1,6 @@
 # domain
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 The JetStream domain the server is part of.
 
 

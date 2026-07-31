@@ -1,6 +1,6 @@
 # expires
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 The amount of time the permission is valid. Values such
 as 1s, 1m, 1h (1 second, minute, hour) etc can be specified.
 Default doesn't have a time limit.

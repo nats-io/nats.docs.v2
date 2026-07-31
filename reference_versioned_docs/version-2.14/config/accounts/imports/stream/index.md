@@ -1,6 +1,6 @@
 # stream
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 Stream import source configuration.
 Exclusive of `service`.
 

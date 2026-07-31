@@ -1,6 +1,6 @@
 # ports_file_dir
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 
 ## Types
 

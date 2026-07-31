@@ -1,7 +1,7 @@
 # publish
 
-<Aliases aliases="`pub`" />
-<Reloadable /> 
+<Aliases aliases="pub" />
+<Reloadable state="noop" />
 A single subject, list of subjects, or a allow-deny map of
 subjects for publishing. Specifying a single subject or list
 of subjects denotes an *allow* and implcitly denies publishing
@@ -19,8 +19,8 @@ to all other subjects.
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`allow`](./allow.md) | List of subjects that are allowed to the client. | `string` | - | Yes |
-| [`deny`](./deny.md) | List of subjects that are denied to the client. | `string` | - | Yes |
+| [`allow`](./allow.md) | List of subjects that are allowed to the client. | `string` | - | Ignored |
+| [`deny`](./deny.md) | List of subjects that are denied to the client. | `string` | - | Ignored |
 ## Examples
 
 ### Allow publish to `foo`

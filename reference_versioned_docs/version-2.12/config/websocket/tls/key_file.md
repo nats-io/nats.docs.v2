@@ -1,6 +1,6 @@
 # key_file
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 TLS certificate key file.
 
 

@@ -1,6 +1,6 @@
 # ttl
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="Handled only as part of the whole `resolver` block; replacement resolver is never Start()ed." />
 If `cache` mode, defines how long an account JWT will be cached
 for before being considered for auto-eviction.
 

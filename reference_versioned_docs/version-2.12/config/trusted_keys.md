@@ -1,6 +1,6 @@
 # trusted_keys
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 One or more operator public keys to trust.
 
 

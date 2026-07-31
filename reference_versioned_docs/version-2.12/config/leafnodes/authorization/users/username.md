@@ -1,7 +1,7 @@
 # username
 
-<Aliases aliases="`user`" />
-<Reloadable /> 
+<Aliases aliases="user" />
+<Reloadable state="not-reloadable" />
 Name of the user.
 
 

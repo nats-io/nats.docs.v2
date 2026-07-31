@@ -1,6 +1,6 @@
 # curve_preferences
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="New connections only." />
 List of TLS cipher curves to use in order.
 
 

@@ -1,6 +1,7 @@
 # host
 
-<Reloadable /> 
+<Aliases aliases="net" />
+<Reloadable state="not-reloadable" />
 Host name the server will listen on for incoming
 leaf node connections.
 

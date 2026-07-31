@@ -1,6 +1,6 @@
 # lame_duck_duration
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Must be at least 30s.
 
 

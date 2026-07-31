@@ -1,6 +1,6 @@
 # logtime_utc
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 If true, log timestamps with be in UTC rather than the local timezone.
 
 

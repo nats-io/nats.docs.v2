@@ -1,6 +1,6 @@
 # same_origin
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 This option is relevant for clients used within a Web Browser, such
 as [nats.ws][nats.ws].
 

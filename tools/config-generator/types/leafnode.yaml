@@ -3,6 +3,10 @@ types:
     type: tls
     properties:
       handshake_first:
+        reloadable: reloadable
+        reloadable_note: |-
+          On 2.11/2.12 the server logs that the value was reloaded while
+          continuing to use the old one.
         type: boolean
         default: false
         description: |-
@@ -26,12 +30,17 @@ types:
 
         properties:
           host:
+            reloadable: not-reloadable
             type: host
             description: |-
               Host name the server will listen on for incoming
               leaf node connections.
 
           port:
+            reloadable: not-reloadable
+            reloadable_note: |-
+              A reload that leaves the value identical (including `port: -1`)
+              is fine; any actual change fails.
             type: integer
             description: |-
               Port the server will listen for incoming leaf node
@@ -39,37 +48,175 @@ types:
             default: 7422
 
           listen:
+            reloadable: not-reloadable
             type: listen
 
           tls:
+            properties:
+              ca_file:
+                reloadable: reloadable
+                reloadable_note: |-
+                  New connections only.
+              cert_file:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Applies to newly accepted leafnode connections only;
+                  existing connections keep the old certificate until they
+                  reconnect.
+              cipher_suites:
+                reloadable: reloadable
+                reloadable_note: |-
+                  New connections only.
+              connection_rate_limit:
+                reloadable: noop
+                reloadable_note: |-
+                  Silently ignored for leafnodes entirely, not just across
+                  reload.
+              curve_preferences:
+                reloadable: reloadable
+                reloadable_note: |-
+                  New connections only.
+              handshake_first:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Accept side only; applies to newly accepted connections.
+              insecure:
+                reloadable: reloadable
+                reloadable_note: |-
+                  New connections only.
+              key_file:
+                reloadable: reloadable
+                reloadable_note: |-
+                  New connections only.
+              verify:
+                reloadable: reloadable
+                reloadable_note: |-
+                  New connections only. Note verify_and_map, which also
+                  implies verify, is NOT reloadable because it sets the
+                  separate TLSMap field.
+              verify_cert_and_check_known_urls:
+                # opts.go:4994 — "verify_cert_and_check_known_urls not
+                # supported in this context". Rejected at parse time.
+                omit: true
+            reloadable: reloadable
+            reloadable_note: |-
+              Reloadable only for
+              cert_file/key_file/ca_file/cipher_suites/curve_preferences/insecure/verify
+              and handshake_first; and only for newly accepted connections.
             type: leafnode-tls
             description: |-
               TLS configuration for securing leaf node connections.
 
           advertise:
+            reloadable: not-reloadable
             type: string
             description: |-
               Hostport to advertise how this sever be contacted
               by leaf nodes. This is useful for setups with a NAT.
 
           no_advertise:
+            reloadable: not-reloadable
             type: boolean
             default: false
             description: |-
               If true, the server will not be advertised to leaf nodes.
 
           authorization:
+            properties:
+              account:
+                reloadable: not-reloadable
+                type: string
+                description: |-
+                  Account that leaf nodes authenticating with these
+                  credentials are bound to.
+
+              nkey:
+                reloadable: not-reloadable
+                type: string
+                description: |-
+                  Public user nkey a connecting leaf node must sign for.
+
+              proxy_required:
+                version: "2.12"
+                reloadable: not-reloadable
+                type: boolean
+                default: false
+                description: |-
+                  Reject leaf node connections that did not arrive through a
+                  PROXY protocol header.
+
+              default_permissions:
+                # Not a case in parseLeafAuthorization (opts.go:2792), so it is
+                # an unknown config field here.
+                omit: true
+              users:
+                reloadable: not-reloadable
+                reloadable_note: |-
+                  Reordering the users array is accepted because the
+                  comparison is keyed by username.
+                properties:
+                  # parseLeafUsers (opts.go:2867) accepts only username,
+                  # password, account and proxy_required.
+                  allowed_connection_types:
+                    omit: true
+                  nkey:
+                    omit: true
+                  permissions:
+                    omit: true
+                  password:
+                    reloadable: not-reloadable
+                  username:
+                    reloadable: not-reloadable
+            reloadable: not-reloadable
             type: network-authorization
             description: |-
               Authorization scoped to accepting leaf node connections.
 
+          isolate_leafnode_interest:
+            version: "2.12"
+            reloadable: not-reloadable
+            type: boolean
+            default: false
+            aliases:
+              - isolate
+            description: |-
+              Do not propagate subscription interest learned from one leaf
+              node to the others attached to this server.
+
+          write_deadline:
+            version: "2.12"
+            reloadable: not-reloadable
+            type: duration
+            default: 10s
+            description: |-
+              How long a leaf node write may block before the connection is
+              treated as stalled.
+
+          write_timeout:
+            version: "2.12"
+            reloadable: not-reloadable
+            type: string
+            choices:
+              - default
+              - close
+              - retry
+            default: default
+            description: |-
+              What to do when a leaf node connection misses its
+              `write_deadline`.
+
           min_version:
+            reloadable: not-reloadable
             type: string
             description: |-
               The minimum server version required of the connecting
               leaf node. This must be at least version `2.8.0`.
 
           compression:
+            reloadable: reloadable
+            reloadable_note: |-
+              Existing leaf connections whose mode requires renegotiation
+              (off->on, ->accept) are closed and reconnect.
             types:
               - compression-mode
               - compression-map
@@ -88,12 +235,18 @@ types:
         properties:
           remotes:
             type: array(remote)
-            reloadable: false
+            reloadable: reloadable
+            versions:
+              # s.leafRemoteCfgs was a positionally-compared slice before 2.14,
+              # so any edit to a remote aborted the reload.
+              "2.11, 2.12":
+                reloadable: not-reloadable
             description: |-
               List of entries specifiying servers where the leaf
               node client connection can be made.
 
           reconnect:
+            reloadable: not-reloadable
             type: integer
             description: |-
               Interval in seconds at which reconnect attempts to a
@@ -103,6 +256,10 @@ types:
     type: object
     properties:
       url:
+        reloadable: reloadable
+        versions:
+          "2.11, 2.12":
+            reloadable: not-reloadable
         types:
           - string
           - array(string)
@@ -116,7 +273,72 @@ types:
         aliases:
           - urls
 
+      nkey:
+        reloadable: reloadable
+        versions:
+          # s.leafRemoteCfgs was compared positionally before 2.14, so any
+          # edit to a remote aborted the reload.
+          "2.11, 2.12":
+            reloadable: not-reloadable
+        type: string
+        aliases:
+          - seed
+        description: |-
+          User nkey seed this remote authenticates with.
+
+      first_info_timeout:
+        reloadable: not-reloadable
+        type: duration
+        default: 1s
+        description: |-
+          How long to wait for the remote's `INFO` message before giving up
+          on the connection.
+
+      disabled:
+        version: "2.12"
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Keep the remote in the configuration without connecting to it.
+
+      isolate_leafnode_interest:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: boolean
+        default: false
+        aliases:
+          - isolate
+        description: |-
+          Do not propagate subscription interest learned from this remote to
+          other leaf nodes on this server.
+
+      request_isolation:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: boolean
+        default: false
+        description: |-
+          Ask the remote to isolate this connection's interest on its side.
+
+      ignore_discovered_servers:
+        version: "2.14"
+        reloadable: not-reloadable
+        type: boolean
+        default: false
+        description: |-
+          Connect only to the URLs listed here, ignoring any additional
+          servers the remote advertises.
+
+      proxy:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: leafnode-proxy
+        description: |-
+          Reach the remote through an HTTP proxy.
+
       no_randomize:
+        reloadable: not-reloadable
         type: boolean
         description: |-
           If true and more than one URL is specified, the first one
@@ -126,6 +348,10 @@ types:
           - dont_randomize
 
       account:
+        reloadable: reloadable
+        versions:
+          "2.11, 2.12":
+            reloadable: not-reloadable
         type: string
         description: |-
           Account name or public NKey identifying the *local* account
@@ -135,6 +361,10 @@ types:
           - local
 
       credentials:
+        reloadable: reloadable
+        versions:
+          "2.11, 2.12":
+            reloadable: not-reloadable
         type: string
         description: |-
           Path to a credentials file. This is application when
@@ -143,16 +373,78 @@ types:
           - creds
 
       tls:
+        properties:
+          ca_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              On 2.11/2.12 the reload succeeds but nothing changes.
+          cert_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              On 2.11/2.12 the reload succeeds but the old certificate
+              keeps being used.
+          cipher_suites:
+            reloadable: reloadable
+            reloadable_note: |-
+              On 2.11/2.12 the reload succeeds but nothing changes.
+          connection_rate_limit:
+            reloadable: noop
+            reloadable_note: |-
+              Silently ignored entirely, not just across reload.
+          curve_preferences:
+            reloadable: reloadable
+            reloadable_note: |-
+              On 2.11/2.12 the reload succeeds but nothing changes.
+          insecure:
+            reloadable: reloadable
+            reloadable_note: |-
+              On 2.11/2.12 the reload succeeds but nothing changes.
+          key_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              On 2.11/2.12 the reload succeeds but nothing changes.
+          pinned_certs:
+            reloadable: noop
+            reloadable_note: |-
+              Silently ignored for leafnode remotes entirely, not just
+              across reload.
+          verify:
+            reloadable: reloadable
+            reloadable_note: |-
+              On 2.11/2.12 the reload succeeds but nothing changes.
+          verify_and_map:
+            reloadable: noop
+            reloadable_note: |-
+              Silently ignored for leafnode remotes entirely, not just
+              across reload.
+          verify_cert_and_check_known_urls:
+            # Same parse-time rejection as the accept-side leafnode TLS block.
+            omit: true
+        reloadable: reloadable
+        reloadable_note: |-
+          On 2.11/2.12 the reload reports success; the new TLS material is
+          used only after a restart.
         type: leafnode-tls
         description: |-
           TLS configuration for connecting/authenticating with
           the remote if mutual TLS is required.
 
       hub:
+        reloadable: not-reloadable
         type: boolean
         description: |-
 
       deny_imports:
+        reloadable: not-reloadable
+        reloadable_note: |-
+          On 2.11/2.12 the reload returns success; the new deny_imports take
+          effect only after a restart.
+        versions:
+          "2.11, 2.12":
+            reloadable: noop
+            reloadable_note: |-
+              On 2.11/2.12 the reload returns success; the new deny_imports
+              take effect only after a restart.
         types:
           - string
           - array(string)
@@ -161,6 +453,16 @@ types:
           - deny_import
 
       deny_exports:
+        reloadable: not-reloadable
+        reloadable_note: |-
+          On 2.11/2.12 the reload returns success; the new deny_exports take
+          effect only after a restart.
+        versions:
+          "2.11, 2.12":
+            reloadable: noop
+            reloadable_note: |-
+              On 2.11/2.12 the reload returns success; the new deny_exports
+              take effect only after a restart.
         types:
           - string
           - array(string)
@@ -169,6 +471,7 @@ types:
           - deny_export
 
       ws_compression:
+        reloadable: not-reloadable
         type: boolean
         default: false
         description: |-
@@ -181,6 +484,7 @@ types:
           - websocket_compression
 
       ws_no_masking:
+        reloadable: not-reloadable
         type: boolean
         default: false
         description: |-
@@ -191,6 +495,7 @@ types:
           - websocket_no_masking
 
       jetstream_cluster_migrate:
+        reloadable: not-reloadable
         type: boolean
         default: true
         description: |-
@@ -198,6 +503,10 @@ types:
           - js_cluster_migrate
 
       compression:
+        reloadable: reloadable
+        reloadable_note: |-
+          Connections that need renegotiation (off->on, ->accept) are closed
+          and reconnect.
         types:
           - compression-mode
           - compression-map
@@ -205,3 +514,30 @@ types:
           Defines the compression mode to use for a outgoing leafnode connection.
 
           If set to `on`, it will use the `s2_auto`.
+
+  leafnode-proxy:
+    type: object
+    properties:
+      url:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          Proxy URL, e.g. `http://proxy.example.com:3128`.
+
+      username:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          User name for proxy authentication.
+
+      password:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          Password for proxy authentication.
+
+      timeout:
+        reloadable: not-reloadable
+        type: duration
+        description: |-
+          How long to wait for the proxy to establish the tunnel.

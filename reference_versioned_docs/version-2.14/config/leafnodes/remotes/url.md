@@ -1,7 +1,7 @@
 # url
 
-<Aliases aliases="`urls`" />
-<Reloadable /> 
+<Aliases aliases="urls" />
+<Reloadable state="reloadable" />
 URL or list of URLs of a remote server accepting leaf
 node connections.
 If username/password or token authentication is required

@@ -1,6 +1,6 @@
 # timeout
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="Read at handshake time, so it applies to every route connection established after the reload. Contrast with gateway.tls.timeout, which hard-fails the reload." />
 TLS handshake timeout.
 
 

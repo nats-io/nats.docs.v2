@@ -28,11 +28,39 @@ type hierPath struct {
 	Path string
 }
 
-func yesno(b bool) string {
-	if b {
-		return "Yes"
+// reloadCell renders a property's reload verdict for a summary table. A
+// starred value means the property page carries a caveat that does not fit in
+// a cell; "-" means no verdict has been authored.
+//
+// "Ignored" is the short form of "Ignored Until Restart": the reload is
+// accepted but the value does not take effect. It reads as a third answer in a
+// column headed "Reloadable" rather than collapsing into Yes or No, both of
+// which would mislead.
+func reloadCell(r Reload, note string) string {
+	var s string
+	switch r {
+	case ReloadYes:
+		s = "Yes"
+	case ReloadNo:
+		s = "No"
+	case ReloadNoop:
+		s = "Ignored"
+	default:
+		return "-"
 	}
-	return "No"
+	if note != "" {
+		s += `\*`
+	}
+	return s
+}
+
+// mdxAttr flattens a value onto one line and escapes it for use as a
+// double-quoted JSX string attribute.
+func mdxAttr(s string) string {
+	s = strings.Join(strings.Fields(s), " ")
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, `"`, "&quot;")
+	return s
 }
 
 func hasNestedProps(p *Property) bool {
@@ -51,17 +79,34 @@ func generateTemplate(w io.Writer, p *Property, mc *MarkdownConfig, hier []*hier
 
 	o("# %s\n\n", p.Name)
 
+	// Bare names: <Aliases> wraps each one in <code> itself, so backticks here
+	// would render literally inside the code element.
 	if len(p.Aliases) > 0 {
-		var aliases []string
-		for _, a := range p.Aliases {
-			aliases = append(aliases, fmt.Sprintf("`%s`", a))
-		}
-		o("<Aliases aliases=\"%s\" />\n", strings.Join(aliases, ", "))
+		o("<Aliases aliases=\"%s\" />\n", mdxAttr(strings.Join(p.Aliases, ", ")))
 	}
 
-	// TODO: Add reloadable note if it exists.
-	if p.Reloadable {
-		o("<Reloadable /> \n")
+	// "Since" is suppressed for anything that predates the oldest documented
+	// version, because every live version has it. Without that suppression the
+	// existing `version: 2.2` on the websocket type would print "Since 2.2" on
+	// every websocket page.
+	if p.Version != "" && (mc.OldestLive == "" || cmpVersion(p.Version, mc.OldestLive) > 0) {
+		o("<Since version=\"%s\" />\n", mdxAttr(p.Version))
+	}
+
+	// A property with no authored verdict renders no badge — claiming
+	// hot-reloadability we have not verified is worse than claiming nothing.
+	// An authored note still renders on its own, so a caveat written without a
+	// verdict is surfaced rather than silently dropped. Each of the three
+	// states has exactly one spelling in the output.
+	if p.Reloadable != ReloadUnset || p.ReloadableNote != "" {
+		var attrs string
+		if p.Reloadable != ReloadUnset {
+			attrs = fmt.Sprintf(" state=%q", p.Reloadable)
+		}
+		if p.ReloadableNote != "" {
+			attrs += fmt.Sprintf(" note=\"%s\"", mdxAttr(p.ReloadableNote))
+		}
+		o("<Reloadable%s />\n", attrs)
 	}
 
 	bpath := mc.BasePath
@@ -168,6 +213,8 @@ func renderSections(w io.Writer, mc *MarkdownConfig, bpath string, t *TypeOption
 		o("| Name | Description | Type | Default | Reloadable |\n")
 		o("| :--- | :---------- | :--- | :------ | :--------- |\n")
 
+		var starred bool
+
 		for _, x := range s.Properties {
 			var path string
 			if mc.RelativeLinks {
@@ -201,16 +248,24 @@ func renderSections(w io.Writer, mc *MarkdownConfig, bpath string, t *TypeOption
 			} else {
 				typ = "(multiple)"
 			}
-			rel := x.Reloadable
+			rel := reloadCell(x.Reloadable, x.ReloadableNote)
+			if strings.HasSuffix(rel, `\*`) {
+				starred = true
+			}
 
 			// Render link to sub-page.
-			o("| [`%s`](%s) | %s | `%s` | %s | %s |\n", x.Name, path, desc, typ, def, yesno(rel))
+			o("| [`%s`](%s) | %s | `%s` | %s | %s |\n", x.Name, path, desc, typ, def, rel)
+		}
+
+		if starred {
+			o("\n\\* See the property page for reload caveats.\n")
 		}
 	}
 }
 
 type MarkdownConfig struct {
 	BasePath      string
+	OldestLive    string
 	RelativeLinks bool
 	IndexName     string
 	TrimIndexFile bool

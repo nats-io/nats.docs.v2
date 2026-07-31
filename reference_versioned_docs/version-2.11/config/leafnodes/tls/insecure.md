@@ -1,6 +1,6 @@
 # insecure
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="New connections only." />
 Skip certificate verification. This only applies to outgoing connections, NOT incoming client connections. **not recommended.**
 
 

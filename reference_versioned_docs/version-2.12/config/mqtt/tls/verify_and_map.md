@@ -1,6 +1,6 @@
 # verify_and_map
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 If true, require and verify client certificates and map certificate values for authentication. Does not apply to monitoring.
 
 

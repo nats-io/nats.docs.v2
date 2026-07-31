@@ -1,6 +1,6 @@
 # rtt_thresholds
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 Applies only when the `s2_auto` mode is used and defines the round-trip time (RTT)
 thresholds for compression level changes.
 

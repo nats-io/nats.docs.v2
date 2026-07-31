@@ -3,23 +3,55 @@ types:
     type: object
     properties:
       host:
+        reloadable: not-reloadable
         type: host
         default: 0.0.0.0
 
       port:
+        reloadable: not-reloadable
+        reloadable_note: |-
+          Keeping `port: -1` across reloads is fine (the original port is
+          restored); any other change fails.
         type: integer
         default: 1883
 
       listen:
+        reloadable: not-reloadable
         type: listen
 
       tls:
+        reloadable_note: |-
+          Certificate material reloads. Changing `timeout`, `verify_and_map`
+          or `pinned_certs` fails the reload.
+        properties:
+          cert_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              New MQTT connections only.
+          connection_rate_limit:
+            reloadable: noop
+            reloadable_note: |-
+              Parsed and accepted, then discarded — a permanent no-op, not
+              just a reload no-op.
+          insecure:
+            reloadable: reloadable
+            reloadable_note: |-
+              Meaningless for the inbound MQTT listener; reloads without
+              error but changes nothing observable.
+          verify_cert_and_check_known_urls:
+            reloadable: not-reloadable
+            reloadable_note: |-
+              Only `false` parses, and it is then discarded (MQTTOpts has
+              no TLSCheckKnownURLs field).
+        reloadable: reloadable
         type: tls
 
       authorization:
+        reloadable: not-reloadable
         type: simple-authorization
 
       no_auth_user:
+        reloadable: not-reloadable
         type: string
         description: |-
           If no user name is provided when an MQTT client connects, will default
@@ -30,6 +62,10 @@ types:
           operator mode.*
 
       ack_wait:
+        reloadable_note: |-
+          The reload handler only logs; the value takes effect because the
+          options are swapped. Existing subscriptions keep the old value.
+        reloadable: reloadable
         type: duration
         default: "30s"
         aliases:
@@ -44,6 +80,11 @@ types:
           subscriptions.
 
       max_ack_pending:
+        reloadable_note: |-
+          Existing sessions pick up the new value, but each subscription
+          captures its own limit when it is created, so only subscriptions
+          made after the reload are governed by it.
+        reloadable: reloadable
         type: integer
         default: 100
         aliases:
@@ -65,11 +106,57 @@ types:
           subscriptions.
 
       js_domain:
+        reloadable: not-reloadable
         type: string
         description: |-
           If specified, sets an explicit JetStream domain to be used by MQTT.
 
+      consumer_memory_storage:
+        reloadable: reloadable
+        reloadable_note: |-
+          Existing consumers are not modified.
+        type: boolean
+        default: false
+        description: |-
+          Hold MQTT consumer state in memory rather than on disk.
+
+      consumer_replicas:
+        reloadable: noop
+        reloadable_note: |-
+          Accepted with a warning and then ignored, at every version.
+        type: integer
+        description: |-
+          Deprecated. The server logs a warning and ignores the value;
+          consumer replication follows the stream.
+
+      js_api_timeout:
+        reloadable: not-reloadable
+        type: duration
+        default: 5s
+        aliases:
+          - api_timeout
+        description: |-
+          How long MQTT waits for a JetStream API call before giving up.
+
+      reject_qos2_publish:
+        reloadable: not-reloadable
+        type: boolean
+        default: false
+        description: |-
+          Reject QoS 2 publishes instead of accepting them, for clients that
+          must not silently get weaker delivery guarantees.
+
+      downgrade_qos2_subscribe:
+        reloadable: not-reloadable
+        type: boolean
+        default: false
+        description: |-
+          Accept a QoS 2 subscription but serve it at QoS 1.
+
       stream_replicas:
+        reloadable: reloadable
+        reloadable_note: |-
+          Takes effect only for MQTT streams that have not been created yet.
         type: integer
         description: |-
           If specified, sets an explicit number of stream replicas to be used
@@ -79,6 +166,9 @@ types:
       #type: integer
 
       consumer_inactive_threshold:
+        reloadable: reloadable
+        reloadable_note: |-
+          Existing consumers are not modified.
         type: duration
         aliases:
           - consumer_auto_cleanup

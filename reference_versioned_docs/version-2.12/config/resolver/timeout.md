@@ -1,6 +1,6 @@
 # timeout
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="Handled only as part of the whole `resolver` block; replacement resolver is never Start()ed." />
 Defines the request timeout for resolvers interacting with with
 other resolvers.
 

@@ -1,6 +1,6 @@
 # timeout
 
-<Reloadable /> 
+<Reloadable state="noop" note="Permanent no-op, not just a reload no-op." />
 TLS handshake timeout.
 
 

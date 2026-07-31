@@ -1,6 +1,6 @@
 # connection_rate_limit
 
-<Reloadable /> 
+<Reloadable state="noop" note="Silently ignored for leafnodes entirely, not just across reload." />
 
 ## Types
 

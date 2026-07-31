@@ -1,6 +1,6 @@
 # cert_file
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="Applies to outbound gateway connections established after the reload." />
 TLS certificate file.
 
 

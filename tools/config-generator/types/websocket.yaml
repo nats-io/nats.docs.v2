@@ -10,33 +10,65 @@ types:
 
     properties:
       host:
+        reloadable: not-reloadable
         type: host
         default: 0.0.0.0
 
       port:
+        reloadable: not-reloadable
         type: integer
         default: 443
         description: |-
           By default, a WebSocket-enabled server requires TLS and binds to port 443.
 
       listen:
+        reloadable: not-reloadable
         type: listen
 
       advertise:
+        reloadable: not-reloadable
         type: listen
         description: |-
           Advertised client `<host>:<port>`. Useful for cluster setups
           behind a NAT.
 
       tls:
+        reloadable_note: |-
+          Certificate material reloads. Changing `verify_and_map` or
+          `pinned_certs` fails the reload.
+        properties:
+          cert_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              New connections only.
+          connection_rate_limit:
+            reloadable: noop
+            reloadable_note: |-
+              Permanent no-op.
+          insecure:
+            reloadable: reloadable
+            reloadable_note: |-
+              Meaningless for the inbound WebSocket listener.
+          timeout:
+            reloadable: noop
+            reloadable_note: |-
+              Permanent no-op, not just a reload no-op.
+          verify_cert_and_check_known_urls:
+            reloadable: not-reloadable
+            reloadable_note: |-
+              Only `false` parses, and it is then discarded (WebsocketOpts
+              has no TLSCheckKnownURLs field).
+        reloadable: reloadable
         type: tls
         description: |-
 
       no_tls:
+        reloadable: not-reloadable
         type: boolean
         description: |-
 
       same_origin:
+        reloadable: not-reloadable
         type: boolean
         default: false
         description: |-
@@ -51,6 +83,7 @@ types:
           [cors]: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 
       allowed_origins:
+        reloadable: not-reloadable
         type: array(string)
         aliases:
           - allowed_origin
@@ -68,6 +101,7 @@ types:
           "http://" scheme, and 443 for "https://".
 
       handshake_timeout:
+        reloadable: not-reloadable
         type: duration
         description: |-
           This is the total time allowed for the server to
@@ -76,6 +110,7 @@ types:
           TLS handshake.
 
       compress:
+        reloadable: not-reloadable
         type: boolean
         aliases:
           - compression
@@ -85,9 +120,44 @@ types:
           and client have to support it.
 
       authorization:
+        reloadable: not-reloadable
         type: simple-authorization
 
-      jwt_token:
+      headers:
+        reloadable: not-reloadable
+        type: map(string)
+        description: |-
+          Extra HTTP headers returned on the WebSocket upgrade response.
+
+      ping_interval:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: duration
+        default: 2m
+        description: |-
+          How often the server sends a WebSocket ping. Set `0` to disable.
+
+      user_cookie:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          Name of the HTTP cookie holding the user name, for clients that
+          authenticate through a browser session.
+
+      pass_cookie:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          Name of the HTTP cookie holding the password.
+
+      token_cookie:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          Name of the HTTP cookie holding the auth token.
+
+      jwt_cookie:
+        reloadable: not-reloadable
         type: string
         description: |-
           Name of the HTTP cookie, that, if present, will be used as a client JWT.
@@ -105,6 +175,7 @@ types:
           [jwt]: https://docs.nats.io/nats-server/configuration/securing_nats/jwt
 
       no_auth_user:
+        reloadable: not-reloadable
         type: string
         description: |-
           If no user name is provided when an MQTT client connects, will default

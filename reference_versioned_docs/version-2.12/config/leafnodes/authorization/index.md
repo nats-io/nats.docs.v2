@@ -1,6 +1,6 @@
 # authorization
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Authorization scoped to accepting leaf node connections.
 
 
@@ -8,9 +8,12 @@ Authorization scoped to accepting leaf node connections.
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`username`](./username.md) | Specifies a global user name that clients can use to authenticate the server (requires `password`, exclusive of `token`). | `string` | - | Yes |
-| [`password`](./password.md) | Specifies a global password that clients can use to authenticate the server (requires `user`, exclusive of `token`). | `string` | - | Yes |
-| [`token`](./token.md) | Specifies a global token that clients can use to authenticate with the server (exclusive of `user` and `password`). | `string` | - | Yes |
-| [`users`](./users/index.md) | A list of multiple users with different credentials. | `object` | - | Yes |
-| [`default_permissions`](./default_permissions/index.md) | The default permissions applied to users, if permissions are not explicitly defined for them. | `object` | - | Yes |
-| [`timeout`](./timeout.md) | Maximum number of seconds to wait for a client to authenticate. | `float` | `1` | Yes |
+| [`username`](./username.md) | User name the connecting server authenticates with (requires `password`). | `string` | - | No |
+| [`password`](./password.md) | Password the connecting server authenticates with (requires `username`). | `string` | - | No |
+| [`users`](./users/index.md) | A list of multiple users with different credentials. | `object` | - | No\* |
+| [`timeout`](./timeout.md) | Maximum number of seconds to wait for a client to authenticate. | `float` | `1` | No |
+| [`account`](./account.md) | Account that leaf nodes authenticating with these credentials are bound to. | `string` | - | No |
+| [`nkey`](./nkey.md) | Public user nkey a connecting leaf node must sign for. | `string` | - | No |
+| [`proxy_required`](./proxy_required.md) | Reject leaf node connections that did not arrive through a PROXY protocol header. | `boolean` | `false` | No |
+
+\* See the property page for reload caveats.

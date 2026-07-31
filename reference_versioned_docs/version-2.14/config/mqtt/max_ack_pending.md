@@ -1,7 +1,7 @@
 # max_ack_pending
 
-<Aliases aliases="`max_pending`, `max_inflight`" />
-<Reloadable /> 
+<Aliases aliases="max_pending, max_inflight" />
+<Reloadable state="reloadable" note="Existing sessions pick up the new value, but each subscription captures its own limit when it is created, so only subscriptions made after the reload are governed by it." />
 This is the amount of QoS 1 messages the server can send to
 a subscription without receiving any `PUBACK` for those messages.
 The valid range is [0..65535].

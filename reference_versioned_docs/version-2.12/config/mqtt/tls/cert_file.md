@@ -1,6 +1,6 @@
 # cert_file
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="New MQTT connections only." />
 TLS certificate file.
 
 

@@ -1,6 +1,6 @@
 # ca_file
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="New connections only." />
 TLS certificate authority file. Defaults to system trust store.
 
 

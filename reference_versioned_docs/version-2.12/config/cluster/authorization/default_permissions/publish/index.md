@@ -1,7 +1,7 @@
 # publish
 
-<Aliases aliases="`pub`" />
-<Reloadable /> 
+<Aliases aliases="pub" />
+<Reloadable state="reloadable" />
 A single subject, list of subjects, or a allow-deny map of
 subjects for publishing. Specifying a single subject or list
 of subjects denotes an *allow* and implcitly denies publishing

@@ -1,6 +1,6 @@
 # https
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Listen specification `<host>:<port>` for TLS server monitoring.
 
 

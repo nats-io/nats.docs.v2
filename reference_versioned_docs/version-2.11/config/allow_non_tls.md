@@ -1,6 +1,6 @@
 # allow_non_tls
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Allow mixed TLS and non-TLS on the same port.
 
 

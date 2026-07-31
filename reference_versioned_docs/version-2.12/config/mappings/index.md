@@ -1,7 +1,7 @@
 # mappings
 
-<Aliases aliases="`maps`" />
-<Reloadable /> 
+<Aliases aliases="maps" />
+<Reloadable state="reloadable" />
 
 ## Types
 

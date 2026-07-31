@@ -3,25 +3,36 @@ types:
   jetstream-limits:
     type: object
     properties:
+      batch:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: jetstream-limits-batch
+        description: |-
+          Ceilings on atomic batch publishing.
+
       max_ack_pending:
+        reloadable: not-reloadable
         type: integer
         description: |-
           Defines the maximum number of in-flight messages allowed to be
           configured on consumers.
 
       max_ha_assets:
+        reloadable: not-reloadable
         type: integer
         description: |-
           The maximum number of JetStream assets that can exist at any given
           time having more than one replica.
 
       max_request_batch:
+        reloadable: not-reloadable
         type: integer
         description: |-
           The maximum request batch size allowed to be configured on pull
           consumers.
 
       duplicate_window:
+        reloadable: not-reloadable
         type: duration
         description: |-
           The maximum duplication window period allowed to be configured on
@@ -29,13 +40,17 @@ types:
 
   jetstream:
     type: object
-    reloadable: false
+    reloadable: not-reloadable
     description: |-
       If the JetStream block is defined, this implicitly enables
       JetStream, unless the `enabled` property is set to `false`.
 
     properties:
       enabled:
+        reloadable: reloadable
+        reloadable_note: |-
+          Also covers the boolean and "enabled"/"disabled" string forms of the
+          top-level jetstream key (opts.go:2644-2654).
         type: boolean
         default: true
         aliases:
@@ -44,6 +59,11 @@ types:
           If true, enables the JetStream subsystem.
 
       store_dir:
+        reloadable: reloadable
+        reloadable_note: |-
+          Only reloadable when JetStream is not currently enabled, or when the
+          new value is empty and JetStream is being disabled in the same
+          reload.
         type: string
         aliases:
           - store
@@ -53,6 +73,16 @@ types:
           Directory to use for file-based storage.
 
       max_memory_store:
+        reloadable: reloadable
+        reloadable_note: |-
+          2.12/2.14: increases only, and only while JetStream stays enabled.
+          2.11: never, while enabled.
+        versions:
+          "2.11":
+            reloadable: not-reloadable
+            reloadable_note: |-
+              2.12/2.14: increases only, and only while JetStream stays
+              enabled. 2.11: never, while enabled.
         type: storage
         aliases:
           - max_mem_store
@@ -62,6 +92,14 @@ types:
           Defaults to 75% of available memory.
 
       max_file_store:
+        reloadable: reloadable
+        reloadable_note: |-
+          2.12/2.14: increases only. 2.11: never, while enabled.
+        versions:
+          "2.11":
+            reloadable: not-reloadable
+            reloadable_note: |-
+              2.12/2.14: increases only. 2.11: never, while enabled.
         type: storage
         aliases:
           - max_file
@@ -70,11 +108,13 @@ types:
           Defaults to up to 1TB if available.
 
       domain:
+        reloadable: not-reloadable
         type: string
         description: |-
           The JetStream domain the server is part of.
 
       encryption_key:
+        reloadable: not-reloadable
         type: string
         aliases:
           - key
@@ -86,6 +126,7 @@ types:
           reduces the byte length to 64.
 
       cipher:
+        reloadable: not-reloadable
         type: string
         choices:
           - chacha
@@ -95,14 +136,96 @@ types:
           Defines the encryption algorithm to use if an encryption key is defined.
 
       extension_hint:
+        reloadable: not-reloadable
         type: string
 
+      prev_encryption_key:
+        reloadable: not-reloadable
+        type: string
+        aliases:
+          - prev_key
+          - prev_ek
+        description: |-
+          Previous encryption key, kept so existing filestore data can be
+          read and re-encrypted after `encryption_key` changes.
+
+      strict:
+        reloadable: not-reloadable
+        type: boolean
+        default: true
+        description: |-
+          Reject API requests containing unknown fields instead of ignoring
+          them.
+
+      max_buffered_msgs:
+        reloadable: not-reloadable
+        type: integer
+        default: 10000
+        description: |-
+          Messages the server buffers for a stream whose storage is
+          temporarily unavailable, before it starts discarding.
+
+      max_buffered_size:
+        reloadable: not-reloadable
+        type: storage
+        default: 128MB
+        description: |-
+          Byte ceiling for that same buffer.
+
+      request_queue_limit:
+        reloadable: not-reloadable
+        type: integer
+        default: 10000
+        description: |-
+          Queued JetStream API requests allowed before new ones are
+          rejected.
+
+      info_queue_limit:
+        version: "2.14"
+        reloadable: not-reloadable
+        type: integer
+        default: 100000
+        description: |-
+          Queued stream-info requests allowed before new ones are rejected.
+
+      meta_compact:
+        version: "2.12"
+        reloadable: reloadable
+        type: integer
+        description: |-
+          Metalayer Raft entries to accumulate before the log is compacted.
+
+      meta_compact_size:
+        version: "2.12"
+        reloadable: reloadable
+        type: storage
+        description: |-
+          Metalayer Raft log size that triggers compaction.
+
+      meta_compact_sync:
+        version: "2.14"
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Compact the metalayer Raft log synchronously rather than in the
+          background.
+
+      tpm:
+        reloadable: not-reloadable
+        type: jetstream-tpm
+        description: |-
+          Seal the filestore encryption key in the machine's TPM, so it
+          cannot be read off disk.
+
       limits:
+        reloadable: not-reloadable
         type: jetstream-limits
         description: |-
           Default cross-account JetStream limits.
 
       unique_tag:
+        reloadable: not-reloadable
         type: string
         description: |-
           Defines a tag prefix as a constraint for placement of assets across
@@ -111,6 +234,7 @@ types:
           different `az:` tags.
 
       max_outstanding_catchup:
+        reloadable: not-reloadable
         type: storage
         default: 32M
         description: |-
@@ -119,6 +243,7 @@ types:
           guard against saturating and degrading performance of the network.
 
       sync_interval:
+        reloadable: not-reloadable
         types:
           - duration
           - sync-interval-choices
@@ -142,3 +267,71 @@ types:
     type: string
     choices:
       - always
+
+  jetstream-tpm:
+    type: object
+    properties:
+      keys_file:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          File the TPM-sealed key is stored in.
+
+      encryption_password:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          Password protecting the sealed key.
+
+      srk_password:
+        reloadable: not-reloadable
+        type: string
+        description: |-
+          Password for the TPM storage root key.
+
+      pcr:
+        reloadable: not-reloadable
+        type: integer
+        description: |-
+          Platform Configuration Register the key is sealed against, so it
+          only unseals on an unchanged boot state.
+
+      cipher:
+        reloadable: not-reloadable
+        type: string
+        choices:
+          - aes
+          - chacha
+        description: |-
+          Cipher used for the filestore once the key is unsealed.
+
+  jetstream-limits-batch:
+    type: object
+    properties:
+      max_msgs:
+        reloadable: not-reloadable
+        type: integer
+        default: 1000
+        description: |-
+          Messages allowed in a single batch.
+
+      max_inflight_total:
+        reloadable: not-reloadable
+        type: integer
+        default: 1000
+        description: |-
+          Batches allowed in flight across the server.
+
+      max_inflight_per_stream:
+        reloadable: not-reloadable
+        type: integer
+        default: 50
+        description: |-
+          Batches allowed in flight for one stream.
+
+      timeout:
+        reloadable: not-reloadable
+        type: duration
+        default: 10s
+        description: |-
+          How long an incomplete batch is held before it is discarded.

@@ -1,6 +1,6 @@
 # connection_rate_limit
 
-<Reloadable /> 
+<Reloadable state="noop" note="Parsed and accepted, then discarded — a permanent no-op, not just a reload no-op." />
 
 ## Types
 
