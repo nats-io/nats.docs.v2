@@ -1,6 +1,6 @@
 # nkey
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 Public NKey identifying the user. The value begins with a `U`
 character. Exclusive with `username` and `password`.
 

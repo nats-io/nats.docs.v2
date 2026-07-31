@@ -93,6 +93,10 @@ import type {
   BatchGetAnimated as BatchGetAnimatedComponent,
   SubjectTransformAnimated as SubjectTransformAnimatedComponent,
   MessageTtlAnimated as MessageTtlAnimatedComponent,
+  AccountIsolationAnimated as AccountIsolationAnimatedComponent,
+  CrossAccountExportAnimated as CrossAccountExportAnimatedComponent,
+  ResolverPushAnimated as ResolverPushAnimatedComponent,
+  TlsFirstHandshakeAnimated as TlsFirstHandshakeAnimatedComponent,
 } from '../components/NatsFlow';
 import type React from 'react';
 import type ReactDOM from 'react-dom/client';
@@ -181,6 +185,10 @@ declare global {
       BatchGetAnimated: typeof BatchGetAnimatedComponent;
       SubjectTransformAnimated: typeof SubjectTransformAnimatedComponent;
       MessageTtlAnimated: typeof MessageTtlAnimatedComponent;
+      AccountIsolationAnimated: typeof AccountIsolationAnimatedComponent;
+      CrossAccountExportAnimated: typeof CrossAccountExportAnimatedComponent;
+      ResolverPushAnimated: typeof ResolverPushAnimatedComponent;
+      TlsFirstHandshakeAnimated: typeof TlsFirstHandshakeAnimatedComponent;
       scenarios: {
         publishSubscribe: typeof publishSubscribeScenario;
         requestReply: typeof requestReplyScenario;

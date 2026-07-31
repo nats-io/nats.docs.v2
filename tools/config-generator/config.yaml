@@ -124,12 +124,17 @@ sections:
   - name: Connectivity
     properties:
       host:
+        reloadable: not-reloadable
         type: host
         default: 0.0.0.0
         description: |-
           Host for client connections.
 
       port:
+        reloadable_note: |-
+          Leaving `port: -1` across reloads is fine — the running port is
+          restored. Any other change fails.
+        reloadable: not-reloadable
         type: integer
         description: |-
           Port for client connections. Use `-1` for a
@@ -137,27 +142,82 @@ sections:
         default: 4222
 
       listen:
+        reloadable: not-reloadable
         type: listen
         description: |-
           `<host>:<port>` for a client connections.
 
       client_advertise:
+        reloadable: reloadable
         type: string
         description: |-
           Advertised client `<host>:<port>`. Useful for cluster setups
           behind a NAT.
 
       tls:
+        properties:
+          ca_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              New connections only.
+          cert_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              Applies to new connections only; existing TLS sessions keep
+              the old certificate.
+          connection_rate_limit:
+            reloadable: not-reloadable
+          insecure:
+            reloadable: reloadable
+            # Scoped here rather than on the `tls` type: `insecure` is
+            # meaningful for the outbound connections `resolver_tls` secures,
+            # which shares the type's declaration of this key.
+            reloadable_note: |-
+              Reloads, but has no effect in this block: it secures inbound
+              client connections, and `insecure` only governs certificate
+              verification on outbound ones.
+          key_file:
+            reloadable: reloadable
+            reloadable_note: |-
+              New connections only.
+          pinned_certs:
+            reloadable: reloadable
+            reloadable_note: |-
+              Reload also disconnects already-connected clients whose
+              certificate is no longer pinned.
+          timeout:
+            reloadable: reloadable
+          verify_cert_and_check_known_urls:
+            reloadable: not-reloadable
+            reloadable_note: |-
+              Only `false` parses in this context, and `false` has no
+              stored effect.
+        reloadable: reloadable
+        reloadable_note: |-
+          New TLS material is used by connections established after the reload;
+          existing client connections keep the session they negotiated.
+          `pinned_certs` is applied to existing connections immediately.
         type: tls
         description: |-
           TLS configuration for client and HTTP monitoring.
 
+      proxy_protocol:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: boolean
+        default: false
+        description: |-
+          Accept the PROXY protocol header on client connections, so the
+          server sees the original client address behind a load balancer.
+
       allow_non_tls:
+        reloadable: not-reloadable
         type: boolean
         description: |-
           Allow mixed TLS and non-TLS on the same port.
 
       ocsp:
+        reloadable: reloadable
         types:
           - boolean
           - ocsp
@@ -167,12 +227,31 @@ sections:
           `status_request` `Must-Staple` flag. If explicitly disabled, the
           server will not request staples even if `Must-Staple` is present.
 
+      ocsp_cache:
+        reloadable: reloadable
+        types:
+          - boolean
+          - ocsp-cache
+        description: |-
+          Cache OCSP responses the server staples, so it does not query the
+          responder on every handshake.
+
       mqtt:
+        reloadable: reloadable
+        reloadable_note: |-
+          Only `ack_wait`, `max_ack_pending`, the consumer settings and the TLS
+          certificate material reload. Changing the MQTT `host`, `port`,
+          `authorization`, `no_auth_user` or `js_domain` fails the reload.
         type: mqtt
         description: |-
           Configuration for enabling the MQTT interface.
 
       websocket:
+        reloadable: reloadable
+        reloadable_note: |-
+          Only the TLS certificate material reloads, and only for connections
+          accepted afterwards. Every other `websocket` setting fails the
+          reload, including `verify_and_map` and `pinned_certs`.
         type: websocket
         description: |-
           Configuration for enabling the WebSocket interface.
@@ -182,16 +261,23 @@ sections:
   - name: Centralized Auth
     properties:
       authorization:
+        reloadable: reloadable
         type: authorization
         description: |-
           Static single or multi-user declaration.
 
       accounts:
+        reloadable: reloadable
         type: map(account)
         description: |-
           Static config-defined accounts.
 
       no_auth_user:
+        reloadable: reloadable
+        reloadable_note: |-
+          Removing `no_auth_user` reloads, provided no user in the new
+          configuration still has that username. Setting or changing it fails the
+          reload.
         type: string
         description: |-
           Name of the user that non-authenticated clients
@@ -201,6 +287,7 @@ sections:
   - name: Decentralized Auth
     properties:
       operator:
+        reloadable: not-reloadable
         types:
           - string
           - array(string)
@@ -214,19 +301,22 @@ sections:
           One or more operator JWTs, either in files or inlined.
 
       trusted_keys:
+        reloadable: not-reloadable
         type: array(string)
         description: |-
           One or more operator public keys to trust.
 
       resolver:
+        reloadable: reloadable
+        reloadable_note: |-
+          Resolver settings are rebuilt and swapped in on reload, but moving to or
+          from an account resolver — enabling or disabling it — fails the reload.
         types:
           - string
           - resolver
         aliases:
           - account_resolver
           - account_resolvers
-        reloadable_note: |-
-          Note, enabling or disabling a resolver requires full server restart.
         description: |-
           Takes precedence over the value obtained from
           the `operator` if defined.
@@ -239,20 +329,57 @@ sections:
           NATS-based resolver should be used.
 
       resolver_tls:
+        properties:
+          cert_file:
+            reloadable: reloadable
+          connection_rate_limit:
+            reloadable: noop
+            reloadable_note: |-
+              Parsed then discarded; no effect on reload or restart.
+          pinned_certs:
+            reloadable: noop
+            reloadable_note: |-
+              Parsed then discarded; no effect on reload or restart.
+          timeout:
+            reloadable: noop
+            reloadable_note: |-
+              The value is accepted by the parser and then discarded; a
+              reload changes nothing and neither does a restart.
+          verify:
+            reloadable: noop
+            reloadable_note: |-
+              Reload succeeds and the value is stored, but ClientAuth is
+              ignored on an outbound client connection, so nothing
+              changes.
+          verify_and_map:
+            reloadable: noop
+            reloadable_note: |-
+              Parsed then discarded; no effect on reload or restart.
+          verify_cert_and_check_known_urls:
+            reloadable: noop
+            reloadable_note: |-
+              Parsed then discarded; no effect on reload or restart.
+        reloadable: reloadable
         type: tls
         description: |-
 
       resolver_preload:
+        reloadable: reloadable
+        reloadable_note: |-
+          Added and updated entries take effect. Removing an entry has no effect
+          until restart unless the resolver is `MEM`.
         type: map(string)
         description: |-
           Map of account public key to the account JWT.
 
       resolver_pinned_accounts:
+        reloadable: reloadable
         types:
           - string
           - array(string)
 
       system_account:
+        reloadable: not-reloadable
         type: string
         default: "$SYS"
         description: |-
@@ -262,6 +389,7 @@ sections:
           - system
 
       no_system_account:
+        reloadable: not-reloadable
         type: boolean
         description: |-
         aliases:
@@ -271,13 +399,25 @@ sections:
   - name: Clustering
     properties:
       cluster:
+        reloadable: reloadable
+        reloadable_note: |-
+          Most cluster settings reload, including routes, name, advertise and
+          pool_size. Changing the cluster `host`, `port` or `listen` fails the
+          reload.
         type: cluster
         description: |-
           Configuration for clustering a set of servers.
 
       gateway:
+        reloadable: reloadable
+        reloadable_note: |-
+          Only TLS certificate material reloads, for this gateway and its
+          remotes, and only for connections established afterwards. Every other
+          gateway setting fails the reload — `host`, `port`, `name`,
+          `authorization`, the remote list, and the TLS `timeout`,
+          `verify_and_map`, `verify_cert_and_check_known_urls` and
+          `pinned_certs`.
         type: gateways
-        reloadable: false
         description: |-
           Configuration for setting up gateway connections
           between clusters.
@@ -285,8 +425,20 @@ sections:
   - name: Leafnodes
     properties:
       leafnodes:
+        reloadable: reloadable
+        reloadable_note: |-
+          Remotes can be added, removed and re-solicited on reload. Changing the
+          leafnode `host`, `port`, `advertise` or `authorization` fails the
+          reload.
+        versions:
+          # Before 2.14 `s.leafRemoteCfgs` was a slice compared positionally, so
+          # any edit to a remote aborted the reload. 2.14 keys it by remote
+          # identity, which is what makes add/remove/re-solicit work.
+          "2.11, 2.12":
+            reloadable_note: |-
+              Changing a remote fails the reload, as do changes to the leafnode
+              `host`, `port`, `advertise` or `authorization`.
         type: leafnode
-        reloadable: false
         description: |-
           Configuration for setting up leaf node connections.
         aliases:
@@ -295,7 +447,11 @@ sections:
   - name: JetStream
     properties:
       jetstream:
-        reloadable: false
+        reloadable: reloadable
+        reloadable_note: |-
+          Enabling or disabling JetStream reloads. Changing `store_dir`, `domain`,
+          `unique_tag` or the encryption settings while JetStream is enabled fails
+          the reload.
         types:
           - boolean
           - enable-disable
@@ -303,6 +459,10 @@ sections:
         default: false
 
       store_dir:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied only while JetStream is not yet enabled. Changing the store
+          directory on a server already running JetStream fails the reload.
         type: string
         deprecated: |-
           Define `store_dir` under the top-level `jetstream` block.
@@ -314,6 +474,7 @@ sections:
   - name: Subject Mapping
     properties:
       mappings:
+        reloadable: reloadable
         type: mappings
         aliases:
           - maps
@@ -321,19 +482,40 @@ sections:
   - name: Logging
     properties:
       debug:
+        reloadable_note: |-
+          Ignored if `-D`, `-DV` or `-DVV` was passed at startup —
+          command-line boolean flags are re-applied over the config on every
+          reload.
+        reloadable: reloadable
         type: boolean
         default: false
         description: |-
           If true, enables debug log messages.
 
       trace:
+        reloadable_note: |-
+          Ignored if `-V`, `-VV`, `-DV` or `-DVV` was passed at startup —
+          command-line boolean flags are re-applied over the config on every
+          reload.
+        reloadable: reloadable
         type: boolean
         default: false
         description: |-
           If true, enables protocol trace log messages,
           excluding the system account.
 
+      trace_headers:
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Trace message headers. Also enables `trace`.
+
       trace_verbose:
+        reloadable_note: |-
+          Also enables `trace`. Ignored if `-VV` or `-DVV` was passed at
+          startup.
+        reloadable: reloadable
         type: boolean
         default: false
         description: |-
@@ -341,25 +523,44 @@ sections:
           including the system account.
 
       logtime:
+        reloadable_note: |-
+          Ignored if `-T` or `-logtime` was passed at startup — command-line
+          boolean flags are re-applied over the config on every reload.
+        reloadable: reloadable
         type: string
         default: true
         description: |-
           If false, log without timestamps.
 
       logtime_utc:
+        reloadable: reloadable
         type: string
         default: false
         description: |-
           If true, log timestamps with be in UTC rather than the local timezone.
 
       logfile:
+        reloadable_note: |-
+          Ignored if `-l` or `--log` was passed at startup — the flag value is
+          re-applied over the config on every reload.
+        reloadable: reloadable
         type: string
         description: |-
           Log file name.
         aliases:
           - log_file
 
+      logfile_max_num:
+        reloadable: not-reloadable
+        type: integer
+        aliases:
+          - log_max_num
+        description: |-
+          Maximum number of rotated log files to keep. Older ones are
+          deleted.
+
       logfile_size_limit:
+        reloadable: not-reloadable
         type: integer
         default: 0
         description: |-
@@ -368,12 +569,20 @@ sections:
           - log_size_limit
 
       syslog:
+        reloadable_note: |-
+          Ignored if `-s` or `-syslog` was passed at startup — command-line
+          boolean flags are re-applied over the config on every reload.
+        reloadable: reloadable
         type: boolean
         default: false
         description: |-
           Log to syslog.
 
       remote_syslog:
+        reloadable_note: |-
+          Takes effect only when `logfile` is unset; a file logger takes
+          precedence over remote syslog.
+        reloadable: reloadable
         type: string
         description: |-
           Remote syslog address.
@@ -381,6 +590,7 @@ sections:
   - name: Monitoring and Tracing
     properties:
       server_name:
+        reloadable: not-reloadable
         type: string
         description: |-
           The servers name, shows up in logging. Defaults to the generated
@@ -390,6 +600,10 @@ sections:
           - value: gcp-us-west1-3
 
       server_tags:
+        reloadable_note: |-
+          The reload handler only logs; the new tags reach `/varz` and the
+          next statsz update because the options are swapped.
+        reloadable: reloadable
         types:
           - string
           - array(string)
@@ -401,16 +615,19 @@ sections:
           - value: "[region:us-west, az:1b]"
 
       http:
+        reloadable: not-reloadable
         type: listen
         description: |-
           Listen specification `<host>:<port>` for server monitoring.
 
       https:
+        reloadable: not-reloadable
         type: listen
         description: |-
           Listen specification `<host>:<port>` for TLS server monitoring.
 
       http_port:
+        reloadable: not-reloadable
         type: integer
         aliases:
           - monitor_port
@@ -418,16 +635,26 @@ sections:
           HTTP port for server monitoring.
 
       https_port:
+        reloadable: not-reloadable
         type: integer
         description: |-
           HTTPS port for server monitoring.
 
       http_base_path:
+        reloadable_note: |-
+          If `--http_base_path` was passed at startup the flag value is
+          re-applied over the config on every reload, so the edit is discarded
+          rather than rejected.
+        reloadable: not-reloadable
         type: string
         description: |-
           Base path for monitoring endpoints.
 
       connect_error_reports:
+        reloadable_note: |-
+          The reload handler only logs, but the new value is read on every
+          connection attempt, so it takes effect immediately.
+        reloadable: reloadable
         type: integer
         default: 3600
         description: |-
@@ -436,6 +663,7 @@ sections:
           once every second.
 
       reconnect_error_reports:
+        reloadable: reloadable
         type: integer
         default: 1
         description: |-
@@ -443,6 +671,7 @@ sections:
           leaf node connection. Default is to report every attempt.
 
       max_traced_msg_len:
+        reloadable: reloadable
         type: integer
         description: |-
           Set a limit to the trace of the payload of a message.
@@ -451,12 +680,17 @@ sections:
   - name: Runtime Configuration
     properties:
       max_control_line:
+        reloadable_note: |-
+          Applied to client connections only. Route, gateway and leafnode
+          connections keep the value they were created with.
+        reloadable: reloadable
         type: string
         default: 4KB
         description: |-
           Maximum length of a protocol line (including combined length of subject and queue group). Increasing this value may require client changes to be used. Applies to all traffic.
 
       max_connections:
+        reloadable: reloadable
         type: string
         default: 64K
         aliases:
@@ -465,18 +699,24 @@ sections:
           Maximum number of active client connections.
 
       max_payload:
+        reloadable: reloadable
         type: string
         default: 1MB
         description: |-
           Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value.
 
       max_pending:
+        reloadable: not-reloadable
         type: string
         default: 64MB
         description: |-
           Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set `PendingLimits` (number of messages and total size) for their subscriptions.
 
       max_subscriptions:
+        reloadable_note: |-
+          This is the per-client limit. The per-account `max_subscriptions`
+          under `accounts` is a different key and does reload.
+        reloadable: not-reloadable
         type: string
         default: 0
         aliases:
@@ -485,11 +725,13 @@ sections:
           Maximum numbers of subscriptions per client and leafnode accounts connection. A value of `0` means unlimited.
 
       max_subscription_tokens:
+        reloadable: not-reloadable
         type: integer
         aliases:
           - max_sub_tokens
 
       ping_interval:
+        reloadable: reloadable
         type: string
         default: 2m
         description: |-
@@ -499,13 +741,72 @@ sections:
           to keep this value bigger than what clients use.
 
       ping_max:
+        reloadable: reloadable
         type: integer
         default: 2
         description: |-
           After how many unanswered pings the server will allow before closing
           the connection.
 
+      write_timeout:
+        version: "2.12"
+        reloadable: not-reloadable
+        type: string
+        choices:
+          - default
+          - close
+          - retry
+        default: default
+        description: |-
+          What the server does when a connection misses its
+          `write_deadline`: `close` drops it, `retry` keeps trying,
+          `default` uses the built-in behaviour.
+
+      max_closed_clients:
+        reloadable: not-reloadable
+        type: integer
+        default: 10000
+        description: |-
+          How many closed connections the server keeps for `/connz`
+          reporting.
+
+      no_fast_producer_stall:
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Do not stall a fast producer when a consumer cannot keep up. The
+          server drops messages to the slow consumer instead.
+
+      server_metadata:
+        version: "2.12"
+        reloadable: reloadable
+        type: map(string)
+        description: |-
+          Arbitrary key/value pairs reported with this server in monitoring
+          endpoints.
+
+      feature_flags:
+        version: "2.14"
+        reloadable: not-reloadable
+        type: map(boolean)
+        description: |-
+          Toggles for features that are not yet on by default. Names are
+          server-internal and change between releases.
+
+      default_sentinel:
+        reloadable: reloadable
+        type: string
+        description: |-
+          User name applied to connections that authenticate with a sentinel
+          JWT, which carries no permissions of its own.
+
       write_deadline:
+        reloadable: reloadable
+        reloadable_note: |-
+          The reload is accepted and logged, but existing connections keep the
+          deadline they were created with. Only connections established after the
+          reload use the new value.
         type: duration
         default: 10s
         description: |-
@@ -514,11 +815,13 @@ sections:
           consumer on how to deal with this on the client.
 
       no_header_support:
+        reloadable: not-reloadable
         type: boolean
         description: |-
           Disables support for message headers.
 
       disable_sublist_cache:
+        reloadable: not-reloadable
         type: boolean
         default: false
         description: |-
@@ -529,12 +832,14 @@ sections:
           - no_sublist_cache
 
       lame_duck_duration:
+        reloadable: not-reloadable
         type: duration
         default: 2m
         description: |-
           Must be at least 30s.
 
       lame_duck_grace_period:
+        reloadable: not-reloadable
         type: duration
         default: 10s
         description: |-
@@ -542,17 +847,28 @@ sections:
           lame duck mode, before starting to close client connections
 
       pidfile:
+        reloadable: reloadable
         type: string
         aliases:
           - pid_file
 
       ports_file_dir:
+        reloadable: reloadable
         type: string
 
+      prof_block_rate:
+        reloadable: reloadable
+        type: integer
+        description: |-
+          Go block-profile sampling rate. Set only while profiling; it slows
+          the server down.
+
       prof_port:
+        reloadable: not-reloadable
         type: integer
 
       default_js_domain:
+        reloadable: not-reloadable
         type: map(string)
         description: |-
           Account to domain name mapping.

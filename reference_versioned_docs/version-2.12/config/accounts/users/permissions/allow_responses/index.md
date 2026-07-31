@@ -1,6 +1,6 @@
 # allow_responses
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 
 ## Types
 

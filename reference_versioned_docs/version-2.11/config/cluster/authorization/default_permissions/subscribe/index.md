@@ -1,7 +1,7 @@
 # subscribe
 
-<Aliases aliases="`sub`" />
-<Reloadable /> 
+<Aliases aliases="sub" />
+<Reloadable state="reloadable" />
 A single subject, list of subjects, or a allow-deny map of
 subjects for subscribing. Note, that the subject permission can
 have an optional second value declaring a queue name.

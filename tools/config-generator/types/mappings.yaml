@@ -94,6 +94,7 @@ types:
     type: object
     properties:
       destination:
+        reloadable: reloadable
         aliases:
           - dest
         type: string
@@ -101,6 +102,7 @@ types:
           The subject mapping destination for the source subject.
 
       weight:
+        reloadable: reloadable
         types:
           - string
           - integer
@@ -111,6 +113,7 @@ types:
           unless artifical message loss is desired for testing.
 
       cluster:
+        reloadable: reloadable
         type: string
         description: |-
           If specified, the destination is cluster-scoped. Messages received

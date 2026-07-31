@@ -10,21 +10,65 @@ types:
 
     properties:
       users:
+        properties:
+          allowed_connection_types:
+            reloadable: reloadable
+          nkey:
+            reloadable: reloadable
+          permissions:
+            properties:
+              allow_responses:
+                reloadable: reloadable
+                properties:
+                  expires:
+                    reloadable: reloadable
+                  max:
+                    reloadable: reloadable
+              publish:
+                reloadable: reloadable
+                properties:
+                  allow:
+                    reloadable: reloadable
+                  deny:
+                    reloadable: reloadable
+              subscribe:
+                reloadable: reloadable
+                properties:
+                  allow:
+                    reloadable: reloadable
+                  deny:
+                    reloadable: reloadable
+        reloadable: reloadable
         type: array(user)
         description: |-
           A list of users under this account.
 
       exports:
+        reloadable: reloadable
+        reloadable_note: |-
+          The whole export set is discarded and rebuilt from the config file
+          on every reload; changes apply to connections that are already up.
         type: array(account-export)
         description: |-
           A list of exports for this account.
 
       imports:
+        reloadable: reloadable
+        reloadable_note: |-
+          Fully re-resolved, but every reload tears down and re-creates ALL of
+          the account's service-import subscriptions, so there is a short
+          window where imported service subjects have no subscriber and
+          requests arriving in it are dropped.
         type: array(account-import)
         description: |-
           A list of imports for this account.
 
       nkey:
+        reloadable: reloadable
+        reloadable_note: |-
+          Copied onto the live account by shallowCopy, but in config
+          (non-operator) mode nothing reads Account.Nkey, so changing it has
+          no observable effect at reload or at startup.
         type: string
         description: |-
           Public NKey that identifies this account (an `A`-prefixed public
@@ -32,29 +76,148 @@ types:
           valid public account NKey.
 
       jetstream:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all.
         types:
           - boolean
           - enable-disable
           - account-jetstream-limits
 
       default_permissions:
+        properties:
+          allow_responses:
+            reloadable: reloadable
+            reloadable_note: |-
+              Folded into each user's permissions at parse time (only
+              users with no explicit `permissions`). Re-applied live, but
+              setPermissions resets the client's reply-tracking map on
+              EVERY reload, so a service still owing a response for a
+              request received before the reload loses permission to
+              publish it.
+            properties:
+              expires:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Folded into each user's permissions at parse time
+                  (only users with no explicit `permissions`).
+                  Re-applied live, but setPermissions resets the
+                  client's reply-tracking map on EVERY reload, so a
+                  service still owing a response for a request
+                  received before the reload loses permission to
+                  publish it.
+              max:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Folded into each user's permissions at parse time
+                  (only users with no explicit `permissions`).
+                  Re-applied live, but setPermissions resets the
+                  client's reply-tracking map on EVERY reload, so a
+                  service still owing a response for a request
+                  received before the reload loses permission to
+                  publish it.
+          publish:
+            reloadable: reloadable
+            reloadable_note: |-
+              Folded into each user's permissions while the config is
+              parsed, so it only affects users with no explicit
+              `permissions`; from there it follows the users path and is
+              re-applied to live client connections. Not re-applied to
+              existing leafnode connections.
+            properties:
+              allow:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Folded into each user's permissions while the config
+                  is parsed, so it only affects users with no explicit
+                  `permissions`; from there it follows the users path
+                  and is re-applied to live client connections. Not
+                  re-applied to existing leafnode connections.
+              deny:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Folded into each user's permissions while the config
+                  is parsed, so it only affects users with no explicit
+                  `permissions`; from there it follows the users path
+                  and is re-applied to live client connections. Not
+                  re-applied to existing leafnode connections.
+          subscribe:
+            reloadable: reloadable
+            reloadable_note: |-
+              Folded into each user's permissions while the config is
+              parsed, so it only affects users with no explicit
+              `permissions`; from there it follows the users path and is
+              re-applied to live client connections. Not re-applied to
+              existing leafnode connections.
+            properties:
+              allow:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Folded into each user's permissions while the config
+                  is parsed, so it only affects users with no explicit
+                  `permissions`; from there it follows the users path
+                  and is re-applied to live client connections. Not
+                  re-applied to existing leafnode connections.
+              deny:
+                reloadable: reloadable
+                reloadable_note: |-
+                  Folded into each user's permissions while the config
+                  is parsed, so it only affects users with no explicit
+                  `permissions`; from there it follows the users path
+                  and is re-applied to live client connections. Not
+                  re-applied to existing leafnode connections.
+        reloadable: reloadable
+        reloadable_note: |-
+          Folded into each user's permissions while the config is parsed, so
+          it only affects users with no explicit `permissions`; from there it
+          follows the users path and is re-applied to live client connections.
+          Not re-applied to existing leafnode connections.
         type: permissions
         description: |-
           The default permissions applied to users within this account,
           if permissions are not explicitly defined for them.
 
+      msg_trace:
+        reloadable: reloadable
+        type: account-msg-trace
+        description: |-
+          Where this account's message traces are delivered, and how often
+          they are sampled.
+
       mappings:
+        reloadable: reloadable
+        reloadable_note: |-
+          Replaced wholesale on the live account; adding, changing and
+          removing mappings all take effect for existing connections. For the
+          global account, leafnode subject-interest maps are fixed up in the
+          same reload.
         type: mappings
         aliases:
           - maps
 
       limits:
+        reloadable: reloadable
+        reloadable_note: |-
+          max_connections, max_subscriptions and max_payload are re-applied to
+          already-connected clients. max_leafnodes is the exception - see that
+          page.
         type: account-limits
 
   account-limits:
     type: object
     properties:
       max_connections:
+        reloadable: reloadable
+        reloadable_note: |-
+          Enforced against already-connected clients: re-registration during
+          the reload fails once the account is at the new limit and those
+          connections are closed with MaxAccountConnectionsExceeded. Which
+          connections get dropped follows map iteration order.
         type: integer
         aliases:
           - max_conns
@@ -62,6 +225,12 @@ types:
           The maximum number of concurrent connections for this account.
 
       max_subscriptions:
+        reloadable: reloadable
+        reloadable_note: |-
+          Re-applied to already-connected clients, and a client already
+          holding more subscriptions than the new limit is disconnected with
+          MaxSubscriptionsExceeded. Effective value is min(account limit,
+          server max_subscriptions).
         type: integer
         aliases:
           - max_subs
@@ -69,6 +238,12 @@ types:
           The maximum number of concurrent subscriptions for this account.
 
       max_payload:
+        reloadable: reloadable
+        reloadable_note: |-
+          Re-applied to already-connected clients. The per-client value is
+          reset to unlimited first, so raising the limit works as well as
+          lowering it; the effective value is min(account limit, server
+          max_payload).
         type: integer
         aliases:
           - max_pay
@@ -76,6 +251,12 @@ types:
           The maximum payload size allowed for messages.
 
       max_leafnodes:
+        reloadable: reloadable
+        reloadable_note: |-
+          Only checked when a leafnode registers with the account.
+          reloadAuthorization walks s.clients, and leafnode connections live
+          in s.leafs, so existing leafnodes are never re-checked - the new
+          limit only applies to leafnodes that connect after the reload.
         type: integer
         aliases:
           - max_leafs
@@ -86,6 +267,15 @@ types:
     type: object
     properties:
       max_memory:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. This is the
+          value whose reduction triggers that rejection.
         type: integer
         aliases:
           - max_mem
@@ -95,6 +285,15 @@ types:
           The maximum storage allowed across all memory-based assets.
 
       max_file:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. This is the
+          value whose reduction triggers that rejection.
         type: integer
         aliases:
           - max_store
@@ -105,6 +304,16 @@ types:
           The maximum storage allowed across all file-based assets.
 
       max_streams:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. Enforced when
+          assets are created or updated; existing streams/consumers above the
+          new value are left running.
         type: integer
         aliases:
           - streams
@@ -112,6 +321,16 @@ types:
           The maximum number of streams allowed.
 
       max_consumers:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. Enforced when
+          assets are created or updated; existing streams/consumers above the
+          new value are left running.
         type: integer
         aliases:
           - consumers
@@ -119,6 +338,16 @@ types:
           The maximum number of consumers allowed.
 
       max_bytes_required:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. Enforced when
+          assets are created or updated; existing streams/consumers above the
+          new value are left running.
         type: boolean
         aliases:
           - max_stream_bytes
@@ -128,6 +357,16 @@ types:
           for both file and memory-based streams.
 
       memory_max_stream_bytes:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. Enforced when
+          assets are created or updated; existing streams/consumers above the
+          new value are left running.
         type: integer
         aliases:
           - mem_max_stream_bytes
@@ -135,6 +374,16 @@ types:
           Maximum bytes any given memory-based stream is allowed to be allocated.
 
       disk_max_stream_bytes:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. Enforced when
+          assets are created or updated; existing streams/consumers above the
+          new value are left running.
         type: integer
         aliases:
           - store_max_stream_bytes
@@ -142,6 +391,16 @@ types:
           Maximum bytes any given file-based stream is allowed to be allocated.
 
       max_ack_pending:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applied by replacing the account's whole limits map, so it is
+          all-or-nothing: on a standalone server the update is rejected if it
+          would put max_memory/max_file below already-reserved stream bytes,
+          and the reload still reports success (the error is only logged).
+          Worse, the account walk returns on the first such error, so accounts
+          later in iteration order get no limit update at all. Enforced when
+          assets are created or updated; existing streams/consumers above the
+          new value are left running.
         type: integer
         description: |-
           The maximum ack pending count allowed to be set on any given consumer.
@@ -150,6 +409,7 @@ types:
     type: object
     properties:
       stream:
+        reloadable: reloadable
         type: string
         description: |-
           A subject or subject with wildcards that the account will publish to.
@@ -158,6 +418,7 @@ types:
           - value: "foo.>"
 
       service:
+        reloadable: reloadable
         type: string
         description: |-
           A subject or subject with wildcards that the account will subscribe to.
@@ -166,6 +427,7 @@ types:
           - value: "bar.>"
 
       accounts:
+        reloadable: reloadable
         type: array(string)
         description: |-
           A list of account names that can import the stream or service.
@@ -175,6 +437,7 @@ types:
           - value: "[B, C]"
 
       response_type:
+        reloadable: reloadable
         type: string
         default: single
         description: |-
@@ -185,24 +448,28 @@ types:
     type: object
     properties:
       stream:
+        reloadable: reloadable
         type: source-config
         description: |-
           Stream import source configuration.
           Exclusive of `service`.
 
       service:
+        reloadable: reloadable
         type: source-config
         description: |-
           Stream import source configuration.
           Exclusive of `stream`.
 
       prefix:
+        reloadable: reloadable
         type: string
         description: |-
           A local subject prefix mapping for the imported stream.
           Applicable to `stream`.
 
       to:
+        reloadable: reloadable
         type: string
         description: |-
           A local subject mapping for the imported service.
@@ -212,11 +479,13 @@ types:
     type: object
     properties:
       account:
+        reloadable: reloadable
         type: string
         description: |-
           Account name owning the export.
 
       subject:
+        reloadable: reloadable
         type: string
         description: |-
           The subject under which the stream or service is made
@@ -226,6 +495,7 @@ types:
     type: object
     properties:
       username:
+        reloadable: reloadable
         type: string
         description: |-
           Name of the user.
@@ -233,6 +503,7 @@ types:
           - user
 
       password:
+        reloadable: reloadable
         type: string
         description: |-
           Password of the user. This can be a free-text value
@@ -242,6 +513,7 @@ types:
           - pass
 
       nkey:
+        reloadable: reloadable
         type: string
         description: |-
           Public NKey identifying the user. The value begins with a `U`
@@ -250,9 +522,11 @@ types:
           - value: UDXU4RCSJNZOIQHZNWXHXORDPRTGNJAHAHFRGZNEEJCPQTT2M7NLCNF4
 
       permissions:
+        reloadable: reloadable
         type: permissions
 
       allowed_connection_types:
+        reloadable: reloadable
         type: array(string)
         choices:
           - STANDARD
@@ -271,3 +545,19 @@ types:
             `remote` on a server.
           - `MQTT` indicates a connection established by an MQTT client to NATS
             if the `mqtt` configuration is enabled.
+
+  account-msg-trace:
+    type: object
+    properties:
+      dest:
+        reloadable: reloadable
+        type: string
+        description: |-
+          Subject the trace events are published to.
+
+      sampling:
+        reloadable: reloadable
+        type: integer
+        default: 100
+        description: |-
+          Percentage of traced messages to report, 1 to 100.

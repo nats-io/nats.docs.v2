@@ -1,6 +1,6 @@
 # ping_max
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 After how many unanswered pings the server will allow before closing
 the connection.
 

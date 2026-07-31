@@ -1,6 +1,6 @@
 # max_request_batch
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 The maximum request batch size allowed to be configured on pull
 consumers.
 

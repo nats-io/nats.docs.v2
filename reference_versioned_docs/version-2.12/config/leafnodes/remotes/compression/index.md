@@ -1,6 +1,6 @@
 # compression
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="Connections that need renegotiation (off->on, ->accept) are closed and reconnect." />
 Defines the compression mode to use for a outgoing leafnode connection.
 
 If set to `on`, it will use the `s2_auto`.
@@ -16,5 +16,5 @@ If set to `on`, it will use the `s2_auto`.
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`mode`](./mode.md) |  | `string` | - | Yes |
+| [`mode`](./mode.md) |  | `string` | `accept` | Yes |
 | [`rtt_thresholds`](./rtt_thresholds.md) | Applies only when the `s2_auto` mode is used and defines the round-trip time (RTT) thresholds for compression level changes.  By default, no compression is used unless the RTT hits the first threshold (e.g. 10ms), then `s2_fast`. The next threshold would switch to `s2_better`, and then finally `s2_best` is the last threshold is reached.  Note, the compression level is dynamic so if the RTT decreases, the compression level will decrease accordingly. | `duration` | `[10ms 50ms 100ms]` | Yes |

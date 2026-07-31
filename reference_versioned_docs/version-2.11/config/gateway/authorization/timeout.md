@@ -1,6 +1,6 @@
 # timeout
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Maximum number of seconds to wait for a client to authenticate.
 
 

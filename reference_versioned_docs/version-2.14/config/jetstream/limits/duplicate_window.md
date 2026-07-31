@@ -1,6 +1,6 @@
 # duplicate_window
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 The maximum duplication window period allowed to be configured on
 a stream.
 

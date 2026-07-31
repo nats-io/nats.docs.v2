@@ -1,6 +1,6 @@
 # name
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 Name of the cluster.
 
 

@@ -1,6 +1,6 @@
 # imports
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="Fully re-resolved, but every reload tears down and re-creates ALL of the account's service-import subscriptions, so there is a short window where imported service subjects have no subscriber and requests arriving in it are dropped." />
 A list of imports for this account.
 
 

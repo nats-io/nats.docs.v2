@@ -7,7 +7,7 @@ types:
     default: 0.0.0.0
     aliases:
       - net
-    reloadable: false
+    reloadable: not-reloadable
     examples:
       - label: Hostname
         value: "localhost"

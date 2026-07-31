@@ -1,6 +1,6 @@
 # port
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 By default, a WebSocket-enabled server requires TLS and binds to port 443.
 
 

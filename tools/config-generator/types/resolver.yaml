@@ -3,6 +3,11 @@ types:
     type: object
     properties:
       type:
+        reloadable_note: |-
+          Handled as part of the whole `resolver` block. The replacement
+          resolver is never started, so its refresh machinery does not run
+          until the server restarts.
+        reloadable: reloadable
         type: string
         choices:
           - full
@@ -15,11 +20,19 @@ types:
           (LRU) TTL.
 
       dir:
+        reloadable: reloadable
+        reloadable_note: |-
+          Handled only as part of the whole `resolver` block; replacement
+          DirAccResolver is never Start()ed.
         type: string
         description: |-
           The path to storing account JWT files when pushed to the server.
 
       limit:
+        reloadable: reloadable
+        reloadable_note: |-
+          Handled only as part of the whole `resolver` block; replacement
+          resolver is never Start()ed.
         type: integer
         description: |-
           If set, limit the number of stored JWTs. In `full` mode, new JWTs
@@ -27,12 +40,21 @@ types:
           for new JWTs.
 
       ttl:
+        reloadable: reloadable
+        reloadable_note: |-
+          Handled only as part of the whole `resolver` block; replacement
+          resolver is never Start()ed.
         type: duration
         description: |-
           If `cache` mode, defines how long an account JWT will be cached
           for before being considered for auto-eviction.
 
       interval:
+        reloadable: reloadable
+        reloadable_note: |-
+          Handled only as part of the whole `resolver` block; the replacement
+          resolver is never Start()ed so the running sync loop keeps the old
+          interval.
         type: duration
         description: |-
           Defines the interval the resolver will randomly contact another server
@@ -41,12 +63,20 @@ types:
           Applies to `full` mode only.
 
       timeout:
+        reloadable: reloadable
+        reloadable_note: |-
+          Handled only as part of the whole `resolver` block; replacement
+          resolver is never Start()ed.
         type: duration
         description: |-
           Defines the request timeout for resolvers interacting with with
           other resolvers.
 
       allow_delete:
+        reloadable: reloadable
+        reloadable_note: |-
+          Handled only as part of the whole `resolver` block; replacement
+          resolver is never Start()ed.
         type: boolean
         default: false
         description: |-
@@ -55,6 +85,10 @@ types:
           `hard_delete` is true.
 
       hard_delete:
+        reloadable: reloadable
+        reloadable_note: |-
+          Handled only as part of the whole `resolver` block; replacement
+          resolver is never Start()ed.
         type: boolean
         default: false
         description: |-

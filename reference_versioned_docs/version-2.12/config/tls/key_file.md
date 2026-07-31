@@ -1,6 +1,6 @@
 # key_file
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="New connections only." />
 TLS certificate key file.
 
 

@@ -1,6 +1,6 @@
 # users
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 A list of users under this account.
 
 

@@ -1,6 +1,7 @@
 # handshake_first
 
-<Reloadable /> 
+<Aliases aliases="first, immediate" />
+<Reloadable state="reloadable" note="Accept side only; applies to newly accepted connections." />
 Force the leafnode connection to use a TLS-first handshake prior
 to the remote sending the `INFO` protocol message.
 

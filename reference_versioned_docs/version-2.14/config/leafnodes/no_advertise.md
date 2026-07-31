@@ -1,6 +1,6 @@
 # no_advertise
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 If true, the server will not be advertised to leaf nodes.
 
 

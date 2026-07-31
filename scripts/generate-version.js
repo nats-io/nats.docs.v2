@@ -87,6 +87,30 @@ function checkoutTag(repoPath, tag) {
   git(repoPath, ["checkout", "--quiet", tag]);
 }
 
+/**
+ * Assert `dir` is its own git repository, not merely an existing directory.
+ * An uninitialized submodule leaves an empty directory behind, and `git -C`
+ * on it silently walks up to this repo — so checkoutTag would fetch and check
+ * out the docs repo itself at a server tag, and the restore in main() would
+ * then "restore" it. Comparing the resolved toplevel against dir is the only
+ * check that catches that; existsSync passes on the empty directory.
+ */
+function assertGitRepo(dir, name) {
+  const hint = `run: git submodule update --init --filter=tree:0 ${name}`;
+  if (!fs.existsSync(dir)) die(`${name} submodule missing at ${dir} — ${hint}`);
+  let top;
+  try {
+    top = git(dir, ["rev-parse", "--show-toplevel"]);
+  } catch (e) {
+    die(`${name} at ${dir} is not a git repository — ${hint}`);
+  }
+  if (fs.realpathSync(top) !== fs.realpathSync(dir)) {
+    die(
+      `${name} at ${dir} is not initialized; git resolves it to ${top} — ${hint}`,
+    );
+  }
+}
+
 function rmrf(target) {
   if (fs.existsSync(target)) fs.rmSync(target, { recursive: true, force: true });
 }
@@ -311,7 +335,7 @@ function step_seedVarzResponse(paths) {
   log(`  seeded ${path.relative(ROOT, dst)}`);
 }
 
-function step_runConfigGenerator(paths) {
+function step_runConfigGenerator(paths, versionName, knownVersions) {
   // config-generator does not clean its output dir; wipe it here so repeat
   // runs drop renamed or removed properties.
   const configDir = path.join(paths.outDocs, "config");
@@ -333,6 +357,13 @@ function step_runConfigGenerator(paths) {
       "-dir", path.relative(path.join(ROOT, "tools/config-generator"), configDir),
       "-base", "/reference/config",
       "-sidebar", path.relative(path.join(ROOT, "tools/config-generator"), paths.configSidebarTmp),
+      // Render this version's answers. Properties gated to a newer server drop
+      // out of the page tree, the parent tables and the sidebar together, and
+      // per-version `versions:` overrides are folded in. -known lets the
+      // generator reject an annotation naming a version that no longer exists
+      // instead of silently matching nothing.
+      "-version", versionName,
+      "-known", knownVersions.join(","),
     ],
   );
 }
@@ -376,15 +407,15 @@ function step_buildSidebar(version, paths) {
 // orchestration
 // --------------------------------------------------------------------------
 
-function generateOne(version, tmpDir) {
+function generateOne(version, tmpDir, knownVersions) {
   log(`==> version ${version.name}`);
   log(`    nats-server: ${version["nats-server"]}`);
   log(`    jsm.go:      ${version["jsm.go"]}`);
 
   const natsPath = path.join(ROOT, "nats-server");
   const jsmPath = path.join(ROOT, "jsm.go");
-  if (!fs.existsSync(natsPath)) die(`nats-server submodule missing at ${natsPath}`);
-  if (!fs.existsSync(jsmPath)) die(`jsm.go submodule missing at ${jsmPath}`);
+  assertGitRepo(natsPath, "nats-server");
+  assertGitRepo(jsmPath, "jsm.go");
 
   const paths = {
     natsPath,
@@ -426,7 +457,7 @@ function generateOne(version, tmpDir) {
     step_copyHandWritten(stagePaths.outDocs);
     step_runGenerateDocs(stagePaths);
     step_seedVarzResponse(stagePaths);
-    step_runConfigGenerator(stagePaths);
+    step_runConfigGenerator(stagePaths, version.name, knownVersions);
     step_runSchemaRefs(version.name, stagePaths);
     stageOk = true;
   } finally {
@@ -499,6 +530,10 @@ function main() {
 
   const natsPath = path.join(ROOT, "nats-server");
   const jsmPath = path.join(ROOT, "jsm.go");
+  // Before currentRef, which is the first call that would silently read this
+  // repo's HEAD instead of the submodule's and record it as the ref to restore.
+  assertGitRepo(natsPath, "nats-server");
+  assertGitRepo(jsmPath, "jsm.go");
   const origNats = currentRef(natsPath);
   const origJsm = currentRef(jsmPath);
   log(`original HEAD: nats-server=${origNats} jsm.go=${origJsm}`);
@@ -509,7 +544,7 @@ function main() {
   let failed = false;
   try {
     for (const v of targets) {
-      try { generateOne(v, tmpDir); }
+      try { generateOne(v, tmpDir, cfg.versions.map((x) => x.name)); }
       catch (e) { log(`FAILED for ${v.name}: ${e.message}`); failed = true; }
     }
   } finally {

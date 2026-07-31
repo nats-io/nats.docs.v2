@@ -3,6 +3,7 @@ types:
     type: object
     properties:
       mode:
+        reloadable: reloadable
         type: string
         choices:
           - always
@@ -13,11 +14,43 @@ types:
           The OCSP stapling mode to adhere to.
 
       url:
+        reloadable: reloadable
         type: string
         description: |-
           An explicit override URL to request staples.
 
       urls:
+        reloadable: reloadable
+        reloadable_note: |-
+          `url` and `urls` write the same field; setting both means
+          last-parsed wins.
         type: array(string)
         description: |-
           An explicit list of override URLs to request staples.
+
+  ocsp-cache:
+    type: object
+    properties:
+      type:
+        reloadable: reloadable
+        type: string
+        choices:
+          - none
+          - local
+        default: none
+        description: |-
+          Where stapled responses are cached. `local` writes them under the
+          server's store directory.
+
+      local_store:
+        reloadable: reloadable
+        type: string
+        description: |-
+          Directory for the local cache.
+
+      preserve_revoked:
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Keep revoked responses in the cache rather than evicting them.

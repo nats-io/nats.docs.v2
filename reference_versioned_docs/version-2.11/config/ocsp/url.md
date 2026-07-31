@@ -1,6 +1,6 @@
 # url
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 An explicit override URL to request staples.
 
 

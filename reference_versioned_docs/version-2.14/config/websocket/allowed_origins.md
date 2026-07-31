@@ -1,7 +1,7 @@
 # allowed_origins
 
-<Aliases aliases="`allowed_origin`, `allow_origins`, `allow_origin`, `origins`, `origin`" />
-<Reloadable /> 
+<Aliases aliases="allowed_origin, allow_origins, allow_origin, origins, origin" />
+<Reloadable state="not-reloadable" />
 The list of accepted origins. When empty, and `same_origin` is `false`,
 clients from any origin are allowed to connect.
 

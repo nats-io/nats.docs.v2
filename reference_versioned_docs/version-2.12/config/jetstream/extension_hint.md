@@ -1,6 +1,6 @@
 # extension_hint
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 
 ## Types
 

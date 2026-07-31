@@ -1,12 +1,14 @@
 import React from 'react';
 
+import styles from './PropertyMeta.module.css';
+
 type Props = {
   aliases: string;
 };
 
 export default function Aliases({ aliases }: Props) {
   return (
-    <div style={{ fontStyle: "italic" }}>
+    <div className={styles.meta} style={{ fontStyle: "italic" }}>
       Aliases:{" "}
       {aliases
         .split(",")

@@ -1,6 +1,6 @@
 # connection_rate_limit
 
-<Reloadable /> 
+<Reloadable state="noop" note="Silently discarded by parseGateway." />
 
 ## Types
 

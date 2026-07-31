@@ -1,7 +1,7 @@
 # max_subscription_tokens
 
-<Aliases aliases="`max_sub_tokens`" />
-<Reloadable /> 
+<Aliases aliases="max_sub_tokens" />
+<Reloadable state="not-reloadable" />
 
 ## Types
 

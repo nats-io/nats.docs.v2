@@ -1,6 +1,6 @@
 # max_ack_pending
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Defines the maximum number of in-flight messages allowed to be
 configured on consumers.
 

@@ -1,6 +1,6 @@
 # cert_file
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="Applies to newly accepted leafnode connections only; existing connections keep the old certificate until they reconnect." />
 TLS certificate file.
 
 

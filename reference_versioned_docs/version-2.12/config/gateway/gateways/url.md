@@ -1,6 +1,6 @@
 # url
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 A single URL to connect to.
 
 

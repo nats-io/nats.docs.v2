@@ -1,7 +1,7 @@
 # mappings
 
-<Aliases aliases="`maps`" />
-<Reloadable /> 
+<Aliases aliases="maps" />
+<Reloadable state="reloadable" note="Replaced wholesale on the live account; adding, changing and removing mappings all take effect for existing connections. For the global account, leafnode subject-interest maps are fixed up in the same reload." />
 
 ## Types
 

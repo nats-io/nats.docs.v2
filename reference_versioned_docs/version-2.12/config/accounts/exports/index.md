@@ -1,6 +1,6 @@
 # exports
 
-<Reloadable /> 
+<Reloadable state="reloadable" note="The whole export set is discarded and rebuilt from the config file on every reload; changes apply to connections that are already up." />
 A list of exports for this account.
 
 

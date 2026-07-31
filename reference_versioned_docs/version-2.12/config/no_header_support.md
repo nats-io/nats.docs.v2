@@ -1,6 +1,6 @@
 # no_header_support
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Disables support for message headers.
 
 

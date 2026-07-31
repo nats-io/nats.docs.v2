@@ -1,9 +1,9 @@
 # password
 
-<Aliases aliases="`pass`" />
-<Reloadable /> 
-Specifies a global password that clients can use to authenticate
-the server (requires `user`, exclusive of `token`).
+<Aliases aliases="pass" />
+<Reloadable state="not-reloadable" />
+Password the connecting server authenticates with
+(requires `username`).
 
 
 ## Types

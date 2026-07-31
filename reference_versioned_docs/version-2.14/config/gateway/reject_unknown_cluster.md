@@ -1,6 +1,6 @@
 # reject_unknown_cluster
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 If true, gateway will reject connections from cluster that are
 not configured in gateways. It does so by checking if the cluster
 name, provided by the incomming connection, exists as named gateway.

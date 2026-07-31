@@ -1,9 +1,9 @@
 # username
 
-<Aliases aliases="`user`" />
-<Reloadable /> 
-Specifies a global user name that clients can use to authenticate
-the server (requires `password`, exclusive of `token`).
+<Aliases aliases="user" />
+<Reloadable state="reloadable" />
+User name the connecting server authenticates with
+(requires `password`).
 
 
 ## Types

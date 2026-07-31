@@ -1,7 +1,7 @@
 # consumer_inactive_threshold
 
-<Aliases aliases="`consumer_auto_cleanup`" />
-<Reloadable /> 
+<Aliases aliases="consumer_auto_cleanup" />
+<Reloadable state="reloadable" note="Existing consumers are not modified." />
 Set an explicit default inactive threshold for consumers used by MQTT.
 
 

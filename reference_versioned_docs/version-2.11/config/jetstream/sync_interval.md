@@ -1,7 +1,7 @@
 # sync_interval
 
-<Aliases aliases="`sync`" />
-<Reloadable /> 
+<Aliases aliases="sync" />
+<Reloadable state="not-reloadable" />
 Defines the internal to force sync file-based stream and consumer data
 to disk. The filestore relies on the operating system's filesystem buffers
 to periodically sync to disk. However, the server will still periodically

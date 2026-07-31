@@ -1,6 +1,6 @@
 # permissions
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 
 ## Properties
 

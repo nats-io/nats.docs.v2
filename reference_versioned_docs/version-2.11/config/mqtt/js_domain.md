@@ -1,6 +1,6 @@
 # js_domain
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 If specified, sets an explicit JetStream domain to be used by MQTT.
 
 

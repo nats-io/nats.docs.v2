@@ -1,6 +1,6 @@
 # name
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Name of the gateway being connected to.
 
 

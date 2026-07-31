@@ -1,0 +1,32 @@
+/*
+ * Shared vertical rhythm for the metadata blocks that sit between a config
+ * property's H1 and its description: Aliases, Since, Reloadable. They stack in
+ * any combination, so the spacing is set here once rather than per component.
+ *
+ * Adjacent block margins collapse, so a run of these renders 1rem apart, and
+ * the last one sits 1rem above the description paragraph (which contributes no
+ * top margin of its own in Infima).
+ */
+.meta {
+  margin: 0.5rem 0 1rem;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* "Requires Restart" is the quiet state — dimming it lets a page full of
+   reloadable properties read at a glance. "Ignored Until Restart" is
+   deliberately not dimmed; it is the state most likely to bite. */
+.badgeMuted {
+  opacity: 0.7;
+}
+
+.note {
+  margin-top: 0.375rem;
+  font-size: 0.875em;
+  line-height: 1.5;
+  opacity: 0.75;
+}

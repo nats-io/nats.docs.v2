@@ -1,6 +1,6 @@
 # max
 
-<Reloadable /> 
+<Reloadable state="noop" />
 The maximum number of response messages that can be published.
 
 

@@ -1,6 +1,6 @@
 # default_js_domain
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Account to domain name mapping.
 
 

@@ -1,6 +1,6 @@
 # timeout
 
-<Reloadable /> 
+<Reloadable state="noop" note="The value is accepted by the parser and then discarded; a reload changes nothing and neither does a restart." />
 TLS handshake timeout.
 
 

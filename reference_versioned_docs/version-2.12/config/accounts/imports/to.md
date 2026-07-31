@@ -1,6 +1,6 @@
 # to
 
-<Reloadable /> 
+<Reloadable state="reloadable" />
 A local subject mapping for the imported service.
 Applicable to `service`.
 

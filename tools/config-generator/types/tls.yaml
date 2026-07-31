@@ -3,55 +3,131 @@ types:
     type: object
     disabled: true
     properties:
+      allow_insecure_cipher_suites:
+        version: "2.12"
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Permit cipher suites Go considers insecure to be named in
+          `cipher_suites`. Without it those names are rejected.
+
+      cert_store:
+        reloadable: reloadable
+        type: string
+        description: |-
+          Load the certificate from an OS certificate store rather than a
+          file. Windows only.
+
+      certs:
+        reloadable: reloadable
+        type: array(tls-cert)
+        description: |-
+          Multiple certificate/key pairs to serve, so one listener can
+          present different certificates to different clients. Use this
+          instead of `cert_file` and `key_file`.
+
+      handshake_first:
+        reloadable: reloadable
+        types:
+          - boolean
+          - string
+        default: false
+        aliases:
+          - first
+          - immediate
+        description: |-
+          Send the TLS handshake before the `INFO` protocol message rather
+          than after. A duration string instead of `true` waits that long for
+          a client that may not support it before falling back.
+
+      min_version:
+        reloadable: reloadable
+        type: string
+        choices:
+          - "1.2"
+          - "1.3"
+        description: |-
+          Lowest TLS version the server will negotiate.
+
+      ocsp_peer:
+        reloadable: reloadable
+        types:
+          - boolean
+          - ocsp-peer
+        default: false
+        description: |-
+          Verify the peer's certificate against its OCSP responder and reject
+          revoked certificates. Set an object to tune the checks.
+
       cert_file:
+        reloadable: reloadable
+        reloadable_note: |-
+          Applies to route connections created after the reload; existing
+          routes are not closed or renegotiated.
         type: string
         description: |-
           TLS certificate file.
 
       key_file:
+        reloadable: reloadable
         type: string
         description: |-
           TLS certificate key file.
 
       ca_file:
+        reloadable: reloadable
         type: string
         description: |-
           TLS certificate authority file. Defaults to system trust store.
 
       cipher_suites:
+        reloadable: reloadable
         type: string
         description: |-
           When set, only the specified TLS cipher suites will be allowed. Values must match the golang version used to build the server.
 
       curve_preferences:
+        reloadable: reloadable
         type: string
         description: |-
           List of TLS cipher curves to use in order.
 
       insecure:
+        reloadable: reloadable
         type: boolean
         description: |-
           Skip certificate verification. This only applies to outgoing connections, NOT incoming client connections. **not recommended.**
 
       timeout:
+        reloadable: not-reloadable
         type: duration
         default: 500ms
         description: |-
           TLS handshake timeout.
 
       verify:
+        reloadable_note: |-
+          Set through the TLS block rather than the `-tlsverify` flag, so it
+          reloads with the rest of the TLS material.
+        reloadable: reloadable
         type: boolean
         default: false
         description: |-
           If true, require and verify client certificates. Does not apply to monitoring.
 
       verify_and_map:
+        reloadable: not-reloadable
         type: boolean
         default: false
         description: |-
           If true, require and verify client certificates and map certificate values for authentication. Does not apply to monitoring.
 
       verify_cert_and_check_known_urls:
+        reloadable: reloadable
+        reloadable_note: |-
+          Evaluated when a route authorizes, i.e. for connections established
+          after the reload.
         type: boolean
         description: |-
           Only used in a non-client context where `verify` is true, such as cluster and gateway configurations.
@@ -67,13 +143,78 @@ types:
           the left most domain.
 
       connection_rate_limit:
+        reloadable: noop
+        reloadable_note: |-
+          Silently discarded by parseCluster; only the top-level tls block
+          honours it.
         type: integer
         description: |-
 
       pinned_certs:
+        reloadable: not-reloadable
         type: string
         multiple: true
         description: |-
           List of hex-encoded SHA256 of DER-encoded public key fingerprints. When present, during the TLS handshake, the
           provided certificate's fingerprint is required to be present in the list, otherwise the connection will be
           closed.
+
+  tls-cert:
+    type: object
+    properties:
+      cert_file:
+        reloadable: reloadable
+        type: string
+        description: |-
+          Certificate file for this pair.
+
+      key_file:
+        reloadable: reloadable
+        type: string
+        description: |-
+          Key file for this pair.
+
+  ocsp-peer:
+    type: object
+    properties:
+      verify:
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Enable OCSP revocation checking of the peer's certificate.
+
+      ca_timeout:
+        reloadable: reloadable
+        type: duration
+        default: 2s
+        description: |-
+          How long to wait for the OCSP responder.
+
+      allowed_clockskew:
+        reloadable: reloadable
+        type: duration
+        default: 30s
+        description: |-
+          Clock skew tolerated when checking responder timestamps.
+
+      unknown_is_good:
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Treat an `unknown` response from the responder as good.
+
+      warn_only:
+        reloadable: reloadable
+        type: boolean
+        default: false
+        description: |-
+          Log revocation failures instead of rejecting the connection.
+
+      cache_ttl_when_next_update_unset:
+        reloadable: reloadable
+        type: duration
+        default: 1h
+        description: |-
+          How long to cache a response that carries no next-update time.

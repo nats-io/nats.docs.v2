@@ -5,6 +5,8 @@ export { default as TutorialsIcon } from './TutorialsIcon';
 export { default as LearnIcon } from './LearnIcon';
 export { default as ReferenceIcon } from './ReferenceIcon';
 export { default as ReloadIcon } from './ReloadIcon';
+export { default as PowerIcon } from './PowerIcon';
+export { default as BanIcon } from './BanIcon';
 export { default as RocketIcon } from './RocketIcon';
 export { default as LightbulbIcon } from './LightbulbIcon';
 export { default as UsersIcon } from './UsersIcon';

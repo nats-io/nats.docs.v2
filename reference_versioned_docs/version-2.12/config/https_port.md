@@ -1,6 +1,6 @@
 # https_port
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 HTTPS port for server monitoring.
 
 

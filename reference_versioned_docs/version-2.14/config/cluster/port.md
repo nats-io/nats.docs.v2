@@ -1,6 +1,6 @@
 # port
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" />
 Port for cluster route connections.
 
 

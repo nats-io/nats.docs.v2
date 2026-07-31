@@ -1,6 +1,6 @@
 # verify_cert_and_check_known_urls
 
-<Reloadable /> 
+<Reloadable state="not-reloadable" note="Only `false` parses, and it is then discarded (MQTTOpts has no TLSCheckKnownURLs field)." />
 Only used in a non-client context where `verify` is true, such as cluster and gateway configurations.
 The incoming connection's certificate x509v3 Subject Alternative Name DNS entries will be matched against
 all URLs. If a match is found, the connection is accepted and rejected otherwise.
