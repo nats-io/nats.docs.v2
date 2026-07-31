@@ -38,7 +38,7 @@ NATS subject. The server escapes those positions instead.
 | `//sensors/temp` | `/./.sensors.temp` | both rules apply in turn |
 | `cold-1.temp` | `cold-1//temp` | a `.` in the topic becomes `//` |
 
-The last row is the one that surprises people. A `.` is an ordinary
+The last row is the one to watch. A `.` is an ordinary
 character in an MQTT topic and the level separator in NATS, so it can't
 pass through unchanged. The server encodes it as `//`, which is why the
 first five rows escape `/` the way they do: the two characters swap
@@ -52,15 +52,15 @@ topic was rejected the way whitespace still is.
 Some characters have no valid encoding, and the server refuses the topic
 rather than converting it.
 
-The **space** is the one to design around. It has never been accepted on
-any version: a subject containing a space would break the NATS wire
+The space is the one to design around, and it has never been accepted
+on any version. A subject containing a space would break the NATS wire
 protocol when forwarded to other connection types, because the control
-line could be split. Newer releases widen the same refusal to other
-whitespace and to control characters.
+line could be split. The full set the server refuses is the space, tab,
+newline, carriage return, form feed, and the DEL character.
 
-Rather than track which release refuses which byte, treat whitespace and
-control characters as unusable in topics and keep them out at the
-source.
+Other control characters pass through unchanged, but there's no good
+reason to use them. Treat anything that isn't printable as unusable in
+topics and keep it out at the source.
 
 The refusal shows up differently depending on what the client was doing:
 
@@ -183,15 +183,26 @@ mosquitto_pub -h 127.0.0.1 -p 1883 -t "cold-1.temp" -m "4.4"
 The subjects show the escaping:
 
 ```
-[#1] Received on "/.sensors.temp"
+[#28] Received on "/.sensors.temp"
+Nmqtt-Pub: 0
+
 4.2
 
-[#2] Received on "sensors./.temp"
+[#36] Received on "sensors./.temp"
+Nmqtt-Pub: 0
+
 4.3
 
-[#3] Received on "cold-1//temp"
+[#44] Received on "cold-1//temp"
+Nmqtt-Pub: 0
+
 4.4
 ```
+
+The full wildcard also catches the server's own traffic — the JetStream
+API calls it makes to manage MQTT state, on `$JS.>` and `$MQTT.>`
+subjects — which is why the message numbers jump. The device messages
+are the ones carrying an `Nmqtt-Pub` header.
 
 Keep this handy when you're writing permissions for a fleet whose topics
 you don't control. Publish one message and read the subject off the
@@ -202,9 +213,8 @@ subscriber rather than working it out by hand.
 **Writing permissions as MQTT topics.** Permissions are checked against
 the converted subject, so a rule written with `/` separators or MQTT
 wildcards never matches. `sensors/#` is not a NATS subject; for
-publishing, the rule you want is `sensors.>`. This fails quietly in the
-wrong direction — the device connects and then finds its publishes
-rejected.
+publishing, the rule you want is `sensors.>`. This fails late: the
+device connects fine, then its publishes are rejected.
 
 **Granting only `sensors.>` for a `#` subscription.** A device
 subscribing to `sensors/#` needs both `sensors.>` and `sensors`, because
@@ -234,8 +244,8 @@ mapping:
 - `/` becomes `.`, with escaping at the start, at the end, and between
   adjacent slashes
 - `.` becomes `//`
-- whitespace and control characters are refused, the space on every
-  version
+- the space, tab, newline, carriage return, form feed, and DEL are
+  refused; the space on every version
 - `+` becomes `*`, `#` becomes `>`, and `#` below the top level costs two
   subscriptions
 - permissions, subscriptions, and stream subjects are all written against

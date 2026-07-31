@@ -36,8 +36,24 @@ authorization {
 }
 ```
 
-Now `sensor` can connect over MQTT and nothing else. Present those
-credentials on port 4222 and the connection is refused.
+Now `sensor` can connect over MQTT and nothing else. See it hold in
+both directions. Over MQTT, the credentials work:
+
+```bash
+mosquitto_pub -h 127.0.0.1 -p 1883 -u sensor -P s3cret \
+  -t "sensors/warehouse/cold-1/temp" -m "4.2"
+```
+
+Present the same credentials on port 4222 as a NATS client and the
+connection is refused:
+
+```bash
+nats pub --user sensor --password s3cret sensors.test "4.2"
+```
+
+```
+nats: error: nats: Authorization Violation
+```
 
 The option accepts a list, so a user that needs two kinds gets both:
 
@@ -95,17 +111,48 @@ The `subscribe` list carries both `fleet.>` and `fleet` so that a device
 subscribing to the MQTT filter `fleet/#` gets both subscriptions the
 server creates for it.
 
+Before this listener faces real devices, put TLS on it. The `mqtt {}`
+block takes its own `tls {}` map, separate from the one on the client
+port:
+
+```conf
+mqtt {
+  listen: 127.0.0.1:1883
+  tls {
+    cert_file: "./certs/mqtt-server.pem"
+    key_file:  "./certs/mqtt-server.key"
+  }
+}
+```
+
+The options are the same as any other `tls {}` block — add `ca_file`
+and `verify: true` for mutual TLS — and
+[Security → Encryption](/learn/security/encryption) covers them.
+
+The `mqtt {}` block can also carry its own `authorization {}` with a
+username, password, or token scoped to the MQTT listener only, and its
+own `no_auth_user`, which overrides the top-level one for MQTT
+connections. That last one is the answer when device firmware can't
+send credentials at all: it maps credential-less MQTT connections onto
+one of the users defined in the top-level `users` list, so the fleet
+gets that user's permissions while NATS clients keep their own rules.
+Two limits apply: a listener-scoped username or token can't be combined
+with a top-level `users` list, and `no_auth_user` doesn't work in
+operator mode.
+
 ### You don't need to allow `$MQTT.sub.>`
 
 A QoS 1 or 2 subscription is backed by a JetStream durable, and the
 server delivers to it over an internal subject under `$MQTT.sub.`.
 
-You don't have to grant permission for that subject. From server 2.14,
-an MQTT connection is implicitly allowed to subscribe to `$MQTT.sub.`
-and `$MQTT.deliver.pubrel.` subjects: the allow-list check is skipped
-for them. Before 2.14 you had to list `$MQTT.sub.>` explicitly, so
-configs written for an older server often still carry that entry. It's
-harmless, and you can drop it.
+You don't have to grant permission for that subject. From server
+2.12.3, an MQTT connection is implicitly allowed to subscribe to
+`$MQTT.sub.` and `$MQTT.deliver.pubrel.` subjects: the allow-list check
+is skipped for them. Before 2.12.3 — including 2.10 and 2.11, which this
+chapter otherwise supports — you have to list `$MQTT.sub.>` in the
+user's subscribe allow list, or every QoS 1 and 2 subscription fails
+with `0x80` in the SUBACK. Configs written for those servers often still
+carry the entry; on 2.12.3 or later it's harmless, and you can drop it.
 
 Deny is still enforced. An explicit deny on `$MQTT.sub.>` stops the
 server from creating the internal subscription, and QoS 1 and 2
@@ -143,7 +190,7 @@ disallows bearer tokens. The device sees a CONNACK with return code 5,
 `Authorization Violation` error a NATS client would receive, so check
 the CONNACK code rather than looking for that string.
 
-Two consequences of a bearer credential are worth stating plainly.
+A bearer credential has two consequences.
 Anyone holding the JWT can connect as that user, since there's no key to
 prove possession, so treat it like a password and put TLS in front of
 it. And `no_auth_user` isn't compatible with operator mode at all — in
@@ -160,7 +207,7 @@ A standalone server can go without `server_name`. Once the server has a
 `cluster` or `gateway` block, MQTT requires it, and startup fails
 otherwise:
 
-```text
+```
 mqtt requires server name to be explicitly set
 ```
 
@@ -198,7 +245,7 @@ of the three.
 
 The streams holding MQTT state are replicated automatically once
 JetStream is clustered, and you don't create them. The replica count is
-derived from the **`routes` you configured**, not from how many servers
+derived from the `routes` you configured, not from how many servers
 the cluster actually has: the server counts the addresses in its own
 `routes` list, then clamps the result to between 1 and 3.
 
@@ -219,16 +266,36 @@ mqtt {
 than the cluster can satisfy and the streams fail to create, which
 surfaces as MQTT clients being unable to connect.
 
-## Limitations
+### MQTT on a leaf node
 
-Two of these are specific to running on a cluster; the rest hold
-everywhere. Together they shape what you can build on MQTT support.
+A leaf node close to the devices — on a factory floor, in a vehicle —
+can serve MQTT too, and it doesn't have to run JetStream itself. The
+standalone JetStream check doesn't apply once the server has a
+`leafnodes` configuration; the leaf can use JetStream reachable through
+its connection to the hub.
+
+If the leaf runs its own JetStream under a domain, point MQTT at it:
+
+```conf
+mqtt {
+  listen: 127.0.0.1:1883
+  js_domain: "factory"
+}
+```
+
+`js_domain` selects the JetStream domain MQTT stores its state in. Set
+it to the leaf's local domain and sessions and retained messages stay
+on the leaf, so local devices keep working when the link to the hub is
+down. The domain is part of the session's storage identity, which is
+also what keeps sessions in different domains from colliding.
+
+### Two cluster caveats
 
 **Retained messages are best-effort in a cluster.** They're stored in a
 replicated stream available cluster-wide, but propagation isn't instant.
 A publisher can retain a message on one server while a subscriber
 connecting to a different server subscribes microseconds later and sees
-nothing, because that server hasn't learned about it yet. When an
+nothing, because that server hasn't received it yet. When an
 application depends on reading a retained value immediately, have it
 connect to the server that produced it.
 
@@ -239,16 +306,24 @@ connections can be briefly alive at once. The detection still works;
 it's just not instantaneous. Unique client IDs per device remain the
 answer.
 
-The rest apply on any deployment:
+## Seeing your devices
 
-- Messages published by NATS clients reach MQTT subscribers as QoS 0.
-- Topics containing whitespace or control characters are rejected:
-  publishing closes the connection, subscribing returns a failure code
-  in the SUBACK.
-- A subscription filter ending in `#` creates two NATS subscriptions and
-  consumes twice the `max_ack_pending` budget.
-- Only MQTT v3.1.1 is supported; a client requesting v5 is rejected at
-  connect.
+The monitoring port knows about MQTT. With `http: 8222` in the config,
+`/connz` can filter connections by MQTT client ID:
+
+```bash
+curl -s "http://127.0.0.1:8222/connz?mqtt_client=truck-17"
+```
+
+Each MQTT connection's record carries its client ID in the
+`mqtt_client` field, and `/varz` has an `mqtt` section showing the
+listener's resolved settings, including the JetStream domain in use.
+This is the tool for the client-ID collision from the
+[previous page](/learn/mqtt/qos-sessions-and-retained#two-devices-one-client-id):
+filter on the suspect client ID and watch which remote address holds
+the session between drops.
+[Monitoring endpoints](/learn/monitoring/monitoring-endpoints) covers
+the port itself.
 
 ## Pitfalls
 
@@ -276,7 +351,7 @@ never appears.
 
 ## Where you are
 
-Acme's fleet is now production-shaped:
+Acme's fleet is now ready for production:
 
 - a `sensor` user restricted to MQTT connections, with permissions
   written against converted subjects

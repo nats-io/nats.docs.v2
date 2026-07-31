@@ -17,18 +17,22 @@ in, and an `mqtt {}` block, which opens the port devices connect to.
 
 ## MQTT stores its state in JetStream
 
-MQTT needs state that outlives a connection. A session remembers a
-client's subscriptions across disconnects, QoS 1 and 2 track which
-messages haven't been acknowledged yet, and a retained message waits for
-subscribers who haven't arrived. The server keeps all of it in JetStream
-streams, so JetStream has to be on.
+MQTT needs state that outlives a connection: a session's
+subscriptions, unacknowledged QoS 1 and 2 messages, and retained
+messages. The server keeps all of it in JetStream streams, so JetStream
+has to be reachable.
 
-This is a hard requirement. Configure `mqtt {}` without JetStream and
-the server refuses to start:
+On a standalone server, reachable means enabled locally. Configure
+`mqtt {}` without JetStream and the server refuses to start:
 
 ```
 mqtt requires JetStream to be enabled if running in standalone mode
 ```
+
+The error names the scope: "in standalone mode". A server with a
+`cluster`, `gateway`, or `leafnode` configuration can reach JetStream
+elsewhere in the system, so the check doesn't apply there. This chapter
+runs JetStream locally throughout.
 
 Turn JetStream on and the server creates the streams it needs on its
 own. You never manage them; they're covered in
@@ -36,7 +40,8 @@ own. You never manage them; they're covered in
 
 ## Enable MQTT
 
-Two blocks: `jetstream` for the state, `mqtt` for the listener.
+You need two blocks: `jetstream` for the state and `mqtt` for the
+listener.
 
 ```conf
 # mqtt-server.conf — one server serving both NATS clients and MQTT devices
@@ -51,10 +56,13 @@ mqtt {
 }
 ```
 
-MQTT gets its own listener on port 1883, the default MQTT port. It's a
-separate listener from the client port on 4222, the way the cluster and
-leafnode ports are separate — one port per kind of connection. NATS
-clients keep connecting to 4222 and know nothing about MQTT.
+MQTT gets its own listener on port 1883, the conventional MQTT port.
+The server doesn't choose it for you: an `mqtt {}` block with no
+`listen` or `port` disables MQTT silently, with no error and no log
+line, so always set one. It's a separate listener from the client port
+on 4222, the way the cluster and leafnode ports are separate — one port
+per kind of connection. NATS clients keep connecting to 4222 and know
+nothing about MQTT.
 
 Start it:
 
@@ -62,7 +70,7 @@ Start it:
 nats-server -c mqtt-server.conf
 ```
 
-The log line to look for confirms the listener is up:
+The log confirms the listener is up:
 
 ```
 [INF] Listening for MQTT clients on mqtt://127.0.0.1:1883
@@ -97,6 +105,8 @@ The NATS subscriber receives it:
 
 ```
 [#1] Received on "sensors.warehouse.cold-1.temp"
+Nmqtt-Pub: 0
+
 4.2
 ```
 
@@ -104,7 +114,9 @@ The device published `sensors/warehouse/cold-1/temp` and the subscriber
 matched `sensors.warehouse.cold-1.temp`. The server converted the topic
 to a subject on the way through, turning each `/` into a `.`. The
 payload crossed untouched — MQTT payloads are bytes, and so are NATS
-payloads.
+payloads. The `Nmqtt-Pub` header is the server marking the message as
+MQTT-originated, with the QoS it was published at; NATS subscribers can
+read it or ignore it.
 
 Nothing on the NATS side is MQTT-aware. `nats sub` used a normal
 wildcard subscription and got a normal message. Any NATS subscriber, a
@@ -150,8 +162,8 @@ messages](/learn/mqtt/qos-sessions-and-retained) covers what that costs you.
 
 When the MQTT client subscribed to `fleet/truck-17/telemetry`, the
 server created a matching NATS subscription on
-`fleet.truck-17.telemetry`. That's what makes the bridge work rather
-than a special case in the publish path.
+`fleet.truck-17.telemetry`. The bridge is a real subscription, not a
+special case in the publish path.
 
 Because the interest is a real NATS subscription, it propagates the way
 any other subscription does. A publisher connected to a different server
@@ -162,10 +174,9 @@ matching NATS subscriber receives it.
 
 ## Where the readings go
 
-A bridge that only moves messages isn't worth much on its own. What
-makes it useful is that the readings are now ordinary NATS traffic, so
-everything Acme already runs on NATS can treat them the same way it
-treats anything else — including keeping them.
+The readings are now ordinary NATS traffic, so everything Acme already
+runs on NATS can treat them the same way it treats anything else,
+including keeping them.
 
 JetStream is already enabled, so capturing both device subject trees
 takes one command:
@@ -186,10 +197,10 @@ stream: a cold-chain excursion flags the order for the shipment it
 belongs to, and truck telemetry updates a delivery's position.
 Consumers, filtering, and replay work exactly as the
 [JetStream deep dive](/learn/jetstream) describes, because this is a
-normal stream — nothing about it is MQTT-specific.
+normal stream.
 
-The devices know none of this; they publish MQTT to what they believe is
-a plain broker. A QoS 0 reading is gone once it is delivered, and QoS 1
+The devices don't change at all; they keep publishing plain MQTT and
+the server does the rest. A QoS 0 reading is gone once it is delivered, and QoS 1
 only reaches subscribers that exist at the time. Stored in `DEVICES`, a
 reading is still readable by a consumer written next month.
 

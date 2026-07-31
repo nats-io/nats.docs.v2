@@ -129,8 +129,11 @@ function MqttRetainedAnimatedInner({
         stage === "clear";
     const serving = stage === "late";
     const storeEmpty = stage === "clear";
-    // The dashboard only enters the picture once it subscribes.
-    const dashboardLive = serving ? 1 : 0.3;
+    // The dashboard enters the picture once it subscribes (late) and stays
+    // connected through the delete (clear), which it receives as a normal
+    // message.
+    const dashboardConnected = stage === "late" || stage === "clear";
+    const dashboardLive = dashboardConnected ? 1 : 0.3;
 
     // The retained store lives inside the server boundary — it is server-side
     // state (a JetStream stream), not a peer of the server. The sensor and the
@@ -181,7 +184,7 @@ function MqttRetainedAnimatedInner({
             zIndex: 1,
             style: {
                 opacity: dashboardLive,
-                filter: serving ? "none" : "grayscale(0.7)",
+                filter: dashboardConnected ? "none" : "grayscale(0.7)",
                 transition: "opacity 0.4s ease, filter 0.4s ease",
             },
         },
@@ -266,6 +269,28 @@ function MqttRetainedAnimatedInner({
                 label: "4.5 on subscribe",
                 labelOffset: -16,
                 labelColor: SERVE_COLOR,
+                animated: true,
+                interval: 1500,
+            },
+        });
+    }
+
+    // --- server -> dashboard : the delete itself is delivered to current
+    // subscribers as a normal (empty) message. ---
+    if (stage === "clear") {
+        edges.push({
+            id: `deliver-${stage}`,
+            source: "server",
+            target: "dashboard",
+            sourceHandle: "request-out",
+            type: "animated",
+            animated: true,
+            markerEnd: { type: MarkerType.ArrowClosed },
+            data: {
+                color: CLEAR_COLOR,
+                label: '"" as a normal message',
+                labelOffset: -16,
+                labelColor: ACCENT_NAVY,
                 animated: true,
                 interval: 1500,
             },

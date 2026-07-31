@@ -2,19 +2,22 @@
 id: qos-sessions-and-retained
 title: "QoS, sessions, and retained messages"
 sidebar_position: 4
-description: What the server guarantees about delivery, what it remembers between connections, and why NATS publishes always arrive as QoS 0
+description: What the server guarantees about delivery, what it stores between connections, and why NATS publishes always arrive as QoS 0
 ---
 
 # QoS, sessions, and retained messages
 
-Devices drop off networks. A truck drives through a tunnel, a warehouse
-sensor loses Wi-Fi, a gateway reboots. MQTT's answer to all three is
-state the broker holds on the client's behalf, and this page covers the
-three kinds NATS keeps for you: delivery state (QoS), subscription state
-(sessions), and last-value state (retained messages).
+You can predict the subject any topic lands on. What the server
+promises about delivering the message there is a separate contract, and
+it's the one devices depend on when they drop off the network and
+reconnect. MQTT handles disconnects with state the broker holds for the
+client, and this page covers the three kinds NATS keeps: delivery state
+(QoS), subscription state (sessions), and retained messages. It also
+covers will messages, which announce an abnormal disconnect to whoever
+is listening.
 
-All three live in the JetStream streams the server created when you
-enabled MQTT. You don't manage them, but knowing they're streams
+The stored state lives in the JetStream streams the server created when
+you enabled MQTT. You don't manage them, but knowing they're streams
 explains why JetStream is required and where the storage goes.
 
 ## The three QoS levels
@@ -34,8 +37,8 @@ for a delivery is the lower of the two: a QoS 0 publish to a QoS 1
 subscriber is still delivered at QoS 0.
 
 QoS is an MQTT-side contract, though. NATS has no equivalent — a NATS
-client doesn't request a delivery guarantee when it publishes, and there
-is no field on a NATS message to carry one. So these guarantees hold end
+client doesn't request a delivery guarantee when it publishes, and
+there's no field on a NATS message to carry one. So these guarantees hold end
 to end only when both ends are MQTT. The next section covers what
 happens when they aren't.
 
@@ -78,12 +81,43 @@ mqtt {
 }
 ```
 
-Two practical notes. A change to `ack_wait` applies only to
-subscriptions created after the change, so existing subscriptions keep
-the old value until they're recreated. And a redelivered message is a
-genuine duplicate: the device sees the same payload twice, which is why
-QoS 1 is "at least once" rather than "exactly once". Handlers that
-matter should be idempotent.
+Two things are worth knowing about this in practice. A change to
+`ack_wait` applies only to subscriptions created after the change, so
+existing subscriptions keep the old value until they're recreated. And a
+redelivered message is a genuine duplicate: the device sees the same
+payload twice, which is why QoS 1 is "at least once" rather than
+"exactly once". Handlers that matter should be idempotent.
+
+### See QoS 1 run
+
+Subscribe at QoS 1 as the truck's telemetry unit:
+
+```bash
+mosquitto_sub -h 127.0.0.1 -p 1883 \
+  -t "fleet/truck-17/telemetry" -q 1 -v
+```
+
+Publish at QoS 1 from another MQTT client:
+
+```bash
+mosquitto_pub -h 127.0.0.1 -p 1883 \
+  -t "fleet/truck-17/telemetry" \
+  -m "eta 14:20" -q 1
+```
+
+The subscriber prints the message once:
+
+```
+fleet/truck-17/telemetry eta 14:20
+```
+
+The visible output is the same as QoS 0; the difference is the
+bookkeeping around it. The publisher waited for a PUBACK before
+exiting, the server stored the message until the subscriber's PUBACK
+arrived, and if that acknowledgment hadn't come within `ack_wait`, the
+server would have sent the message again with the DUP flag set. Both
+ends were MQTT here, which is what made the QoS 1 contract hold end to
+end.
 
 ## How many messages can be in flight
 
@@ -103,8 +137,10 @@ Two limits follow from that:
   [Topics and subjects](/learn/mqtt/topics-and-subjects#why--sometimes-creates-two-subscriptions)).
 
 Those two combine into a tighter ceiling than the 65535 suggests. At the
-default of 1024, a session has room for about 64 plain subscriptions, or
-32 if they all end in `#`. A device that subscribes to many topics can
+default of 1024, a session has room for 63 plain subscriptions, or
+31 if they all end in `#` — the check is strict, so the subscription
+that would reach the cap exactly is already refused. A device that
+subscribes to many topics can
 hit that, and the symptom is a subscription refused with `0x80` rather
 than an error your code can catch later. Lower `max_ack_pending` if you
 need more subscriptions per session. Like `ack_wait`, a change applies
@@ -139,26 +175,76 @@ Client IDs must be unique. The specification requires that when a second
 connection presents a client ID already in use, the server closes the
 first one and accepts the newcomer.
 
-That rule is harsh when it happens by accident. Deploy the same client
-ID to two devices and each connection evicts the other; if both have
-reconnect logic, they take turns kicking each other off as fast as they
-can reconnect. The old connection is closed straight away. What keeps
-this from becoming a hot loop is on the other side: the server records
-the client ID as flapping and holds off letting a new connection take
-that session over for about a second. It slows the cycle rather than
-stopping it.
+This bites when it happens by accident. Deploy the same client ID to
+two devices and each connection evicts the other; if both have
+reconnect logic, the cycle repeats as fast as they can reconnect. The
+server limits the damage by recording the client ID as flapping and
+refusing to hand the session over again for about a second, which slows
+the cycle without stopping it.
 
 The check works across a cluster too, and there it's less immediate:
 eviction has to travel between servers rather than happening in one
 process. There are also cases where the server refuses the new
 connection instead of closing the old one — for instance when the
 existing connection is in the middle of processing packets and can't be
-closed safely. Treat client IDs as unique per device and the whole
-problem disappears.
+closed safely. Treat client IDs as unique per device and none of this
+comes up.
 
-## Retained messages
+## Will messages
 
-A retained message is the last-value cache for a topic. Publish with the
+A will message is how the rest of the system finds out a device dropped
+off. The device registers the will in its CONNECT packet: a topic, a
+payload, and optionally a QoS level and the RETAIN flag. If the
+connection ends without a clean DISCONNECT — the network drops, the
+keepalive times out, the process dies — the server publishes the will.
+A clean DISCONNECT discards it silently.
+
+The will topic converts to a subject by the same rules as any other
+topic, so the notification reaches NATS subscribers too. That makes
+device liveness visible to the whole backbone: a will on
+`fleet/truck-17/status` lands on `fleet.truck-17.status`, where any
+NATS service can react to it.
+
+Watch it happen. Subscribe on the NATS side:
+
+```bash
+nats sub "fleet.>"
+```
+
+Connect an MQTT client that registers a will, in another terminal:
+
+```bash
+mosquitto_sub -h 127.0.0.1 -p 1883 \
+  -t "fleet/dispatch" \
+  --will-topic "fleet/truck-17/status" \
+  --will-payload "offline"
+```
+
+Now kill that client without giving it the chance to disconnect
+cleanly:
+
+```bash
+kill -9 $(pgrep mosquitto_sub)
+```
+
+The NATS subscriber receives the will:
+
+```
+[#1] Received on "fleet.truck-17.status"
+Nmqtt-Pub: 0
+
+offline
+```
+
+Interrupt the client with Ctrl-C instead and nothing arrives: mosquitto
+sends a DISCONNECT on the way out, and the server discards the will.
+The will fires only on an abnormal disconnect, which is exactly the
+case you want to detect.
+
+Pair the will with the RETAIN flag (`--will-retain` in mosquitto) and
+the "offline" marker persists as the topic's retained value, so a
+dashboard that subscribes later still sees the device as down. Retained
+messages are the next section. Publish with the
 RETAIN flag and the server stores that message; every subscriber whose
 filter matches the topic afterward receives it immediately on
 subscribing, without waiting for the next publish.
@@ -220,7 +306,7 @@ relying on the MQTT subscription.
 
 **Sharing a client ID across devices.** Two devices with the same client
 ID evict each other on every reconnect. It looks like a flaky network:
-both devices connect, both drop, neither stays. Give every device its
+both devices connect and both keep dropping. Give every device its
 own client ID, and prefer one derived from hardware rather than baked
 into an image.
 
@@ -235,6 +321,12 @@ retained value per topic is kept. A device that publishes ten readings
 with RETAIN while a subscriber is offline leaves one value behind, not
 ten. Use JetStream when you need the history.
 
+**Testing a will with a clean shutdown.** A client that exits normally
+sends DISCONNECT, and the server discards the will without publishing
+it. If your liveness test stops the device politely, you'll conclude
+wills don't work. Test with a hard kill or by cutting the network, the
+failures the will exists for.
+
 ## Where you are
 
 Your setup is unchanged, and you now know what the server is holding:
@@ -246,6 +338,8 @@ Your setup is unchanged, and you now know what the server is holding:
   (30 seconds by default), capped in flight by `max_ack_pending`
 - sessions keyed by client ID, stored in JetStream, cleared by the
   clean session flag
+- a will message registered at connect, published on abnormal
+  disconnect, and discarded on a clean one
 - one retained message per topic, replaced by the next retained publish
   and deleted by an empty one
 
