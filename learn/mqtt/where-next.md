@@ -7,21 +7,17 @@ description: Recap the MQTT model and point to the chapters and Reference that t
 
 # Where to go next
 
-You started this chapter with devices that speak a protocol NATS doesn't
-and firmware Acme can't change. You end it with those devices on the same
-backbone as everything else: publishing MQTT topics that land on NATS
-subjects, captured in a `DEVICES` stream the ORDERS platform reads,
-authenticated as MQTT-only users, running on the `east` cluster. The
-devices were never modified.
+Acme's devices now sit on the same backbone as everything else,
+unmodified: publishing MQTT topics that land on NATS subjects, captured
+in a `DEVICES` stream the ORDERS platform reads, authenticated as
+MQTT-only users, running on the `east` cluster.
 
 This page doesn't teach anything new. It collects the model into one
 place and points at what takes each piece further.
 
 ## The core idea
 
-Every page circled the same idea, which is worth stating on its own.
-
-`nats-server` **is** the MQTT broker. There's no bridge process and no
+`nats-server` is the MQTT broker. There's no bridge process and no
 translation layer you operate. One binary holds one listener for NATS
 clients and another for MQTT devices, and the conversion between them
 happens inside the server.
@@ -44,7 +40,28 @@ in-flight QoS 1 and 2 deliveries are all stored in streams the server
 manages for itself. That's why the account needs JetStream, and why
 sessions survive both a reconnect and a restart.
 
-Those four ideas are the chapter. Everything else refines them.
+## What this chapter did not cover
+
+A few things hold everywhere and didn't get a page of their own:
+
+- Messages published by NATS clients reach MQTT subscribers as QoS 0.
+- Topics containing a space, tab, newline, carriage return, form feed,
+  or DEL are rejected: publishing closes the connection, subscribing
+  returns a failure code in the SUBACK.
+- A subscription filter ending in `#` creates two NATS subscriptions and
+  consumes twice the `max_ack_pending` budget.
+- Only MQTT v3.1.1 is supported; a client requesting v5 is rejected at
+  connect.
+
+And two topics are out of scope here:
+
+- **MQTT over WebSocket.** Browser-based MQTT clients connect through
+  the `websocket {}` listener, with `MQTT_WS` as their connection type.
+  The WebSocket side has its own configuration and is not covered in
+  this chapter.
+- **Sparkplug B.** The payload specification some industrial fleets
+  layer on top of MQTT. To the server it's ordinary MQTT traffic;
+  nothing in NATS interprets it.
 
 ## Where the reference details live
 
@@ -83,6 +100,8 @@ One more is worth knowing about rather than reading now.
 well: a leaf on a factory floor or in a vehicle gives local MQTT clients
 a nearby server that needs only outbound connectivity to the hub, so
 they keep working when the link to the cloud is down.
+[Auth and clustering](/learn/mqtt/auth-and-clustering#mqtt-on-a-leaf-node)
+covers the `js_domain` setting that keeps MQTT state on the leaf.
 
 ## Production checklist
 
@@ -106,13 +125,14 @@ server. Each group links back to the page that explains why.
 
 - [ ] Don't rely on a QoS 1 subscription to make NATS-originated traffic durable; it arrives as QoS 0. Put that data in a stream instead.
 - [ ] Give every device its own client ID, ideally derived from hardware; duplicates evict each other on every reconnect.
-- [ ] Count subscriptions against `max_ack_pending`; at the default of 1024 a session fits about 64 subscriptions (32 if they end in `#`) before the 65535 per-session cap refuses one with `0x80`.
+- [ ] Count subscriptions against `max_ack_pending`; at the default of 1024 a session fits 63 subscriptions (31 if they end in `#`) before the 65535 per-session cap refuses one with `0x80`.
 - [ ] Use JetStream where you need history; only the last retained value per topic is kept.
+- [ ] Test wills with a hard kill or a cut network, not a clean shutdown; a DISCONNECT discards the will.
 
 ### Auth and clustering — see [Pitfalls](/learn/mqtt/auth-and-clustering#pitfalls)
 
 - [ ] Put credentials and TLS on the MQTT listener before it leaves a lab; an open port 1883 accepts any device that can reach it.
-- [ ] Keep `$MQTT.sub.>` out of permission lists entirely — allowing it is unnecessary from 2.14, and denying it silently breaks QoS 1 and 2.
+- [ ] Keep `$MQTT.sub.>` out of permission lists on 2.12.3 and later — allowing it is unnecessary there, and denying it silently breaks QoS 1 and 2. On 2.10 and 2.11, allow it explicitly.
 - [ ] Set `--bearer` on both the account and the user for operator-mode devices; missing either refuses a valid JWT with CONNACK return code 5.
 - [ ] Set `server_name` on every server; MQTT requires it as soon as a cluster or gateway block exists.
 

@@ -253,6 +253,8 @@ const TITLES = {
   maxMsgsAnimated: 'MaxMsgs keeps a fixed message count (animated)',
   messageTtlAnimated: 'Per-message TTL versus MaxAge (animated)',
   mirrorCopyAnimated: 'A mirror catches up and stays current (animated)',
+  mqttBridgeAnimated: 'An MQTT topic becomes a NATS subject (animated)',
+  mqttRetainedAnimated: 'A retained message serves late subscribers (animated)',
   purgeStreamAnimated: 'Purge clears data, not the counter (animated)',
   sequenceGapAnimated: 'A deletion leaves a permanent gap (animated)',
   sourcesMergeAnimated: 'Sources merge many streams into one (animated)',
