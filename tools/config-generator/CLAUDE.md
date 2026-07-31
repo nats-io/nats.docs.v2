@@ -231,8 +231,18 @@ backfill is complete.
 Do **not** treat `hot-reload-opts.md` as authoritative. It was audited against
 nats-server v2.11.17 / v2.12.12 / v2.14.3 and found wrong in both directions —
 see `reloadable-audit.md` at the repo root for per-key verdicts. Those verdicts
-have been backfilled into this spec: every rendered page now matches the audit
-at all three versions, and `-strict` passes.
+have been backfilled into this spec: every rendered page matches the audit at all
+three versions, and `-strict` passes.
+
+The audit itself is not authoritative either, and it was taken at different tags
+from the ones the docs render. It ran against v2.11.17 / v2.12.12 / v2.14.3,
+while `scripts/doc-versions.json` pins v2.11.9 / v2.12.4 / v2.14.0 — and reload
+behaviour changes within a minor. `gateway.tls.pinned_certs` is the known case:
+the audit reports it reloadable at all three versions, which is true at the tags
+it measured but false at the tags 2.11 and 2.12 render from, where a change to it
+aborts the whole reload. That key is version-gated here and deliberately diverges
+from the audit. Re-derive from source at the pinned tag before trusting any row;
+see the `config-reload-audit` skill for the procedure.
 
 34 of the audit's caveat strings were hard-truncated at 160 characters when the
 TSV was written. Those keys were re-read against the server source and their

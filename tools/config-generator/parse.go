@@ -423,20 +423,39 @@ func (p *parser) applyVersion(prop *Property, yp *yamlType) error {
 		return nil
 	}
 
+	// Go randomizes map iteration, so if two keys both named the target version
+	// the winner would be whichever came out last — a verdict that flips
+	// between builds. Reject the overlap rather than ordering around it: there
+	// is no defensible answer to "which of the two did you mean?". Every key is
+	// checked, not just the ones matching the target, so an authoring mistake
+	// surfaces on the first build instead of when that version goes live.
+	claimed := make(map[string]string, len(yp.Versions))
+	var (
+		match    *yamlVersionOverride
+		matchKey string
+	)
 	for key, ov := range yp.Versions {
 		vs, err := parseVersionKey(key, p.known)
 		if err != nil {
 			return fmt.Errorf("property %q: %w", prop.Name, err)
 		}
-		if p.version == "" {
+		for _, v := range vs {
+			if prev, dup := claimed[v]; dup {
+				return fmt.Errorf("property %q: version %q is claimed by both %q and %q",
+					prop.Name, v, prev, key)
+			}
+			claimed[v] = key
+		}
+		if p.version == "" || !knownVersion(p.version, vs) || ov == nil {
 			continue
 		}
-		if !knownVersion(p.version, vs) {
-			continue
-		}
-		if ov == nil {
-			continue
-		}
+		match, matchKey = ov, key
+	}
+
+	// At most one key can match now that overlaps are rejected, so applying
+	// after the loop is deterministic.
+	if match != nil {
+		ov, key := match, matchKey
 		if ov.Reloadable != ReloadUnset {
 			if !ov.Reloadable.Valid() {
 				return fmt.Errorf("property %q: version %q: unknown reloadable verdict %q",

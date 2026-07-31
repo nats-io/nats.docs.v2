@@ -45,9 +45,17 @@ types:
       tls:
         reloadable_note: |-
           Certificate material reloads and is used by connections established
-          afterwards. Changing `timeout`, `verify_and_map`,
-          `verify_cert_and_check_known_urls` or `pinned_certs` fails the
-          reload.
+          afterwards. Changing `timeout`, `verify_and_map` or
+          `verify_cert_and_check_known_urls` fails the reload.
+        versions:
+          # Before 2.14, TLSPinnedCerts was not blanked before the gateway
+          # block's DeepEqual, so a change to it aborted the whole reload.
+          "2.11, 2.12":
+            reloadable_note: |-
+              Certificate material reloads and is used by connections
+              established afterwards. Changing `timeout`, `verify_and_map`,
+              `verify_cert_and_check_known_urls` or `pinned_certs` fails the
+              reload.
         properties:
           ca_file:
             reloadable: reloadable
@@ -81,9 +89,16 @@ types:
           pinned_certs:
             reloadable: reloadable
             reloadable_note: |-
-              The only gateway key that is explicitly whitelisted for
-              reload; it also re-checks and disconnects existing gateway
-              connections.
+              Reloads, and also re-checks gateway connections that are already
+              established, disconnecting any whose certificate is no longer
+              pinned.
+            versions:
+              "2.11, 2.12":
+                reloadable: not-reloadable
+                reloadable_note: |-
+                  Changing the pinned certificates fails the whole reload, so
+                  the server has to be restarted. Reloading them is supported
+                  from 2.14.
           verify:
             reloadable: noop
             reloadable_note: |-

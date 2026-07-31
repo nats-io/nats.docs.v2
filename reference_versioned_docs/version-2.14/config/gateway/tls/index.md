@@ -1,6 +1,6 @@
 # tls
 
-<Reloadable state="reloadable" note="Certificate material reloads and is used by connections established afterwards. Changing `timeout`, `verify_and_map`, `verify_cert_and_check_known_urls` or `pinned_certs` fails the reload." />
+<Reloadable state="reloadable" note="Certificate material reloads and is used by connections established afterwards. Changing `timeout`, `verify_and_map` or `verify_cert_and_check_known_urls` fails the reload." />
 A `tls` configuration map for securing gateway connections. `verify`
 is always enabled. Unless otherwise, `cert_file` will be the default
 client certificate.

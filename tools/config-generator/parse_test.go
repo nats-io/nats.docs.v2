@@ -217,6 +217,30 @@ func TestApplyVersion(t *testing.T) {
 	} else if !strings.Contains(err.Error(), "whatever") {
 		t.Errorf("error should name the property, got: %v", err)
 	}
+
+	// Two keys claiming the same version must fail the build. Map iteration is
+	// randomized, so silently taking one would make the rendered verdict differ
+	// between builds of an unchanged spec.
+	overlap := &yamlType{
+		Name: "listen",
+		Versions: map[string]*yamlVersionOverride{
+			"2.11, 2.12": {Reloadable: ReloadNo},
+			"2.12":       {Reloadable: ReloadYes},
+		},
+	}
+	for _, v := range []string{"2.11", "2.12", "2.14"} {
+		p = &parser{version: v, known: known}
+		err := p.applyVersion(&Property{Name: "listen"}, overlap)
+		if err == nil {
+			t.Errorf("%s: expected overlap to be rejected", v)
+			continue
+		}
+		// Rejected while building *any* version, including one the overlapping
+		// keys do not name, so the mistake cannot hide until 2.12 is built.
+		if !strings.Contains(err.Error(), "2.12") {
+			t.Errorf("%s: error should name the contested version, got: %v", v, err)
+		}
+	}
 }
 
 func TestGatedOut(t *testing.T) {
@@ -233,6 +257,9 @@ func TestGatedOut(t *testing.T) {
 		{"introduced earlier", "2.14", "2.12", "", false},
 		{"removed in target", "2.14", "", "2.14", true},
 		{"removed later", "2.12", "", "2.14", false},
+		{"both set, inside window", "2.12", "2.11", "2.14", false},
+		{"both set, before window", "2.11", "2.12", "2.14", true},
+		{"both set, after window", "2.14", "2.11", "2.14", true},
 		{"introduced 2.2 vs 2.11 target", "2.11", "2.2", "", false},
 		{"no target renders everything", "", "2.14", "", false},
 	}
