@@ -118,6 +118,7 @@ list it always did, with a different scheme:
 | Go | `nats.Connect("ws://127.0.0.1:8080")` |
 | JavaScript/TypeScript | `wsconnect({ servers: "ws://127.0.0.1:8080" })` |
 | Python | `nats.client.connect("ws://127.0.0.1:8080")` — needs `pip install nats-core[websocket]` |
+| Java | `Nats.connect("ws://127.0.0.1:8080")` |
 | Rust | `async_nats::connect("ws://127.0.0.1:8080")` |
 | C#/.NET | `new NatsOpts { Url = "ws://127.0.0.1:8080" }` |
 
@@ -185,7 +186,10 @@ never 4222:
 
 A bare hostname is treated as TLS on 443. Dropping the port from a
 `ws://` URL gets you port 80. Neither is likely to be your listener, and
-the failure looks like the server being down. Write the port every time.
+the failure looks like the server being down. The last row is a trap of
+its own: the port survives but the scheme doesn't, so the client sends a
+WebSocket handshake to the plain client port, which won't answer it.
+Write the scheme and the port every time.
 
 ## Binary frames, and why a frame isn't a message
 
