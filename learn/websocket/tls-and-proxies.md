@@ -58,12 +58,13 @@ names the scheme it's actually serving:
 [INF] Listening for websocket clients on wss://0.0.0.0:443
 ```
 
-Certificate material reloads. Changing `cert_file` or `key_file` and
-sending the server a reload picks up the new certificate for connections
-made afterwards; existing connections keep the one they negotiated.
-Changing `verify_and_map` or `pinned_certs` does not reload — it's
-rejected, and a rejected field aborts the entire reload, including any
-other change in the same edit.
+Certificate material is the only part of the `websocket {}` block that
+reloads. Changing `cert_file` or `key_file` and sending the server a
+reload picks up the new certificate for connections made afterwards;
+existing connections keep the one they negotiated. Any other change in
+the block — `verify_and_map`, `pinned_certs`, `allowed_origins`, the
+timeouts — is rejected, and a rejected field aborts the entire reload,
+including changes in the same edit that would have been accepted.
 
 ## TLS terminated in front
 

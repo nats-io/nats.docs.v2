@@ -26,11 +26,13 @@ a TCP socket, so WebSocket is the only way it reaches NATS at all. A
 dashboard, an admin console, or any front end subscribing to live
 subjects connects this way.
 
-The other case is **infrastructure that only speaks HTTP**. A Kubernetes
-ingress, a cloud HTTP load balancer, or a service mesh gateway routes
-HTTP and nothing else, so a `nats://` connection has no path through
-them. Exposing NATS behind one means exposing the WebSocket listener.
-The same applies to a leaf node reaching a hub that sits behind that
+The other case is **an edge that only routes HTTP**. A Kubernetes
+`Ingress`, a cloud HTTP load balancer, or a service mesh gateway won't
+carry a `nats://` connection. That's not the only way out of Kubernetes —
+a `LoadBalancer` Service or the TCP routing some ingress controllers
+offer carries plain NATS fine — but when the shared HTTPS edge is the
+only path allowed in, the WebSocket listener is what gets published
+through it. The same applies to a leaf node reaching a hub behind that
 kind of edge.
 
 If neither applies, keep using `nats://`. It's one less moving part, and
@@ -59,8 +61,8 @@ as it arrives. It runs in a browser, so WebSocket is the only option.
 An Acme **retail branch** runs a leaf node so its tills keep working
 when the link to head office drops. The `east` cluster is reached
 through the same HTTPS ingress that fronts the rest of Acme's estate,
-which routes HTTP and nothing else, so the branch can't dial the
-leafnode port directly.
+and that ingress publishes HTTP routes only, so the branch can't dial
+the leafnode port directly.
 
 Neither adds a subsystem. Both are new ways into the system the
 earlier chapters set up.

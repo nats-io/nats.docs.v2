@@ -32,9 +32,9 @@ origin checking and the cookie settings address. Neither is a
 replacement for authorization, which is still what protects the port.
 
 **One listener serves clients and servers alike.** Reaching for
-WebSocket is often nothing to do with browsers — an HTTP ingress or load
-balancer in front of NATS routes HTTP, so the WebSocket listener is what
-gets published through it. A leaf node uses that endpoint exactly as a
+WebSocket is often nothing to do with browsers — where an HTTP ingress
+or load balancer is the only path into the network, the WebSocket
+listener is what gets published through it. A leaf node uses that endpoint exactly as a
 client does, which is how an edge site joins a cluster that isn't
 otherwise exposed.
 

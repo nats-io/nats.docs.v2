@@ -262,6 +262,8 @@ const TITLES = {
   superClusterAnimated: 'Two clusters join into a super-cluster (animated)',
   topologiesClusterMesh: 'One seed grows into a full mesh (animated)',
   topologiesSingleServer: 'A single server topology (animated)',
+  wsLeafNodeAnimated: 'A leaf node joins its hub over WebSocket (animated)',
+  wsUpgradeAnimated: 'One connection upgrades from HTTP to NATS (animated)',
 };
 
 const cache = new Map();

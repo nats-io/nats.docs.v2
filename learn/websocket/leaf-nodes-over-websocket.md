@@ -15,9 +15,9 @@ nodes](/learn/topologies/leaf-nodes) covers the model this page reuses.
 
 The reason to do it is usually on the hub side. Acme reaches the `east`
 cluster through the HTTPS ingress set up in [TLS and
-proxies](/learn/websocket/tls-and-proxies), and an ingress routes HTTP.
-The leafnode port isn't published through it, but the WebSocket listener
-is — the same one the warehouse dashboard connects to. An Acme retail
+proxies](/learn/websocket/tls-and-proxies). The leafnode port isn't
+published through it, but the WebSocket listener is — the same one the
+warehouse dashboard connects to. An Acme retail
 branch running a leaf node for its tills uses that door.
 
 ## The hub side

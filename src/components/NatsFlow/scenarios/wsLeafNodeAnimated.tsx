@@ -11,15 +11,15 @@ import { AnimatedEdge } from "../edges";
 
 // wsLeafNodeAnimated
 // A branch leaf node reaches its hub through the HTTPS ingress that fronts the
-// cluster. The ingress routes HTTP, so the WebSocket listener is the endpoint
-// published through it — the same one browser clients use.
+// cluster. The ingress publishes only HTTP routes, so the WebSocket listener
+// is the endpoint published through it — the same one browser clients use.
 
 // Scenario metadata picked up by scripts/rehype-nats-flow.mjs — the plugin
 // reads the first description key it finds in this file, so keep this object
 // first and don't add that key anywhere else.
 export const wsLeafNodeMeta = {
     description:
-        "A retail branch runs a leaf node that reaches the east cluster through the HTTPS ingress in front of it. An ingress routes HTTP, so the leafnode port is not published through it and the WebSocket listener is — the same endpoint the browser dashboard uses. The remote points at wss://nats.acme.example:443, the scheme drives a TLS handshake, and the leaf registers exactly as it would over port 7422. Once the link is up, subject interest and messages flow in both directions across it.",
+        "A retail branch runs a leaf node that reaches the east cluster through the HTTPS ingress in front of it. The ingress publishes only HTTP routes, so the leafnode port is not reachable through it and the WebSocket listener is — the same endpoint the browser dashboard uses. The remote points at wss://nats.acme.example:443, the scheme drives a TLS handshake, and the leaf registers exactly as it would over port 7422. Once the link is up, subject interest and messages flow in both directions across it.",
 };
 
 const nodeTypes = {
@@ -114,7 +114,7 @@ function WsLeafNodeAnimatedInner({
 
     const rightActive =
         stage === "dial"
-            ? { color: DIAL_COLOR, label: "routed to :8080" }
+            ? { color: DIAL_COLOR, label: "routed to websocket listener" }
             : stage === "up"
               ? { color: DIAL_COLOR, label: "leaf registered" }
               : stage === "traffic"

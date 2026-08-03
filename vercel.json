@@ -902,12 +902,12 @@
     },
     {
       "source": "/running-a-nats-service/configuration/websocket",
-      "destination": "/reference/config/websocket/",
+      "destination": "/learn/websocket/",
       "permanent": false
     },
     {
       "source": "/running-a-nats-service/configuration/websocket/",
-      "destination": "/reference/config/websocket/",
+      "destination": "/learn/websocket/",
       "permanent": false
     },
     {
@@ -1877,12 +1877,12 @@
     },
     {
       "source": "/nats-server/configuration/websocket",
-      "destination": "/reference/config/websocket/",
+      "destination": "/learn/websocket/",
       "permanent": false
     },
     {
       "source": "/nats-server/configuration/websocket/",
-      "destination": "/reference/config/websocket/",
+      "destination": "/learn/websocket/",
       "permanent": false
     },
     {
