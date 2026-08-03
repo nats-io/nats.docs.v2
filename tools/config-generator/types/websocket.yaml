@@ -17,9 +17,11 @@ types:
       port:
         reloadable: not-reloadable
         type: integer
-        default: 443
         description: |-
-          By default, a WebSocket-enabled server requires TLS and binds to port 443.
+          Port to accept WebSocket client connections on. There is no default:
+          the listener is only started once a port is set, here or via `listen`.
+
+          TLS is required unless `no_tls` is `true`.
 
       listen:
         reloadable: not-reloadable
@@ -73,13 +75,16 @@ types:
         default: false
         description: |-
           This option is relevant for clients used within a Web Browser, such
-          as [nats.ws][nats.ws].
+          as [nats.js][nats.js].
 
           When set to `true`, the HTTP `Origin` header must match the request’s
           hostname. Refer to [cross-origin resource sharing][cors] documentation
           for more details.
 
-          [nats.ws]: https://github.com/nats-io/nats.ws
+          The check only applies when the request carries an `Origin` header,
+          which browsers send and non-browser clients generally do not.
+
+          [nats.js]: https://github.com/nats-io/nats.js
           [cors]: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 
       allowed_origins:
@@ -178,10 +183,14 @@ types:
         reloadable: not-reloadable
         type: string
         description: |-
-          If no user name is provided when an MQTT client connects, will default
-          this user name in the authentication phase. If specified, this will
-          override, for MQTT clients, any `no_auth_user` value defined in the
-          main configuration file.
+          If no user name is provided when a WebSocket client connects, will
+          default this user name in the authentication phase. If specified, this
+          will override, for WebSocket clients, any `no_auth_user` value defined
+          in the main configuration file.
+
+          A leaf node connecting over WebSocket also picks this value up in
+          preference to the top-level `no_auth_user`.
+
           *Note: that this is not compatible with running the server in
           operator mode.*
 
