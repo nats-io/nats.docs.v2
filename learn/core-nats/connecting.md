@@ -48,6 +48,11 @@ default, so a server on your own machine is `nats://127.0.0.1:4222`. That's also
 what a client dials when you don't give it a URL, and what the `nats` CLI uses
 until you point it elsewhere with `--server` or a saved context.
 
+The scheme names the transport. `tls://` is the same connection encrypted, and
+`ws://` or `wss://` carries the protocol over WebSocket — the transport a
+browser has to use, and the one that gets through a network allowing only
+outbound 443. [Connect over WebSocket](/learn/websocket/) covers that case.
+
 One URL names one server. A production client usually passes several URLs so it
 can fail over when one server is unreachable; that list, and how the client
 works through it, belong to [Resilient clients →

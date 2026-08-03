@@ -20,16 +20,18 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
  * `east`, server names `n1-east`/`n2-east`/`n3-east` (enforced by
  * .claude/workflows/consistency-check.mjs).
  *
- * Status: all thirteen chapters are written — Develop (Core NATS, Services,
+ * Status: all fourteen chapters are written — Develop (Core NATS, Services,
  * JetStream, Resilient Clients, Key-Value, Object Store) and Operate
  * (Topologies, Security, Clustering, Monitoring, Backup & Recovery,
- * Deployment, MQTT). Each page follows the deep-dive conventions: pinned Acme
- * ORDERS scenario, nats-example divs + committed CLI snippets, animated
- * NatsFlow scenarios, per-page Pitfalls, and a Production checklist in
- * each where-next.
+ * Deployment, MQTT, WebSocket). Each page follows the deep-dive conventions:
+ * pinned Acme ORDERS scenario, nats-example divs + committed CLI snippets,
+ * animated NatsFlow scenarios, per-page Pitfalls, and a Production checklist
+ * in each where-next.
  *
- * Exception: the MQTT chapter uses inline config/mosquitto/nats-CLI blocks
- * rather than nats-example divs, since MQTT interop is not a NATS-client task.
+ * Exception: Topologies, MQTT and WebSocket use inline config and CLI blocks
+ * rather than nats-example divs. Their subject matter is server configuration
+ * and operational commands rather than client-library calls, which is what the
+ * multi-language example system exists to show.
  */
 const sidebars: SidebarsConfig = {
   learnSidebar: [
@@ -241,6 +243,18 @@ const sidebars: SidebarsConfig = {
             "mqtt/qos-sessions-and-retained",
             "mqtt/auth-and-clustering",
             "mqtt/where-next",
+          ],
+        },
+        {
+          type: "category",
+          label: "WebSocket",
+          link: { type: "doc", id: "websocket/index" },
+          items: [
+            "websocket/your-first-websocket-connection",
+            "websocket/browsers-and-origins",
+            "websocket/tls-and-proxies",
+            "websocket/leaf-nodes-over-websocket",
+            "websocket/where-next",
           ],
         },
       ],

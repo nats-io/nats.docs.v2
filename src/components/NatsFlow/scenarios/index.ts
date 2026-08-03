@@ -99,3 +99,6 @@ export { TlsFirstHandshakeAnimated } from './tlsFirstHandshakeAnimated';
 // --- MQTT deep-dive scenarios ---
 export { MqttBridgeAnimated } from './mqttBridgeAnimated';
 export { MqttRetainedAnimated } from './mqttRetainedAnimated';
+// --- WebSocket deep-dive scenarios ---
+export { WsUpgradeAnimated } from './wsUpgradeAnimated';
+export { WsLeafNodeAnimated } from './wsLeafNodeAnimated';

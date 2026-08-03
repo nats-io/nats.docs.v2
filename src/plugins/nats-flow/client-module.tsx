@@ -108,6 +108,9 @@ if (ExecutionEnvironment.canUseDOM) {
       // --- MQTT deep-dive scenarios ---
       MqttBridgeAnimated: module.MqttBridgeAnimated,
       MqttRetainedAnimated: module.MqttRetainedAnimated,
+      // --- WebSocket deep-dive scenarios ---
+      WsUpgradeAnimated: module.WsUpgradeAnimated,
+      WsLeafNodeAnimated: module.WsLeafNodeAnimated,
       scenarios: {
         publishSubscribe: module.publishSubscribeScenario,
         requestReply: module.requestReplyScenario,

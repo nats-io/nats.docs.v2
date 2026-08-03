@@ -19,11 +19,13 @@ const CHAPTER_PAGES = {
   'backup-recovery': ['index','stream-backup-restore','mirrors-and-sources','disaster-recovery','config-and-jwt-backup','where-next'],
   'deployment': ['index','sizing-and-resources','kubernetes','config-management','rolling-upgrades','hardening','where-next'],
   'mqtt': ['index','your-first-mqtt-client','topics-and-subjects','qos-sessions-and-retained','auth-and-clustering','where-next'],
+  'websocket': ['index','your-first-websocket-connection','browsers-and-origins','tls-and-proxies','leaf-nodes-over-websocket','where-next'],
 }
 
 // Most chapters share the 2026-06-05 spec naming; MQTT has its own.
 const SPEC_PATH = {
   'mqtt': 'docs/superpowers/specs/2026-07-30-mqtt-docs-design.md',
+  'websocket': 'docs/superpowers/specs/2026-07-31-websocket-docs-design.md',
 }
 const SPEC = (ch) => SPEC_PATH[ch] || `specs/2026-06-05-${ch}-deep-dive-design.md`
 
@@ -49,6 +51,51 @@ MQTT CHAPTER EXCEPTIONS — these OVERRIDE the standing conventions above. Do NO
   n1-east/n2-east/n3-east.
 - Valid data-scenario names for this chapter: mqttBridgeAnimated,
   mqttRetainedAnimated. There is deliberately no QoS-1 redelivery diagram.
+`,
+  'websocket': `
+WEBSOCKET CHAPTER EXCEPTIONS — these OVERRIDE the standing conventions above. Do
+NOT "fix" the page toward the standing convention where it conflicts here:
+- NO nats-example divs and NO CLI .sh snippet files anywhere in this chapter.
+  Every example is an inline fenced block: "conf" for server config, "bash" for
+  nats CLI and nats-server commands, "html" for the single browser page. This
+  chapter is server configuration and operational commands, not client-library
+  calls, and follows Topologies and MQTT in using inline blocks. Never add a div
+  or a .sh file to this chapter.
+- Titles carry NO leading number on any page.
+- where-next skeleton is: recap intro -> "## The core idea" -> "## Where the
+  reference details live" -> "## What to read next" -> "## Production checklist"
+  -> "## See also". There is deliberately NO "## Sibling deep dives" and NO
+  "## Where you are" section on where-next.
+- index.md deliberately has NO "## When to use it" section; the motivation lives
+  inside "## Who this is for", matching the other twelve chapters. MQTT is the
+  only chapter with both, and this one does not copy that.
+- Scenario: Acme's warehouse dashboard (a browser page subscribing to orders.>)
+  and a retail branch leaf node reaching the east cluster through the HTTPS
+  ingress in front of it. Cluster "east" with n1-east/n2-east/n3-east.
+- Valid data-scenario names for this chapter: wsUpgradeAnimated,
+  wsLeafNodeAnimated.
+
+VERIFIED SERVER BEHAVIOUR — these were confirmed by running nats-server during
+authoring and CONTRADICT the old docs. Do not flag them as errors and do not
+"correct" them back toward the old documentation:
+- TLS on a leafnode remote is turned on by EITHER the wss:// scheme OR a tls{}
+  block; either alone is enough. The old docs say the tls{} block decides "not
+  wss:// versus ws://" — that is only half the rule. Consequence stated in the
+  chapter: the URL scheme does not tell you whether a link is encrypted.
+- websocket{} has NO default port. Omitting port/listen starts the server with
+  no WebSocket listener at all and no error. The reference's "default: 443" was
+  wrong and has been fixed.
+- A hub needs a leafnodes{} block WITH a port even when every leaf arrives over
+  WebSocket. An empty leafnodes{} or none at all makes the hub accept the
+  WebSocket connection and then close it.
+- allowed_origins / same_origin are evaluated ONLY when the request carries an
+  Origin header. Non-browser clients (including the nats CLI) send none and
+  connect regardless. This is correct behaviour, not a gap to warn about.
+- The server accepts both text and binary WebSocket data frames on read
+  (server/websocket.go:316); it always SENDS binary. Do not claim text frames
+  are rejected.
+- A FIPS-140 build refuses the whole websocket listener only when built with Go
+  1.25 or earlier; Go 1.26+ FIPS builds run WebSocket normally.
 `,
 }
 

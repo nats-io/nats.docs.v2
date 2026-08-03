@@ -73,6 +73,9 @@ Run, scale, and secure NATS.
 - **[MQTT](/learn/mqtt/)** running `nats-server` as the MQTT
   broker for your devices: topic-to-subject conversion, QoS, sessions
   and retained messages, and MQTT users on a cluster.
+- **[WebSocket](/learn/websocket/)** the NATS protocol over a
+  WebSocket transport: browser clients, origin checking and cookie
+  credentials, TLS behind a proxy, and leaf nodes over port 443.
 
 ## Where to start
 
