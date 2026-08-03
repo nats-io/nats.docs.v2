@@ -13,7 +13,7 @@ If you only want to pick a client and start building, jump to [Tier 1 clients](#
 
 ## Server
 
-The single binary that does all message routing. Clustering, JetStream persistence, leaf nodes, [MQTT](/learn/mqtt/), and WebSocket are all enabled through configuration on the same `nats-server` — there are no separate components to install.
+The single binary that does all message routing. Clustering, JetStream persistence, leaf nodes, [MQTT](/learn/mqtt/), and [WebSocket](/learn/websocket/) are all enabled through configuration on the same `nats-server` — there are no separate components to install.
 
 | Name | Description |
 |---|---|
@@ -30,7 +30,7 @@ These are the ones the NATS team ships first when a new server feature lands. If
 | Language | Repo | Description |
 |---|---|---|
 | Go | [nats-io/nats.go](https://github.com/nats-io/nats.go) | Reference implementation |
-| JavaScript / TypeScript | [nats-io/nats.js](https://github.com/nats-io/nats.js) | Node, Deno, Bun, browser (WebSocket). Supersedes the archived `nats.node`, `nats.deno`, `nats.ws`, `nats.ts` |
+| JavaScript / TypeScript | [nats-io/nats.js](https://github.com/nats-io/nats.js) | Node, Deno, Bun, browser ([WebSocket](/learn/websocket/)). Supersedes the archived `nats.node`, `nats.deno`, `nats.ws`, `nats.ts` |
 | Python | [nats-io/nats.py](https://github.com/nats-io/nats.py) | asyncio-based, Python 3 only |
 | Java | [nats-io/nats.java](https://github.com/nats-io/nats.java) | JVM; usable from Kotlin and Scala |
 | Rust | [nats-io/nats.rs](https://github.com/nats-io/nats.rs) | The `async-nats` crate |

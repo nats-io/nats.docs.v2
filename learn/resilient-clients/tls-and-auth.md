@@ -97,6 +97,9 @@ TLS context you build with the CA loaded into it. The server URL uses the
 
 <div class="nats-example" data-type="learn-resilient-clients-tls-and-auth-connect-tls" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 
+Where the client reaches the server over WebSocket, `wss://` is the encrypted
+equivalent — see [Connect over WebSocket](/learn/websocket/).
+
 The secure handshake runs in this order: the plaintext `INFO`, then the TLS
 upgrade and CA validation, then the credentials in `CONNECT`, then the
 server's `PONG` — plus the auth-failure branch.
