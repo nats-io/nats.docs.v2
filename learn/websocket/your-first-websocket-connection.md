@@ -117,13 +117,15 @@ list it always did, with a different scheme:
 | `nats` CLI | `nats -s ws://127.0.0.1:8080` |
 | Go | `nats.Connect("ws://127.0.0.1:8080")` |
 | JavaScript/TypeScript | `wsconnect({ servers: "ws://127.0.0.1:8080" })` |
-| Python | `nats.connect("ws://127.0.0.1:8080")` — needs `pip install nats-py[websocket]` |
+| Python | `nats.client.connect("ws://127.0.0.1:8080")` — needs `pip install nats-core[websocket]` |
 | Rust | `async_nats::connect("ws://127.0.0.1:8080")` |
 | C#/.NET | `new NatsOpts { Url = "ws://127.0.0.1:8080" }` |
 
-nats.py is the one that needs more than a URL: its WebSocket support
-ships behind an optional extra, so `pip install nats-py` alone can't open
-a `ws://` connection.
+Python is the one that needs more than a URL. The `nats-core` client
+keeps its WebSocket transport behind an optional extra, so plain
+`pip install nats-core` can't open a `ws://` connection — install
+`nats-core[websocket]`. It's the new Python client and needs Python
+3.13 or later.
 
 Use `wss://` where the listener holds a certificate. Subjects, queue
 groups, request-reply, JetStream, and headers all behave as they do on a
