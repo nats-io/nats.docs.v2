@@ -26,17 +26,12 @@ a TCP socket, so WebSocket is the only way it reaches NATS at all. A
 dashboard, an admin console, or any front end subscribing to live
 subjects connects this way.
 
-The other case is **an HTTP-routed path into the network**. `nats://`
-is plain TCP, so a route defined at the HTTP layer — an `Ingress` rule,
-an L7 load balancer listener, a gateway's HTTP route — can't carry it.
-The same infrastructure can usually pass raw TCP when you configure it
-to: a `LoadBalancer` Service, an ingress controller's TCP passthrough,
-a Gateway API `TCPRoute`. Where that's an option, plain `nats://`
-through it works fine. WebSocket is for when it isn't one — the edge in
-front of NATS offers HTTP routing only, one shared 443 with
-certificates handled at the ingress — and then the WebSocket listener
-is what gets published through it. The same applies to a leaf node
-reaching a hub behind that kind of edge.
+The other case is **infrastructure that only speaks HTTP**. A cloud
+HTTP load balancer or a CDN in front of your domain routes HTTP and
+nothing else, so a `nats://` connection has no path through them.
+Exposing NATS behind one means exposing the WebSocket listener. The
+same applies to a leaf node reaching a hub that sits behind that kind
+of edge.
 
 If neither applies, keep using `nats://`. It's one less moving part, and
 a plain TCP connection avoids the WebSocket framing overhead.
