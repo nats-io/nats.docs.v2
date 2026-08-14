@@ -185,6 +185,7 @@ function buildSidebarTemplate(schemaRefs, configCategory) {
 
   return [
     { type: "doc", id: "index", label: "Reference" },
+    { type: "link", label: "Release Notes", href: "/release-notes/" },
     configCategory,
     {
       type: "category",
