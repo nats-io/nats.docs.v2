@@ -20,7 +20,7 @@ For the complete changelog, see the [v2.14.0 release notes on GitHub](https://gi
 
 * **Scheduled subject sampling:** The `AllowMsgSchedules` stream configuration option now also allows to source the data of the last message matching the subject in the scheduled message. Useful for downsampling data on an interval. More information is available in [ADR-51](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-51.md#subject-sampling).
 
-* **Reliable WorkQueue and Interest mirroring/sourcing:** Sourcing or mirroring from a WorkQueue or Interest retention stream is now supported. A durable consumer, as opposed to an ephemeral one, will automatically be used to perform the async replication. A new ack policy of `AckFlowControl` is used to acknowledge messages after they were persisted, based on flow control. See [Mirrors and sources](/learn/backup-recovery/mirrors-and-sources) and [ADR-60](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-60.md), plus the upgrade considerations below.
+* **Reliable WorkQueue and Interest mirroring/sourcing:** Sourcing or mirroring from a WorkQueue or Interest retention stream is now supported. A durable consumer, as opposed to an ephemeral one, will automatically be used to perform the async replication. A new ack policy of `AckFlowControl` is used to acknowledge messages after they were persisted, based on flow control. See [Mirrors and sources](/learn/jetstream/mirrors-and-sources) and [ADR-60](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-60.md), plus the upgrade considerations below.
 
 ### Consumers
 
