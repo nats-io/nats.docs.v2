@@ -291,6 +291,10 @@ const config: Config = {
               label: "Reference",
               to: "/reference/",
             },
+            {
+              label: "Release Notes",
+              to: "/release-notes/",
+            },
           ],
         },
         {

@@ -41,6 +41,16 @@ const sidebars: SidebarsConfig = {
                 "concepts/security",
             ],
         },
+        {
+            type: "category",
+            label: "Release Notes",
+            collapsed: true,
+            link: { type: "doc", id: "release-notes/index" },
+            items: [
+                "release-notes/upgrade-to-2.14",
+                "release-notes/upgrade-to-2.12",
+            ],
+        },
     ],
 };
 
