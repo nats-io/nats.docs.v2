@@ -261,8 +261,12 @@ const config: Config = {
           type: "docsVersionDropdown",
           docsPluginId: "reference",
           position: "right",
-          // Only appears when user is on a reference page. Versions come
-          // from scripts/doc-versions.json; labels from referenceVersions above.
+          // Renders on every page (stock component; it is not scoped to
+          // reference routes). Versions come from scripts/doc-versions.json;
+          // labels from referenceVersions above.
+          dropdownItemsBefore: [
+            { to: "/release-notes/", label: "Release notes" },
+          ],
         },
         {
           href: "https://github.com/nats-io",

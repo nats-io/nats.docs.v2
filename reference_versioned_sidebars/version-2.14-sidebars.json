@@ -6,6 +6,11 @@
       "label": "Reference"
     },
     {
+      "type": "link",
+      "label": "Release Notes",
+      "href": "/release-notes/"
+    },
+    {
       "type": "category",
       "label": "Configuration",
       "collapsed": true,
