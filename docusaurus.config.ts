@@ -251,6 +251,13 @@ const config: Config = {
           href: "/reference/",
         },
         {
+          type: "custom-docSidebar",
+          sidebarId: "releaseNotesSidebar",
+          position: "left",
+          label: "Release Notes",
+          href: "/release-notes/",
+        },
+        {
           type: "docsVersionDropdown",
           docsPluginId: "reference",
           position: "right",
