@@ -22,47 +22,57 @@
     },
     {
       "source": "/release_notes/whats_new",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
       "permanent": false
     },
     {
       "source": "/release_notes/whats_new_214",
-      "destination": "/reference/",
+      "destination": "/release-notes/upgrade-to-2.14",
       "permanent": false
     },
     {
       "source": "/release_notes/whats_new_212",
-      "destination": "/reference/",
+      "destination": "/release-notes/upgrade-to-2.12",
       "permanent": false
     },
     {
       "source": "/release_notes/whats_new_211",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
       "permanent": false
     },
     {
       "source": "/release_notes/whats_new_210",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
       "permanent": false
     },
     {
       "source": "/release_notes/whats_new_22",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
       "permanent": false
     },
     {
       "source": "/release_notes/whats_new_20",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
+      "permanent": false
+    },
+    {
+      "source": "/release-notes/whats_new/whats_new_214",
+      "destination": "/release-notes/upgrade-to-2.14",
+      "permanent": false
+    },
+    {
+      "source": "/release-notes/whats_new/whats_new_212",
+      "destination": "/release-notes/upgrade-to-2.12",
       "permanent": false
     },
     {
       "source": "/release-notes/whats_new",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
       "permanent": false
     },
     {
       "source": "/release-notes/whats_new/:path*",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
       "permanent": false
     },
     {
@@ -2597,7 +2607,7 @@
     },
     {
       "source": "/release_notes/:path*",
-      "destination": "/reference/",
+      "destination": "/release-notes/",
       "permanent": false
     },
     {
