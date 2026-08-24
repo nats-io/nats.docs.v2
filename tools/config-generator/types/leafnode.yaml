@@ -155,8 +155,9 @@ types:
                   Reordering the users array is accepted because the
                   comparison is keyed by username.
                 properties:
-                  # parseLeafUsers (opts.go:2867) accepts only username,
-                  # password, account and proxy_required.
+                  # parseLeafUsers (opts.go:2976) accepts only username,
+                  # password, account and proxy_required. The last two are not
+                  # on the shared `user` type, so they are added here.
                   allowed_connection_types:
                     omit: true
                   nkey:
@@ -167,6 +168,34 @@ types:
                     reloadable: not-reloadable
                   username:
                     reloadable: not-reloadable
+                  account:
+                    reloadable: not-reloadable
+                    type: string
+                    description: |-
+                      Account that leaf nodes authenticating as this user are
+                      bound to. Each user in the list can name a different
+                      account.
+
+                      The account must be declared in the `accounts` block or
+                      the server refuses to start. Leave it unset to bind to
+                      the global account; the `account` on the surrounding
+                      `authorization` block does not apply to users listed
+                      here.
+                  proxy_required:
+                    version: "2.12"
+                    reloadable: reloadable
+                    reloadable_note: |-
+                      Read when a leaf node authenticates, so the new value
+                      applies to connections made after the reload. Existing
+                      connections keep the setting they connected under.
+                    type: boolean
+                    default: false
+                    description: |-
+                      Reject this user's leaf node connections if they did not
+                      arrive through a PROXY protocol header. Setting
+                      `proxy_required` on the surrounding `authorization` block
+                      applies the requirement to every user regardless of what
+                      they set here.
             reloadable: not-reloadable
             type: network-authorization
             description: |-
