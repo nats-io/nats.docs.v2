@@ -7,20 +7,17 @@ Learn deep dives, and per-version generated Reference (from `nats-server` and
 `jsm.go` source), plus interactive message-flow animations and multi-language
 code examples pulled from the client repositories.
 
-> **Status:** work in progress. This is an experimental rebuild by
-> [Synadia](https://synadia.com), not (yet) the official NATS documentation —
-> the official docs live at [docs.nats.io](https://docs.nats.io) and
-> [nats-io/nats.docs](https://github.com/nats-io/nats.docs).
-
 ## Overview
 
 **What is this repository?**
+
 - A rebuilt NATS documentation site
 - Written in Markdown/MDX with React components
 - Reference docs generated per NATS version from upstream source
 - Builds to a static site (`npm run build`) servable by any static host
 
 **For new contributors:**
+
 - 📝 **Editing docs?** See [Common Tasks](#common-tasks)
 - 💻 **Adding code examples?** See [Contributing](#contributing)
 - 🔧 **Technical deep dive?** See [Development](#development)
@@ -38,23 +35,27 @@ code examples pulled from the client repositories.
 ## Quick Start
 
 ### Requirements
+
 - **Node.js** 18 or higher
 - **npm** 8 or higher (comes with Node.js)
 
 ### Installation
 
 1. Clone this repository:
+
 ```bash
 git clone https://github.com/nats-io/nats.docs.v2.git
 cd nats.docs.v2
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start the development server:
+
 ```bash
 npm start
 ```
@@ -80,12 +81,14 @@ This generates static content in the `build/` directory that can be served by an
 Documentation pages are located in the `docs/` directory and written in Markdown (`.md`) or MDX (`.mdx`).
 
 **To edit an existing page:**
+
 1. Find the file in `docs/` (e.g., `docs/concepts/getting-started/index.md`)
 2. Make your changes
 3. Save the file - changes appear immediately in your browser (hot reload)
 4. Commit and push your changes
 
 **Example file locations:**
+
 - Getting Started: `docs/concepts/getting-started/index.md`
 - Concepts: `docs/concepts/*.md`
 - Learn deep dives: `learn/<chapter>/*.md` (own docs instance, served at `/learn`)
@@ -93,6 +96,7 @@ Documentation pages are located in the `docs/` directory and written in Markdown
 - Reference: `reference_versioned_docs/version-<ver>/**` (generated — do not hand-edit; fix the generators under `tools/config-generator` and `scripts/` instead)
 
 **Note:** The `docs/` directory maps to the root URL path `/`. For example:
+
 - `docs/concepts/getting-started/index.md` → `http://localhost:3000/concepts/getting-started`
 - `docs/concepts/publish-subscribe.md` → `http://localhost:3000/concepts/publish-subscribe`
 
@@ -101,6 +105,7 @@ Documentation pages are located in the `docs/` directory and written in Markdown
 **Where do code examples live?**
 
 - **Programming language examples** (Go, Rust, JavaScript, Python, Java, C#): Always in their respective client repositories
+
   - Go → `nats.go` repository
   - Rust → `nats.rs` repository
   - JavaScript/TypeScript → `nats.js` repository
@@ -117,8 +122,8 @@ Documentation pages are located in the `docs/` directory and written in Markdown
 Use Docusaurus tabs directly in your MDX file:
 
 ```mdx
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs groupId="lang">
 <TabItem value="cli" label="CLI" default>
@@ -180,6 +185,7 @@ GIT_USER=<Your GitHub username> npm run deploy
 Reference documentation is generated per NATS version from upstream source code. Each version checks out matching tags of both `nats-server` and `jsm.go` submodules (tag mapping in `scripts/doc-versions.json`), parses errors/headers/monitor schemas, vendors JSON schemas, and writes a version-scoped doc tree.
 
 **What gets generated (per version):**
+
 - `reference_versioned_docs/version-<ver>/jetstream/errors.md`
 - `reference_versioned_docs/version-<ver>/system/errors.md`
 - `reference_versioned_docs/version-<ver>/jetstream/api/headers.md`
@@ -189,6 +195,7 @@ Reference documentation is generated per NATS version from upstream source code.
 - `src/schemas/vendor/v<ver>/**` (vendored JSON schemas)
 
 **Prerequisites:**
+
 - Go + Node (to run the generators)
 - `nats-server` and `jsm.go` submodules initialized
 
@@ -211,6 +218,7 @@ npm run generate-docs:dry-run
 ```
 
 **When to regenerate:**
+
 - After bumping a version's tag in `scripts/doc-versions.json`
 - When adding or changing entries in `scripts/schema-refs.json`
 - When modifying generation templates in `scripts/templates/`
@@ -221,6 +229,7 @@ npm run generate-docs:dry-run
 ### Technology Stack
 
 This site is built with:
+
 - **[Docusaurus](https://docusaurus.io/)** - Static site generator optimized for documentation
 - **React** - UI components and interactive elements
 - **MDX** - Markdown with JSX for rich documentation pages
@@ -254,6 +263,7 @@ nats.docs.v2/
 ```
 
 **Important notes:**
+
 - `docs/` content is served at the root URL path (`/`)
 - `static/examples/snippets/cli/` is committed; the Go/Rust/JS/Python/Java/C# subtrees and `metadata.json` are fetched by `npm run fetch-examples` and gitignored
 - `scripts/rehype-nats-example.mjs` renders `nats-example` divs into language tabs at build time (restart the dev server after fetching new examples — the plugin caches `metadata.json`)
@@ -263,6 +273,7 @@ nats.docs.v2/
 The documentation uses a **multi-repository example system**:
 
 **For programming language examples (Go, Rust, JavaScript, Python, Java, C#):**
+
 1. Code examples live in the actual NATS client repositories (nats.go, nats.rs, nats.js, nats.py, nats.java, nats.net)
 2. All examples are on the `doc-examples` branch in each repository
 3. `scripts/fetch-examples.js` fetches examples from GitHub
@@ -271,10 +282,12 @@ The documentation uses a **multi-repository example system**:
 6. Documentation pages use `<div class="nats-example" data-type="..." data-languages="..."></div>` tags
 
 **For CLI examples:**
+
 1. CLI snippets always live in this repo at `static/examples/snippets/cli/[page]/[snippet].sh` and are committed to git
 2. `npm run fetch-examples` auto-scans that directory into `metadata.json` alongside the fetched languages
 
 **Why this approach?**
+
 - **Programming language examples** are tested, working code from actual client libraries
 - Examples can be run and validated in their native repositories
 - Single source of truth - if the client library changes, examples stay in sync
@@ -283,6 +296,7 @@ The documentation uses a **multi-repository example system**:
 ### Key Configuration Files
 
 **docusaurus.config.ts**
+
 - Main site configuration
 - Navbar and footer settings
 - Plugin configuration
@@ -290,21 +304,25 @@ The documentation uses a **multi-repository example system**:
 - Deployment configuration
 
 **sidebars.ts**
+
 - Documentation sidebar navigation structure
 - Controls the order and grouping of doc pages
 - Uses file paths relative to `docs/` directory
 
 **package.json**
+
 - Dependencies and versions
 - npm scripts (start, build, fetch-examples, etc.)
 - Project metadata
 
 **scripts/fetch-examples.js**
+
 - Configuration for code examples from GitHub
 - Maps example names to file paths in client repos
 - Defines which examples to fetch and where to find them
 
 **scripts/rehype-nats-example.mjs**
+
 - Build-time rehype plugin that replaces `nats-example` divs with language tabs
 - Reads `static/examples/snippets/metadata.json` (caches it — restart the dev
   server after `npm run fetch-examples`)
@@ -312,10 +330,12 @@ The documentation uses a **multi-repository example system**:
 ### Branch Strategy and PRs
 
 **Main branches:**
+
 - `main` - Production branch, auto-deploys to GitHub Pages
 - Feature branches - Create from `main` for your work
 
 **Workflow:**
+
 1. Create a feature branch: `git checkout -b your-feature-name`
 2. Make your changes and commit regularly
 3. Push to GitHub: `git push origin your-feature-name`
@@ -330,6 +350,7 @@ All examples must be on the `doc-examples` branch in the respective repository (
 ### What NOT to Commit
 
 **Generated files (excluded by .gitignore):**
+
 - `static/examples/snippets/go/` - Fetched from nats.go repository
 - `static/examples/snippets/rust/` - Fetched from nats.rs repository
 - `static/examples/snippets/javascript/` - Fetched from nats.js repository
@@ -339,6 +360,7 @@ All examples must be on the `doc-examples` branch in the respective repository (
 - `node_modules/` - npm dependencies
 
 **Files you SHOULD commit:**
+
 - Documentation pages in `docs/`
 - React components in `src/`
 - CLI examples in `static/examples/snippets/cli/` (source of truth for CLI examples)
@@ -346,6 +368,7 @@ All examples must be on the `doc-examples` branch in the respective repository (
 - Static assets in `static/` (images, fonts, etc.)
 
 **Important:** The `static/examples/snippets/` directory structure:
+
 ```
 static/examples/snippets/
 ├── cli/              # ✅ COMMIT - CLI examples (source of truth)
@@ -359,6 +382,7 @@ static/examples/snippets/
 ```
 
 **Where programming language examples live:**
+
 - Go: `nats.go` · Rust: `nats.rs` · JavaScript/TypeScript: `nats.js` ·
   Python: `nats.py` · Java: `nats.java` · C#: `nats.net` — each on its
   `doc-examples` branch
@@ -366,19 +390,22 @@ static/examples/snippets/
 ### Writing Documentation
 
 **File format:**
+
 - Use `.md` for simple pages with plain Markdown
 - Use `.mdx` for pages that need React components (tabs, NatsFlow animations, etc.)
 
 **Front matter:**
 Every documentation page should have front matter at the top:
+
 ```yaml
 ---
 title: Page Title
-sidebar_label: Short Label  # Optional, for sidebar
+sidebar_label: Short Label # Optional, for sidebar
 ---
 ```
 
 **Best practices:**
+
 - **Start simple:** Begin with core concepts before diving into details
 - **Show, don't just tell:** Use code examples and animations to illustrate concepts
 - **Be consistent:** Follow the style guide in [CLAUDE.md](./CLAUDE.md)
@@ -391,11 +418,13 @@ sidebar_label: Short Label  # Optional, for sidebar
 Always show examples in this order: CLI, JavaScript/TypeScript, Go, Python, Java, Rust, C#/.NET
 
 **When to use NatsFlow animations:**
+
 - Message flow patterns (pub/sub, request/reply)
 - Timing and sequencing diagrams
 - Fan-out and load balancing visualization
 
 **When to use code examples:**
+
 - API syntax and usage
 - Configuration examples
 - Step-by-step tutorials
@@ -407,6 +436,7 @@ Always show examples in this order: CLI, JavaScript/TypeScript, Go, Python, Java
 This documentation site uses a **multi-repository example system** that pulls code examples from the actual NATS client repositories. This ensures examples are tested, working code.
 
 **Important principle:**
+
 - **Programming language examples** (Go, Rust, JavaScript, Python, Java, C#) → Always add to respective client repositories
 - **CLI-only examples** (no programming language versions) → Add to this documentation repository
 
@@ -444,6 +474,7 @@ cd ../nats.js-docs && git checkout -b doc-examples origin/doc-examples
 #### Example Naming Convention
 
 Examples follow the pattern `[page]-[snippet]`:
+
 - `getting-started-publish` - Publish example on the getting-started page
 - `basics-subscribe` - Subscribe example on the basics page
 
@@ -452,15 +483,18 @@ Examples follow the pattern `[page]-[snippet]`:
 ##### CLI Examples (Local)
 
 CLI examples are stored locally in this repository. This includes:
+
 - CLI portions of multi-language examples
 - CLI-only examples (examples with no programming language equivalents)
 
 **Location:**
+
 ```bash
 static/examples/snippets/cli/[page]/[snippet].sh
 ```
 
 **Example:**
+
 ```bash
 # static/examples/snippets/cli/getting-started/publish.sh
 #!/bin/bash
@@ -470,6 +504,7 @@ nats pub --server=demo.nats.io hello "Hello NATS!"
 ```
 
 **After creating CLI examples:**
+
 - CLI examples are committed directly to this repository (not fetched from GitHub)
 - They do not need to be pushed to a separate branch
 - Just commit and push to your feature branch in this repo
@@ -508,6 +543,7 @@ func main() {
 ```
 
 After creating examples:
+
 ```bash
 cd ~/coding/nats.go-docs
 go fmt ./examples/docs/getting-started-publish/main.go
@@ -544,6 +580,7 @@ async fn main() -> Result<(), async_nats::Error> {
 ```
 
 After creating examples:
+
 ```bash
 cd ~/coding/nats.rs-docs/async-nats
 cargo +nightly fmt
@@ -576,6 +613,7 @@ await nc.drain();
 ```
 
 After creating examples:
+
 ```bash
 cd ~/coding/nats.js-docs
 git add examples/docs/getting-started-publish/
@@ -610,21 +648,24 @@ Add your examples to `scripts/fetch-examples.js`:
 
 ```javascript
 const EXAMPLES_CONFIG = {
-  "go": {
+  go: {
     examples: {
-      "getting-started-publish": "examples/docs/getting-started-publish/main.go",
+      "getting-started-publish":
+        "examples/docs/getting-started-publish/main.go",
       // ... add more
     },
   },
-  "rust": {
+  rust: {
     examples: {
-      "getting-started-publish": "async-nats/examples/docs_getting_started_publish.rs",
+      "getting-started-publish":
+        "async-nats/examples/docs_getting_started_publish.rs",
       // ... add more
     },
   },
-  "javascript": {
+  javascript: {
     examples: {
-      "getting-started-publish": "examples/docs/getting-started-publish/index.ts",
+      "getting-started-publish":
+        "examples/docs/getting-started-publish/index.ts",
       // ... add more
     },
   },
@@ -648,7 +689,11 @@ In your MDX files:
 ```mdx
 ### Publisher Example
 
-<div class="nats-example" data-type="getting-started-publish" data-languages="cli,js,go,java,rust,csharp"></div>
+<div
+  class="nats-example"
+  data-type="getting-started-publish"
+  data-languages="cli,js,go,java,rust,csharp"
+></div>
 ```
 
 Languages are shown in the order specified. CLI should always be first with `default` attribute.
@@ -678,6 +723,7 @@ Languages are shown in the order specified. CLI should always be first with `def
 ### Style Guide
 
 See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines including:
+
 - Code example structure
 - Tab ordering (CLI, JavaScript/TypeScript, Go, Python, Java, Rust, C#/.NET)
 - Comment style
@@ -690,6 +736,7 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines includi
 **Issue:** `npm start` fails or shows port conflicts
 
 **Solutions:**
+
 1. Check if port 3000 is already in use:
    ```bash
    lsof -i :3000
@@ -711,14 +758,17 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines includi
 **Possible causes and solutions:**
 
 1. **Examples not fetched from GitHub:**
+
    ```bash
    npm run fetch-examples
    ```
+
    Check that `static/examples/snippets/metadata.json` exists and contains your example.
 
 2. **Wrong data-type attribute:**
    Verify the `data-type` matches the example name in `scripts/fetch-examples.js`.
    For example, if the config has `"getting-started-publish"`, use:
+
    ```html
    <div class="nats-example" data-type="getting-started-publish" ...></div>
    ```
@@ -727,6 +777,7 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines includi
    CLI examples are stored in this repository at `static/examples/snippets/cli/[page]/[snippet].sh`.
 
    If a CLI example doesn't appear:
+
    - Check that the file exists: `static/examples/snippets/cli/[page]/[snippet].sh`
    - Verify the file is committed to git (CLI examples should be in the repository)
    - Re-run `npm run fetch-examples` (it scans the CLI tree into `metadata.json`) and restart the dev server — the rehype plugin caches `metadata.json`
@@ -736,10 +787,11 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines includi
 **Issue:** `npm run typecheck` shows errors
 
 **Solutions:**
+
 1. Make sure `docusaurus.config.ts` and other TypeScript files have correct types
 2. Check imports in MDX files - use `@site/` prefix for absolute imports:
    ```typescript
-   import { NatsFlow } from '@site/src/components/NatsFlow';
+   import { NatsFlow } from "@site/src/components/NatsFlow";
    ```
 3. Restart your IDE's TypeScript server if errors persist after fixing
 
@@ -748,6 +800,7 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines includi
 **Issue:** Changes to files don't appear in the browser
 
 **Solutions:**
+
 1. Restart the dev server (`Ctrl+C`, then `npm start`)
 2. Hard refresh the browser (`Cmd+Shift+R` on Mac, `Ctrl+Shift+R` on Windows/Linux)
 3. Check the terminal for build errors
@@ -758,6 +811,7 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines includi
 **Issue:** `npm run build` fails
 
 **Common causes:**
+
 1. **Broken links:** Check for invalid internal links in markdown files
 2. **Type errors:** Run `npm run typecheck` to identify issues
 3. **Missing dependencies:** Run `npm install` to ensure all packages are installed
@@ -769,6 +823,7 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation style guidelines includi
 
 **For programming language examples (Go, Rust, JavaScript, Python, Java, C#):**
 Examples are fetched from GitHub, not local repositories. You need to:
+
 1. Push your changes to the `doc-examples` branch in the client repo (nats.go, nats.rs, or nats.js)
 2. Wait a moment for GitHub to process the push
 3. Run `npm run fetch-examples` in this repository to pull from GitHub
@@ -778,6 +833,7 @@ Examples are fetched from GitHub, not local repositories. You need to:
 
 **For CLI examples:**
 CLI examples are stored directly in this repository at `static/examples/snippets/cli/`, so they don't need to be fetched:
+
 1. Commit your CLI example to this repository
 2. Changes appear immediately after saving (hot reload)
 3. No need to run `npm run fetch-examples` for CLI-only changes
@@ -787,6 +843,7 @@ CLI examples are stored directly in this repository at `static/examples/snippets
 **Issue:** `<div class="nats-flow" data-scenario="...">` not rendering
 
 **Solutions:**
+
 1. Verify the `data-scenario` name: `*Animated` scenarios must be exported from
    `src/components/NatsFlow/scenarios/index.ts` and registered in
    `src/plugins/nats-flow/client-module.tsx`
