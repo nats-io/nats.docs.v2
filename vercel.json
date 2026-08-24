@@ -1122,7 +1122,7 @@
     },
     {
       "source": "/running-a-nats-service/nats_admin/profiling",
-      "destination": "/reference/system/monitor/profilez",
+      "destination": "/learn/monitoring/profiling",
       "permanent": false
     },
     {

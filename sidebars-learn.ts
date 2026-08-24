@@ -205,6 +205,7 @@ const sidebars: SidebarsConfig = {
             "monitoring/jetstream-health",
             "monitoring/advisories-and-events",
             "monitoring/prometheus-and-dashboards",
+            "monitoring/profiling",
             "monitoring/where-next",
           ],
         },

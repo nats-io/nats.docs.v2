@@ -1,7 +1,7 @@
 ---
 id: where-next
 title: "Where to go next"
-sidebar_position: 6
+sidebar_position: 7
 description: Recap the four monitoring lenses and point to the Operate siblings and Reference that take watching NATS further
 ---
 
@@ -101,7 +101,9 @@ You hold the core model: the live numbers come from the monitoring
 endpoints, lag comes from consumer state, the events you didn't poll for
 come from advisories, and the history that turns a number into an alert
 comes from the exporter. Those four sources together are how you keep a
-NATS deployment observable in production.
+NATS deployment observable in production. When all four say a node is
+unhealthy and none says why, a
+[profile](/learn/monitoring/profiling) is what you take next.
 
 ## Production checklist
 
@@ -134,6 +136,12 @@ back to the page that explains the why.
 - [ ] Use `/healthz?js-meta-only=true` to check cluster quorum; `?js-enabled-only=true` checks only whether the local node's JetStream is running and returns 200 even with no quorum.
 - [ ] Set explicit `nats server check` thresholds like `--unprocessed-critical`; defaults don't know your SLA, and a check with no threshold never fires.
 - [ ] Put Prometheus behind the exporter; the exporter stores no history, so on its own you only ever see "now."
+
+### Profiling — see [Pitfalls](/learn/monitoring/profiling#pitfalls)
+
+- [ ] Leave `prof_port` unset in production, or restrict it with firewall rules; it has no authentication and binds to the same interfaces as the client port.
+- [ ] Reach for `nats server request profile` before `prof_port`; it needs no config change and no restart, and `prof_port` isn't reloadable.
+- [ ] Set `prof_block_rate` above zero before asking for a `block` profile, and drop it back to zero afterwards; the profile is empty without it and the sampling slows the server down.
 
 ## See also
 

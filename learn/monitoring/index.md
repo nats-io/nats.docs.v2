@@ -74,6 +74,7 @@ concept needs and links to [Reference](/reference/) for the rest.
 | [JetStream health](/learn/monitoring/jetstream-health) | Stream and consumer state, and how to read lag, in-flight, and redelivery as numbers |
 | [Advisories and events](/learn/monitoring/advisories-and-events) | Transient messages on `$JS.EVENT.ADVISORY.>` and `$SYS.*` that report events you never actively queried for |
 | [Prometheus and dashboards](/learn/monitoring/prometheus-and-dashboards) | The exporter, time series, Grafana dashboards, and `nats server check` alert thresholds |
+| [Profiling the server](/learn/monitoring/profiling) | CPU and memory profiles over the system account or the `prof_port` endpoint, for when the numbers say a node is unhealthy but not why |
 | [Where to go next](/learn/monitoring/where-next) | A recap of the four lenses and a map of the Operate siblings beyond this chapter |
 
 The four lenses map to four pages: numbers come from the
@@ -81,7 +82,10 @@ The four lenses map to four pages: numbers come from the
 [consumer state](/learn/monitoring/jetstream-health), surprises come
 from [advisories](/learn/monitoring/advisories-and-events), and history
 comes from the
-[exporter](/learn/monitoring/prometheus-and-dashboards).
+[exporter](/learn/monitoring/prometheus-and-dashboards). The last
+content page, [profiling](/learn/monitoring/profiling), is the
+escalation from all four: what to do when they agree a node is unhealthy
+and none of them says why.
 
 ## Prerequisites
 

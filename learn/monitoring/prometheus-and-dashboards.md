@@ -207,11 +207,11 @@ angle a running deployment offers.
 
 ## What's next
 
-The next page recaps the four ways of observing, points to where the *fixes* for
-what you observe live, and collects every page's Pitfalls into one
-production checklist.
+The four lenses tell you a node is unhealthy. The next page covers what
+to do when they don't tell you why: taking a CPU or memory profile from
+a running server.
 
-Continue to [Where to go next](/learn/monitoring/where-next).
+Continue to [Profiling the server](/learn/monitoring/profiling).
 
 ## See also
 
