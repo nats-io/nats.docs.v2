@@ -1291,7 +1291,9 @@
                   },
                   "items": [
                     "config/leafnodes/authorization/users/username",
-                    "config/leafnodes/authorization/users/password"
+                    "config/leafnodes/authorization/users/password",
+                    "config/leafnodes/authorization/users/account",
+                    "config/leafnodes/authorization/users/proxy_required"
                   ]
                 },
                 "config/leafnodes/authorization/timeout",
