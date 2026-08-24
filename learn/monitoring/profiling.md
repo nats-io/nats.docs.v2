@@ -63,7 +63,7 @@ on `$SYS`, so the request gets no replies.
 Every server that answers writes its own file, named
 `<profile>-<timestamp>-<server>` in the working directory:
 
-```
+```text
 Server "n1-east" profile written: heap-20260824-141530-n1-east
 Server "n2-east" profile written: heap-20260824-141530-n2-east
 Server "n3-east" profile written: heap-20260824-141530-n3-east
@@ -97,7 +97,7 @@ The server can also serve Go's `net/http/pprof` handlers on a port of
 its own. It's off until you set `prof_port` in the node's
 configuration:
 
-```
+```conf
 prof_port: 65432
 ```
 
