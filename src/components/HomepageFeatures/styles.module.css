@@ -22,6 +22,10 @@
   color: var(--ifm-color-emphasis-700);
 }
 
+.docSectionRow {
+  justify-content: center;
+}
+
 .docSection {
   margin-bottom: 2rem;
 }
