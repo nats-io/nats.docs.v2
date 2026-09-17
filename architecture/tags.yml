@@ -1,0 +1,37 @@
+# Tags for the architecture docs instance. Inline tags in frontmatter must be defined here.
+core-nats:
+  label: "Core NATS"
+  description: "Core NATS messaging: subjects, publish-subscribe, request-reply, queue groups"
+jetstream:
+  label: "JetStream"
+  description: "JetStream streams and consumers"
+key-value:
+  label: "Key-Value"
+  description: "Key-Value store"
+object-store:
+  label: "Object Store"
+  description: "Object store"
+topology:
+  label: "Topology"
+  description: "Deployment shape: clusters, super-clusters, leaf nodes"
+security:
+  label: "Security"
+  description: "Accounts, authentication, authorization, TLS"
+multi-region:
+  label: "Multi-region"
+  description: "Designs that span regions"
+edge:
+  label: "Edge"
+  description: "Edge and IoT deployments"
+multi-tenant:
+  label: "Multi-tenant"
+  description: "Multi-tenant platforms and account isolation"
+operations:
+  label: "Operations"
+  description: "Running NATS in production"
+clients:
+  label: "Clients"
+  description: "Client library behaviour and configuration"
+migration:
+  label: "Migration"
+  description: "Coming to NATS from another system"
