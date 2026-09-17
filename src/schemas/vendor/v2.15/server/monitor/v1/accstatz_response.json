@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/accstatz_response.json",
+  "title": "io.nats.server.monitor.v1.accstatz_response",
+  "description": "Response from accstatz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "account_statz": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "acc": {
+            "type": "string"
+          },
+          "conns": {
+            "type": "integer"
+          },
+          "leafnodes": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "num_subscriptions": {
+            "type": "integer"
+          },
+          "received": {
+            "type": "object",
+            "properties": {
+              "bytes": {
+                "type": "integer"
+              },
+              "gateways": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "leafs": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "msgs": {
+                "type": "integer"
+              },
+              "routes": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              }
+            },
+            "required": [
+              "bytes",
+              "msgs"
+            ]
+          },
+          "sent": {
+            "type": "object",
+            "properties": {
+              "bytes": {
+                "type": "integer"
+              },
+              "gateways": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "leafs": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              },
+              "msgs": {
+                "type": "integer"
+              },
+              "routes": {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer"
+                  },
+                  "msgs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bytes",
+                  "msgs"
+                ]
+              }
+            },
+            "required": [
+              "bytes",
+              "msgs"
+            ]
+          },
+          "slow_consumers": {
+            "type": "integer"
+          },
+          "total_conns": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "acc",
+          "conns",
+          "leafnodes",
+          "name",
+          "num_subscriptions",
+          "received",
+          "sent",
+          "slow_consumers",
+          "total_conns"
+        ]
+      }
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "server_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_statz",
+    "now",
+    "server_id"
+  ]
+}

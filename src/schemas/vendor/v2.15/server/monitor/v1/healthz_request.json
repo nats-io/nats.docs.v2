@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/healthz_request.json",
+  "title": "io.nats.server.monitor.v1.healthz_request",
+  "description": "Request options for healthz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "account": {
+      "type": "string"
+    },
+    "consumer": {
+      "type": "string"
+    },
+    "details": {
+      "type": "boolean"
+    },
+    "js-enabled": {
+      "type": "boolean",
+      "description": "Deprecated: Use JSEnabledOnly instead"
+    },
+    "js-enabled-only": {
+      "type": "boolean"
+    },
+    "js-meta-only": {
+      "type": "boolean"
+    },
+    "js-server-only": {
+      "type": "boolean"
+    },
+    "stream": {
+      "type": "string"
+    }
+  }
+}

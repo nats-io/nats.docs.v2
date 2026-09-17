@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/leafz_request.json",
+  "title": "io.nats.server.monitor.v1.leafz_request",
+  "description": "Request options for leafz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "account": {
+      "type": "string"
+    },
+    "subscriptions": {
+      "type": "boolean",
+      "description": "Subscriptions indicates that Leafz will return a leafnode's subscriptions"
+    }
+  }
+}

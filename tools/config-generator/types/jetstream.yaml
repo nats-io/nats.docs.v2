@@ -6,12 +6,26 @@ types:
       batch:
         version: "2.12"
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a batch publish starts, so a batch already in
+              progress is unaffected. Only a batch started after the reload
+              sees the new ceiling.
         type: jetstream-limits-batch
         description: |-
           Ceilings on atomic batch publishing.
 
       max_ack_pending:
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a consumer is created or updated, so an
+              already-existing consumer keeps the value that applied when it
+              was made.
         type: integer
         description: |-
           Defines the maximum number of in-flight messages allowed to be
@@ -26,6 +40,13 @@ types:
 
       max_request_batch:
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a pull consumer is created or updated, so an
+              already-existing consumer keeps the value that applied when it
+              was made.
         type: integer
         description: |-
           The maximum request batch size allowed to be configured on pull
@@ -33,10 +54,34 @@ types:
 
       duplicate_window:
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a stream is created or updated, so an
+              already-existing stream keeps the value that applied when it
+              was made.
         type: duration
         description: |-
           The maximum duplication window period allowed to be configured on
           a stream.
+
+      default_max_consumers:
+        version: "2.15"
+        reloadable: reloadable
+        reloadable_note: |-
+          Read live at the moment a consumer is created, so the new value
+          applies to the next consumer created on any stream, including a
+          stream that already exists. It does not remove consumers that
+          already exceed it.
+        type: integer
+        default: 1000
+        description: |-
+          The default maximum number of consumers allowed on a stream that
+          does not set its own `max_consumers`, and whose account has no
+          consumer limit either. Set to `-1` to disable this default and
+          allow an unlimited number of consumers, matching pre-2.15
+          behavior.
 
   jetstream:
     type: object
@@ -220,9 +265,37 @@ types:
 
       limits:
         reloadable: not-reloadable
+        reloadable_note: |-
+          Starting in 2.15, a change to this block no longer aborts the
+          reload; see the individual keys below it.
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Each key is enforced when the stream or consumer it applies to
+              is created or updated, so an already-existing asset keeps the
+              value that applied when it was made — see the individual keys
+              below for exceptions.
         type: jetstream-limits
         description: |-
           Default cross-account JetStream limits.
+
+      max_concurrent_io:
+        version: "2.15"
+        reloadable: reloadable
+        reloadable_note: |-
+          Only reloadable while JetStream is being disabled in the same
+          reload (the whole `jetstream` block removed or `enabled: false`
+          set). Any other change while JetStream stays enabled fails the
+          reload.
+        type: integer
+        default: 4096
+        description: |-
+          Maximum number of disk I/O operations the server allows in flight
+          at once, across all streams and consumers. Must be between 4 and
+          8192. Lower it to reduce contention for the underlying disk on a
+          server with many assets; raise it on fast storage to allow more
+          parallel I/O.
 
       unique_tag:
         reloadable: not-reloadable
@@ -310,6 +383,12 @@ types:
     properties:
       max_msgs:
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a batch publish starts, so a batch already in
+              progress is unaffected.
         type: integer
         default: 1000
         description: |-
@@ -317,6 +396,12 @@ types:
 
       max_inflight_total:
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a batch publish starts, so a batch already in
+              progress is unaffected.
         type: integer
         default: 1000
         description: |-
@@ -324,6 +409,12 @@ types:
 
       max_inflight_per_stream:
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a batch publish starts, so a batch already in
+              progress is unaffected.
         type: integer
         default: 50
         description: |-
@@ -331,6 +422,12 @@ types:
 
       timeout:
         reloadable: not-reloadable
+        versions:
+          "2.15":
+            reloadable: reloadable
+            reloadable_note: |-
+              Enforced when a batch publish starts, so a batch already in
+              progress keeps the timeout it started with.
         type: duration
         default: 10s
         description: |-

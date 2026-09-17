@@ -18,15 +18,17 @@ A new minor version ships roughly every six months. Two release lines get patche
 
 | Version | Released | Status | Notes |
 |---|---|---|---|
-| 2.14 | 2026-04-30 | Latest | |
+| 2.15 | 2026-09-17 | Latest | |
+| 2.14 | 2026-04-30 | Maintained | |
 | 2.13 | — | Skipped | Never released |
-| 2.12 | 2025-09-22 | Maintained | |
+| 2.12 | 2025-09-22 | End of life | Final release [v2.12.15](https://github.com/nats-io/nats-server/releases/tag/v2.12.15), 2026-08-12 |
 | 2.11 | 2025-03-19 | End of life | Final release [v2.11.17](https://github.com/nats-io/nats-server/releases/tag/v2.11.17), 2026-04-27 |
 
 ## Releases
 
 | Version | Upgrade guide | Changelog | Announcement |
 |---|---|---|---|
+| 2.15 | [Upgrade to 2.15](/release-notes/upgrade-to-2.15) | [GitHub](https://github.com/nats-io/nats-server/releases/tag/v2.15.0) | [Blog post](https://nats.io/blog/nats-server-2.15-release/) |
 | 2.14 | [Upgrade to 2.14](/release-notes/upgrade-to-2.14) | [GitHub](https://github.com/nats-io/nats-server/releases/tag/v2.14.0) | [Blog post](https://nats.io/blog/nats-server-2.14-release/) |
 | 2.12 | [Upgrade to 2.12](/release-notes/upgrade-to-2.12) | [GitHub](https://github.com/nats-io/nats-server/releases/tag/v2.12.0) | [Blog post](https://nats.io/blog/nats-server-2.12-release/) |
 | 2.11 | [Guide in the nats.docs archive](https://github.com/nats-io/nats.docs/blob/master/release_notes/whats_new_211.md) | [GitHub](https://github.com/nats-io/nats-server/releases/tag/v2.11.0) | [Blog post](https://nats.io/blog/nats-server-2.11-release/) |

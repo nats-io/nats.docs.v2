@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/healthz_response.json",
+  "title": "io.nats.server.monitor.v1.healthz_response",
+  "description": "Response from healthz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "error": {
+      "type": "string"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "consumer": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "stream": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "CONNECTION",
+              "BAD_REQUEST",
+              "JETSTREAM",
+              "ACCOUNT",
+              "STREAM",
+              "CONSUMER"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "status": {
+      "type": "string"
+    },
+    "status_code": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "status"
+  ]
+}
