@@ -281,6 +281,17 @@ types:
               Interval in seconds at which reconnect attempts to a
               remote server are made.
 
+          dial_timeout:
+            version: "2.15"
+            reloadable: not-reloadable
+            type: duration
+            default: 1s
+            description: |-
+              How long to wait for the TCP connection to a remote server to
+              be established. Raise it on high-latency links where the
+              default is too short for the handshake to complete. Applies to
+              every remote, unless a remote sets its own `dial_timeout`.
+
   remote:
     type: object
     properties:
@@ -322,6 +333,16 @@ types:
         description: |-
           How long to wait for the remote's `INFO` message before giving up
           on the connection.
+
+      dial_timeout:
+        version: "2.15"
+        reloadable: not-reloadable
+        type: duration
+        description: |-
+          How long to wait for the TCP connection to this remote to be
+          established. Overrides the server-wide `leafnodes.dial_timeout`
+          for this remote only. If not set, the server-wide value applies,
+          which itself defaults to `1s`.
 
       disabled:
         version: "2.12"

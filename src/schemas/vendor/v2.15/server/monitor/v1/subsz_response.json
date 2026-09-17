@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nats.io/schemas/server/monitor/v1/subsz_response.json",
+  "title": "io.nats.server.monitor.v1.subsz_response",
+  "description": "Response from subsz monitoring endpoint",
+  "type": "object",
+  "properties": {
+    "avg_fanout": {
+      "type": "number"
+    },
+    "cacheCnt": {
+      "type": "integer"
+    },
+    "cacheHits": {
+      "type": "integer"
+    },
+    "cache_hit_rate": {
+      "type": "number"
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "max_fanout": {
+      "type": "integer"
+    },
+    "now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "num_cache": {
+      "type": "integer"
+    },
+    "num_inserts": {
+      "type": "integer"
+    },
+    "num_matches": {
+      "type": "integer"
+    },
+    "num_removes": {
+      "type": "integer"
+    },
+    "num_subscriptions": {
+      "type": "integer"
+    },
+    "offset": {
+      "type": "integer"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "subscriptions_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "account_tag": {
+            "type": "string"
+          },
+          "cid": {
+            "type": "integer"
+          },
+          "max": {
+            "type": "integer"
+          },
+          "msgs": {
+            "type": "integer"
+          },
+          "qgroup": {
+            "type": "string"
+          },
+          "sid": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cid",
+          "msgs",
+          "sid",
+          "subject"
+        ]
+      }
+    },
+    "totFanout": {
+      "type": "integer"
+    },
+    "total": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "avg_fanout",
+    "cache_hit_rate",
+    "limit",
+    "max_fanout",
+    "now",
+    "num_cache",
+    "num_inserts",
+    "num_matches",
+    "num_removes",
+    "num_subscriptions",
+    "offset",
+    "server_id",
+    "total"
+  ]
+}

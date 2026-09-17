@@ -48,6 +48,7 @@ const sidebars: SidebarsConfig = {
             id: "release-notes/index",
             label: "Overview",
         },
+        "release-notes/upgrade-to-2.15",
         "release-notes/upgrade-to-2.14",
         "release-notes/upgrade-to-2.12",
     ],

@@ -28,6 +28,7 @@
     "generate-docs:v2.11": "node scripts/generate-version.js 2.11",
     "generate-docs:v2.12": "node scripts/generate-version.js 2.12",
     "generate-docs:v2.14": "node scripts/generate-version.js 2.14",
+    "generate-docs:v2.15": "node scripts/generate-version.js 2.15",
     "generate-docs:all-versions": "node scripts/generate-version.js"
   },
   "dependencies": {
