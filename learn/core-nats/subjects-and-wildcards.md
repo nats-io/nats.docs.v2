@@ -50,6 +50,11 @@ Tokens are split by single dots only. Spaces, tabs, and line breaks
 aren't allowed anywhere in a subject. Stick to letters, digits, `-`, and
 `_` inside a token and you'll never be surprised.
 
+Note that subjects beginning with `$` are **reserved** for special or
+internal use by the server or clients and should always be avoided when
+designing your subject space. Future server or client versions may claim
+additional subject namespaces beginning with `$` at any time.
+
 ## Subjects cost almost nothing to create
 
 Acme just invented four new subjects without telling the server first —
@@ -146,7 +151,9 @@ Acme can name subjects almost anything, but two prefixes are reserved.
 Subjects beginning with `$` belong to the server and its subsystems:
 `$SYS` for system events, and `$JS`, `$KV`, `$O`, and `$SRV` for the
 JetStream, Key-Value, Object-Store, and Services subsystems. Don't
-publish application messages under `$`.
+publish application messages under `$` and do not design your applications
+to use subjects starting with `$`, as they may be claimed by future
+versions of the server or clients at any time.
 
 The `_INBOX` prefix is reserved for reply subjects that clients generate
 automatically. You don't pick `_INBOX` names yourself, and you don't
