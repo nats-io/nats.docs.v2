@@ -307,3 +307,6 @@ Continue to
   — the snapshot internals the restore step depends on.
 - [Clustering](/learn/clustering) — R3 leader election, the availability
   story that is not a recovery story.
+- [Clustering → Desired state and evacuation](/learn/clustering/desired-state)
+  — the ordinary way to take a server out, and what to do instead of a
+  rescue while the meta group still has a leader.
