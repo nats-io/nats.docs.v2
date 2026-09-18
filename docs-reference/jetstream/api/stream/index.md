@@ -13,5 +13,8 @@
 | [Purge stream](./purge) | `$JS.API.STREAM.PURGE.{stream}`              | No             |
 | [Leader stepdown](./leader-stepdown) | `$JS.API.STREAM.LEADER.STEPDOWN.{stream}`    | No             |
 | [Remove peer](./remove-peer) | `$JS.API.STREAM.PEER.REMOVE.{stream}`        | No             |
+| [Evacuate peer](./evacuate-peer) | `$JS.API.STREAM.PEER.EVACUATE.{stream}`      | No             |
+| [Cancel move](./cancel-move) | `$JS.API.STREAM.CANCEL_MOVE.{stream}`        | No             |
+| [Cancel move (other account)](./cancel-move) | `$JS.API.ACCOUNT.STREAM.CANCEL_MOVE.{account}.{stream}` | Yes            |
 | [Restore stream](./restore) | `$JS.API.STREAM.RESTORE.{stream}`            | No             |
 | [Snapshot stream](./snapshot) | `$JS.API.STREAM.SNAPSHOT.{stream}`           | No             |
