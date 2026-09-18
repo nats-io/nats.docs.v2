@@ -27,7 +27,7 @@ const COMMIT_COLOR = "#34A574"; // NATS green — files safely landed
 const ACK_COLOR = "#8DC63F"; // lime — flow-control ack
 const NAVY_COLOR = "#375C93"; // navy — accent for control plane
 
-// Backing up the ORDERS stream with `nats stream backup`: a request opens
+// Backing up the ORDERS stream with `nats backup stream`: a request opens
 // an ephemeral inbox, the server streams the stream as S2-compressed tar
 // chunks, the client acks each chunk for flow control, and the result is
 // two files in an off-site store.
@@ -61,11 +61,11 @@ const CAPTION: Record<Stage, string> = {
     config:
         "The server answers with the stream's config and state, then begins draining its store as an S2-compressed tar archive.",
     chunk:
-        "The server streams stream.tar.s2 to the inbox one chunk at a time — a chunked pull, never a single huge payload.",
+        "The server streams stream.arc.s2 to the inbox one chunk at a time — a chunked pull, never a single huge payload.",
     ack:
         "After each chunk the client returns a flow-control ack. The server waits for it before sending the next chunk — backpressure keeps the client from drowning.",
     land:
-        "When the last chunk is acked, backup.json (config + state) and stream.tar.s2 (the messages) land in the off-site backup store.",
+        "When the last chunk is acked, backup.json (config + state) and stream.arc.s2 (the messages) land in the off-site backup store.",
 };
 
 function StreamSnapshotAnimatedInner({
@@ -178,7 +178,7 @@ function StreamSnapshotAnimatedInner({
         style: { opacity: chunkActive || stage === "ack" ? 1 : 0.5 },
         data: {
             color: chunkActive ? MSG_COLOR : IDLE_COLOR,
-            label: "stream.tar.s2 chunk",
+            label: "stream.arc.s2 chunk",
             labelColor: chunkActive ? NAVY_COLOR : "#94a3b8",
             animated: chunkActive,
             interval: 1200,
