@@ -8,7 +8,7 @@ import metaServerRemoveResponse from '@site/src/schemas/vendor/v2.15/jsm/jetstre
 
 ## Subject
 
-`$JS.API.META.SERVER.REMOVE`
+`$JS.API.SERVER.REMOVE`
 
 ## Request
 

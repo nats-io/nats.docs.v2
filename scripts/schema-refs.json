@@ -594,7 +594,7 @@
       "kind": "api",
       "subjectLabel": "Subject",
       "subjects": [
-        "$JS.API.META.SERVER.REMOVE"
+        "$JS.API.SERVER.REMOVE"
       ],
       "subjectStyle": "inline",
       "subjectProse": "",
