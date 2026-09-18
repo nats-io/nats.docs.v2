@@ -181,7 +181,7 @@
           "$comment": "integer with a dynamic bit size depending on the platform the cluster runs on, can be up to 64bit",
           "type": "integer",
           "maximum": 9223372036854775807,
-          "minimum": -9223372036854775807
+          "minimum": -9223372036854775808
         },
         "filter_subject": {
           "description": "Filter the stream by a single subjects",
@@ -221,7 +221,7 @@
           "$comment": "integer with a dynamic bit size depending on the platform the cluster runs on, can be up to 64bit",
           "type": "integer",
           "maximum": 9223372036854775807,
-          "minimum": -9223372036854775807
+          "minimum": -9223372036854775808
         },
         "idle_heartbeat": {
           "minimum": 0,
@@ -245,6 +245,11 @@
         "direct": {
           "type": "boolean",
           "description": "Creates a special consumer that does not touch the Raft layers, not for general use by clients, internal use only",
+          "default": false
+        },
+        "sourcing": {
+          "type": "boolean",
+          "description": "Marks the consumer as one used by a stream to source data from another stream, not for general use by clients, internal use only",
           "default": false
         },
         "headers_only": {
@@ -294,10 +299,10 @@
         },
         "num_replicas": {
           "description": "When set do not inherit the replica count from the stream but specifically set it to this amount",
-          "type": "integer",
           "minimum": 0,
           "maximum": 5,
-          "$comment": "integer with a dynamic bit size depending on the platform the cluster runs on, can be up to 64bit"
+          "$comment": "integer with a dynamic bit size depending on the platform the cluster runs on, can be up to 64bit",
+          "type": "integer"
         },
         "mem_storage": {
           "description": "Force the consumer state to be kept in memory rather than inherit the setting from the stream",
