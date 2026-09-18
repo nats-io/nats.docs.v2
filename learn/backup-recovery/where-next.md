@@ -142,6 +142,7 @@ group links back to the page that explains the why.
 - [ ] Reach for a snapshot, not R3, against an accidental delete or a logical error; the bad write replicates, so availability cannot undo it.
 - [ ] Test restore on a schedule, quarterly at least; a green `nats stream info` on the live stream proves nothing about the archive.
 - [ ] Stop publishers before purging corrupted messages; purging under live writes races new bad data in.
+- [ ] Name the domain with `--js-domain` when rescuing a topology that has more than one; each domain runs its own meta group and a rescue lowers the quorum of exactly one of them.
 
 ### Config and JWT backup — see [Pitfalls](/learn/backup-recovery/config-and-jwt-backup#pitfalls)
 
