@@ -22,7 +22,8 @@
  *   6. tools/config-generator                          (config tree .md files
  *        and a config-sidebar.json fragment at a temp path)
  *   7. generate-schema-refs.js                         (71 pure-template MDX
- *        files with version-scoped schema imports)
+ *        files with version-scoped schema imports), then prune index.md
+ *        table rows pointing at pages this version did not generate
  *   8. build reference_versioned_sidebars/version-<name>-sidebars.json by
  *      splicing the config-sidebar fragment into a fixed reference-sidebar
  *      template (doc IDs have their legacy "reference/" prefix stripped)
@@ -373,6 +374,59 @@ function step_runSchemaRefs(version, paths) {
   runCmd("node", ["scripts/generate-schema-refs.js", version, "--out", paths.outDocs]);
 }
 
+/**
+ * Drop index-table rows that point at pages this version does not have.
+ *
+ * The index.md files under docs-reference/ are hand-written once and copied
+ * into every version, but generate-schema-refs.js only emits a page when its
+ * schemas exist in that version's vendor dir. An endpoint added in a later
+ * NATS major therefore leaves a dead `./name` link in every older version's
+ * index. Prune those rows here so each index lists exactly the pages that
+ * were generated next to it, and the shared file can stay authored against
+ * the newest version.
+ */
+function step_pruneIndexRows(paths) {
+  let pruned = 0;
+
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (entry.name === "index.md") {
+        pruneOne(full);
+      }
+    }
+  };
+
+  const pruneOne = (file) => {
+    const dir = path.dirname(file);
+    const lines = fs.readFileSync(file, "utf8").split("\n");
+    const kept = lines.filter((line) => {
+      // Only table rows, and only ones whose sole link is a sibling page.
+      if (!line.startsWith("|")) return true;
+      const targets = [...line.matchAll(/\]\(\.\/([A-Za-z0-9._-]+)\/?\)/g)].map((m) => m[1]);
+      if (targets.length === 0) return true;
+      const missing = targets.filter(
+        (t) =>
+          !fs.existsSync(path.join(dir, `${t}.md`)) &&
+          !fs.existsSync(path.join(dir, `${t}.mdx`)) &&
+          !fs.existsSync(path.join(dir, t)),
+      );
+      if (missing.length === 0) return true;
+      pruned++;
+      return false;
+    });
+    if (kept.length !== lines.length) {
+      fs.writeFileSync(file, kept.join("\n"));
+      log(`  pruned ${lines.length - kept.length} row(s) from ${path.relative(paths.outDocs, file)}`);
+    }
+  };
+
+  walk(paths.outDocs);
+  if (pruned === 0) log("  no index rows to prune");
+}
+
 function step_buildSidebar(version, paths) {
   // Filter schema-refs to only entries whose schemas exist in this version's
   // vendor dir — mirrors the filtering in generate-schema-refs.js.
@@ -460,6 +514,7 @@ function generateOne(version, tmpDir, knownVersions) {
     step_seedVarzResponse(stagePaths);
     step_runConfigGenerator(stagePaths, version.name, knownVersions);
     step_runSchemaRefs(version.name, stagePaths);
+    step_pruneIndexRows(stagePaths);
     stageOk = true;
   } finally {
     if (!stageOk) {
