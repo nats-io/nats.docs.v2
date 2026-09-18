@@ -193,6 +193,7 @@ const sidebars: SidebarsConfig = {
             "clustering/replication-and-r3",
             "clustering/placement",
             "clustering/scaling-and-peers",
+            "clustering/desired-state",
             "clustering/where-next",
           ],
         },

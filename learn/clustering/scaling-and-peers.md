@@ -87,38 +87,66 @@ pulls its weight as a replica like any other peer.
 
 ## Moving a replica off a server
 
-To retire a server, or move a stream off one, you **remove a peer**. This
-doesn't shrink the stream: it evicts the replica from the named server, and
-the meta leader re-places it on another server that qualifies, so `ORDERS`
-stays at its replica count. The command names the stream and the peer to
-drop:
+To move a stream off a server, you **evacuate** the peer. This doesn't
+shrink the stream: it moves the replica off the named server and onto
+another server that qualifies, so `ORDERS` stays at its replica count. The
+command names the stream and the peer to clear:
 
 ```bash
-nats --server nats://127.0.0.1:4222 stream cluster peer-remove ORDERS n4-east
+nats --server nats://127.0.0.1:4222 stream cluster evacuate ORDERS n4-east
 ```
 
-The meta leader picks a replacement peer, updates the stream's assignment,
-and the evicted server lets go of its RAFT subscriptions for the group. The
-replacement then catches up the same way a grown peer does. If the evicted
-peer held leadership, the group elects a new leader first, so leadership
-lands on a peer that stays. If no other server qualifies — placement leaves
-nowhere to put the replica — an R>1 stream still loses the peer: the server
-evicts it and returns `peer remap failed`, leaving the group a replica
-short. Only a single-replica stream is spared, since removing its last peer
-would brick it (the pitfall below covers that case).
+The meta leader picks a replacement peer and records the new peer set, but
+`n4-east` doesn't drop out at that point. It stays in the group, serving the
+stream, while the replacement joins and catches up the same way a grown peer
+does. Only once the replacement is caught up does the membership change that
+drops `n4-east` commit. If the evacuated peer held leadership, the group
+elects a new leader before it goes, so leadership lands on a peer that
+stays.
+
+If no other server qualifies — placement leaves nowhere to put the replica —
+the request fails with `peer remap failed` and nothing moves. That refusal
+is the point: the alternative would be dropping to two replicas on a stream
+you asked to keep at three. Fix the placement, or add a server that
+satisfies it, then evacuate again.
+
+Consumers move with the stream. A consumer pinned to the same server can
+also be moved on its own:
+
+```bash
+nats --server nats://127.0.0.1:4222 consumer cluster evacuate ORDERS NEW n4-east
+```
 
 To change the replica *count* — shrink `R=3` to `R=1`, say — edit the stream
-instead: `nats stream edit ORDERS --replicas=1`. `peer-remove` moves a
-replica between servers; `--replicas` sets how many replicas there are.
+instead: `nats stream edit ORDERS --replicas=1`. Evacuating moves a replica
+between servers; `--replicas` sets how many replicas there are.
+
+Re-read the group after an evacuation and expect a move in progress rather
+than a finished one. Both peers are listed while it runs, with the
+replacement behind on lag, and `nats` marks a peer that is joining or on its
+way out `(pending)`.
+
+<div class="nats-example" data-type="learn-clustering-scaling-and-peers-evacuate" data-languages="cli"></div>
+
+The move is done when `n4-east` is gone from the `Replicas` list and
+`stream info` stops printing the migration section it shows while a
+reconfiguration is in flight. Don't wait on lag reaching zero instead: a
+stream taking constant writes always has followers a little behind, because
+a write commits once a quorum has it rather than once everyone does. If a
+move looks stuck, that migration section carries a status line saying what
+it's waiting on — the [next page](/learn/clustering/desired-state) reads it
+properly.
 
 Removing a server from the JetStream **meta** group is a different command,
 `nats server cluster peer-remove`, and that one allows only one change at a
 time: ask for a second while one is in flight and it answers
-`cluster member change is in progress`. Let one finish before the next.
+`cluster member change is in progress`. Let one finish before the next. It's
+also for a different situation — a server that is gone and isn't coming
+back. Evacuating is what you reach for while the server is still running.
 
-After any `peer-remove`, re-read the group before you touch it again: the
-evicted peer is gone, its replacement is catching up, and a named leader is
-in place. The `Cluster` block of `nats stream info` shows all three.
+Stop the server before you peer-remove it, always. A running server that
+gets peer-removed reacts by turning JetStream off on itself, so you take a
+live node out of service instead of retiring a stopped one.
 
 The full set of peer-management and stream-assignment operations is
 documented in [Reference](/reference/jetstream/api/meta). We only need
@@ -126,43 +154,34 @@ grow, move, and the verify step here.
 
 ## Pitfalls
 
-Three mistakes are common the first time you resize a live group. All
-three come from this page's two concepts: growing a group with catchup, and
+Two mistakes are common the first time you resize a live group. Both
+come from this page's two concepts: growing a group with catchup, and
 moving a replica off a server.
 
-**Don't stack membership changes before the replacement catches up.** A
-`peer-remove` evicts a healthy replica and its replacement starts empty, so
-for a while only the peers that already held the data can serve it. Fire a
-second change — another `peer-remove`, or a `--replicas` edit — before that
-replacement is `current`, and you can drop the number of peers holding the
-data below the majority the group needs, and it stops committing. Make one
-change, wait for a named leader and a caught-up replacement, then the next.
+**Scaling up costs you failure headroom until the new peer catches up.**
+Raising `ORDERS` from three replicas to four raises the quorum with it: a
+four-peer group commits once three peers hold a write, where three peers
+needed two. The new peer joins the group before it holds any of the
+stream's history, so until it catches up it can't supply one of those three
+acks — which leaves all three of the original peers having to. Lose one of
+them mid-catchup and writes stall until the new peer is caught up. For that
+window a four-replica stream tolerates fewer failures than the three-replica
+one it grew from, which is the opposite of what raising the count suggests.
+It closes when `nats stream info` shows the new peer `current`.
 
-The handling is the verify step itself. Make exactly one change, then read
-the `Cluster` block back before going further:
+**`peer remap failed` means nothing moved, and that's the safe outcome.**
+Evacuating a stream or a consumer refuses to proceed when no server
+qualifies to take the replica — placement is too narrow, or the cluster is
+too small — rather than completing the move and leaving the group a replica
+short. Read the error as "fix the placement and try again", not as a failure
+to work around with `--force`. The one command that behaves differently is
+`nats server cluster evacuate`, which drains a whole server best-effort and
+*will* leave an asset under-replicated if nothing qualifies; the
+[next page](/learn/clustering/desired-state) covers that difference.
 
-<div class="nats-example" data-type="learn-clustering-scaling-and-peers-peerRemove" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
-
-If that second `stream info` shows `no leader`, stop. You've lost
-quorum, and the fix is to restore a peer, not make another change.
-
-**A freshly added peer isn't safe until its lag is zero.** When you raise
-the replica count, the new peer joins the set immediately but holds none of
-the stream's history. It can't win an election and can't serve a read while
-it catches up. Kill another server mid-catchup and you can drop below the
-peers that actually hold the data and stall the group. Don't treat a new
-peer as a working replica until `nats stream info` shows it `current` with
-zero lag, which is when catchup is done.
-
-**Removing the only peer needs `--force`, and forcing it doesn't move the
-data.** The CLI refuses to `peer-remove` the last peer of a stream without
-`--force` (`removing the only peer on a stream will result in data loss`).
-Even forced, there's nowhere to re-place the replica, so the server refuses
-to drop it and answers `peer remap failed` rather than brick the stream. The
-danger to avoid is forcing the removal in the belief the data will follow —
-it won't. Know the current replica count from `nats stream info` first, and
-change the count with `nats stream edit --replicas` rather than by removing
-the last peer.
+Note also that evacuating is not how you change the replica count. To go
+from `R=3` to `R=1`, read the current count from `nats stream info` and edit
+it with `nats stream edit --replicas`.
 
 ## Where you are
 
@@ -171,9 +190,11 @@ You can now resize a live RAFT group without taking the stream down:
 - You grew the `ORDERS` group by raising `--replicas`, watched the new
   peer catch up, and learned not to lean on it until `stream info` shows
   it `current`.
-- You moved a replica off a server with `nats stream cluster peer-remove`,
+- You moved a replica off a server with `nats stream cluster evacuate`,
   saw the meta leader re-place it to keep the replica count, and confirmed a
   leader was back before touching it again.
+- You know that a refused evacuation (`peer remap failed`) has moved
+  nothing, and that it is protecting the stream's replica count.
 - You know to make one membership change at a time, and why stacking a
   second before the replacement catches up is the way to lose quorum.
 
@@ -183,19 +204,21 @@ on purpose.
 
 ## What's next
 
-You've walked the whole mechanism: routes form the mesh, RAFT groups
-agree, a quorum commits each write, placement decides where replicas
-live, and peer management grows the set safely. The last page collects
-the recap, points to where the exhaustive detail lives, and gathers
-every page's Pitfalls into one production checklist.
+You've changed the group one peer at a time and waited for each change to
+land. From 2.15 the server records where a reconfiguration is heading and
+converges on it for you, which is what makes draining a whole server a
+single command — and what makes a move you started by mistake something you
+can roll back.
 
-Continue to [Where to go next](/learn/clustering/where-next).
+Continue to [Desired state and evacuation](/learn/clustering/desired-state).
 
 ## See also
 
 - [Raft and leaders](/learn/clustering/raft-and-leaders) — election and
-  `leader-stepdown`, which a `peer-remove` triggers when it drops the
+  `leader-stepdown`, which an evacuation triggers when it moves the
   leader.
+- [Desired state and evacuation](/learn/clustering/desired-state) — the
+  2.15 model these operations run under, and the bulk evacuate command.
 - [Reference → meta API](/reference/jetstream/api/meta) — the full set
   of peer-management and stream-assignment operations.
 - [Backup & recovery](/learn/backup-recovery) — take a backup before a

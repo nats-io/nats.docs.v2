@@ -1,7 +1,7 @@
 ---
 id: where-next
 title: "Where to go next"
-sidebar_position: 7
+sidebar_position: 8
 description: Recap the clustering mechanism and point to siblings, Reference, and a production checklist
 ---
 
@@ -146,9 +146,16 @@ explains the why.
 
 ### Scaling and peer management — see [Pitfalls](/learn/clustering/scaling-and-peers#pitfalls)
 
-- [ ] Make one membership change at a time; stacking a second before the replacement is `current` can drop the peers holding the data below a majority and the stream stops committing. Make one change, wait for a named leader and a caught-up replacement, then the next.
 - [ ] Wait for a freshly added peer to show `current` with zero lag before trusting it; while it catches up it can't win an election or serve a read, so don't kill another server mid-catchup.
-- [ ] Change the replica count with `nats stream edit --replicas`, not by removing the last peer; the CLI blocks removing the only peer without `--force`, and even forced the server answers `peer remap failed` rather than move the data.
+- [ ] Treat `peer remap failed` from `nats stream cluster evacuate` as a refusal that moved nothing, not something to force; it means no server qualifies to take the replica, so fix the placement or add capacity and run it again.
+- [ ] Change the replica count with `nats stream edit --replicas`, not by evacuating; evacuating moves a replica between servers, `--replicas` sets how many there are.
+
+### Desired state and evacuation — see [Pitfalls](/learn/clustering/desired-state#pitfalls)
+
+- [ ] Compare `Desired Peers` against the `Replica` lines before cancelling a move; a rollback is itself a reconfiguration, so cancelling one that's nearly done costs more catchup than letting it land.
+- [ ] Run `nats stream cluster cancel-move` without `--force` first; the unforced checks are what tell you the move already completed (`stream is not busy moving`) rather than silently running against nothing.
+- [ ] Hold off on scales and moves until every node is on 2.15, and upgrade from 2.14.7 or later; a 2.14 server persists desired state but won't run it to completion, so the reconfiguration stalls mid-upgrade.
+- [ ] Check `nats stream info` on the streams you care about after a `nats server cluster evacuate`; replacement there is best effort, so a drain with no spare capacity leaves assets under-replicated rather than refusing.
 
 ## See also
 

@@ -77,6 +77,7 @@ clusters (gateways, geo-affinity, super-cluster traffic) stays in
 | [Replication and R=3](/learn/clustering/replication-and-r3) | How a quorum commits a write, then followers apply it, and the consistency you get |
 | [Placement](/learn/clustering/placement) | Constrain replicas to a cluster and tagged servers, and move a stream's leader to a chosen server |
 | [Scaling and peer management](/learn/clustering/scaling-and-peers) | Grow the group with catchup, move a replica off a server safely, and never lose quorum doing it |
+| [Desired state and evacuation](/learn/clustering/desired-state) | Read a reconfiguration in flight, evacuate a server in one command, and roll a move back |
 | [Where to go next](/learn/clustering/where-next) | A recap of the whole mechanism and a production checklist |
 
 In summary, servers form a mesh, elect leaders, replicate

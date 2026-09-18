@@ -238,6 +238,8 @@ Both are system-account commands. Don't reach for either during an ordinary
 version roll: evacuating a node you're about to restart copies every replica
 it holds to another server for nothing, and the PDB and lame-duck sequence
 above already keep the stream safe across a restart.
+[Desired state and evacuation](/learn/clustering/desired-state) covers what
+the server records while those assets move, and how to roll it back.
 
 ## Client reconnection during the upgrade
 
@@ -338,3 +340,5 @@ Continue to [Hardening](/learn/deployment/hardening).
 - [Core NATS → Connection lifecycle](/learn/core-nats/connection-lifecycle) —
   the client's side of lame-duck mode: what the notice means and how the
   client ends up on another node.
+- [Clustering → Desired state and evacuation](/learn/clustering/desired-state) —
+  moving a node's assets off it for good, and reading the move in flight.
