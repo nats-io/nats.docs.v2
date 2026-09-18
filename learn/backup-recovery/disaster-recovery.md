@@ -29,6 +29,7 @@ under pressure during an outage is *which tool*. Decide it ahead of time, per fa
 | Someone deleted or purged `ORDERS` by mistake | recover from `ORDERS_DR`, or restore the snapshot | The mirror survives an upstream delete: it keeps every message it had copied and just stops updating, so it's usually the freshest intact copy. The snapshot is the older fallback. |
 | Messages on `ORDERS` are corrupt or wrong (a bad publisher) | restore a known-good snapshot, or purge the bad range | The bad data replicated to the mirror as well. The snapshot predates the corruption. |
 | A consumer lost its position (`shipping` redelivering from zero) | restore a `--consumers` snapshot | Only the snapshot captured the consumer's saved delivery position. |
+| Enough `east` servers are permanently gone that the meta group has no leader | rescue the meta group, then remove the dead peers | Nothing can be created, moved, or restored while the metadata layer has no quorum. |
 
 One principle runs through the whole table: a snapshot is the only copy
 that predates a mistake. A mirror follows the upstream's live writes, so
@@ -166,6 +167,76 @@ restore name rule) live one page back on
 [Stream backup and restore](/learn/backup-recovery/stream-backup-restore).
 Here it's one step in a larger procedure.
 
+## Last resort: rescue the meta group
+
+Every recovery above assumes the metadata layer still works. Streams are
+created, restored, and moved by the meta group, and it needs a majority of
+its peers to agree. Lose enough servers permanently — three of five gone
+with their disks — and the survivors can't form that majority. There's no
+leader, so `peer-remove` can't run, because removing a peer is itself a
+change the meta group has to agree on.
+
+From NATS 2.15 there's a supported way out. **Rescue** temporarily lowers
+the number of peers the meta group needs, so the survivors can agree again
+and you can remove the dead ones:
+
+```bash
+nats server cluster rescue
+```
+
+The command asks every server for its view first and prints what it found,
+so you can see how many are actually reachable before changing anything:
+
+```
+Current Cluster State
+
+   Server   Cluster  Size  Peers               Quorum Requires  Rescuing
+   n1-east  east     5     2 online / 5 peers  3                false
+   n2-east  east     5     2 online / 5 peers  3                false
+```
+
+Two servers online where quorum needs three is the situation rescue exists
+for. It then asks how many peers to require, defaulting to the number still
+online, broadcasts the change, and reports back per server:
+
+```
+Server "n1-east" now requires 2 quorum size (was 3)
+Server "n2-east" now requires 2 quorum size (was 3)
+```
+
+The meta group elects a leader again, and you finish the job by removing
+the servers that aren't coming back:
+
+```bash
+nats server cluster peer-remove n3-east
+```
+
+Only ever peer-remove a server that is stopped. Here that's a given — these
+servers are gone, which is why you're rescuing at all — but the rule holds
+everywhere: a running server that gets peer-removed disables JetStream on
+itself. If one of the "dead" servers turns out to be reachable, shut it down
+before removing its peer.
+
+Once only live servers remain in the meta group, normal operation resumes
+and the recoveries earlier on this page become possible again.
+
+**With more than one JetStream domain, name the one you mean.** Each domain
+runs its own meta group, with its own peers and its own quorum. A rescue
+lowers the quorum of exactly one of them, so on a topology with several
+domains — a hub and its leaf domains, say — the command has to be told which
+meta group it is rescuing. Left to guess, it stops with `multiple domains
+found, pick one from ...` and lists what answered. Name the domain:
+
+```bash
+nats server cluster rescue --js-domain hub
+```
+
+Two more things to know before you run it. It refuses to do anything while
+any server still reports a leader, printing `Cluster is healthy with a
+leader, no rescue needed` — if you see that, your problem is something else
+on this page. And it skips servers older than 2.15.0, naming each one, so a
+half-upgraded cluster tells you which nodes it ignored.
+
 ## Pitfalls
 
 The runbook fails most often on the order of the steps and the
@@ -191,6 +262,16 @@ the mistake rows of the table; that's what snapshots are for.
 sequence range while `order-svc` is still writing lets new corrupt data arrive
 behind you, so you keep purging against a tail that keeps growing. Stop the
 publishers, purge or restore, then resume.
+
+**Rescue is not peer management.** Lowering the quorum makes a smaller set
+of servers authoritative over the cluster's metadata, which is exactly the
+condition a split brain needs: bring the "gone" servers back after a rescue
+and two sets of peers each believe they had the majority. Use it only when
+the servers are genuinely not coming back, remove their peers straight
+afterward, and raise the cluster back to its full size. Retiring a node in
+the normal course is `nats server cluster evacuate` and
+`nats server cluster peer-remove` while the meta group still has a leader —
+never rescue.
 
 **An untested snapshot is unverified.** A healthy `nats stream info` on the live
 stream tells you the live stream is healthy; it proves nothing about the
