@@ -73,10 +73,10 @@
     },
     "max_connections": {
       "description": "The maximum amount of connections the server can accept",
-      "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
+      "$comment": "signed 64 bit integer",
       "type": "integer",
-      "maximum": 9223372036854775807,
-      "minimum": -9223372036854775807
+      "maximum": 9223372036854776000,
+      "minimum": -9223372036854776000
     },
     "max_subscriptions": {
       "type": "integer",
@@ -169,8 +169,8 @@
           "description": "The maximum time writes to sockets have to complete",
           "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
           "type": "integer",
-          "maximum": 9223372036854775807,
-          "minimum": -9223372036854775807
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000
         },
         "write_timeout": {
           "description": "The policy to apply to sockets being closed due to write_deadline",
@@ -262,8 +262,8 @@
           "description": "The maximum time writes to sockets have to complete",
           "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
           "type": "integer",
-          "maximum": 9223372036854775807,
-          "minimum": -9223372036854775807
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000
         },
         "write_timeout": {
           "description": "The policy to apply to sockets being closed due to write_deadline",
@@ -364,8 +364,8 @@
           "description": "The maximum time writes to sockets have to complete",
           "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
           "type": "integer",
-          "maximum": 9223372036854775807,
-          "minimum": -9223372036854775807
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000
         },
         "write_timeout": {
           "description": "The policy to apply to sockets being closed due to write_deadline",
@@ -424,8 +424,8 @@
           "description": "How long the internal JetStream state store will allow acks to complete",
           "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
           "type": "integer",
-          "maximum": 9223372036854775807,
-          "minimum": -9223372036854775807
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000
         },
         "max_ack_pending": {
           "type": "integer",
@@ -469,8 +469,8 @@
           "type": "number",
           "description": "How long the connection has to complete the websocket setup",
           "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
-          "maximum": 9223372036854775807,
-          "minimum": -9223372036854775807
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000
         },
         "auth_timeout": {
           "type": "number",
@@ -540,8 +540,8 @@
               "description": "How frequently we sync to disk in the background by calling fsync",
               "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
               "type": "integer",
-              "maximum": 9223372036854775807,
-              "minimum": -9223372036854775807
+              "maximum": 9223372036854776000,
+              "minimum": -9223372036854776000
             },
             "sync_always": {
               "type": "boolean",
@@ -662,11 +662,11 @@
                     "description": "Indicates if it has not been seen recently"
                   },
                   "active": {
-                    "description": "The timestamp it was last active",
+                    "description": "Nanoseconds since this peer was last seen",
                     "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
                     "type": "integer",
-                    "maximum": 9223372036854775807,
-                    "minimum": -9223372036854775807
+                    "maximum": 9223372036854776000,
+                    "minimum": -9223372036854776000
                   },
                   "lag": {
                     "type": "integer",
@@ -675,6 +675,10 @@
                   "peer": {
                     "type": "string",
                     "description": "The unique ID for the peer"
+                  },
+                  "pending": {
+                    "type": "boolean",
+                    "description": "Indicates the peer is part of the assignment, but is not a peer of the Raft group yet or is being removed"
                   }
                 }
               },
@@ -683,6 +687,15 @@
             "cluster_size": {
               "type": "integer",
               "description": "The known size of the cluster"
+            },
+            "quorum_needed": {
+              "type": "integer",
+              "description": "This server's current effective quorum size"
+            },
+            "rescue": {
+              "type": "boolean",
+              "description": "Indicates the quorum is unsafely lowered by an active rescue",
+              "default": false
             },
             "pending": {
               "type": "integer",
@@ -704,15 +717,15 @@
                   "type": "integer",
                   "description": "The count of pending entries in the meta layer",
                   "$comment": "signed 64 bit integer",
-                  "maximum": 9223372036854775807,
-                  "minimum": -9223372036854775807
+                  "maximum": 9223372036854776000,
+                  "minimum": -9223372036854776000
                 },
                 "pending_size": {
                   "type": "integer",
                   "description": "The size of pending entries in the meta layer in bytes",
                   "$comment": "signed 64 bit integer",
-                  "maximum": 9223372036854775807,
-                  "minimum": -9223372036854775807
+                  "maximum": 9223372036854776000,
+                  "minimum": -9223372036854776000
                 },
                 "last_time": {
                   "type": "string",
@@ -723,8 +736,8 @@
                   "type": "integer",
                   "description": "The duration of the last snapshot in nanoseconds",
                   "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
-                  "maximum": 9223372036854775807,
-                  "minimum": -9223372036854775807
+                  "maximum": 9223372036854776000,
+                  "minimum": -9223372036854776000
                 }
               }
             }
@@ -750,8 +763,8 @@
               "description": "The maximum value for duplicate tracking on Streams",
               "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
               "type": "integer",
-              "maximum": 9223372036854775807,
-              "minimum": -9223372036854775807
+              "maximum": 9223372036854776000,
+              "minimum": -9223372036854776000
             },
             "max_batch_inflight_per_stream": {
               "type": "integer",
@@ -769,8 +782,8 @@
               "description": "The maximum time to receive the commit message after receiving the first message of a batch",
               "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
               "type": "integer",
-              "maximum": 9223372036854775807,
-              "minimum": -9223372036854775807
+              "maximum": 9223372036854776000,
+              "minimum": -9223372036854776000
             }
           }
         }
@@ -784,8 +797,8 @@
       "description": "The maximum time writes to sockets have to complete",
       "$comment": "nanoseconds depicting a duration in time, signed 64 bit integer",
       "type": "integer",
-      "maximum": 9223372036854775807,
-      "minimum": -9223372036854775807
+      "maximum": 9223372036854776000,
+      "minimum": -9223372036854776000
     },
     "write_timeout": {
       "description": "The policy to apply to sockets being closed due to write_deadline",
@@ -849,19 +862,35 @@
     },
     "in_msgs": {
       "type": "integer",
-      "description": "The number of messages this server received"
-    },
-    "out_msgs": {
-      "type": "integer",
-      "description": "The number of message this server sent"
+      "description": "The total number of messages this server received. This includes messages from the clients, routers, gateways and leaf nodes"
     },
     "in_bytes": {
       "type": "integer",
-      "description": "The number of bytes this server received"
+      "description": "The total number of bytes this server received. This includes messages from the clients, routers, gateways and leaf nodes"
+    },
+    "in_client_msgs": {
+      "type": "integer",
+      "description": "The number of messages this server received from the clients"
+    },
+    "in_client_bytes": {
+      "type": "integer",
+      "description": "The number of bytes this server received from the clients"
+    },
+    "out_msgs": {
+      "type": "integer",
+      "description": "The total number of message this server sent. This includes messages sent to the clients, routers, gateways and leaf nodes"
     },
     "out_bytes": {
       "type": "integer",
-      "description": "The number of bytes this server sent"
+      "description": "The total number of bytes this server sent. This includes messages sent to the clients, routers, gateways and leaf nodes"
+    },
+    "out_client_msgs": {
+      "type": "integer",
+      "description": "The number of messages this server sent to the clients"
+    },
+    "out_client_bytes": {
+      "type": "integer",
+      "description": "The number of bytes this server sent to the clients"
     },
     "slow_consumers": {
       "type": "integer",
@@ -907,6 +936,13 @@
         "type": "string"
       },
       "description": "The metadata assigned to the server in configuration"
+    },
+    "feature_flags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "description": "The feature flags enabled/disabled in configuration"
     },
     "trusted_operators_jwt": {
       "type": "array",
@@ -1008,9 +1044,50 @@
         }
       }
     },
+    "disk_io_wait_stats": {
+      "type": "object",
+      "description": "Information about disk I/O semaphore contention",
+      "properties": {
+        "waiters": {
+          "type": "integer",
+          "description": "The number of goroutines waiting on the dios"
+        },
+        "waits": {
+          "type": "integer",
+          "description": "The number of dios acquires that had to wait"
+        },
+        "wait_time": {
+          "type": "integer",
+          "description": "The cumulative time spent waiting for dios"
+        },
+        "max_wait_time": {
+          "type": "integer",
+          "description": "The longest observed wait"
+        }
+      }
+    },
+    "proxies": {
+      "description": "Holds information about network proxy devices",
+      "type": "object",
+      "properties": {
+        "trusted": {
+          "type": "array",
+          "description": "List of trusted proxy devices",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "Public key of the network proxy",
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
     "tls_cert_not_after": {
       "type": "string",
-      "description": "The expiration date of the TLS certificate"
+      "description": "The expiration date of the TLS certificate of this server"
     }
   }
 }

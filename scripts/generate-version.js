@@ -16,9 +16,10 @@
  *        landing page, protocol specs, index.md files)
  *   4. generate-docs.go                                (errors, headers,
  *        monitor schemas from nats-server; copy jsm.go/schemas into vendor)
- *   5. seed src/schemas/vendor/v<name>/server/monitor/v1/varz_response.json
- *      from scripts/seed-varz-response.json (nats-server does not generate
- *      this schema and the older jsm.go tags don't ship it either)
+ *   5. write src/schemas/vendor/v<name>/server/monitor/v1/varz_response.json
+ *      from the jsm.go varz schema (nats-server does not generate this one),
+ *      falling back to scripts/seed-varz-response.json for jsm.go tags older
+ *      than v0.5.0, whose varz schema is not in a renderable shape
  *   6. tools/config-generator                          (config tree .md files
  *        and a config-sidebar.json fragment at a temp path)
  *   7. generate-schema-refs.js                         (71 pure-template MDX
@@ -333,8 +334,31 @@ function step_seedVarzResponse(paths) {
   const dst = path.join(paths.outMonitorSchemas, "varz_response.json");
   if (fs.existsSync(dst)) return; // generator/jsm.go already wrote one
   fs.mkdirSync(path.dirname(dst), { recursive: true });
+
+  // jsm.go ships the varz schema, but under its own name and only in a usable
+  // shape from v0.5.0 on. Earlier tags wrap every field in a non-standard
+  // "varz_v1" key instead of "properties", which <JSONSchema> renders as an
+  // empty table — those versions fall back to the hand-maintained seed.
+  const jsmVarz = path.join(paths.outJsmSchemas, "server/monitor/v1/varz.json");
+  if (fs.existsSync(jsmVarz)) {
+    let parsed = null;
+    try {
+      parsed = JSON.parse(fs.readFileSync(jsmVarz, "utf8"));
+    } catch (err) {
+      log(`  WARNING: ${path.relative(ROOT, jsmVarz)} is not valid JSON: ${err.message}`);
+    }
+    if (parsed && parsed.properties) {
+      // Keep the $id the varz page has always advertised; only the field
+      // definitions come from jsm.go.
+      const seeded = { ...parsed, $id: "https://nats.io/schemas/server/monitor/v1/varz_response.json" };
+      fs.writeFileSync(dst, JSON.stringify(seeded, null, 2) + "\n");
+      log(`  wrote ${path.relative(ROOT, dst)} from jsm.go`);
+      return;
+    }
+  }
+
   fs.copyFileSync(SEED_VARZ, dst);
-  log(`  seeded ${path.relative(ROOT, dst)}`);
+  log(`  seeded ${path.relative(ROOT, dst)} from ${path.relative(ROOT, SEED_VARZ)}`);
 }
 
 function step_runConfigGenerator(paths, versionName, knownVersions) {
