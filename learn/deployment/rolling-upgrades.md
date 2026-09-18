@@ -192,6 +192,53 @@ The full set of server configuration options is documented in
 [Reference → Configuration](/reference/config). We only cover the keys
 this deployment needs here.
 
+## Replacing a node, not restarting it
+
+A rolling upgrade takes each node down and brings the same node back, so
+its stream replicas are still assigned to it and catch up when it returns.
+That's why the three steps above never move any data.
+
+Retiring a node is a different job. If `nats-2` is leaving the cluster for
+good — smaller cluster, a replacement instance, hardware going away — its
+replicas have to live somewhere else before you stop it. From NATS 2.15 one
+command moves them all:
+
+```bash
+nats server cluster evacuate nats-2
+```
+
+Every stream and consumer assigned to `nats-2` keeps its replica count and
+gets a replacement peer that qualifies under its placement — where one
+exists. Replacement is best effort: the command's job is to clear the node,
+so an asset with nowhere to go moves off `nats-2` anyway and runs
+under-replicated until a qualifying server appears. On a three-node cluster
+an `R=3` stream has nowhere to put its third replica once `nats-2` leaves,
+so expect exactly that unless you add the replacement node first.
+
+Wait for the assets to report the new peers as `current`, and check the
+streams you care about are back at their replica count. Then **stop the
+node**, and only once it's down remove it from the meta group:
+
+```bash
+# On nats-2: shut the server down first.
+systemctl stop nats-server
+
+# Then, from anywhere with the system account:
+nats server cluster peer-remove nats-2
+```
+
+That order is not a style preference. A running server that gets
+peer-removed sees the removal, logs `JetStream being DISABLED, our server
+was removed from the cluster`, emits a `server_removed` advisory and turns
+JetStream off on itself. You end up having taken JetStream down on a live
+node instead of retiring a stopped one, and you still have to stop it. Stop
+first, and the removal is just bookkeeping on a node that has already gone.
+
+Both are system-account commands. Don't reach for either during an ordinary
+version roll: evacuating a node you're about to restart copies every replica
+it holds to another server for nothing, and the PDB and lame-duck sequence
+above already keep the stream safe across a restart.
+
 ## Client reconnection during the upgrade
 
 A node leaving in lame-duck mode requires no action from a correctly
