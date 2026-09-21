@@ -296,7 +296,7 @@ Continue to [JetStream health](/learn/monitoring/jetstream-health).
 
 ## See also
 
-- [Reference → monitoring endpoints](/reference/system/monitor) — the
+- [Reference → monitoring endpoints](/reference/system/monitor/) — the
   exhaustive field-by-field layer behind every number on this page.
 - [Reference → http_port](/reference/config/http_port) — configuring the
   monitoring port itself.

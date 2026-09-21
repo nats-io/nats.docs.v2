@@ -59,7 +59,7 @@ look.
 The [Reference root](/reference/) is the entry point. The handoff
 phrases throughout this chapter ("the full set of fields is documented
 in Reference") all point into it. The
-[monitoring endpoints reference](/reference/system/monitor) and the
+[monitoring endpoints reference](/reference/system/monitor/) and the
 [advisory reference](/reference/system/advisory) are the two you'll
 reach for most.
 
@@ -145,7 +145,7 @@ back to the page that explains the why.
 
 ## See also
 
-- [Reference → monitoring endpoints](/reference/system/monitor) — every
+- [Reference → monitoring endpoints](/reference/system/monitor/) — every
   endpoint field, type, and query param, versioned and exhaustive.
 - [Backup & Recovery deep dive](/learn/backup-recovery) — the fix for a
   lag this chapter only measured.

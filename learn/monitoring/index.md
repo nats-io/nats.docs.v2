@@ -112,5 +112,5 @@ Bring up the `east` cluster, leave it running, and turn to
   chapter observes
 - [JetStream deep dive](/learn/jetstream) — the `ORDERS` stream and the
   `shipping` consumer whose state this chapter reads
-- [Reference → monitoring endpoints](/reference/system/monitor) — the
+- [Reference → monitoring endpoints](/reference/system/monitor/) — the
   exhaustive field-by-field layer behind every number here
