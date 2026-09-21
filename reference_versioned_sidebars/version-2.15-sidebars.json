@@ -1627,6 +1627,8 @@
                 "jetstream/api/stream/purge",
                 "jetstream/api/stream/leader-stepdown",
                 "jetstream/api/stream/remove-peer",
+                "jetstream/api/stream/evacuate-peer",
+                "jetstream/api/stream/cancel-move",
                 "jetstream/api/stream/restore",
                 "jetstream/api/stream/snapshot",
                 "jetstream/api/stream/pub-ack"
@@ -1649,6 +1651,7 @@
                 "jetstream/api/consumer/get-next",
                 "jetstream/api/consumer/pause",
                 "jetstream/api/consumer/leader-stepdown",
+                "jetstream/api/consumer/evacuate-peer",
                 "jetstream/api/consumer/unpin"
               ]
             },
@@ -1662,7 +1665,9 @@
               },
               "items": [
                 "jetstream/api/meta/leader-stepdown",
-                "jetstream/api/meta/server-remove"
+                "jetstream/api/meta/server-remove",
+                "jetstream/api/meta/server-evacuate",
+                "jetstream/api/meta/rescue"
               ]
             },
             {

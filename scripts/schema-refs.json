@@ -298,6 +298,50 @@
       ]
     },
     {
+      "path": "jetstream/api/stream/evacuate-peer",
+      "title": "Evacuate Peer",
+      "description": "Moves a stream and its consumers off one peer. The stream keeps its replica count and the server picks the replacement peer. If no peer qualifies under the stream's placement, the request fails with a peer remap error rather than leaving the group under-replicated.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.PEER.EVACUATE.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream.",
+      "schemas": [
+        {
+          "var": "streamEvacuatePeerRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/stream_evacuate_peer_request.json"
+        },
+        {
+          "var": "streamEvacuatePeerResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_evacuate_peer_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/stream/cancel-move",
+      "title": "Cancel Move",
+      "description": "Cancels an in-progress stream reconfiguration and rolls the stream back to the config and peers it had before the reconfiguration started. This covers any in-flight desired state, not only moves: a scale up or down and a retention change are rolled back the same way.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.STREAM.CANCEL_MOVE.{stream}",
+        "$JS.API.ACCOUNT.STREAM.CANCEL_MOVE.{account}.{stream}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the name of the stream and `{account}` is the account that holds it.\n\nThe first subject is used from the account that owns the stream. The second cancels a move on behalf of another account and is only available from the system account.",
+      "schemas": [
+        {
+          "var": "streamCancelMoveResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/stream_cancel_move_response.json"
+        }
+      ]
+    },
+    {
       "path": "jetstream/api/stream/restore",
       "title": "Restore Stream",
       "description": "Restores a stream from a snapshot.",
@@ -540,6 +584,30 @@
       ]
     },
     {
+      "path": "jetstream/api/consumer/evacuate-peer",
+      "title": "Evacuate Peer",
+      "description": "Moves a single consumer off one peer. The consumer keeps its replica count and the server picks the replacement peer. If no peer qualifies, the request fails with a peer remap error rather than leaving the group under-replicated.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.PEER.EVACUATE.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "schemas": [
+        {
+          "var": "consumerEvacuatePeerRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_evacuate_peer_request.json"
+        },
+        {
+          "var": "consumerEvacuatePeerResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_evacuate_peer_response.json"
+        }
+      ]
+    },
+    {
       "path": "jetstream/api/consumer/unpin",
       "title": "Unpin Consumer",
       "description": "Unpins a consumer group.",
@@ -594,7 +662,7 @@
       "kind": "api",
       "subjectLabel": "Subject",
       "subjects": [
-        "$JS.API.META.SERVER.REMOVE"
+        "$JS.API.SERVER.REMOVE"
       ],
       "subjectStyle": "inline",
       "subjectProse": "",
@@ -608,6 +676,54 @@
           "var": "metaServerRemoveResponse",
           "label": "Response",
           "import": "jsm/jetstream/api/v1/meta_server_remove_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/meta/server-evacuate",
+      "title": "Server Evacuate",
+      "description": "Moves every stream and consumer off one server, so it can be taken out of the cluster. Each asset keeps its replica count and the server picks the replacement peers. Replacement is best effort: an asset with no qualifying peer is moved off the server anyway and runs under-replicated until one becomes available. The evacuated server is excluded from placement for those assets so they are not handed straight back to it.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.SERVER.EVACUATE"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Only works from the system account.",
+      "schemas": [
+        {
+          "var": "metaServerEvacuateRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/meta_server_evacuate_request.json"
+        },
+        {
+          "var": "metaServerEvacuateResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/meta_server_evacuate_response.json"
+        }
+      ]
+    },
+    {
+      "path": "jetstream/api/meta/rescue",
+      "title": "Meta Rescue",
+      "description": "Lowers the quorum the meta group needs, so peers can be removed when too many servers are permanently gone. This is unsafe and is only for disaster recovery.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.META.RESCUE"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Only works from the system account. This is a broadcast subject: every online server evaluates the request and replies on its own, so expect one response per server rather than a single reply.",
+      "schemas": [
+        {
+          "var": "metaRescueRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/meta_rescue_request.json"
+        },
+        {
+          "var": "metaRescueResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/meta_rescue_response.json"
         }
       ]
     },

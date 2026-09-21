@@ -16,13 +16,15 @@
  *        landing page, protocol specs, index.md files)
  *   4. generate-docs.go                                (errors, headers,
  *        monitor schemas from nats-server; copy jsm.go/schemas into vendor)
- *   5. seed src/schemas/vendor/v<name>/server/monitor/v1/varz_response.json
- *      from scripts/seed-varz-response.json (nats-server does not generate
- *      this schema and the older jsm.go tags don't ship it either)
+ *   5. write src/schemas/vendor/v<name>/server/monitor/v1/varz_response.json
+ *      from the jsm.go varz schema (nats-server does not generate this one),
+ *      falling back to scripts/seed-varz-response.json for jsm.go tags older
+ *      than v0.5.0, whose varz schema is not in a renderable shape
  *   6. tools/config-generator                          (config tree .md files
  *        and a config-sidebar.json fragment at a temp path)
  *   7. generate-schema-refs.js                         (71 pure-template MDX
- *        files with version-scoped schema imports)
+ *        files with version-scoped schema imports), then prune index.md
+ *        table rows pointing at pages this version did not generate
  *   8. build reference_versioned_sidebars/version-<name>-sidebars.json by
  *      splicing the config-sidebar fragment into a fixed reference-sidebar
  *      template (doc IDs have their legacy "reference/" prefix stripped)
@@ -332,8 +334,31 @@ function step_seedVarzResponse(paths) {
   const dst = path.join(paths.outMonitorSchemas, "varz_response.json");
   if (fs.existsSync(dst)) return; // generator/jsm.go already wrote one
   fs.mkdirSync(path.dirname(dst), { recursive: true });
+
+  // jsm.go ships the varz schema, but under its own name and only in a usable
+  // shape from v0.5.0 on. Earlier tags wrap every field in a non-standard
+  // "varz_v1" key instead of "properties", which <JSONSchema> renders as an
+  // empty table — those versions fall back to the hand-maintained seed.
+  const jsmVarz = path.join(paths.outJsmSchemas, "server/monitor/v1/varz.json");
+  if (fs.existsSync(jsmVarz)) {
+    let parsed = null;
+    try {
+      parsed = JSON.parse(fs.readFileSync(jsmVarz, "utf8"));
+    } catch (err) {
+      log(`  WARNING: ${path.relative(ROOT, jsmVarz)} is not valid JSON: ${err.message}`);
+    }
+    if (parsed && parsed.properties) {
+      // Keep the $id the varz page has always advertised; only the field
+      // definitions come from jsm.go.
+      const seeded = { ...parsed, $id: "https://nats.io/schemas/server/monitor/v1/varz_response.json" };
+      fs.writeFileSync(dst, JSON.stringify(seeded, null, 2) + "\n");
+      log(`  wrote ${path.relative(ROOT, dst)} from jsm.go`);
+      return;
+    }
+  }
+
   fs.copyFileSync(SEED_VARZ, dst);
-  log(`  seeded ${path.relative(ROOT, dst)}`);
+  log(`  seeded ${path.relative(ROOT, dst)} from ${path.relative(ROOT, SEED_VARZ)}`);
 }
 
 function step_runConfigGenerator(paths, versionName, knownVersions) {
@@ -371,6 +396,59 @@ function step_runConfigGenerator(paths, versionName, knownVersions) {
 
 function step_runSchemaRefs(version, paths) {
   runCmd("node", ["scripts/generate-schema-refs.js", version, "--out", paths.outDocs]);
+}
+
+/**
+ * Drop index-table rows that point at pages this version does not have.
+ *
+ * The index.md files under docs-reference/ are hand-written once and copied
+ * into every version, but generate-schema-refs.js only emits a page when its
+ * schemas exist in that version's vendor dir. An endpoint added in a later
+ * NATS major therefore leaves a dead `./name` link in every older version's
+ * index. Prune those rows here so each index lists exactly the pages that
+ * were generated next to it, and the shared file can stay authored against
+ * the newest version.
+ */
+function step_pruneIndexRows(paths) {
+  let pruned = 0;
+
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (entry.name === "index.md") {
+        pruneOne(full);
+      }
+    }
+  };
+
+  const pruneOne = (file) => {
+    const dir = path.dirname(file);
+    const lines = fs.readFileSync(file, "utf8").split("\n");
+    const kept = lines.filter((line) => {
+      // Only table rows, and only ones whose sole link is a sibling page.
+      if (!line.startsWith("|")) return true;
+      const targets = [...line.matchAll(/\]\(\.\/([A-Za-z0-9._-]+)\/?\)/g)].map((m) => m[1]);
+      if (targets.length === 0) return true;
+      const missing = targets.filter(
+        (t) =>
+          !fs.existsSync(path.join(dir, `${t}.md`)) &&
+          !fs.existsSync(path.join(dir, `${t}.mdx`)) &&
+          !fs.existsSync(path.join(dir, t)),
+      );
+      if (missing.length === 0) return true;
+      pruned++;
+      return false;
+    });
+    if (kept.length !== lines.length) {
+      fs.writeFileSync(file, kept.join("\n"));
+      log(`  pruned ${lines.length - kept.length} row(s) from ${path.relative(paths.outDocs, file)}`);
+    }
+  };
+
+  walk(paths.outDocs);
+  if (pruned === 0) log("  no index rows to prune");
 }
 
 function step_buildSidebar(version, paths) {
@@ -460,6 +538,7 @@ function generateOne(version, tmpDir, knownVersions) {
     step_seedVarzResponse(stagePaths);
     step_runConfigGenerator(stagePaths, version.name, knownVersions);
     step_runSchemaRefs(version.name, stagePaths);
+    step_pruneIndexRows(stagePaths);
     stageOk = true;
   } finally {
     if (!stageOk) {

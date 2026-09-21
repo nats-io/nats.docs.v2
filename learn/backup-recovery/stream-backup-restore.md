@@ -26,9 +26,16 @@ streams it to you in chunks; the CLI writes those chunks to a directory.
 
 That directory holds two things. A `backup.json` file records the
 stream's configuration and state: its subjects, retention, limits, and
-sequence range. Alongside it, `stream.tar.s2` is the messages
-themselves, packed into a tarball and compressed with S2. Together
-they're everything you need to recreate the stream from scratch.
+sequence range. Alongside it is the messages themselves, compressed with
+S2. Together they're everything you need to recreate the stream from
+scratch.
+
+The archive comes in two shapes, and which one you get depends on the
+server. NATS 2.15 writes `stream.arc.s2`, an archive format the CLI can
+read and rewrite. Older servers write `stream.tar.s2`, a tarball of the
+stream's on-disk files. Restore accepts either, so backups you already
+have keep working. The backup commands later on this page need the 2.15
+shape.
 
 Take a snapshot of `ORDERS` into a dated, off-site directory:
 
@@ -51,7 +58,7 @@ you back up a production stream.
 ## How the snapshot streams off the server
 
 A snapshot doesn't arrive as one big download. The server cuts the
-tarball into chunks and pushes them to an inbox subject, keeping up to a
+archive into chunks and pushes them to an inbox subject, keeping up to a
 window's worth of unacknowledged chunks in flight at once — 8 MiB by
 default, which is 64 of the default 128 KiB chunks. Each client ack frees
 a slot for the next chunk, and if no ack arrives for about five seconds
@@ -62,7 +69,7 @@ overwhelming a slow disk or a high-latency link.
 
 The request lands on the snapshot API, the server answers with the
 config and state, and then the message chunks flow to the inbox with an
-ack per chunk until the tarball and `backup.json` are written to the
+ack per chunk until the archive and `backup.json` are written to the
 backup store. The two settings that govern this, chunk size and window
 size, have sensible defaults, and you only change them when the
 defaults time out. We cover them in the [Pitfalls](#pitfalls).
@@ -75,8 +82,10 @@ We only need the behavior here.
 
 A snapshot becomes useful when you turn it back into a stream.
 **Restore** reads a snapshot directory and recreates the stream from it:
-same messages, same sequence numbers, same configuration. If the snapshot
-included consumer state, restore brings the consumers back too.
+same messages, same sequence numbers, same configuration. The server
+checks the archive's header to tell the two formats apart, so you don't
+have to say which one you have. If the snapshot included consumer state,
+restore brings the consumers back too.
 
 Restore the directory you just wrote:
 
@@ -109,22 +118,46 @@ stream you snapshotted, and `Active Consumers` shows `shipping` and
 the archive is real; the backup command exiting zero does not prove it on
 its own.
 
+## Read the backup without restoring it
+
+Verifying by restoring means standing up somewhere to restore into. From
+2.15 you don't have to: the archive is a format the CLI understands, so a
+backup directory can be checked offline.
+
+<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-validate" data-languages="cli"></div>
+
+`nats backup validate` walks the archive and reports whether it's complete
+and restorable. `nats backup info` prints what's inside — stream name,
+message count, sequence range, consumers — and `--subjects` breaks the
+counts down per subject, which is how you catch a nightly job that has been
+quietly capturing an empty stream.
+
+There's also `nats backup edit`, which writes a *new* backup from an
+existing one rather than changing it in place. It filters by subject, time,
+sequence range, header, or payload match, and can renumber the kept
+messages from 1. Its `--obfuscate` flag replaces names, subjects, and
+message bodies with keyed hashes and zeros of the same length, so you can
+send a support case a backup with the same shape as your production data
+but none of its contents. The key file it writes beside the target turns
+the hashes back into real values through `nats backup lookup`.
+
 ## Pitfalls
 
 Four common pitfalls, each scoped to this page's two operations: snapshot
 and restore.
 
-**Memory streams cannot be snapshotted.** A snapshot reads a stream's
-on-disk files, so a stream with `Storage: Memory` has nothing to read.
-The backup fails with `memory streams do not support snapshots`. Any stream
-you want to back up needs file storage: set `Storage: File` when you
-create it. Check the storage type before you rely on a snapshot, rather than
-finding out during an incident:
+**Before 2.15, memory streams cannot be snapshotted.** The older backup
+format copies a stream's on-disk files, so a stream with `Storage: Memory`
+has nothing to copy and the backup fails. NATS 2.15 reads the messages
+themselves rather than the files, which is what lets it back up and restore
+memory streams too. If any server you back up from is older than 2.15,
+treat file storage as a requirement for anything you can't lose, and check
+the storage type before you rely on a snapshot rather than finding out
+during an incident:
 
-<div class="nats-example" data-type="learn-backup-recovery-stream-backup-restore-backup" data-languages="cli,js,go,python,java,rust,csharp"></div>
-
-If that command errors on a memory stream, recreate the stream with file
-storage before it holds anything you can't lose.
+```bash
+nats stream info ORDERS | grep Storage
+```
 
 **The stream name cannot change on restore.** As above, the server
 rejects a restore that would rename the stream with `stream name may not
@@ -142,7 +175,7 @@ cheaper:
 
 ```bash
 # Smaller chunks and a smaller window survive a slow or distant link.
-nats stream backup ORDERS ./backups/orders/2026-06-04 \
+nats backup stream ORDERS ./backups/orders/2026-06-04 \
   --consumers --chunk-size 64k --window-size 1m
 ```
 
@@ -157,7 +190,7 @@ default unless you plan to recreate every consumer by hand.
 You now have:
 
 - A dated, off-site snapshot of `ORDERS` under `./backups/orders/`:
-  `backup.json` plus a compressed `stream.tar.s2`.
+  `backup.json` plus the compressed archive.
 - A restore procedure that rebuilds the stream byte-identical, under its
   original name, with its consumers intact.
 - A verification step that proves the restore by matching message counts.
@@ -185,3 +218,5 @@ Continue to
   — the restore request schema.
 - [Reference → Snapshot Create Advisory](/reference/jetstream/advisory/snapshot-create)
   — the event the server emits when a snapshot starts, for backup alerting.
+- [Upgrade to 2.15](/release-notes/upgrade-to-2.15) — the backup format
+  change and what else moved in the same release.

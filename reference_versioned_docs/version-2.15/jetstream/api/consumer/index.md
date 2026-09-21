@@ -9,5 +9,6 @@
 | [Consumer names](./names) | `$JS.API.CONSUMER.NAMES.{stream}`                | No             |
 | [Get next message](./get-next) | `$JS.API.CONSUMER.MSG.NEXT.{stream}.{consumer}`  | No             |
 | [Leader stepdown](./leader-stepdown) | `$JS.API.CONSUMER.LEADER.STEPDOWN.{stream}.{consumer}` | No             |
+| [Evacuate peer](./evacuate-peer) | `$JS.API.CONSUMER.PEER.EVACUATE.{stream}.{consumer}` | No             |
 | [Pause consumer](./pause) | `$JS.API.CONSUMER.PAUSE.{stream}.{consumer}`     | No             |
 | [Unpin consumer](./unpin) | `$JS.API.CONSUMER.UNPIN.{stream}.{consumer}`     | No             |

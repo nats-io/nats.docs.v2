@@ -1,6 +1,6 @@
 # limits
 
-<Reloadable state="not-reloadable" />
+<Reloadable state="not-reloadable" note="Starting in 2.15, a change to this block no longer aborts the reload; see the individual keys below it." />
 Default cross-account JetStream limits.
 
 

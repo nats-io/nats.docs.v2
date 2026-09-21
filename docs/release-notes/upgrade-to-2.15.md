@@ -10,6 +10,8 @@ This guide is tailored for existing NATS users upgrading from NATS version v2.14
 
 **Important:** Due to the desired state changes in the metalayer, we highly recommend upgrading from at least v2.14.7 to v2.15.x for the smoothest upgrade experience (see upgrade considerations below).
 
+For the complete changelog, see the [v2.15.0 release notes on GitHub](https://github.com/nats-io/nats-server/releases/tag/v2.15.0). For the story behind the release, see the [announcement post](https://nats.io/blog/nats-server-2.15-release/).
+
 ## Features
 
 ### Operations

@@ -172,14 +172,14 @@
             },
             "first_seq": {
               "description": "A custom sequence to use for the first message in the stream",
-              "type": "integer",
               "$comment": "unsigned 64 bit integer",
+              "type": "integer",
               "minimum": 0,
               "maximum": 18446744073709551615
             },
             "num_replicas": {
               "description": "How many replicas to keep for each message.",
-              "minimum": 1,
+              "minimum": 0,
               "default": 1,
               "maximum": 5,
               "$comment": "integer with a dynamic bit size depending on the platform the cluster runs on, can be up to 64bit",
@@ -288,7 +288,8 @@
                   "type": "object",
                   "description": "Consumer information for durable sourcing",
                   "required": [
-                    "name"
+                    "name",
+                    "deliver_subject"
                   ],
                   "properties": {
                     "name": {
@@ -385,7 +386,8 @@
                     "type": "object",
                     "description": "Consumer information for durable sourcing",
                     "required": [
-                      "name"
+                      "name",
+                      "deliver_subject"
                     ],
                     "properties": {
                       "name": {
@@ -469,7 +471,6 @@
               "type": "object",
               "description": "Rules for republishing messages from a stream with subject mapping onto new subjects for partitioning and more",
               "required": [
-                "src",
                 "dest"
               ],
               "properties": {
@@ -516,7 +517,7 @@
                   "$comment": "integer with a dynamic bit size depending on the platform the cluster runs on, can be up to 64bit",
                   "type": "integer",
                   "maximum": 9223372036854775807,
-                  "minimum": -9223372036854775807
+                  "minimum": -9223372036854775808
                 }
               }
             },
@@ -582,8 +583,10 @@
               "maximum": 18446744073709551615
             },
             "first_ts": {
+              "description": "The timestamp of the first message in the Stream",
+              "$comment": "A point in time in RFC3339 format including timezone, though typically in UTC",
               "type": "string",
-              "description": "The timestamp of the first message in the Stream"
+              "format": "date-time"
             },
             "last_seq": {
               "description": "Sequence number of the last message in the Stream",
@@ -593,8 +596,10 @@
               "maximum": 18446744073709551615
             },
             "last_ts": {
+              "description": "The timestamp of the last message in the Stream",
+              "$comment": "A point in time in RFC3339 format including timezone, though typically in UTC",
               "type": "string",
-              "description": "The timestamp of the last message in the Stream"
+              "format": "date-time"
             },
             "deleted": {
               "description": "IDs of messages that were deleted using the Message Delete API or Interest based streams removing messages out of order",
