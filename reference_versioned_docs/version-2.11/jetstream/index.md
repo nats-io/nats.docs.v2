@@ -28,6 +28,13 @@ Comprehensive error reference:
 - Detailed error descriptions
 - Troubleshooting guidance
 
+### [Cross-account subjects](./cross-account-subjects)
+Subjects that cross an account or domain boundary:
+- Exports and imports for sourcing and mirroring with ephemeral and durable consumers
+- Acknowledgement and delivery subjects for consumers driven from another account
+- Leafnode subject permissions in both directions
+- The v1 and v2 formats of `$JS.ACK`, `$JS.FC`, and `$JSC.R`
+
 ## Key Concepts
 
 JetStream extends NATS with:

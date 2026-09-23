@@ -166,15 +166,18 @@ subjects with a subject transform, or reach a stream in another account
 or JetStream domain. Each is one extra field on the mirror or source
 configuration.
 
-Reaching across an account or domain involves three subjects, each with a
-required export type. Setting one wrong is a common mistake — the Pitfalls
-below cover which type each subject needs and what goes wrong.
-
 The full set of mirror and source options (`filter_subject`,
 `subject_transforms`, `opt_start_seq`, `external`, and the rest) is
 documented in
 [Reference → Stream Configuration](/reference/jetstream/api/stream/create).
 We use only the plain `--mirror` and `--source` forms here.
+
+Reaching across an account or domain involves a consumer API subject, a
+delivery subject, and a flow control subject, each needing an export with the
+right type. Setting one wrong is a common mistake —
+the Pitfalls below cover what goes wrong, and
+[Reference → Cross-account subjects](/reference/jetstream/cross-account-subjects)
+lists each subject, its export type, and a worked config.
 
 Using mirrors for disaster recovery (switching over to a mirror when the
 primary cluster is lost) is its own operational topic, covered in
@@ -222,13 +225,13 @@ same entry. Pick the one that fits.
 
 **Cross-domain config that fails silently.** Reaching a stream in another
 account or JetStream domain needs the `external` block plus matching
-exports and imports on both sides, and each of the three subjects has a
-required type. The consumer API and flow-control subjects are *service*
+exports and imports on both sides, and each subject has a required
+type. The consumer API and flow-control subjects are *service*
 exports, because they work as request and reply. The delivery subject is
 a *stream* export, because the messages flow one way. Get a type wrong
 and replication doesn't fail with an error; the mirror never catches
 up. Check each import type against
-[Reference → Stream Configuration](/reference/jetstream/api/stream/create).
+[Reference → Cross-account subjects](/reference/jetstream/cross-account-subjects).
 Setting up cross-account and cross-domain access is part of configuring
 accounts and authorization.
 
@@ -256,5 +259,8 @@ served by any replica or mirror. After that,
   mirroring and sourcing behavior.
 - [Reference → Stream Configuration](/reference/jetstream/api/stream/create)
   — every mirror and source field and its valid values.
+- [Reference → Cross-account subjects](/reference/jetstream/cross-account-subjects)
+  — the subject formats, a worked export/import config, and leafnode
+  permissions.
 - [Operate → Backup & Recovery](/learn/backup-recovery/mirrors-and-sources)
   — using mirrors for disaster recovery.

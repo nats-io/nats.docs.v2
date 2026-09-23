@@ -67,6 +67,8 @@ jetstream {
 
 The only feature flag that switches its default in 2.15 is `js_raft_delete_range`. When mirroring a stream with huge delete gaps into a replicated stream, this would result in individual message deletes for every single message that was deleted. With this feature flag enabled the server instead proposes a single delete range, which is more efficient. Support for this operation has already been available throughout 2.14, so you don’t need to make any changes to your system and this flag is safely enabled when upgrading to 2.15. However, this may cause problems when upgrading to 2.15 directly from 2.12 or earlier.
 
+The `js_ack_fc_v2` flag keeps its 2.14 default in 2.15, which is the v1 acknowledgement and flow control reply subject format. The default changes to the v2 format in 2.16. If you have account imports/exports or subject permissions containing the `$JS.ACK.<stream>.>` or `$JS.FC.<stream>.>` (or more granular) subjects, you need to update them before upgrading to 2.16. See [domain-aware acknowledgement and flow control subjects](/release-notes/upgrade-to-2.14#domain-aware-acknowledgement-and-flow-control-subjects) in the 2.14 upgrade guide for the details.
+
 ## Downgrade considerations
 
 ### Desired state metalayer
