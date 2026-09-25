@@ -19,17 +19,17 @@ Server advisories enable:
 
 ### Connection Events
 
-- [Client Connect](./client-connect) - Published when a client connects to the server
+- [Client Connect](./client-connect.md) - Published when a client connects to the server
   - Subject: `$SYS.ACCOUNT.{account}.CONNECT`
   - Contains client ID, IP address, and metadata
 
-- [Client Disconnect](./client-disconnect) - Published when a client disconnects from the server
+- [Client Disconnect](./client-disconnect.md) - Published when a client disconnects from the server
   - Subject: `$SYS.ACCOUNT.{account}.DISCONNECT`
   - Includes disconnect reason and statistics
 
 ### Account Events
 
-- [Account Connections](./account-connections) - Published when account connection limits are reached
+- [Account Connections](./account-connections.md) - Published when account connection limits are reached
   - Subject: `$SYS.ACCOUNT.{account}.CONNECTIONS`
   - Alerts when approaching or exceeding limits
 

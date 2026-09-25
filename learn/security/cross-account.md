@@ -111,7 +111,7 @@ export down to named accounts, list them on the export entry:
 The order platform is fine with a public export here.
 
 (More sophisticated export restrictions are available when using
-[Operator mode](./operator-mode).)
+[Operator mode](./operator-mode.md).)
 
 ## Import the subject into ANALYTICS
 

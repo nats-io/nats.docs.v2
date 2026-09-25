@@ -86,6 +86,24 @@ nc.Publish("subject", []byte("hello"))
 // NATS-DOC-END
 ```
 
+### Links Between Pages
+
+**MUST link to a page in the same docs folder by its file path, with the extension:**
+```md
+[Watching](./watching.md)
+[Subjects](../subjects.md)
+[Stream API](./stream/index.md)
+```
+
+**NEVER use a relative URL such as `./watching` or `watching`.** The browser
+resolves a relative URL against the current address. The link then breaks when
+the trailing slash changes: `./watching` on `/learn/key-value` goes to
+`/learn/watching`. Docusaurus resolves a file path at build time, so the link
+works on both addresses.
+
+For a page in a different docs instance (for example, from `learn/` to the
+reference), use an absolute URL such as `/reference/jetstream/api/stream/create`.
+
 ## 🟡 SHOULD Rules (Best Practices)
 
 ### Code Examples
@@ -227,6 +245,7 @@ npm run fetch-examples # Fetch code examples
 - [ ] Code blocks specify language
 - [ ] Examples tested and working
 - [ ] Links are valid
+- [ ] Page links use file paths (`./page.md`), not relative URLs (`./page`)
 - [ ] `npm run typecheck` passes
 
 **Content:**

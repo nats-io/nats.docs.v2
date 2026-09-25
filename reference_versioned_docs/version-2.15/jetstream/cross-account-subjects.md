@@ -418,7 +418,7 @@ account, and sourcing stalls on flow control.
   format.
 - [Learn → Mirrors and sources](/learn/jetstream/mirrors-and-sources): building
   a mirror or source, including across an account or domain.
-- [Stream configuration](./api/stream/create): every field of the `external`
+- [Stream configuration](./api/stream/create.md): every field of the `external`
   and `consumer` blocks on a source or mirror.
 - [ADR-60](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-60.md):
   durable sourcing and the consumer reset API.

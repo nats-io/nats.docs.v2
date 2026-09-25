@@ -15,7 +15,7 @@ JetStream publishes metrics as system events on specific subjects. These metrics
 
 | Name | Subject | Description |
 | ---- | ------- | ----------- |
-| [Consumer Acknowledgement](./consumer-ack) | `$JS.EVENT.METRIC.CONSUMER.ACK.{stream}.{consumer}` | Message acknowledgement metrics including latency |
+| [Consumer Acknowledgement](./consumer-ack.md) | `$JS.EVENT.METRIC.CONSUMER.ACK.{stream}.{consumer}` | Message acknowledgement metrics including latency |
 
 ## Usage
 

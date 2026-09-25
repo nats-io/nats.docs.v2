@@ -25,19 +25,19 @@ Every page in this chapter belongs to one of three parts.
 presents proof of identity (a password, a token, a bearer JWT; or presents a
 signature using a secret: mTLS or NKeys (perhaps with non-bearer JWTs)),
 and the server decides whether to admit it. The authentication
-pages cover this, from [Authentication basics](./authentication-basics)
-through [Operator mode](./operator-mode) and
-[Decentralized authentication](./decentralized-auth), plus
-[Auth callout](./auth-callout).
+pages cover this, from [Authentication basics](./authentication-basics.md)
+through [Operator mode](./operator-mode.md) and
+[Decentralized authentication](./decentralized-auth.md), plus
+[Auth callout](./auth-callout.md).
 
 **Authorization** answers what you're allowed to do. Once admitted, a
 user can publish and subscribe only to the subjects you grant it; the
-server denies everything else. The [Authorization](./authorization) page
+server denies everything else. The [Authorization](./authorization.md) page
 covers this.
 
 **Encryption** answers whether the wire is safe. TLS protects each
 connection from eavesdropping and tampering, and a client certificate
-can serve as the identity itself. The [Encryption & TLS](./encryption) page
+can serve as the identity itself. The [Encryption & TLS](./encryption.md) page
 covers this.
 
 ## Accounts scope all three
@@ -47,8 +47,8 @@ A fourth idea scopes all three: the **account**.
 An account is an isolated tenant. Each account has its own users and its
 own subject space. Two accounts never see
 each other's messages unless you deliberately connect them.
-[Accounts and multitenancy](./accounts-and-multitenancy) builds the two
-accounts this chapter uses, and [Cross-account](./cross-account)
+[Accounts and multitenancy](./accounts-and-multitenancy.md) builds the two
+accounts this chapter uses, and [Cross-account](./cross-account.md)
 connects them.
 
 A user authenticates into an account, where permissions decide what it
@@ -104,15 +104,15 @@ covers only what you need to understand the concept and links to
 
 | Page | What you learn |
 |---|---|
-| [Authentication basics](./authentication-basics) | Centralized, config-based auth and the credential types |
-| [Authorization](./authorization) | Subject permissions: publish and subscribe allow and deny lists |
-| [Accounts and multitenancy](./accounts-and-multitenancy) | An account is an isolated tenant; the `$G` and `$SYS` accounts |
-| [Cross-account](./cross-account) | Exports and imports that share one subject across tenants |
-| [Operator mode](./operator-mode) | The `nats auth` workflow and the account resolver |
-| [Decentralized authentication](./decentralized-auth) | The operator, account, and user trust chain, with nkeys and JWTs |
-| [Auth callout](./auth-callout) | Delegating the authentication decision to an external service |
-| [Encryption & TLS](./encryption) | TLS per connection type, mutual TLS identity mapping, TLS-first handshakes, and encryption at rest |
-| [Where to go next](./where-next) | A map of what's beyond this chapter |
+| [Authentication basics](./authentication-basics.md) | Centralized, config-based auth and the credential types |
+| [Authorization](./authorization.md) | Subject permissions: publish and subscribe allow and deny lists |
+| [Accounts and multitenancy](./accounts-and-multitenancy.md) | An account is an isolated tenant; the `$G` and `$SYS` accounts |
+| [Cross-account](./cross-account.md) | Exports and imports that share one subject across tenants |
+| [Operator mode](./operator-mode.md) | The `nats auth` workflow and the account resolver |
+| [Decentralized authentication](./decentralized-auth.md) | The operator, account, and user trust chain, with nkeys and JWTs |
+| [Auth callout](./auth-callout.md) | Delegating the authentication decision to an external service |
+| [Encryption & TLS](./encryption.md) | TLS per connection type, mutual TLS identity mapping, TLS-first handshakes, and encryption at rest |
+| [Where to go next](./where-next.md) | A map of what's beyond this chapter |
 
 ## Prerequisites
 
@@ -125,4 +125,4 @@ You'll need:
   Client libraries take the same credentials on their connect call.
 
 Open a terminal and keep a config file handy. Continue to
-[Authentication basics](./authentication-basics).
+[Authentication basics](./authentication-basics.md).

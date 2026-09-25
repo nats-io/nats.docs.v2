@@ -56,7 +56,7 @@ In this pattern, one request is broadcast to all three services (A, B, C), and a
 
 ### Pattern 2: One Service Responds (Load Balancing)
 
-With [queue groups](./queue-groups), **only one** service receives the request and responds, providing automatic load balancing for scalability:
+With [queue groups](./queue-groups.md), **only one** service receives the request and responds, providing automatic load balancing for scalability:
 
 <div class="nats-flow" data-scenario="requestReplyQueueGroup" data-width="800" data-height="450"></div>
 
@@ -124,9 +124,9 @@ Use publish-subscribe when you need:
 
 ## Related Concepts
 
-- [Subjects](./subjects) - Understanding subject-based addressing
-- [Queue Groups](./queue-groups) - Load balancing for services
-- [Publish-Subscribe](./pub-sub-basics) - Asynchronous messaging patterns
+- [Subjects](./subjects.md) - Understanding subject-based addressing
+- [Queue Groups](./queue-groups.md) - Load balancing for services
+- [Publish-Subscribe](./pub-sub-basics.md) - Asynchronous messaging patterns
 
 ## Try It Yourself
 
