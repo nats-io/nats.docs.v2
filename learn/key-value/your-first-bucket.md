@@ -43,7 +43,7 @@ The second is `--history 1`. **History** is how many prior values the
 bucket keeps for each key. One means the bucket holds only the current
 value of a key and forgets the rest. That's the default and all the
 inventory service needs to start. The depth can go as high as 64, but no
-higher; [History and revisions](./history-and-revisions) raises it so a key
+higher; [History and revisions](./history-and-revisions.md) raises it so a key
 remembers where it's been, and for now, one is enough.
 
 You didn't set any other configuration. A bucket has the same long list
@@ -67,7 +67,7 @@ revision 1; in a bucket that already holds other keys, the same put would
 take the next number in the bucket's sequence instead. The put API returns
 that revision to client code; the CLI prints only the value you stored.
 Revisions are how the bucket tracks change over time, and
-[History and revisions](./history-and-revisions) builds on them.
+[History and revisions](./history-and-revisions.md) builds on them.
 
 Now read it back:
 

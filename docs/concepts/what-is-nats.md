@@ -36,7 +36,7 @@ NATS ships as a small set of pieces you compose together: the server, a client f
 - **Orbit** — optional per-language extension libraries with higher-level utilities and experimental features built on top of the core client.
 - **Tooling** — the `nats` CLI with built-in `nats auth` identity commands, `nsc` as the standalone identity tool, NACK and Helm charts for Kubernetes, Prometheus exporter, surveyor, bridges to Kafka / JMS / Spark / Flink, and a Terraform provider.
 
-See the [ecosystem page](ecosystem) for the full list with links.
+See the [ecosystem page](./ecosystem.md) for the full list with links.
 
 ## Key Differentiators
 
@@ -93,6 +93,6 @@ NATS excels in scenarios requiring:
 
 - [Core NATS deep dive](/learn/core-nats) — go hands-on with the messaging fundamentals
 - [The full Learn section](/learn) — guided chapters across every NATS topic
-- [Getting Started Guide](getting-started) — set up your first NATS application
-- [Pub/Sub Basics](pub-sub-basics) — deep dive into the publish-subscribe pattern
-- [Request-Reply](request-reply) — learn synchronous communication patterns
+- [Getting Started Guide](./getting-started/index.md) — set up your first NATS application
+- [Pub/Sub Basics](./pub-sub-basics.md) — deep dive into the publish-subscribe pattern
+- [Request-Reply](./request-reply.md) — learn synchronous communication patterns

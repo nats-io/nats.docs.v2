@@ -73,10 +73,10 @@ consumers:
 
 ## Related Concepts
 
-- [Publish-Subscribe](./pub-sub-basics) - The fire-and-forget messaging model
+- [Publish-Subscribe](./pub-sub-basics.md) - The fire-and-forget messaging model
   JetStream builds on
-- [Subjects](./subjects) - How streams capture messages by subject patterns
-- [Queue Groups](./queue-groups) - Load balancing across consumers, also
+- [Subjects](./subjects.md) - How streams capture messages by subject patterns
+- [Queue Groups](./queue-groups.md) - Load balancing across consumers, also
   available with JetStream consumers
 
 ## Next steps

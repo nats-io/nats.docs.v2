@@ -12,27 +12,27 @@ The NATS Server provides comprehensive interfaces for:
 
 ## Categories
 
-### [Advisory](./advisory/)
+### [Advisory](./advisory/index.md)
 System event notifications:
 - Client connection and disconnection events
 - Account limit warnings
 - Cluster state changes
 - Authentication events
 
-### [Metrics](./metric/)
+### [Metrics](./metric/index.md)
 
 Performance and telemetry data:
 - Resource utilization metrics
 - Throughput measurements
 
-### [Monitoring](./monitor/)
+### [Monitoring](./monitor/index.md)
 
 HTTP monitoring endpoints:
 - Health check endpoints
 - Cluster state information
 - Connection details
 
-### [Errors](./errors/)
+### [Errors](./errors.md)
 
 Server error responses:
 - Protocol violations

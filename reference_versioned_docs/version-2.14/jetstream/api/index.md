@@ -8,10 +8,10 @@ The JetStream API provides programmatic access to manage and interact with NATS 
 
 ## API Categories
 
-- [Account](./account/) - Account-level JetStream management
-- [Consumer](./consumer/) - Consumer management operations
-- [Stream](./stream/) - Stream management and data operations
-- [Meta](./meta/) - Metadata and cluster management operations
+- [Account](./account/index.md) - Account-level JetStream management
+- [Consumer](./consumer/index.md) - Consumer management operations
+- [Stream](./stream/index.md) - Stream management and data operations
+- [Meta](./meta/index.md) - Metadata and cluster management operations
 
 ## Request/Response Pattern
 

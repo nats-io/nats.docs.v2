@@ -4,7 +4,7 @@ NATS uses text-based protocols for all communication between clients, servers, a
 
 ## Protocol Types
 
-### [Client Protocol](client)
+### [Client Protocol](./client.md)
 The fundamental protocol for client-server communication. This text-based protocol defines how clients connect, authenticate, publish messages, create subscriptions, and handle responses. Features include:
 - Simple text-based commands (PUB, SUB, UNSUB)
 - Optional TLS encryption
@@ -12,14 +12,14 @@ The fundamental protocol for client-server communication. This text-based protoc
 - Support for request-reply patterns
 - Header support for metadata
 
-### [Route Protocol](route)
+### [Route Protocol](./route.md)
 Used for intra-cluster communication between NATS servers. Routes create a full mesh topology where every server connects to every other server in the cluster. Key characteristics:
 - Automatic message routing between servers
 - Interest propagation for efficient message delivery
 - Cluster-wide state synchronization
 - Fault tolerance and automatic failover
 
-### [Leafnode Protocol](leafnode)
+### [Leafnode Protocol](./leafnode.md)
 Enables lightweight, unidirectional connections from edge servers to a central cluster. Ideal for:
 - IoT and edge deployments
 - Hub-and-spoke architectures
@@ -27,7 +27,7 @@ Enables lightweight, unidirectional connections from edge servers to a central c
 - Selective message propagation
 - Account isolation
 
-### [Gateway Protocol](gateway)
+### [Gateway Protocol](./gateway.md)
 Connects multiple NATS clusters into a super-cluster while maintaining cluster autonomy. Benefits include:
 - Cross-cluster communication
 - Geographic distribution

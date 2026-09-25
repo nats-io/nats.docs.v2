@@ -83,12 +83,12 @@ long list, the page covers only the behavior you need and links to
 
 | Page | What you learn |
 |---|---|
-| [Your first service](./your-first-service) | Create `OrderInventory` with one endpoint, and the handler contract |
-| [Endpoints and groups](./endpoints-and-groups) | Host multiple endpoints in one service and group them under a subject prefix |
-| [Discovery](./discovery) | The three `$SRV` verbs (PING, INFO, STATS) and why discovery is broadcast |
-| [Observability](./observability) | Read per-endpoint stats and signal a service error |
-| [Scaling](./scaling) | Run N instances and let the queue group balance the load |
-| [Where to go next](./where-next) | A map of what's beyond this chapter |
+| [Your first service](./your-first-service.md) | Create `OrderInventory` with one endpoint, and the handler contract |
+| [Endpoints and groups](./endpoints-and-groups.md) | Host multiple endpoints in one service and group them under a subject prefix |
+| [Discovery](./discovery.md) | The three `$SRV` verbs (PING, INFO, STATS) and why discovery is broadcast |
+| [Observability](./observability.md) | Read per-endpoint stats and signal a service error |
+| [Scaling](./scaling.md) | Run N instances and let the queue group balance the load |
+| [Where to go next](./where-next.md) | A map of what's beyond this chapter |
 
 ## Prerequisites
 

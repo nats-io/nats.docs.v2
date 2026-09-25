@@ -25,28 +25,28 @@ subjects, and queue groups.
 
 | Page | What you learn |
 |---|---|
-| [Your first stream](./your-first-stream) | Why a stream, then create the `ORDERS` stream and read its anatomy |
-| [Publishing](./publishing) | Publish into a stream and understand the `PubAck` contract |
-| [Reading back the stream](./reading-back) | Read stored messages back with a durable consumer |
-| [Filtering what you consume](./filtering) | Add a second consumer that reads only `orders.shipped` |
-| [Delivery and acknowledgment](./delivery-and-acknowledgment) | In-flight, ack, double ack, and redelivery |
-| [Ack responses and redelivery](./acknowledgment) | ack, nak, term, in-progress, and redelivery timing |
-| [Pull consumers in depth](./pull-consumers) | fetch vs consume, and the knobs that bound a pull |
-| [Scaling a consumer](./worker-pool) | Many workers split the load of one consumer |
-| [Ordered consumers](./ordered-consumer) | A throwaway in-order read of a stream, and the config behind it |
-| [Priority groups](./priority-groups) | Steer which client gets served: overflow, pinned_client, and prioritized |
-| [Pausing a consumer](./pausing) | Stop delivery for a window, then resume |
-| [Shaping the stream](./shaping-the-stream) | Tune retention limits and discard behavior |
-| [Retention policies](./retention-policies) | Limits, Interest, and WorkQueue retention |
-| [Altering stream state](./altering-stream-state) | Delete a message or purge the stream, by hand |
-| [Surviving node loss](./surviving-node-loss) | Replicas, leaders, and storage durability |
-| [Advanced publishing](./advanced-publishing) | Async, atomic-batch, and fast-ingest publishing |
-| [Mirrors and sources](./mirrors-and-sources) | Copy one stream, or aggregate many |
-| [Reading messages directly](./get-direct) | Get one message or a batch straight from the stream, no consumer |
-| [Subject mapping and transforms](./subject-mapping) | Rewrite subjects on the way into a stream, and republish stored messages |
-| [Per-message TTL](./message-ttl) | Expire individual messages ahead of the stream |
-| [Stream and consumer policies](./policies) | Every stream and consumer policy, and which are fixed at creation |
-| [Where to go next](./where-next) | A map of what's beyond this chapter |
+| [Your first stream](./your-first-stream.md) | Why a stream, then create the `ORDERS` stream and read its anatomy |
+| [Publishing](./publishing.md) | Publish into a stream and understand the `PubAck` contract |
+| [Reading back the stream](./reading-back.md) | Read stored messages back with a durable consumer |
+| [Filtering what you consume](./filtering.md) | Add a second consumer that reads only `orders.shipped` |
+| [Delivery and acknowledgment](./delivery-and-acknowledgment.md) | In-flight, ack, double ack, and redelivery |
+| [Ack responses and redelivery](./acknowledgment.md) | ack, nak, term, in-progress, and redelivery timing |
+| [Pull consumers in depth](./pull-consumers.md) | fetch vs consume, and the knobs that bound a pull |
+| [Scaling a consumer](./worker-pool.md) | Many workers split the load of one consumer |
+| [Ordered consumers](./ordered-consumer.md) | A throwaway in-order read of a stream, and the config behind it |
+| [Priority groups](./priority-groups.md) | Steer which client gets served: overflow, pinned_client, and prioritized |
+| [Pausing a consumer](./pausing.md) | Stop delivery for a window, then resume |
+| [Shaping the stream](./shaping-the-stream.md) | Tune retention limits and discard behavior |
+| [Retention policies](./retention-policies.md) | Limits, Interest, and WorkQueue retention |
+| [Altering stream state](./altering-stream-state.md) | Delete a message or purge the stream, by hand |
+| [Surviving node loss](./surviving-node-loss.md) | Replicas, leaders, and storage durability |
+| [Advanced publishing](./advanced-publishing.md) | Async, atomic-batch, and fast-ingest publishing |
+| [Mirrors and sources](./mirrors-and-sources.md) | Copy one stream, or aggregate many |
+| [Reading messages directly](./get-direct.md) | Get one message or a batch straight from the stream, no consumer |
+| [Subject mapping and transforms](./subject-mapping.md) | Rewrite subjects on the way into a stream, and republish stored messages |
+| [Per-message TTL](./message-ttl.md) | Expire individual messages ahead of the stream |
+| [Stream and consumer policies](./policies.md) | Every stream and consumer policy, and which are fixed at creation |
+| [Where to go next](./where-next.md) | A map of what's beyond this chapter |
 
 ## Prerequisites
 

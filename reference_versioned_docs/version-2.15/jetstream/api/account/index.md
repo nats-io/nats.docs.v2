@@ -2,5 +2,5 @@
 
 | Name            | Subject                  | System Account |
 | --------------- | ------------------------ | -------------- |
-| [Account info](./info) | `$JS.API.INFO`           | No             |
-| [Account purge](./purge) | `$JS.API.ACCOUNT.PURGE`  | No             |
+| [Account info](./info.md) | `$JS.API.INFO`           | No             |
+| [Account purge](./purge.md) | `$JS.API.ACCOUNT.PURGE`  | No             |
