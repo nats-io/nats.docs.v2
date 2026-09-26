@@ -119,6 +119,32 @@ Orbit helper can drive a batch with raw headers, as the Python tab shows. See
 [ADR-50](https://github.com/nats-io/nats-architecture-and-design/blob/main/adr/ADR-50.md)
 for the full header set and limits.
 
+### Concurrency control inside a batch
+
+A batch can carry the same concurrency check as a single publish. Put
+`Nats-Expected-Last-Subject-Sequence` on the **first** message and the server
+evaluates it against the stream as it was before the batch: the group commits
+only if the subject is still where you expect it. That turns a batch into a
+conditional append — read the current state, decide, write the several messages
+that follow from it, and lose the race cleanly if another publisher got there
+first. A later message in the batch can carry its own subject check too, as long
+as no earlier message in the same batch already wrote that subject.
+
+Add `Nats-Expected-Last-Subject-Sequence-Subject` to check a **different**
+subject from the one you publish on, wildcards included. A batch can then write
+to several subjects while gating on their common parent — the line items of one
+order published under `orders.o123.item.*`, gated on `orders.o123.>`.
+
+**A replayed batch is rejected, not de-duplicated.** The `Nats-Msg-Id` advice
+from the async section doesn't carry over. Outside a batch the server drops a
+repeat silently; a batch containing a message id the server has already seen is
+refused as a whole, with `duplicate message id` (`10201`). The duplicate check
+also runs before the sequence check, so a replay whose expected sequence has
+since moved still comes back as `10201` rather than the `wrong last sequence`
+conflict (`10071`). After a lost ack that is exactly what you want: the two codes
+let a retry tell *already committed* from *someone wrote first*. Message ids in
+batches need server 2.12.1 or later — 2.12.0 rejects them.
+
 ## Fast-ingest batch publish
 
 A **fast-ingest batch** moves data into a stream at high speed with the server
