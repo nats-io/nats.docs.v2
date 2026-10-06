@@ -130,9 +130,9 @@ and `verify: true` for mutual TLS — and
 [Security → Encryption](/learn/security/encryption) covers them.
 
 The `mqtt {}` block can also carry its own `authorization {}` with a
-username, password, or token scoped to the MQTT listener only, and its
-own `no_auth_user`, which overrides the top-level one for MQTT
-connections. That last one is the answer when device firmware can't
+username, password, or token scoped to the MQTT listener including MQTT
+over WebSocket, and its own `no_auth_user`, which overrides the top-level
+one for MQTT connections. That last one is the answer when device firmware can't
 send credentials at all: it maps credential-less MQTT connections onto
 one of the users defined in the top-level `users` list, so the fleet
 gets that user's permissions while NATS clients keep their own rules.
@@ -331,6 +331,12 @@ the port itself.
 block, any device that can reach port 1883 connects. Devices sit on
 networks you control least, so put credentials and TLS on the MQTT
 listener before it leaves a lab.
+
+**Assuming WebSocket authentication protects MQTT.** MQTT clients
+connecting over WebSocket (`/mqtt`) use `mqtt.authorization`, falling
+back to global authentication. The `websocket.authorization` section
+does not apply to MQTT over WebSocket clients. Configure MQTT-specific
+or global authentication to protect both MQTT transports.
 
 **Denying `$MQTT.sub.>`.** A permission set written to be restrictive
 sometimes denies everything under `$MQTT.`, which silently breaks QoS 1
