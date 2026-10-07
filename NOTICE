@@ -1,6 +1,6 @@
 nats.docs.v2
 
-Copyright (c) 2026 Synadia Communications, Inc.
+Copyright (c) 2026 NATS Authors
 
 Original code and documentation in this repository are licensed under the
 MIT License (see LICENSE).
@@ -27,4 +27,4 @@ Version 2.0; this repository's MIT license applies to the original work
 contained here and does not relicense upstream content.
 
 NATS and the NATS logo are trademarks of the Cloud Native Computing
-Foundation and/or Synadia Communications, Inc.
+Foundation.
