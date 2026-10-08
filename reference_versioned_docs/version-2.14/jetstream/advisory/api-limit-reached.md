@@ -7,9 +7,9 @@ import apiLimitReached from '@site/src/schemas/vendor/v2.14/jsm/jetstream/adviso
 
 ## Subscription Subject
 
-`$JS.EVENT.ADVISORY.API.LIMIT_REACHED.{account}`
+`$JS.EVENT.ADVISORY.API.LIMIT_REACHED`
 
-Where `{account}` is the account name.
+The subject has no account token. The server publishes this advisory in the system account, and the `server` field identifies the server that hit the limit.
 
 ## Event Schema
 

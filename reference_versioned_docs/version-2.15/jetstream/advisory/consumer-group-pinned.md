@@ -7,7 +7,7 @@ import consumerGroupPinned from '@site/src/schemas/vendor/v2.15/jsm/jetstream/ad
 
 ## Subscription Subject
 
-`$JS.EVENT.ADVISORY.CONSUMER.GROUP_PINNED.{stream}.{consumer}`
+`$JS.EVENT.ADVISORY.CONSUMER.PINNED.{stream}.{consumer}`
 
 Where:
 - `{stream}` is the stream name
