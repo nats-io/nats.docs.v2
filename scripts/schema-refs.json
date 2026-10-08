@@ -753,10 +753,10 @@
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
-        "$JS.EVENT.ADVISORY.API.LIMIT_REACHED.{account}"
+        "$JS.EVENT.ADVISORY.API.LIMIT_REACHED"
       ],
       "subjectStyle": "inline",
-      "subjectProse": "Where `{account}` is the account name.",
+      "subjectProse": "The subject has no account token. The server publishes this advisory in the system account, and the `server` field identifies the server that hit the limit.",
       "schemas": [
         {
           "var": "apiLimitReached",
@@ -792,7 +792,7 @@
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
-        "$JS.EVENT.ADVISORY.CONSUMER.GROUP_PINNED.{stream}.{consumer}"
+        "$JS.EVENT.ADVISORY.CONSUMER.PINNED.{stream}.{consumer}"
       ],
       "subjectStyle": "inline",
       "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
@@ -811,7 +811,7 @@
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
-        "$JS.EVENT.ADVISORY.CONSUMER.GROUP_UNPINNED.{stream}.{consumer}"
+        "$JS.EVENT.ADVISORY.CONSUMER.UNPINNED.{stream}.{consumer}"
       ],
       "subjectStyle": "inline",
       "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",
@@ -887,10 +887,10 @@
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
-        "$JS.EVENT.ADVISORY.DOMAIN.LEADER_ELECTED.{domain}"
+        "$JS.EVENT.ADVISORY.DOMAIN.LEADER_ELECTED"
       ],
       "subjectStyle": "inline",
-      "subjectProse": "",
+      "subjectProse": "The subject has no domain token. The domain name is in the `domain` field of the event.",
       "schemas": [
         {
           "var": "domainLeaderElected",
@@ -925,7 +925,7 @@
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
-        "$JS.EVENT.ADVISORY.CONSUMER.MSG_NAK.{stream}.{consumer}"
+        "$JS.EVENT.ADVISORY.CONSUMER.MSG_NAKED.{stream}.{consumer}"
       ],
       "subjectStyle": "inline",
       "subjectProse": "Where:\n- `{stream}` is the stream name\n- `{consumer}` is the consumer name",

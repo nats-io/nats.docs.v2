@@ -7,16 +7,16 @@ Advisories are system events published by JetStream servers to notify about impo
 | Name | Subject | Description |
 | ---- | ------- | ----------- |
 | [API Audit](./api-audit.md) | `$JS.EVENT.ADVISORY.API` | Audit trail of JetStream API operations |
-| [API Limit Reached](./api-limit-reached.md) | `$JS.EVENT.ADVISORY.API.LIMIT_REACHED.{account}` | API rate limit reached |
+| [API Limit Reached](./api-limit-reached.md) | `$JS.EVENT.ADVISORY.API.LIMIT_REACHED` | API rate limit reached |
 | [Consumer Action](./consumer-action.md) | `$JS.EVENT.ADVISORY.CONSUMER.CREATED.{stream}.{consumer}`<br/>`$JS.EVENT.ADVISORY.CONSUMER.DELETED.{stream}.{consumer}` | Consumer lifecycle events |
-| [Consumer Group Pinned](./consumer-group-pinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.GROUP_PINNED.{stream}.{consumer}` | Consumer group pinned to node |
-| [Consumer Group Unpinned](./consumer-group-unpinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.GROUP_UNPINNED.{stream}.{consumer}` | Consumer group unpinned from node |
+| [Consumer Group Pinned](./consumer-group-pinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.PINNED.{stream}.{consumer}` | Consumer group pinned to node |
+| [Consumer Group Unpinned](./consumer-group-unpinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.UNPINNED.{stream}.{consumer}` | Consumer group unpinned from node |
 | [Consumer Leader Elected](./consumer-leader-elected.md) | `$JS.EVENT.ADVISORY.CONSUMER.LEADER_ELECTED.{stream}.{consumer}` | New consumer leader elected |
 | [Consumer Pause](./consumer-pause.md) | `$JS.EVENT.ADVISORY.CONSUMER.PAUSE.{stream}.{consumer}` | Consumer paused or resumed |
 | [Consumer Quorum Lost](./consumer-quorum-lost.md) | `$JS.EVENT.ADVISORY.CONSUMER.QUORUM_LOST.{stream}.{consumer}` | Consumer lost quorum |
-| [Domain Leader Elected](./domain-leader-elected.md) | `$JS.EVENT.ADVISORY.DOMAIN.LEADER_ELECTED.{domain}` | New domain leader elected |
+| [Domain Leader Elected](./domain-leader-elected.md) | `$JS.EVENT.ADVISORY.DOMAIN.LEADER_ELECTED` | New domain leader elected |
 | [Max Deliveries Exceeded](./max-deliver.md) | `$JS.EVENT.ADVISORY.CONSUMER.MAX_DELIVERIES.{stream}.{consumer}` | Message exceeded max delivery attempts |
-| [Message NAK](./nak.md) | `$JS.EVENT.ADVISORY.CONSUMER.MSG_NAK.{stream}.{consumer}` | Message negatively acknowledged |
+| [Message NAK](./nak.md) | `$JS.EVENT.ADVISORY.CONSUMER.MSG_NAKED.{stream}.{consumer}` | Message negatively acknowledged |
 | [Message Terminated](./terminated.md) | `$JS.EVENT.ADVISORY.CONSUMER.MSG_TERMINATED.{stream}.{consumer}` | Message terminated |
 | [Restore Complete](./restore-complete.md) | `$JS.EVENT.ADVISORY.STREAM.RESTORE_COMPLETE.{stream}` | Stream restore completed |
 | [Restore Started](./restore-create.md) | `$JS.EVENT.ADVISORY.STREAM.RESTORE_CREATE.{stream}` | Stream restore initiated |
