@@ -9,7 +9,7 @@ import domainLeaderElected from '@site/src/schemas/vendor/v2.14/jsm/jetstream/ad
 
 `$JS.EVENT.ADVISORY.DOMAIN.LEADER_ELECTED`
 
-The subject has no domain token. The domain name is in the `domain` field of the event.
+The subject has no domain token. When configured, the domain name appears in the `domain` field of the event; otherwise, the field is omitted.
 
 ## Event Schema
 
