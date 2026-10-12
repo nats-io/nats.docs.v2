@@ -1,13 +1,13 @@
 # Consumer Group Pinned
 
-Consumer group pinned to node.
+Consumer group pinned to a client.
 
 import JSONSchema from '@site/src/components/JSONSchema';
 import consumerGroupPinned from '@site/src/schemas/vendor/v2.14/jsm/jetstream/advisory/v1/consumer_group_pinned.json';
 
 ## Subscription Subject
 
-`$JS.EVENT.ADVISORY.CONSUMER.GROUP_PINNED.{stream}.{consumer}`
+`$JS.EVENT.ADVISORY.CONSUMER.PINNED.{stream}.{consumer}`
 
 Where:
 - `{stream}` is the stream name

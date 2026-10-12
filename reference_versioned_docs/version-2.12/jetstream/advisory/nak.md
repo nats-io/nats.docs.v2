@@ -7,7 +7,7 @@ import nak from '@site/src/schemas/vendor/v2.12/jsm/jetstream/advisory/v1/nak.js
 
 ## Subscription Subject
 
-`$JS.EVENT.ADVISORY.CONSUMER.MSG_NAK.{stream}.{consumer}`
+`$JS.EVENT.ADVISORY.CONSUMER.MSG_NAKED.{stream}.{consumer}`
 
 Where:
 - `{stream}` is the stream name
