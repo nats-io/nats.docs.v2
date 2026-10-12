@@ -749,7 +749,7 @@
     {
       "path": "jetstream/advisory/api-limit-reached",
       "title": "API Limit Reached",
-      "description": "API rate limit reached events.",
+      "description": "API request queue limit reached events.",
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
@@ -788,7 +788,7 @@
     {
       "path": "jetstream/advisory/consumer-group-pinned",
       "title": "Consumer Group Pinned",
-      "description": "Consumer group pinned to node.",
+      "description": "Consumer group pinned to a client.",
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
@@ -807,7 +807,7 @@
     {
       "path": "jetstream/advisory/consumer-group-unpinned",
       "title": "Consumer Group Unpinned",
-      "description": "Consumer group unpinned from node.",
+      "description": "Consumer group unpinned from a client.",
       "kind": "advisory",
       "subjectLabel": "Subscription Subject",
       "subjects": [
@@ -890,7 +890,7 @@
         "$JS.EVENT.ADVISORY.DOMAIN.LEADER_ELECTED"
       ],
       "subjectStyle": "inline",
-      "subjectProse": "The subject has no domain token. The domain name is in the `domain` field of the event.",
+      "subjectProse": "The subject has no domain token. When configured, the domain name appears in the `domain` field of the event; otherwise, the field is omitted.",
       "schemas": [
         {
           "var": "domainLeaderElected",

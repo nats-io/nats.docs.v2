@@ -7,10 +7,10 @@ Advisories are system events published by JetStream servers to notify about impo
 | Name | Subject | Description |
 | ---- | ------- | ----------- |
 | [API Audit](./api-audit.md) | `$JS.EVENT.ADVISORY.API` | Audit trail of JetStream API operations |
-| [API Limit Reached](./api-limit-reached.md) | `$JS.EVENT.ADVISORY.API.LIMIT_REACHED` | API rate limit reached |
+| [API Limit Reached](./api-limit-reached.md) | `$JS.EVENT.ADVISORY.API.LIMIT_REACHED` | API request queue limit reached |
 | [Consumer Action](./consumer-action.md) | `$JS.EVENT.ADVISORY.CONSUMER.CREATED.{stream}.{consumer}`<br/>`$JS.EVENT.ADVISORY.CONSUMER.DELETED.{stream}.{consumer}` | Consumer lifecycle events |
-| [Consumer Group Pinned](./consumer-group-pinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.PINNED.{stream}.{consumer}` | Consumer group pinned to node |
-| [Consumer Group Unpinned](./consumer-group-unpinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.UNPINNED.{stream}.{consumer}` | Consumer group unpinned from node |
+| [Consumer Group Pinned](./consumer-group-pinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.PINNED.{stream}.{consumer}` | Consumer group pinned to a client |
+| [Consumer Group Unpinned](./consumer-group-unpinned.md) | `$JS.EVENT.ADVISORY.CONSUMER.UNPINNED.{stream}.{consumer}` | Consumer group unpinned from a client |
 | [Consumer Leader Elected](./consumer-leader-elected.md) | `$JS.EVENT.ADVISORY.CONSUMER.LEADER_ELECTED.{stream}.{consumer}` | New consumer leader elected |
 | [Consumer Pause](./consumer-pause.md) | `$JS.EVENT.ADVISORY.CONSUMER.PAUSE.{stream}.{consumer}` | Consumer paused or resumed |
 | [Consumer Quorum Lost](./consumer-quorum-lost.md) | `$JS.EVENT.ADVISORY.CONSUMER.QUORUM_LOST.{stream}.{consumer}` | Consumer lost quorum |
