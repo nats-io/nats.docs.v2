@@ -13,19 +13,19 @@ NATS Services extend the request-reply pattern with:
 
 ## API Responses
 
-### [Info Response](./info-response)
+### [Info Response](./info-response.md)
 Service metadata and configuration:
 - Service name and version
 - Endpoint descriptions
 - Configuration details
 
-### [Ping Response](./ping-response)
+### [Ping Response](./ping-response.md)
 Health check and liveness probe:
 - Service availability status
 - Response time measurement
 - Instance identification
 
-### [Stats Response](./stats-response)
+### [Stats Response](./stats-response.md)
 Operational statistics:
 - Request counts and rates
 - Error tracking

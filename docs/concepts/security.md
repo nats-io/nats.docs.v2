@@ -144,4 +144,4 @@ nats pub --user alice --password s3cret billing.invoice "nope"
 - [Security deep dive](/learn/security) — secure a deployment end to end
 - [Encryption & TLS](/learn/security/encryption) — secure connections in transit
 - [Operator mode](/learn/security/operator-mode) — decentralized JWT-based auth
-- [Subjects](./subjects) — the addressing system permissions are built on
+- [Subjects](./subjects.md) — the addressing system permissions are built on

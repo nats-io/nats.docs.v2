@@ -137,5 +137,5 @@ Track these metrics for queue groups:
 - [Queue groups in the Core NATS deep dive](/learn/core-nats/queue-groups) — runnable, step-by-step walkthrough
 - [Services](/learn/services) — queue-group load balancing for services
 - [JetStream worker pools](/learn/jetstream/worker-pool) — durable work distribution at scale
-- [Request-Reply](./request-reply) — synchronous communication patterns
-- [Publish-Subscribe](./pub-sub-basics) — one-to-many messaging
+- [Request-Reply](./request-reply.md) — synchronous communication patterns
+- [Publish-Subscribe](./pub-sub-basics.md) — one-to-many messaging

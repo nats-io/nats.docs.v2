@@ -154,8 +154,8 @@ stream is why it exists.
 You now have:
 
 - The same `INVENTORY` bucket you built across the first four pages, from
-  [Your first bucket](./your-first-bucket) through
-  [TTL and limits](./ttl-and-limits), plus the ability to inspect it as the
+  [Your first bucket](./your-first-bucket.md) through
+  [TTL and limits](./ttl-and-limits.md), plus the ability to inspect it as the
   `KV_INVENTORY` stream it's always been.
 - A map from every KV operation to its stream mechanism: put is a message, get is
   a direct read of the last message per subject, history is messages kept per

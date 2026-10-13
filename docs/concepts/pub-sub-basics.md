@@ -17,7 +17,7 @@ Watch how messages flow as subscribers join. With no subscribers, messages reach
 
 ## How It Works
 
-1. **Publishers** send messages to a [subject](./subjects) — a simple string like `orders.created`
+1. **Publishers** send messages to a [subject](./subjects.md) — a simple string like `orders.created`
 2. **Subscribers** express interest in subjects they care about
 3. **NATS delivers** a copy of each message to every matching subscriber
 4. **No coupling** — publishers don't know about subscribers, and subscribers don't know about publishers
@@ -90,11 +90,11 @@ orders.us.canceled
 
 This creates logical namespaces for organizing your messages. You can use wildcards to subscribe across hierarchies — `orders.*.created` catches orders from any region.
 
-For a deep dive into subjects, hierarchies, wildcards, and naming conventions, see [Subjects](./subjects).
+For a deep dive into subjects, hierarchies, wildcards, and naming conventions, see [Subjects](./subjects.md).
 
 ## How Delivery Works
 
-- **At-most-once delivery**: Core NATS delivers messages without persistence. If you need guaranteed delivery, that's what [JetStream](jetstream) is for.
+- **At-most-once delivery**: Core NATS delivers messages without persistence. If you need guaranteed delivery, that's what [JetStream](./jetstream.md) is for.
 - **Active subscribers only**: Only subscribers connected when the message is published will receive it. Messages aren't stored for later.
 - **Every subscriber gets a copy**: Subscribing doesn't consume or remove messages — each subscriber independently receives its own copy.
 - **Message size**: NATS has a default max message size of 1MB (configurable). For large data, consider using object stores or passing references.
@@ -120,6 +120,6 @@ You'll see each message arrive in Terminal 1 the instant it's published. Try ope
 
 - [Core NATS deep dive](/learn/core-nats) — the full runnable walkthrough
 - [Publish-subscribe, step by step](/learn/core-nats/publish-subscribe) — build pub/sub up from scratch
-- [Subjects](./subjects) — the addressing system that makes pub/sub flexible
-- [Queue Groups](./queue-groups) — same pub/sub, but with built-in load balancing
-- [Request-Reply](./request-reply) — pub/sub with a reply subject for synchronous patterns
+- [Subjects](./subjects.md) — the addressing system that makes pub/sub flexible
+- [Queue Groups](./queue-groups.md) — same pub/sub, but with built-in load balancing
+- [Request-Reply](./request-reply.md) — pub/sub with a reply subject for synchronous patterns

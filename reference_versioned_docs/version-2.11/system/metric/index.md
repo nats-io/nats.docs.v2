@@ -12,7 +12,7 @@ Server metrics are published as events that can be subscribed to for real-time m
 
 ## Available Metrics
 
-### [Service Latency](./service-latency)
+### [Service Latency](./service-latency.md)
 Measures the time taken to process service requests:
 - Request/response round-trip times
 - Processing latency distribution

@@ -255,8 +255,8 @@ Congratulations! You've successfully:
 - [Core NATS deep dive](/learn/core-nats) — hands-on path through the fundamentals
 - [JetStream deep dive](/learn/jetstream) — persistence and streaming
 - [The full Learn section](/learn) — guided, runnable chapters
-- [Request-Reply Pattern](../request-reply) — synchronous communication
-- [Subjects](../subjects) — understanding subject-based messaging
+- [Request-Reply Pattern](../request-reply.md) — synchronous communication
+- [Subjects](../subjects.md) — understanding subject-based messaging
 
 ### Client Libraries
 

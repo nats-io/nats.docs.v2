@@ -71,9 +71,9 @@ v1: $JS.ACK.<stream name>.<consumer name>.<num delivered>.<stream sequence>.<con
 v2: $JS.ACK.<domain>.<account hash>.<stream name>.<consumer name>.<num delivered>.<stream sequence>.<consumer sequence>.<timestamp>.<num pending>
 ```
 
-While both v1 and v2 formats will be supported starting from 2.14, v1 remains the default. However, in version 2.15 the default will change to be the v2 format. Users that have defined account imports/exports or subject permissions containing the `$JS.ACK.<stream>.>` or `$JS.FC.<stream>.>` (or more granular) subjects **will be required to update their ACLs and/or account imports/exports before the 2.15 release** to allow the same stream and consumer names to be used in different domains or accounts without them conflicting with each other.
+While both v1 and v2 formats will be supported starting from 2.14, v1 remains the default. However, in version 2.16 the default will change to be the v2 format. Users that have defined account imports/exports or subject permissions containing the `$JS.ACK.<stream>.>` or `$JS.FC.<stream>.>` (or more granular) subjects **will be required to update their ACLs and/or account imports/exports before the 2.16 release** to allow the same stream and consumer names to be used in different domains or accounts without them conflicting with each other.
 
-If you have not defined such account imports/exports or subject permissions, for example if you use JetStream only within a single account, or you defined them as the "catch-all wildcard" `$JS.ACK.>` or `$JS.FC.>` then you will not need to make any changes. The default will change in version 2.15 and there should be no impact.
+If you have not defined such account imports/exports or subject permissions, for example if you use JetStream only within a single account, or you defined them as the "catch-all wildcard" `$JS.ACK.>` or `$JS.FC.>` then you will not need to make any changes. The default will change in version 2.16 and there should be no impact.
 
 To ease the migration path, the server now supports feature flags to test and enable this at your own convenience. Not specifying the feature flag means "use the server default" which for 2.14 will be the v1 format. Setting it to `true` will use the v2 format (also the v1 format will still be supported) and setting it to `false` will use the v1 format but still support v2.
 

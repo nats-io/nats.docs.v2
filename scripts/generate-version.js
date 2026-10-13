@@ -247,6 +247,11 @@ function buildSidebarTemplate(schemaRefs, configCategory) {
           items: pathsByKind("metric").filter((p) => p.startsWith("jetstream/metric/")),
         },
         { type: "doc", label: "Errors", id: "jetstream/errors" },
+        {
+          type: "doc",
+          label: "Cross-account subjects",
+          id: "jetstream/cross-account-subjects",
+        },
       ],
     },
     {

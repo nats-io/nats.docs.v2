@@ -154,9 +154,9 @@ The `>` wildcard enables powerful monitoring capabilities:
 
 ## Related Concepts
 
-- [Publish-Subscribe Basics](./pub-sub-basics) - Core messaging patterns
-- [Request-Reply](./request-reply) - Synchronous communication using subjects
-- [Queue Groups](./queue-groups) - Load balancing with subject subscriptions
+- [Publish-Subscribe Basics](./pub-sub-basics.md) - Core messaging patterns
+- [Request-Reply](./request-reply.md) - Synchronous communication using subjects
+- [Queue Groups](./queue-groups.md) - Load balancing with subject subscriptions
 
 ## Try It Yourself
 

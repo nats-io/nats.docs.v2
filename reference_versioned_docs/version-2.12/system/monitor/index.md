@@ -13,7 +13,7 @@ NATS Server exposes HTTP monitoring endpoints that return JSON-formatted data ab
 
 ## Available Endpoints
 
-### [Varz](./varz)
+### [Varz](./varz.md)
 General server information including:
 - Server version and configuration
 - Current connections and subscriptions
@@ -21,84 +21,84 @@ General server information including:
 - Memory and CPU usage
 - Cluster membership information
 
-### [Connz](./connz)
+### [Connz](./connz.md)
 Detailed connection information for all clients connected to the server:
 - Client connection details
 - Connection state and statistics
 - IP addresses and ports
 - Subscription counts per connection
 
-### [Subsz](./subsz)
+### [Subsz](./subsz.md)
 Subscription routing details:
 - Active subscriptions
 - Queue group information
 - Subscription statistics
 - Filtering and pagination options
 
-### [Routez](./routez)
+### [Routez](./routez.md)
 Cluster route information:
 - Route connections between cluster nodes
 - Route statistics and health
 - Cluster topology information
 
-### [Gatewayz](./gatewayz)
+### [Gatewayz](./gatewayz.md)
 Gateway connections for superclusters:
 - Gateway connection status
 - Remote gateway information
 - Traffic statistics between gateways
 
-### [Leafz](./leafz)
+### [Leafz](./leafz.md)
 Leafnode connections:
 - Leafnode server connections
 - Remote leafnode details
 - Connection statistics
 
-### [Accountz](./accountz)
+### [Accountz](./accountz.md)
 Account information:
 - Account configuration and limits
 - Connection and subscription counts per account
 - Import/export configurations
 
-### [Accstatz](./accstatz)
+### [Accstatz](./accstatz.md)
 Account statistics:
 - Detailed account usage statistics
 - Message and byte counts
 - Connection metrics per account
 
-### [JSz](./jsz)
+### [JSz](./jsz.md)
 JetStream information:
 - Stream and consumer details
 - JetStream cluster status
 - Memory and storage usage
 
-### [Healthz](./healthz)
+### [Healthz](./healthz.md)
 Health check endpoint:
 - Server health status
 - Suitable for liveness/readiness probes
 - Simple OK/Error responses
 
-### [Statsz](./statsz)
+### [Statsz](./statsz.md)
 Server statistics summary:
 - Aggregated server metrics
 - Performance statistics
 - System resource usage
 
-### [IPQueuesz](./ipqueuesz)
+### [IPQueuesz](./ipqueuesz.md)
 IP queue information:
 - Client IP-based queue statistics
 - Connection queuing metrics
 
-### [Idz](./idz)
+### [Idz](./idz.md)
 Server identification:
 - Server identity information
 - Unique server identifiers
 
-### [Profilez](./profilez)
+### [Profilez](./profilez.md)
 Server profiling data:
 - CPU and memory profiling endpoints
 - Performance debugging information
 
-### [Raftz](./raftz)
+### [Raftz](./raftz.md)
 Raft consensus information:
 - JetStream Raft cluster details
 - Leader election status

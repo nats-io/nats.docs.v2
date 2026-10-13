@@ -1652,6 +1652,11 @@
           "type": "doc",
           "label": "Errors",
           "id": "jetstream/errors"
+        },
+        {
+          "type": "doc",
+          "label": "Cross-account subjects",
+          "id": "jetstream/cross-account-subjects"
         }
       ]
     },
