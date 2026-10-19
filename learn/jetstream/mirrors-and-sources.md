@@ -44,9 +44,8 @@ data and the new mirror catches up on its own.
 
 ## What sources are
 
-A **source** is the inverse of a mirror. Where a mirror copies from one
-upstream, a stream with sources pulls from several upstreams at once and
-merges them into a single stream.
+Where a mirror copies from one upstream, a stream with **sources** pulls from
+several upstreams at once and merges them into a single stream.
 
 Consider three regional order streams — `ORDERS-US`, `ORDERS-EU`,
 `ORDERS-APAC`. A stream that lists all three as sources becomes one
