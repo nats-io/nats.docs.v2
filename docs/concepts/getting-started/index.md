@@ -25,6 +25,12 @@ This starts NATS Server with:
 - Client connections on port 4222
 - HTTP monitoring on port 8222
 
+### Deploy on Easypanel
+
+NATS has a one-click deployment template on [Easypanel](https://easypanel.io), a self-hosted Docker deployment platform:
+
+[![Deploy on Easypanel](https://easypanel.io/img/deploy-on-easypanel-40.svg)](https://easypanel.io/templates/nats)
+
 ### Install NATS Server
 
 #### macOS
