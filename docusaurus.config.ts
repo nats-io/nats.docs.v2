@@ -23,6 +23,15 @@ import rehypeStripHeadingAnchors from "./scripts/rehype-strip-heading-anchors.mj
 // instances; module-level caches inside the plugins are shared too.
 const SHARED_REHYPE_PLUGINS = [rehypeNatsExample, rehypeNatsFlow];
 
+// GA4 measurement ID for the nats.io property. docs.nats.io shares it with
+// nats.io so visits across both count as one user and session; filter by
+// hostname in GA to see docs traffic alone.
+const GA_MEASUREMENT_ID = "G-6242VH03CH";
+
+// Reo client ID. Docusaurus has no Reo plugin, so the script Reo provides is
+// added through headTags.
+const REO_CLIENT_ID = "35b4aa21c04d729";
+
 // Base for "Edit this page" links. Docusaurus appends the instance's content
 // dir (docs/, learn/, tutorials/) plus the doc path, so one base serves all
 // instances. The versioned 'reference' instance deliberately has no editUrl:
@@ -62,6 +71,18 @@ const config: Config = {
       type: 'module',
     }
   ],
+
+  // Reo. Only production Vercel deploys report, the same as GA4 below.
+  headTags:
+    process.env.VERCEL_ENV === "production"
+      ? [
+          {
+            tagName: "script",
+            attributes: { type: "text/javascript" },
+            innerHTML: `!function(){var e,t,n;e="${REO_CLIENT_ID}",t=function(){Reo.init({clientID:"${REO_CLIENT_ID}", enableThirdPartyTracking: true})},(n=document.createElement("script")).src="https://static.reo.dev/"+e+"/reo.js",n.defer=!0,n.onload=t,document.head.appendChild(n)}();`,
+          },
+        ]
+      : [],
 
   plugins: [
     [
@@ -196,6 +217,15 @@ const config: Config = {
         theme: {
           customCss: "./src/css/custom.css",
         },
+        // GA4, same setup as nats.io (layouts/partials/meta.html in
+        // nats-site). Only production Vercel deploys report, so preview
+        // and local builds stay out of the data.
+        ...(process.env.VERCEL_ENV === "production" && {
+          gtag: {
+            trackingID: GA_MEASUREMENT_ID,
+            anonymizeIP: true,
+          },
+        }),
       } satisfies Preset.Options,
     ],
   ],
