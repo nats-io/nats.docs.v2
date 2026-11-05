@@ -28,6 +28,10 @@ const SHARED_REHYPE_PLUGINS = [rehypeNatsExample, rehypeNatsFlow];
 // hostname in GA to see docs traffic alone.
 const GA_MEASUREMENT_ID = "G-6242VH03CH";
 
+// Reo client ID. Docusaurus has no Reo plugin, so the script Reo provides is
+// added through headTags.
+const REO_CLIENT_ID = "35b4aa21c04d729";
+
 // Base for "Edit this page" links. Docusaurus appends the instance's content
 // dir (docs/, learn/, tutorials/) plus the doc path, so one base serves all
 // instances. The versioned 'reference' instance deliberately has no editUrl:
@@ -67,6 +71,18 @@ const config: Config = {
       type: 'module',
     }
   ],
+
+  // Reo. Only production Vercel deploys report, the same as GA4 below.
+  headTags:
+    process.env.VERCEL_ENV === "production"
+      ? [
+          {
+            tagName: "script",
+            attributes: { type: "text/javascript" },
+            innerHTML: `!function(){var e,t,n;e="${REO_CLIENT_ID}",t=function(){Reo.init({clientID:"${REO_CLIENT_ID}", enableThirdPartyTracking: true})},(n=document.createElement("script")).src="https://static.reo.dev/"+e+"/reo.js",n.defer=!0,n.onload=t,document.head.appendChild(n)}();`,
+          },
+        ]
+      : [],
 
   plugins: [
     [
