@@ -60,8 +60,10 @@ Subjects: orders.>
 ## Step 3: Write and run the app
 
 Now write the app itself. It connects to NATS, publishes three order events into
-the stream, then subscribes to `orders.count` and replies to any request with the
-running total it published.
+the stream, then subscribes to `app.orders.count` and replies to any request with the
+running total it published. The request subject sits outside `orders.>` on
+purpose: a subject under `orders.>` would be stored by the stream, and the
+stream's storage acknowledgment would answer the request before the app does.
 
 Save the code for your language as a single file, then install its
 dependencies and run it in your second terminal:
@@ -98,12 +100,12 @@ func main() {
 	count := len(orders)
 	fmt.Printf("published %d order events\n", count)
 
-	// Reply to any request on orders.count with the running total.
-	nc.Subscribe("orders.count", func(msg *nats.Msg) {
+	// Reply to any request on app.orders.count with the running total.
+	nc.Subscribe("app.orders.count", func(msg *nats.Msg) {
 		msg.Respond([]byte(fmt.Sprintf("%d orders", count)))
 	})
 
-	fmt.Println("ready: send a request to orders.count")
+	fmt.Println("ready: send a request to app.orders.count")
 	select {} // keep running so it can answer requests
 }
 ```
@@ -136,14 +138,14 @@ import { jetstream } from "@nats-io/jetstream";
   const count = orders.length;
   console.log(`published ${count} order events`);
 
-  // Reply to any request on orders.count with the running total.
-  nc.subscribe("orders.count", {
+  // Reply to any request on app.orders.count with the running total.
+  nc.subscribe("app.orders.count", {
     callback: (_err, msg) => {
       msg.respond(`${count} orders`);
     },
   });
 
-  console.log("ready: send a request to orders.count");
+  console.log("ready: send a request to app.orders.count");
 
   // Keep running so it can answer requests.
   await nc.closed();
@@ -165,7 +167,7 @@ You should see the app print its progress and then wait:
 
 ```
 published 3 order events
-ready: send a request to orders.count
+ready: send a request to app.orders.count
 ```
 
 Leave the app running.
@@ -190,7 +192,7 @@ The events are now in the stream, ready for a consumer to read back:
 
 ## Step 5: Ask the app a question
 
-Still in your third terminal, send a request to the app on `orders.count`:
+Still in your third terminal, send a request to the app on `app.orders.count`:
 
 <div class="nats-example" data-type="tutorials-build-an-app-call-app" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
 

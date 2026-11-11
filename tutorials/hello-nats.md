@@ -42,7 +42,7 @@ brew install nats-io/nats-tools/nats
 curl -sf https://binaries.nats.dev/nats-io/nats-server/v2@latest | PREFIX=/usr/local/bin sh
 
 # CLI (installs nats into /usr/local/bin)
-curl -sf https://binaries.nats.dev/nats-io/natscli/v0@latest | PREFIX=/usr/local/bin sh
+curl -sf https://binaries.nats.dev/nats-io/natscli/nats@latest | PREFIX=/usr/local/bin sh
 ```
 
 </TabItem>
