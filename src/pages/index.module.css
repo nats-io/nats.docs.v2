@@ -1,102 +1,44 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
+/* Thesis on the left over a faint drifting network, a hairline below. */
 .heroBanner {
-  padding: 5rem 0 4rem;
-  text-align: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #27AAE1 0%, #375C93 50%, #34A574 100%);
-  color: white;
+  border-bottom: 1px solid var(--rule);
+  padding: 56px 0 48px;
 }
 
-.heroBanner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.1;
-  z-index: 0;
-}
-
-.heroBanner > .container {
+/* Thesis on the left, the capability diagram on the right. */
+.heroInner {
   position: relative;
-  z-index: 1;
-  pointer-events: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: 48px;
+  align-items: center;
 }
 
-.heroLogo {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 1.5rem;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+@media screen and (max-width: 960px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+  }
 }
 
 .heroTitle {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  font-size: clamp(1.875rem, 1.45rem + 1.3vw, 2.625rem);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
 .heroSubtitle {
-  font-size: 1.25rem;
-  font-weight: 300;
-  max-width: 700px;
-  margin: 0 auto 2rem;
-  opacity: 0.95;
-  line-height: 1.6;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 38em;
+  margin: 16px 0 0;
 }
 
-.buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-  flex-wrap: wrap;
-  position: relative;
-  z-index: 2;
-}
-
-.buttons a {
-  text-decoration: none;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
-
-@media screen and (max-width: 996px) {
+@media screen and (max-width: 640px) {
   .heroBanner {
-    padding: 3rem 0;
-  }
-
-  .heroLogo {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 1rem;
-  }
-
-  .heroTitle {
-    font-size: 2.25rem;
-  }
-
-  .heroSubtitle {
-    font-size: 1.1rem;
-  }
-}
-
-@media screen and (max-width: 576px) {
-  .heroBanner {
-    padding: 2.5rem 0;
-  }
-
-  .heroLogo {
-    width: 70px;
-    height: 70px;
+    padding: 36px 0 32px;
   }
 
   .heroTitle {
@@ -104,17 +46,6 @@
   }
 
   .heroSubtitle {
-    font-size: 1rem;
-    padding: 0 1rem;
-  }
-
-  .buttons {
-    flex-direction: column;
-    width: 100%;
-    padding: 0 1rem;
-  }
-
-  .buttons .button {
-    width: 100%;
+    font-size: 1.0625rem;
   }
 }
