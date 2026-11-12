@@ -46,7 +46,7 @@
 
 .docSectionDescription {
   flex: 1;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   color: var(--ink-2);
   margin-bottom: 10px;
 }

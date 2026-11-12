@@ -275,7 +275,7 @@ const config: Config = {
       style: "dark",
       logo: {
         alt: "NATS Logo",
-        src: "img/nats-logo.svg",
+        src: "img/nats-horizontal-color.png",
         width: 94,
         height: 24,
       },
@@ -309,13 +309,6 @@ const config: Config = {
           href: "/reference/",
         },
         {
-          type: "custom-docSidebar",
-          sidebarId: "releaseNotesSidebar",
-          position: "left",
-          label: "Release Notes",
-          href: "/release-notes/",
-        },
-        {
           type: "docsVersionDropdown",
           docsPluginId: "reference",
           position: "right",
@@ -326,15 +319,20 @@ const config: Config = {
             { to: "/release-notes/", label: "Release notes" },
           ],
         },
+        // Icon buttons, as on nats.io (icons in custom.css); the label shows in the mobile drawer.
         {
           href: "https://github.com/nats-io",
           label: "GitHub",
           position: "right",
+          className: "navbar-ib navbar-ib--github",
+          "aria-label": "GitHub",
         },
         {
           href: "https://slack.nats.io",
           label: "Slack",
           position: "right",
+          className: "navbar-ib navbar-ib--slack",
+          "aria-label": "Slack",
         },
       ],
     },
@@ -405,7 +403,14 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} NATS Authors. Built with Docusaurus.`,
+      logo: {
+        alt: "Cloud Native Computing Foundation",
+        src: "img/cncf-white.png",
+        href: "https://www.cncf.io/",
+        width: 164,
+        height: 26,
+      },
+      copyright: `NATS is a <a href="https://www.cncf.io/">Cloud Native Computing Foundation</a> Graduated Project.<br />Copyright © ${new Date().getFullYear()} NATS Authors. Built with Docusaurus.`,
     },
     prism: {
       theme: natsPrismTheme,

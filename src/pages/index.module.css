@@ -12,7 +12,7 @@
   display: grid;
   grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
   gap: 48px;
-  align-items: center;
+  align-items: start;
 }
 
 @media screen and (max-width: 960px) {
@@ -43,9 +43,5 @@
 
   .heroTitle {
     font-size: 1.75rem;
-  }
-
-  .heroSubtitle {
-    font-size: 1.0625rem;
   }
 }
