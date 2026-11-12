@@ -1,41 +1,26 @@
 import React from "react";
-import clsx from "clsx";
-import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
+import HeroNet from "@site/src/components/HeroNet";
+import HeroSystem from "@site/src/components/HeroSystem";
 import styles from "./index.module.css";
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
   return (
-    <header className={clsx("hero", styles.heroBanner)}>
-      <div className="container">
-        <img
-          src="/img/nats-icon.svg"
-          alt="NATS Logo"
-          className={styles.heroLogo}
-        />
-        <h1 className={clsx("hero__title", styles.heroTitle)}>
-          Welcome to NATS Documentation
-        </h1>
-        <p className={clsx("hero__subtitle", styles.heroSubtitle)}>
-          Everything you need to build with NATS - a simple, secure, and high-performance messaging system
-        </p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--primary button--lg"
-            to="/concepts/intro"
-          >
-            Get Started
-          </Link>
-          <Link
-            className="button button--secondary button--lg"
-            to="/concepts/what-is-nats"
-          >
-            Learn Concepts
-          </Link>
+    <header className={styles.heroBanner}>
+      <HeroNet />
+      <div className={`container ${styles.heroInner}`}>
+        <div>
+          <h1 className={styles.heroTitle}>
+            Welcome to NATS Documentation
+          </h1>
+          <p className={styles.heroSubtitle}>
+            Everything you need to build with NATS - a simple, secure, and high-performance messaging system
+          </p>
         </div>
+        <HeroSystem />
       </div>
     </header>
   );

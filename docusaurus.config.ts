@@ -1,4 +1,4 @@
-import { themes as prismThemes } from "prism-react-renderer";
+import type { PrismTheme } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 import type { Options as DocsOptions } from "@docusaurus/plugin-content-docs";
@@ -51,6 +51,20 @@ const referenceVersions: DocsOptions["versions"] = Object.fromEntries(
   ]),
 );
 
+// Syntax colours from the brand line colours, as on nats.io. Values are
+// CSS variables from src/css/custom.css, so one theme serves light and dark.
+const natsPrismTheme: PrismTheme = {
+  plain: { color: "var(--ink)", backgroundColor: "var(--bg-2)" },
+  styles: [
+    { types: ["comment", "prolog", "doctype", "cdata"], style: { color: "var(--ink-3)", fontStyle: "italic" } },
+    { types: ["keyword", "tag", "operator-keyword", "important"], style: { color: "var(--code-dkblue)", fontWeight: "600" } },
+    { types: ["string", "char", "attr-value", "regex", "inserted"], style: { color: "var(--code-green)" } },
+    { types: ["number", "boolean", "constant", "function", "class-name", "builtin", "attr-name", "property"], style: { color: "var(--code-blue)" } },
+    { types: ["deleted"], style: { color: "var(--err)" } },
+    { types: ["punctuation", "operator"], style: { color: "var(--ink-2)" } },
+  ],
+};
+
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
@@ -63,6 +77,13 @@ const config: Config = {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
+  // Same typefaces as nats.io.
+  stylesheets: [
+    {
+      href: "https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap",
+    },
+  ],
+
   // Global scripts
   scripts: [
     {
@@ -72,9 +93,11 @@ const config: Config = {
     }
   ],
 
-  // Reo. Only production Vercel deploys report, the same as GA4 below.
-  headTags:
-    process.env.VERCEL_ENV === "production"
+  headTags: [
+    { tagName: "link", attributes: { rel: "preconnect", href: "https://fonts.googleapis.com" } },
+    { tagName: "link", attributes: { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "anonymous" } },
+    // Reo. Only production Vercel deploys report, the same as GA4 below.
+    ...(process.env.VERCEL_ENV === "production"
       ? [
           {
             tagName: "script",
@@ -82,7 +105,8 @@ const config: Config = {
             innerHTML: `!function(){var e,t,n;e="${REO_CLIENT_ID}",t=function(){Reo.init({clientID:"${REO_CLIENT_ID}", enableThirdPartyTracking: true})},(n=document.createElement("script")).src="https://static.reo.dev/"+e+"/reo.js",n.defer=!0,n.onload=t,document.head.appendChild(n)}();`,
           },
         ]
-      : [],
+      : []),
+  ],
 
   plugins: [
     [
@@ -242,14 +266,18 @@ const config: Config = {
       { name: "twitter:card", content: "summary_large_image" },
       { name: "og:image", content: "/img/nats-social-card.png" },
     ],
+    colorMode: {
+      respectPrefersColorScheme: true,
+    },
     navbar: {
       title: "",
+      // Navy in both themes, so the colour logo is used for both.
+      style: "dark",
       logo: {
         alt: "NATS Logo",
-        src: "img/nats-logo.svg",
-        srcDark: "img/nats-logo-dark.svg",
-        width: 100,
-        height: 32,
+        src: "img/nats-horizontal-color.png",
+        width: 94,
+        height: 24,
       },
       items: [
         {
@@ -281,13 +309,6 @@ const config: Config = {
           href: "/reference/",
         },
         {
-          type: "custom-docSidebar",
-          sidebarId: "releaseNotesSidebar",
-          position: "left",
-          label: "Release Notes",
-          href: "/release-notes/",
-        },
-        {
           type: "docsVersionDropdown",
           docsPluginId: "reference",
           position: "right",
@@ -298,15 +319,20 @@ const config: Config = {
             { to: "/release-notes/", label: "Release notes" },
           ],
         },
+        // Icon buttons, as on nats.io (icons in custom.css); the label shows in the mobile drawer.
         {
           href: "https://github.com/nats-io",
           label: "GitHub",
           position: "right",
+          className: "navbar-ib navbar-ib--github",
+          "aria-label": "GitHub",
         },
         {
           href: "https://slack.nats.io",
           label: "Slack",
           position: "right",
+          className: "navbar-ib navbar-ib--slack",
+          "aria-label": "Slack",
         },
       ],
     },
@@ -377,11 +403,17 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} NATS Authors. Built with Docusaurus.`,
+      logo: {
+        alt: "Cloud Native Computing Foundation",
+        src: "img/cncf-white.png",
+        href: "https://www.cncf.io/",
+        width: 164,
+        height: 26,
+      },
+      copyright: `NATS is a <a href="https://www.cncf.io/">Cloud Native Computing Foundation</a> Graduated Project.<br />Copyright © ${new Date().getFullYear()} NATS Authors. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.oneLight,
-      darkTheme: prismThemes.oneDark,
+      theme: natsPrismTheme,
       additionalLanguages: ['bash', 'go', 'rust', 'java', 'csharp'],
     },
   } satisfies Preset.ThemeConfig,

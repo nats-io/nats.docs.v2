@@ -1,0 +1,57 @@
+.fig {
+  margin: 0;
+  justify-self: end;
+  width: 100%;
+  max-width: 440px;
+}
+.fig svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* One type size; sans for names and descriptions, mono 1px smaller for literal tokens so both
+   read as the same size. */
+.n { font: 600 12px var(--sans); fill: var(--ink); }
+.d { font: 400 12px var(--sans); fill: var(--ink-2); }
+.k { font: 500 11px var(--mono); fill: var(--ink); }
+
+.band { fill: var(--bg); stroke: var(--rule-2); stroke-width: 1; transition: stroke 0.15s; }
+.bandLink { cursor: pointer; }
+.bandLink:hover .band { stroke: var(--stroke); }
+.bandLink:hover .n { fill: var(--link); }
+.bandLink:focus { outline: none; }
+.bandLink:focus-visible .band { stroke: var(--focus); stroke-width: 2; }
+.art { pointer-events: none; }
+
+.swBlue { fill: var(--l-blue); }
+.swGreen { fill: var(--l-green); }
+.swDkblue { fill: var(--l-dkblue); }
+.swLgreen { fill: var(--l-lgreen); }
+.dot { fill: var(--ink); pointer-events: none; }
+
+.mLine { fill: none; stroke: var(--l-blue); stroke-width: 1.5; stroke-linecap: round; }
+.mPub { fill: var(--l-blue); }
+.mSub { fill: var(--bg); stroke: var(--l-blue); stroke-width: 1.5; transition: fill 0.5s; }
+.mSub.hit { fill: var(--l-blue); }
+
+.sCell { fill: var(--bg); stroke: var(--stroke); stroke-width: 1; transition: fill 0.6s, stroke 0.6s; }
+.sCell.on { fill: color-mix(in srgb, var(--l-green) 28%, var(--bg)); stroke: var(--l-green); }
+.sCur { fill: var(--ink); }
+
+.kvBox { fill: var(--bg); stroke: var(--l-dkblue); stroke-width: 1.5; transition: fill 0.5s; }
+.kvBox.hit { fill: color-mix(in srgb, var(--l-dkblue) 18%, var(--bg)); }
+
+.vLine { fill: none; stroke: var(--l-lgreen); stroke-width: 1.5; stroke-linecap: round; }
+.vReq { fill: var(--l-lgreen); }
+.vBranch { stroke-width: 1.25; stroke-dasharray: 3 3; }
+.vInst { fill: var(--bg); stroke: var(--l-lgreen); stroke-width: 1.5; transition: fill 0.5s; }
+.vInst.hit { fill: var(--l-lgreen); }
+
+@media (max-width: 960px) {
+  .fig { justify-self: start; }
+}
+/* On phones the cards below already lead to the same pages. */
+@media (max-width: 640px) {
+  .fig { display: none; }
+}
