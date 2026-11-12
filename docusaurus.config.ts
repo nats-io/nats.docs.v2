@@ -93,6 +93,7 @@ const config: Config = {
         siteDescription:
           "Connective Technology for Adaptive Edge & Distributed Systems — official NATS messaging documentation.",
         includeOrder: [
+          "architecture/**",
           "concepts/**",
           "tutorials/**",
           "reference/**",
@@ -114,8 +115,8 @@ const config: Config = {
       {
         hashed: true,
         indexBlog: false,
-        docsRouteBasePath: ["/", "reference"],
-        docsDir: ["docs", "docs-reference"],
+        docsRouteBasePath: ["/", "reference", "architecture"],
+        docsDir: ["docs", "docs-reference", "architecture"],
         highlightSearchTermsOnTargetPage: true,
         explicitSearchResultPath: true,
       },
@@ -164,6 +165,25 @@ const config: Config = {
         // the Learn deep dives for the "why".
         includeCurrentVersion: true,
         editUrl: EDIT_URL,
+        beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
+      } satisfies DocsOptions,
+    ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "architecture",
+        path: "architecture",
+        routeBasePath: "architecture",
+        sidebarPath: "./sidebars-architecture.ts",
+        // Expert layer: how to design NATS systems (patterns, topologies,
+        // decisions, numbered rules, reference architectures). Written for
+        // architects and for AI assistants, so pages are declarative and
+        // templated by type; see architecture/_authoring.md. Unversioned;
+        // version-bound detail is linked out to the 'reference' instance.
+        includeCurrentVersion: true,
+        editUrl: EDIT_URL,
+        tags: "tags.yml",
+        onInlineTags: "throw",
         beforeDefaultRehypePlugins: SHARED_REHYPE_PLUGINS,
       } satisfies DocsOptions,
     ],
@@ -275,6 +295,13 @@ const config: Config = {
         },
         {
           type: "custom-docSidebar",
+          sidebarId: "architectureSidebar",
+          position: "left",
+          label: "Architecture",
+          href: "/architecture/",
+        },
+        {
+          type: "custom-docSidebar",
           sidebarId: "referenceSidebar",
           position: "left",
           label: "Reference",
@@ -327,6 +354,10 @@ const config: Config = {
             {
               label: "Tutorials",
               to: "/tutorials",
+            },
+            {
+              label: "Architecture",
+              to: "/architecture/",
             },
             {
               label: "Reference",

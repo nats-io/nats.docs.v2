@@ -198,7 +198,7 @@ State:
 A group with no active client reads `No client`. To list every fully
 pinned consumer at once, run `nats consumer find ORDERS --pinned`.
 
-:::note Client support varies
+:::note[Client support varies]
 The pinned-client steps (storing `Nats-Pin-Id`, sending it back, handling
 the `423`) run in the Go, Java, JavaScript/TypeScript, and .NET clients today.
 Rust and Python let you set the configuration fields but don't yet run the

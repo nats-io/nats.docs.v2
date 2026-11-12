@@ -9,6 +9,7 @@ import {
   TutorialsIcon,
   ReferenceIcon,
   UsersIcon,
+  ArchitectureIcon,
 } from '@site/src/components/Icons';
 import type {IconProps} from '@site/src/components/Icons';
 import styles from './styles.module.css';
@@ -67,6 +68,17 @@ const DocSections: DocSection[] = [
     link: '/tutorials',
   },
   {
+    title: 'Architecture',
+    Icon: ArchitectureIcon,
+    accent: '#8DC63F',
+    description: (
+      <>
+        Design NATS systems that hold up in production: patterns, topologies, decisions, and rules.
+      </>
+    ),
+    link: '/architecture',
+  },
+  {
     title: 'Reference',
     Icon: ReferenceIcon,
     accent: '#375C93',
@@ -122,7 +134,7 @@ export default function HomepageFeatures(): ReactNode {
           <Heading as="h2">Explore the Documentation</Heading>
           <p>Find everything you need to build with NATS</p>
         </div>
-        <div className="row">
+        <div className={clsx("row", styles.docSectionRow)}>
           {DocSections.map((props, idx) => (
             <DocSectionCard key={idx} {...props} />
           ))}

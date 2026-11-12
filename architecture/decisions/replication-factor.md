@@ -1,0 +1,36 @@
+---
+id: replication-factor
+title: "What replication factor?"
+description: "R3 for anything you can't afford to lose, R1 for disposable or re-creatable data, never R2"
+tags: [jetstream, operations]
+---
+# What replication factor?
+
+:::note[Placeholder]
+This page is part of the Architecture skeleton and hasn't been written yet. Scope: R1/R3/R5 trade-offs, memory vs file storage, consumer vs stream replication.
+:::
+
+## Summary
+
+_The default answer in one or two sentences, and the main reason to deviate._
+
+## Decision table
+
+_Criteria in rows, choices in columns, one cell per combination._
+
+## Default
+
+_What to pick when nothing on the table forces a choice, and why._
+
+## When to deviate
+
+_One subsection per alternative: choose it when …_
+
+## Common mistakes
+
+_The wrong choices people make here, and what each costs._
+
+## Related
+
+_Rules applied, patterns that use this choice, Learn pages for the mechanism._
+
