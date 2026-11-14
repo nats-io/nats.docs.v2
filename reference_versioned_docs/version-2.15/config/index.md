@@ -56,7 +56,7 @@ authorization: {
 Server configurations can specify variables. Variables allow you to reference a value from one or more sections in the configuration. Variables:
 
 * Are block-scoped
-* Are referenced with a `$` prefix. They have to be unquoted when being referenced, for example an assigment like `foo = "$example"` will result in `foo` being the literal string `"$example"`.
+* Are referenced with a `$` prefix. They have to be unquoted when being referenced, for example an assignment like `foo = "$example"` will result in `foo` being the literal string `"$example"`.
 * Can be resolved from environment variables having the same name
 
 :::warning
