@@ -8,4 +8,4 @@ If false, log without timestamps.
 
 | Type | Description | Choices |
 | :--- | :---------- | :------ |
-| `string` | - | - |
+| `boolean` | - | `true`, `false` |

@@ -198,8 +198,8 @@ nats-server -c server.conf
 | [`trace`](./trace.md) | If true, enables protocol trace log messages, excluding the system account. | `boolean` | `false` | Yes\* |
 | [`trace_headers`](./trace_headers.md) | Trace message headers. Also enables `trace`. | `boolean` | `false` | Yes |
 | [`trace_verbose`](./trace_verbose.md) | If true, enables protocol trace log messages, including the system account. | `boolean` | `false` | Yes\* |
-| [`logtime`](./logtime.md) | If false, log without timestamps. | `string` | `true` | Yes\* |
-| [`logtime_utc`](./logtime_utc.md) | If true, log timestamps with be in UTC rather than the local timezone. | `string` | `false` | Yes |
+| [`logtime`](./logtime.md) | If false, log without timestamps. | `boolean` | `true` | Yes\* |
+| [`logtime_utc`](./logtime_utc.md) | If true, log timestamps will be in UTC rather than the local timezone. | `boolean` | `false` | Yes |
 | [`logfile`](./logfile.md) | Log file name. | `string` | - | Yes\* |
 | [`logfile_max_num`](./logfile_max_num.md) | Maximum number of rotated log files to keep. Older ones are deleted. | `integer` | - | No |
 | [`logfile_size_limit`](./logfile_size_limit.md) | Size in bytes after the log file rolls over to a new one. | `integer` | `0` | No |
