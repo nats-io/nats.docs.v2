@@ -25,7 +25,7 @@ const DocSections: DocSection[] = [
   {
     title: 'Getting Started',
     Icon: RocketIcon,
-    accent: '#27AAE1',
+    accent: 'var(--l-blue)',
     description: (
       <>
         New to NATS? Start here to learn the basics and get your first application running in minutes.
@@ -36,7 +36,7 @@ const DocSections: DocSection[] = [
   {
     title: 'Concepts',
     Icon: LightbulbIcon,
-    accent: '#F59E0B',
+    accent: 'var(--l-dkblue)',
     description: (
       <>
         Understand the core concepts and architecture behind NATS messaging patterns and JetStream.
@@ -47,7 +47,7 @@ const DocSections: DocSection[] = [
   {
     title: 'Learn',
     Icon: LearnIcon,
-    accent: '#8B5CF6',
+    accent: 'var(--l-green)',
     description: (
       <>
         Long-form deep dives into Core NATS, JetStream, and operating NATS in production.
@@ -58,7 +58,7 @@ const DocSections: DocSection[] = [
   {
     title: 'Tutorials',
     Icon: TutorialsIcon,
-    accent: '#34A574',
+    accent: 'var(--l-lgreen)',
     description: (
       <>
         Hands-on tutorials to help you learn by building real-world applications with NATS.
@@ -69,7 +69,7 @@ const DocSections: DocSection[] = [
   {
     title: 'Reference',
     Icon: ReferenceIcon,
-    accent: '#375C93',
+    accent: 'var(--l-dkblue)',
     description: (
       <>
         Complete reference documentation for server configuration, protocol details, and API specifications.
@@ -80,7 +80,7 @@ const DocSections: DocSection[] = [
   {
     title: 'Community',
     Icon: UsersIcon,
-    accent: '#EC4899',
+    accent: 'var(--l-blue)',
     description: (
       <>
         Join the NATS community on Slack, contribute on GitHub, or get help from fellow developers.
@@ -101,7 +101,7 @@ function DocSectionCard({title, Icon, description, link, accent}: DocSection) {
           style={{['--card-accent' as string]: accent} as CSSProperties}
         >
           <div className={styles.docSectionIcon}>
-            <Icon width={28} height={28} />
+            <Icon width={24} height={24} />
           </div>
           <Heading as="h3" className={styles.docSectionTitle}>{title}</Heading>
           <p className={styles.docSectionDescription}>{description}</p>
@@ -118,10 +118,6 @@ export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
-        <div className={styles.sectionHeader}>
-          <Heading as="h2">Explore the Documentation</Heading>
-          <p>Find everything you need to build with NATS</p>
-        </div>
         <div className="row">
           {DocSections.map((props, idx) => (
             <DocSectionCard key={idx} {...props} />

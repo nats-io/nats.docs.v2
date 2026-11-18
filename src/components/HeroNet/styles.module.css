@@ -1,0 +1,18 @@
+/* Lightest under the headline, strongest on the empty right side; partly visible everywhere so
+   low-contrast screens still show it. */
+.net {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 85% 125% at 74% 45%, #000 30%, rgba(0, 0, 0, 0.45) 65%, rgba(0, 0, 0, 0.15) 100%);
+  mask-image: radial-gradient(ellipse 85% 125% at 74% 45%, #000 30%, rgba(0, 0, 0, 0.45) 65%, rgba(0, 0, 0, 0.15) 100%);
+}
+
+@media (max-width: 960px) {
+  .net {
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.3), #000 70%);
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.3), #000 70%);
+  }
+}

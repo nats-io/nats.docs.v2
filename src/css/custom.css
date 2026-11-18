@@ -1,283 +1,531 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+/*
+ * Design tokens shared with nats.io. Every colour is a token so both themes
+ * stay in step; Infima's variables are mapped onto them below. Line colours
+ * hold 3:1 against --bg and --bg-2; text tokens hold 4.5:1.
  */
-
-/* NATS Brand Colors */
 :root {
-  --ifm-color-primary: #3884ff;
-  --ifm-color-primary-dark: #1a6ff7;
-  --ifm-color-primary-darker: #0d62f0;
-  --ifm-color-primary-darkest: #0a4fc5;
-  --ifm-color-primary-light: #5699ff;
-  --ifm-color-primary-lighter: #6fa9ff;
-  --ifm-color-primary-lightest: #9fc5ff;
-  --ifm-code-font-size: 95%;
-  --ifm-font-family-base: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
-  --docusaurus-highlighted-code-line-bg: rgba(56, 132, 255, 0.1);
-  
-  /* NATS Brand Accent Colors */
-  --nats-accent-blue: #3884ff;
-  --nats-accent-dark: #1d1d1d;
-  --nats-accent-gray: #6c757d;
-  --nats-success: #27c940;
-  --nats-warning: #ffb347;
-  --nats-error: #ff5252;
+  --navy: #00011f;
+  --blue: #27aae1;
+  --bg: #ffffff;
+  --bg-2: #f5f6f8;
+  --ink: #10131f;
+  --ink-2: #474d63;
+  --ink-3: #636a80;
+  --rule: #e2e5ea;
+  --rule-2: #cdd2db;
+  --stroke: #7b8195;
+  --l-blue: #1782b6;
+  --l-green: #27875c;
+  --l-dkblue: #375c93;
+  --l-lgreen: #5f9126;
+  --link: #13699a;
+  --btn: #1474a6;
+  --btn-ink: #ffffff;
+  --btn-hover: #0f5d86;
+  --focus: #1474a6;
+  --err: #b42318;
+  --sel: rgba(39, 170, 225, 0.22);
+  --head: #00011f;
+  /* Thin navy strips against white read darker than the large footer, so in light mode they sit a step lighter. */
+  --head-strip: #0a0c2e;
+  --head-ink: #e9ecf5;
+  --head-ink-2: #a3adc8;
+  --head-link: #5cc6f2;
+  --head-rule: rgba(255, 255, 255, 0.1);
+  /* Syntax colours: the line colours, darkened where they fall under 4.5:1 on --bg-2. */
+  --code-blue: #13699a;
+  --code-green: #1f7550;
+  --code-dkblue: #375c93;
+  --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Source Code Pro", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ifm-color-primary: #1474a6;
+  --ifm-color-primary-dark: #126995;
+  --ifm-color-primary-darker: #11638d;
+  --ifm-color-primary-darkest: #0e5174;
+  --ifm-color-primary-light: #167fb7;
+  --ifm-color-primary-lighter: #1785bf;
+  --ifm-color-primary-lightest: #1b97d8;
+  --ifm-link-color: var(--link);
+  --ifm-link-hover-color: var(--link);
+  --ifm-font-family-base: var(--sans);
+  --ifm-font-family-monospace: var(--mono);
+  --ifm-heading-font-family: var(--sans);
+  --ifm-line-height-base: 1.6;
+  --ifm-background-color: var(--bg);
+  --ifm-background-surface-color: var(--bg-2);
+  --ifm-font-color-base: var(--ink);
+  --ifm-heading-color: var(--ink);
+  --ifm-heading-font-weight: 700;
+  --ifm-heading-line-height: 1.2;
+  --ifm-hr-background-color: var(--rule);
+  --ifm-toc-border-color: var(--rule);
+  --ifm-table-border-color: var(--rule);
+  --ifm-table-stripe-background: transparent;
+  --ifm-table-head-background: transparent;
+  --ifm-global-radius: 4px;
+  --ifm-code-font-size: 0.875em;
+  --ifm-code-background: var(--bg-2);
+  --ifm-code-border-radius: 3px;
+  --ifm-pre-background: var(--bg-2);
+  --ifm-card-background-color: var(--bg);
+  --ifm-navbar-height: 56px;
+  --ifm-navbar-background-color: var(--head-strip);
+  --ifm-navbar-shadow: none;
+  --ifm-navbar-link-color: var(--head-ink-2);
+  --ifm-navbar-link-hover-color: #fff;
+  --ifm-navbar-link-active-color: #fff;
+  --ifm-footer-background-color: var(--head);
+  --ifm-footer-color: var(--head-ink-2);
+  --ifm-footer-link-color: var(--head-ink);
+  --ifm-footer-link-hover-color: #fff;
+  --ifm-footer-title-color: #fff;
+  --ifm-menu-color-active: var(--ink);
+  --ifm-menu-color-background-active: transparent;
+  --docusaurus-highlighted-code-line-bg: rgba(39, 170, 225, 0.12);
 }
 
-/* Dark mode with NATS branding */
 [data-theme='dark'] {
-  --ifm-color-primary: #5699ff;
-  --ifm-color-primary-dark: #3884ff;
-  --ifm-color-primary-darker: #2b79ff;
-  --ifm-color-primary-darkest: #0d62f0;
-  --ifm-color-primary-light: #74aaff;
-  --ifm-color-primary-lighter: #83b3ff;
-  --ifm-color-primary-lightest: #b0d0ff;
-  --docusaurus-highlighted-code-line-bg: rgba(56, 132, 255, 0.2);
-  --ifm-background-color: #1a1a1a;
+  --bg: #0e1018;
+  --bg-2: #161925;
+  --ink: #e8eaf1;
+  --ink-2: #aab0c3;
+  --ink-3: #8e94a9;
+  --rule: #262a3a;
+  --rule-2: #343a4f;
+  --stroke: #7f86a0;
+  --l-blue: #27aae1;
+  --l-green: #34a574;
+  --l-dkblue: #5b80c0;
+  --l-lgreen: #8dc63f;
+  --link: #5cc6f2;
+  --btn: #27aae1;
+  --btn-ink: #00011f;
+  --btn-hover: #4bbbea;
+  --focus: #5cc6f2;
+  --err: #f97066;
+  --sel: rgba(39, 170, 225, 0.35);
+  --head-strip: #00011f;
+  --code-blue: #27aae1;
+  --code-green: #34a574;
+  --code-dkblue: #7393cc;
+
+  --ifm-color-primary: #27aae1;
+  --ifm-color-primary-dark: #1e9dd3;
+  --ifm-color-primary-darker: #1c94c7;
+  --ifm-color-primary-darkest: #177aa4;
+  --ifm-color-primary-light: #3db3e5;
+  --ifm-color-primary-lighter: #48b8e6;
+  --ifm-color-primary-lightest: #6ac5ec;
+  --ifm-background-color: var(--bg);
+  --ifm-background-surface-color: var(--bg-2);
+  --ifm-dropdown-background-color: var(--bg-2);
+  --docusaurus-highlighted-code-line-bg: rgba(39, 170, 225, 0.18);
 }
 
-/* Custom NATS Styles */
-.hero {
-  background: linear-gradient(135deg, #27AAE1 0%, #375C93 50%, #34A574 100%);
-}
-
-.hero--primary {
-  --ifm-hero-text-color: #ffffff;
-}
-
-/* Feature cards styling */
-.feature {
-  padding: 2rem;
-  border-radius: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.feature:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(56, 132, 255, 0.15);
-}
-
-/* Code blocks enhancement */
-pre code {
-  border-radius: 4px;
+body {
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  text-shadow: none !important; /* Remove any text shadows */
+}
+::selection {
+  background: var(--sel);
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
-/* Better font rendering for dark mode */
-[data-theme='dark'] pre code {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-shadow: none !important;
+/* Navy header and footer in both themes, as on nats.io. Infima's --dark
+   variants set their own colours, so the tokens are re-applied on them. */
+.navbar.navbar--dark {
+  --ifm-navbar-background-color: var(--head-strip);
+  --ifm-navbar-link-color: var(--head-ink-2);
+  --ifm-navbar-link-hover-color: #fff;
+  --ifm-navbar-search-input-icon: url('data:image/svg+xml;utf8,<svg fill="%23a3adc8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16px" width="16px"><path d="M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z" /></svg>');
+  border-bottom: 1px solid var(--head-rule);
 }
-
-/* Navbar enhancements */
-.navbar__title {
-  font-weight: 700;
-  font-size: 1.25rem;
+/* Search results open on page colours, so they drop the header's white text. */
+.navbar [class*='dropdownMenu'] {
+  color: var(--ink);
 }
-
+.footer.footer--dark {
+  --ifm-footer-background-color: var(--head);
+  --ifm-footer-color: var(--head-ink-2);
+  --ifm-footer-link-color: var(--head-ink);
+  --ifm-footer-title-color: #fff;
+}
+.navbar__link {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+/* Section icons stay a quiet hint beside the label, not a second label. */
+.navbar__link svg {
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+.navbar__link:hover svg,
+.navbar__link--active svg {
+  opacity: 1;
+}
+.navbar__link--active {
+  box-shadow: inset 0 -2px 0 var(--blue);
+}
 .navbar__logo {
-  height: 2rem;
-  margin-right: 0.5rem;
+  height: 24px;
+}
+.navbar .navbar__toggle,
+.navbar [class*='colorModeToggle'] button {
+  color: var(--head-ink-2);
+}
+.navbar [class*='colorModeToggle'] button:hover {
+  color: #fff;
+  background: transparent;
+}
+/* Header icon buttons: square, no fill, brighten on hover. The label is hidden in the header
+   and shown in the mobile drawer; the icon is a mask so it takes the link colour. */
+.navbar [class*='colorModeToggle'] {
+  width: 34px;
+  height: 34px;
+}
+.navbar [class*='colorModeToggle'] button {
+  border-radius: 4px;
+}
+/* Brand icons: Font Awesome Free 6.5.1 (CC BY 4.0), the set nats.io uses. */
+.navbar-ib--github {
+  --ib-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 496 512'%3E%3Cpath d='M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z'/%3E%3C/svg%3E");
+}
+.navbar-ib--slack {
+  --ib-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M94.12 315.1c0 25.9-21.16 47.06-47.06 47.06S0 341 0 315.1c0-25.9 21.16-47.06 47.06-47.06h47.06v47.06zm23.72 0c0-25.9 21.16-47.06 47.06-47.06s47.06 21.16 47.06 47.06v117.84c0 25.9-21.16 47.06-47.06 47.06s-47.06-21.16-47.06-47.06V315.1zm47.06-188.98c-25.9 0-47.06-21.16-47.06-47.06S139 32 164.9 32s47.06 21.16 47.06 47.06v47.06H164.9zm0 23.72c25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06H47.06C21.16 243.96 0 222.8 0 196.9s21.16-47.06 47.06-47.06H164.9zm188.98 47.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06h-47.06V196.9zm-23.72 0c0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06V79.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06V196.9zM283.1 385.88c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06v-47.06h47.06zm0-23.72c-25.9 0-47.06-21.16-47.06-47.06 0-25.9 21.16-47.06 47.06-47.06h117.84c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06H283.1z'/%3E%3C/svg%3E");
+}
+.navbar-ib::before {
+  content: '';
+  flex: none;
+  width: 0.95rem;
+  height: 0.95rem;
+  background: currentColor;
+  -webkit-mask: var(--ib-icon) center / contain no-repeat;
+  mask: var(--ib-icon) center / contain no-repeat;
+}
+.navbar__items--right .navbar-ib {
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: 0 1px;
+  padding: 0;
+  border-radius: 4px;
+  font-size: 0;
+}
+.navbar__items--right .navbar-ib svg {
+  display: none;
+}
+/* Docusaurus hides header items below 997px; only show these where it shows the rest. */
+@media (min-width: 997px) {
+  .navbar__items--right .navbar-ib {
+    display: flex;
+  }
+}
+.navbar-sidebar .navbar-ib {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+/* Search is an icon button like GitHub and Slack. Focus (or the keyboard shortcut) opens it as a
+   command palette over a dimmed page, so the header itself never changes. The icon is a background
+   so it can sit inside the field, which means its colours are fixed: --head-ink-2 and white on the
+   navy header, --ink-3 for each theme in the palette. */
+.navbar {
+  --search-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23636a80' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E");
+  --search-local-modal-width: min(560px, calc(100vw - 32px));
+  --search-local-modal-width-sm: var(--search-local-modal-width);
+  --search-local-modal-background: var(--bg);
+}
+[data-theme='dark'] .navbar {
+  --search-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e94a9' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E");
+}
+/* The outer box holds the button's place, and keeps its icon while the palette is open. */
+.navbar [class*='navbarSearchContainer'] {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  margin-left: 2px;
+  padding: 0;
+}
+.navbar [class*='navbarSearchContainer']:has([class*='focused']) {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E") no-repeat 8px center / 18px 18px;
+}
+.navbar [class*='searchBarContainer'] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+}
+/* The open palette sits a fixed distance down the page, whatever the header is doing. */
+.navbar [class*='searchBarContainer'][class*='focused'] {
+  position: fixed;
+  top: 12vh;
+  right: auto;
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+}
+/* The backdrop takes the click that closes the palette, so a dimmed link under it is not followed. */
+.navbar [class*='searchBarContainer'][class*='focused']::before {
+  content: '';
+  position: absolute;
+  inset: -200vmax;
+  z-index: -1;
+  background: rgb(4 6 24 / 0.5);
+}
+/* Fixed in place, the results cannot be scrolled into view with the page, so they scroll themselves. */
+.navbar [class*='searchBarContainer'][class*='focused'] [class*='dropdownMenu'] {
+  max-height: calc(88vh - 70px);
+  overflow-y: auto;
+}
+/* The clear button blurs the field on press, which closes the palette before its click lands;
+   Escape closes the palette instead. */
+.navbar [class*='searchClearButton'] {
+  display: none;
+}
+.navbar [class*='searchBarContainer'] > [class*='searchIcon'],
+.navbar [class*='searchHintContainer'] {
+  display: none;
+}
+.navbar .navbar__search-input {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3adc8' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E") no-repeat 7px center / 18px 18px;
+  color: transparent;
+  font: 400 0.875rem var(--sans);
+  cursor: pointer;
+}
+.navbar .navbar__search-input::placeholder {
+  color: transparent;
+}
+.navbar .navbar__search-input:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E");
+}
+/* The palette is on page colours, so it takes the theme's own focus colour. */
+.navbar .navbar__search-input:focus {
+  width: var(--search-local-modal-width);
+  height: 46px;
+  padding: 0 40px 0 44px;
+  border-color: var(--focus);
+  border-radius: 6px;
+  outline: none;
+  background-color: var(--bg);
+  background-image: var(--search-ico);
+  background-position: 14px center;
+  background-size: 20px 20px;
+  color: var(--ink);
+  font-size: 1rem;
+  cursor: text;
+}
+.navbar .navbar__search-input:focus::placeholder {
+  color: var(--ink-3);
+}
+/* The mobile drawer sits on page colours, so its links go back to page ink. */
+.navbar-sidebar {
+  --ifm-navbar-link-color: var(--ink-2);
+  --ifm-navbar-link-hover-color: var(--ink);
+  --ifm-menu-link-sublist-icon-filter: none;
+  --ifm-menu-color-background-active: transparent;
+  background-color: var(--bg);
+  color: var(--ink);
+}
+[data-theme='dark'] .navbar-sidebar {
+  --ifm-menu-link-sublist-icon-filter: invert(100%) sepia(94%) saturate(17%) hue-rotate(223deg) brightness(104%) contrast(98%);
+}
+/* The drawer keeps the header's dark-navbar toggle class, whose grey hover fill is meant for navy. */
+.navbar .navbar-sidebar [class*='toggleButton'] {
+  color: var(--ink-2);
+}
+.navbar .navbar-sidebar [class*='toggleButton']:hover {
+  color: var(--ink);
+  background: var(--bg-2);
+}
+.navbar-sidebar .navbar__link--active {
+  box-shadow: none;
 }
 
-/* Footer styling */
-.footer {
-  background-color: var(--ifm-color-primary-darkest);
+/* Sidebar and on-this-page lists: a blue rule marks the current entry. */
+.menu__link {
+  color: var(--ink-2);
 }
-
-.footer--dark {
-  --ifm-footer-background-color: #1a1a1a;
+.menu__link:hover {
+  color: var(--ink);
 }
-
-/* Button styles */
-.button--primary {
+.menu__link--active:not(.menu__link--sublist) {
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  box-shadow: inset 2px 0 0 var(--l-blue);
+  border-radius: 0;
+}
+.table-of-contents,
+.breadcrumbs__link {
+  font-size: 0.875rem;
+}
+.table-of-contents__link {
+  color: var(--ink-2);
+}
+.table-of-contents__link--active {
+  color: var(--ink);
 }
 
-/* Documentation specific styles */
+/* Markdown body. */
+.markdown {
+  color: var(--ink-2);
+}
 .markdown h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--nats-accent-blue);
+  font-size: clamp(1.875rem, 1.5rem + 1vw, 2.375rem);
+  letter-spacing: -0.02em;
 }
-
 .markdown h2 {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  margin-top: 2.75rem;
+}
+.markdown h3 {
+  font-size: 1.1875rem;
   margin-top: 2rem;
 }
-
-.markdown h3 {
-  font-size: 1.5rem;
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  font-size: 1rem;
+}
+.markdown strong,
+.markdown b {
+  color: var(--ink);
   font-weight: 600;
-  margin-top: 1.5rem;
+}
+.markdown blockquote {
+  border-left: 3px solid var(--rule-2);
+  background: transparent;
+  color: var(--ink-2);
+}
+.markdown table {
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+.markdown table tr {
+  border-top: 0;
+}
+.markdown table th,
+.markdown table td {
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  padding: 9px 16px 9px 0;
+  vertical-align: top;
+}
+.markdown table th {
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  border-bottom-color: var(--rule-2);
+  vertical-align: bottom;
 }
 
-/* Cards and boxes */
-.card {
-  border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  transition: all 0.2s;
+:not(pre) > code {
+  border: 1px solid var(--rule);
+  padding: 0.05em 0.35em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+/* Prism's colours come from the theme in docusaurus.config.ts, which points at these tokens. */
+.theme-code-block {
+  border: 1px solid var(--rule);
+  box-shadow: none;
+}
+pre code {
+  font-size: 0.8125rem;
+  line-height: 1.65;
 }
 
-.card:hover {
-  border-color: var(--nats-accent-blue);
-  box-shadow: 0 4px 12px rgba(56, 132, 255, 0.1);
+/* Admonitions: a hairline box like other nats.io panels; the icon carries the type colour. */
+.theme-admonition {
+  --ifm-alert-background-color: var(--bg-2);
+  --ifm-alert-foreground-color: var(--ink-2);
+  --ifm-alert-border-color: var(--rule);
+  --ifm-alert-border-width: 1px;
+  --ifm-alert-border-left-width: 1px;
+  box-shadow: none;
+  border-radius: 4px;
+}
+.theme-admonition [class*='admonitionHeading'] {
+  color: var(--ink);
+}
+.theme-admonition [class*='admonitionIcon'] svg {
+  fill: var(--adm-color, var(--stroke));
+}
+.theme-admonition-tip { --adm-color: var(--l-green); }
+.theme-admonition-info { --adm-color: var(--l-blue); }
+.theme-admonition-warning,
+.theme-admonition-caution { --adm-color: #b54708; }
+.theme-admonition-danger { --adm-color: var(--err); }
+
+.button {
+  --ifm-button-padding-horizontal: 1rem;
+  --ifm-button-padding-vertical: 10px;
+  font-size: calc(0.9375rem * var(--ifm-button-size-multiplier));
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: 4px;
+}
+.button--primary {
+  --ifm-button-background-color: var(--btn);
+  --ifm-button-border-color: var(--btn);
+  --ifm-button-color: var(--btn-ink);
+}
+.button--primary:hover {
+  --ifm-button-background-color: var(--btn-hover);
+  --ifm-button-border-color: var(--btn-hover);
+}
+.button.button--secondary {
+  --ifm-button-background-color: var(--bg);
+  --ifm-button-border-color: var(--rule-2);
+  color: var(--ink);
+}
+.button.button--secondary:hover {
+  --ifm-button-border-color: var(--stroke);
 }
 
-/* Alert/Admonition customization */
-.admonition {
-  border-left-width: 4px;
+.footer {
+  font-size: 0.9375rem;
 }
-
-.admonition-note {
-  border-left-color: var(--nats-accent-blue);
+.footer__title {
+  font-size: 0.875rem;
 }
-
-.admonition-tip {
-  border-left-color: var(--nats-success);
+.footer__copyright {
+  font-size: 0.8125rem;
+  border-top: 1px solid var(--head-rule);
+  padding-top: 18px;
 }
-
-.admonition-warning {
-  border-left-color: var(--nats-warning);
+.footer__copyright a {
+  color: var(--head-link);
 }
-
-.admonition-danger {
-  border-left-color: var(--nats-error);
+.footer__logo {
+  height: 26px;
+  width: auto;
 }
-
-/* Navigation Icons */
-.navbar__item svg {
-  color: var(--ifm-navbar-link-color);
-  transition: all 0.2s ease;
-  opacity: 0.8;
-}
-
-.navbar__item:hover svg {
-  color: var(--ifm-navbar-link-hover-color);
+/* Docusaurus dims the footer logo until hover; the CNCF mark should read at full strength. */
+.footer [class*='footerLogoLink'] {
   opacity: 1;
-  transform: translateY(-1px);
 }
 
-.navbar__link {
-  transition: all 0.2s ease;
-}
-
-.navbar__link:hover {
-  text-decoration: none;
-}
-
-[data-theme='light'] .navbar__item svg {
-  color: #6c757d;
-}
-
-[data-theme='light'] .navbar__item:hover svg {
-  color: var(--ifm-color-primary);
-}
-
-[data-theme='dark'] .navbar__item svg {
-  color: #a0a0a0;
-}
-
-[data-theme='dark'] .navbar__item:hover svg {
-  color: var(--ifm-color-primary-light);
-}
-
-/* Bash comment colors - make comments gray in both themes */
-/* Works for both Docusaurus native tabs and custom JavaScript tabs */
-.language-bash .token.comment,
-pre[class*="language-bash"] .token.comment {
-  color: #6b7280 !important; /* Gray for comments in light mode */
-}
-
-[data-theme='dark'] .language-bash .token.comment,
-[data-theme='dark'] pre[class*="language-bash"] .token.comment {
-  color: #9ca3af !important; /* Gray for comments in dark mode */
-}
-
-/* Light mode syntax highlighting for dynamic code blocks */
-/* Override Prism CDN default to match Docusaurus oneLight theme */
-/* Only apply to custom tabs, not Docusaurus native tabs */
-.nats-tab-panel code[class*="language-"],
-.nats-tab-panel pre[class*="language-"] {
-  background: hsl(230, 1%, 98%);
-}
-
-/* Dark mode syntax highlighting for dynamic code blocks */
-/* Prism CDN loads light theme - these overrides provide dark mode colors */
-/* Only apply to custom tabs, not Docusaurus native tabs */
-[data-theme='dark'] .nats-tab-panel code[class*="language-"],
-[data-theme='dark'] .nats-tab-panel pre[class*="language-"] {
-  color: #d4d4d4;
-  background: hsl(220, 13%, 18%);
-  text-shadow: none;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.comment,
-[data-theme='dark'] .nats-tab-panel .token.prolog,
-[data-theme='dark'] .nats-tab-panel .token.doctype,
-[data-theme='dark'] .nats-tab-panel .token.cdata {
-  color: #6a9955;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.punctuation {
-  color: #d4d4d4;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.property,
-[data-theme='dark'] .nats-tab-panel .token.tag,
-[data-theme='dark'] .nats-tab-panel .token.boolean,
-[data-theme='dark'] .nats-tab-panel .token.number,
-[data-theme='dark'] .nats-tab-panel .token.constant,
-[data-theme='dark'] .nats-tab-panel .token.symbol,
-[data-theme='dark'] .nats-tab-panel .token.deleted {
-  color: #b5cea8;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.selector,
-[data-theme='dark'] .nats-tab-panel .token.attr-name,
-[data-theme='dark'] .nats-tab-panel .token.string,
-[data-theme='dark'] .nats-tab-panel .token.char,
-[data-theme='dark'] .nats-tab-panel .token.builtin,
-[data-theme='dark'] .nats-tab-panel .token.inserted {
-  color: #ce9178;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.operator,
-[data-theme='dark'] .nats-tab-panel .token.entity,
-[data-theme='dark'] .nats-tab-panel .token.url,
-[data-theme='dark'] .nats-tab-panel .language-css .token.string,
-[data-theme='dark'] .nats-tab-panel .style .token.string {
-  color: #d4d4d4;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.atrule,
-[data-theme='dark'] .nats-tab-panel .token.attr-value,
-[data-theme='dark'] .nats-tab-panel .token.keyword {
-  color: #569cd6;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.function,
-[data-theme='dark'] .nats-tab-panel .token.class-name {
-  color: #dcdcaa;
-}
-
-[data-theme='dark'] .nats-tab-panel .token.regex,
-[data-theme='dark'] .nats-tab-panel .token.important,
-[data-theme='dark'] .nats-tab-panel .token.variable {
-  color: #d16969;
-}
 /* Topology concept page images */
 .topology-image {
   display: block;
@@ -286,11 +534,18 @@ pre[class*="language-bash"] .token.comment {
   height: auto;
 }
 
-
 /* Security concept page images */
 .security-image {
   display: block;
   margin: 2.5rem auto;
   max-width: 70%;
   height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
 }

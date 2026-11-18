@@ -1,29 +1,9 @@
 .features {
-  display: flex;
-  align-items: center;
-  padding: 4rem 0;
-  width: 100%;
-  background: var(--ifm-background-surface-color);
-}
-
-.sectionHeader {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.sectionHeader h2 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--ifm-heading-color);
-}
-
-.sectionHeader p {
-  font-size: 1.2rem;
-  color: var(--ifm-color-emphasis-700);
+  padding: 56px 0;
 }
 
 .docSection {
-  margin-bottom: 2rem;
+  margin-bottom: var(--ifm-spacing-horizontal);
 }
 
 .docSectionLink {
@@ -39,81 +19,45 @@
 }
 
 .docSectionCard {
-  background: var(--ifm-card-background-color);
-  border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 12px;
-  padding: 2rem;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 20px;
   height: 100%;
-  transition: all 0.3s ease;
-  position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.docSectionCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px color-mix(in srgb, var(--card-accent, var(--ifm-color-primary)) 18%, transparent);
-  border-color: var(--card-accent, var(--ifm-color-primary));
+.docSectionLink:hover .docSectionCard {
+  border-color: var(--stroke);
 }
 
 .docSectionIcon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--card-accent, var(--ifm-color-primary)) 12%, transparent);
-  color: var(--card-accent, var(--ifm-color-primary));
-  margin-bottom: 1.25rem;
+  color: var(--card-accent, var(--l-blue));
+  margin-bottom: 12px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.docSectionCard:hover .docSectionIcon {
-  background: color-mix(in srgb, var(--card-accent, var(--ifm-color-primary)) 22%, transparent);
-  transform: scale(1.05);
 }
 
 .docSectionTitle {
-  font-size: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--ifm-heading-color);
+  font-size: 1.125rem;
+  margin-bottom: 6px;
+  color: var(--ink);
 }
 
 .docSectionDescription {
   flex: 1;
   font-size: 1rem;
-  line-height: 1.6;
-  color: var(--ifm-color-emphasis-700);
-  margin-bottom: 1rem;
+  color: var(--ink-2);
+  margin-bottom: 10px;
 }
 
 .docSectionArrow {
-  font-size: 1.5rem;
-  color: var(--card-accent, var(--ifm-color-primary));
-  font-weight: bold;
-  transition: transform 0.2s ease;
+  font-weight: 600;
+  color: var(--link);
 }
 
-.docSectionCard:hover .docSectionArrow {
-  transform: translateX(4px);
-}
-
-@media screen and (max-width: 996px) {
+@media screen and (max-width: 640px) {
   .features {
-    padding: 3rem 0;
-  }
-
-  .sectionHeader h2 {
-    font-size: 2rem;
-  }
-
-  .sectionHeader p {
-    font-size: 1rem;
-  }
-
-  .docSectionCard {
-    padding: 1.5rem;
+    padding: 40px 0;
   }
 }
