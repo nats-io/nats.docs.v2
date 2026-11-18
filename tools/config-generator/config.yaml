@@ -527,17 +527,17 @@ sections:
           Ignored if `-T` or `-logtime` was passed at startup — command-line
           boolean flags are re-applied over the config on every reload.
         reloadable: reloadable
-        type: string
+        type: boolean
         default: true
         description: |-
           If false, log without timestamps.
 
       logtime_utc:
         reloadable: reloadable
-        type: string
+        type: boolean
         default: false
         description: |-
-          If true, log timestamps with be in UTC rather than the local timezone.
+          If true, log timestamps will be in UTC rather than the local timezone.
 
       logfile:
         reloadable_note: |-
