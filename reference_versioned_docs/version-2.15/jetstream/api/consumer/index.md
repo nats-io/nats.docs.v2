@@ -11,4 +11,5 @@
 | [Leader stepdown](./leader-stepdown.md) | `$JS.API.CONSUMER.LEADER.STEPDOWN.{stream}.{consumer}` | No             |
 | [Evacuate peer](./evacuate-peer.md) | `$JS.API.CONSUMER.PEER.EVACUATE.{stream}.{consumer}` | No             |
 | [Pause consumer](./pause.md) | `$JS.API.CONSUMER.PAUSE.{stream}.{consumer}`     | No             |
+| [Reset consumer](./reset.md) | `$JS.API.CONSUMER.RESET.{stream}.{consumer}`     | No             |
 | [Unpin consumer](./unpin.md) | `$JS.API.CONSUMER.UNPIN.{stream}.{consumer}`     | No             |

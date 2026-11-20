@@ -560,6 +560,31 @@
       ]
     },
     {
+      "path": "jetstream/api/consumer/reset",
+      "title": "Reset Consumer",
+      "description": "Resets a consumer to its ack floor, or to a given stream sequence.",
+      "kind": "api",
+      "subjectLabel": "Subject",
+      "subjects": [
+        "$JS.API.CONSUMER.RESET.{stream}.{consumer}"
+      ],
+      "subjectStyle": "inline",
+      "subjectProse": "Where `{stream}` is the stream name and `{consumer}` is the consumer name.",
+      "bodyFile": "scripts/schema-ref-bodies/consumer-reset.md",
+      "schemas": [
+        {
+          "var": "consumerResetRequest",
+          "label": "Request",
+          "import": "jsm/jetstream/api/v1/consumer_reset_request.json"
+        },
+        {
+          "var": "consumerResetResponse",
+          "label": "Response",
+          "import": "jsm/jetstream/api/v1/consumer_reset_response.json"
+        }
+      ]
+    },
+    {
       "path": "jetstream/api/consumer/leader-stepdown",
       "title": "Leader Stepdown",
       "description": "Initiates leader stepdown for a consumer.",

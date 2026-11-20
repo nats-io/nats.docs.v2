@@ -1644,6 +1644,7 @@
                 "jetstream/api/consumer/names",
                 "jetstream/api/consumer/get-next",
                 "jetstream/api/consumer/pause",
+                "jetstream/api/consumer/reset",
                 "jetstream/api/consumer/leader-stepdown",
                 "jetstream/api/consumer/unpin"
               ]
