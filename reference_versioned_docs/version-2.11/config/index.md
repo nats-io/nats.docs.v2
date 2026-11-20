@@ -153,7 +153,7 @@ nats-server -c server.conf
 | :--- | :---------- | :--- | :------ | :--------- |
 | [`operator`](./operator.md) | One or more operator JWTs, either in files or inlined. | `(multiple)` | - | No |
 | [`trusted_keys`](./trusted_keys.md) | One or more operator public keys to trust. | `string` | - | No |
-| [`resolver`](./resolver/index.md) | Takes precedence over the value obtained from the `operator` if defined.  If a string value is used, it must be `MEMORY` or `URL(<url>)` where where `url` is an HTTP endpoint pointing to the [NATS account resolver](https://docs.nats.io/legacy/nas).  Note: the NATS account resolver is deprecated and the built-in NATS-based resolver should be used. | `(multiple)` | - | Yes\* |
+| [`resolver`](./resolver/index.md) | Takes precedence over the value obtained from the `operator` if defined.  If a string value is used, it must be `MEMORY` or `URL(<url>)` where `url` is an HTTP endpoint pointing to the [NATS account resolver](https://docs.nats.io/legacy/nas).  Note: the NATS account resolver is deprecated and the built-in NATS-based resolver should be used. | `(multiple)` | - | Yes\* |
 | [`resolver_tls`](./resolver_tls/index.md) |  | `object` | - | Yes |
 | [`resolver_preload`](./resolver_preload.md) | Map of account public key to the account JWT. | `string` | - | Yes\* |
 | [`resolver_pinned_accounts`](./resolver_pinned_accounts.md) |  | `(multiple)` | - | Yes |
