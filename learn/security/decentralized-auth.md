@@ -235,6 +235,59 @@ user JWT inside it lapses after 30 days. Expiry belongs to the minted
 credential, not the stored user: re-run `nats auth user credential`
 whenever you need a fresh one.
 
+### Templates in scoped permissions
+
+A fixed scope gives every user of the key the same subjects. To give each
+user its own subjects from one key, put a template in the scope's
+permissions. When a user connects, the server replaces the template with
+values from that user's JWT or its account.
+
+For example, each regional order service should publish only the orders
+of its own region. Add a key `regional-writer` whose publish permission
+uses the user's `region` tag, and issue a user with the tag `region:eu`:
+
+<div class="nats-example" data-type="learn-security-decentralized-auth-scoped-key-templates" data-languages="cli"></div>
+
+```
+User order-svc-eu (UDQSWTVD75VJKKE74QE6PPT7DJBFJLFRNZIMDEZPP4RYOZN73SHRDCVY)
+...
+             Scoped: true
+               Tags: region:eu
+...
+  Publish:
+
+                Allow: orders.{{tag(region)}}.>
+```
+
+The user info shows the template, because the server fills it in only at
+connect time. After you push the account, `order-svc-eu` can publish to
+`orders.eu.>` and gets a permissions violation for `orders.us.>`. A user
+issued with `--tags region:us` gets `orders.us.>` from the same key.
+
+You can use these templates in the allow and deny subjects of a scope:
+
+| Template | Replaced with |
+| --- | --- |
+| `{{name()}}` | The user's name |
+| `{{subject()}}` | The user's public key (`U...`) |
+| `{{account-name()}}` | The account's name |
+| `{{account-subject()}}` | The account's public key (`A...`) |
+| `{{tag(key)}}` | The value of each user tag `key:value` |
+| `{{account-tag(key)}}` | The value of each account tag `key:value` |
+
+The rules for tags:
+
+- Tags are stored in lowercase. `--tags region:US` becomes `region:us`, so
+  the subject is `orders.us.>`.
+- A user with several values for one tag (`--tags region:eu --tags region:uk`)
+  gets one subject for each value. A subject with several tag templates
+  gets one subject for each combination. From nats-server 2.14, the server
+  rejects the user if this adds up to more than 4,096 subjects.
+- If the user has no value for the tag, the server drops an allow subject
+  that uses it. If no allow subjects are left, the user can't publish (or
+  subscribe) at all. In a deny subject, a missing tag rejects the
+  connection with `Authorization Violation`.
+
 ## Revoking a user
 
 The snippet passed `--revoke` when it removed the old, unrestricted
