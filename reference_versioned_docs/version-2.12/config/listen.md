@@ -1,7 +1,7 @@
 # listen
 
 <Reloadable state="not-reloadable" />
-`<host>:<port>` for a client connections.
+`<host>:<port>` for client connections.
 
 
 ## Types

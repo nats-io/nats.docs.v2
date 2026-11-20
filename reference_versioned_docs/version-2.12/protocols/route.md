@@ -164,7 +164,7 @@ PONG\r\n
 
 ## -ERR {#err}
 
-The `-ERR` message is used by the server indicate a protocol, authorization, or other runtime connection error to the client. Most of these errors result in the server closing the connection.
+The `-ERR` message is used by the server to indicate a protocol, authorization, or other runtime connection error to the client. Most of these errors result in the server closing the connection.
 
 Handling of these errors usually has to be done asynchronously.
 

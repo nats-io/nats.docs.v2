@@ -145,7 +145,7 @@ sections:
         reloadable: not-reloadable
         type: listen
         description: |-
-          `<host>:<port>` for a client connections.
+          `<host>:<port>` for client connections.
 
       client_advertise:
         reloadable: reloadable
@@ -322,7 +322,7 @@ sections:
           the `operator` if defined.
 
           If a string value is used, it must be `MEMORY` or `URL(<url>)`
-          where where `url` is an HTTP endpoint pointing to the [NATS account
+          where `url` is an HTTP endpoint pointing to the [NATS account
           resolver](https://docs.nats.io/legacy/nas).
 
           Note: the NATS account resolver is deprecated and the built-in
@@ -593,7 +593,7 @@ sections:
         reloadable: not-reloadable
         type: string
         description: |-
-          The servers name, shows up in logging. Defaults to the generated
+          The server's name, shows up in logging. Defaults to the generated
           server ID. When JetStream is used, within a domain, all server
           names need to be unique.
         examples:
@@ -667,7 +667,7 @@ sections:
         type: integer
         default: 1
         description: |-
-          Number of failed attempt to reconnect a route, gateway or
+          Number of failed attempts to reconnect a route, gateway or
           leaf node connection. Default is to report every attempt.
 
       max_traced_msg_len:
@@ -703,14 +703,14 @@ sections:
         type: string
         default: 1MB
         description: |-
-          Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value.
+          Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be less than or equal to the `max_pending` value.
 
       max_pending:
         reloadable: not-reloadable
         type: string
         default: 64MB
         description: |-
-          Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set `PendingLimits` (number of messages and total size) for their subscriptions.
+          Maximum number of bytes buffered for a connection. Applies to client connections. Note that applications can also set `PendingLimits` (number of messages and total size) for their subscriptions.
 
       max_subscriptions:
         reloadable_note: |-
@@ -722,7 +722,7 @@ sections:
         aliases:
           - max_subs
         description: |-
-          Maximum numbers of subscriptions per client and leafnode accounts connection. A value of `0` means unlimited.
+          Maximum number of subscriptions per client and leafnode accounts connection. A value of `0` means unlimited.
 
       max_subscription_tokens:
         reloadable: not-reloadable
@@ -735,18 +735,18 @@ sections:
         type: string
         default: 2m
         description: |-
-          Duration at which pings are sent to clients, leaf nodes and routes.
+          Interval at which pings are sent to clients, leaf nodes and routes.
           In the presence of client traffic, such as messages or client side
           pings, the server will not send pings. Therefore it is recommended
-          to keep this value bigger than what clients use.
+          to keep this value greater than the interval used by clients.
 
       ping_max:
         reloadable: reloadable
         type: integer
         default: 2
         description: |-
-          After how many unanswered pings the server will allow before closing
-          the connection.
+          The number of unanswered pings allowed before the server closes the
+          connection.
 
       write_timeout:
         version: "2.12"

@@ -128,7 +128,7 @@ nats-server -c server.conf
 | :--- | :---------- | :--- | :------ | :--------- |
 | [`host`](./host.md) | Host for client connections. | `string` | `0.0.0.0` | No |
 | [`port`](./port.md) | Port for client connections. Use `-1` for a random available port. | `integer` | `4222` | No\* |
-| [`listen`](./listen.md) | `<host>:<port>` for a client connections. | `string` | - | No |
+| [`listen`](./listen.md) | `<host>:<port>` for client connections. | `string` | - | No |
 | [`client_advertise`](./client_advertise.md) | Advertised client `<host>:<port>`. Useful for cluster setups behind a NAT. | `string` | - | Yes |
 | [`tls`](./tls/index.md) | TLS configuration for client and HTTP monitoring. | `object` | - | Yes\* |
 | [`proxy_protocol`](./proxy_protocol.md) | Accept the PROXY protocol header on client connections, so the server sees the original client address behind a load balancer. | `boolean` | `false` | No |
@@ -154,7 +154,7 @@ nats-server -c server.conf
 | :--- | :---------- | :--- | :------ | :--------- |
 | [`operator`](./operator.md) | One or more operator JWTs, either in files or inlined. | `(multiple)` | - | No |
 | [`trusted_keys`](./trusted_keys.md) | One or more operator public keys to trust. | `string` | - | No |
-| [`resolver`](./resolver/index.md) | Takes precedence over the value obtained from the `operator` if defined.  If a string value is used, it must be `MEMORY` or `URL(<url>)` where where `url` is an HTTP endpoint pointing to the [NATS account resolver](https://docs.nats.io/legacy/nas).  Note: the NATS account resolver is deprecated and the built-in NATS-based resolver should be used. | `(multiple)` | - | Yes\* |
+| [`resolver`](./resolver/index.md) | Takes precedence over the value obtained from the `operator` if defined.  If a string value is used, it must be `MEMORY` or `URL(<url>)` where `url` is an HTTP endpoint pointing to the [NATS account resolver](https://docs.nats.io/legacy/nas).  Note: the NATS account resolver is deprecated and the built-in NATS-based resolver should be used. | `(multiple)` | - | Yes\* |
 | [`resolver_tls`](./resolver_tls/index.md) |  | `object` | - | Yes |
 | [`resolver_preload`](./resolver_preload.md) | Map of account public key to the account JWT. | `string` | - | Yes\* |
 | [`resolver_pinned_accounts`](./resolver_pinned_accounts.md) |  | `(multiple)` | - | Yes |
@@ -211,7 +211,7 @@ nats-server -c server.conf
 
 | Name | Description | Type | Default | Reloadable |
 | :--- | :---------- | :--- | :------ | :--------- |
-| [`server_name`](./server_name.md) | The servers name, shows up in logging. Defaults to the generated server ID. When JetStream is used, within a domain, all server names need to be unique. | `string` | - | No |
+| [`server_name`](./server_name.md) | The server's name, shows up in logging. Defaults to the generated server ID. When JetStream is used, within a domain, all server names need to be unique. | `string` | - | No |
 | [`server_tags`](./server_tags.md) | One or more tags associated with the server. This is currently used for placement of JetStream streams and consumers. | `(multiple)` | - | Yes\* |
 | [`http`](./http.md) | Listen specification `<host>:<port>` for server monitoring. | `string` | - | No |
 | [`https`](./https.md) | Listen specification `<host>:<port>` for TLS server monitoring. | `string` | - | No |
@@ -219,7 +219,7 @@ nats-server -c server.conf
 | [`https_port`](./https_port.md) | HTTPS port for server monitoring. | `integer` | - | No |
 | [`http_base_path`](./http_base_path.md) | Base path for monitoring endpoints. | `string` | - | No\* |
 | [`connect_error_reports`](./connect_error_reports.md) | Number of attempts at which a repeated failed route, gateway or leaf node connection is reported. Connect attempts are made once every second. | `integer` | `3600` | Yes\* |
-| [`reconnect_error_reports`](./reconnect_error_reports.md) | Number of failed attempt to reconnect a route, gateway or leaf node connection. Default is to report every attempt. | `integer` | `1` | Yes |
+| [`reconnect_error_reports`](./reconnect_error_reports.md) | Number of failed attempts to reconnect a route, gateway or leaf node connection. Default is to report every attempt. | `integer` | `1` | Yes |
 | [`max_traced_msg_len`](./max_traced_msg_len.md) | Set a limit to the trace of the payload of a message. | `integer` | `0` | Yes |
 
 \* See the property page for reload caveats.
@@ -229,12 +229,12 @@ nats-server -c server.conf
 | :--- | :---------- | :--- | :------ | :--------- |
 | [`max_control_line`](./max_control_line.md) | Maximum length of a protocol line (including combined length of subject and queue group). Increasing this value may require client changes to be used. Applies to all traffic. | `string` | `4KB` | Yes\* |
 | [`max_connections`](./max_connections.md) | Maximum number of active client connections. | `string` | `64K` | Yes |
-| [`max_payload`](./max_payload.md) | Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value. | `string` | `1MB` | Yes |
-| [`max_pending`](./max_pending.md) | Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set `PendingLimits` (number of messages and total size) for their subscriptions. | `string` | `64MB` | No |
-| [`max_subscriptions`](./max_subscriptions.md) | Maximum numbers of subscriptions per client and leafnode accounts connection. A value of `0` means unlimited. | `string` | `0` | No\* |
+| [`max_payload`](./max_payload.md) | Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be less than or equal to the `max_pending` value. | `string` | `1MB` | Yes |
+| [`max_pending`](./max_pending.md) | Maximum number of bytes buffered for a connection. Applies to client connections. Note that applications can also set `PendingLimits` (number of messages and total size) for their subscriptions. | `string` | `64MB` | No |
+| [`max_subscriptions`](./max_subscriptions.md) | Maximum number of subscriptions per client and leafnode accounts connection. A value of `0` means unlimited. | `string` | `0` | No\* |
 | [`max_subscription_tokens`](./max_subscription_tokens.md) |  | `integer` | - | No |
-| [`ping_interval`](./ping_interval.md) | Duration at which pings are sent to clients, leaf nodes and routes. In the presence of client traffic, such as messages or client side pings, the server will not send pings. Therefore it is recommended to keep this value bigger than what clients use. | `string` | `2m` | Yes |
-| [`ping_max`](./ping_max.md) | After how many unanswered pings the server will allow before closing the connection. | `integer` | `2` | Yes |
+| [`ping_interval`](./ping_interval.md) | Interval at which pings are sent to clients, leaf nodes and routes. In the presence of client traffic, such as messages or client side pings, the server will not send pings. Therefore it is recommended to keep this value greater than the interval used by clients. | `string` | `2m` | Yes |
+| [`ping_max`](./ping_max.md) | The number of unanswered pings allowed before the server closes the connection. | `integer` | `2` | Yes |
 | [`write_timeout`](./write_timeout.md) | What the server does when a connection misses its `write_deadline`: `close` drops it, `retry` keeps trying, `default` uses the built-in behaviour. | `string` | `default` | No |
 | [`max_closed_clients`](./max_closed_clients.md) | How many closed connections the server keeps for `/connz` reporting. | `integer` | `10000` | No |
 | [`no_fast_producer_stall`](./no_fast_producer_stall.md) | Do not stall a fast producer when a consumer cannot keep up. The server drops messages to the slow consumer instead. | `boolean` | `false` | Yes |
