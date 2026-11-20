@@ -71,6 +71,8 @@ function parseArgs(argv) {
  *
  *   Subject prose…          (if present)
  *
+ *   Body                    (if `bodyFile` is set: Markdown file, verbatim)
+ *
  *   ## Request Schema       (per schema, using entry's recorded label)
  *
  *   <JSONSchema schema={var} />
@@ -114,6 +116,18 @@ function renderEntry(entry, version) {
     if (entry.subjectProse) {
       parts.push("");
       parts.push(entry.subjectProse);
+    }
+  }
+
+  // Optional hand-written body, inserted between the subject and the schemas.
+  // `bodyFile` is a Markdown file path relative to the repo root.
+  if (entry.bodyFile) {
+    const bodyPath = path.join(ROOT, entry.bodyFile);
+    if (!fs.existsSync(bodyPath)) die(`${entry.path}: bodyFile not found: ${entry.bodyFile}`);
+    const body = fs.readFileSync(bodyPath, "utf8").replace(/\r\n/g, "\n").trim();
+    if (body) {
+      parts.push("");
+      parts.push(body);
     }
   }
 
