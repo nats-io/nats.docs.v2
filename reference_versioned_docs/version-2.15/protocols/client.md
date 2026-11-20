@@ -391,7 +391,7 @@ Connection closed by foreign host.
 
 When the `verbose` connection option is set to `true` (the default value), the server acknowledges each well-formed protocol message from the client with a `+OK` message. Most NATS clients set the `verbose` option to `false` using the [`CONNECT`](#connect) message
 
-The `-ERR` message is used by the server indicate a protocol, authorization, or other runtime connection error to the client. Most of these errors result in the server closing the connection.
+The `-ERR` message is used by the server to indicate a protocol, authorization, or other runtime connection error to the client. Most of these errors result in the server closing the connection.
 
 Handling of these errors usually has to be done asynchronously.
 
