@@ -239,6 +239,12 @@ displays orders needs subscribe on `orders.>`. Publish rights on a
 credential that ships to browsers is a much larger surface than the
 feature needs.
 
+**Assuming WebSocket authentication protects MQTT.**
+The `websocket {}` block's `authorization`, `no_auth_user` and cookie
+settings don't apply to MQTT-over-WebSocket clients. Those use
+MQTT-specific or top-level authentication. See
+[MQTT authentication pitfalls](/learn/mqtt/auth-and-clustering#pitfalls).
+
 ## Where you are
 
 The dashboard is now a controlled client:
