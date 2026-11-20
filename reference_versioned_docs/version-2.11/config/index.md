@@ -218,7 +218,7 @@ nats-server -c server.conf
 | [`https_port`](./https_port.md) | HTTPS port for server monitoring. | `integer` | - | No |
 | [`http_base_path`](./http_base_path.md) | Base path for monitoring endpoints. | `string` | - | No\* |
 | [`connect_error_reports`](./connect_error_reports.md) | Number of attempts at which a repeated failed route, gateway or leaf node connection is reported. Connect attempts are made once every second. | `integer` | `3600` | Yes\* |
-| [`reconnect_error_reports`](./reconnect_error_reports.md) | Number of failed attempt to reconnect a route, gateway or leaf node connection. Default is to report every attempt. | `integer` | `1` | Yes |
+| [`reconnect_error_reports`](./reconnect_error_reports.md) | Number of failed attempts to reconnect a route, gateway or leaf node connection. Default is to report every attempt. | `integer` | `1` | Yes |
 | [`max_traced_msg_len`](./max_traced_msg_len.md) | Set a limit to the trace of the payload of a message. | `integer` | `0` | Yes |
 
 \* See the property page for reload caveats.

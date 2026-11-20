@@ -667,7 +667,7 @@ sections:
         type: integer
         default: 1
         description: |-
-          Number of failed attempt to reconnect a route, gateway or
+          Number of failed attempts to reconnect a route, gateway or
           leaf node connection. Default is to report every attempt.
 
       max_traced_msg_len:
