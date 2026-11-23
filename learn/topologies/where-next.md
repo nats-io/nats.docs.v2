@@ -170,9 +170,16 @@ Each group links to the page that explains why.
 
 **Super-cluster**: see [Pitfalls](/learn/topologies/super-clusters#pitfalls)
 
-- [ ] Join regions with a `gateway {}` block, never a `cluster {}` stretched across them.
+- [ ] Join regions with a `gateway {}` block, not a `cluster {}` stretched across them; the exception is three nearby data centers that meet the requirements on [Resilient cross-region clusters](/learn/topologies/resilient-cross-region-clusters).
 - [ ] Match the local gateway `name` to the `cluster {}` name (the server won't start otherwise), and each `gateways` entry to the remote cluster's exact name — a remote typo fails silently, so confirm a publish crosses to the other region.
 - [ ] Place a queue subscriber for each workload in every region that produces it.
+
+**Resilient cross-region clusters**: see [Pitfalls](/learn/topologies/resilient-cross-region-clusters#pitfalls)
+
+- [ ] Stretch a cluster only across three nearby data centers with a stable network, low latency, and about the same round-trip time between every pair.
+- [ ] Run the same number of servers in each data center, tag each with its data center, and set `unique_tag` so every R3 stream gets one replica per data center.
+- [ ] Never add a single distant server to a cluster over a high-latency link; use a leaf node or a gateway.
+- [ ] Estimate the egress cost of replicating every write across data centers before you commit to the design.
 
 **Leaf nodes**: see [Pitfalls](/learn/topologies/leaf-nodes#pitfalls)
 

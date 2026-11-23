@@ -117,6 +117,8 @@ copy those files off-site and put them back.
 | [Stream backup and restore](/learn/backup-recovery/stream-backup-restore) | Take a point-in-time snapshot of `ORDERS`, restore it, and verify the counts match |
 | [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources) | Stand up `ORDERS_DR` at a second site, read its lag, and see why a mirror is not a backup |
 | [Disaster recovery](/learn/backup-recovery/disaster-recovery) | A runbook that picks restore or promotion per failure class, and how to promote a mirror |
+| [Rescue Meta details](/learn/backup-recovery/rescue-meta-details) | Rescue a meta group that lost quorum step by step, peer-remove the dead servers, and verify the cluster |
+| [JetStream data recovery](/learn/backup-recovery/jetstream-data-recovery) | Recover servers at another site by moving each server's storage volume and config file |
 | [Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup) | Back up and restore the operator, accounts, keys, and server config off-site |
 | [Where to go next](/learn/backup-recovery/where-next) | The whole game recapped, plus a single production checklist |
 

@@ -29,6 +29,7 @@ under pressure during an outage is *which tool*. Decide it ahead of time, per fa
 | Someone deleted or purged `ORDERS` by mistake | recover from `ORDERS_DR`, or restore the snapshot | The mirror survives an upstream delete: it keeps every message it had copied and just stops updating, so it's usually the freshest intact copy. The snapshot is the older fallback. |
 | Messages on `ORDERS` are corrupt or wrong (a bad publisher) | restore a known-good snapshot, or purge the bad range | The bad data replicated to the mirror as well. The snapshot predates the corruption. |
 | A consumer lost its position (`shipping` redelivering from zero) | restore a `--consumers` snapshot | Only the snapshot captured the consumer's saved delivery position. |
+| The `east` data center is unusable, but the servers' disks survived | move each volume and its config to `site2` | Each volume carries its server's full state, including R1 streams that have no other copy. See [JetStream data recovery](./jetstream-data-recovery.md). |
 | Enough `east` servers are permanently gone that the meta group has no leader | rescue the meta group, then remove the dead peers | Nothing can be created, moved, or restored while the metadata layer has no quorum. |
 
 One principle runs through the whole table: a snapshot is the only copy
@@ -135,6 +136,9 @@ recovers. Second, the promoted stream must live where that quorum
 survives. That's why a DR mirror is normally placed in its own JetStream
 domain (a leaf node) or an independent cluster, rather than sharing one
 meta group that spans both sites.
+A meta group that spans sites is only safe with three nearby data
+centers, as described on
+[Resilient cross-region clusters](../topologies/resilient-cross-region-clusters.md).
 
 How the mirror replicated those messages in the first place (the config,
 the filters, the start position) is the JetStream chapter's job, covered in
@@ -219,6 +223,10 @@ before removing its peer.
 
 Once only live servers remain in the meta group, normal operation resumes
 and the recoveries earlier on this page become possible again.
+
+The full procedure, with the checks before and after each step and what
+happens to the streams, is on
+[Rescue Meta details](./rescue-meta-details.md).
 
 Where more than one JetStream domain is present, you must specify the domain
 in the rescue command. Each domain runs its own meta group, with its own peers
@@ -307,6 +315,10 @@ Continue to
   — the snapshot internals the restore step depends on.
 - [Clustering](/learn/clustering) — R3 leader election, the availability
   story that is not a recovery story.
+- [Rescue Meta details](./rescue-meta-details.md) — the meta rescue and
+  peer-remove procedure step by step.
+- [JetStream data recovery](./jetstream-data-recovery.md) — recover servers
+  at another site from their moved volumes.
 - [Clustering → Desired state and evacuation](/learn/clustering/desired-state)
   — the ordinary way to take a server out, and what to do instead of a
   rescue while the meta group still has a leader.

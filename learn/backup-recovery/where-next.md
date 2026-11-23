@@ -144,6 +144,23 @@ group links back to the page that explains the why.
 - [ ] Stop publishers before purging corrupted messages; purging under live writes races new bad data in.
 - [ ] Name the domain with `--js-domain` when rescuing a topology that has more than one; each domain runs its own meta group and a rescue lowers the quorum of exactly one of them.
 
+### Rescue Meta details — see [Caveats](/learn/backup-recovery/rescue-meta-details#caveats)
+
+- [ ] Stop the lost servers and disable their restart before you rescue; a server that returns while the quorum is lowered can cause a split brain.
+- [ ] Rescue only when the meta group has no leader; with a leader, use evacuate and peer-remove.
+- [ ] Finish the peer-removes within 5 minutes, one at a time; if the rescue expires, run it again.
+- [ ] Compare each stream's last sequence with what publishers last saw; a surviving replica that was behind loses the last acknowledged writes.
+- [ ] Restore R1 streams and streams with no surviving replica from a snapshot or a mirror.
+- [ ] Verify with `nats server report jetstream` that the meta group has one leader and every listed peer is online and current.
+
+### JetStream data recovery — see [Caveats](/learn/backup-recovery/jetstream-data-recovery#caveats)
+
+- [ ] Keep each server's `store_dir` on its own single mount point, so one volume snapshot captures all of its state at once.
+- [ ] Copy each volume once, to one server, under its original `server_name`; never copy one volume to several servers.
+- [ ] Fence the original servers before starting the copies; nothing in the store stops two servers using the same state.
+- [ ] Move the config file with the volume, keeping `server_name`, cluster name, domain, and encryption key, and changing routes and addresses.
+- [ ] Keep a recoverable copy of the encryption key; a TPM-sealed key doesn't move with the disk.
+
 ### Config and JWT backup — see [Pitfalls](/learn/backup-recovery/config-and-jwt-backup#pitfalls)
 
 - [ ] Seal every `nats auth operator backup` with `--key` and store the curve seed apart from the backups; the file carries every private seed, and losing store plus key together is losing the identity.
