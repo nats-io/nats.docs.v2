@@ -97,9 +97,10 @@ Point `order-svc` and the consumers at `west`. The stream has the same
 name there, so publishers only change the server address.
 
 Consumers are different: a mirror copies messages, not consumers. The
-`shipping` consumer you had on `east` doesn't exist on `west`, so create
-it there as part of the failover, and choose where it starts, for example
-from the sequence after the last one it processed.
+`shipping` consumer you had on `east` doesn't exist on `west` unless you
+created it there. With the setup from [Consumer DR](./consumer-dr.md), reset
+each paused consumer on `west` to its last synced ack floor and resume it.
+Without it, create the consumers now and choose where each one starts.
 
 A publish now lands on `west`:
 
@@ -378,6 +379,8 @@ Continue to
   — the snapshot internals the restore step depends on.
 - [Clustering](/learn/clustering) — R3 leader election, the availability
   story that is not a recovery story.
+- [Consumer DR](./consumer-dr.md) — paused consumers on the mirror, synced
+  ack floors, and the reset on failover.
 - [Rescue Meta details](./rescue-meta-details.md) — the meta rescue and
   peer-remove procedure step by step.
 - [JetStream data recovery](./jetstream-data-recovery.md) — recover servers

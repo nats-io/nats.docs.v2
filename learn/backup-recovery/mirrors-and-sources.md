@@ -307,18 +307,19 @@ You now have:
 - A way to read its `Lag` and `Last Seen`, and to tell a caught-up mirror
   from a stalled one.
 
-What you don't have yet is the procedure for using the mirror when `east`
-fails: promoting it to a writable stream, redirecting clients, and moving
-back to `east` later. That's the runbook.
+What you don't have yet are the consumers at the DR site, which a mirror
+doesn't copy, and the procedure for using the mirror when `east` fails.
 
 ## What's next
 
-Continue to [Disaster recovery](./disaster-recovery.md).
+Continue to [Consumer DR](./consumer-dr.md).
 
 ## See also
 
 - [Mirrors & sources](/learn/jetstream/mirrors-and-sources) — how a mirror
   replicates: start position, subject handling, and sourcing.
+- [Consumer DR](./consumer-dr.md) — consumers at the DR site, which the
+  mirror doesn't copy.
 - [Leaf nodes](/learn/topologies/leaf-nodes) — the leaf connection between
   `west` and `east`, and JetStream domains.
 - [Get direct](/learn/jetstream/get-direct) — `allow_direct` and

@@ -139,6 +139,14 @@ group links back to the page that explains the why.
 - [ ] Create a new durable consumer on the upstream for every mirror you create from scratch, or the new mirror starts where the old one stopped.
 - [ ] Avoid Work Queue retention on a mirrored upstream; the mirror's internal consumer bypasses the work queue's subject-overlap check and breaks the single-consumer guarantee, so use Limits.
 
+### Consumer DR — see [Pitfalls](/learn/backup-recovery/consumer-dr#pitfalls)
+
+- [ ] Create every consumer on the mirror ahead of time, paused, with the same config as on the upstream and deliver policy `all`.
+- [ ] Store each consumer's ack floor under `<stream>.<consumer>` in a KV bucket, and mirror the bucket to the DR site.
+- [ ] Sync at a moderate interval and write only changed values; consumer info costs the cluster.
+- [ ] On failover, reset each consumer to the stored ack floor plus one, capped at the stream's last sequence plus one, then resume it.
+- [ ] Make processing safe to repeat; messages acknowledged after the last sync are delivered again.
+
 ### Disaster recovery — see [Pitfalls](/learn/backup-recovery/disaster-recovery#pitfalls)
 
 - [ ] Promote with one edit, `--no-mirror --subjects`; with the upstream gone, accept the data written after `Last Seen` as lost rather than waiting for the lag.

@@ -115,6 +115,7 @@ copy those files off-site and put them back.
 |---|---|
 | [Stream backup and restore](/learn/backup-recovery/stream-backup-restore) | Take a point-in-time snapshot of `ORDERS`, restore it, and verify the counts match |
 | [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources) | Stand up a mirror of `ORDERS` on `west` in its own JetStream domain, read its lag, and see why a mirror is not a backup |
+| [Consumer DR](/learn/backup-recovery/consumer-dr) | Keep consumer positions close to current at the DR site with paused consumers, ack floors in a mirrored KV bucket, and a consumer reset |
 | [Disaster recovery](/learn/backup-recovery/disaster-recovery) | A runbook that picks restore or promotion per failure class, how to promote a mirror, and how to fail back |
 | [Rescue Meta details](/learn/backup-recovery/rescue-meta-details) | Rescue a meta group that lost quorum step by step, peer-remove the dead servers, and verify the cluster |
 | [JetStream data recovery](/learn/backup-recovery/jetstream-data-recovery) | Recover servers at another site by moving each server's storage volume and config file |

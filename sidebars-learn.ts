@@ -218,6 +218,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "backup-recovery/stream-backup-restore",
             "backup-recovery/mirrors-and-sources",
+            "backup-recovery/consumer-dr",
             "backup-recovery/disaster-recovery",
             "backup-recovery/rescue-meta-details",
             "backup-recovery/jetstream-data-recovery",
