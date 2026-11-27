@@ -103,6 +103,7 @@ re-introducing it.
 | [Your first cluster](/learn/topologies/your-first-cluster) | Join servers with routes into a cluster, and what client reconnect and failover buy you |
 | [JetStream in a cluster](/learn/topologies/jetstream-in-a-cluster) | What changes for streams once there's a cluster: the meta layer and replicated streams |
 | [Super-clusters](/learn/topologies/super-clusters) | Join clusters with gateways across regions, and how geo-affinity keeps traffic local |
+| [Resilient cross-region clusters](/learn/topologies/resilient-cross-region-clusters) | When a cluster stretched across three nearby data centers survives losing one, and what it requires |
 | [Leaf nodes](/learn/topologies/leaf-nodes) | Attach a leaf node with an outbound leaf connection and how subject interest flows across it |
 | [Putting it together](/learn/topologies/putting-it-together) | Compose clusters, gateways, and leaf nodes into a full picture |
 | [Where to go next](/learn/topologies/where-next) | A map of what's beyond this chapter |

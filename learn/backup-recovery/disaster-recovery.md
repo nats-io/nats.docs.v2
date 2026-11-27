@@ -2,21 +2,21 @@
 id: disaster-recovery
 title: Disaster recovery
 sidebar_position: 4
-description: A runbook that picks restore-from-snapshot or promote-the-mirror per failure class, then promotes ORDERS_DR cleanly
+description: A runbook that picks restore-from-snapshot or promote-the-mirror per failure class, then promotes the mirror and fails back
 ---
 
 # Disaster recovery
 
 You now have two tools. A **snapshot** of `ORDERS` sits off-site under
-`./backups/orders/`, and a live **mirror**, `ORDERS_DR`, runs at `site2`.
+`./backups/orders/`, and a live **mirror** of `ORDERS` runs on the `west` cluster.
 Each protects against a different failure, and reaching for the
 wrong one during an outage costs you either data or hours.
 
 This page is the **runbook**: an ordered procedure that names the failure,
 picks the right tool, and carries out the recovery against the real `ORDERS`
 deployment. It also covers the one operation the earlier pages set up but never
-performed: **promotion**, turning the read-only `ORDERS_DR` into a
-writable primary.
+performed: **promotion**, turning the read-only mirror into a
+writable stream, and the way back to `east` afterwards.
 
 ## Match the failure to the tool
 
@@ -25,10 +25,11 @@ under pressure during an outage is *which tool*. Decide it ahead of time, per fa
 
 | What happened | Reach for | Why |
 |---|---|---|
-| The whole `east` cluster is gone | promote `ORDERS_DR` | The mirror already holds the data; promotion is minutes, a restore is hours. |
-| Someone deleted or purged `ORDERS` by mistake | recover from `ORDERS_DR`, or restore the snapshot | The mirror survives an upstream delete: it keeps every message it had copied and just stops updating, so it's usually the freshest intact copy. The snapshot is the older fallback. |
+| The whole `east` cluster is gone | promote the mirror on `west` | The mirror already holds the data; promotion is minutes, a restore is hours. |
+| Someone deleted or purged `ORDERS` by mistake | recover from the mirror on `west`, or restore the snapshot | The mirror survives an upstream delete: it keeps every message it had copied and just stops updating, so it's usually the freshest intact copy. The snapshot is the older fallback. |
 | Messages on `ORDERS` are corrupt or wrong (a bad publisher) | restore a known-good snapshot, or purge the bad range | The bad data replicated to the mirror as well. The snapshot predates the corruption. |
 | A consumer lost its position (`shipping` redelivering from zero) | restore a `--consumers` snapshot | Only the snapshot captured the consumer's saved delivery position. |
+| The `east` data center is unusable, but the servers' disks survived | move each volume and its config to another site | Each volume carries its server's full state, including R1 streams that have no other copy. See [JetStream data recovery](./jetstream-data-recovery.md). |
 | Enough `east` servers are permanently gone that the meta group has no leader | rescue the meta group, then remove the dead peers | Nothing can be created, moved, or restored while the metadata layer has no quorum. |
 
 One principle runs through the whole table: a snapshot is the only copy
@@ -41,105 +42,167 @@ write three times doesn't undo it.
 
 ## Failover: promote the mirror
 
-When the `east` cluster is gone, the goal is to make `ORDERS_DR` start accepting
-writes so `order-svc` and the consumers can carry on at `site2`. That's
-promotion, and it's a short, ordered sequence. The animation below
-shows it end to end.
+When the `east` cluster is gone, the goal is to make the `ORDERS` mirror on
+`west` accept writes, so `order-svc` and the consumers can carry on there.
+That's **promotion**. The animation below shows it end to end.
 
 <div class="nats-flow" data-scenario="mirrorFailoverAnimated" data-width="600" data-height="350"></div>
 
-### Step 1 — verify the lag is zero
+While `east` is down, nothing listens on `orders.>`: the mirror has no
+subjects, so a publish from any client gets `No responders`. That's the
+visible sign that writes have stopped.
 
-A mirror trails its upstream by some **lag**: the count of messages it
-hasn't copied yet. Promote it while lag is non-zero and you start publishing on
-top of a stream that's still missing its tail. So the first runbook step is
-always the same: read the lag.
+### Step 1 — read the mirror's state
 
-<div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-checkLag" data-languages="cli,js,go,python,java,rust,csharp,c"></div>
+Read how far the mirror got before contact dropped:
 
-If the `east` site is fully unreachable, the mirror can't reach its upstream and the lag
-stops at whatever it was when contact dropped. That stalled number is your
-real recovery point: the messages written to `ORDERS` after the last
-successful copy are lost. Note it, then proceed. Waiting for a lag that will
-never move to zero only extends the outage.
+<div class="nats-example" data-type="learn-backup-recovery-disaster-recovery-checkLag" data-languages="cli"></div>
 
-### Step 2 — drop the mirror config
+Look at `Last Seen` first. If `east` is unreachable, `Last Seen` grows and
+`Lag` keeps the value it had when the last message arrived, often `0`.
+That `0` doesn't mean the mirror has everything: whatever `east` stored
+after `Last Seen` is lost, and the mirror can't tell you how much that is.
+Note the last sequence and the time of `Last Seen`; that's your recovery
+point.
 
-A mirror is **read-only** by design: it rejects direct publishes because its
-only job is to follow its upstream. To make `ORDERS_DR` writable, you remove
-the mirror relationship from its configuration.
+If `east` is still reachable but degraded, wait until `Lag` reaches `0`
+with a small `Last Seen` before you promote. Waiting for a lag to move
+when `east` is gone only extends the outage.
 
-```bash
-# At site2: edit ORDERS_DR so it is no longer a mirror.
-# Removing the mirror source makes the stream a standalone primary.
-nats --server nats://site2:4222 stream edit ORDERS_DR --no-mirror
-```
+### Step 2 — promote the mirror
 
-Once the mirror config is gone, the stream stops following `east`. It still
-holds every message it had copied. Promotion doesn't touch the data, only
-the relationship.
-
-### Step 3 — clear the lost stream's assignment
-
-The subject bind in the next step fails if the old `ORDERS` assignment is
-still in the JetStream metadata. The server checks the subjects you're
-adding against every stream in the account, and losing the site doesn't
-remove the dead `ORDERS` on its own, so the edit comes back with
-`subjects overlap with an existing stream (10065)`. Clear the stale entry
-first:
+Remove the mirror configuration and give the stream the subjects
+`ORDERS` used on `east`, in one edit (NATS 2.12 and later):
 
 ```bash
-# Remove the assignment for the lost ORDERS so its subjects are free.
-nats --server nats://site2:4222 stream rm ORDERS --force
+nats --context west stream edit ORDERS --no-mirror --subjects "orders.>"
 ```
 
-This is the official promotion order: free the mirrored stream's
-subjects, drop the mirror config (step 2), then bind those subjects to
-the promoted stream (step 4).
+The stream on `west` is now a normal R3 stream that captures
+`orders.created`, `orders.shipped`, and `orders.canceled`. The edit goes
+through the meta group of the `west` domain, which the outage didn't touch.
 
-### Step 4 — add the subjects so it accepts writes
+Promotion doesn't change the data. Sequence numbers continue where the
+mirror stopped: if the mirror's last message was `seq 1042`, the next write
+gets `seq 1043`, so a consumer position recorded as a sequence number on
+`east` still points at the same message on `west`.
 
-A mirror has no subjects of its own; it receives messages through the mirror
-mechanism, not by listening on `orders.>`. A writable primary needs to *bind*
-those subjects so publishers can reach it. Add them:
+A promoted stream can't become a mirror again. Going back to `east` later
+means deleting it and creating a new mirror, as described under
+[Failback](#failback-move-back-to-east).
+
+### Step 3 — redirect publishers and consumers
+
+Point `order-svc` and the consumers at `west`. The stream has the same
+name there, so publishers only change the server address.
+
+Consumers are different: a mirror copies messages, not consumers. The
+`shipping` consumer you had on `east` doesn't exist on `west` unless you
+created it there. With the setup from [Consumer DR](./consumer-dr.md), reset
+each paused consumer on `west` to its last synced ack floor and resume it.
+Without it, create the consumers now and choose where each one starts.
+
+A publish now lands on `west`:
 
 ```bash
-# Give the promoted stream the subjects ORDERS used to own.
-nats --server nats://site2:4222 stream edit ORDERS_DR --subjects "orders.>"
+nats --context west req orders.created \
+  '{"order_id":"ord_9a1c","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
 ```
 
-`ORDERS_DR` now captures `orders.created`, `orders.shipped`,
-`orders.canceled` — the same subjects the lost primary held. It now functions
-as a full primary.
+```
+{"stream":"ORDERS","domain":"west","seq":1043}
+```
 
-### Step 5 — redirect publishers and consumers
+The acknowledgment now names the `west` domain. Failover is complete. The
+recovery time is one command plus client reconnection, and the data lost
+is whatever `east` stored after the mirror's `Last Seen`.
 
-The last step redirects traffic. Point `order-svc` and the consumers at `site2` and
-they resume against the promoted stream:
+This sequence depends on `west` having its own meta group. If the mirror
+shared a meta group with `east` and that group lost its majority with
+`east`, the promotion edit would fail until the meta group recovers. A meta
+group that spans sites is only safe with three nearby data centers, as
+described on
+[Resilient cross-region clusters](../topologies/resilient-cross-region-clusters.md).
+
+## Failback: move back to `east`
+
+When `east` is available again, you move the writes back. It's two parts:
+first `east` catches up as a mirror of `west`, then you swap the roles.
+
+### Delete the old stream on `east` first
+
+After a real outage, `east` comes back with its old `ORDERS`, data
+included, and it still listens on `orders.>`. As soon as it has elected a
+leader, a few seconds after start, both streams store every write. Each
+publisher sees the acknowledgment from its own side first, the old stream
+on `east` is missing everything written on `west` during the outage, and
+the two streams assign different sequence numbers to the same message.
+
+Delete it before anything else, as soon as `east` is up:
 
 ```bash
-# Publishers and consumers now connect to site2.
-nats --server nats://site2:4222 pub orders.created \
-  '{"order_id":"ord_8w2k","customer":"acme-co","total_cents":4200,"ts":"2026-05-22T10:14:22Z"}'
+nats --context east stream rm ORDERS --force
 ```
 
-The order JSON is byte-for-byte what `order-svc` always sent; only the server
-address changed. Failover is complete: the platform writes and reads at
-`site2`, and the data loss is exactly the stalled lag you noted in step 1.
+If you can, keep clients from connecting to `east` until you've done this,
+for example by keeping `east` out of the clients' server list.
 
-Two deployment preconditions sit under this whole sequence. First, every
-`stream rm` and `stream edit` here goes through the JetStream metadata
-group, so that group has to keep quorum after the site is lost — if the
-failed site held the meta majority, no edit succeeds until the cluster
-recovers. Second, the promoted stream must live where that quorum
-survives. That's why a DR mirror is normally placed in its own JetStream
-domain (a leaf node) or an independent cluster, rather than sharing one
-meta group that spans both sites.
+### Part 1 — make `east` a mirror of `west`
 
-How the mirror replicated those messages in the first place (the config,
-the filters, the start position) is the JetStream chapter's job, covered in
-[Mirrors and sources](/learn/jetstream/mirrors-and-sources). The runbook only
-reads the lag and changes the relationship.
+Create a durable consumer on `west` for the new mirror, then create
+`ORDERS` on `east` as a mirror of the `west` domain. The mirror's config
+is the one from
+[Mirrors as a DR tool](./mirrors-and-sources.md#create-the-mirror), with
+the directions swapped: `"external": { "api": "$JS.west.API" }` and a
+consumer named `mirror-east` that delivers on `_mirror.ORDERS.east`.
+
+```bash
+nats --context west consumer add ORDERS mirror-east \
+  --target _mirror.ORDERS.east \
+  --ack flow_control --flow-control --heartbeat 1s \
+  --deliver all --defaults
+
+nats --context east stream add ORDERS --config orders-mirror-of-west.json
+```
+
+The new mirror copies everything from `west`, including what was written
+there during the outage. Wait until it shows `Lag: 0` with a small
+`Last Seen`. Clients still write to `west`.
+
+### Part 2 — swap the roles
+
+Stop or pause the publishers for this part. Between the first and the
+second command both streams listen on `orders.>`, and a write could land in
+both with different sequence numbers.
+
+```bash
+# east becomes the writable stream again
+nats --context east stream edit ORDERS --no-mirror --subjects "orders.>"
+
+# remove the promoted stream on west
+nats --context west stream rm ORDERS --force
+
+# west becomes a mirror of east again, through a new durable consumer
+nats --context east consumer rm ORDERS mirror-west --force
+nats --context east consumer add ORDERS mirror-west \
+  --target _mirror.ORDERS.west \
+  --ack flow_control --flow-control --heartbeat 1s \
+  --deliver all --defaults
+nats --context west stream add ORDERS --config orders-mirror-of-east.json
+```
+
+Resume the publishers and point them back at `east`. The setup is the one
+you started with: writes are acknowledged by the `east` domain, and the
+mirror on `west` follows.
+
+The old `mirror-west` consumer is removed and created again so that the
+new mirror starts at the beginning of `east`'s stream, not where the old
+mirror stopped.
+
+How the mirror replicates (the start position, filters, and subject
+handling) is covered in
+[Mirrors and sources](/learn/jetstream/mirrors-and-sources). The runbook
+only reads the mirror's state and changes the relationship.
 
 ## Recovery from a mistake: restore the snapshot
 
@@ -220,6 +283,10 @@ before removing its peer.
 Once only live servers remain in the meta group, normal operation resumes
 and the recoveries earlier on this page become possible again.
 
+The full procedure, with the checks before and after each step and what
+happens to the streams, is on
+[Rescue Meta details](./rescue-meta-details.md).
+
 Where more than one JetStream domain is present, you must specify the domain
 in the rescue command. Each domain runs its own meta group, with its own peers
 and its own quorum. A rescue lowers the quorum of exactly one of them, so on a
@@ -240,18 +307,21 @@ cluster tells you which nodes it ignored.
 ## Pitfalls
 
 The runbook fails most often on the order of the steps and the
-assumptions around them rather than on the commands themselves. Five common mistakes happen mid-outage.
+assumptions around them rather than on the commands themselves.
 
-**Never promote a mirror before lag reaches zero.** Promotion makes the
-mirror writable. If you do it while messages are still in flight from the
-upstream, those tail messages are lost and new writes land on top of the
-gap. Always run the lag check first, and only proceed at `Lag: 0` or with a
-stalled lag you've consciously accepted as your recovery point. Read the lag
-and don't skip step 1.
+**`Lag: 0` doesn't mean the mirror is complete.** When `east` stops
+answering, `Lag` keeps its last value while `Last Seen` grows. Read both in
+[step 1](#step-1--read-the-mirrors-state). With `east` gone, the data loss
+is whatever it stored after `Last Seen`; with `east` reachable, wait for
+`Lag: 0` before you promote.
 
-You can make that check a gate. Run the lag check from
-[step 1 above](#step-1--verify-the-lag-is-zero), decide on the number, then
-promote, never the reverse.
+**Delete the old stream when `east` comes back.** The returning `east`
+still has its `ORDERS` listening on `orders.>`. Once it elects a leader,
+writes land in both streams with different sequence numbers. Remove it
+before you start the failback.
+
+**Pause publishers during the role swap.** Between promoting `east` and
+removing the stream on `west`, both listen on `orders.>`.
 
 **R3 replication will not save you from a mistake.** A three-replica stream
 survives a node loss, but an accidental delete or a bad publish replicates to
@@ -279,8 +349,10 @@ time you run it isn't during the outage.
 ## Where you are
 
 You can now name a NATS failure and reach for the right tool quickly.
-A lost site means promote `ORDERS_DR`: verify lag, drop the mirror
-config, add the subjects, redirect traffic. A mistake (delete, corruption,
+A lost site means promote the mirror on `west`: read its `Last Seen` and
+`Lag`, promote it with one edit, redirect traffic. Moving back means
+deleting the old stream on `east`, mirroring `west` into `east`, and
+swapping the roles with publishers paused. A mistake (delete, corruption,
 or a lost consumer position) means restore the snapshot, the copy that
 predates the mistake — a mirror copies a corrupt write and only freezes
 at an upstream delete. R3 is on neither path; it's availability, not
@@ -307,6 +379,12 @@ Continue to
   — the snapshot internals the restore step depends on.
 - [Clustering](/learn/clustering) — R3 leader election, the availability
   story that is not a recovery story.
+- [Consumer DR](./consumer-dr.md) — paused consumers on the mirror, synced
+  ack floors, and the reset on failover.
+- [Rescue Meta details](./rescue-meta-details.md) — the meta rescue and
+  peer-remove procedure step by step.
+- [JetStream data recovery](./jetstream-data-recovery.md) — recover servers
+  at another site from their moved volumes.
 - [Clustering → Desired state and evacuation](/learn/clustering/desired-state)
   — the ordinary way to take a server out, and what to do instead of a
   rescue while the meta group still has a leader.

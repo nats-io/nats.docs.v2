@@ -2,265 +2,327 @@
 id: mirrors-and-sources
 title: Mirrors as a DR tool
 sidebar_position: 3
-description: Stand up a cross-site mirror of ORDERS for disaster recovery, read its lag, and learn why a mirror is not a backup
+description: Stand up a cross-site mirror of ORDERS in its own JetStream domain, read its lag, and learn why a mirror is not a backup
 ---
 
 # Mirrors as a DR tool
 
 The last page gave you a **snapshot**, a point-in-time copy of `ORDERS`
 you can restore from. A snapshot gets back the data as it stood at the
-moment you took it. The data written *since* that moment is gone, and a
-restore takes as long as it takes to stream the archive back in.
+moment you took it. The data written since then is gone, and a restore
+takes as long as it takes to stream the archive back in.
 
-This page adds the second tool of the triad: a **mirror**. A mirror
-is a read-only live copy of `ORDERS` running at a second site, kept current
-by replication. A snapshot answers "what point can I return to", and a
-mirror answers "what site can I promote to take over". You'll stand one up,
-watch how far it trails the original, and learn the one statement that
-keeps a mirror from being treated as more than it is.
+This page adds the second tool: a **mirror**. A mirror is a read-only live
+copy of `ORDERS` at a second site, kept current by replication. A snapshot
+answers "what point can I return to", and a mirror answers "what site can I
+promote to take over". You'll set one up, read how far it trails the
+original, and see where its protection ends.
 
-This page applies a mirror to disaster recovery. It doesn't teach how
-a mirror replicates internally (the start position, the subject
-handling, the fan-in rules). That mechanism is taught in full at
-[Mirrors & sources](/learn/jetstream/mirrors-and-sources), and this page
-links to it rather than repeating it.
+This page applies a mirror to disaster recovery. How a mirror replicates
+(start position, subject filters, sourcing) is covered in
+[Mirrors & sources](/learn/jetstream/mirrors-and-sources).
 
 ## A mirror is a live copy at a second site
 
-So far the `ORDERS` stream lives on the `east` cluster
-(`n1-east`/`n2-east`/`n3-east`). That cluster is one site. If the whole
-site fails (a power loss, a network partition that strands the
-region, a data-center failure), every replica of `ORDERS` fails with
-it. The R3 replication that protects you from losing *one node* does
-nothing when you lose the *whole cluster*.
+So far `ORDERS` lives on the `east` cluster. If the whole site fails, every
+replica of `ORDERS` fails with it. R3 replication protects you from losing
+one server, not from losing the cluster.
 
-A mirror lives somewhere else. Call the second site `site2`: a separate
-cluster, reachable from the primary over a gateway or leaf-node link you
-built in the Topologies chapter. On `site2` you create a stream named
-`ORDERS_DR` whose only job is to copy `ORDERS`. It accepts no direct
-writes from your services. It receives every message the upstream
-stores and stores it too.
+A mirror lives somewhere else. The second site is a cluster called `west`.
+On `west` you create a stream that copies `ORDERS` from `east`. It accepts
+no writes of its own; it stores every message the `east` stream stores. The
+stream it copies from is its **upstream**. The copy flows one way, from the
+upstream to the mirror.
 
-The stream `ORDERS_DR` copies from is its **upstream stream** (here,
-`ORDERS` on `east`). The copy flows one way: upstream to mirror, never
-back.
+## Keep the two sites independent
 
-Create the mirror on `site2`, pointing it at the upstream:
+A mirror only helps if `west` keeps working when `east` is gone. That
+decides how you connect the two clusters:
 
-```bash
-# Run against a server in site2, where ORDERS_DR will live.
-nats --server nats://site2:4222 stream add ORDERS_DR \
-  --mirror ORDERS --defaults
+- **Each cluster is its own JetStream domain.** A **JetStream domain** is a
+  set of servers with its own meta group, the RAFT group that holds all stream
+  and consumer assignments. With `east` and `west` in separate domains,
+  losing `east` doesn't touch the control plane of `west`, and you can edit
+  streams in `west` during the outage.
+- **`west` connects to `east` as a leaf node.** The leaf connection carries
+  ordinary subjects and the other domain's JetStream API, which is
+  reachable as `$JS.east.API` from `west` and `$JS.west.API` from `east`.
+
+If both clusters shared one meta group, for example as two clusters of a
+super-cluster without domains, losing `east` could also cost the meta
+group its majority. Then no stream can be edited anywhere, including the
+promotion of the mirror. That design needs a third cluster to keep the
+quorum; see
+[Resilient cross-region clusters](../topologies/resilient-cross-region-clusters.md).
+
+The domain is set in each server's `jetstream` block. On `east`:
+
+```conf
+jetstream {
+  store_dir: "/data/jetstream"
+  domain: east
+}
+
+# west's servers connect here as leaf nodes
+leafnodes {
+  listen: 0.0.0.0:7422
+}
 ```
 
-The `--mirror ORDERS` flag is the whole DR setup from the data side;
-`--defaults` just accepts the standard storage and retention answers
-instead of prompting for them. The server on `site2` opens a replication
-link to the upstream and
-begins pulling messages. Every order that lands in `ORDERS` on `east`
-shows up in `ORDERS_DR` on `site2` a short time later.
+On `west`, each server sets its own domain and a leaf connection to `east`
+in the `ORDERS` account:
 
-Decide the topology before you run that command, because a mirror's
-configuration is fixed once the stream exists: you can't re-point a
-running mirror at a different upstream or change what it copies in place.
-Changing it means deleting `ORDERS_DR` and recreating it, after which the
-messages re-replicate from the upstream. Plan the upstream, the site, and
-the subjects you want once, upfront.
+```conf
+jetstream {
+  store_dir: "/data/jetstream"
+  domain: west
+}
 
-The full set of mirror configuration (start position, subject filtering,
-sourcing from many streams) is covered at
-[Mirrors & sources](/learn/jetstream/mirrors-and-sources). For disaster
-recovery you only need the plain 1:1 copy above.
+leafnodes {
+  remotes: [
+    {
+      urls: [
+        "nats-leaf://n1-east:7422"
+        "nats-leaf://n2-east:7422"
+        "nats-leaf://n3-east:7422"
+      ]
+      # the local account the leaf traffic joins
+      account: ORDERS
+      # a user in the ORDERS account on east
+      credentials: "/etc/nats/orders-leaf.creds"
+    }
+  ]
+}
+```
+
+Leaf nodes and domains are covered in
+[Leaf nodes](/learn/topologies/leaf-nodes).
+
+## Use the same stream name at both sites
+
+Name the mirror `ORDERS`, the same as the upstream. Stream names are per
+domain, so the two don't collide. After a failover, clients reconnect to
+`west` and find a stream called `ORDERS`, with no change to their
+configuration.
+
+## Create the mirror
+
+The mirror reads `ORDERS` in the `east` domain. Its configuration says
+where the upstream is with an `external` block, the API prefix of the other
+domain. Write it to a file, `orders-mirror-of-east.json`:
+
+```json
+{
+  "name": "ORDERS",
+  "storage": "file",
+  "num_replicas": 3,
+  "allow_direct": true,
+  "mirror_direct": true,
+  "mirror": {
+    "name": "ORDERS",
+    "external": { "api": "$JS.east.API" },
+    "consumer": { "name": "mirror-west", "deliver_subject": "_mirror.ORDERS.west" }
+  }
+}
+```
+
+The mirror has no `subjects`. It listens on nothing, so it can't take a
+write by mistake.
+
+The `consumer` block makes it a **durable mirror** (NATS 2.14 and later).
+By default a mirror creates a temporary consumer on the upstream for
+itself. A durable mirror instead reads through a named consumer on the
+upstream, which keeps the mirror's position when the upstream cluster goes
+down and comes back. Create that consumer on `east` first, then the mirror
+on `west`:
+
+```bash
+# On east: the durable consumer the mirror reads through.
+nats --context east consumer add ORDERS mirror-west \
+  --target _mirror.ORDERS.west \
+  --ack flow_control --flow-control --heartbeat 1s \
+  --deliver all --defaults
+
+# On west: the mirror itself.
+nats --context west stream add ORDERS --config orders-mirror-of-east.json
+```
+
+The consumer uses the `flow_control` ack policy, which needs a push
+consumer with flow control and a heartbeat. The mirror acknowledges through
+the flow-control messages, so the consumer's ack floor is the mirror's
+position. A durable consumer remembers what it delivered, so create a new
+one whenever you create a mirror from scratch; otherwise the new mirror
+starts where the old one stopped.
+
+`mirror_direct` lets the mirror answer Direct Get requests, so reads in
+`west` are served by `west`. Direct Get is covered in
+[Get direct](/learn/jetstream/get-direct).
+
+Decide this setup before you create the mirror. You can't re-point a
+mirror at a different upstream or change what it copies; to change it, you
+delete the mirror and create it again.
+
+## How writes and reads flow
+
+In normal operation there's one stream that accepts writes, `ORDERS` on
+`east`. A publish to `orders.created` from a client connected to `west`
+crosses the leaf connection and is stored by `east`:
+
+```bash
+nats --context west req orders.created '{"order_id":"ord_8w2k"}'
+```
+
+```
+{"stream":"ORDERS","domain":"east","seq":1}
+```
+
+The acknowledgment names the `east` domain. All writes go through one
+stream, in one order. The mirror copies each message with its original
+sequence number, so `seq 1` on `east` is `seq 1` on `west`.
+
+Reads in `west` stay local. A Direct Get for a message is answered by the
+mirror:
+
+```bash
+nats --context west stream get ORDERS --last-for orders.created
+```
 
 <div class="nats-flow" data-scenario="mirrorDRAnimated" data-width="600" data-height="350"></div>
 
-The animation shows the steady state: `order-svc` writes the canonical
-order to `ORDERS` on the `east` cluster, and each message replicates across to
-`ORDERS_DR` on `site2`. Watch the `Lag` counter: it's the next concept,
-and it's the number that determines the outcome of a failover.
+The animation shows the steady state: `order-svc` writes to `ORDERS` on
+`east`, and each message replicates to the mirror on `west`.
 
 ## Lag is how far the mirror trails
 
-Replication isn't instant or synchronous. The upstream stores
-a message and acknowledges the publisher *before* the mirror has it. The
-mirror catches up a moment later. That gap is called
-**lag**: how many messages the mirror trails behind its upstream.
+Replication isn't synchronous. The upstream stores a message and
+acknowledges the publisher before the mirror has it. The gap is the
+mirror's **lag**: how many messages it trails behind its upstream.
 
-You read lag from the mirror's own stream info:
+Read it from the mirror's stream info:
 
 ```bash
-nats --server nats://site2:4222 stream info ORDERS_DR
+nats --context west stream info ORDERS
 ```
 
-The output carries a `Mirror` section the upstream stream doesn't have:
+The output has a `Mirror Information` section:
 
 ```
 Mirror Information:
 
   Stream Name: ORDERS
+  External API: $JS.east.API
           Lag: 0
     Last Seen: 1.20s
 ```
 
-Three fields are relevant here: `Stream Name`, `Lag`, and `Last Seen`.
+`Lag` is the number of messages the upstream has that the mirror doesn't.
+`Last Seen` is how long ago the mirror last heard from the upstream.
 
-`Stream Name` confirms the upstream this mirror copies: `ORDERS`. If it
-says anything else, the mirror points at the wrong source.
+Read the two together. The mirror computes `Lag` from the last message it
+received, which reports how many more the upstream has pending. When the
+upstream stops answering, no more messages arrive and `Lag` keeps its last
+value, often `0`, while `Last Seen` grows. So `Lag: 0` only means the
+mirror is caught up when `Last Seen` is small, a second or two.
 
-`Lag` is the count of messages the upstream has that the mirror doesn't
-have yet. `Lag: 0` means the mirror holds every message the upstream holds.
-Any number above zero is the data you'd lose if the primary vanished
-this instant.
+These numbers are your **RPO**, the recovery point objective: how much data
+you lose if the upstream is gone. With a healthy link it's the lag. Once
+the link is down, it's everything the upstream stored after `Last Seen`,
+and the mirror can't tell you how much that is.
 
-`Last Seen` is how long ago the mirror last heard from its upstream. A
-small number, a second or two, means the link is healthy. A growing
-`Last Seen` means the mirror is no longer keeping up, and the `Lag` you
-read is already stale.
-
-These two numbers are your **RPO**, the recovery point objective: how much
-data you can afford to lose. A mirror at `Lag: 0` gives you an RPO of
-zero messages; a mirror that trails by thousands gives you an RPO of
-thousands. Read this number *before* you ever trust the mirror in a real
-failover. The disaster-recovery page makes "is lag zero?" the first step
-of promotion for exactly this reason.
-
-A failover isn't the only time to look. A mirror that quietly stops
-keeping up is worth catching long before the day you need it, so watch
-`Lag` continuously rather than checking it once. The server surfaces the
-same `Lag` and `Last Seen` fields through its monitoring endpoints for an
-alert to scrape (in the JSON the last-seen field is named `active`).
-Wiring that up is the [Monitoring](/learn/monitoring)
-chapter's job.
+Watch both fields continuously rather than checking them once. The server
+exposes them through its monitoring endpoints for an alert to scrape; in
+the JSON the last-seen field is named `active`. Setting that up is covered
+in [Monitoring](/learn/monitoring).
 
 ## A mirror is not a backup
 
-One statement captures the limit of a mirror:
+A mirror follows the upstream's live writes. A corrupt write lands in the
+mirror too, and a mirror keeps no earlier state to rewind to.
 
-> A mirror follows the upstream's live writes, so a corrupt write lands
-> in the mirror too — and a mirror keeps no earlier state to rewind to.
+A mirror gives you **availability**. Lose the whole `east` site and the
+mirror on `west` still holds your orders, ready to take over. That shortens
+your **RTO**, the recovery time objective: how long recovery takes.
 
-A mirror gives you **availability**. Lose the whole `east` site and
-`ORDERS_DR` on `site2` still holds your orders, ready to take over. That's
-a matter of recovery *time*: your **RTO**, how long recovery takes. A
-mirror's RTO is short, because the data is already there.
-
-A mirror does not give you a **recovery point** you can rewind to. It
-tracks the upstream's live tail: write a corrupt batch and the
-corruption replicates into `ORDERS_DR` as faithfully as a good write. The
-mirror holds only what the upstream has now, never an earlier state, and
-its own retention limits can age messages out on their own schedule.
+A mirror doesn't give you a point in time you can rewind to. Write a
+corrupt batch and the corruption replicates as faithfully as a good write.
+The mirror holds only what the upstream has now, and its own retention
+limits can age messages out on their own schedule.
 
 An upstream delete or purge behaves differently from what people expect.
-Delete the upstream `ORDERS` and `ORDERS_DR` is *not* deleted with it: it
-keeps every message it had already copied, stops receiving new ones, and
-records the fault in the `Error` field of its Mirror Information. Purge a
-range on the upstream and the messages the mirror already stored stay
-put; the purge only caps what the mirror will still receive, because it
-detects the sequence gap and skips the missing messages. So a mirror can
-outlive a mistake on the upstream — but only as a stale copy frozen at
-the break, never as a point in time you chose.
+Delete `ORDERS` on `east` and the mirror isn't deleted with it: it keeps
+every message it had copied, stops receiving new ones, and records the
+fault in the `Error` field of its Mirror Information. Purge a range on the
+upstream and the messages the mirror already stored stay; the mirror only
+skips what it hadn't received yet. So a mirror can outlive a mistake on the
+upstream, but only as a copy frozen at the break, never as a point in time
+you chose.
 
-A snapshot differs here. It's fixed at the moment you took it, so a
-delete or a corruption that happens *after* the snapshot can't affect it.
-Because it's fixed, you can rewind to it.
+A snapshot is fixed at the moment you took it, so a later delete or
+corruption can't affect it, and you can rewind to it. The two tools cover
+different failures, and you need both:
 
-So the two tools cover two different failures, and you need both:
+- **Mirror:** the site failed. Promote the copy and redirect traffic to it.
+  Short RTO, data loss bounded by the lag at the time of the failure.
+- **Snapshot:** the data is wrong (deleted, purged, corrupted). Restore the
+  point in time before it went wrong.
 
-- **Mirror** → the site failed. Promote the copy and redirect traffic to it.
-  Short RTO, no data loss if lag was zero.
-- **Snapshot** → the data is wrong (deleted, purged, corrupted). Restore
-  the point in time before it went wrong. Bounded RPO, restore-length
-  RTO.
-
-Don't let a healthy mirror be your reason to stop taking snapshots. A
-mirror doesn't protect against the failure snapshots exist for.
-
-And don't reach for R3 replication here either. R3 keeps `ORDERS` available
-across the loss of one node in the `east` cluster: availability inside
-one site, not a backup and not a second site. A corrupt write replicates
-across all three R3 replicas just as faithfully as it lands in a mirror.
-Why R3 is availability and never a backup is taken up on the
-[disaster-recovery](/learn/backup-recovery/disaster-recovery) page, and
-leader election is covered at [Clustering](/learn/clustering).
+R3 replication is neither. It keeps `ORDERS` available when one server of
+`east` fails, and a corrupt write replicates to all three replicas.
 
 ## Pitfalls
 
-A mirror is easy to create and easy to over-trust. Each trap below is
-scoped to this page's two ideas: the mirror as a DR copy, and the
-distinction between a mirror and a backup.
+**A mirror is not a backup.** Corrupt data replicates into the mirror, and
+an upstream delete leaves the mirror frozen where replication stopped. Pair
+the mirror with snapshots.
 
-**A mirror is not a backup.** It's the main point of this page and the
-most common mistake. Corrupt the upstream and the corruption replicates
-into the mirror as faithfully as a good write; delete or purge the
-upstream and the mirror survives only as a stale copy frozen where
-replication stopped. Either way it gives you no earlier state to rewind
-to. Don't run a mirror *instead of* snapshots. Pair them: the mirror for
-site failure, the snapshot for bad data.
+**Don't trust `Lag: 0` without `Last Seen`.** When the upstream is down,
+`Lag` keeps its last value while `Last Seen` grows. Check both, and alert on
+`Last Seen`.
 
-**Read `Lag` before you trust the copy.** Replication is eventually
-consistent, not synchronous, so a mirror can trail its upstream by an
-unknown amount at any moment. If you've never checked a mirror, you don't
-know how far it trails. Read `Lag` and `Last Seen` from the mirror's
-stream info and confirm the link is current before you depend on it:
+**Don't share a meta group between the sites.** If the mirror's cluster
+depends on a meta group that loses its majority with the upstream site, you
+can't promote the mirror. Put each site in its own JetStream domain.
 
-```bash
-# Confirm ORDERS_DR is caught up. Lag should read 0, and Last Seen
-# should be a small, recent number. A growing Last Seen means the
-# Lag you just read is already stale — the link is falling behind.
-nats --server nats://site2:4222 stream info ORDERS_DR | grep -A4 "Mirror Information"
-```
+**Create a new durable consumer for each new mirror.** A durable consumer
+keeps its position. A mirror created from scratch on an old consumer starts
+where the old mirror stopped, not at the start of the upstream.
 
-If `Lag` is non-zero or `Last Seen` keeps climbing, the mirror is behind.
-Diagnose the link before a failover, never during one.
+**A mirror's config is fixed after creation.** You can't re-point it or
+change what it copies; delete it and create it again.
 
-**A mirror's config is effectively locked after creation.** As the setup
-section warned, you can't re-point a running mirror or change what it
-copies in place. Don't treat `ORDERS_DR` as something you'll tune
-later; settle the upstream, the site, and the subjects upfront. To
-change any of them, delete the mirror and recreate it, and the messages
-re-replicate from the upstream.
-
-**Avoid a Work Queue upstream under a mirror.** A Work Queue stream is
-built to hand each message to exactly one consumer. To replicate, a
-mirror creates a hidden internal consumer on the upstream, and that
-consumer is a *direct* consumer that bypasses the work queue's
-subject-overlap check. So a regular worker and the mirror's consumer can
-both receive the same message, which defeats precisely the single-consumer
-guarantee the work queue exists to enforce. Use a `Limits` upstream
-instead; the retention policies are covered at
+**Avoid a Work Queue upstream.** The mirror's consumer on the upstream
+bypasses the work queue's check for overlapping consumers, so a worker and
+the mirror can both receive the same message. Use `Limits` retention on the
+upstream. Retention policies are covered in
 [Mirrors & sources](/learn/jetstream/mirrors-and-sources).
 
 ## Where you are
 
 You now have:
 
-- An `ORDERS_DR` mirror running at `site2`, copying `ORDERS` from the
-  `east` cluster one message at a time.
-- A way to read its `Lag` and `Last Seen` fields, and the knowledge that
-  `Lag: 0` is the condition that makes a failover safe.
-- The distinction between the two DR tools: a mirror gives you a short RTO
-  for a site failure; a snapshot gives you a recovery point for bad data.
-  Neither replaces the other, and R3 replaces neither.
+- Two clusters in separate JetStream domains, `west` connected to `east` as
+  a leaf node.
+- An `ORDERS` mirror on `west`, copying `ORDERS` from `east` through a
+  durable consumer, and answering reads locally.
+- A way to read its `Lag` and `Last Seen`, and to tell a caught-up mirror
+  from a stalled one.
 
-What you *don't* have yet is the procedure for actually using the mirror
-when the primary fails: verifying lag, promoting the copy to a writable
-primary, and redirecting your publishers and consumers to `site2`. That
-procedure is the runbook.
+What you don't have yet are the consumers at the DR site, which a mirror
+doesn't copy, and the procedure for using the mirror when `east` fails.
 
 ## What's next
 
-The next page is the disaster-recovery **runbook**: which tool to reach
-for per failure class, and the exact steps to **promote** `ORDERS_DR`
-into a writable `ORDERS` when the `east` site is gone.
-
-Continue to
-[Disaster recovery](/learn/backup-recovery/disaster-recovery).
+Continue to [Consumer DR](./consumer-dr.md).
 
 ## See also
 
-- [Mirrors & sources](/learn/jetstream/mirrors-and-sources) — how a
-  mirror replicates: start position, subject handling, and sourcing.
-- [Cross-account export & import](/learn/security/cross-account) — what a
-  cross-account mirror's export/import is, which you must back up too.
-- [Super-clusters](/learn/topologies/super-clusters) — the gateway links
-  that connect `east` to `site2`.
+- [Mirrors & sources](/learn/jetstream/mirrors-and-sources) — how a mirror
+  replicates: start position, subject handling, and sourcing.
+- [Consumer DR](./consumer-dr.md) — consumers at the DR site, which the
+  mirror doesn't copy.
+- [Leaf nodes](/learn/topologies/leaf-nodes) — the leaf connection between
+  `west` and `east`, and JetStream domains.
+- [Get direct](/learn/jetstream/get-direct) — `allow_direct` and
+  `mirror_direct`.
+- [Reference → Cross-account subjects](/reference/jetstream/cross-account-subjects)
+  — the API and delivery subjects a cross-domain mirror uses.

@@ -162,6 +162,7 @@ const sidebars: SidebarsConfig = {
             "topologies/your-first-cluster",
             "topologies/jetstream-in-a-cluster",
             "topologies/super-clusters",
+            "topologies/resilient-cross-region-clusters",
             "topologies/leaf-nodes",
             "topologies/putting-it-together",
             "topologies/where-next",
@@ -217,7 +218,10 @@ const sidebars: SidebarsConfig = {
           items: [
             "backup-recovery/stream-backup-restore",
             "backup-recovery/mirrors-and-sources",
+            "backup-recovery/consumer-dr",
             "backup-recovery/disaster-recovery",
+            "backup-recovery/rescue-meta-details",
+            "backup-recovery/jetstream-data-recovery",
             "backup-recovery/config-and-jwt-backup",
             "backup-recovery/where-next",
           ],

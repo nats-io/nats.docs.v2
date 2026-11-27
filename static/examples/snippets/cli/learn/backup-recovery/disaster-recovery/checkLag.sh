@@ -1,28 +1,27 @@
 #!/bin/bash
 
-# Before you promote ORDERS_DR, read how far it trails the upstream.
-# A mirror is eventually consistent: it follows its upstream over the
-# network, so at any instant it can be a few messages behind. The Lag
-# field is that gap, in messages. Promote a mirror with non-zero lag
-# and you publish on top of a stream that is still missing tail
-# messages.
+# Before you promote the ORDERS mirror on west, read how far it got.
+# A mirror follows its upstream over the network, so at any moment it
+# can be behind. Its Mirror Information shows by how much, and how
+# recently it heard from the upstream.
 
-# Point at site2, where the ORDERS_DR mirror lives.
-nats --server nats://127.0.0.1:5222 stream info ORDERS_DR
+# Point at west, where the ORDERS mirror lives.
+nats --context west stream info ORDERS
 
 # Look at the Mirror block in the output:
 #
 #   Mirror Information:
 #
 #            Stream Name: ORDERS
+#           External API: $JS.east.API
 #                    Lag: 0
 #              Last Seen: 1.2s
 #
-# Lag: 0 means the mirror has caught up to every message the upstream
-# had at last contact — it is safe to promote. A non-zero Lag means
-# messages are still in flight; wait and re-run until it reaches 0.
+# Read Last Seen first. A small Last Seen with Lag: 0 means the mirror
+# holds everything the upstream had: it is safe to promote.
 #
-# Last Seen is how long ago the mirror last heard from the upstream. If
-# the upstream site is already gone, Last Seen climbs and Lag freezes at
-# whatever it was when contact dropped — that frozen Lag is your data
-# loss, your actual RPO for this failover.
+# If east is gone, Last Seen keeps growing and Lag keeps the value it
+# had when the last message arrived, often 0. That 0 doesn't mean the
+# mirror is complete: whatever east stored after Last Seen is lost, and
+# the mirror can't tell how much that is. Note the last sequence and
+# the Last Seen time as your recovery point, then promote.

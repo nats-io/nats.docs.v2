@@ -11,8 +11,8 @@ You started this chapter with a built but unprotected platform: an
 `ORDERS` stream full of real orders, the `ACME` operator and its
 accounts deciding who may touch them, all spread across the `east`
 cluster, with no backup or recovery in place. You end
-it with a dated snapshot under `./backups/orders/`, an `ORDERS_DR` mirror
-running at a second site, and an encrypted off-site copy of every key
+it with a dated snapshot under `./backups/orders/`, a mirror of `ORDERS`
+running on `west`, and an encrypted off-site copy of every key
 that proves who you are. That covers the full progression.
 
 This page doesn't teach anything new. It collects the model you built
@@ -105,7 +105,7 @@ question this chapter assumes you've already answered.
 
 This is the end of the chapter: the triad is complete, and this page
 introduces no new scenario state. The `east` cluster, the `ORDERS`
-stream, the `ORDERS_DR` mirror at the second site, and the off-site
+stream, the `ORDERS` mirror on `west`, and the off-site
 identity backup are all exactly as you left them on the previous page.
 You can rehearse a failover against them, schedule a test restore, or
 tear the practice copies down when you're done.
@@ -133,16 +133,46 @@ group links back to the page that explains the why.
 
 - [ ] Pair every mirror with snapshots; a mirror is not a backup — a corrupt write replicates to the copy, and a mirror keeps no earlier state to rewind to.
 - [ ] Plan the mirror topology upfront; a mirror's config is effectively locked after creation, so changing it means delete and recreate.
-- [ ] Read the `Lag` field before trusting a mirror; replication is eventually consistent, not synchronous.
+- [ ] Put the mirror's cluster in its own JetStream domain, connected as a leaf node, so losing the upstream site doesn't stop the mirror's meta group.
+- [ ] Give the mirror the same stream name as the upstream, so clients fail over by changing only the server address.
+- [ ] Read `Lag` together with `Last Seen`; when the upstream is gone, `Lag` keeps its last value while `Last Seen` grows.
+- [ ] Create a new durable consumer on the upstream for every mirror you create from scratch, or the new mirror starts where the old one stopped.
 - [ ] Avoid Work Queue retention on a mirrored upstream; the mirror's internal consumer bypasses the work queue's subject-overlap check and breaks the single-consumer guarantee, so use Limits.
+
+### Consumer DR — see [Pitfalls](/learn/backup-recovery/consumer-dr#pitfalls)
+
+- [ ] Create every consumer on the mirror ahead of time, paused, with the same config as on the upstream and deliver policy `all`.
+- [ ] Store each consumer's ack floor under `<stream>.<consumer>` in a KV bucket, and mirror the bucket to the DR site.
+- [ ] Sync at a moderate interval and write only changed values; consumer info costs the cluster.
+- [ ] On failover, reset each consumer to the stored ack floor plus one, capped at the stream's last sequence plus one, then resume it.
+- [ ] Make processing safe to repeat; messages acknowledged after the last sync are delivered again.
 
 ### Disaster recovery — see [Pitfalls](/learn/backup-recovery/disaster-recovery#pitfalls)
 
-- [ ] Verify lag has reached 0 before promoting a mirror; promote early and you publish on top of a stream still missing its tail.
+- [ ] Promote with one edit, `--no-mirror --subjects`; with the upstream gone, accept the data written after `Last Seen` as lost rather than waiting for the lag.
+- [ ] Delete the old stream on the returning site before failback; once it elects a leader, writes land in both streams.
+- [ ] Pause publishers while swapping the roles back; between the promotion and the delete, both streams listen on the subjects.
 - [ ] Reach for a snapshot, not R3, against an accidental delete or a logical error; the bad write replicates, so availability cannot undo it.
 - [ ] Test restore on a schedule, quarterly at least; a green `nats stream info` on the live stream proves nothing about the archive.
 - [ ] Stop publishers before purging corrupted messages; purging under live writes races new bad data in.
 - [ ] Name the domain with `--js-domain` when rescuing a topology that has more than one; each domain runs its own meta group and a rescue lowers the quorum of exactly one of them.
+
+### Rescue Meta details — see [Caveats](/learn/backup-recovery/rescue-meta-details#caveats)
+
+- [ ] Stop the lost servers and disable their restart before you rescue; a server that returns while the quorum is lowered can cause a split brain.
+- [ ] Rescue only when the meta group has no leader; with a leader, use evacuate and peer-remove.
+- [ ] Finish the peer-removes within 5 minutes, one at a time; if the rescue expires, run it again.
+- [ ] Compare each stream's last sequence with what publishers last saw; a surviving replica that was behind loses the last acknowledged writes.
+- [ ] Restore R1 streams and streams with no surviving replica from a snapshot or a mirror.
+- [ ] Verify with `nats server report jetstream` that the meta group has one leader and every listed peer is online and current.
+
+### JetStream data recovery — see [Caveats](/learn/backup-recovery/jetstream-data-recovery#caveats)
+
+- [ ] Keep each server's `store_dir` on its own single mount point, so one volume snapshot captures all of its state at once.
+- [ ] Copy each volume once, to one server, under its original `server_name`; never copy one volume to several servers.
+- [ ] Fence the original servers before starting the copies; nothing in the store stops two servers using the same state.
+- [ ] Move the config file with the volume, keeping `server_name`, cluster name, domain, and encryption key, and changing routes and addresses.
+- [ ] Keep a recoverable copy of the encryption key; a TPM-sealed key doesn't move with the disk.
 
 ### Config and JWT backup — see [Pitfalls](/learn/backup-recovery/config-and-jwt-backup#pitfalls)
 

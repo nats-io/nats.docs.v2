@@ -64,8 +64,8 @@ live in the [Clustering & Replication](/learn/clustering) deep dive.
 - A dated, off-site snapshot of the `ORDERS` stream under
   `./backups/orders/`, plus a verified restore procedure that rebuilds
   it with matching message counts.
-- An `ORDERS_DR` mirror of `ORDERS` running at a second site, whose
-  lag you can read before trusting it.
+- A mirror of `ORDERS` on a second cluster, `west`, in its own JetStream
+  domain, whose state you can read before trusting it.
 - A runbook that picks the right recovery for each class of failure
   (restore the snapshot or promote the mirror), walked against the
   real objects.
@@ -94,8 +94,7 @@ chapter that owns each of those and builds the operational layer on top.
 
 Each page introduces at most two new concepts and carries the same Acme
 ORDERS world forward. You keep the `east` cluster and the `ORDERS`
-stream running, take a snapshot of them, stand up `ORDERS_DR` beside
-them, and then walk the runbook against those exact objects, with no
+stream running, take a snapshot of them, stand up a mirror of `ORDERS` on `west`, and then walk the runbook against those exact objects, with no
 fresh example per page.
 
 Where a feature has a long list of knobs, error codes, or advisory
@@ -115,8 +114,11 @@ copy those files off-site and put them back.
 | Page | What you learn |
 |---|---|
 | [Stream backup and restore](/learn/backup-recovery/stream-backup-restore) | Take a point-in-time snapshot of `ORDERS`, restore it, and verify the counts match |
-| [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources) | Stand up `ORDERS_DR` at a second site, read its lag, and see why a mirror is not a backup |
-| [Disaster recovery](/learn/backup-recovery/disaster-recovery) | A runbook that picks restore or promotion per failure class, and how to promote a mirror |
+| [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources) | Stand up a mirror of `ORDERS` on `west` in its own JetStream domain, read its lag, and see why a mirror is not a backup |
+| [Consumer DR](/learn/backup-recovery/consumer-dr) | Keep consumer positions close to current at the DR site with paused consumers, ack floors in a mirrored KV bucket, and a consumer reset |
+| [Disaster recovery](/learn/backup-recovery/disaster-recovery) | A runbook that picks restore or promotion per failure class, how to promote a mirror, and how to fail back |
+| [Rescue Meta details](/learn/backup-recovery/rescue-meta-details) | Rescue a meta group that lost quorum step by step, peer-remove the dead servers, and verify the cluster |
+| [JetStream data recovery](/learn/backup-recovery/jetstream-data-recovery) | Recover servers at another site by moving each server's storage volume and config file |
 | [Config and JWT backup](/learn/backup-recovery/config-and-jwt-backup) | Back up and restore the operator, accounts, keys, and server config off-site |
 | [Where to go next](/learn/backup-recovery/where-next) | The whole game recapped, plus a single production checklist |
 

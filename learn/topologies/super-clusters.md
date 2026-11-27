@@ -26,7 +26,9 @@ You could also stretch one cluster across both regions, putting all six
 servers in a single mesh of routes. That works, but every server holds a
 route to every other server, and route traffic flows freely across the
 slow, expensive link between regions. A full mesh assumes the members
-are close together.
+are close together. The narrow case where a stretched cluster does make
+sense, three nearby data centers with low and equal latency, is covered on
+[Resilient cross-region clusters](./resilient-cross-region-clusters.md).
 
 A **super-cluster** is the shape for this. It joins two independent
 clusters into one logical system without combining them into a single
