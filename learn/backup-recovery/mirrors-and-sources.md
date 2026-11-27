@@ -129,7 +129,7 @@ domain. Write it to a file, `orders-mirror-of-east.json`:
 The mirror has no `subjects`. It listens on nothing, so it can't take a
 write by mistake.
 
-The `consumer` block makes it a **durable mirror** (NATS 2.12 and later).
+The `consumer` block makes it a **durable mirror** (NATS 2.14 and later).
 By default a mirror creates a temporary consumer on the upstream for
 itself. A durable mirror instead reads through a named consumer on the
 upstream, which keeps the mirror's position when the upstream cluster goes

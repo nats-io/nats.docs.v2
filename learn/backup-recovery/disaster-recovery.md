@@ -84,7 +84,8 @@ through the meta group of the `west` domain, which the outage didn't touch.
 
 Promotion doesn't change the data. Sequence numbers continue where the
 mirror stopped: if the mirror's last message was `seq 1042`, the next write
-gets `seq 1043`. Consumer positions stay meaningful.
+gets `seq 1043`, so a consumer position recorded as a sequence number on
+`east` still points at the same message on `west`.
 
 A promoted stream can't become a mirror again. Going back to `east` later
 means deleting it and creating a new mirror, as described under
@@ -93,8 +94,14 @@ means deleting it and creating a new mirror, as described under
 ### Step 3 — redirect publishers and consumers
 
 Point `order-svc` and the consumers at `west`. The stream has the same
-name there, so nothing in their configuration changes except the server
-address:
+name there, so publishers only change the server address.
+
+Consumers are different: a mirror copies messages, not consumers. The
+`shipping` consumer you had on `east` doesn't exist on `west`, so create
+it there as part of the failover, and choose where it starts, for example
+from the sequence after the last one it processed.
+
+A publish now lands on `west`:
 
 ```bash
 nats --context west req orders.created \
