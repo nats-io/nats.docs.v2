@@ -344,7 +344,7 @@ the accounts into an empty resolver, and verifies a real client
 connects.
 
 Combined with the snapshot from [Stream backup and restore](/learn/backup-recovery/stream-backup-restore)
-and the `ORDERS_DR` mirror from [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources),
+and the `ORDERS` mirror on `west` from [Mirrors as a DR tool](/learn/backup-recovery/mirrors-and-sources),
 the whole platform now survives a clean-room rebuild. The data
 comes back from a snapshot, the site comes back from the mirror, and the
 identity that gates both comes back from this backup.

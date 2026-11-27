@@ -25,7 +25,7 @@ const SYNC_COLOR = "#34A574"; // NATS green — mirror fully caught up
 const NAVY = "#375C93"; // accent navy
 
 // Replication-as-DR story: order-svc writes to ORDERS on site1; messages
-// replicate continuously to the ORDERS_DR mirror on site2, with a visible
+// replicate continuously to the ORDERS mirror on west, with a visible
 // lag counter trending toward zero. No promotion happens — this is the
 // steady-state DR picture.
 type Stage = "publish" | "replicate" | "catchup" | "synced";
@@ -42,16 +42,16 @@ const STAGE_DURATION_MS: Record<Stage, number> = {
 
 const CAPTION: Record<Stage, string> = {
     publish:
-        "order-svc publishes to ORDERS on site1. site1 holds the authoritative copy of every order message.",
+        "order-svc publishes to ORDERS on east. The east stream is the only one that accepts writes.",
     replicate:
-        "ORDERS_DR on site2 is a mirror of ORDERS. It pulls new messages across the link continuously — replication runs on its own, no client involvement.",
+        "The ORDERS stream on west, in its own JetStream domain, is a mirror of east's ORDERS. It copies new messages across the leaf connection on its own, with no client involvement.",
     catchup:
-        "The mirror works through the backlog. The lag counter — how many messages ORDERS_DR is behind ORDERS — trends toward zero.",
+        "The mirror works through the backlog. The lag counter, how many messages the mirror is behind east, goes down toward zero.",
     synced:
-        "Lag reaches 0: ORDERS_DR holds a complete, up-to-date copy of every order. site2 is a hot standby, ready for disaster recovery. No promotion yet — site1 still serves all traffic.",
+        "Lag reaches 0 with a recent Last Seen: the mirror holds every order. west is a hot standby, ready for disaster recovery. east still takes all writes.",
 };
 
-// Visible lag counter per stage (messages ORDERS_DR is behind ORDERS).
+// Visible lag counter per stage (messages the mirror on west is behind east).
 const LAG_BY_STAGE: Record<Stage, number> = {
     publish: 12,
     replicate: 12,
@@ -95,14 +95,14 @@ function MirrorDRAnimatedInner({
             id: "site1",
             type: "server",
             position: { x: 200, y: 130 },
-            data: { label: "site1 · ORDERS" },
+            data: { label: "east · ORDERS" },
         },
-        // --- site2: ORDERS_DR mirror ---
+        // --- west: ORDERS mirror ---
         {
             id: "site2",
             type: "server",
             position: { x: 470, y: 130 },
-            data: { label: "site2 · ORDERS_DR" },
+            data: { label: "west · ORDERS (mirror)" },
             style: {
                 opacity: inSync ? 1 : 0.92,
                 transition: "opacity 0.4s ease",

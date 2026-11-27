@@ -48,15 +48,15 @@ const STAGE_DURATION_MS: Record<Stage, number> = {
 
 const CAPTION: Record<Stage, string> = {
     healthy:
-        "site1 owns the writable ORDERS stream. order-svc publishes there, and ORDERS_DR on site2 mirrors every message across the WAN.",
+        "east owns the writable ORDERS stream. order-svc publishes there, and the ORDERS mirror on west copies every message across the leaf connection.",
     outage:
-        "site1 goes dark. The primary ORDERS stream — and everyone connected to it — is gone. Only the ORDERS_DR mirror on site2 survives.",
+        "east goes dark, with its ORDERS stream and the clients connected to it. Nothing listens on orders.> anymore. The mirror on west survives, read-only.",
     lagcheck:
-        "Before failing over, check the mirror's lag. Wait until ORDERS_DR has drained its backlog and reports 0 messages behind — only then is it safe to promote.",
+        "Before failing over, read the mirror's state. Last Seen keeps growing while Lag keeps its last value, so whatever east stored after Last Seen is lost. Note that recovery point and promote.",
     promote:
-        "The mirror is promoted: ORDERS_DR is reconfigured into a standalone, writable ORDERS stream on site2. It can now accept new publishes.",
+        "The mirror is promoted with one edit: no mirror, subjects orders.>. ORDERS on west is now writable, and sequence numbers continue where the mirror stopped.",
     redirect:
-        "order-svc and the consumers reconnect to site2 and resume against the promoted ORDERS. Operations continue from where the mirror left off.",
+        "order-svc and the consumers reconnect to west. The stream has the same name there, so only the server address changes.",
 };
 
 function MirrorFailoverAnimatedInner({
@@ -82,13 +82,13 @@ function MirrorFailoverAnimatedInner({
     const promoted = stage === "promote" || stage === "redirect";
     const redirected = stage === "redirect";
 
-    // Lag readout on site2's mirror: counts down to 0 during the lag check.
+    // State readout on the mirror on west.
     const lagLabel = stage === "healthy"
-        ? "ORDERS_DR (lag 0)"
+        ? "ORDERS mirror (lag 0)"
         : stage === "outage"
-        ? "ORDERS_DR (lag ?)"
+        ? "ORDERS mirror (stalled)"
         : stage === "lagcheck"
-        ? "ORDERS_DR (lag 0)"
+        ? "ORDERS mirror (check Last Seen)"
         : "ORDERS (writable)";
 
     const nodes: any[] = [
@@ -97,7 +97,7 @@ function MirrorFailoverAnimatedInner({
             id: "site1",
             type: "server",
             position: { x: 120, y: 60 },
-            data: { label: site1Down ? "site1 (down)" : "site1 ORDERS" },
+            data: { label: site1Down ? "east (down)" : "east ORDERS" },
             style: {
                 opacity: site1Down ? 0.25 : 1,
                 filter: site1Down ? "grayscale(1)" : "none",
